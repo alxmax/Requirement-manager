@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.consilium/
+
+# Generated, regenerable view — rebuild with: python scripts/reqmap.py map
+requirements/_map.html
