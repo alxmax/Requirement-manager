@@ -295,7 +295,7 @@ h1{font-size:18px;font-weight:500;margin:0 0 4px}.cap{color:var(--mut);font-size
 svg text{fill:var(--fg);font:13px system-ui,sans-serif}
 .rq rect{fill:var(--sur);stroke:var(--bor);stroke-width:1;cursor:pointer}
 .rq.sel rect{stroke:var(--acc);stroke-width:2}.rq.dim{opacity:.35}
-.edge{stroke:var(--bor);stroke-width:1;opacity:.4}.edge.hot{stroke:var(--mut);stroke-width:1.6;opacity:.95}.edge.edim{opacity:.1}
+.edge{stroke:var(--bor);stroke-width:1;opacity:.4;marker-end:url(#arr)}.edge.hot{stroke:var(--mut);stroke-width:1.6;opacity:.95;marker-end:url(#arr-hot)}.edge.edim{opacity:.1}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -310,13 +310,13 @@ const D=__DATA__;
 const feats=D.nodes.filter(n=>n.layer!=='bus'),bus=D.nodes.filter(n=>n.layer==='bus');
 const pos={};function place(arr,y){const n=arr.length||1,w=Math.min(150,560/n-10);arr.forEach((nd,i)=>{const cx=60+(560)*(i+0.5)/n;pos[nd.id]={x:cx-w/2,y,w,cx,cy:y+26}})}
 place(feats,40);place(bus,210);
-const g=document.getElementById('g');let svg='';
+const g=document.getElementById('g');let svg='<defs><marker id=arr markerWidth=8 markerHeight=6 refX=8 refY=3 orient=auto markerUnits=strokeWidth><path d="M0,0 L0,6 L8,3 z" fill="var(--bor)"/></marker><marker id=arr-hot markerWidth=8 markerHeight=6 refX=8 refY=3 orient=auto markerUnits=strokeWidth><path d="M0,0 L0,6 L8,3 z" fill="var(--mut)"/></marker></defs>';
 D.edges.forEach(([a,b])=>{if(pos[a]&&pos[b])svg+=`<line class=edge data-a="${a}" data-b="${b}" x1="${pos[a].cx}" y1="${pos[a].y+52}" x2="${pos[b].cx}" y2="${pos[b].y}"/>`});
 D.nodes.forEach(n=>{const p=pos[n.id];svg+=`<g class=rq data-id="${n.id}"><rect x="${p.x}" y="${p.y}" width="${p.w}" height="52" rx="8"/><text x="${p.cx}" y="${p.y+24}" text-anchor=middle>${n.id}</text><text x="${p.cx}" y="${p.y+40}" text-anchor=middle font-size=11 fill="var(--mut)">${n.layer}</text></g>`});
 g.innerHTML=svg;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
 function render(id){const n=byId[id];const li=a=>a.map(x=>'<li>'+x+'</li>').join('');
-const mem=n.members.length?n.members.map(m=>`<div class=mono>${m.role}: ${m.loc}</div>`).join(''):'<div class=k>(no members found)</div>';
+const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${e.role}: ${e.f}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
 const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
 document.getElementById('p').innerHTML=`<h2>${n.id} <span class=pill style="color:${sc}">${n.status}</span><span class=pill>${n.layer}</span></h2>
 <p style="color:var(--mut);font-style:italic;margin:0 0 8px">${n.intent}</p>
