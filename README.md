@@ -19,8 +19,8 @@ This repo is also a plugin marketplace. Add it and install:
 ```
 
 Then invoke the `requirement-manager` skill in any repo; on first use it seeds
-`scripts/reqmap.py` + `templates/requirement.md` into that repo (see the skill's
-Setup section).
+`scripts/reqmap.py` into that repo (the requirement template is built into the
+engine — see the skill's Setup section).
 
 ## Meta-model
 
@@ -46,8 +46,7 @@ and the member list is discovered by scanning code — never hand-maintained.
 plugin/                                   the plugin (source of truth, self-contained)
   .claude-plugin/plugin.json              plugin manifest
   skills/requirement-manager/SKILL.md     the skill contract (read this first)
-  scripts/reqmap.py                       the engine (stdlib only)
-  templates/requirement.md                the per-capability template
+  scripts/reqmap.py                       the engine (stdlib only; carries the built-in template)
   requirements/*.md                       the source of truth (one file per capability)
   requirements/_reqlock.json              the drift baseline (committed)
 ```
@@ -60,11 +59,13 @@ python scripts/reqmap.py scan              # list code members per capability
 python scripts/reqmap.py check             # the gate: link sync + drift (pre-commit/CI)
 python scripts/reqmap.py map               # generate requirements/_map.html + _map.md
 python scripts/reqmap.py extract           # draft requirements from legacy code
+python scripts/reqmap.py candidates        # read-only JSON extraction plan (AI-assist, writes no .md)
+python scripts/reqmap.py findings          # aggregate open verify-intent items into _findings.md
 ```
 
 ## Dogfooded
 
 This repo applies the skill to itself: `plugin/requirements/` describes `reqmap.py`'s
-own capabilities (3 `bus` + 5 `feature`), and `cd plugin && python scripts/reqmap.py
+own capabilities (3 `bus` + 7 `feature`), and `cd plugin && python scripts/reqmap.py
 check` passes with zero errors. See [SKILL.md](plugin/skills/requirement-manager/SKILL.md)
 for the full model and authoring rules.

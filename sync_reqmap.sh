@@ -15,7 +15,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"
-CACHE="$HOME/.claude/plugins/cache/requirement-manager/requirement-manager/1.0.0"
+# Derive the cache path from the plugin's declared version (NOT a hard-coded one,
+# which silently no-ops once the published version moves on). Fall back to whatever
+# version dir is actually installed if that exact one is absent.
+CACHE_BASE="$HOME/.claude/plugins/cache/requirement-manager/requirement-manager"
+PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin/.claude-plugin/plugin.json" \
+  | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
+CACHE="$CACHE_BASE/$PLUGIN_VERSION"
+if [[ ! -d "$CACHE" ]]; then
+  CACHE="$(ls -d "$CACHE_BASE"/*/ 2>/dev/null | sort -V | tail -1)"
+  CACHE="${CACHE%/}"
+fi
 
 # ── 1. source must exist ────────────────────────────────────────────────────
 if [[ ! -f "$SRC" ]]; then

@@ -60,26 +60,43 @@ def _as_list(v):  # implements: CORE-PARSE-001
     return [v] if v else []
 
 
+def _clean_item(s):  # implements: CORE-PARSE-001
+    """One list element: drop a trailing `# comment`, trim, strip matching quotes."""
+    return s.split("#", 1)[0].strip().strip("\"'")
+
+
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
-    """Return (meta_dict, body). Minimal YAML: scalars and inline [a, b] lists."""
+    """Return (meta_dict, body). Minimal YAML: scalars, inline [a, b] lists, and the
+    block form (`key:` then indented `- item` lines). An inline list missing its
+    closing `]` is parsed leniently rather than silently kept as a literal string."""
     meta, body = {}, text.lstrip("﻿")  # tolerate a stray UTF-8 BOM
     if body.startswith("---"):
         end = body.find("\n---", 3)
         if end != -1:
             block = body[3:end]
             body = body[end + 4:].lstrip("\n")
-            for line in block.splitlines():
+            lines = block.splitlines()
+            i = 0
+            while i < len(lines):
+                line = lines[i]; i += 1
                 s = line.strip()
                 if not s or s.startswith("#") or ":" not in line:
                     continue
                 k, v = line.split(":", 1)
                 k, v = k.strip(), v.strip()
-                if v.startswith("[") and "]" in v:
-                    # keep only through the closing bracket; a '#' inside the
-                    # list is data, a '#' after it is a trailing comment
-                    inner = v[1:v.index("]")]
-                    items = [x.split("#", 1)[0].strip().strip("\"'") for x in inner.split(",")]
-                    meta[k] = [x for x in items if x]
+                if v.startswith("["):
+                    # inline list; tolerate a missing `]` (lenient) — a '#' inside
+                    # the brackets is data, a '#' after the close is a comment
+                    inner = v[1:v.index("]")] if "]" in v else v[1:]
+                    meta[k] = [x for x in (_clean_item(x) for x in inner.split(",")) if x]
+                elif not v:
+                    # block-style list: consume following indented `- item` lines.
+                    # No items -> keep the empty scalar (e.g. an unset superseded_by).
+                    items = []
+                    while i < len(lines) and lines[i].lstrip().startswith("- "):
+                        items.append(_clean_item(lines[i].lstrip()[2:]))
+                        i += 1
+                    meta[k] = [x for x in items if x] if items else ""
                 else:
                     v = v.split("#", 1)[0].rstrip()      # inline comment
                     if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
@@ -269,6 +286,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
 
     lock = load_lock(reqs_dir)
+    # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
+    # two look identical to the drift loop (every `old` is None -> no drift ever
+    # fires). Surface the corrupt case so a silently-disabled drift signal is visible.
+    lp = lock_path(reqs_dir)
+    if os.path.exists(lp):
+        try:
+            with open(lp, encoding="utf-8") as f:
+                json.load(f)
+        except (json.JSONDecodeError, OSError):
+            warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
+                         "— drift detection skipped this run; re-run with --update-lock")
     new_lock = {}
     for rid, r in reqs.items():
         h = binding_hash(r["body"])
@@ -400,14 +428,21 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
             risk = _risk(src)
             review = "REVIEW" if risk >= 2 else "auto-baseline"
             with open(dest, "w", encoding="utf-8") as f:
+                # new emission schema (Contract / Verify-intent / Acceptance / Current-impl),
+                # matching cmd_new so a promoted draft needs no reshaping
                 f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
                         f"owner: auto\ndepends_on: []\nrisk: {risk}  # {review}\n---\n\n"
                         f"# {os.path.splitext(fn)[0]}\n\n"
                         f"> DRAFT extracted from {rel}. Describes observed behavior, "
                         f"not validated intent.\n\n"
-                        f"## Input\n- TODO\n\n## Description\n- TODO (why?)\n\n"
-                        f"## Output\n- TODO\n\n## Acceptance (= tests)\n"
-                        f"- characterization: current behavior captured, correctness UNVERIFIED\n")
+                        f"## WHAT — Contract (normative)\n"
+                        f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
+                        f"## WHAT — Verify intent (open questions for the human)\n"
+                        f"- TODO: anything that looks like an accident (swallowed error, magic "
+                        f"constant, dead branch) — intended, or a bug to fix?\n\n"
+                        f"## HOW — Acceptance (= tests)\n"
+                        f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
+                        f"## WHERE — Current implementation\n- {rel}\n")
             proposed += 1
             print(f"{review:14} {cap}  <- {rel}")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")
@@ -470,11 +505,18 @@ def _js_facts(src):  # implements: REQ-CANDIDATES-009
     comment as the module doc, and top-level function/binding names. Imports are
     not resolved for JS in v1 (the agent and _capmap.json fill that gap)."""
     facts = {"signatures": [], "docstrings": {}, "imports": []}
-    m = re.match(r"\s*/\*+(.*?)\*/", src, re.S)
-    if m:
-        head = [ln.strip(" *") for ln in m.group(1).strip().splitlines() if ln.strip(" *")]
-        if head:
-            facts["docstrings"]["module"] = head[0][:200]
+    # Leading block comment via plain string scan over a capped prefix — NOT a regex.
+    # The old `/\*+(.*?)\*/` backtracks O(n^2) on a file opening with a long run of
+    # `*` (a DoS on `candidates`); str.find is linear and cannot backtrack. The
+    # leading `*`s of `/***` are stripped by the per-line `.strip(" *")` below.
+    head_src = src[:8000].lstrip()
+    if head_src.startswith("/*"):
+        close = head_src.find("*/", 2)
+        if close != -1:
+            head = [ln.strip(" *") for ln in head_src[2:close].strip().splitlines()
+                    if ln.strip(" *")]
+            if head:
+                facts["docstrings"]["module"] = head[0][:200]
     names = re.findall(r"(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)", src)
     names += re.findall(r"(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=", src)
     facts["signatures"] = list(dict.fromkeys(names))   # dedupe, keep order
@@ -521,7 +563,7 @@ def _mint_cap_id(rel):  # implements: REQ-CANDIDATES-009
 def _collect_files(code_root, reqs_dir):  # implements: REQ-CANDIDATES-009
     """Sorted rel paths of candidate source files, honoring _prune_dirs (noise +
     the SSOT dir) and .reqmapignore — the same exclusions scan_members uses."""
-    ignore = load_ignore(code_root)
+    ignore = load_ignore(code_root, reqs_dir)   # match scan_members: look in requirements/ first
     out = []
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
@@ -548,6 +590,10 @@ def cmd_candidates(reqs, members, code_root, reqs_dir, out):  # implements: REQ-
             if role == "implements":
                 tagged.setdefault(fp, cap)
 
+    # depends_on is resolved by matching an import name to a file STEM. Known
+    # limitation (Stage-1 heuristic): an import that shadows a stdlib/3rd-party name
+    # (e.g. `import json` next to a local json.py) or collides with a same-basename
+    # file in another dir can yield a false edge — the Stage-2 author prunes these.
     stem_of = {os.path.splitext(os.path.basename(r))[0]: r for r in files}  # for depends_on
 
     # ----- grouping: _capmap.json wins; uncovered files fall back to one-per-file
@@ -628,7 +674,7 @@ def _req_title(body, rid):
 
 
 def collect_findings(reqs):  # implements: REQ-FINDINGS-010
-    """Per requirement, the open '## WHAT - Verify intent' bullets minus the
+    """Per requirement, the open '## WHAT — Verify intent' bullets minus the
     'None - ...' placeholder. Returns [(rid, title, [item, ...]), ...] for reqs
     that have >=1 real finding, in id order. Deterministic; reads only the md."""
     out = []
@@ -644,7 +690,7 @@ def collect_findings(reqs):  # implements: REQ-FINDINGS-010
 def _render_findings_raw(groups, total):
     L = ["# Open findings", "",
          "> {} open verify-intent item(s) across {} requirement(s), aggregated from each "
-         "requirement's `## WHAT - Verify intent` section by `reqmap.py findings`."
+         "requirement's `## WHAT — Verify intent` section by `reqmap.py findings`."
          .format(total, len(groups)),
          ">",
          "> These are open questions raised while reconstructing intent from code - NOT "
@@ -668,7 +714,11 @@ def _render_findings_triaged(triage, raw_total):
     items = [it for it in triage.get("items", []) if isinstance(it, dict)]
     buckets = {"REAL_BUG": [], "USER_DECISION": [], "INTENTIONAL": [], "FALSE_POSITIVE": []}
     for it in items:
-        buckets.setdefault(it.get("classification", "USER_DECISION"), []).append(it)
+        # an unknown/typo'd/missing classification folds into USER_DECISION rather
+        # than landing in an orphan bucket that no block renders (silent loss). The
+        # AI triage sidecar is LLM-authored, so an off-enum value is realistic.
+        cls = it.get("classification")
+        buckets[cls if cls in buckets else "USER_DECISION"].append(it)
     bugs = sorted(buckets.get("REAL_BUG", []),
                   key=lambda x: _SEV_RANK.get((x.get("severity") or "").lower(), 9))
     n = len(items)
@@ -1053,7 +1103,7 @@ def _add_clicks(diagram, data):
     return diagram + "\n" + clicks
 
 
-# Per-tab legends (parallel to the 5 diagrams, same order) so each view is
+# Per-tab legends (parallel to the 4 diagrams, same order) so each view is
 # self-explanatory. HTML uses colored swatches; markdown uses words.
 _LEGEND_HTML = [
     '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
@@ -1131,6 +1181,11 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     return out
 
 
+# mermaid is loaded from a CDN without Subresource Integrity (SRI) on purpose: the
+# src is pinned to a major range (@10) so a fixed integrity hash would break on every
+# patch release. The map is a local, developer-facing artifact (no secrets, opened
+# from disk), so the supply-chain exposure is accepted rather than pinned. To harden,
+# pin an exact version + add integrity="sha384-..." crossorigin="anonymous".
 MAP_HTML_TEMPLATE = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
@@ -1235,7 +1290,7 @@ function sel(id){
   const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
   const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
   document.getElementById('p').innerHTML=`
-    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr id=ctrBtn title="center this requirement in the current diagram"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
     ${(n.contract&&n.contract.length)
       ? `<div class=lbl>WHAT — Contract</div><ul>${li(n.contract)}</ul>`
@@ -1247,6 +1302,9 @@ function sel(id){
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
     <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
     ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
+  // wire the center button in JS so the id stays a variable, never interpolated into
+  // markup (an id with a quote would otherwise break out of the onclick string).
+  const _cb=document.getElementById('ctrBtn');if(_cb)_cb.onclick=()=>centerNode(n.id);
   highlight(id);   // selecting a requirement also yellow-highlights it in the current diagram
 }
 let _hits=[];
@@ -1255,8 +1313,12 @@ function search(q){
   if(!q){box.innerHTML='';_hits=[];return;}
   _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,(n.contract||[]).join(' '),(n.notes||[]).join(' '),n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
   box.innerHTML=_hits.length
-    ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+    ? _hits.map(n=>`<div class="qhit" data-id="${esc(n.id)}">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
     : '<div class="qhit nohit">no match</div>';
+  // delegate the click off a data-id attribute (HTML-escaped) instead of an inline
+  // onclick with the raw id — dataset.id reaches pick() as a plain decoded string,
+  // never as interpolated code. Assigning .onclick is idempotent across re-renders.
+  box.onclick=e=>{const h=e.target.closest('.qhit');if(h&&h.dataset.id)pick(h.dataset.id);};
 }
 function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
 function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
@@ -1292,6 +1354,15 @@ switchTab(0);
 </script>"""
 
 
+def _js_str(value):
+    """JSON-encode `value` for safe embedding inside an inline <script>: escape
+    < > & to \\uXXXX so neither "</script>" (tag breakout) nor a quote (string
+    breakout) in the data can terminate the script or inject code. Used for both
+    the data payload and the per-node callbacks."""
+    return (json.dumps(value)
+            .replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026"))
+
+
 def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     diagrams = [
         ("System Map",      _add_clicks(_mermaid_system(data),        data)),
@@ -1320,17 +1391,19 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
         for i, (_, diagram) in enumerate(diagrams)
     )
 
+    # The function NAME is keyed by the sanitized _safe_id (alnum/underscore only);
+    # the id passed to sel() is JSON-encoded + <>&-escaped so an id containing a
+    # quote (string breakout) or "</script>" (tag breakout) cannot inject JS.
     callbacks = "\n".join(
-        "window['sel_{}'] = function(){{sel('{}');}};".format(
-            _safe_id(n["id"]), n["id"])
+        "window['sel_{}'] = function(){{sel({});}};".format(
+            _safe_id(n["id"]), _js_str(n["id"]))
         for n in data["nodes"]
     )
 
     # Embed as JSON inside a <script>: escape < > & so a requirement title
     # containing "</script>" (or "<!--") cannot break out of the data block.
     # \uXXXX decodes back to the original char when the JSON is parsed.
-    payload = (json.dumps(data)
-               .replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026"))
+    payload = _js_str(data)
 
     html = MAP_HTML_TEMPLATE
     html = html.replace("REQMAP_DATA",      payload)
@@ -1346,6 +1419,16 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
 
 
 def main():
+    # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
+    # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
+    # reqmap.py check` would crash with UnicodeEncodeError and fail the gate on an
+    # encoding error, not a real violation. Force UTF-8 so no caller has to remember
+    # `-X utf8`. Guarded: reconfigure() is Python 3.7+ and may be absent on exotic streams.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            pass
     ap = argparse.ArgumentParser(prog="reqmap")
     ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates", "findings"])
     ap.add_argument("arg", nargs="?")

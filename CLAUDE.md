@@ -46,7 +46,7 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 **Gate logic** (`check`): three checks — link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence.
 
 **Generated outputs** (all under `plugin/requirements/`, committed):
-- `_map.html` — interactive 4-tab viewer (System Map, Dependency Map, Status, Risk)
+- `_map.html` — interactive 4-tab viewer (System Map, Req→Code, Dependencies, Risk)
 - `_map.md` — 4 Mermaid diagrams for static rendering
 - `_reqlock.json` — content hash baseline for drift detection
 - `_findings.md` — aggregated verify-intent triage

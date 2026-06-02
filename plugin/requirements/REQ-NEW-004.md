@@ -11,23 +11,28 @@ superseded_by:
 
 > Create a new requirement file from the template, so every capability starts in the same shape.
 
-## Input
-- A capability id `AREA-NAME-NNN` (CLI argument). The scaffold is the engine's
-  built-in template (an on-disk `templates/requirement.md` overrides it if present).
+## WHAT — Contract (normative)
+- Given a capability id `AREA-NAME-NNN`, it shall write `requirements/<ID>.md` stamped from
+  a template with `AREA-NAME-NNN` replaced by the given id, creating the directory if absent.
+- The scaffold shall be the engine's built-in template; an on-disk `templates/requirement.md`,
+  when present, shall override it.
+- It shall refuse to overwrite an existing file (exit non-zero, write nothing).
 
-## Description
-A consistent shape is what makes the registry scannable by both humans and the
-parser. Rather than let people invent their own layout, `new` stamps the template
-with the given id. It refuses to overwrite an existing file so a requirement is
-never silently clobbered.
+## WHAT — Verify intent (open questions for the human)
+- None — authored from known intent, not reconstructed from code.
 
-## Output
-- A new `requirements/AREA-NAME-NNN.md` with the id substituted into the template.
+## WHAT — Notes & known limitations (informative)
+- The built-in template is the single source of the new-requirement shape; no `templates/`
+  directory is required for `new` to work.
 
-## Acceptance (= tests)
+## HOW — Acceptance (= tests)
 - `new FOO-NEW-099` on an empty registry creates `requirements/FOO-NEW-099.md` with that id.
 - Running `new` for an id that already exists exits non-zero and writes nothing.
 - The created file matches the template with `AREA-NAME-NNN` replaced by the given id.
+- With no on-disk template, the built-in scaffold (Contract + Acceptance sections) is used.
+
+## WHERE — Current implementation
+- `cmd_new` and `REQUIREMENT_TEMPLATE` in `reqmap.py`.
 
 ## Links
 - Used by: (auto)
