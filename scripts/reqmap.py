@@ -293,6 +293,21 @@ def _safe_id(rid):
     return re.sub(r"[^A-Za-z0-9]", "_", rid)
 
 
+def _mlabel(text):
+    """Make free text safe inside a quoted Mermaid node label.
+
+    Even inside quotes, Mermaid's parser chokes on backticks, brackets,
+    braces, pipes and backslashes; under securityLevel:loose, angle
+    brackets would also be rendered as HTML. Neutralize all of them.
+    """
+    text = text or "—"
+    for a, b in (('"', "'"), ("`", "'"), ("[", "("), ("]", ")"),
+                 ("{", "("), ("}", ")"), ("|", "/"), ("\\", "/"),
+                 ("<", "‹"), (">", "›")):
+        text = text.replace(a, b)
+    return text
+
+
 def _mermaid_system(data):  # implements: REQ-MAP-007
     lines = ["graph TD"]
     feats = [n for n in data["nodes"] if n["layer"] != "bus"]
@@ -350,7 +365,7 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
             loc = "{}:{}".format(g["f"], g["min"]) if g["min"] == g["max"] \
                   else "{}:{}-{}".format(g["f"], g["min"], g["max"])
             file_sid = "f_" + re.sub(r"[^A-Za-z0-9]", "_", loc)
-            lines.append('  {}["{}"]'.format(file_sid, loc))
+            lines.append('  {}["{}"]'.format(file_sid, _mlabel(loc)))
             lines.append("  {} -->|{}| {}".format(sid, g["role"], file_sid))
     return "\n".join(lines)
 
@@ -359,8 +374,8 @@ def _mermaid_behavioral(data):  # implements: REQ-MAP-007
     lines = ["flowchart LR"]
     for n in data["nodes"]:
         sid  = _safe_id(n["id"])
-        inp  = (n["input"]  or "—")[:50].replace('"', "'")
-        out  = (n["output"] or "—")[:50].replace('"', "'")
+        inp  = _mlabel(n["input"])[:50]
+        out  = _mlabel(n["output"])[:50]
         in_id  = "in_"  + sid
         out_id = "out_" + sid
         lines.append('  {}(["{}"])'.format(in_id,  inp))
@@ -419,7 +434,7 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
 def _add_clicks(diagram, data):
     """Append Mermaid click statements for every requirement node."""
     clicks = "\n".join(
-        "  click {} \"sel_{}\"".format(_safe_id(n["id"]), _safe_id(n["id"]))
+        "  click {} sel_{}".format(_safe_id(n["id"]), _safe_id(n["id"]))
         for n in data["nodes"]
     )
     return diagram + "\n" + clicks
@@ -512,7 +527,6 @@ function switchTab(i){
   pane.classList.add('active');
   if(!rendered.has(i)){mermaid.run({nodes:pane.querySelectorAll('.mermaid')});rendered.add(i);}
 }
-switchTab(0);
 const D=REQMAP_DATA;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
 function sel(id){
@@ -532,6 +546,7 @@ function sel(id){
     <div class=k>Used by</div><div class=mono>${n.used_by.join(' · ')||'—'}</div>`;
 }
 REQMAP_CALLBACKS
+switchTab(0);
 </script>"""
 
 
