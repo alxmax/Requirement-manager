@@ -264,9 +264,10 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             html = self._html(d, "T")
             self.assertIn('id="q"', html)                 # search box
             self.assertIn("class=ctr", html)              # ◎ center button in the detail panel header
-            self.assertIn("function focus(", html)
+            self.assertIn("function centerNode(", html)   # NOT 'focus' (shadowed by element.focus in inline onclick)
+            self.assertIn('onclick="centerNode(', html)   # the button actually calls it
             self.assertIn(".pane.active", html)           # centers in the CURRENT tab
-            self.assertNotIn("switchTab(0)", html.split("function focus(")[1].split("}")[0])  # focus must not switch tabs
+            self.assertNotIn("switchTab(0)", html.split("function centerNode(")[1].split("}")[0])  # must not switch tabs
 
     def test_risk_grouped_no_edges_flags_baseline(self):
         data = {"nodes": [self._node("AI-X-001", status="baseline"),

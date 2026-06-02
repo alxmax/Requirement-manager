@@ -966,8 +966,8 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 #qres:empty{display:none}
 .qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
 .qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}.qhit.nohit{cursor:default;color:var(--mut)}
-.ctr{border:1px solid var(--bor);background:var(--bg);color:var(--acc);border-radius:8px;cursor:pointer;font:14px/1 system-ui;padding:3px 9px;vertical-align:middle;margin-left:6px}
-.ctr:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
+.ctr{border:1px solid #e11;background:var(--bg);color:#e11;border-radius:8px;cursor:pointer;font:15px/1 system-ui;padding:3px 9px;vertical-align:middle;margin-left:8px}
+.ctr:hover{background:#e11;color:#fff;border-color:#e11}
 .mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e11 !important;stroke-width:4px !important;filter:drop-shadow(0 0 6px #e11)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
@@ -1030,7 +1030,7 @@ function sel(id){
   const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
   const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
   document.getElementById('p').innerHTML=`
-    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="focus('${n.id}')">◎</button></h2>
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')">◎</button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
     <div class=lbl>WHAT</div>
     <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
@@ -1053,7 +1053,9 @@ function search(q){
 function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
 function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
 // center + highlight a node IN THE CURRENTLY-OPEN diagram — never switches tabs.
-function focus(id){
+// NB: named centerNode (not focus) — an inline onclick="focus(...)" on a <button>
+// would resolve to the element's built-in .focus(), shadowing a global focus().
+function centerNode(id){
   const pane=document.querySelector('.pane.active');
   const box=pane&&pane.querySelector('.mermaid');
   const svg=box&&box.querySelector('svg');
