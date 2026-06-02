@@ -128,6 +128,26 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             members = R.scan_members(d, None)
             self.assertEqual(members["FOO-BAR-001"][0][1], "sub/dir/m.py")
 
+    def test_reqmapignore_excludes_listed_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            _write(os.path.join(d, "scripts", "app.py"), tag("APP-Y-001") + "\n")
+            _write(os.path.join(d, ".reqmapignore"), "# vendored tool\nscripts/reqmap.py\n")
+            members = R.scan_members(d, None)
+            self.assertNotIn("TOOL-X-001", members)  # ignored
+            self.assertIn("APP-Y-001", members)       # still scanned
+
+    def test_reqmapignore_glob_pattern(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "gen", "a.py"), tag("GEN-A-001") + "\n")
+            _write(os.path.join(d, ".reqmapignore"), "gen/*.py\n")
+            self.assertNotIn("GEN-A-001", R.scan_members(d, None))
+
+    def test_no_reqmapignore_scans_everything(self):  # backward compat
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), tag("FOO-BAR-001") + "\n")
+            self.assertIn("FOO-BAR-001", R.scan_members(d, None))
+
 
 class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _data(self, title):
