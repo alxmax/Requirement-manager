@@ -5,6 +5,7 @@ layer: feature       # bus | feature
 owner: alex
 depends_on: []       # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
+# area:              # optional: System Map grouping label (else the id prefix is used)
 ---
 
 # Short name

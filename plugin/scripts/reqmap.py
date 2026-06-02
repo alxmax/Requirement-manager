@@ -23,6 +23,25 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature"}
 ENFORCED = {"in-progress", "implemented", "confirmed"}
+# System Map declutter: hide depends_on edges into a node this many capabilities
+# depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
+# the Dependency Map tab.
+SYSTEM_HUB_FANIN = 8
+
+# Scripted, deterministic guidance per risk signal — surfaced in the Risk tab,
+# the detail panel, and the _map.md risk table so a flagged requirement comes
+# with a concrete next action, not just a color.
+RISK_ADVICE = {
+    "unimplemented": "Confirmed but no code linked: tag the implementing code "
+                     "`# implements: <ID>`, or drop status back to in-progress/draft "
+                     "until it is built. A confirmed requirement must point to code.",
+    "unreviewed": "Draft/baseline, not yet validated: review the contract, wire its "
+                  "`tested-by` tests, then promote to `confirmed`. Until then it is "
+                  "tracked, not enforced.",
+    "blast-radius": "High fan-in — many capabilities depend on this. Change it only "
+                    "behind its contract, run the full gate + dependents' tests, and "
+                    "treat it as shared foundation (bus).",
+}
 
 # Bumped on any change to this engine. `check` warns a seeded repo when its
 # vendored copy is older than the installed plugin's. ISO date: lexicographic
@@ -546,6 +565,7 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
             "status": m.get("status", "draft"),
+            "area": m.get("area", ""),
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
             "input": _section(r["body"], "input"),
@@ -555,6 +575,9 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
+            "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
+                {"status": m.get("status", "draft"), "members": members.get(rid, [])},
+                len(used_by.get(rid, [])))],
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -644,42 +667,93 @@ def _area_of(rid):  # implements: REQ-MAP-007
     return rid.split("-", 1)[0] or rid
 
 
-def _mermaid_system(data):  # implements: REQ-MAP-007
-    # Cluster nodes into per-area subgraphs (by id prefix) rather than one flat
-    # graph: past ~20 nodes a single graph is unreadable, so area boxes keep it
-    # navigable. Bus nodes get a thicker stroke so the bus stays identifiable now
-    # that it is no longer its own subgraph.
-    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
-    areas, bus_ids = {}, []
-    for n in data["nodes"]:
-        areas.setdefault(_area_of(n["id"]), []).append(n)
-    for area in sorted(areas):
+def _node_area(n):  # implements: REQ-MAP-007
+    """Grouping key for a node: an explicit `area:` frontmatter field wins (lets a
+    repo group e.g. several standalone capabilities under one ANALYSIS box without
+    renaming ids); otherwise fall back to the id prefix."""
+    return (n.get("area") or "").strip() or _area_of(n["id"])
+
+
+def _grouped_areas(nodes):  # implements: REQ-MAP-007
+    """Order nodes into [(area_label, [node,...]), ...]: multi-node areas first
+    (sorted), then one 'misc' bucket of every single-node area. Shared by the
+    System / Dependency / Risk diagrams so a 40+ node map stays navigable
+    (Miller 7+-2 / C4 levels — split a big diagram by meaningful boundary)."""
+    areas = {}
+    for n in nodes:
+        areas.setdefault(_node_area(n), []).append(n)
+    groups = [(a, areas[a]) for a in sorted(areas) if len(areas[a]) > 1]
+    singles = [n for a in sorted(areas) if len(areas[a]) == 1 for n in areas[a]]
+    if singles:
+        groups.append(("misc", sorted(singles, key=lambda n: n["id"])))
+    return groups
+
+
+def _emit_area_subgraphs(lines, nodes, label_fn=None):
+    """Append per-area `subgraph` blocks (singletons collapse into 'misc')."""
+    label_fn = label_fn or _node_label
+    for area, ns in _grouped_areas(nodes):
         lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(area), area))
-        for n in areas[area]:
-            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
-            if n.get("layer") == "bus":
-                bus_ids.append(n["id"])
+        for n in ns:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), label_fn(n)))
         lines.append("  end")
+
+
+def _bus_ids(nodes):
+    return [n["id"] for n in nodes if n.get("layer") == "bus"]
+
+
+def _hub_targets(data, bus_ids):
+    """Bus nodes + any node with fan-in >= SYSTEM_HUB_FANIN (the hub hairball)."""
+    fanin = {}
+    for _src, tgt in data["edges"]:
+        fanin[tgt] = fanin.get(tgt, 0) + 1
+    return set(bus_ids) | {nid for nid, c in fanin.items() if c >= SYSTEM_HUB_FANIN}
+
+
+def _mermaid_system(data):  # implements: REQ-MAP-007
+    # Per-area subgraphs + hide edges into bus/hubs (the hairball); the full graph
+    # is in the Dependency Map. Bus nodes keep a thick stroke.
+    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
+    bus_ids = _bus_ids(data["nodes"])
+    _emit_area_subgraphs(lines, data["nodes"])
+    hubs = _hub_targets(data, bus_ids)
     for a, b in data["edges"]:
-        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+        if b not in hubs:
+            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
     for bid in bus_ids:
         lines.append("  style {} stroke-width:3px".format(_safe_id(bid)))
     return "\n".join(lines)
 
 
 def _mermaid_deps(data):  # implements: REQ-MAP-007
-    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
-    byid = {n["id"]: n for n in data["nodes"]}
-    seen = set()
+    # Area-level coupling overview (C4 'container' zoom-out): one box per area, an
+    # edge A->B when ANY capability in A depends on one in B. Aggregating the
+    # per-capability edges here kills the bus hub hairball; the System Map keeps
+    # the per-capability detail and the detail panel lists each node's deps.
+    groups = _grouped_areas(data["nodes"])
+    if not groups:
+        return 'graph LR\n  none["(no requirements)"]'
+    label_of, counts, bus_areas = {}, {}, set()
+    for label, ns in groups:
+        counts[label] = len(ns)
+        for n in ns:
+            label_of[n["id"]] = label
+            if n.get("layer") == "bus":
+                bus_areas.add(label)
+    edges = set()
     for a, b in data["edges"]:
-        for rid in (a, b):
-            if rid not in seen:
-                label = _node_label(byid[rid]) if rid in byid else rid
-                lines.append('  {}["{}"]'.format(_safe_id(rid), label))
-                seen.add(rid)
-        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
-    if not data["edges"]:
-        lines.append('  none["(no dependencies defined)"]')
+        la, lb = label_of.get(a), label_of.get(b)
+        if la and lb and la != lb:
+            edges.add((la, lb))
+    lines = ["graph LR"]
+    for label in sorted(counts):
+        lines.append('  a_{}["{}<br><small>{} caps</small>"]'.format(
+            _safe_id(label), _mlabel(label), counts[label]))
+    for la, lb in sorted(edges):
+        lines.append("  a_{} --> a_{}".format(_safe_id(la), _safe_id(lb)))
+    for label in sorted(bus_areas):
+        lines.append("  style a_{} stroke-width:3px".format(_safe_id(label)))
     return "\n".join(lines)
 
 
@@ -748,33 +822,27 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
     for _, b in data["edges"]:
         dep_count[b] = dep_count.get(b, 0) + 1
 
-    risky = []
-    for n in data["nodes"]:
-        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
-        if sigs:
-            risky.append((n, sigs))
+    risky = [(n, _risk_signals(n, dep_count.get(n["id"], 0))) for n in data["nodes"]]
+    risky = [(n, s) for n, s in risky if s]
 
-    lines = ["graph TD"]
+    lines = ["graph LR"]
     if not risky:
         lines.append('  ok["No risk signals detected"]')
         return "\n".join(lines)
 
-    risky_ids = {n["id"] for n, _ in risky}
+    # Grouped by area, colored by signal, NO edges — Risk answers "which
+    # capabilities need attention", not topology (the Dependency Map has edges).
+    sigs_by = {n["id"]: s for n, s in risky}
+    _emit_area_subgraphs(lines, [n for n, _ in risky],
+                         label_fn=lambda n: _node_label(n) + "<br>" + ", ".join(sigs_by[n["id"]]))
     for n, sigs in risky:
-        sid   = _safe_id(n["id"])
-        label = _node_label(n) + "<br>" + ", ".join(sigs)
-        lines.append('  {}["{}"]'.format(sid, label))
+        sid = _safe_id(n["id"])
         if "unimplemented" in sigs:
             lines.append("  style {} fill:#fee,stroke:#c00,color:#900".format(sid))
         elif "unreviewed" in sigs:
             lines.append("  style {} fill:#fff3cd,stroke:#a66,color:#630".format(sid))
         else:
             lines.append("  style {} fill:#fff9c4,stroke:#aa0,color:#550".format(sid))
-
-    for a, b in data["edges"]:
-        if a in risky_ids or b in risky_ids:
-            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
-
     return "\n".join(lines)
 
 
@@ -785,6 +853,31 @@ def _add_clicks(diagram, data):
         for n in data["nodes"]
     )
     return diagram + "\n" + clicks
+
+
+# Per-tab legends (parallel to the 5 diagrams, same order) so each view is
+# self-explanatory. HTML uses colored swatches; markdown uses words.
+_LEGEND_HTML = [
+    '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
+    '<i>edges into the bus/hubs are hidden (Dependencies tab shows area-level coupling) · '
+    'open a requirement (click a node / search) then press the ⌖ crosshair in its panel to center it here</i>',
+    'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
+    '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
+    '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
+    '<b>Input → Requirement → Output</b> for each capability — the data thread',
+    'area-level coupling: one box per area (<b>N caps</b>), arrow A→B = some capability in A depends on one in B · the System Map has the per-capability detail',
+    'requirements needing attention · '
+    '<span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · '
+    '<span class="sw" style="background:#fff3cd;border-color:#a66"></span>unreviewed (promote after review) · '
+    '<span class="sw" style="background:#fff9c4;border-color:#aa0"></span>blast-radius (≥3 dependents)',
+]
+_LEGEND_MD = [
+    "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
+    "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
+    "`Input → Requirement → Output` for each capability — the data thread.",
+    "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
+    "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents).",
+]
 
 
 def render_md(data, reqs_dir):  # implements: REQ-MAP-007
@@ -813,25 +906,27 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
         "# Requirement Map",
         "",
     ]
-    for title, diagram in diagrams:
-        lines += ["## {}".format(title), "", "```mermaid", diagram, "```", ""]
+    for i, (title, diagram) in enumerate(diagrams):
+        legend = _LEGEND_MD[i] if i < len(_LEGEND_MD) else ""
+        lines += ["## {}".format(title), "", "_{}_".format(legend), "", "```mermaid", diagram, "```", ""]
 
-    # risk table
+    # risk table — each flagged requirement with its scripted recommendation
     risk_rows = []
     for n in data["nodes"]:
         sigs = _risk_signals(n, dep_count.get(n["id"], 0))
         if sigs:
+            rec = " ".join(RISK_ADVICE[s] for s in sigs).replace("|", "/").replace("\n", " ")
             risk_rows.append((n["id"], n["status"],
                               len(n["members"]), dep_count.get(n["id"], 0),
-                              ", ".join(sigs)))
+                              ", ".join(sigs), rec))
     if risk_rows:
         lines += [
             "### Risk Table", "",
-            "| ID | status | members | dependents | risks |",
-            "| --- | --- | --- | --- | --- |",
+            "| ID | status | members | dependents | risks | recommendation |",
+            "| --- | --- | --- | --- | --- | --- |",
         ]
         for row in risk_rows:
-            lines.append("| {} | {} | {} | {} | {} |".format(*row))
+            lines.append("| {} | {} | {} | {} | {} | {} |".format(*row))
         lines.append("")
 
     out = os.path.join(reqs_dir, "_map.md")
@@ -862,6 +957,19 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 .mctrl button{width:30px;height:30px;border:1px solid var(--bor);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer;font:16px/1 system-ui;opacity:.85}
 .mctrl button:hover{opacity:1;border-color:var(--acc)}
 .mhint{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--mut);pointer-events:none}
+.legend{font-size:12px;color:var(--mut);margin:0 0 8px;line-height:1.7}
+.legend b{color:var(--fg);font-weight:600}
+.sw{display:inline-block;width:11px;height:11px;border:1px solid var(--bor);border-radius:2px;vertical-align:middle;margin:0 3px 0 2px}
+.search{position:relative;margin:0 0 12px;max-width:560px}
+#q{width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--bor);border-radius:8px;background:var(--sur);color:var(--fg);font:14px system-ui}
+#qres{position:absolute;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--bor);border-radius:8px;margin-top:4px;max-height:340px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+#qres:empty{display:none}
+.qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
+.qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}.qhit.nohit{cursor:default;color:var(--mut)}
+.ctr{display:inline-flex;align-items:center;justify-content:center;border:1px solid #e0a800;background:var(--bg);color:#caa000;border-radius:8px;cursor:pointer;padding:4px 8px;vertical-align:middle;margin-left:8px}
+.ctr:hover{background:#f5c518;color:#000;border-color:#e0a800}
+.ctr svg{display:block}
+.mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e0a800 !important;stroke-width:4px !important;fill:#fff6cc !important;filter:drop-shadow(0 0 7px #ffcc00)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -871,6 +979,7 @@ ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
 .lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
 <h1>Requirement map</h1>
+<div class="search"><input id="q" placeholder="Search requirements / keyword…  (then the ⌖ crosshair in the panel centers it)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
 <div class="tabs">REQMAP_TABS</div>
 REQMAP_PANES
 <div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
@@ -922,7 +1031,7 @@ function sel(id){
   const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
   const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
   document.getElementById('p').innerHTML=`
-    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span></h2>
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
     <div class=lbl>WHAT</div>
     <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
@@ -930,8 +1039,48 @@ function sel(id){
     <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
     <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
-    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>`;
+    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
+    ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
+  highlight(id);   // selecting a requirement also yellow-highlights it in the current diagram
 }
+let _hits=[];
+function search(q){
+  q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
+  if(!q){box.innerHTML='';_hits=[];return;}
+  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  box.innerHTML=_hits.length
+    ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+    : '<div class="qhit nohit">no match</div>';
+}
+function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
+function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
+// center + highlight a node IN THE CURRENTLY-OPEN diagram — never switches tabs.
+// NB: named centerNode (not focus) — an inline onclick="focus(...)" on a <button>
+// would resolve to the element's built-in .focus(), shadowing a global focus().
+function _findNode(id){
+  const pane=document.querySelector('.pane.active');
+  const box=pane&&pane.querySelector('.mermaid');
+  const svg=box&&box.querySelector('svg');
+  if(!svg)return null;
+  svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+  const safe=id.replace(/[^A-Za-z0-9]/g,'_');
+  let g=null;svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
+  if(g)g.classList.add('hl');    // requirement may not be drawn in this view (e.g. Dependencies) -> g null
+  return {box:box,g:g};
+}
+function highlight(id){_findNode(id);}             // yellow-highlight in the current diagram
+function centerNode(id){
+  const r=_findNode(id);if(!r||!r.g)return;
+  const box=r.box,g=r.g,st=box._pz;if(!st)return;
+  try{
+    st.s=Math.max(st.s,1);box._apply&&box._apply();          // not zoomed out; apply before measuring
+    const gr=g.getBoundingClientRect(),br=box.getBoundingClientRect();    // current on-screen rects
+    st.x+=(br.left+br.width/2)-(gr.left+gr.width/2);         // shift pan by the pixel delta -> node to center
+    st.y+=(br.top+br.height/2)-(gr.top+gr.height/2);
+    box._apply&&box._apply();
+  }catch(e){}
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
 REQMAP_CALLBACKS
 switchTab(0);
 </script>"""
@@ -942,7 +1091,7 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
         ("System Map",      _add_clicks(_mermaid_system(data),        data)),
         ("Req→Code",   _add_clicks(_mermaid_req_to_code(data),   data)),
         ("Behavioral Flow", _add_clicks(_mermaid_behavioral(data),    data)),
-        ("Dependencies",    _add_clicks(_mermaid_deps(data),          data)),
+        ("Dependencies",    _mermaid_deps(data)),   # area-level: nodes are areas, not requirements
         ("Risk",            _add_clicks(_mermaid_risk(data),          data)),
     ]
 
@@ -953,13 +1102,16 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     )
 
     panes = "".join(
-        ('<div id="pane{0}" class="pane{1}"><div class="mwrap">'
+        ('<div id="pane{0}" class="pane{1}">'
+         '<div class="legend">{3}</div>'
+         '<div class="mwrap">'
          '<div class="mctrl"><button onclick="pz({0},1.25)">+</button>'
          '<button onclick="pz({0},0.8)">−</button>'
          '<button onclick="pzReset({0})" title="reset">↺</button></div>'
          '<div class="mermaid">{2}</div>'
          '<div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div>'
-         '</div></div>').format(i, " active" if i == 0 else "", diagram)
+         '</div></div>').format(i, " active" if i == 0 else "", diagram,
+                                 _LEGEND_HTML[i] if i < len(_LEGEND_HTML) else "")
         for i, (_, diagram) in enumerate(diagrams)
     )
 

@@ -216,13 +216,80 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
         out = R._mermaid_req_to_code({"nodes": [self._node("AREA-FOO-001", status="confirmed")], "edges": []})
         self.assertIn("#fee", out)        # enforced + unlinked = a real gap -> red
 
-    def test_system_map_clusters_by_area(self):
+    def test_system_map_boxes_multinode_area_and_collapses_singletons(self):
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
+                          self._node("BUS-RULES-002", layer="bus"),
                           self._node("AI-POSTMORTEM-001")], "edges": []}
         out = R._mermaid_system(data)
-        self.assertIn('subgraph sg_BUS["BUS"]', out)   # per-area subgraph
-        self.assertIn('subgraph sg_AI["AI"]', out)
-        self.assertIn("stroke-width:3px", out)         # bus node stays marked
+        self.assertIn('subgraph sg_BUS["BUS"]', out)     # multi-node area gets a box
+        self.assertIn('subgraph sg_misc["misc"]', out)   # lone node collapses into misc
+        self.assertIn("stroke-width:3px", out)           # bus stays marked
+
+    def test_system_map_hides_edges_into_bus(self):
+        data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
+                          self._node("BUS-RULES-002", layer="bus"),
+                          self._node("ETL-PIPELINE-001"), self._node("DASH-BUILD-001")],
+                "edges": [["ETL-PIPELINE-001", "BUS-PATHS-001"],     # into bus -> hidden
+                          ["ETL-PIPELINE-001", "DASH-BUILD-001"]]}   # feature->feature -> kept
+        out = R._mermaid_system(data)
+        self.assertNotIn("--> BUS_PATHS_001", out)
+        self.assertIn("--> DASH_BUILD_001", out)
+
+    def test_system_map_area_override_via_frontmatter(self):
+        a = self._node("RULESFLOW-REPORT-001"); a["area"] = "ANALYSIS"
+        b = self._node("PLAYBOOK-ANALYSIS-001"); b["area"] = "ANALYSIS"
+        out = R._mermaid_system({"nodes": [a, b], "edges": []})
+        self.assertIn('subgraph sg_ANALYSIS["ANALYSIS"]', out)   # grouped by area:, not id prefix
+
+    def test_render_html_and_md_carry_legends(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIn("bus (shared foundation)", self._html(d, "T"))
+            R.render_md(self._data("T"), d)
+            md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
+            self.assertIn("data thread", md)   # behavioral-flow legend line present
+
+    def test_deps_is_area_level_overview(self):
+        data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
+                          self._node("BUS-RULES-002", layer="bus"),
+                          self._node("AI-X-001"), self._node("AI-Y-002")],
+                "edges": [["AI-X-001", "BUS-PATHS-001"], ["AI-Y-002", "BUS-PATHS-001"]]}
+        out = R._mermaid_deps(data)
+        self.assertIn('a_BUS["BUS', out)                 # one node per area, with a count
+        self.assertIn('a_AI["AI', out)
+        self.assertEqual(out.count("a_AI --> a_BUS"), 1)  # two AI->bus edges aggregate to one
+        self.assertNotIn("BUS_PATHS_001", out)           # no per-capability hub hairball
+
+    def test_detail_panel_center_button_in_active_pane(self):
+        with tempfile.TemporaryDirectory() as d:
+            html = self._html(d, "T")
+            self.assertIn('id="q"', html)                 # search box
+            self.assertIn("class=ctr", html)              # ◎ center button in the detail panel header
+            self.assertIn("function centerNode(", html)   # NOT 'focus' (shadowed by element.focus in inline onclick)
+            self.assertIn('onclick="centerNode(', html)   # the button actually calls it
+            self.assertIn(".pane.active", html)           # centers in the CURRENT tab
+            self.assertNotIn("switchTab(0)", html.split("function centerNode(")[1].split("}")[0])  # must not switch tabs
+
+    def test_risk_grouped_no_edges_flags_baseline(self):
+        data = {"nodes": [self._node("AI-X-001", status="baseline"),
+                          self._node("AI-Y-002", status="baseline")],
+                "edges": [["AI-X-001", "AI-Y-002"]]}
+        out = R._mermaid_risk(data)
+        self.assertIn("unreviewed", out)
+        self.assertIn('subgraph sg_AI["AI"]', out)       # grouped by area
+        self.assertNotIn("-->", out)                     # Risk shows no edges
+
+    def test_risk_table_has_scripted_recommendation(self):
+        with tempfile.TemporaryDirectory() as d:
+            R.render_md({"nodes": [self._node("AI-X-001", status="baseline")], "edges": []}, d)
+            md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
+            self.assertIn("recommendation", md)            # new table column
+            self.assertIn("promote to `confirmed`", md)    # unreviewed advice text
+
+    def test_search_bar_in_html(self):
+        with tempfile.TemporaryDirectory() as d:
+            html = self._html(d, "T")
+            self.assertIn('id="q"', html)
+            self.assertIn("function search(", html)
 
 
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
