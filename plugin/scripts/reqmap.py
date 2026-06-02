@@ -557,12 +557,15 @@ function switchTab(i){
   if(!rendered.has(i)){
     rendered.add(i);
     mermaid.run({nodes:pane.querySelectorAll('.mermaid')})
-      .then(()=>pane.querySelectorAll('.mermaid').forEach(initPanZoom));
+      .then(()=>pane.querySelectorAll('.mermaid').forEach(initPanZoom))
+      .catch(()=>{rendered.delete(i);pane.querySelectorAll('.mermaid').forEach(mapFallback);});
   }
 }
 function paneBox(i){return document.getElementById('pane'+i).querySelector('.mermaid');}
+// render failed (CDN blocked / parse error / no svg): restore a scrollable pane so content isn't silently clipped
+function mapFallback(box){box.style.overflow='auto';box.style.cursor='default';}
 function initPanZoom(box){
-  const svg=box.querySelector('svg');if(!svg||box._pz)return;
+  const svg=box.querySelector('svg');if(!svg){mapFallback(box);return;}if(box._pz)return;
   svg.style.maxWidth='none';
   const st={s:1,x:0,y:0};box._pz=st;
   const apply=()=>{svg.style.transform='translate('+st.x+'px,'+st.y+'px) scale('+st.s+')';};
