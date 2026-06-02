@@ -15,7 +15,9 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
 import argparse, hashlib, json, os, re, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
-TAG_RE = re.compile(r"(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
+# the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
+# `x-implements:` from being picked up as a real `implements:` tag
+TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml")
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
@@ -29,24 +31,40 @@ MAP_ENGINE_VERSION = "2026-06-02"
 
 
 # ---------- parsing ----------
+def _as_list(v):  # implements: CORE-PARSE-001
+    """Coerce a frontmatter value to a list: lists pass through, a bare scalar
+    becomes a one-element list, empty/None becomes []. Guards callers that
+    iterate list-valued keys (e.g. depends_on) against a string written without
+    brackets being walked character-by-character."""
+    if isinstance(v, list):
+        return v
+    return [v] if v else []
+
+
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
     """Return (meta_dict, body). Minimal YAML: scalars and inline [a, b] lists."""
-    meta, body = {}, text
-    if text.startswith("---"):
-        end = text.find("\n---", 3)
+    meta, body = {}, text.lstrip("﻿")  # tolerate a stray UTF-8 BOM
+    if body.startswith("---"):
+        end = body.find("\n---", 3)
         if end != -1:
-            block = text[3:end]
-            body = text[end + 4:].lstrip("\n")
+            block = body[3:end]
+            body = body[end + 4:].lstrip("\n")
             for line in block.splitlines():
-                line = line.split("#", 1)[0].rstrip()
-                if not line.strip() or ":" not in line:
+                s = line.strip()
+                if not s or s.startswith("#") or ":" not in line:
                     continue
                 k, v = line.split(":", 1)
                 k, v = k.strip(), v.strip()
-                if v.startswith("[") and v.endswith("]"):
-                    items = [x.strip() for x in v[1:-1].split(",")]
+                if v.startswith("[") and "]" in v:
+                    # keep only through the closing bracket; a '#' inside the
+                    # list is data, a '#' after it is a trailing comment
+                    inner = v[1:v.index("]")]
+                    items = [x.split("#", 1)[0].strip().strip("\"'") for x in inner.split(",")]
                     meta[k] = [x for x in items if x]
                 else:
+                    v = v.split("#", 1)[0].rstrip()      # inline comment
+                    if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
+                        v = v[1:-1]                       # strip matching quotes
                     meta[k] = v
     return meta, body
 
@@ -59,7 +77,7 @@ def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
         if not name.endswith(".md") or name.startswith("_"):
             continue
         path = os.path.join(reqs_dir, name)
-        with open(path, encoding="utf-8") as f:
+        with open(path, encoding="utf-8-sig") as f:  # tolerate a UTF-8 BOM
             text = f.read()
         meta, body = parse_frontmatter(text)
         rid = meta.get("id") or os.path.splitext(name)[0]
@@ -67,20 +85,42 @@ def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
     return reqs
 
 
-def scan_members(code_root):  # implements: CORE-SCAN-002
+def _prune_dirs(dirpath, dirs, reqs_dir):  # implements: CORE-SCAN-002
+    """Drop noise dirs and the SSOT output dir from an os.walk in place.
+
+    Excludes ONLY the actual requirements dir (by realpath), not every folder
+    that happens to be named 'requirements' — a source package named
+    requirements/ must still be scanned."""
+    reqs_real = os.path.realpath(reqs_dir) if reqs_dir else None
+    keep = []
+    for d in dirs:
+        if d in (".git", "node_modules", "__pycache__"):
+            continue
+        if reqs_real and os.path.realpath(os.path.join(dirpath, d)) == reqs_real:
+            continue
+        keep.append(d)
+    dirs[:] = keep
+
+
+def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     members = {}  # cap_id -> list[(role, file, line)]
     for dirpath, dirs, files in os.walk(code_root):
-        dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "__pycache__", "requirements")]
+        _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
             if not fn.endswith(CODE_EXTS):
                 continue
             fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
             try:
                 with open(fp, encoding="utf-8", errors="ignore") as f:
                     for i, line in enumerate(f, 1):
+                        seen = set()
                         for role, cap in TAG_RE.findall(line):
-                            members.setdefault(cap, []).append(
-                                (role, os.path.relpath(fp, code_root), i))
+                            key = (role, cap)
+                            if key in seen:        # same tag twice on one line
+                                continue
+                            seen.add(key)
+                            members.setdefault(cap, []).append((role, rel, i))
             except OSError:
                 continue
     return members
@@ -107,13 +147,17 @@ def lock_path(reqs_dir):  # implements: CORE-DRIFT-003
 def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
     p = lock_path(reqs_dir)
     if os.path.exists(p):
-        with open(p) as f:
-            return json.load(f)
+        try:
+            with open(p, encoding="utf-8") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return {}  # empty / corrupt / merge-conflicted lock: treat as no lock
     return {}
 
 
 def save_lock(reqs_dir, lock):  # implements: CORE-DRIFT-003
-    with open(lock_path(reqs_dir), "w") as f:
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(lock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(lock, f, indent=2, sort_keys=True)
 
 
@@ -169,7 +213,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
             errors.append(f"{rid}: invalid status {m.get('status')!r}")
         if m.get("layer") not in VALID_LAYER:
             errors.append(f"{rid}: invalid layer {m.get('layer')!r}")
-        for dep in m.get("depends_on", []):
+        for dep in _as_list(m.get("depends_on")):
             if dep not in cap_ids:
                 errors.append(f"{rid}: depends_on missing {dep}")
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
@@ -212,24 +256,37 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     return 0
 
 
+def _draft_id(rel):  # implements: REQ-EXTRACT-008
+    """Mint a draft capability id from a file's relative path. Path-aware so
+    same-basename files in different dirs don't collide; falls back to FILE when
+    the name has no usable A-Z0-9 token (e.g. `_.py`, non-ASCII stems)."""
+    slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
+    return "DRAFT-" + (slug or "FILE")
+
+
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
-    proposed = 0
+    proposed, used = 0, set()
+    os.makedirs(reqs_dir, exist_ok=True)
     for dirpath, dirs, files in os.walk(code_root):
-        dirs[:] = [d for d in dirs if d not in (".git", "node_modules", "__pycache__")]
-        for fn in files:
+        _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
+        dirs.sort()                            # deterministic id/suffix assignment
+        for fn in sorted(files):
             if not fn.endswith((".py", ".js", ".ts", ".cpp", ".c")):
                 continue
-            rel = os.path.relpath(os.path.join(dirpath, fn), code_root)
+            rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
             if rel in tagged:
                 continue
-            cap = "DRAFT-" + re.sub(r"[^A-Z0-9]+", "-",
-                                        os.path.splitext(fn)[0].upper()).strip("-")
+            cap = base = _draft_id(rel)
+            k = 2
+            while cap in used:                 # residual collision (case/ext only)
+                cap = "{}-{}".format(base, k); k += 1
+            used.add(cap)
             dest = os.path.join(reqs_dir, cap + ".md")
             if os.path.exists(dest):
                 continue
-            with open(os.path.join(dirpath, fn), errors="ignore") as f:
+            with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
                 src = f.read()
             risk = _risk(src)
             review = "REVIEW" if risk >= 2 else "auto-baseline"
@@ -260,7 +317,7 @@ def _risk(src):  # implements: REQ-EXTRACT-008
 def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
     used_by = {rid: [] for rid in reqs}
     for rid, r in reqs.items():
-        for dep in r["meta"].get("depends_on", []):
+        for dep in _as_list(r["meta"].get("depends_on")):
             if dep in used_by:
                 used_by[dep].append(rid)
     data = {"nodes": [], "edges": []}
@@ -275,12 +332,12 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
             "output": _section(r["body"], "output"),
             "desc": _section(r["body"], "description"),
             "acc": _bullets(r["body"], "acceptan"),
-            "deps": m.get("depends_on", []),
+            "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
         })
     for rid, r in reqs.items():
-        for dep in r["meta"].get("depends_on", []):
+        for dep in _as_list(r["meta"].get("depends_on")):
             data["edges"].append([rid, dep])
     html_out = render_html(data, reqs_dir)
     md_out   = render_md(data, reqs_dir)
@@ -358,7 +415,7 @@ def _node_label(n):
     passed through the sanitizer.
     """
     title = _mlabel(n.get("title") or n["id"])
-    return "{}<br><small>{}</small>".format(title, n["id"])
+    return "{}<br><small>{}</small>".format(title, _mlabel(n["id"]))
 
 
 def _mermaid_system(data):  # implements: REQ-MAP-007
@@ -543,6 +600,7 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
         lines.append("")
 
     out = os.path.join(reqs_dir, "_map.md")
+    os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     return out
@@ -620,21 +678,22 @@ function pz(i,f){const b=paneBox(i),st=b._pz;if(!st)return;const r=b.getBounding
 function pzReset(i){const b=paneBox(i),st=b._pz;if(!st)return;st.s=1;st.x=0;st.y=0;b._apply();}
 const D=REQMAP_DATA;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function sel(id){
   const n=byId[id];if(!n)return;
-  const li=a=>a.map(x=>'<li>'+x+'</li>').join('');
-  const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${e.role}: ${e.f}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
+  const li=a=>a.map(x=>'<li>'+esc(x)+'</li>').join('');
+  const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
   const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
   document.getElementById('p').innerHTML=`
-    <h2>${n.id} <span class=pill style="color:${sc}">${n.status}</span><span class=pill>${n.layer}</span></h2>
-    <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${n.intent||'—'}</p>
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span></h2>
+    <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
     <div class=lbl>WHAT</div>
-    <div class=io><div><div class=k>Input</div>${n.input||'—'}</div><div><div class=k>Output</div>${n.output||'—'}</div></div>
-    <div class=k>Description</div><p style="margin:2px 0 10px">${n.desc||'—'}</p>
+    <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
+    <div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>
     <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
     <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
-    <div class=k style="margin-top:8px">Depends on</div><div class=mono>${n.deps.join(' · ')||'— (bus)'}</div>
-    <div class=k>Used by</div><div class=mono>${n.used_by.join(' · ')||'—'}</div>`;
+    <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
+    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>`;
 }
 REQMAP_CALLBACKS
 switchTab(0);
@@ -673,13 +732,20 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
         for n in data["nodes"]
     )
 
+    # Embed as JSON inside a <script>: escape < > & so a requirement title
+    # containing "</script>" (or "<!--") cannot break out of the data block.
+    # \uXXXX decodes back to the original char when the JSON is parsed.
+    payload = (json.dumps(data)
+               .replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026"))
+
     html = MAP_HTML_TEMPLATE
-    html = html.replace("REQMAP_DATA",      json.dumps(data))
+    html = html.replace("REQMAP_DATA",      payload)
     html = html.replace("REQMAP_TABS",      tab_btns)
     html = html.replace("REQMAP_PANES",     panes)
     html = html.replace("REQMAP_CALLBACKS", callbacks)
 
     out = os.path.join(reqs_dir, "_map.html")
+    os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write(html)
     return out
@@ -705,7 +771,7 @@ def main():
         return cmd_new(reqs_dir, tmpl, a.arg)
 
     reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root)
+    members = scan_members(code_root, reqs_dir)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "check":
