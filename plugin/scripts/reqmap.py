@@ -727,17 +727,33 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
 
 
 def _mermaid_deps(data):  # implements: REQ-MAP-007
-    # The FULL coupling view: same per-area boxes as the System Map, but every
-    # depends_on edge is drawn — including the bus edges the System Map hides.
-    if not data["edges"]:
-        return 'graph LR\n  none["(no dependencies defined)"]'
-    lines = ["graph LR"]
-    bus_ids = _bus_ids(data["nodes"])
-    _emit_area_subgraphs(lines, data["nodes"])
+    # Area-level coupling overview (C4 'container' zoom-out): one box per area, an
+    # edge A->B when ANY capability in A depends on one in B. Aggregating the
+    # per-capability edges here kills the bus hub hairball; the System Map keeps
+    # the per-capability detail and the detail panel lists each node's deps.
+    groups = _grouped_areas(data["nodes"])
+    if not groups:
+        return 'graph LR\n  none["(no requirements)"]'
+    label_of, counts, bus_areas = {}, {}, set()
+    for label, ns in groups:
+        counts[label] = len(ns)
+        for n in ns:
+            label_of[n["id"]] = label
+            if n.get("layer") == "bus":
+                bus_areas.add(label)
+    edges = set()
     for a, b in data["edges"]:
-        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
-    for bid in bus_ids:
-        lines.append("  style {} stroke-width:3px".format(_safe_id(bid)))
+        la, lb = label_of.get(a), label_of.get(b)
+        if la and lb and la != lb:
+            edges.add((la, lb))
+    lines = ["graph LR"]
+    for label in sorted(counts):
+        lines.append('  a_{}["{}<br><small>{} caps</small>"]'.format(
+            _safe_id(label), _mlabel(label), counts[label]))
+    for la, lb in sorted(edges):
+        lines.append("  a_{} --> a_{}".format(_safe_id(la), _safe_id(lb)))
+    for label in sorted(bus_areas):
+        lines.append("  style a_{} stroke-width:3px".format(_safe_id(label)))
     return "\n".join(lines)
 
 
@@ -843,22 +859,23 @@ def _add_clicks(diagram, data):
 # self-explanatory. HTML uses colored swatches; markdown uses words.
 _LEGEND_HTML = [
     '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
-    '<i>edges into the bus/hubs are hidden — see the Dependencies tab for the full graph</i>',
+    '<i>edges into the bus/hubs are hidden (Dependencies tab shows area-level coupling) · '
+    'use the search box ↵ to spotlight a node here</i>',
     'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
     '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
     '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
     '<b>Input → Requirement → Output</b> for each capability — the data thread',
-    'the full <b>depends_on</b> topology (includes the bus edges the System Map hides)',
+    'area-level coupling: one box per area (<b>N caps</b>), arrow A→B = some capability in A depends on one in B · the System Map has the per-capability detail',
     'requirements needing attention · '
     '<span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · '
     '<span class="sw" style="background:#fff3cd;border-color:#a66"></span>unreviewed (promote after review) · '
     '<span class="sw" style="background:#fff9c4;border-color:#aa0"></span>blast-radius (≥3 dependents)',
 ]
 _LEGEND_MD = [
-    "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden — see the Dependency Map for the full graph.",
+    "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
     "`Input → Requirement → Output` for each capability — the data thread.",
-    "Full `depends_on` topology, including the bus edges the System Map hides.",
+    "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
     "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents).",
 ]
 
@@ -949,6 +966,7 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 #qres:empty{display:none}
 .qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
 .qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}
+.mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e11 !important;stroke-width:4px !important;filter:drop-shadow(0 0 6px #e11)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -958,7 +976,7 @@ ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
 .lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
 <h1>Requirement map</h1>
-<div class="search"><input id="q" placeholder="Search requirements / keyword…" oninput="search(this.value)" autocomplete="off"><div id="qres"></div></div>
+<div class="search"><input id="q" placeholder="Search requirements / keyword… (↵ spotlights on the System Map)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
 <div class="tabs">REQMAP_TABS</div>
 REQMAP_PANES
 <div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
@@ -1021,15 +1039,34 @@ function sel(id){
     <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
     ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
 }
+let _hits=[];
 function search(q){
   q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
-  if(!q){box.innerHTML='';return;}
-  const hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
-  box.innerHTML=hits.length
-    ? hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+  if(!q){box.innerHTML='';_hits=[];return;}
+  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  box.innerHTML=_hits.length
+    ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
     : '<div class="qhit" style="cursor:default;color:var(--mut)">no match</div>';
 }
-function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
+function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
+function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';focus(id);}
+function focus(id){
+  sel(id);                       // open the detail panel
+  switchTab(0);                  // jump to the System Map
+  const safe=id.replace(/[^A-Za-z0-9]/g,'_');let tries=0;
+  (function spotlight(){
+    const box=document.getElementById('pane0').querySelector('.mermaid');
+    const svg=box&&box.querySelector('svg');
+    if(!svg){if(tries++<20)setTimeout(spotlight,80);return;}
+    svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+    let g=null;
+    svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
+    if(!g)return;
+    g.classList.add('hl');
+    const st=box._pz;
+    if(st){try{const r=box.getBoundingClientRect(),bb=g.getBBox();st.s=1.1;st.x=r.width/2-st.s*(bb.x+bb.width/2);st.y=r.height/2-st.s*(bb.y+bb.height/2);box._apply&&box._apply();}catch(e){}}
+  })();
+}
 document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
 REQMAP_CALLBACKS
 switchTab(0);
@@ -1041,7 +1078,7 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
         ("System Map",      _add_clicks(_mermaid_system(data),        data)),
         ("Req→Code",   _add_clicks(_mermaid_req_to_code(data),   data)),
         ("Behavioral Flow", _add_clicks(_mermaid_behavioral(data),    data)),
-        ("Dependencies",    _add_clicks(_mermaid_deps(data),          data)),
+        ("Dependencies",    _mermaid_deps(data)),   # area-level: nodes are areas, not requirements
         ("Risk",            _add_clicks(_mermaid_risk(data),          data)),
     ]
 

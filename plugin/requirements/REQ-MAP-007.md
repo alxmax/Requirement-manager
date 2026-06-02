@@ -25,8 +25,11 @@ Both are regenerated, never edited, and live under `requirements/` so they trave
 with the registry. For legibility at scale the System Map clusters nodes into
 per-area subgraphs (a node's `area:` field, else its id prefix), collapses
 single-node areas into one `misc` box, and hides `depends_on` edges into the bus /
-high-fan-in hubs (the full graph stays in the Dependency Map). Every tab carries a
-legend, and Req→Code colors only an enforced-but-unlinked requirement red.
+high-fan-in hubs; the Dependency Map is an area-level coupling overview (one box
+per area, aggregated edges). Every tab carries a legend, Req→Code colors only an
+enforced-but-unlinked requirement red, the Risk tab pairs each signal with a
+scripted recommendation, and a search box spotlights a matching node on the
+System Map.
 
 ## Output
 - `requirements/_map.html`: multi-tab HTML viewer with mermaid.js; clicking a node opens
@@ -38,8 +41,10 @@ legend, and Req→Code colors only an enforced-but-unlinked requirement red.
 - `_map.md` contains exactly 5 Mermaid code blocks, one per view.
 - `_map.html` has a tab bar with 5 tabs: System Map, Req→Code, Behavioral Flow, Dependencies, Risk, and each pane carries a legend.
 - Behavioral Flow shows `Input[...] --> REQ-ID --> Output[...]` for every requirement.
-- System Map groups nodes into per-area subgraphs, collapses single-node areas into a `misc` box, and omits edges whose target is a bus node (the Dependency Map keeps them).
-- Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents).
+- System Map groups nodes into per-area subgraphs, collapses single-node areas into a `misc` box, and omits edges whose target is a bus node.
+- Dependency Map is area-level: one node per area (with a capability count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
+- Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents), each paired with a scripted recommendation.
+- The HTML carries a search box; pressing Enter (or clicking a result) spotlights the node on the System Map.
 - A node with no members renders "(no members found)" in the HTML detail panel.
 
 ## Links

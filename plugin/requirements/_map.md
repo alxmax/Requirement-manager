@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-02 17:20
+generated: 2026-06-02 17:37
 nodes: 9
 edges: 10
 ---
@@ -8,7 +8,7 @@ edges: 10
 
 ## System Map
 
-_Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden — see the Dependency Map for the full graph._
+_Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling)._
 
 ```mermaid
 graph LR
@@ -54,8 +54,8 @@ graph LR
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
   f_scripts_reqmap_py_372_476["scripts/reqmap.py:372-476"]
   REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_372_476
-  f_scripts_test_reqmap_py_350["scripts/test_reqmap.py:350"]
-  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_350
+  f_scripts_test_reqmap_py_359["scripts/test_reqmap.py:359"]
+  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_359
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_224_241["scripts/reqmap.py:224-241"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_224_241
@@ -64,23 +64,23 @@ graph LR
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_306_355["scripts/reqmap.py:306-355"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_306_355
-  f_scripts_test_reqmap_py_283["scripts/test_reqmap.py:283"]
-  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_283
+  f_scripts_test_reqmap_py_292["scripts/test_reqmap.py:292"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_292
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_556_1039["scripts/reqmap.py:556-1039"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1039
+  f_scripts_reqmap_py_556_1076["scripts/reqmap.py:556-1076"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1076
   f_scripts_test_reqmap_py_170["scripts/test_reqmap.py:170"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_170
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
   f_scripts_reqmap_py_293["scripts/reqmap.py:293"]
   REQ_NEW_004 -->|implements| f_scripts_reqmap_py_293
-  f_scripts_test_reqmap_py_305["scripts/test_reqmap.py:305"]
-  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_305
+  f_scripts_test_reqmap_py_314["scripts/test_reqmap.py:314"]
+  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_314
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_205["scripts/reqmap.py:205"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_205
-  f_scripts_test_reqmap_py_336["scripts/test_reqmap.py:336"]
-  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_336
+  f_scripts_test_reqmap_py_345["scripts/test_reqmap.py:345"]
+  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_345
 ```
 
 ## Behavioral Flow
@@ -129,36 +129,14 @@ flowchart LR
 
 ## Dependency Map
 
-_Full `depends_on` topology, including the bus edges the System Map hides._
+_Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail._
 
 ```mermaid
 graph LR
-  subgraph sg_CORE["CORE"]
-    CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
-    CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
-    CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
-  end
-  subgraph sg_REQ["REQ"]
-    REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-    REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
-    REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-    REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-    REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
-    REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
-  end
-  REQ_CANDIDATES_009 --> CORE_SCAN_002
-  REQ_CHECK_006 --> CORE_PARSE_001
-  REQ_CHECK_006 --> CORE_SCAN_002
-  REQ_CHECK_006 --> CORE_DRIFT_003
-  REQ_EXTRACT_008 --> CORE_SCAN_002
-  REQ_MAP_007 --> CORE_PARSE_001
-  REQ_MAP_007 --> CORE_SCAN_002
-  REQ_NEW_004 --> CORE_PARSE_001
-  REQ_SCAN_005 --> CORE_PARSE_001
-  REQ_SCAN_005 --> CORE_SCAN_002
-  style CORE_DRIFT_003 stroke-width:3px
-  style CORE_PARSE_001 stroke-width:3px
-  style CORE_SCAN_002 stroke-width:3px
+  a_CORE["CORE<br><small>3 caps</small>"]
+  a_REQ["REQ<br><small>6 caps</small>"]
+  a_REQ --> a_CORE
+  style a_CORE stroke-width:3px
 ```
 
 ## Risk & Unknowns

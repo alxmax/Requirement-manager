@@ -248,14 +248,23 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
             self.assertIn("data thread", md)   # behavioral-flow legend line present
 
-    def test_deps_groups_areas_and_keeps_bus_edges(self):
+    def test_deps_is_area_level_overview(self):
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
                           self._node("BUS-RULES-002", layer="bus"),
-                          self._node("ETL-PIPELINE-001")],
-                "edges": [["ETL-PIPELINE-001", "BUS-PATHS-001"]]}
+                          self._node("AI-X-001"), self._node("AI-Y-002")],
+                "edges": [["AI-X-001", "BUS-PATHS-001"], ["AI-Y-002", "BUS-PATHS-001"]]}
         out = R._mermaid_deps(data)
-        self.assertIn('subgraph sg_BUS["BUS"]', out)     # grouped like the System Map
-        self.assertIn("--> BUS_PATHS_001", out)          # full graph keeps the bus edge
+        self.assertIn('a_BUS["BUS', out)                 # one node per area, with a count
+        self.assertIn('a_AI["AI', out)
+        self.assertEqual(out.count("a_AI --> a_BUS"), 1)  # two AI->bus edges aggregate to one
+        self.assertNotIn("BUS_PATHS_001", out)           # no per-capability hub hairball
+
+    def test_search_and_spotlight_in_html(self):
+        with tempfile.TemporaryDirectory() as d:
+            html = self._html(d, "T")
+            self.assertIn('id="q"', html)
+            self.assertIn("function focus(", html)        # spotlight on the System Map
+            self.assertIn("searchEnter", html)            # Enter picks the top match
 
     def test_risk_grouped_no_edges_flags_baseline(self):
         data = {"nodes": [self._node("AI-X-001", status="baseline"),
