@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-02 17:08
+generated: 2026-06-02 17:20
 nodes: 9
 edges: 10
 ---
@@ -37,50 +37,50 @@ _Each requirement → its code; arrow label = role (`implements` / `tested-by`).
 ```mermaid
 graph LR
   CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
-  f_scripts_reqmap_py_155_183["scripts/reqmap.py:155-183"]
-  CORE_DRIFT_003 -->|implements| f_scripts_reqmap_py_155_183
+  f_scripts_reqmap_py_170_198["scripts/reqmap.py:170-198"]
+  CORE_DRIFT_003 -->|implements| f_scripts_reqmap_py_170_198
   f_scripts_test_reqmap_py_91["scripts/test_reqmap.py:91"]
   CORE_DRIFT_003 -->|tested-by| f_scripts_test_reqmap_py_91
   CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
-  f_scripts_reqmap_py_38_76["scripts/reqmap.py:38-76"]
-  CORE_PARSE_001 -->|implements| f_scripts_reqmap_py_38_76
+  f_scripts_reqmap_py_53_91["scripts/reqmap.py:53-91"]
+  CORE_PARSE_001 -->|implements| f_scripts_reqmap_py_53_91
   f_scripts_test_reqmap_py_35["scripts/test_reqmap.py:35"]
   CORE_PARSE_001 -->|tested-by| f_scripts_test_reqmap_py_35
   CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
-  f_scripts_reqmap_py_92_127["scripts/reqmap.py:92-127"]
-  CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_92_127
+  f_scripts_reqmap_py_107_142["scripts/reqmap.py:107-142"]
+  CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_107_142
   f_scripts_test_reqmap_py_122["scripts/test_reqmap.py:122"]
   CORE_SCAN_002 -->|tested-by| f_scripts_test_reqmap_py_122
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-  f_scripts_reqmap_py_357_461["scripts/reqmap.py:357-461"]
-  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_357_461
-  f_scripts_test_reqmap_py_319["scripts/test_reqmap.py:319"]
-  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_319
+  f_scripts_reqmap_py_372_476["scripts/reqmap.py:372-476"]
+  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_372_476
+  f_scripts_test_reqmap_py_350["scripts/test_reqmap.py:350"]
+  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_350
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
-  f_scripts_reqmap_py_209_226["scripts/reqmap.py:209-226"]
-  REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_209_226
+  f_scripts_reqmap_py_224_241["scripts/reqmap.py:224-241"]
+  REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_224_241
   f_scripts_test_reqmap_py_81_104["scripts/test_reqmap.py:81-104"]
   REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_81_104
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-  f_scripts_reqmap_py_291_340["scripts/reqmap.py:291-340"]
-  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_291_340
-  f_scripts_test_reqmap_py_252["scripts/test_reqmap.py:252"]
-  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_252
+  f_scripts_reqmap_py_306_355["scripts/reqmap.py:306-355"]
+  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_306_355
+  f_scripts_test_reqmap_py_283["scripts/test_reqmap.py:283"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_283
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_541_999["scripts/reqmap.py:541-999"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_541_999
+  f_scripts_reqmap_py_556_1039["scripts/reqmap.py:556-1039"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1039
   f_scripts_test_reqmap_py_170["scripts/test_reqmap.py:170"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_170
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
-  f_scripts_reqmap_py_278["scripts/reqmap.py:278"]
-  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_278
-  f_scripts_test_reqmap_py_274["scripts/test_reqmap.py:274"]
-  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_274
-  REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
-  f_scripts_reqmap_py_190["scripts/reqmap.py:190"]
-  REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_190
+  f_scripts_reqmap_py_293["scripts/reqmap.py:293"]
+  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_293
   f_scripts_test_reqmap_py_305["scripts/test_reqmap.py:305"]
-  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_305
+  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_305
+  REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
+  f_scripts_reqmap_py_205["scripts/reqmap.py:205"]
+  REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_205
+  f_scripts_test_reqmap_py_336["scripts/test_reqmap.py:336"]
+  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_336
 ```
 
 ## Behavioral Flow
@@ -133,25 +133,32 @@ _Full `depends_on` topology, including the bus edges the System Map hides._
 
 ```mermaid
 graph LR
-  REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-  CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
+  subgraph sg_CORE["CORE"]
+    CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
+    CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
+    CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
+  end
+  subgraph sg_REQ["REQ"]
+    REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
+    REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
+    REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
+    REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
+    REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
+    REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
+  end
   REQ_CANDIDATES_009 --> CORE_SCAN_002
-  REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
-  CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
   REQ_CHECK_006 --> CORE_PARSE_001
   REQ_CHECK_006 --> CORE_SCAN_002
-  CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
   REQ_CHECK_006 --> CORE_DRIFT_003
-  REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   REQ_EXTRACT_008 --> CORE_SCAN_002
-  REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
   REQ_MAP_007 --> CORE_PARSE_001
   REQ_MAP_007 --> CORE_SCAN_002
-  REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
   REQ_NEW_004 --> CORE_PARSE_001
-  REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   REQ_SCAN_005 --> CORE_PARSE_001
   REQ_SCAN_005 --> CORE_SCAN_002
+  style CORE_DRIFT_003 stroke-width:3px
+  style CORE_PARSE_001 stroke-width:3px
+  style CORE_SCAN_002 stroke-width:3px
 ```
 
 ## Risk & Unknowns
@@ -159,25 +166,18 @@ graph LR
 _Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents)._
 
 ```mermaid
-graph TD
-  CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small><br>blast-radius"]
+graph LR
+  subgraph sg_CORE["CORE"]
+    CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small><br>blast-radius"]
+    CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small><br>blast-radius"]
+  end
   style CORE_PARSE_001 fill:#fff9c4,stroke:#aa0,color:#550
-  CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small><br>blast-radius"]
   style CORE_SCAN_002 fill:#fff9c4,stroke:#aa0,color:#550
-  REQ_CANDIDATES_009 --> CORE_SCAN_002
-  REQ_CHECK_006 --> CORE_PARSE_001
-  REQ_CHECK_006 --> CORE_SCAN_002
-  REQ_EXTRACT_008 --> CORE_SCAN_002
-  REQ_MAP_007 --> CORE_PARSE_001
-  REQ_MAP_007 --> CORE_SCAN_002
-  REQ_NEW_004 --> CORE_PARSE_001
-  REQ_SCAN_005 --> CORE_PARSE_001
-  REQ_SCAN_005 --> CORE_SCAN_002
 ```
 
 ### Risk Table
 
-| ID | status | members | dependents | risks |
-| --- | --- | --- | --- | --- |
-| CORE-PARSE-001 | confirmed | 4 | 4 | blast-radius |
-| CORE-SCAN-002 | confirmed | 4 | 5 | blast-radius |
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| CORE-PARSE-001 | confirmed | 4 | 4 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |
+| CORE-SCAN-002 | confirmed | 4 | 5 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |

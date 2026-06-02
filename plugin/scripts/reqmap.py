@@ -28,6 +28,21 @@ ENFORCED = {"in-progress", "implemented", "confirmed"}
 # the Dependency Map tab.
 SYSTEM_HUB_FANIN = 8
 
+# Scripted, deterministic guidance per risk signal — surfaced in the Risk tab,
+# the detail panel, and the _map.md risk table so a flagged requirement comes
+# with a concrete next action, not just a color.
+RISK_ADVICE = {
+    "unimplemented": "Confirmed but no code linked: tag the implementing code "
+                     "`# implements: <ID>`, or drop status back to in-progress/draft "
+                     "until it is built. A confirmed requirement must point to code.",
+    "unreviewed": "Draft/baseline, not yet validated: review the contract, wire its "
+                  "`tested-by` tests, then promote to `confirmed`. Until then it is "
+                  "tracked, not enforced.",
+    "blast-radius": "High fan-in — many capabilities depend on this. Change it only "
+                    "behind its contract, run the full gate + dependents' tests, and "
+                    "treat it as shared foundation (bus).",
+}
+
 # Bumped on any change to this engine. `check` warns a seeded repo when its
 # vendored copy is older than the installed plugin's. ISO date: lexicographic
 # order == chronological order, so a plain string compare is enough.
@@ -560,6 +575,9 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
+            "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
+                {"status": m.get("status", "draft"), "members": members.get(rid, [])},
+                len(used_by.get(rid, [])))],
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -656,40 +674,50 @@ def _node_area(n):  # implements: REQ-MAP-007
     return (n.get("area") or "").strip() or _area_of(n["id"])
 
 
-def _mermaid_system(data):  # implements: REQ-MAP-007
-    # Cluster nodes into per-area subgraphs so a 40+ node map stays navigable
-    # (Miller 7+-2 / C4 levels). Single-node areas would each be a noisy 1-box, so
-    # collect them into one "misc" box. Bus nodes keep a thick stroke. Group key is
-    # the `area:` frontmatter field if set, else the id prefix.
-    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
-    areas, bus_ids = {}, []
-    for n in data["nodes"]:
+def _grouped_areas(nodes):  # implements: REQ-MAP-007
+    """Order nodes into [(area_label, [node,...]), ...]: multi-node areas first
+    (sorted), then one 'misc' bucket of every single-node area. Shared by the
+    System / Dependency / Risk diagrams so a 40+ node map stays navigable
+    (Miller 7+-2 / C4 levels — split a big diagram by meaningful boundary)."""
+    areas = {}
+    for n in nodes:
         areas.setdefault(_node_area(n), []).append(n)
-        if n.get("layer") == "bus":
-            bus_ids.append(n["id"])
+    groups = [(a, areas[a]) for a in sorted(areas) if len(areas[a]) > 1]
+    singles = [n for a in sorted(areas) if len(areas[a]) == 1 for n in areas[a]]
+    if singles:
+        groups.append(("misc", sorted(singles, key=lambda n: n["id"])))
+    return groups
 
-    def _emit(label, nodes):
-        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(label), label))
-        for n in nodes:
-            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
+
+def _emit_area_subgraphs(lines, nodes, label_fn=None):
+    """Append per-area `subgraph` blocks (singletons collapse into 'misc')."""
+    label_fn = label_fn or _node_label
+    for area, ns in _grouped_areas(nodes):
+        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(area), area))
+        for n in ns:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), label_fn(n)))
         lines.append("  end")
 
-    multi = {a: ns for a, ns in areas.items() if len(ns) > 1}
-    singles = [n for ns in areas.values() if len(ns) == 1 for n in ns]
-    for area in sorted(multi):
-        _emit(area, multi[area])
-    if singles:
-        _emit("misc", sorted(singles, key=lambda n: n["id"]))
 
-    # Declutter the hub hairball: a bus / very-high-fan-in node is depended on by
-    # almost everything, so drawing every edge into it is noise, not signal
-    # ("don't draw a line from every module to the logger"). Hide those edges
-    # here; the full graph stays in the Dependency Map tab.
-    bus_set = set(bus_ids)
+def _bus_ids(nodes):
+    return [n["id"] for n in nodes if n.get("layer") == "bus"]
+
+
+def _hub_targets(data, bus_ids):
+    """Bus nodes + any node with fan-in >= SYSTEM_HUB_FANIN (the hub hairball)."""
     fanin = {}
     for _src, tgt in data["edges"]:
         fanin[tgt] = fanin.get(tgt, 0) + 1
-    hubs = bus_set | {nid for nid, c in fanin.items() if c >= SYSTEM_HUB_FANIN}
+    return set(bus_ids) | {nid for nid, c in fanin.items() if c >= SYSTEM_HUB_FANIN}
+
+
+def _mermaid_system(data):  # implements: REQ-MAP-007
+    # Per-area subgraphs + hide edges into bus/hubs (the hairball); the full graph
+    # is in the Dependency Map. Bus nodes keep a thick stroke.
+    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
+    bus_ids = _bus_ids(data["nodes"])
+    _emit_area_subgraphs(lines, data["nodes"])
+    hubs = _hub_targets(data, bus_ids)
     for a, b in data["edges"]:
         if b not in hubs:
             lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
@@ -699,18 +727,17 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
 
 
 def _mermaid_deps(data):  # implements: REQ-MAP-007
-    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
-    byid = {n["id"]: n for n in data["nodes"]}
-    seen = set()
-    for a, b in data["edges"]:
-        for rid in (a, b):
-            if rid not in seen:
-                label = _node_label(byid[rid]) if rid in byid else rid
-                lines.append('  {}["{}"]'.format(_safe_id(rid), label))
-                seen.add(rid)
-        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    # The FULL coupling view: same per-area boxes as the System Map, but every
+    # depends_on edge is drawn — including the bus edges the System Map hides.
     if not data["edges"]:
-        lines.append('  none["(no dependencies defined)"]')
+        return 'graph LR\n  none["(no dependencies defined)"]'
+    lines = ["graph LR"]
+    bus_ids = _bus_ids(data["nodes"])
+    _emit_area_subgraphs(lines, data["nodes"])
+    for a, b in data["edges"]:
+        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    for bid in bus_ids:
+        lines.append("  style {} stroke-width:3px".format(_safe_id(bid)))
     return "\n".join(lines)
 
 
@@ -779,33 +806,27 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
     for _, b in data["edges"]:
         dep_count[b] = dep_count.get(b, 0) + 1
 
-    risky = []
-    for n in data["nodes"]:
-        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
-        if sigs:
-            risky.append((n, sigs))
+    risky = [(n, _risk_signals(n, dep_count.get(n["id"], 0))) for n in data["nodes"]]
+    risky = [(n, s) for n, s in risky if s]
 
-    lines = ["graph TD"]
+    lines = ["graph LR"]
     if not risky:
         lines.append('  ok["No risk signals detected"]')
         return "\n".join(lines)
 
-    risky_ids = {n["id"] for n, _ in risky}
+    # Grouped by area, colored by signal, NO edges — Risk answers "which
+    # capabilities need attention", not topology (the Dependency Map has edges).
+    sigs_by = {n["id"]: s for n, s in risky}
+    _emit_area_subgraphs(lines, [n for n, _ in risky],
+                         label_fn=lambda n: _node_label(n) + "<br>" + ", ".join(sigs_by[n["id"]]))
     for n, sigs in risky:
-        sid   = _safe_id(n["id"])
-        label = _node_label(n) + "<br>" + ", ".join(sigs)
-        lines.append('  {}["{}"]'.format(sid, label))
+        sid = _safe_id(n["id"])
         if "unimplemented" in sigs:
             lines.append("  style {} fill:#fee,stroke:#c00,color:#900".format(sid))
         elif "unreviewed" in sigs:
             lines.append("  style {} fill:#fff3cd,stroke:#a66,color:#630".format(sid))
         else:
             lines.append("  style {} fill:#fff9c4,stroke:#aa0,color:#550".format(sid))
-
-    for a, b in data["edges"]:
-        if a in risky_ids or b in risky_ids:
-            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
-
     return "\n".join(lines)
 
 
@@ -872,22 +893,23 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
         legend = _LEGEND_MD[i] if i < len(_LEGEND_MD) else ""
         lines += ["## {}".format(title), "", "_{}_".format(legend), "", "```mermaid", diagram, "```", ""]
 
-    # risk table
+    # risk table — each flagged requirement with its scripted recommendation
     risk_rows = []
     for n in data["nodes"]:
         sigs = _risk_signals(n, dep_count.get(n["id"], 0))
         if sigs:
+            rec = " ".join(RISK_ADVICE[s] for s in sigs).replace("|", "/").replace("\n", " ")
             risk_rows.append((n["id"], n["status"],
                               len(n["members"]), dep_count.get(n["id"], 0),
-                              ", ".join(sigs)))
+                              ", ".join(sigs), rec))
     if risk_rows:
         lines += [
             "### Risk Table", "",
-            "| ID | status | members | dependents | risks |",
-            "| --- | --- | --- | --- | --- |",
+            "| ID | status | members | dependents | risks | recommendation |",
+            "| --- | --- | --- | --- | --- | --- |",
         ]
         for row in risk_rows:
-            lines.append("| {} | {} | {} | {} | {} |".format(*row))
+            lines.append("| {} | {} | {} | {} | {} | {} |".format(*row))
         lines.append("")
 
     out = os.path.join(reqs_dir, "_map.md")
@@ -921,6 +943,12 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 .legend{font-size:12px;color:var(--mut);margin:0 0 8px;line-height:1.7}
 .legend b{color:var(--fg);font-weight:600}
 .sw{display:inline-block;width:11px;height:11px;border:1px solid var(--bor);border-radius:2px;vertical-align:middle;margin:0 3px 0 2px}
+.search{position:relative;margin:0 0 12px;max-width:560px}
+#q{width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--bor);border-radius:8px;background:var(--sur);color:var(--fg);font:14px system-ui}
+#qres{position:absolute;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--bor);border-radius:8px;margin-top:4px;max-height:340px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+#qres:empty{display:none}
+.qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
+.qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -930,6 +958,7 @@ ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
 .lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
 <h1>Requirement map</h1>
+<div class="search"><input id="q" placeholder="Search requirements / keyword…" oninput="search(this.value)" autocomplete="off"><div id="qres"></div></div>
 <div class="tabs">REQMAP_TABS</div>
 REQMAP_PANES
 <div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
@@ -989,8 +1018,19 @@ function sel(id){
     <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
     <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
-    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>`;
+    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
+    ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
 }
+function search(q){
+  q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
+  if(!q){box.innerHTML='';return;}
+  const hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  box.innerHTML=hits.length
+    ? hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+    : '<div class="qhit" style="cursor:default;color:var(--mut)">no match</div>';
+}
+function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
 REQMAP_CALLBACKS
 switchTab(0);
 </script>"""

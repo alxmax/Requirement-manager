@@ -248,6 +248,37 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
             self.assertIn("data thread", md)   # behavioral-flow legend line present
 
+    def test_deps_groups_areas_and_keeps_bus_edges(self):
+        data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
+                          self._node("BUS-RULES-002", layer="bus"),
+                          self._node("ETL-PIPELINE-001")],
+                "edges": [["ETL-PIPELINE-001", "BUS-PATHS-001"]]}
+        out = R._mermaid_deps(data)
+        self.assertIn('subgraph sg_BUS["BUS"]', out)     # grouped like the System Map
+        self.assertIn("--> BUS_PATHS_001", out)          # full graph keeps the bus edge
+
+    def test_risk_grouped_no_edges_flags_baseline(self):
+        data = {"nodes": [self._node("AI-X-001", status="baseline"),
+                          self._node("AI-Y-002", status="baseline")],
+                "edges": [["AI-X-001", "AI-Y-002"]]}
+        out = R._mermaid_risk(data)
+        self.assertIn("unreviewed", out)
+        self.assertIn('subgraph sg_AI["AI"]', out)       # grouped by area
+        self.assertNotIn("-->", out)                     # Risk shows no edges
+
+    def test_risk_table_has_scripted_recommendation(self):
+        with tempfile.TemporaryDirectory() as d:
+            R.render_md({"nodes": [self._node("AI-X-001", status="baseline")], "edges": []}, d)
+            md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
+            self.assertIn("recommendation", md)            # new table column
+            self.assertIn("promote to `confirmed`", md)    # unreviewed advice text
+
+    def test_search_bar_in_html(self):
+        with tempfile.TemporaryDirectory() as d:
+            html = self._html(d, "T")
+            self.assertIn('id="q"', html)
+            self.assertIn("function search(", html)
+
 
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10
