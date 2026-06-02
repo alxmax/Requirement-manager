@@ -248,10 +248,11 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
     for rid, r in reqs.items():
         for dep in r["meta"].get("depends_on", []):
             data["edges"].append([rid, dep])
-    out = os.path.join(reqs_dir, "_map.html")
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(MAP_HTML.replace("__DATA__", json.dumps(data)))
-    print(f"wrote {out}  ({len(data['nodes'])} nodes, {len(data['edges'])} edges)")
+    html_out = render_html(data, reqs_dir)
+    md_out   = render_md(data, reqs_dir)
+    print("wrote {}".format(html_out))
+    print("wrote {}".format(md_out))
+    print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
 
 
@@ -286,51 +287,291 @@ def _bullets(body, name):  # implements: REQ-MAP-007
     return out
 
 
-MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
+# ---------- mermaid generators ----------
+def _safe_id(rid):
+    """Mermaid-safe node ID: replace non-alphanumeric chars with underscores."""
+    return re.sub(r"[^A-Za-z0-9]", "_", rid)
+
+
+def _mermaid_system(data):  # implements: REQ-MAP-007
+    lines = ["graph TD"]
+    feats = [n for n in data["nodes"] if n["layer"] != "bus"]
+    bus   = [n for n in data["nodes"] if n["layer"] == "bus"]
+    if feats:
+        lines.append("  subgraph Features")
+        for n in feats:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+        lines.append("  end")
+    if bus:
+        lines.append("  subgraph Bus")
+        for n in bus:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+        lines.append("  end")
+    for a, b in data["edges"]:
+        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    return "\n".join(lines)
+
+
+def _mermaid_deps(data):  # implements: REQ-MAP-007
+    lines = ["graph TD"]
+    seen = set()
+    for a, b in data["edges"]:
+        for rid in (a, b):
+            if rid not in seen:
+                lines.append('  {}["{}"]'.format(_safe_id(rid), rid))
+                seen.add(rid)
+        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    if not data["edges"]:
+        lines.append('  none["(no dependencies defined)"]')
+    return "\n".join(lines)
+
+
+def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
+    lines = ["graph LR"]
+    for n in data["nodes"]:
+        rid = n["id"]
+        sid = _safe_id(rid)
+        lines.append('  {}["{}"]'.format(sid, rid))
+        if not n["members"]:
+            lines.append("  style {} fill:#fee,stroke:#c66".format(sid))
+            continue
+        # group by role+file, compute min/max line numbers
+        groups = {}
+        for m in n["members"]:
+            c = m["loc"].rfind(":")
+            f, ln = m["loc"][:c], int(m["loc"][c + 1:])
+            k = m["role"] + "|" + f
+            if k not in groups:
+                groups[k] = {"role": m["role"], "f": f, "min": ln, "max": ln}
+            else:
+                groups[k]["min"] = min(groups[k]["min"], ln)
+                groups[k]["max"] = max(groups[k]["max"], ln)
+        for g in groups.values():
+            loc = "{}:{}".format(g["f"], g["min"]) if g["min"] == g["max"] \
+                  else "{}:{}-{}".format(g["f"], g["min"], g["max"])
+            file_sid = "f_" + re.sub(r"[^A-Za-z0-9]", "_", loc)
+            lines.append('  {}["{}"]'.format(file_sid, loc))
+            lines.append("  {} -->|{}| {}".format(sid, g["role"], file_sid))
+    return "\n".join(lines)
+
+
+def _mermaid_behavioral(data):  # implements: REQ-MAP-007
+    lines = ["flowchart LR"]
+    for n in data["nodes"]:
+        sid  = _safe_id(n["id"])
+        inp  = (n["input"]  or "—")[:50].replace('"', "'")
+        out  = (n["output"] or "—")[:50].replace('"', "'")
+        in_id  = "in_"  + sid
+        out_id = "out_" + sid
+        lines.append('  {}(["{}"])'.format(in_id,  inp))
+        lines.append('  {}["{}"]'.format(sid, n["id"]))
+        lines.append('  {}(["{}"])'.format(out_id, out))
+        lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
+    return "\n".join(lines)
+
+
+def _risk_signals(node, dependents_count):
+    signals = []
+    if node["status"] == "confirmed" and not node["members"]:
+        signals.append("unimplemented")
+    if node["status"] in ("draft", "baseline"):
+        signals.append("unreviewed")
+    if dependents_count >= 3:
+        signals.append("blast-radius")
+    return signals
+
+
+def _mermaid_risk(data):  # implements: REQ-MAP-007
+    dep_count = {n["id"]: 0 for n in data["nodes"]}
+    for _, b in data["edges"]:
+        dep_count[b] = dep_count.get(b, 0) + 1
+
+    risky = []
+    for n in data["nodes"]:
+        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
+        if sigs:
+            risky.append((n, sigs))
+
+    lines = ["graph TD"]
+    if not risky:
+        lines.append('  ok["No risk signals detected"]')
+        return "\n".join(lines)
+
+    risky_ids = {n["id"] for n, _ in risky}
+    for n, sigs in risky:
+        sid   = _safe_id(n["id"])
+        label = n["id"] + "\\n" + ", ".join(sigs)
+        lines.append('  {}["{}"]'.format(sid, label))
+        if "unimplemented" in sigs:
+            lines.append("  style {} fill:#fee,stroke:#c00,color:#900".format(sid))
+        elif "unreviewed" in sigs:
+            lines.append("  style {} fill:#fff3cd,stroke:#a66,color:#630".format(sid))
+        else:
+            lines.append("  style {} fill:#fff9c4,stroke:#aa0,color:#550".format(sid))
+
+    for a, b in data["edges"]:
+        if a in risky_ids or b in risky_ids:
+            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+
+    return "\n".join(lines)
+
+
+def _add_clicks(diagram, data):
+    """Append Mermaid click statements for every requirement node."""
+    clicks = "\n".join(
+        "  click {} \"sel_{}\"".format(_safe_id(n["id"]), _safe_id(n["id"]))
+        for n in data["nodes"]
+    )
+    return diagram + "\n" + clicks
+
+
+def render_md(data, reqs_dir):  # implements: REQ-MAP-007
+    from datetime import datetime
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    dep_count = {n["id"]: 0 for n in data["nodes"]}
+    for _, b in data["edges"]:
+        dep_count[b] = dep_count.get(b, 0) + 1
+
+    diagrams = [
+        ("System Map",          _mermaid_system(data)),
+        ("Requirement-to-Code", _mermaid_req_to_code(data)),
+        ("Behavioral Flow",     _mermaid_behavioral(data)),
+        ("Dependency Map",      _mermaid_deps(data)),
+        ("Risk & Unknowns",     _mermaid_risk(data)),
+    ]
+
+    lines = [
+        "---",
+        "generated: {}".format(ts),
+        "nodes: {}".format(len(data["nodes"])),
+        "edges: {}".format(len(data["edges"])),
+        "---",
+        "",
+        "# Requirement Map",
+        "",
+    ]
+    for title, diagram in diagrams:
+        lines += ["## {}".format(title), "", "```mermaid", diagram, "```", ""]
+
+    # risk table
+    risk_rows = []
+    for n in data["nodes"]:
+        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
+        if sigs:
+            risk_rows.append((n["id"], n["status"],
+                              len(n["members"]), dep_count.get(n["id"], 0),
+                              ", ".join(sigs)))
+    if risk_rows:
+        lines += [
+            "### Risk Table", "",
+            "| ID | status | members | dependents | risks |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+        for row in risk_rows:
+            lines.append("| {} | {} | {} | {} | {} |".format(*row))
+        lines.append("")
+
+    out = os.path.join(reqs_dir, "_map.md")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return out
+
+
+MAP_HTML_TEMPLATE = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
 @media(prefers-color-scheme:dark){:root{--bg:#1f1e1c;--fg:#e9e7df;--mut:#9c9a92;--sur:#2a2926;--bor:#3a3935;--acc:#afa9ec;--ok:#97c459;--wip:#fac775}}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif;padding:24px}
-h1{font-size:18px;font-weight:500;margin:0 0 4px}.cap{color:var(--mut);font-size:12px;margin:0 0 16px}
-svg text{fill:var(--fg);font:13px system-ui,sans-serif}
-.rq rect{fill:var(--sur);stroke:var(--bor);stroke-width:1;cursor:pointer}
-.rq.sel rect{stroke:var(--acc);stroke-width:2}.rq.dim{opacity:.35}
-.edge{stroke:var(--bor);stroke-width:1;opacity:.4;marker-end:url(#arr)}.edge.hot{stroke:var(--mut);stroke-width:1.6;opacity:.95;marker-end:url(#arr-hot)}.edge.edim{opacity:.1}
+h1{font-size:18px;font-weight:500;margin:0 0 12px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:6px 14px;cursor:pointer;border-radius:6px;border:1px solid var(--bor);background:var(--sur);color:var(--fg);font:14px system-ui,sans-serif}
+.tab.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pane{display:none}.pane.active{display:block}
+.mermaid{background:var(--sur);border-radius:8px;padding:16px;overflow-x:auto}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
 .io{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .io div{background:var(--sur);border-radius:8px;padding:10px}.io .k{font-size:12px;color:var(--mut)}
 ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
+.lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
-<h1>Requirement map</h1><p class=cap>Top = feature · bottom = bus · arrow = depends on · click a node</p>
-<svg id=g width=100% viewBox="0 0 680 300" role=img></svg><div id=p></div>
+<h1>Requirement map</h1>
+<div class="tabs">REQMAP_TABS</div>
+REQMAP_PANES
+<div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
 <script>
-const D=__DATA__;
-const feats=D.nodes.filter(n=>n.layer!=='bus'),bus=D.nodes.filter(n=>n.layer==='bus');
-const pos={};function place(arr,y){const n=arr.length||1,w=Math.min(150,560/n-10);arr.forEach((nd,i)=>{const cx=60+(560)*(i+0.5)/n;pos[nd.id]={x:cx-w/2,y,w,cx,cy:y+26}})}
-place(feats,40);place(bus,210);
-const g=document.getElementById('g');let svg='<defs><marker id=arr markerWidth=8 markerHeight=6 refX=8 refY=3 orient=auto markerUnits=strokeWidth><path d="M0,0 L0,6 L8,3 z" fill="var(--bor)"/></marker><marker id=arr-hot markerWidth=8 markerHeight=6 refX=8 refY=3 orient=auto markerUnits=strokeWidth><path d="M0,0 L0,6 L8,3 z" fill="var(--mut)"/></marker></defs>';
-D.edges.forEach(([a,b])=>{if(pos[a]&&pos[b])svg+=`<line class=edge data-a="${a}" data-b="${b}" x1="${pos[a].cx}" y1="${pos[a].y+52}" x2="${pos[b].cx}" y2="${pos[b].y}"/>`});
-D.nodes.forEach(n=>{const p=pos[n.id];svg+=`<g class=rq data-id="${n.id}"><rect x="${p.x}" y="${p.y}" width="${p.w}" height="52" rx="8"/><text x="${p.cx}" y="${p.y+24}" text-anchor=middle>${n.id}</text><text x="${p.cx}" y="${p.y+40}" text-anchor=middle font-size=11 fill="var(--mut)">${n.layer}</text></g>`});
-g.innerHTML=svg;
+mermaid.initialize({startOnLoad:false,securityLevel:'loose',theme:'neutral'});
+const rendered=new Set();
+function switchTab(i){
+  document.querySelectorAll('.tab,.pane').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-tab="'+i+'"]').classList.add('active');
+  const pane=document.getElementById('pane'+i);
+  pane.classList.add('active');
+  if(!rendered.has(i)){mermaid.run({nodes:pane.querySelectorAll('.mermaid')});rendered.add(i);}
+}
+switchTab(0);
+const D=REQMAP_DATA;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
-function render(id){const n=byId[id];const li=a=>a.map(x=>'<li>'+x+'</li>').join('');
-const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${e.role}: ${e.f}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
-const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
-document.getElementById('p').innerHTML=`<h2>${n.id} <span class=pill style="color:${sc}">${n.status}</span><span class=pill>${n.layer}</span></h2>
-<p style="color:var(--mut);font-style:italic;margin:0 0 8px">${n.intent}</p>
-<div class=io><div><div class=k>Input</div>${n.input||'—'}</div><div><div class=k>Output</div>${n.output||'—'}</div></div>
-<div class=k>Description</div><p style="margin:2px 0 10px">${n.desc||'—'}</p>
-<div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
-<div class=k>Members in code</div>${mem}
-<div class=k style="margin-top:8px">Depends on</div><div class=mono>${n.deps.join(' · ')||'— (bus)'}</div>
-<div class=k>Used by</div><div class=mono>${n.used_by.join(' · ')||'—'}</div>`}
-function sel(id){document.querySelectorAll('.rq').forEach(e=>{const x=e.dataset.id;const c=D.edges.some(([a,b])=>(a===id&&b===x)||(b===id&&a===x));e.classList.toggle('sel',x===id);e.classList.toggle('dim',!(x===id||c))});
-document.querySelectorAll('.edge').forEach(l=>{const h=l.dataset.a===id||l.dataset.b===id;l.classList.toggle('hot',h);l.classList.toggle('edim',!h)});render(id)}
-document.querySelectorAll('.rq').forEach(e=>e.addEventListener('click',()=>sel(e.dataset.id)));
-if(D.nodes.length)sel(D.nodes[0].id);
+function sel(id){
+  const n=byId[id];if(!n)return;
+  const li=a=>a.map(x=>'<li>'+x+'</li>').join('');
+  const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${e.role}: ${e.f}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
+  const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
+  document.getElementById('p').innerHTML=`
+    <h2>${n.id} <span class=pill style="color:${sc}">${n.status}</span><span class=pill>${n.layer}</span></h2>
+    <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${n.intent||'—'}</p>
+    <div class=lbl>WHAT</div>
+    <div class=io><div><div class=k>Input</div>${n.input||'—'}</div><div><div class=k>Output</div>${n.output||'—'}</div></div>
+    <div class=k>Description</div><p style="margin:2px 0 10px">${n.desc||'—'}</p>
+    <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
+    <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
+    <div class=k style="margin-top:8px">Depends on</div><div class=mono>${n.deps.join(' · ')||'— (bus)'}</div>
+    <div class=k>Used by</div><div class=mono>${n.used_by.join(' · ')||'—'}</div>`;
+}
+REQMAP_CALLBACKS
 </script>"""
+
+
+def render_html(data, reqs_dir):  # implements: REQ-MAP-007
+    diagrams = [
+        ("System Map",      _add_clicks(_mermaid_system(data),        data)),
+        ("Req→Code",   _add_clicks(_mermaid_req_to_code(data),   data)),
+        ("Behavioral Flow", _add_clicks(_mermaid_behavioral(data),    data)),
+        ("Dependencies",    _add_clicks(_mermaid_deps(data),          data)),
+        ("Risk",            _add_clicks(_mermaid_risk(data),          data)),
+    ]
+
+    tab_btns = "".join(
+        '<button class="tab{}" data-tab="{}" onclick="switchTab({}">{}</button>'.format(
+            " active" if i == 0 else "", i, i, title)
+        for i, (title, _) in enumerate(diagrams)
+    )
+
+    panes = "".join(
+        '<div id="pane{}" class="pane{}"><div class="mermaid">{}</div></div>'.format(
+            i, " active" if i == 0 else "", diagram)
+        for i, (_, diagram) in enumerate(diagrams)
+    )
+
+    callbacks = "\n".join(
+        "window['sel_{}'] = function(){{sel('{}');}};".format(
+            _safe_id(n["id"]), n["id"])
+        for n in data["nodes"]
+    )
+
+    html = MAP_HTML_TEMPLATE
+    html = html.replace("REQMAP_DATA",      json.dumps(data))
+    html = html.replace("REQMAP_TABS",      tab_btns)
+    html = html.replace("REQMAP_PANES",     panes)
+    html = html.replace("REQMAP_CALLBACKS", callbacks)
+
+    out = os.path.join(reqs_dir, "_map.html")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(html)
+    return out
 
 
 def main():

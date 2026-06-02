@@ -7,9 +7,9 @@ depends_on: [CORE-PARSE-001, CORE-SCAN-002]
 superseded_by:
 ---
 
-# Requirement map (HTML)
+# Requirement map (HTML + MD)
 
-> Render the whole registry as one navigable graph a human can read at a glance.
+> Render the whole registry as navigable diagrams a human can read at a glance.
 
 ## Input
 - The loaded requirements and the discovered members.
@@ -17,17 +17,25 @@ superseded_by:
 ## Description
 Text listings do not show shape — which capabilities sit on the bus, what depends
 on what, where the code lives. The map is a derived view (never a source of truth):
-features on top, bus at the bottom, edges for `depends_on`, and a detail panel per
-node showing intent, input/output, acceptance and members. It is regenerated, never
-edited, and lives under `requirements/` so it travels with the registry.
+two output files are generated together:
+- `_map.html`: multi-tab interactive viewer with mermaid.js and a clickable detail panel.
+- `_map.md`: five Mermaid diagrams for GitHub/GitLab static rendering.
+
+Both are regenerated, never edited, and live under `requirements/` so they travel
+with the registry.
 
 ## Output
-- `requirements/_map.html`: a self-contained HTML file with the registry embedded as JSON.
+- `requirements/_map.html`: multi-tab HTML viewer with mermaid.js; clicking a node opens
+  its WHY / WHAT / WHERE / HOW detail panel.
+- `requirements/_map.md`: 5 Mermaid diagrams + YAML frontmatter with node/edge counts.
 
 ## Acceptance (= tests)
-- The generated file contains one node per requirement and one edge per `depends_on`.
-- Bus and feature nodes are placed on separate rows.
-- A node with no members renders "(no members found)" in its panel.
+- The generated files contain one node per requirement and one edge per `depends_on`.
+- `_map.md` contains exactly 5 Mermaid code blocks, one per view.
+- `_map.html` has a tab bar with 5 tabs: System Map, Req→Code, Behavioral Flow, Dependencies, Risk.
+- Behavioral Flow shows `Input([...]) --> REQ-ID[REQ-ID] --> Output([...])` for every requirement.
+- Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents).
+- A node with no members renders "(no members found)" in the HTML detail panel.
 
 ## Links
 - Used by: (auto)
