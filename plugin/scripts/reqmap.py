@@ -639,7 +639,7 @@ def _node_label(n):
 
 
 def _mermaid_system(data):  # implements: REQ-MAP-007
-    lines = ["graph TD"]
+    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
     feats = [n for n in data["nodes"] if n["layer"] != "bus"]
     bus   = [n for n in data["nodes"] if n["layer"] == "bus"]
     if feats:
@@ -658,7 +658,7 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
 
 
 def _mermaid_deps(data):  # implements: REQ-MAP-007
-    lines = ["graph TD"]
+    lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
     byid = {n["id"]: n for n in data["nodes"]}
     seen = set()
     for a, b in data["edges"]:
@@ -710,9 +710,9 @@ def _mermaid_behavioral(data):  # implements: REQ-MAP-007
         out  = _mlabel(n["output"])[:50]
         in_id  = "in_"  + sid
         out_id = "out_" + sid
-        lines.append('  {}(["{}"])'.format(in_id,  inp))
+        lines.append('  {}["{}"]'.format(in_id,  inp))    # rectangle, not stadium pill
         lines.append('  {}["{}"]'.format(sid, _node_label(n)))
-        lines.append('  {}(["{}"])'.format(out_id, out))
+        lines.append('  {}["{}"]'.format(out_id, out))     # rectangle, not stadium pill
         lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
     return "\n".join(lines)
 
@@ -841,6 +841,8 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 .mermaid{background:var(--sur);border-radius:8px;height:72vh;overflow:hidden;cursor:grab;touch-action:none}
 .mermaid:active{cursor:grabbing}
 .mermaid svg{transform-origin:0 0}
+/* sharp rectangle nodes across every diagram (override the neutral theme's rounded corners) */
+.mermaid .node rect,.mermaid .node polygon{rx:0;ry:0}
 .mctrl{position:absolute;top:10px;right:10px;display:flex;gap:4px;z-index:5}
 .mctrl button{width:30px;height:30px;border:1px solid var(--bor);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer;font:16px/1 system-ui;opacity:.85}
 .mctrl button:hover{opacity:1;border-color:var(--acc)}
