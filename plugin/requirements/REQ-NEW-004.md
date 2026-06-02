@@ -12,7 +12,8 @@ superseded_by:
 > Create a new requirement file from the template, so every capability starts in the same shape.
 
 ## Input
-- A capability id `AREA-NAME-NNN` (CLI argument) and `templates/requirement.md`.
+- A capability id `AREA-NAME-NNN` (CLI argument). The scaffold is the engine's
+  built-in template (an on-disk `templates/requirement.md` overrides it if present).
 
 ## Description
 A consistent shape is what makes the registry scannable by both humans and the

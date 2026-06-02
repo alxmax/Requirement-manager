@@ -101,6 +101,18 @@ class Gate(unittest.TestCase):
             R.save_lock(missing, {"A": "b"})  # must not raise
             self.assertTrue(os.path.exists(os.path.join(missing, "_reqlock.json")))
 
+    def test_binding_hash_tracks_contract_not_commentary(self):  # tested-by: CORE-DRIFT-003
+        base = ("# T\n\n## WHAT — Contract (normative)\n- shall do X\n\n"
+                "## HOW — Acceptance (= tests)\nAC-1\n  Then X holds\n")
+        notes_a = base + "\n## WHAT — Notes & known limitations\n- footgun A\n"
+        notes_b = base + "\n## WHAT — Verify intent\n- Observed: weird thing. Bug?\n"
+        # commentary (Notes / Verify-intent) must NOT change the binding hash
+        self.assertEqual(R.binding_hash(notes_a), R.binding_hash(notes_b))
+        # changing the Contract MUST change it
+        self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("shall do X", "shall do Y")))
+        # changing an acceptance criterion MUST change it
+        self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("X holds", "Y holds")))
+
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-FOO-001.md"),
@@ -246,7 +258,7 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("bus (shared foundation)", self._html(d, "T"))
             R.render_md(self._data("T"), d)
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
-            self.assertIn("data thread", md)   # behavioral-flow legend line present
+            self.assertIn("area-level coupling", md)   # dependency-map legend line present
 
     def test_deps_is_area_level_overview(self):
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
@@ -330,6 +342,19 @@ class New(unittest.TestCase):  # tested-by: REQ-NEW-004
                 content = f.read()
             self.assertIn("CORE-FOO-001", content)
             self.assertNotIn("AREA-NAME-NNN", content)
+
+    def test_new_uses_builtin_template_when_no_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "reqs")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_new(reqs_dir, None, "CORE-FOO-001")   # no on-disk template
+            self.assertEqual(code, 0)
+            content = open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8").read()
+            self.assertIn("CORE-FOO-001", content)
+            self.assertNotIn("AREA-NAME-NNN", content)
+            self.assertIn("## WHAT — Contract", content)        # new emission schema
+            self.assertIn("Acceptance (= tests)", content)      # from the built-in scaffold
 
     def test_new_refuses_to_overwrite_existing(self):
         with tempfile.TemporaryDirectory() as d:
@@ -419,6 +444,90 @@ class Candidates(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
             files = [f for c in self._plan(d)["candidates"] for f in c["files"]]
             self.assertIn("good.py", files)
             self.assertIn("bad.py", files)
+
+
+def _req_with_verify(rid, items, title="Cap"):
+    """A new-schema requirement whose Verify-intent section holds `items`."""
+    vi = "\n".join("- " + it for it in items)
+    return (
+        "---\nid: {id}\nstatus: baseline\nlayer: feature\n---\n\n# {t}\n\n"
+        "## WHAT — Contract (normative)\n- shall do the thing.\n\n"
+        "## WHAT — Verify intent (open questions for the human)\n{vi}\n\n"
+        "## HOW — Acceptance (= tests)\nAC-1\n"
+    ).format(id=rid, t=title, vi=vi)
+
+
+class Findings(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
+    def _run(self, d, raw=False):
+        reqs = R.load_requirements(os.path.join(d, "requirements"))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_findings(reqs, os.path.join(d, "requirements"), raw=raw)
+        md = open(os.path.join(d, "requirements", "_findings.md"), encoding="utf-8").read()
+        return md, buf.getvalue()
+
+    def test_aggregates_verify_intent_grouped(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["swallowed except, intended?", "magic 1.05, bug?"]))
+            md, out = self._run(d)
+            self.assertIn("AREA-X-001", md)
+            self.assertIn("magic 1.05", md)
+            self.assertIn("2 open finding(s) across 1 requirement(s)", out)
+
+    def test_skips_none_placeholder(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-Y-001.md"),
+                   _req_with_verify("AREA-Y-001", ["None — behavior is unambiguous and matches the contract."]))
+            md, out = self._run(d)
+            self.assertIn("0 open finding(s)", out)
+            self.assertIn("_No open findings._", md)
+
+    def test_triage_sidecar_orders_confirmed_bugs_first(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["magic 1.05, bug?", "swallowed except, intended?"]))
+            _write(os.path.join(d, "requirements", R.FINDINGS_SIDECAR), json.dumps({
+                "generated_at": "2026-06-02T00:00:00Z",
+                "items": [
+                    {"req_id": "AREA-X-001", "finding": "swallowed except", "classification": "USER_DECISION", "severity": "low"},
+                    {"req_id": "AREA-X-001", "finding": "magic 1.05", "classification": "REAL_BUG", "severity": "high", "location": "f.py:10", "fix": "read from yaml"},
+                ]}))
+            md, out = self._run(d)
+            self.assertLess(md.index("Confirmed bugs"), md.index("Your call"))
+            self.assertIn("[HIGH]", md)
+            self.assertIn("`f.py:10`", md)
+            self.assertIn("1 confirmed bug(s)", out)
+
+    def test_raw_flag_ignores_sidecar(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["magic 1.05, bug?"]))
+            _write(os.path.join(d, "requirements", R.FINDINGS_SIDECAR), json.dumps({
+                "items": [{"req_id": "AREA-X-001", "finding": "magic 1.05", "classification": "REAL_BUG", "severity": "high"}]}))
+            md, _ = self._run(d, raw=True)
+            self.assertNotIn("Confirmed bugs", md)
+            self.assertIn("Open findings", md)
+
+    def test_staleness_note_when_counts_differ(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["a?", "b?", "c?"]))  # 3 raw
+            _write(os.path.join(d, "requirements", R.FINDINGS_SIDECAR), json.dumps({
+                "items": [{"req_id": "AREA-X-001", "finding": "a", "classification": "INTENTIONAL"}]}))  # 1 triaged
+            md, _ = self._run(d)
+            self.assertIn("WARN", md)
+            self.assertIn("re-run the AI triage", md)
+
+    def test_check_reports_open_findings(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["magic 1.05, bug?"]))
+            reqs = R.load_requirements(os.path.join(d, "requirements"))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, {}, os.path.join(d, "requirements"), False)
+            self.assertIn("1 open verify-intent finding(s)", buf.getvalue())
 
 
 if __name__ == "__main__":

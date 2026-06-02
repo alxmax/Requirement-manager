@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-02 18:10
-nodes: 9
-edges: 10
+generated: 2026-06-02 20:10
+nodes: 10
+edges: 11
 ---
 
 # Requirement Map
@@ -21,6 +21,7 @@ graph LR
     REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
     REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
     REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
+    REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
     REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
     REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
@@ -37,94 +38,55 @@ _Each requirement → its code; arrow label = role (`implements` / `tested-by`).
 ```mermaid
 graph LR
   CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
-  f_scripts_reqmap_py_170_198["scripts/reqmap.py:170-198"]
-  CORE_DRIFT_003 -->|implements| f_scripts_reqmap_py_170_198
-  f_scripts_test_reqmap_py_91["scripts/test_reqmap.py:91"]
-  CORE_DRIFT_003 -->|tested-by| f_scripts_test_reqmap_py_91
+  f_scripts_reqmap_py_172_203["scripts/reqmap.py:172-203"]
+  CORE_DRIFT_003 -->|implements| f_scripts_reqmap_py_172_203
+  f_scripts_test_reqmap_py_91_104["scripts/test_reqmap.py:91-104"]
+  CORE_DRIFT_003 -->|tested-by| f_scripts_test_reqmap_py_91_104
   CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
   f_scripts_reqmap_py_53_91["scripts/reqmap.py:53-91"]
   CORE_PARSE_001 -->|implements| f_scripts_reqmap_py_53_91
   f_scripts_test_reqmap_py_35["scripts/test_reqmap.py:35"]
   CORE_PARSE_001 -->|tested-by| f_scripts_test_reqmap_py_35
   CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
-  f_scripts_reqmap_py_107_142["scripts/reqmap.py:107-142"]
-  CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_107_142
-  f_scripts_test_reqmap_py_122["scripts/test_reqmap.py:122"]
-  CORE_SCAN_002 -->|tested-by| f_scripts_test_reqmap_py_122
+  f_scripts_reqmap_py_107_144["scripts/reqmap.py:107-144"]
+  CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_107_144
+  f_scripts_test_reqmap_py_134["scripts/test_reqmap.py:134"]
+  CORE_SCAN_002 -->|tested-by| f_scripts_test_reqmap_py_134
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-  f_scripts_reqmap_py_372_476["scripts/reqmap.py:372-476"]
-  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_372_476
-  f_scripts_test_reqmap_py_362["scripts/test_reqmap.py:362"]
-  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_362
+  f_scripts_reqmap_py_434_538["scripts/reqmap.py:434-538"]
+  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_434_538
+  f_scripts_test_reqmap_py_387["scripts/test_reqmap.py:387"]
+  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_387
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
-  f_scripts_reqmap_py_224_241["scripts/reqmap.py:224-241"]
-  REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_224_241
-  f_scripts_test_reqmap_py_81_104["scripts/test_reqmap.py:81-104"]
-  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_81_104
+  f_scripts_reqmap_py_229_246["scripts/reqmap.py:229-246"]
+  REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_229_246
+  f_scripts_test_reqmap_py_81_116["scripts/test_reqmap.py:81-116"]
+  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_81_116
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-  f_scripts_reqmap_py_306_355["scripts/reqmap.py:306-355"]
-  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_306_355
-  f_scripts_test_reqmap_py_295["scripts/test_reqmap.py:295"]
-  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_295
+  f_scripts_reqmap_py_368_417["scripts/reqmap.py:368-417"]
+  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_368_417
+  f_scripts_test_reqmap_py_307["scripts/test_reqmap.py:307"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_307
+  REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
+  f_scripts_reqmap_py_630_713["scripts/reqmap.py:630-713"]
+  REQ_FINDINGS_010 -->|implements| f_scripts_reqmap_py_630_713
+  f_scripts_test_reqmap_py_460["scripts/test_reqmap.py:460"]
+  REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_460
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_556_1089["scripts/reqmap.py:556-1089"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1089
-  f_scripts_test_reqmap_py_170["scripts/test_reqmap.py:170"]
-  REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_170
+  f_scripts_reqmap_py_748_1286["scripts/reqmap.py:748-1286"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_748_1286
+  f_scripts_test_reqmap_py_182["scripts/test_reqmap.py:182"]
+  REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_182
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
-  f_scripts_reqmap_py_293["scripts/reqmap.py:293"]
-  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_293
-  f_scripts_test_reqmap_py_317["scripts/test_reqmap.py:317"]
-  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_317
+  f_scripts_reqmap_py_347["scripts/reqmap.py:347"]
+  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_347
+  f_scripts_test_reqmap_py_329["scripts/test_reqmap.py:329"]
+  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_329
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
-  f_scripts_reqmap_py_205["scripts/reqmap.py:205"]
-  REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_205
-  f_scripts_test_reqmap_py_348["scripts/test_reqmap.py:348"]
-  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_348
-```
-
-## Behavioral Flow
-
-_`Input → Requirement → Output` for each capability — the data thread._
-
-```mermaid
-flowchart LR
-  in_CORE_DRIFT_003["A requirement body (markdown) and the lock file 'r"]
-  CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
-  out_CORE_DRIFT_003["A 12-char content hash of the binding sections; re"]
-  in_CORE_DRIFT_003 --> CORE_DRIFT_003 --> out_CORE_DRIFT_003
-  in_CORE_PARSE_001["A 'requirements/' directory containing '*.md' file"]
-  CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
-  out_CORE_PARSE_001["A dict 'id -› (meta, body, path)'. 'meta' is the p"]
-  in_CORE_PARSE_001 --> CORE_PARSE_001 --> out_CORE_PARSE_001
-  in_CORE_SCAN_002["A code root directory and source files in known ex"]
-  CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
-  out_CORE_SCAN_002["A dict 'cap_id -› ((role, relative_file, line_numb"]
-  in_CORE_SCAN_002 --> CORE_SCAN_002 --> out_CORE_SCAN_002
-  in_REQ_CANDIDATES_009["A code root, walked with the same exclusions as sc"]
-  REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-  out_REQ_CANDIDATES_009["A single JSON object on stdout (or '--out PATH'): "]
-  in_REQ_CANDIDATES_009 --> REQ_CANDIDATES_009 --> out_REQ_CANDIDATES_009
-  in_REQ_CHECK_006["The loaded requirements, the discovered members, a"]
-  REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
-  out_REQ_CHECK_006["Printed 'ERROR'/'WARN' lines plus a summary; exit "]
-  in_REQ_CHECK_006 --> REQ_CHECK_006 --> out_REQ_CHECK_006
-  in_REQ_EXTRACT_008["A code root and the already-discovered members (so"]
-  REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-  out_REQ_EXTRACT_008["One 'requirements/DRAFT-*.md' per untagged file, e"]
-  in_REQ_EXTRACT_008 --> REQ_EXTRACT_008 --> out_REQ_EXTRACT_008
-  in_REQ_MAP_007["The loaded requirements and the discovered members"]
-  REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  out_REQ_MAP_007["'requirements/_map.html': multi-tab HTML viewer wi"]
-  in_REQ_MAP_007 --> REQ_MAP_007 --> out_REQ_MAP_007
-  in_REQ_NEW_004["A capability id 'AREA-NAME-NNN' (CLI argument) and"]
-  REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
-  out_REQ_NEW_004["A new 'requirements/AREA-NAME-NNN.md' with the id "]
-  in_REQ_NEW_004 --> REQ_NEW_004 --> out_REQ_NEW_004
-  in_REQ_SCAN_005["The loaded requirements and the discovered members"]
-  REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
-  out_REQ_SCAN_005["Printed lines: each capability id, then its 'role "]
-  in_REQ_SCAN_005 --> REQ_SCAN_005 --> out_REQ_SCAN_005
+  f_scripts_reqmap_py_210["scripts/reqmap.py:210"]
+  REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_210
+  f_scripts_test_reqmap_py_373["scripts/test_reqmap.py:373"]
+  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_373
 ```
 
 ## Dependency Map
@@ -134,7 +96,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>6 caps</small>"]
+  a_REQ["REQ<br><small>7 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
 ```
@@ -157,5 +119,5 @@ graph LR
 
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
-| CORE-PARSE-001 | confirmed | 4 | 4 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |
+| CORE-PARSE-001 | confirmed | 4 | 5 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |
 | CORE-SCAN-002 | confirmed | 4 | 5 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |

@@ -2,7 +2,7 @@
 """reqmap — requirement manager engine (stdlib only).
 
 Subcommands:
-  new AREA-NAME-NNN   scaffold a requirement from templates/requirement.md
+  new AREA-NAME-NNN   scaffold a requirement from the built-in template
   scan              list code members (implements/generated-from/... tags) per capability
   check             the gate: link sync + drift; exit non-zero on error (use in pre-commit/CI)
   map               generate requirements/_map.html (navigable graph)
@@ -121,27 +121,29 @@ def _prune_dirs(dirpath, dirs, reqs_dir):  # implements: CORE-SCAN-002
     dirs[:] = keep
 
 
-def load_ignore(code_root):  # implements: CORE-SCAN-002
-    """Read optional `.reqmapignore` at the scan root: fnmatch globs over POSIX
-    rel paths, one per line, blanks and # comments skipped. Lets a repo exclude
-    vendored tooling (e.g. its own copy of reqmap.py) from membership scanning so
-    the engine's self-tags don't pollute the consumer's map. Fail-open: a missing
-    or unreadable file yields no patterns (behavior identical to before)."""
+def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+    """Read optional `.reqmapignore` (fnmatch globs over POSIX rel paths, one per
+    line, blanks and # comments skipped). Looked up in `requirements/` first (the
+    consolidated home for reqmap files) then at the scan root; first found wins.
+    Patterns are still matched against repo-root-relative paths regardless of where
+    the file lives. Fail-open: a missing/unreadable file yields no patterns."""
     pats = []
-    try:
-        with open(os.path.join(code_root, ".reqmapignore"), encoding="utf-8") as f:
-            for line in f:
-                s = line.strip()
-                if s and not s.startswith("#"):
-                    pats.append(s)
-    except OSError:
-        pass
+    for base in ([reqs_dir] if reqs_dir else []) + [code_root]:
+        try:
+            with open(os.path.join(base, ".reqmapignore"), encoding="utf-8") as f:
+                for line in f:
+                    s = line.strip()
+                    if s and not s.startswith("#"):
+                        pats.append(s)
+            break   # first .reqmapignore found wins
+        except OSError:
+            continue
     return pats
 
 
 def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     members = {}  # cap_id -> list[(role, file, line)]
-    ignore = load_ignore(code_root)
+    ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
@@ -168,12 +170,15 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
 
 # ---------- hashing / drift ----------
 def binding_hash(body):  # implements: CORE-DRIFT-003
-    """Hash only the semantically binding sections, not rationale/links."""
+    """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
+    Everything else (Verify-intent, Notes, Current-implementation, links) is
+    commentary and may drift freely without tripping the gate. (Legacy docs used
+    Input/Output/Acceptance; those headers are still honored for back-compat.)"""
     keep, grab = [], False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = any(s in h for s in ("input", "output", "acceptan"))
+            grab = any(s in h for s in ("contract", "acceptan", "input", "output"))
             continue
         if grab and line.strip():
             keep.append(line.strip())
@@ -285,17 +290,74 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         save_lock(reqs_dir, new_lock)
         print("lock updated.")
 
+    n_find = sum(len(items) for _rid, _t, items in collect_findings(reqs))
+    if n_find:
+        print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py findings`")
+
     print(f"\n{len(reqs)} requirements, {sum(len(v) for v in members.values())} members, "
           f"{len(errors)} errors, {len(warns)} warnings.")
     return 1 if errors else 0
+
+
+# Built-in scaffold so `new` needs no separate templates/ dir — the engine is
+# self-contained (one file). An on-disk templates/requirement.md still overrides
+# it when cmd_new is given a tmpl_path that exists.
+REQUIREMENT_TEMPLATE = """\
+---
+id: AREA-NAME-NNN
+status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
+layer: feature       # bus | feature
+owner: alex
+depends_on: []       # ids of bus/other capabilities this builds on
+superseded_by:       # <ID>, if replaced
+# area:              # optional: System Map grouping label (else the id prefix is used)
+---
+
+# Short name
+
+> WHY: one line — what this is, in plain language.
+
+## WHAT — Contract (normative)
+- The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
+  no function names; true regardless of how the code is implemented).
+- Output shape + allowed values; required vs optional inputs and how it degrades
+  when an optional input is missing/invalid; the decision logic that selects each
+  output (say so explicitly if it is delegated to a model/heuristic).
+
+## WHAT — Verify intent (open questions for the human)
+- Observed: <a behavior that may be an AI accident — swallowed error, empty-string
+  fallback, magic constant, unreachable branch>. Intended, or a bug to fix?
+
+## WHAT — Notes & known limitations (informative)
+- A known fragility/footgun the implementer should know but which is NOT enforced.
+
+## HOW — Acceptance (= tests)
+AC-1
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
+
+## WHERE — Current implementation
+- How the code does it today (the volatile narrative — may drift from the contract).
+
+## WHERE — Members in code (auto)
+"""
 
 
 def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
         print(f"exists: {dest}"); return 1
-    with open(tmpl_path, encoding="utf-8") as f:
-        t = f.read().replace("AREA-NAME-NNN", cap_id)
+    t = None
+    if tmpl_path:                      # an on-disk template, if supplied, wins
+        try:
+            with open(tmpl_path, encoding="utf-8") as f:
+                t = f.read()
+        except OSError:
+            t = None
+    if t is None:                      # otherwise use the built-in scaffold
+        t = REQUIREMENT_TEMPLATE
+    t = t.replace("AREA-NAME-NNN", cap_id)
     os.makedirs(reqs_dir, exist_ok=True)
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
@@ -552,6 +614,136 @@ def cmd_candidates(reqs, members, code_root, reqs_dir, out):  # implements: REQ-
     return 0
 
 
+# ---------- findings (open verify-intent items) ----------
+FINDINGS_SIDECAR = "_findings_triage.json"
+_SEV_RANK = {"high": 0, "medium": 1, "low": 2, "none": 3, "": 4}
+_SEV_BADGE = {"high": "HIGH", "medium": "MEDIUM", "low": "LOW"}
+
+
+def _req_title(body, rid):
+    for line in body.splitlines():
+        if line.startswith("# "):
+            return line[2:].strip()
+    return rid
+
+
+def collect_findings(reqs):  # implements: REQ-FINDINGS-010
+    """Per requirement, the open '## WHAT - Verify intent' bullets minus the
+    'None - ...' placeholder. Returns [(rid, title, [item, ...]), ...] for reqs
+    that have >=1 real finding, in id order. Deterministic; reads only the md."""
+    out = []
+    for rid in sorted(reqs):
+        body = reqs[rid]["body"]
+        items = [b for b in _bullets(body, "verify intent")
+                 if b and not b.lstrip("*_ ").lower().startswith("none")]
+        if items:
+            out.append((rid, _req_title(body, rid), items))
+    return out
+
+
+def _render_findings_raw(groups, total):
+    L = ["# Open findings", "",
+         "> {} open verify-intent item(s) across {} requirement(s), aggregated from each "
+         "requirement's `## WHAT - Verify intent` section by `reqmap.py findings`."
+         .format(total, len(groups)),
+         ">",
+         "> These are open questions raised while reconstructing intent from code - NOT "
+         "confirmed bugs. Resolve each by fixing the code or promoting the behavior into a "
+         "Contract line. Run the AI triage pass (see SKILL.md) and drop a `{}` beside this "
+         "file for a verified, prioritized view.".format(FINDINGS_SIDECAR),
+         "", "---", ""]
+    if not groups:
+        L.append("_No open findings._")
+        return "\n".join(L) + "\n", 0, 0
+    for rid, title, items in groups:
+        L.append("## {} - {}  ({})".format(rid, title, len(items)))
+        L.append("")
+        for it in items:
+            L.append("- {}".format(it))
+        L.append("")
+    return "\n".join(L) + "\n", 0, 0
+
+
+def _render_findings_triaged(triage, raw_total):
+    items = [it for it in triage.get("items", []) if isinstance(it, dict)]
+    buckets = {"REAL_BUG": [], "USER_DECISION": [], "INTENTIONAL": [], "FALSE_POSITIVE": []}
+    for it in items:
+        buckets.setdefault(it.get("classification", "USER_DECISION"), []).append(it)
+    bugs = sorted(buckets.get("REAL_BUG", []),
+                  key=lambda x: _SEV_RANK.get((x.get("severity") or "").lower(), 9))
+    n = len(items)
+    L = ["# Open findings - triaged", "",
+         "> {} finding(s) classified: {} confirmed bug(s), {} product/config decision(s), "
+         "{} intentional, {} false-positive. Source: `{}`{}."
+         .format(n, len(bugs), len(buckets.get("USER_DECISION", [])),
+                 len(buckets.get("INTENTIONAL", [])), len(buckets.get("FALSE_POSITIVE", [])),
+                 FINDINGS_SIDECAR,
+                 " (generated {})".format(triage["generated_at"]) if triage.get("generated_at") else "")]
+    if raw_total and raw_total != n:
+        L += [">", "> WARN  {} raw verify-intent item(s) currently in the requirements vs {} "
+                   "triaged - re-run the AI triage pass to refresh.".format(raw_total, n)]
+    L += ["", "---", ""]
+
+    def block(title, rows, detail):
+        L.append("## {} ({})".format(title, len(rows)))
+        L.append("")
+        for it in rows:
+            rid = it.get("req_id", "?")
+            sev = (it.get("severity") or "").lower()
+            head = "**[{}] `{}`**".format(_SEV_BADGE[sev], rid) if (detail and sev in _SEV_BADGE) \
+                else "**`{}`**".format(rid)
+            L.append("- {} {}".format(head, it.get("finding", "")))
+            if detail and it.get("location"):
+                L.append("  - where: `{}`".format(it["location"]))
+            if detail and it.get("fix"):
+                L.append("  - fix: {}".format(it["fix"]))
+        L.append("")
+
+    if bugs:
+        block("Confirmed bugs", bugs, True)
+    if buckets.get("USER_DECISION"):
+        block("Your call - config / product decisions", buckets["USER_DECISION"], True)
+    if buckets.get("INTENTIONAL"):
+        block("Intentional", buckets["INTENTIONAL"], False)
+    if buckets.get("FALSE_POSITIVE"):
+        block("False-positive", buckets["FALSE_POSITIVE"], False)
+    return "\n".join(L) + "\n", n, len(bugs)
+
+
+def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
+    """Aggregate every requirement's open verify-intent items into
+    requirements/_findings.md. If a `_findings_triage.json` sidecar exists (and
+    --raw is off), render the verified, classified view from it instead; else the
+    raw grouped list. Stdlib-only: the AI triage that produces the sidecar lives
+    in the skill, not here (same split as candidates vs AI-authoring)."""
+    groups = collect_findings(reqs)
+    total = sum(len(items) for _rid, _t, items in groups)
+
+    triage = None
+    if not raw:
+        sidecar = os.path.join(reqs_dir, FINDINGS_SIDECAR)
+        if os.path.exists(sidecar):
+            try:
+                with open(sidecar, encoding="utf-8") as f:
+                    triage = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                triage = None
+
+    if triage and isinstance(triage.get("items"), list):
+        md, n_tri, n_bugs = _render_findings_triaged(triage, total)
+    else:
+        md, n_tri, n_bugs = _render_findings_raw(groups, total)
+
+    os.makedirs(reqs_dir, exist_ok=True)
+    out = os.path.join(reqs_dir, "_findings.md")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(md)
+    extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if triage else ""
+    print("{} open finding(s) across {} requirement(s){} -> {}"
+          .format(total, len(groups), extra, out))
+    return 0
+
+
 # ---------- map (HTML) ----------
 def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
     used_by = {rid: [] for rid in reqs}
@@ -568,10 +760,17 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
             "area": m.get("area", ""),
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
+            # new emission schema (Contract / Verify-intent / Notes / Current-impl)
+            "contract": _bullets(r["body"], "contract"),
+            "verify": _bullets(r["body"], "verify"),
+            "notes": _bullets(r["body"], "notes"),
+            "current_impl": _bullets(r["body"], "current implementation"),
+            "acc": _bullets(r["body"], "acceptan"),          # AC bullets if any
+            "accept": _section_raw(r["body"], "acceptan"),    # raw acceptance (AC blocks, line breaks kept)
+            # legacy schema (Input / Description / Output) — kept so old docs still render
             "input": _section(r["body"], "input"),
             "output": _section(r["body"], "output"),
             "desc": _section(r["body"], "description"),
-            "acc": _bullets(r["body"], "acceptan"),
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
@@ -615,6 +814,20 @@ def _section(body, name):  # implements: REQ-MAP-007
         if grab and line.strip() and not line.strip().startswith("<!--"):
             out.append(line.strip().lstrip("- "))
     return " ".join(out)
+
+
+def _section_raw(body, name):  # implements: REQ-MAP-007
+    """Like _section but preserves line breaks + indentation — used for the
+    multi-line Given/When/Then acceptance blocks so they read as written."""
+    out, grab = [], False
+    for line in body.splitlines():
+        h = line.strip().lower()
+        if h.startswith("## "):
+            grab = name in h
+            continue
+        if grab and not line.strip().startswith("<!--"):
+            out.append(line.rstrip())
+    return "\n".join(out).strip()
 
 
 def _bullets(body, name):  # implements: REQ-MAP-007
@@ -791,21 +1004,6 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
-def _mermaid_behavioral(data):  # implements: REQ-MAP-007
-    lines = ["flowchart LR"]
-    for n in data["nodes"]:
-        sid  = _safe_id(n["id"])
-        inp  = _mlabel(n["input"])[:50]
-        out  = _mlabel(n["output"])[:50]
-        in_id  = "in_"  + sid
-        out_id = "out_" + sid
-        lines.append('  {}["{}"]'.format(in_id,  inp))    # rectangle, not stadium pill
-        lines.append('  {}["{}"]'.format(sid, _node_label(n)))
-        lines.append('  {}["{}"]'.format(out_id, out))     # rectangle, not stadium pill
-        lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
-    return "\n".join(lines)
-
-
 def _risk_signals(node, dependents_count):
     signals = []
     if node["status"] == "confirmed" and not node["members"]:
@@ -864,7 +1062,6 @@ _LEGEND_HTML = [
     'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
     '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
     '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
-    '<b>Input → Requirement → Output</b> for each capability — the data thread',
     'area-level coupling: one box per area (<b>N caps</b>), arrow A→B = some capability in A depends on one in B · the System Map has the per-capability detail',
     'requirements needing attention · '
     '<span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · '
@@ -874,7 +1071,6 @@ _LEGEND_HTML = [
 _LEGEND_MD = [
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
-    "`Input → Requirement → Output` for each capability — the data thread.",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
     "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents).",
 ]
@@ -891,7 +1087,6 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     diagrams = [
         ("System Map",          _mermaid_system(data)),
         ("Requirement-to-Code", _mermaid_req_to_code(data)),
-        ("Behavioral Flow",     _mermaid_behavioral(data)),
         ("Dependency Map",      _mermaid_deps(data)),
         ("Risk & Unknowns",     _mermaid_risk(data)),
     ]
@@ -1033,11 +1228,13 @@ function sel(id){
   document.getElementById('p').innerHTML=`
     <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
-    <div class=lbl>WHAT</div>
-    <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
-    <div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>
-    <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
-    <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
+    ${(n.contract&&n.contract.length)
+      ? `<div class=lbl>WHAT — Contract</div><ul>${li(n.contract)}</ul>`
+        + ((n.verify&&n.verify.length)?`<div class=lbl style="color:#b8860b">Verify intent</div><ul>${li(n.verify)}</ul>`:'')
+        + ((n.notes&&n.notes.length)?`<div class=k style="margin-top:6px">Notes &amp; limitations</div><ul>${li(n.notes)}</ul>`:'')
+      : `<div class=lbl>WHAT</div><div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div><div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>`}
+    <div class=lbl>HOW — Acceptance</div>${(n.acc&&n.acc.length)?`<ul>${li(n.acc)}</ul>`:`<pre style="white-space:pre-wrap;font:12px/1.45 ui-monospace,monospace;background:var(--sur);border-radius:6px;padding:8px;margin:4px 0">${esc(n.accept)||'—'}</pre>`}
+    <div class=lbl>WHERE</div>${(n.current_impl&&n.current_impl.length)?`<div class=k>Current implementation</div><ul>${li(n.current_impl)}</ul>`:''}<div class=k>Members in code</div>${mem}
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
     <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
     ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
@@ -1047,7 +1244,7 @@ let _hits=[];
 function search(q){
   q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
   if(!q){box.innerHTML='';_hits=[];return;}
-  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,(n.contract||[]).join(' '),(n.notes||[]).join(' '),n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
   box.innerHTML=_hits.length
     ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
     : '<div class="qhit nohit">no match</div>';
@@ -1090,7 +1287,6 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     diagrams = [
         ("System Map",      _add_clicks(_mermaid_system(data),        data)),
         ("Req→Code",   _add_clicks(_mermaid_req_to_code(data),   data)),
-        ("Behavioral Flow", _add_clicks(_mermaid_behavioral(data),    data)),
         ("Dependencies",    _mermaid_deps(data)),   # area-level: nodes are areas, not requirements
         ("Risk",            _add_clicks(_mermaid_risk(data),          data)),
     ]
@@ -1142,18 +1338,24 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
 
 def main():
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates"])
+    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates", "findings"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
     ap.add_argument("--code", default=None)
     ap.add_argument("--out", default=None, help="candidates: write plan JSON here ('-' or omit = stdout)")
+    ap.add_argument("--raw", action="store_true",
+                    help="findings: ignore the triage sidecar and emit the raw grouped list")
     ap.add_argument("--update-lock", action="store_true")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
+    # prefer an on-disk templates/requirement.md if present (back-compat), else the
+    # built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
     here = os.path.dirname(os.path.abspath(__file__))
     tmpl = os.path.join(here, "..", "templates", "requirement.md")
+    if not os.path.exists(tmpl):
+        tmpl = None
 
     if a.cmd == "new":
         if not a.arg:
@@ -1172,6 +1374,8 @@ def main():
         return cmd_extract(reqs, members, code_root, reqs_dir)
     if a.cmd == "candidates":
         return cmd_candidates(reqs, members, code_root, reqs_dir, a.out)
+    if a.cmd == "findings":
+        return cmd_findings(reqs, reqs_dir, a.raw)
 
 
 if __name__ == "__main__":
