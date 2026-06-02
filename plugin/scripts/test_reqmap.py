@@ -331,6 +331,18 @@ class New(unittest.TestCase):  # tested-by: REQ-NEW-004
             self.assertIn("CORE-FOO-001", content)
             self.assertNotIn("AREA-NAME-NNN", content)
 
+    def test_new_uses_builtin_template_when_no_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "reqs")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_new(reqs_dir, None, "CORE-FOO-001")   # no on-disk template
+            self.assertEqual(code, 0)
+            content = open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8").read()
+            self.assertIn("CORE-FOO-001", content)
+            self.assertNotIn("AREA-NAME-NNN", content)
+            self.assertIn("## Acceptance (= tests)", content)   # from the built-in scaffold
+
     def test_new_refuses_to_overwrite_existing(self):
         with tempfile.TemporaryDirectory() as d:
             tmpl = os.path.join(d, "tmpl.md")

@@ -2,7 +2,7 @@
 """reqmap — requirement manager engine (stdlib only).
 
 Subcommands:
-  new AREA-NAME-NNN   scaffold a requirement from templates/requirement.md
+  new AREA-NAME-NNN   scaffold a requirement from the built-in template
   scan              list code members (implements/generated-from/... tags) per capability
   check             the gate: link sync + drift; exit non-zero on error (use in pre-commit/CI)
   map               generate requirements/_map.html (navigable graph)
@@ -121,27 +121,29 @@ def _prune_dirs(dirpath, dirs, reqs_dir):  # implements: CORE-SCAN-002
     dirs[:] = keep
 
 
-def load_ignore(code_root):  # implements: CORE-SCAN-002
-    """Read optional `.reqmapignore` at the scan root: fnmatch globs over POSIX
-    rel paths, one per line, blanks and # comments skipped. Lets a repo exclude
-    vendored tooling (e.g. its own copy of reqmap.py) from membership scanning so
-    the engine's self-tags don't pollute the consumer's map. Fail-open: a missing
-    or unreadable file yields no patterns (behavior identical to before)."""
+def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+    """Read optional `.reqmapignore` (fnmatch globs over POSIX rel paths, one per
+    line, blanks and # comments skipped). Looked up in `requirements/` first (the
+    consolidated home for reqmap files) then at the scan root; first found wins.
+    Patterns are still matched against repo-root-relative paths regardless of where
+    the file lives. Fail-open: a missing/unreadable file yields no patterns."""
     pats = []
-    try:
-        with open(os.path.join(code_root, ".reqmapignore"), encoding="utf-8") as f:
-            for line in f:
-                s = line.strip()
-                if s and not s.startswith("#"):
-                    pats.append(s)
-    except OSError:
-        pass
+    for base in ([reqs_dir] if reqs_dir else []) + [code_root]:
+        try:
+            with open(os.path.join(base, ".reqmapignore"), encoding="utf-8") as f:
+                for line in f:
+                    s = line.strip()
+                    if s and not s.startswith("#"):
+                        pats.append(s)
+            break   # first .reqmapignore found wins
+        except OSError:
+            continue
     return pats
 
 
 def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     members = {}  # cap_id -> list[(role, file, line)]
-    ignore = load_ignore(code_root)
+    ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
@@ -290,12 +292,59 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
     return 1 if errors else 0
 
 
+# Built-in scaffold so `new` needs no separate templates/ dir — the engine is
+# self-contained (one file). An on-disk templates/requirement.md still overrides
+# it when cmd_new is given a tmpl_path that exists.
+REQUIREMENT_TEMPLATE = """\
+---
+id: AREA-NAME-NNN
+status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
+layer: feature       # bus | feature
+owner: alex
+depends_on: []       # ids of bus/other capabilities this builds on
+superseded_by:       # <ID>, if replaced
+# area:              # optional: System Map grouping label (else the id prefix is used)
+---
+
+# Short name
+
+> One line: what this is, in plain language.
+
+## Input
+- What the caller / runtime provides.
+
+## Description
+What it does between input and output, and why it exists. The "why" goes here —
+code can never recover it. Keep it short; this is the part a human reads cold.
+
+## Output
+- What it produces. This defines the boundary.
+
+## Acceptance (= tests)
+- A checkable statement that becomes a test.
+- An edge case -> expected result.
+- A failure mode -> expected error.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)
+"""
+
+
 def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
         print(f"exists: {dest}"); return 1
-    with open(tmpl_path, encoding="utf-8") as f:
-        t = f.read().replace("AREA-NAME-NNN", cap_id)
+    t = None
+    if tmpl_path:                      # an on-disk template, if supplied, wins
+        try:
+            with open(tmpl_path, encoding="utf-8") as f:
+                t = f.read()
+        except OSError:
+            t = None
+    if t is None:                      # otherwise use the built-in scaffold
+        t = REQUIREMENT_TEMPLATE
+    t = t.replace("AREA-NAME-NNN", cap_id)
     os.makedirs(reqs_dir, exist_ok=True)
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
@@ -1152,8 +1201,12 @@ def main():
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
+    # prefer an on-disk templates/requirement.md if present (back-compat), else the
+    # built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
     here = os.path.dirname(os.path.abspath(__file__))
     tmpl = os.path.join(here, "..", "templates", "requirement.md")
+    if not os.path.exists(tmpl):
+        tmpl = None
 
     if a.cmd == "new":
         if not a.arg:

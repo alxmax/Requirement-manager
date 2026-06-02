@@ -18,23 +18,30 @@ A script reconciles the two and generates a navigable map.
 
 ## Setup (first use in a repo)
 
-The engine is a single stdlib-only script. Seed it into the target repo once:
+The engine is a single stdlib-only script. Seed it — and everything else reqmap
+writes — under `requirements/`, so the tool leaves one tidy folder:
 
 ```bash
-mkdir -p scripts templates requirements
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
-cp "${CLAUDE_PLUGIN_ROOT}/templates/requirement.md" templates/requirement.md
-printf 'scripts/reqmap.py\n' >> .reqmapignore   # don't scan the vendored engine
+mkdir -p requirements
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" requirements/reqmap.py
+printf 'data/\narchive/\nbuild/\n' > requirements/.reqmapignore   # dirs to skip
 ```
 
-From then on every command below runs against the repo's own `scripts/reqmap.py`.
-Commit the script with the repo so the gate works in CI without the plugin present.
+From then on run `python requirements/reqmap.py <cmd>`, and commit it so the gate
+works in CI without the plugin. Everything reqmap produces (`_map.html`, `_map.md`,
+`_reqlock.json`, the requirement `.md` files) lands in `requirements/` too.
 
-**`.reqmapignore`** (fnmatch globs, one per line) keeps files out of scanning.
-Always list the vendored `scripts/reqmap.py` — it self-documents with
-`# implements: CORE-*` tags, which otherwise surface in *your* repo as
-dangling-tag errors. Add generated/vendored dirs too (`data/`, `archive/`, build
-output) so the registry stays about *your* code, not tooling.
+Because the engine lives **inside** `requirements/` — the one dir the scanner skips
+— its own `# implements: CORE-*` self-tags are ignored automatically; you don't
+list it in `.reqmapignore`. The requirement template is built into the engine, so
+no `templates/` dir is needed.
+
+**`.reqmapignore`** (in `requirements/`; fnmatch globs over repo-root-relative
+paths) keeps generated/vendored dirs out of scanning — `data/`, `archive/`, build
+output — so the registry stays about *your* code, not tooling.
+
+> The plugin's own repo keeps the engine in `plugin/scripts/` instead — it
+> *dogfoods*, so its `CORE-*`/`REQ-*` requirements need `reqmap.py` to be scanned.
 
 ## Core model
 
