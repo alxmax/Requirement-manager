@@ -248,10 +248,11 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
     for rid, r in reqs.items():
         for dep in r["meta"].get("depends_on", []):
             data["edges"].append([rid, dep])
-    out = os.path.join(reqs_dir, "_map.html")
-    with open(out, "w", encoding="utf-8") as f:
-        f.write(MAP_HTML.replace("__DATA__", json.dumps(data)))
-    print(f"wrote {out}  ({len(data['nodes'])} nodes, {len(data['edges'])} edges)")
+    html_out = render_html(data, reqs_dir)
+    md_out   = render_md(data, reqs_dir)
+    print("wrote {}".format(html_out))
+    print("wrote {}".format(md_out))
+    print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
 
 
