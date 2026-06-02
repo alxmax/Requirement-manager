@@ -23,6 +23,10 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature"}
 ENFORCED = {"in-progress", "implemented", "confirmed"}
+# System Map declutter: hide depends_on edges into a node this many capabilities
+# depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
+# the Dependency Map tab.
+SYSTEM_HUB_FANIN = 8
 
 # Bumped on any change to this engine. `check` warns a seeded repo when its
 # vendored copy is older than the installed plugin's. ISO date: lexicographic
@@ -546,6 +550,7 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
             "status": m.get("status", "draft"),
+            "area": m.get("area", ""),
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
             "input": _section(r["body"], "input"),
@@ -644,24 +649,50 @@ def _area_of(rid):  # implements: REQ-MAP-007
     return rid.split("-", 1)[0] or rid
 
 
+def _node_area(n):  # implements: REQ-MAP-007
+    """Grouping key for a node: an explicit `area:` frontmatter field wins (lets a
+    repo group e.g. several standalone capabilities under one ANALYSIS box without
+    renaming ids); otherwise fall back to the id prefix."""
+    return (n.get("area") or "").strip() or _area_of(n["id"])
+
+
 def _mermaid_system(data):  # implements: REQ-MAP-007
-    # Cluster nodes into per-area subgraphs (by id prefix) rather than one flat
-    # graph: past ~20 nodes a single graph is unreadable, so area boxes keep it
-    # navigable. Bus nodes get a thicker stroke so the bus stays identifiable now
-    # that it is no longer its own subgraph.
+    # Cluster nodes into per-area subgraphs so a 40+ node map stays navigable
+    # (Miller 7+-2 / C4 levels). Single-node areas would each be a noisy 1-box, so
+    # collect them into one "misc" box. Bus nodes keep a thick stroke. Group key is
+    # the `area:` frontmatter field if set, else the id prefix.
     lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
     areas, bus_ids = {}, []
     for n in data["nodes"]:
-        areas.setdefault(_area_of(n["id"]), []).append(n)
-    for area in sorted(areas):
-        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(area), area))
-        for n in areas[area]:
+        areas.setdefault(_node_area(n), []).append(n)
+        if n.get("layer") == "bus":
+            bus_ids.append(n["id"])
+
+    def _emit(label, nodes):
+        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(label), label))
+        for n in nodes:
             lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
-            if n.get("layer") == "bus":
-                bus_ids.append(n["id"])
         lines.append("  end")
+
+    multi = {a: ns for a, ns in areas.items() if len(ns) > 1}
+    singles = [n for ns in areas.values() if len(ns) == 1 for n in ns]
+    for area in sorted(multi):
+        _emit(area, multi[area])
+    if singles:
+        _emit("misc", sorted(singles, key=lambda n: n["id"]))
+
+    # Declutter the hub hairball: a bus / very-high-fan-in node is depended on by
+    # almost everything, so drawing every edge into it is noise, not signal
+    # ("don't draw a line from every module to the logger"). Hide those edges
+    # here; the full graph stays in the Dependency Map tab.
+    bus_set = set(bus_ids)
+    fanin = {}
+    for _src, tgt in data["edges"]:
+        fanin[tgt] = fanin.get(tgt, 0) + 1
+    hubs = bus_set | {nid for nid, c in fanin.items() if c >= SYSTEM_HUB_FANIN}
     for a, b in data["edges"]:
-        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+        if b not in hubs:
+            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
     for bid in bus_ids:
         lines.append("  style {} stroke-width:3px".format(_safe_id(bid)))
     return "\n".join(lines)
@@ -787,6 +818,30 @@ def _add_clicks(diagram, data):
     return diagram + "\n" + clicks
 
 
+# Per-tab legends (parallel to the 5 diagrams, same order) so each view is
+# self-explanatory. HTML uses colored swatches; markdown uses words.
+_LEGEND_HTML = [
+    '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
+    '<i>edges into the bus/hubs are hidden — see the Dependencies tab for the full graph</i>',
+    'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
+    '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
+    '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
+    '<b>Input → Requirement → Output</b> for each capability — the data thread',
+    'the full <b>depends_on</b> topology (includes the bus edges the System Map hides)',
+    'requirements needing attention · '
+    '<span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · '
+    '<span class="sw" style="background:#fff3cd;border-color:#a66"></span>unreviewed (promote after review) · '
+    '<span class="sw" style="background:#fff9c4;border-color:#aa0"></span>blast-radius (≥3 dependents)',
+]
+_LEGEND_MD = [
+    "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden — see the Dependency Map for the full graph.",
+    "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
+    "`Input → Requirement → Output` for each capability — the data thread.",
+    "Full `depends_on` topology, including the bus edges the System Map hides.",
+    "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents).",
+]
+
+
 def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     from datetime import datetime
     ts = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -813,8 +868,9 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
         "# Requirement Map",
         "",
     ]
-    for title, diagram in diagrams:
-        lines += ["## {}".format(title), "", "```mermaid", diagram, "```", ""]
+    for i, (title, diagram) in enumerate(diagrams):
+        legend = _LEGEND_MD[i] if i < len(_LEGEND_MD) else ""
+        lines += ["## {}".format(title), "", "_{}_".format(legend), "", "```mermaid", diagram, "```", ""]
 
     # risk table
     risk_rows = []
@@ -862,6 +918,9 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 .mctrl button{width:30px;height:30px;border:1px solid var(--bor);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer;font:16px/1 system-ui;opacity:.85}
 .mctrl button:hover{opacity:1;border-color:var(--acc)}
 .mhint{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--mut);pointer-events:none}
+.legend{font-size:12px;color:var(--mut);margin:0 0 8px;line-height:1.7}
+.legend b{color:var(--fg);font-weight:600}
+.sw{display:inline-block;width:11px;height:11px;border:1px solid var(--bor);border-radius:2px;vertical-align:middle;margin:0 3px 0 2px}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -953,13 +1012,16 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     )
 
     panes = "".join(
-        ('<div id="pane{0}" class="pane{1}"><div class="mwrap">'
+        ('<div id="pane{0}" class="pane{1}">'
+         '<div class="legend">{3}</div>'
+         '<div class="mwrap">'
          '<div class="mctrl"><button onclick="pz({0},1.25)">+</button>'
          '<button onclick="pz({0},0.8)">−</button>'
          '<button onclick="pzReset({0})" title="reset">↺</button></div>'
          '<div class="mermaid">{2}</div>'
          '<div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div>'
-         '</div></div>').format(i, " active" if i == 0 else "", diagram)
+         '</div></div>').format(i, " active" if i == 0 else "", diagram,
+                                 _LEGEND_HTML[i] if i < len(_LEGEND_HTML) else "")
         for i, (_, diagram) in enumerate(diagrams)
     )
 

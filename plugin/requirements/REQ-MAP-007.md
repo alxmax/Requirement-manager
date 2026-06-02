@@ -22,7 +22,11 @@ two output files are generated together:
 - `_map.md`: five Mermaid diagrams for GitHub/GitLab static rendering.
 
 Both are regenerated, never edited, and live under `requirements/` so they travel
-with the registry.
+with the registry. For legibility at scale the System Map clusters nodes into
+per-area subgraphs (a node's `area:` field, else its id prefix), collapses
+single-node areas into one `misc` box, and hides `depends_on` edges into the bus /
+high-fan-in hubs (the full graph stays in the Dependency Map). Every tab carries a
+legend, and Req→Code colors only an enforced-but-unlinked requirement red.
 
 ## Output
 - `requirements/_map.html`: multi-tab HTML viewer with mermaid.js; clicking a node opens
@@ -32,8 +36,9 @@ with the registry.
 ## Acceptance (= tests)
 - The generated files contain one node per requirement and one edge per `depends_on`.
 - `_map.md` contains exactly 5 Mermaid code blocks, one per view.
-- `_map.html` has a tab bar with 5 tabs: System Map, Req→Code, Behavioral Flow, Dependencies, Risk.
-- Behavioral Flow shows `Input([...]) --> REQ-ID[REQ-ID] --> Output([...])` for every requirement.
+- `_map.html` has a tab bar with 5 tabs: System Map, Req→Code, Behavioral Flow, Dependencies, Risk, and each pane carries a legend.
+- Behavioral Flow shows `Input[...] --> REQ-ID --> Output[...]` for every requirement.
+- System Map groups nodes into per-area subgraphs, collapses single-node areas into a `misc` box, and omits edges whose target is a bus node (the Dependency Map keeps them).
 - Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents).
 - A node with no members renders "(no members found)" in the HTML detail panel.
 
