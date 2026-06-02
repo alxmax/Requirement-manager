@@ -1199,8 +1199,17 @@ function mapFallback(box){box.style.overflow='auto';box.style.cursor='default';}
 function initPanZoom(box){
   const svg=box.querySelector('svg');if(!svg){mapFallback(box);return;}if(box._pz)return;
   svg.style.maxWidth='none';
-  const st={s:1,x:0,y:0};box._pz=st;
+  // fit-to-container: scale so the whole diagram is visible on first open;
+  // never zoom in beyond 1:1, only zoom out when the diagram is larger than the box.
+  const vb=svg.getAttribute('viewBox');
+  let svgW=parseFloat(svg.getAttribute('width')||0);
+  let svgH=parseFloat(svg.getAttribute('height')||0);
+  if(vb){const p=vb.trim().split(/[\s,]+/);svgW=+p[2]||svgW;svgH=+p[3]||svgH;}
+  const br=box.getBoundingClientRect();
+  const fitS=(svgW>0&&svgH>0)?Math.min(1,Math.min((br.width-16)/svgW,(br.height-16)/svgH)):1;
+  const st={s:fitS,x:0,y:0};box._pz=st;box._fitS=fitS;
   const apply=()=>{svg.style.transform='translate('+st.x+'px,'+st.y+'px) scale('+st.s+')';};
+  apply();
   box.addEventListener('wheel',e=>{
     e.preventDefault();
     const r=box.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
@@ -1216,7 +1225,7 @@ function initPanZoom(box){
   box._apply=apply;
 }
 function pz(i,f){const b=paneBox(i),st=b._pz;if(!st)return;const r=b.getBoundingClientRect(),cx=r.width/2,cy=r.height/2;const ns=Math.min(8,Math.max(.15,st.s*f));st.x=cx-(cx-st.x)*(ns/st.s);st.y=cy-(cy-st.y)*(ns/st.s);st.s=ns;b._apply();}
-function pzReset(i){const b=paneBox(i),st=b._pz;if(!st)return;st.s=1;st.x=0;st.y=0;b._apply();}
+function pzReset(i){const b=paneBox(i),st=b._pz;if(!st)return;st.s=b._fitS||1;st.x=0;st.y=0;b._apply();}
 const D=REQMAP_DATA;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
