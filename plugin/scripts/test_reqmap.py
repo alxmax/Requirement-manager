@@ -202,6 +202,28 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             R.render_md(self._data("T"), missing)
             self.assertTrue(os.path.exists(os.path.join(missing, "_map.html")))
 
+    def _node(self, rid, status="baseline", layer="feature", members=None):
+        return {"id": rid, "layer": layer, "status": status, "title": rid,
+                "intent": "", "input": "i", "output": "o", "desc": "", "acc": [],
+                "deps": [], "used_by": [], "members": members or []}
+
+    def test_req_to_code_baseline_no_members_is_grey_not_red(self):
+        out = R._mermaid_req_to_code({"nodes": [self._node("AREA-FOO-001", status="baseline")], "edges": []})
+        self.assertIn("#eee", out)        # muted grey: not-yet-linked baseline is expected
+        self.assertNotIn("#fee", out)     # NOT the alarming red
+
+    def test_req_to_code_confirmed_no_members_is_red(self):
+        out = R._mermaid_req_to_code({"nodes": [self._node("AREA-FOO-001", status="confirmed")], "edges": []})
+        self.assertIn("#fee", out)        # enforced + unlinked = a real gap -> red
+
+    def test_system_map_clusters_by_area(self):
+        data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
+                          self._node("AI-POSTMORTEM-001")], "edges": []}
+        out = R._mermaid_system(data)
+        self.assertIn('subgraph sg_BUS["BUS"]', out)   # per-area subgraph
+        self.assertIn('subgraph sg_AI["AI"]', out)
+        self.assertIn("stroke-width:3px", out)         # bus node stays marked
+
 
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10
