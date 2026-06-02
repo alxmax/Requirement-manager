@@ -16,6 +16,19 @@ A capability registry that sits between intent and code. Each capability is one
 markdown file (the single source of truth). Code points back to it with a tag.
 A script reconciles the two and generates a navigable map.
 
+## Setup (first use in a repo)
+
+The engine is a single stdlib-only script. Seed it into the target repo once:
+
+```bash
+mkdir -p scripts templates requirements
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp "${CLAUDE_PLUGIN_ROOT}/templates/requirement.md" templates/requirement.md
+```
+
+From then on every command below runs against the repo's own `scripts/reqmap.py`.
+Commit the script with the repo so the gate works in CI without the plugin present.
+
 ## Core model
 
 - **Source of truth**: one `.md` per capability in `requirements/`, with YAML
@@ -75,7 +88,7 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 - `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
-- `python scripts/reqmap.py map`               — generate `requirements/_map.html`
+- `python scripts/reqmap.py map`               — generate `requirements/_map.html` (5-tab interactive viewer) + `requirements/_map.md` (5 Mermaid diagrams)
 - `python scripts/reqmap.py extract`           — draft requirements from legacy code
 
 ## Legacy / brownfield (extract mode)
