@@ -2,6 +2,6 @@ __pycache__/
 *.pyc
 .consilium/
 
-# Generated, regenerable views — rebuild with: python scripts/reqmap.py map
-requirements/_map.html
-requirements/_map.md
+# Generated, regenerable views — rebuild with: cd plugin && python scripts/reqmap.py map
+plugin/requirements/_map.html
+plugin/requirements/_map.md
