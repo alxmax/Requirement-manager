@@ -11,22 +11,27 @@ superseded_by:
 
 > Show, for every capability, which code claims it — and which capabilities have no code.
 
-## Input
-- The loaded requirements and the discovered members.
+## WHAT — Contract (normative)
+- It shall print every capability id (the union of loaded requirements and discovered
+  members, in sorted order) followed by its `role file:line` members, one per line.
+- A capability with no members shall print `(no members found)`.
+- A tag pointing at an id with no requirement shall still appear in the listing (so orphan
+  tags and unimplemented requirements both surface).
 
-## Description
-This is the human-facing read of the thread: a flat listing that answers "where is
-X implemented?" and, just as importantly, "what is declared but never built?".
-Capabilities and members are unioned so an orphan tag (code with no requirement)
-and an unimplemented requirement both show up.
+## WHAT — Verify intent (open questions for the human)
+- None — authored from known intent, not reconstructed from code.
 
-## Output
-- Printed lines: each capability id, then its `role file:line` members, or `(no members found)`.
+## WHAT — Notes & known limitations (informative)
+- This is the human-facing read of the thread; it answers "where is X implemented?" and
+  "what is declared but never built?".
 
-## Acceptance (= tests)
+## HOW — Acceptance (= tests)
 - A capability with two tags prints both `role file:line` lines under its id.
 - A requirement with no members prints `(no members found)`.
 - A tag pointing at an id with no requirement still appears in the listing.
+
+## WHERE — Current implementation
+- `cmd_scan` in `reqmap.py`.
 
 ## Links
 - Used by: (auto)
