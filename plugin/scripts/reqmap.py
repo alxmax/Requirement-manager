@@ -12,7 +12,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, hashlib, json, os, re, sys
+import argparse, fnmatch, hashlib, json, os, re, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
@@ -102,8 +102,27 @@ def _prune_dirs(dirpath, dirs, reqs_dir):  # implements: CORE-SCAN-002
     dirs[:] = keep
 
 
+def load_ignore(code_root):  # implements: CORE-SCAN-002
+    """Read optional `.reqmapignore` at the scan root: fnmatch globs over POSIX
+    rel paths, one per line, blanks and # comments skipped. Lets a repo exclude
+    vendored tooling (e.g. its own copy of reqmap.py) from membership scanning so
+    the engine's self-tags don't pollute the consumer's map. Fail-open: a missing
+    or unreadable file yields no patterns (behavior identical to before)."""
+    pats = []
+    try:
+        with open(os.path.join(code_root, ".reqmapignore"), encoding="utf-8") as f:
+            for line in f:
+                s = line.strip()
+                if s and not s.startswith("#"):
+                    pats.append(s)
+    except OSError:
+        pass
+    return pats
+
+
 def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     members = {}  # cap_id -> list[(role, file, line)]
+    ignore = load_ignore(code_root)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
@@ -111,6 +130,8 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
             try:
                 with open(fp, encoding="utf-8", errors="ignore") as f:
                     for i, line in enumerate(f, 1):
