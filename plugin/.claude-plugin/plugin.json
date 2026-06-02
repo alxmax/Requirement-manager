@@ -1,7 +1,7 @@
 {
   "name": "requirement-manager",
   "description": "A capability registry that sits between intent and code: one markdown file per capability as the single source of truth, a drift gate for commit/merge, and a navigable requirement map (5 Mermaid diagrams + interactive HTML).",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Schipor Alexandru",
     "email": "schipor.alexandru123@gmail.com"
