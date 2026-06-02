@@ -354,6 +354,21 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
+def _mermaid_behavioral(data):  # implements: REQ-MAP-007
+    lines = ["flowchart LR"]
+    for n in data["nodes"]:
+        sid  = _safe_id(n["id"])
+        inp  = (n["input"]  or "—")[:50].replace('"', "'")
+        out  = (n["output"] or "—")[:50].replace('"', "'")
+        in_id  = "in_"  + sid
+        out_id = "out_" + sid
+        lines.append('  {}(["{}"])'.format(in_id,  inp))
+        lines.append('  {}["{}"]'.format(sid, n["id"]))
+        lines.append('  {}(["{}"])'.format(out_id, out))
+        lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
+    return "\n".join(lines)
+
+
 MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
