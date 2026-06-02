@@ -24,10 +24,17 @@ The engine is a single stdlib-only script. Seed it into the target repo once:
 mkdir -p scripts templates requirements
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
 cp "${CLAUDE_PLUGIN_ROOT}/templates/requirement.md" templates/requirement.md
+printf 'scripts/reqmap.py\n' >> .reqmapignore   # don't scan the vendored engine
 ```
 
 From then on every command below runs against the repo's own `scripts/reqmap.py`.
 Commit the script with the repo so the gate works in CI without the plugin present.
+
+**`.reqmapignore`** (fnmatch globs, one per line) keeps files out of scanning.
+Always list the vendored `scripts/reqmap.py` — it self-documents with
+`# implements: CORE-*` tags, which otherwise surface in *your* repo as
+dangling-tag errors. Add generated/vendored dirs too (`data/`, `archive/`, build
+output) so the registry stays about *your* code, not tooling.
 
 ## Core model
 
@@ -89,16 +96,34 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (5-tab interactive viewer) + `requirements/_map.md` (5 Mermaid diagrams)
-- `python scripts/reqmap.py extract`           — draft requirements from legacy code
+- `python scripts/reqmap.py extract`           — quick one-draft-per-file scaffold (TODO bodies)
+- `python scripts/reqmap.py candidates`        — emit a JSON capability-extraction plan (read-only; feeds AI authoring)
 
-## Legacy / brownfield (extract mode)
+## Legacy / brownfield
 
-`extract` walks the code and proposes `draft` requirements (structure, input/output
-from signatures, `depends_on` from imports). It **cannot** recover intent — it only
-captures observed behavior, so:
-- Everything it emits is `draft`/`baseline`, never `confirmed`. It never canonizes a
-  bug as correct.
-- Routing to review is by **risk = blast radius × uncertainty × proximity to known
-  problems**, not by parsing ease (clean code can be a clean bug). High-risk →
-  review; low-risk → accept as `baseline` (tracked, not asserted correct).
-- Aim ~80% auto-`baseline` / ~20% human-`confirmed` as a *health signal*, not a quota.
+Two ways to bootstrap a registry on existing code. **Neither invents intent** —
+they lower the cost of writing requirements you then review. Nothing is ever
+auto-`confirmed`: a bug is never canonized as correct.
+
+### `extract` — quick scaffold (one draft per file)
+`extract` walks untagged source and writes one `draft` requirement per file with a
+**TODO body** and a cheap risk score (counts of `TODO`/`FIXME`/`HACK` markers, lint
+suppressions, and file size). It does **not** read signatures or imports — the body
+is left as TODO for a human to fill (this is the contract, see `REQ-EXTRACT-008`).
+The console prints `auto-baseline` / `REVIEW` as a review *hint*; the file's
+`status` field is always `draft`. Use it only for a fast, throwaway inventory — it
+is one-draft-per-file, not capability-level, so it does not by itself produce a
+useful registry.
+
+### `candidates` + AI authoring — capability-level requirements (recommended)
+`candidates` is **read-only** (writes no `.md`) and emits a JSON *extraction plan*.
+It groups files into capabilities — authoritative `requirements/_capmap.json` when
+present (a list of `{id, layer, files[]}`), else one candidate per file — and for
+each derives docstrings + top-level signatures (Python via `ast`, JS/TS via regex),
+the import graph as `depends_on`, test-file coverage, fan-in (a `bus` hint), and an
+`existing_req` flag for files already tagged. An agent (or you) then authors a real
+`requirements/<ID>.md` per candidate from that plan: filling Input → Description →
+Output → Acceptance, choosing `bus`/`feature`, and **referencing existing
+capabilities instead of duplicating them**. Author bus capabilities first so feature
+`depends_on` resolve, then tag the member files (`# implements: <ID>`) and run
+`check --update-lock`. Promote `draft → baseline → confirmed` at human review.
