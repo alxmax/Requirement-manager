@@ -369,6 +369,52 @@ def _mermaid_behavioral(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
+def _risk_signals(node, dependents_count):
+    signals = []
+    if node["status"] == "confirmed" and not node["members"]:
+        signals.append("unimplemented")
+    if node["status"] in ("draft", "baseline"):
+        signals.append("unreviewed")
+    if dependents_count >= 3:
+        signals.append("blast-radius")
+    return signals
+
+
+def _mermaid_risk(data):  # implements: REQ-MAP-007
+    dep_count = {n["id"]: 0 for n in data["nodes"]}
+    for _, b in data["edges"]:
+        dep_count[b] = dep_count.get(b, 0) + 1
+
+    risky = []
+    for n in data["nodes"]:
+        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
+        if sigs:
+            risky.append((n, sigs))
+
+    lines = ["graph TD"]
+    if not risky:
+        lines.append('  ok["No risk signals detected"]')
+        return "\n".join(lines)
+
+    risky_ids = {n["id"] for n, _ in risky}
+    for n, sigs in risky:
+        sid   = _safe_id(n["id"])
+        label = n["id"] + "\\n" + ", ".join(sigs)
+        lines.append('  {}["{}"]'.format(sid, label))
+        if "unimplemented" in sigs:
+            lines.append("  style {} fill:#fee,stroke:#c00,color:#900".format(sid))
+        elif "unreviewed" in sigs:
+            lines.append("  style {} fill:#fff3cd,stroke:#a66,color:#630".format(sid))
+        else:
+            lines.append("  style {} fill:#fff9c4,stroke:#aa0,color:#550".format(sid))
+
+    for a, b in data["edges"]:
+        if a in risky_ids or b in risky_ids:
+            lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+
+    return "\n".join(lines)
+
+
 MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
