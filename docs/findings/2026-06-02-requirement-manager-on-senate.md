@@ -1,6 +1,6 @@
 # Findings — requirement-manager applied to the `Senate` repo
 
-Observations from running the plugin against `C:\Users\ALEX\Desktop\Doc\Senate`
+Observations from running the plugin against the `Senate` repo
 (a 9-senator deliberative-audit skill, stdlib-only Python in `scripts/`, behavior
 defined in `prompts/senators/*.md`). Date: 2026-06-02.
 
