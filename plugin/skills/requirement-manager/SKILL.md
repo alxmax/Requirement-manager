@@ -129,6 +129,7 @@ Run `check` on every commit (locally) and every push/PR (CI):
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer) + `requirements/_map.md` (4 Mermaid diagrams)
 - `python scripts/reqmap.py extract`           — quick one-draft-per-file scaffold (TODO bodies)
 - `python scripts/reqmap.py candidates`        — emit a JSON capability-extraction plan (read-only; feeds AI authoring)
+- `python scripts/reqmap.py findings`          — aggregate open `Verify intent` items into `requirements/_findings.md` (renders an AI-triage sidecar when present; `--raw` to ignore it)
 
 ## Legacy / brownfield
 
@@ -178,3 +179,39 @@ B" walkthrough goes under **`## WHERE — Current implementation`**, never the
 contract. When intent is genuinely ambiguous, write "observed: X; intent
 unconfirmed" rather than guessing. The drift gate tracks only Contract + Acceptance
 — commentary may change freely.
+
+## Findings — surfacing & triaging suspected bugs
+
+Verify-intent sections are where reconstruction parks suspected AI accidents.
+`reqmap.py findings` rolls them up so they are reviewable in one place rather than
+scattered one-per-requirement.
+
+- **Aggregate (deterministic, stdlib).** `python scripts/reqmap.py findings` scans
+  every requirement, collects each `## WHAT — Verify intent` bullet (skipping the
+  "None — …" placeholder), and writes `requirements/_findings.md` grouped by
+  requirement with counts. `check` also prints an advisory "N open findings" line.
+  This is pure aggregation — it does **not** judge whether a finding is a real bug.
+
+- **Triage (AI, in-session — do this before acting on a finding).** Each finding is
+  only a *suspicion*. Run a two-pass triage and write the result beside the report
+  as `requirements/_findings_triage.json`; `findings` then renders a verified,
+  prioritized `_findings.md` (confirmed bugs first, by severity):
+  1. **Verify** — for each finding, read the cited code and classify it
+     `REAL_BUG` / `INTENTIONAL` / `FALSE_POSITIVE` / `USER_DECISION`, with a
+     `severity`, `location` (file:line) and one-line `fix`.
+  2. **Challenge** — for every `REAL_BUG`, a skeptic pass tries to refute it (the
+     triggering input never occurs, an upstream guard prevents it, the "wrong" value
+     is harmless as used); keep only the ones that survive. This kills
+     plausible-but-wrong findings before they reach the report.
+
+  Sidecar schema:
+  ```json
+  { "generated_at": "<ISO-Z>",
+    "items": [ { "req_id": "AREA-NAME-NNN", "finding": "...",
+      "classification": "REAL_BUG|INTENTIONAL|FALSE_POSITIVE|USER_DECISION",
+      "severity": "high|medium|low|none",
+      "location": "file:line", "fix": "...", "note": "..." } ] }
+  ```
+
+Keeping the triage in the skill (not the engine) preserves the hermetic, stdlib-only
+gate — the same split as `candidates` (deterministic) vs AI-authoring.
