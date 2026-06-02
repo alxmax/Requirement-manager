@@ -966,9 +966,9 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 #qres:empty{display:none}
 .qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
 .qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}.qhit.nohit{cursor:default;color:var(--mut)}
-.ctr{border:1px solid #e11;background:var(--bg);color:#e11;border-radius:8px;cursor:pointer;font:15px/1 system-ui;padding:3px 9px;vertical-align:middle;margin-left:8px}
-.ctr:hover{background:#e11;color:#fff;border-color:#e11}
-.mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e11 !important;stroke-width:4px !important;filter:drop-shadow(0 0 6px #e11)}
+.ctr{border:1px solid #e0a800;background:var(--bg);color:#caa000;border-radius:8px;cursor:pointer;font:15px/1 system-ui;padding:3px 9px;vertical-align:middle;margin-left:8px}
+.ctr:hover{background:#f5c518;color:#000;border-color:#e0a800}
+.mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e0a800 !important;stroke-width:4px !important;fill:#fff6cc !important;filter:drop-shadow(0 0 7px #ffcc00)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -1040,6 +1040,7 @@ function sel(id){
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
     <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
     ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
+  highlight(id);   // selecting a requirement also yellow-highlights it in the current diagram
 }
 let _hits=[];
 function search(q){
@@ -1055,18 +1056,28 @@ function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
 // center + highlight a node IN THE CURRENTLY-OPEN diagram — never switches tabs.
 // NB: named centerNode (not focus) — an inline onclick="focus(...)" on a <button>
 // would resolve to the element's built-in .focus(), shadowing a global focus().
-function centerNode(id){
+function _findNode(id){
   const pane=document.querySelector('.pane.active');
   const box=pane&&pane.querySelector('.mermaid');
   const svg=box&&box.querySelector('svg');
-  if(!svg)return;
+  if(!svg)return null;
   svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
   const safe=id.replace(/[^A-Za-z0-9]/g,'_');
   let g=null;svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
-  if(!g)return;                  // requirement isn't drawn in this view (e.g. Dependencies)
-  g.classList.add('hl');
-  const st=box._pz;
-  if(st){try{const r=box.getBoundingClientRect(),bb=g.getBBox();st.s=Math.max(st.s,1.1);st.x=r.width/2-st.s*(bb.x+bb.width/2);st.y=r.height/2-st.s*(bb.y+bb.height/2);box._apply&&box._apply();}catch(e){}}
+  if(g)g.classList.add('hl');    // requirement may not be drawn in this view (e.g. Dependencies) -> g null
+  return {box:box,g:g};
+}
+function highlight(id){_findNode(id);}             // yellow-highlight in the current diagram
+function centerNode(id){
+  const r=_findNode(id);if(!r||!r.g)return;
+  const box=r.box,g=r.g,st=box._pz;if(!st)return;
+  try{
+    st.s=Math.max(st.s,1);box._apply&&box._apply();          // not zoomed out; apply before measuring
+    const gr=g.getBoundingClientRect(),br=box.getBoundingClientRect();    // current on-screen rects
+    st.x+=(br.left+br.width/2)-(gr.left+gr.width/2);         // shift pan by the pixel delta -> node to center
+    st.y+=(br.top+br.height/2)-(gr.top+gr.height/2);
+    box._apply&&box._apply();
+  }catch(e){}
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
 REQMAP_CALLBACKS
