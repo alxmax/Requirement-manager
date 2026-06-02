@@ -21,10 +21,13 @@ A script reconciles the two and generates a navigable map.
 The engine is a single stdlib-only script. Seed it into the target repo once:
 
 ```bash
-mkdir -p scripts templates requirements
+mkdir -p scripts requirements
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
-cp "${CLAUDE_PLUGIN_ROOT}/templates/requirement.md" templates/requirement.md
 ```
+
+The requirement template is **built into the engine** — `reqmap.py new` needs no
+template file. (Optionally, drop a `templates/requirement.md` in the repo to override
+the built-in scaffold; the engine uses it automatically when present.)
 
 **Create `.reqmapignore` immediately after the copy** — `reqmap.py` carries its own
 `implements:` self-tags. Without this file the gate fails with dangling-ref errors
@@ -74,8 +77,9 @@ engine changes to the cache and any registered consumer repos in one command:
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
-2. **A requirement is its output.** Fill `Input → Description → Output` first; the
-   boundary follows from the output.
+2. **A requirement is its contract.** Fill `WHAT — Contract` (the normative,
+   testable behavior) first; the boundary follows from the contract. (Legacy
+   requirements may still use `Input → Description → Output`; the engine reads both.)
 3. **Acceptance criteria are tests.** Write them as checkable statements; they map
    to `tested-by` test files.
 4. **One fact, one home.** Reference ids; never copy a contract into a README.
