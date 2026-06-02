@@ -100,6 +100,23 @@ class Gate(unittest.TestCase):
             R.save_lock(missing, {"A": "b"})  # must not raise
             self.assertTrue(os.path.exists(os.path.join(missing, "_reqlock.json")))
 
+    def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-FOO-001.md"),
+                   REQ.format(id="AREA-FOO-001", status="confirmed", layer="bus", extra="", title="Foo")
+                   + "\n## Input\n- x\n## Output\n- y\n## Acceptance\n- z\n")
+            _write(os.path.join(d, "mod.py"), tag("AREA-FOO-001") + "\n")
+            _write(os.path.join(d, "_reqlock.json"), '{"AREA-FOO-001": "stalehash0000"}')  # != current
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, d, False)
+            out = buf.getvalue()
+            self.assertIn("DRIFT", out)
+            self.assertIn("re-check 1 member", out)   # actionable count
+            self.assertIn("mod.py:1", out)            # names the member location
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_tag_re_left_boundary(self):  # bug #3
