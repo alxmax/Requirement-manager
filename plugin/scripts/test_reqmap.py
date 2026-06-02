@@ -277,7 +277,8 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn('id="q"', html)                 # search box
             self.assertIn("class=ctr", html)              # ◎ center button in the detail panel header
             self.assertIn("function centerNode(", html)   # NOT 'focus' (shadowed by element.focus in inline onclick)
-            self.assertIn('onclick="centerNode(', html)   # the button actually calls it
+            self.assertIn("centerNode(n.id)", html)       # button wired in JS (id stays a var, not interpolated markup)
+            self.assertNotIn("centerNode('${n.id}')", html)  # the unsafe inline-onclick interpolation is gone
             self.assertIn(".pane.active", html)           # centers in the CURRENT tab
             self.assertNotIn("switchTab(0)", html.split("function centerNode(")[1].split("}")[0])  # must not switch tabs
 
@@ -528,6 +529,247 @@ class Findings(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
             with redirect_stdout(buf):
                 R.cmd_check(reqs, {}, os.path.join(d, "requirements"), False)
             self.assertIn("1 open verify-intent finding(s)", buf.getvalue())
+
+
+# ---- regression tests for the 2026-06-02 audit fixes + previously-untested code ----
+
+def _map_html_for(node):
+    """render_html for a single node dict (defaults filled), return the HTML."""
+    base = {"id": "A-1", "layer": "feature", "status": "draft", "title": "t", "intent": "",
+            "input": "", "output": "", "desc": "", "acc": [], "deps": [], "used_by": [],
+            "members": []}
+    base.update(node)
+    with tempfile.TemporaryDirectory() as d:
+        R.render_html({"nodes": [base], "edges": []}, d)
+        return open(os.path.join(d, "_map.html"), encoding="utf-8").read()
+
+
+class Security(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_js_str_escapes_angle_brackets_and_amp(self):
+        self.assertEqual(R._js_str("a<b>&"), '"a\\u003cb\\u003e\\u0026"')
+
+    def test_id_with_quote_does_not_break_out_of_callback(self):  # bug: id-js-string-breakout-xss
+        html = _map_html_for({"id": "x');};alert(1);y=function(){sel('"})
+        self.assertNotIn("sel('x');};alert(1)", html)   # NOT executable: no raw breakout
+        self.assertIn('sel("x', html)                    # id passed as a JSON string arg
+
+    def test_id_with_script_close_is_escaped(self):  # bug: id-js-string-breakout-xss
+        html = _map_html_for({"id": "a</script><img src=x>"})
+        self.assertEqual(html.count("</script>"), 2)     # only the template's own two
+        self.assertIn("\\u003c", html)                   # the id's < was escaped
+
+    def test_search_results_use_data_id_not_inline_onclick(self):
+        html = _map_html_for({"id": "A-1"})
+        self.assertNotIn("onclick=\"pick(", html)        # no raw-id inline onclick
+        self.assertIn("data-id=", html)                  # delegated off a data attribute
+
+
+class JsFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested
+        f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){}\nconst bar = 1;\n")
+        self.assertEqual(f["docstrings"].get("module"), "Module doc.")
+        self.assertIn("foo", f["signatures"])
+        self.assertIn("bar", f["signatures"])
+
+    def test_leading_comment_scan_is_linear_on_star_run(self):  # bug: js-doc-comment-redos
+        import time
+        src = "/*" + "*" * 400000          # unterminated star run that DoS'd the old regex
+        t = time.time(); R._js_facts(src)
+        self.assertLess(time.time() - t, 2.0)   # str.find is linear; was minutes before
+
+
+class Staleness(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def test_engine_version_at_reads_and_missing(self):  # bug: warn-if-stale-untested
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "reqmap.py")
+            _write(p, 'X = 1\nMAP_ENGINE_VERSION = "2099-12-31"\n')
+            self.assertEqual(R._engine_version_at(p), "2099-12-31")
+            self.assertIsNone(R._engine_version_at(os.path.join(d, "nope.py")))
+
+    def test_warn_if_stale_fires_only_when_plugin_newer(self):  # bug: warn-if-stale-untested
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "reqmap.py"),
+                   'MAP_ENGINE_VERSION = "2099-12-31"\n')
+            old = os.environ.get("CLAUDE_PLUGIN_ROOT")
+            try:
+                os.environ["CLAUDE_PLUGIN_ROOT"] = d
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    R.warn_if_stale()
+                self.assertIn("stale", buf.getvalue())
+                os.environ.pop("CLAUDE_PLUGIN_ROOT")          # no env -> silent
+                buf2 = io.StringIO()
+                with redirect_stdout(buf2):
+                    R.warn_if_stale()
+                self.assertEqual(buf2.getvalue(), "")
+            finally:
+                if old is not None:
+                    os.environ["CLAUDE_PLUGIN_ROOT"] = old
+                else:
+                    os.environ.pop("CLAUDE_PLUGIN_ROOT", None)
+
+
+class GateErrors(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def _check(self, files):
+        with tempfile.TemporaryDirectory() as d:
+            for name, body in files.items():
+                _write(os.path.join(d, name), body)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, False)
+            return code, buf.getvalue()
+
+    def test_invalid_status_errors_and_exits_nonzero(self):  # bug: gate-never-asserted-to-fail
+        code, out = self._check({"A-FOO-001.md": REQ.format(
+            id="A-FOO-001", status="bogus", layer="feature", extra="", title="T")})
+        self.assertIn("invalid status", out)
+        self.assertEqual(code, 1)
+
+    def test_invalid_layer_errors(self):
+        code, out = self._check({"A-FOO-001.md": REQ.format(
+            id="A-FOO-001", status="baseline", layer="bogus", extra="", title="T")})
+        self.assertIn("invalid layer", out)
+        self.assertEqual(code, 1)
+
+    def test_depends_on_missing_errors(self):
+        code, out = self._check({"A-FOO-001.md": REQ.format(
+            id="A-FOO-001", status="baseline", layer="feature",
+            extra="depends_on: [GHOST-X-999]\n", title="T")})
+        self.assertIn("depends_on missing GHOST-X-999", out)
+        self.assertEqual(code, 1)
+
+    def test_dangling_tag_errors(self):
+        code, out = self._check({"mod.py": tag("GHOST-CAP-001") + "\n"})
+        self.assertIn("dangling tag", out)
+        self.assertEqual(code, 1)
+
+    def test_confirmed_without_implements_errors(self):
+        code, out = self._check({"A-FOO-001.md": REQ.format(
+            id="A-FOO-001", status="confirmed", layer="bus", extra="", title="T")})
+        self.assertIn("no implements", out)
+        self.assertEqual(code, 1)
+
+    def test_corrupt_lock_warns_in_check(self):  # bug: corrupt-lock-disables-drift-silently
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   REQ.format(id="A-FOO-001", status="baseline", layer="bus", extra="", title="T"))
+            _write(os.path.join(d, "_reqlock.json"), "{ not json")
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, R.scan_members(d, d), d, False)
+            self.assertIn("unreadable", buf.getvalue())
+            self.assertEqual(code, 0)   # corrupt lock is a WARN, never a hard error
+
+
+class ParserBlockLists(unittest.TestCase):  # tested-by: CORE-PARSE-001
+    def test_block_style_list_is_parsed(self):  # bug: block-style-yaml-list-silently-empty
+        meta, _ = R.parse_frontmatter("---\nowner: a\ndepends_on:\n  - A-1\n  - B-2\n---\nbody")
+        self.assertEqual(meta["depends_on"], ["A-1", "B-2"])
+
+    def test_unclosed_inline_list_is_lenient(self):  # bug: unclosed-inline-list-literal-string
+        meta, _ = R.parse_frontmatter("---\ndepends_on: [A-1, B-2\n---\nbody")
+        self.assertEqual(meta["depends_on"], ["A-1", "B-2"])
+
+    def test_empty_scalar_after_key_stays_empty(self):  # no regression on unset superseded_by
+        meta, _ = R.parse_frontmatter("---\nsuperseded_by:\nid: X-1\n---\nbody")
+        self.assertEqual(meta["superseded_by"], "")
+        self.assertEqual(meta["id"], "X-1")
+
+
+class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def _node(self, members):
+        return {"id": "A-FOO-001", "layer": "feature", "status": "confirmed", "title": "T",
+                "members": members}
+
+    def test_req_to_code_collapses_line_range(self):  # bug: mermaid-req-to-code-line-range-untested
+        out = R._mermaid_req_to_code({"nodes": [self._node(
+            [{"role": "implements", "loc": "src/a.py:10"},
+             {"role": "implements", "loc": "src/a.py:25"}])], "edges": []})
+        self.assertIn("src/a.py:10-25", out)            # min-max collapsed
+
+    def test_req_to_code_single_member_no_range(self):
+        out = R._mermaid_req_to_code({"nodes": [self._node(
+            [{"role": "implements", "loc": "src/a.py:10"}])], "edges": []})
+        self.assertIn("src/a.py:10", out)
+        self.assertNotIn("src/a.py:10-10", out)
+
+    def test_mlabel_neutralizes_mermaid_metacharacters(self):  # bug: mlabel-sanitizer-set-partially-tested
+        out = R._mlabel("a|b[c]{d}`e`\\f")
+        for ch in "|[]{}`\\":
+            self.assertNotIn(ch, out)
+
+
+class CapmapMalformed(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def test_corrupt_json_returns_empty(self):  # bug: load-capmap-malformed-untested
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_capmap.json"), "{ not json")
+            self.assertEqual(R._load_capmap(d), [])
+
+    def test_bare_list_shape_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_capmap.json"),
+                   json.dumps([{"id": "CORE-AB-001", "files": ["a.py", "b.py"]}]))
+            out = R._load_capmap(d)
+            self.assertEqual(len(out), 1)
+            self.assertEqual(out[0]["id"], "CORE-AB-001")
+
+    def test_entry_missing_files_is_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_capmap.json"),
+                   json.dumps({"capabilities": [{"id": "X-1"}, {"id": "Y-2", "files": ["a.py"]}]}))
+            out = R._load_capmap(d)
+            self.assertEqual([c["id"] for c in out], ["Y-2"])  # X-1 (no files) dropped
+
+
+class CandidatesGrouping(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def _plan(self, d):
+        reqs_dir = os.path.join(d, "requirements")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_candidates(R.load_requirements(reqs_dir), R.scan_members(d, reqs_dir),
+                             d, reqs_dir, None)
+        return json.loads(buf.getvalue())
+
+    def test_high_fanin_module_inferred_bus(self):  # bug: candidates-bus-threshold-untested
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "paths.py"), "ROOT = '.'\n")
+            for i in range(R.BUS_FANIN_THRESHOLD):
+                _write(os.path.join(d, "imp%d.py" % i), "import paths\n")
+            plan = self._plan(d)
+            paths = next(c for c in plan["candidates"] if "paths.py" in c["files"])
+            self.assertGreaterEqual(paths["importer_count"], R.BUS_FANIN_THRESHOLD)
+            self.assertEqual(paths["suggested_layer"], "bus")
+            self.assertIn(paths["suggested_id"], plan["bus"])
+
+    def test_candidates_honors_reqmapignore_in_requirements_dir(self):  # bug: collect-files-ignores-reqsdir-reqmapignore
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "keep.py"), "x = 1\n")
+            _write(os.path.join(d, "skip.py"), "y = 2\n")
+            # .reqmapignore lives in requirements/ (the documented home), not the scan root
+            _write(os.path.join(d, "requirements", ".reqmapignore"), "skip.py\n")
+            files = [f for c in self._plan(d)["candidates"] for f in c["files"]]
+            self.assertIn("keep.py", files)
+            self.assertNotIn("skip.py", files)   # candidates now matches scan/check
+
+
+class TriageFolding(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
+    def test_unknown_classification_folds_into_user_decision(self):  # bug: triage-unknown-classification-dropped
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["mystery finding, bug?"]))
+            _write(os.path.join(rd, R.FINDINGS_SIDECAR), json.dumps({
+                "items": [{"req_id": "AREA-X-001", "finding": "mystery finding",
+                           "classification": "WONTFIX"}]}))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_findings(R.load_requirements(rd), rd, raw=False)
+            md = open(os.path.join(rd, "_findings.md"), encoding="utf-8").read()
+            self.assertIn("mystery finding", md)            # NOT silently dropped
+            self.assertIn("1 product/config decision", md)  # counted in a real bucket
 
 
 if __name__ == "__main__":
