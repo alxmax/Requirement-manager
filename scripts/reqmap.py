@@ -236,6 +236,7 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
             "status": m.get("status", "draft"),
+            "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
             "input": _section(r["body"], "input"),
             "output": _section(r["body"], "output"),
@@ -254,6 +255,14 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
     print("wrote {}".format(md_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
+
+
+def _title(body):  # implements: REQ-MAP-007
+    """The human title from the requirement's first `# ` heading."""
+    for line in body.splitlines():
+        if line.strip().startswith("# "):
+            return line.strip()[2:].strip()
+    return ""
 
 
 def _first_quote(body):  # implements: REQ-MAP-007
@@ -308,6 +317,17 @@ def _mlabel(text):
     return text
 
 
+def _node_label(n):
+    """Two-line node label: human title big, capability id small below.
+
+    The `<br>`/`<small>` tags are added outside `_mlabel` (which would
+    otherwise neutralize the angle brackets); only the title text is
+    passed through the sanitizer.
+    """
+    title = _mlabel(n.get("title") or n["id"])
+    return "{}<br><small>{}</small>".format(title, n["id"])
+
+
 def _mermaid_system(data):  # implements: REQ-MAP-007
     lines = ["graph TD"]
     feats = [n for n in data["nodes"] if n["layer"] != "bus"]
@@ -315,12 +335,12 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
     if feats:
         lines.append("  subgraph Features")
         for n in feats:
-            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
         lines.append("  end")
     if bus:
         lines.append("  subgraph Bus")
         for n in bus:
-            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
         lines.append("  end")
     for a, b in data["edges"]:
         lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
@@ -329,11 +349,13 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
 
 def _mermaid_deps(data):  # implements: REQ-MAP-007
     lines = ["graph TD"]
+    byid = {n["id"]: n for n in data["nodes"]}
     seen = set()
     for a, b in data["edges"]:
         for rid in (a, b):
             if rid not in seen:
-                lines.append('  {}["{}"]'.format(_safe_id(rid), rid))
+                label = _node_label(byid[rid]) if rid in byid else rid
+                lines.append('  {}["{}"]'.format(_safe_id(rid), label))
                 seen.add(rid)
         lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
     if not data["edges"]:
@@ -346,7 +368,7 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
     for n in data["nodes"]:
         rid = n["id"]
         sid = _safe_id(rid)
-        lines.append('  {}["{}"]'.format(sid, rid))
+        lines.append('  {}["{}"]'.format(sid, _node_label(n)))
         if not n["members"]:
             lines.append("  style {} fill:#fee,stroke:#c66".format(sid))
             continue
@@ -379,7 +401,7 @@ def _mermaid_behavioral(data):  # implements: REQ-MAP-007
         in_id  = "in_"  + sid
         out_id = "out_" + sid
         lines.append('  {}(["{}"])'.format(in_id,  inp))
-        lines.append('  {}["{}"]'.format(sid, n["id"]))
+        lines.append('  {}["{}"]'.format(sid, _node_label(n)))
         lines.append('  {}(["{}"])'.format(out_id, out))
         lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
     return "\n".join(lines)
@@ -415,7 +437,7 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
     risky_ids = {n["id"] for n, _ in risky}
     for n, sigs in risky:
         sid   = _safe_id(n["id"])
-        label = n["id"] + "\\n" + ", ".join(sigs)
+        label = _node_label(n) + "<br>" + ", ".join(sigs)
         lines.append('  {}["{}"]'.format(sid, label))
         if "unimplemented" in sigs:
             lines.append("  style {} fill:#fee,stroke:#c00,color:#900".format(sid))
