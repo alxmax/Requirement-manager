@@ -4,9 +4,9 @@ A capability registry that sits between intent and code. Each capability is one
 markdown file (the single source of truth); code points back to it with a tag; a
 small stdlib-only script reconciles the two and generates a navigable map.
 
-It is packaged as a [Claude Code plugin](.claude-plugin/plugin.json) exposing the
-[`requirement-manager` skill](skills/requirement-manager/SKILL.md) — useful on any
-project that needs a single source of truth for requirements, especially with
+It is packaged as a [Claude Code plugin](plugin/.claude-plugin/plugin.json) exposing
+the [`requirement-manager` skill](plugin/skills/requirement-manager/SKILL.md) — useful
+on any project that needs a single source of truth for requirements, especially with
 multiple agents or vibe coding, to prevent drift between code, docs and intent.
 
 ## Install (as a plugin)
@@ -42,13 +42,14 @@ and the member list is discovered by scanning code — never hand-maintained.
 ## Layout
 
 ```
-.claude-plugin/marketplace.json    marketplace manifest (this repo is a marketplace)
-.claude-plugin/plugin.json         plugin manifest
-skills/requirement-manager/SKILL.md  the skill contract (read this first)
-scripts/reqmap.py                  the engine (stdlib only)
-templates/requirement.md           the per-capability template
-requirements/*.md                  the source of truth (one file per capability)
-requirements/_reqlock.json         the drift baseline (committed)
+.claude-plugin/marketplace.json           marketplace manifest (this repo is a marketplace)
+plugin/                                   the plugin (source of truth, self-contained)
+  .claude-plugin/plugin.json              plugin manifest
+  skills/requirement-manager/SKILL.md     the skill contract (read this first)
+  scripts/reqmap.py                       the engine (stdlib only)
+  templates/requirement.md                the per-capability template
+  requirements/*.md                       the source of truth (one file per capability)
+  requirements/_reqlock.json              the drift baseline (committed)
 ```
 
 ## Commands
@@ -63,7 +64,7 @@ python scripts/reqmap.py extract           # draft requirements from legacy code
 
 ## Dogfooded
 
-This repo applies the skill to itself: `requirements/` describes `reqmap.py`'s own
-capabilities (3 `bus` + 5 `feature`), and `python scripts/reqmap.py check` passes
-with zero errors. See [SKILL.md](skills/requirement-manager/SKILL.md) for the full
-model and authoring rules.
+This repo applies the skill to itself: `plugin/requirements/` describes `reqmap.py`'s
+own capabilities (3 `bus` + 5 `feature`), and `cd plugin && python scripts/reqmap.py
+check` passes with zero errors. See [SKILL.md](plugin/skills/requirement-manager/SKILL.md)
+for the full model and authoring rules.

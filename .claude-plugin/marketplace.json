@@ -10,7 +10,7 @@
     {
       "name": "requirement-manager",
       "version": "1.0.0",
-      "source": "."
+      "source": "./plugin"
     }
   ]
 }
