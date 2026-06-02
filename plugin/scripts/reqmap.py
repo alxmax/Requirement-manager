@@ -22,6 +22,11 @@ VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", 
 VALID_LAYER = {"bus", "feature"}
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 
+# Bumped on any change to this engine. `check` warns a seeded repo when its
+# vendored copy is older than the installed plugin's. ISO date: lexicographic
+# order == chronological order, so a plain string compare is enough.
+MAP_ENGINE_VERSION = "2026-06-02"
+
 
 # ---------- parsing ----------
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
@@ -122,8 +127,36 @@ def cmd_scan(reqs, members):  # implements: REQ-SCAN-005
             print("    (no members found)")
 
 
+def _engine_version_at(path):
+    """Best-effort MAP_ENGINE_VERSION parsed from a reqmap.py at `path`; None on any failure."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            m = re.search(r'MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', f.read(4000))
+        return m.group(1) if m else None
+    except Exception:  # fail open — never let the staleness probe break the gate
+        return None
+
+
+def warn_if_stale():  # implements: REQ-CHECK-006
+    """Print a non-fatal notice when this vendored copy is older than the installed
+    plugin's. Silent in CI: only runs when CLAUDE_PLUGIN_ROOT is set. Never raises,
+    never affects the exit code."""
+    try:
+        root = os.environ.get("CLAUDE_PLUGIN_ROOT")
+        if not root:
+            return
+        plugin_ver = _engine_version_at(os.path.join(root, "scripts", "reqmap.py"))
+        if plugin_ver and plugin_ver > MAP_ENGINE_VERSION:
+            print(f"WARN  vendored reqmap.py is stale ({MAP_ENGINE_VERSION} < plugin "
+                  f"{plugin_ver}) - re-seed: cp \"$CLAUDE_PLUGIN_ROOT/scripts/reqmap.py\" "
+                  f"scripts/reqmap.py")
+    except Exception:
+        return
+
+
 def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-006
     errors, warns = [], []
+    warn_if_stale()
     cap_ids = set(reqs)
 
     for cap, hits in members.items():
