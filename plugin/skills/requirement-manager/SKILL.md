@@ -126,7 +126,7 @@ Run `check` on every commit (locally) and every push/PR (CI):
 - `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
-- `python scripts/reqmap.py map`               — generate `requirements/_map.html` (5-tab interactive viewer) + `requirements/_map.md` (5 Mermaid diagrams)
+- `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer) + `requirements/_map.md` (4 Mermaid diagrams)
 - `python scripts/reqmap.py extract`           — quick one-draft-per-file scaffold (TODO bodies)
 - `python scripts/reqmap.py candidates`        — emit a JSON capability-extraction plan (read-only; feeds AI authoring)
 
