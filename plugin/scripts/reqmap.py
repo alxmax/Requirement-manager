@@ -860,7 +860,7 @@ def _add_clicks(diagram, data):
 _LEGEND_HTML = [
     '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
     '<i>edges into the bus/hubs are hidden (Dependencies tab shows area-level coupling) · '
-    'open a requirement (click a node / search) then press ◎ in its panel to center it here</i>',
+    'open a requirement (click a node / search) then press the ⌖ crosshair in its panel to center it here</i>',
     'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
     '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
     '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
@@ -966,8 +966,9 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 #qres:empty{display:none}
 .qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
 .qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}.qhit.nohit{cursor:default;color:var(--mut)}
-.ctr{border:1px solid #e0a800;background:var(--bg);color:#caa000;border-radius:8px;cursor:pointer;font:15px/1 system-ui;padding:3px 9px;vertical-align:middle;margin-left:8px}
+.ctr{display:inline-flex;align-items:center;justify-content:center;border:1px solid #e0a800;background:var(--bg);color:#caa000;border-radius:8px;cursor:pointer;padding:4px 8px;vertical-align:middle;margin-left:8px}
 .ctr:hover{background:#f5c518;color:#000;border-color:#e0a800}
+.ctr svg{display:block}
 .mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e0a800 !important;stroke-width:4px !important;fill:#fff6cc !important;filter:drop-shadow(0 0 7px #ffcc00)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
@@ -978,7 +979,7 @@ ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
 .lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
 <h1>Requirement map</h1>
-<div class="search"><input id="q" placeholder="Search requirements / keyword…  (then ◎ in the panel centers it)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
+<div class="search"><input id="q" placeholder="Search requirements / keyword…  (then the ⌖ crosshair in the panel centers it)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
 <div class="tabs">REQMAP_TABS</div>
 REQMAP_PANES
 <div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
@@ -1030,7 +1031,7 @@ function sel(id){
   const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
   const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
   document.getElementById('p').innerHTML=`
-    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')">◎</button></h2>
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
     <div class=lbl>WHAT</div>
     <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
