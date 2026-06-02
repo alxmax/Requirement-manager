@@ -860,7 +860,7 @@ def _add_clicks(diagram, data):
 _LEGEND_HTML = [
     '<span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · '
     '<i>edges into the bus/hubs are hidden (Dependencies tab shows area-level coupling) · '
-    'use the search box ↵ to spotlight a node here</i>',
+    'search a requirement and press ◎ to center it in whichever diagram is open</i>',
     'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
     '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
     '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
@@ -964,8 +964,11 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 #q{width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--bor);border-radius:8px;background:var(--sur);color:var(--fg);font:14px system-ui}
 #qres{position:absolute;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--bor);border-radius:8px;margin-top:4px;max-height:340px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.12)}
 #qres:empty{display:none}
-.qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
-.qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}
+.qhit{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--bor);font-size:13px}
+.qhit:last-child{border-bottom:none}
+.qt{flex:1;cursor:pointer}.qt:hover{color:var(--acc)}
+.qtarget{flex:none;border:1px solid var(--bor);background:var(--bg);color:var(--acc);border-radius:6px;cursor:pointer;font:15px/1 system-ui;padding:3px 8px}
+.qtarget:hover{background:var(--acc);color:#fff;border-color:var(--acc)}
 .mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e11 !important;stroke-width:4px !important;filter:drop-shadow(0 0 6px #e11)}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
@@ -976,7 +979,7 @@ ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
 .lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
 </style>
 <h1>Requirement map</h1>
-<div class="search"><input id="q" placeholder="Search requirements / keyword… (↵ spotlights on the System Map)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
+<div class="search"><input id="q" placeholder="Search requirements / keyword…  (◎ or ↵ centers it in the current diagram)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
 <div class="tabs">REQMAP_TABS</div>
 REQMAP_PANES
 <div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
@@ -1045,27 +1048,23 @@ function search(q){
   if(!q){box.innerHTML='';_hits=[];return;}
   _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
   box.innerHTML=_hits.length
-    ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+    ? _hits.map(n=>`<div class="qhit"><span class="qt" onclick="sel('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></span><button class="qtarget" title="center in the current diagram" onclick="event.stopPropagation();focus('${n.id}')">◎</button></div>`).join('')
     : '<div class="qhit" style="cursor:default;color:var(--mut)">no match</div>';
 }
-function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
-function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';focus(id);}
+function searchEnter(){ if(_hits.length) focus(_hits[0].id); }
+// center + highlight a node IN THE CURRENTLY-OPEN diagram — never switches tabs.
 function focus(id){
-  sel(id);                       // open the detail panel
-  switchTab(0);                  // jump to the System Map
-  const safe=id.replace(/[^A-Za-z0-9]/g,'_');let tries=0;
-  (function spotlight(){
-    const box=document.getElementById('pane0').querySelector('.mermaid');
-    const svg=box&&box.querySelector('svg');
-    if(!svg){if(tries++<20)setTimeout(spotlight,80);return;}
-    svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
-    let g=null;
-    svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
-    if(!g)return;
-    g.classList.add('hl');
-    const st=box._pz;
-    if(st){try{const r=box.getBoundingClientRect(),bb=g.getBBox();st.s=1.1;st.x=r.width/2-st.s*(bb.x+bb.width/2);st.y=r.height/2-st.s*(bb.y+bb.height/2);box._apply&&box._apply();}catch(e){}}
-  })();
+  const pane=document.querySelector('.pane.active');
+  const box=pane&&pane.querySelector('.mermaid');
+  const svg=box&&box.querySelector('svg');
+  if(!svg)return;
+  svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+  const safe=id.replace(/[^A-Za-z0-9]/g,'_');
+  let g=null;svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
+  if(!g)return;                  // requirement isn't drawn in this view (e.g. Dependencies)
+  g.classList.add('hl');
+  const st=box._pz;
+  if(st){try{const r=box.getBoundingClientRect(),bb=g.getBBox();st.s=Math.max(st.s,1.1);st.x=r.width/2-st.s*(bb.x+bb.width/2);st.y=r.height/2-st.s*(bb.y+bb.height/2);box._apply&&box._apply();}catch(e){}}
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
 REQMAP_CALLBACKS

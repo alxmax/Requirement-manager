@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-02 17:37
+generated: 2026-06-02 17:44
 nodes: 9
 edges: 10
 ---
@@ -54,8 +54,8 @@ graph LR
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
   f_scripts_reqmap_py_372_476["scripts/reqmap.py:372-476"]
   REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_372_476
-  f_scripts_test_reqmap_py_359["scripts/test_reqmap.py:359"]
-  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_359
+  f_scripts_test_reqmap_py_361["scripts/test_reqmap.py:361"]
+  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_361
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_224_241["scripts/reqmap.py:224-241"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_224_241
@@ -64,23 +64,23 @@ graph LR
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_306_355["scripts/reqmap.py:306-355"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_306_355
-  f_scripts_test_reqmap_py_292["scripts/test_reqmap.py:292"]
-  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_292
+  f_scripts_test_reqmap_py_294["scripts/test_reqmap.py:294"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_294
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_556_1076["scripts/reqmap.py:556-1076"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1076
+  f_scripts_reqmap_py_556_1075["scripts/reqmap.py:556-1075"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_556_1075
   f_scripts_test_reqmap_py_170["scripts/test_reqmap.py:170"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_170
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
   f_scripts_reqmap_py_293["scripts/reqmap.py:293"]
   REQ_NEW_004 -->|implements| f_scripts_reqmap_py_293
-  f_scripts_test_reqmap_py_314["scripts/test_reqmap.py:314"]
-  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_314
+  f_scripts_test_reqmap_py_316["scripts/test_reqmap.py:316"]
+  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_316
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_205["scripts/reqmap.py:205"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_205
-  f_scripts_test_reqmap_py_345["scripts/test_reqmap.py:345"]
-  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_345
+  f_scripts_test_reqmap_py_347["scripts/test_reqmap.py:347"]
+  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_347
 ```
 
 ## Behavioral Flow
