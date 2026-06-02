@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-02 12:19
+generated: 2026-06-02 12:55
 nodes: 8
 edges: 9
 ---
@@ -40,27 +40,43 @@ graph LR
   CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
   f_scripts_reqmap_py_130_158["scripts/reqmap.py:130-158"]
   CORE_DRIFT_003 -->|implements| f_scripts_reqmap_py_130_158
+  f_scripts_test_reqmap_py_90["scripts/test_reqmap.py:90"]
+  CORE_DRIFT_003 -->|tested-by| f_scripts_test_reqmap_py_90
   CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
   f_scripts_reqmap_py_34_72["scripts/reqmap.py:34-72"]
   CORE_PARSE_001 -->|implements| f_scripts_reqmap_py_34_72
+  f_scripts_test_reqmap_py_34["scripts/test_reqmap.py:34"]
+  CORE_PARSE_001 -->|tested-by| f_scripts_test_reqmap_py_34
   CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
   f_scripts_reqmap_py_88_105["scripts/reqmap.py:88-105"]
   CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_88_105
+  f_scripts_test_reqmap_py_104["scripts/test_reqmap.py:104"]
+  CORE_SCAN_002 -->|tested-by| f_scripts_test_reqmap_py_104
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_184_201["scripts/reqmap.py:184-201"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_184_201
+  f_scripts_test_reqmap_py_80["scripts/test_reqmap.py:80"]
+  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_80
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-  f_scripts_reqmap_py_259_308["scripts/reqmap.py:259-308"]
-  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_259_308
+  f_scripts_reqmap_py_262_311["scripts/reqmap.py:262-311"]
+  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_262_311
+  f_scripts_test_reqmap_py_168["scripts/test_reqmap.py:168"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_168
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_317_703["scripts/reqmap.py:317-703"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_317_703
+  f_scripts_reqmap_py_320_706["scripts/reqmap.py:320-706"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_320_706
+  f_scripts_test_reqmap_py_132["scripts/test_reqmap.py:132"]
+  REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_132
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
-  f_scripts_reqmap_py_246["scripts/reqmap.py:246"]
-  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_246
+  f_scripts_reqmap_py_249["scripts/reqmap.py:249"]
+  REQ_NEW_004 -->|implements| f_scripts_reqmap_py_249
+  f_scripts_test_reqmap_py_190["scripts/test_reqmap.py:190"]
+  REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_190
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_165["scripts/reqmap.py:165"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_165
+  f_scripts_test_reqmap_py_221["scripts/test_reqmap.py:221"]
+  REQ_SCAN_005 -->|tested-by| f_scripts_test_reqmap_py_221
 ```
 
 ## Behavioral Flow
@@ -146,5 +162,5 @@ graph TD
 
 | ID | status | members | dependents | risks |
 | --- | --- | --- | --- | --- |
-| CORE-PARSE-001 | confirmed | 3 | 4 | blast-radius |
-| CORE-SCAN-002 | confirmed | 2 | 4 | blast-radius |
+| CORE-PARSE-001 | confirmed | 4 | 4 | blast-radius |
+| CORE-SCAN-002 | confirmed | 3 | 4 | blast-radius |

@@ -219,6 +219,9 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
         if m.get("status") in ENFORCED and not impls:
             errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
+        tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
+        if m.get("status") == "confirmed" and not tests:
+            warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
 
     lock = load_lock(reqs_dir)
     new_lock = {}

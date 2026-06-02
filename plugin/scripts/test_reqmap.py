@@ -31,7 +31,7 @@ def tag(cap):
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
-class Parsing(unittest.TestCase):
+class Parsing(unittest.TestCase):  # tested-by: CORE-PARSE-001
     def test_bom_does_not_break_frontmatter(self):  # bug #1
         text = "﻿---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n"
         meta, _ = R.parse_frontmatter(text)
@@ -77,7 +77,7 @@ class Gate(unittest.TestCase):
                 code = R.cmd_check(reqs, members, d, False)
             return code, buf.getvalue()
 
-    def test_bare_scalar_depends_on_no_percharacter_errors(self):  # bug #5
+    def test_bare_scalar_depends_on_no_percharacter_errors(self):  # bug #5  tested-by: REQ-CHECK-006
         files = {
             "AREA-FOO-001.md": REQ.format(id="AREA-FOO-001", status="baseline", layer="feature",
                                           extra="depends_on: AREA-BAR-002\n", title="Foo"),
@@ -87,7 +87,7 @@ class Gate(unittest.TestCase):
         self.assertNotIn("depends_on missing", out)
         self.assertEqual(code, 0)
 
-    def test_corrupt_lock_does_not_crash(self):  # bug #6
+    def test_corrupt_lock_does_not_crash(self):  # bug #6  tested-by: CORE-DRIFT-003
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "_reqlock.json"), "")        # empty
             self.assertEqual(R.load_lock(d), {})
@@ -101,7 +101,7 @@ class Gate(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(missing, "_reqlock.json")))
 
 
-class Scanning(unittest.TestCase):
+class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_tag_re_left_boundary(self):  # bug #3
         self.assertEqual(R.TAG_RE.findall(tag("FOO-BAR-001")), [("implements", "FOO-BAR-001")])
         self.assertEqual(R.TAG_RE.findall("# re" + _ROLE + ": FOO-BAR-001"), [])
@@ -129,7 +129,7 @@ class Scanning(unittest.TestCase):
             self.assertEqual(members["FOO-BAR-001"][0][1], "sub/dir/m.py")
 
 
-class Rendering(unittest.TestCase):
+class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _data(self, title):
         return {"nodes": [{"id": "A-1", "layer": "bus", "status": "draft", "title": title,
                            "intent": "", "input": "", "output": "", "desc": "", "acc": [],
@@ -165,7 +165,7 @@ class Rendering(unittest.TestCase):
             self.assertTrue(os.path.exists(os.path.join(missing, "_map.html")))
 
 
-class Extract(unittest.TestCase):
+class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10
         self.assertNotEqual(R._draft_id("src/utils.py"), R._draft_id("lib/utils.js"))
         self.assertEqual(R._draft_id("src/utils.py"), "DRAFT-SRC-UTILS")
@@ -185,6 +185,51 @@ class Extract(unittest.TestCase):
                 R.cmd_extract({}, {}, code, out)
             made = sorted(n for n in os.listdir(out) if n.startswith("DRAFT-"))
             self.assertEqual(made, ["DRAFT-LIB-UTILS.md", "DRAFT-SRC-UTILS.md"])
+
+
+class New(unittest.TestCase):  # tested-by: REQ-NEW-004
+    def test_new_scaffolds_from_template_and_substitutes_id(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmpl = os.path.join(d, "tmpl.md")
+            _write(tmpl, "---\nid: AREA-NAME-NNN\n---\n\n# AREA-NAME-NNN\n")
+            reqs_dir = os.path.join(d, "reqs")  # does not exist yet
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_new(reqs_dir, tmpl, "CORE-FOO-001")
+            self.assertEqual(code, 0)
+            dest = os.path.join(reqs_dir, "CORE-FOO-001.md")
+            self.assertTrue(os.path.exists(dest))
+            with open(dest, encoding="utf-8") as f:
+                content = f.read()
+            self.assertIn("CORE-FOO-001", content)
+            self.assertNotIn("AREA-NAME-NNN", content)
+
+    def test_new_refuses_to_overwrite_existing(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmpl = os.path.join(d, "tmpl.md")
+            _write(tmpl, "# AREA-NAME-NNN\n")
+            reqs_dir = os.path.join(d, "reqs")
+            _write(os.path.join(reqs_dir, "CORE-FOO-001.md"), "existing\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_new(reqs_dir, tmpl, "CORE-FOO-001")
+            self.assertEqual(code, 1)
+            with open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8") as f:
+                self.assertEqual(f.read(), "existing\n")  # untouched
+
+
+class Scan(unittest.TestCase):  # tested-by: REQ-SCAN-005
+    def test_scan_lists_members_and_flags_empty(self):
+        reqs = {"CORE-FOO-001": {}, "CORE-BAR-002": {}}
+        members = {"CORE-FOO-001": [("implements", "src/foo.py", 12)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_scan(reqs, members)
+        out = buf.getvalue()
+        self.assertIn("CORE-FOO-001", out)
+        self.assertIn("implements", out)
+        self.assertIn("src/foo.py:12", out)
+        self.assertIn("(no members found)", out)  # CORE-BAR-002 has none
 
 
 if __name__ == "__main__":
