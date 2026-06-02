@@ -286,6 +286,45 @@ def _bullets(body, name):  # implements: REQ-MAP-007
     return out
 
 
+# ---------- mermaid generators ----------
+def _safe_id(rid):
+    """Mermaid-safe node ID: replace non-alphanumeric chars with underscores."""
+    return re.sub(r"[^A-Za-z0-9]", "_", rid)
+
+
+def _mermaid_system(data):  # implements: REQ-MAP-007
+    lines = ["graph TD"]
+    feats = [n for n in data["nodes"] if n["layer"] != "bus"]
+    bus   = [n for n in data["nodes"] if n["layer"] == "bus"]
+    if feats:
+        lines.append("  subgraph Features")
+        for n in feats:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+        lines.append("  end")
+    if bus:
+        lines.append("  subgraph Bus")
+        for n in bus:
+            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), n["id"]))
+        lines.append("  end")
+    for a, b in data["edges"]:
+        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    return "\n".join(lines)
+
+
+def _mermaid_deps(data):  # implements: REQ-MAP-007
+    lines = ["graph TD"]
+    seen = set()
+    for a, b in data["edges"]:
+        for rid in (a, b):
+            if rid not in seen:
+                lines.append('  {}["{}"]'.format(_safe_id(rid), rid))
+                seen.add(rid)
+        lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    if not data["edges"]:
+        lines.append('  none["(no dependencies defined)"]')
+    return "\n".join(lines)
+
+
 MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
