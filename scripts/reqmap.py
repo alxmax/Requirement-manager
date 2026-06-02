@@ -325,6 +325,35 @@ def _mermaid_deps(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
+def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
+    lines = ["graph LR"]
+    for n in data["nodes"]:
+        rid = n["id"]
+        sid = _safe_id(rid)
+        lines.append('  {}["{}"]'.format(sid, rid))
+        if not n["members"]:
+            lines.append("  style {} fill:#fee,stroke:#c66".format(sid))
+            continue
+        # group by role+file, compute min/max line numbers
+        groups = {}
+        for m in n["members"]:
+            c = m["loc"].rfind(":")
+            f, ln = m["loc"][:c], int(m["loc"][c + 1:])
+            k = m["role"] + "|" + f
+            if k not in groups:
+                groups[k] = {"role": m["role"], "f": f, "min": ln, "max": ln}
+            else:
+                groups[k]["min"] = min(groups[k]["min"], ln)
+                groups[k]["max"] = max(groups[k]["max"], ln)
+        for g in groups.values():
+            loc = "{}:{}".format(g["f"], g["min"]) if g["min"] == g["max"] \
+                  else "{}:{}-{}".format(g["f"], g["min"], g["max"])
+            file_sid = "f_" + re.sub(r"[^A-Za-z0-9]", "_", loc)
+            lines.append('  {}["{}"]'.format(file_sid, loc))
+            lines.append("  {} -->|{}| {}".format(sid, g["role"], file_sid))
+    return "\n".join(lines)
+
+
 MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
