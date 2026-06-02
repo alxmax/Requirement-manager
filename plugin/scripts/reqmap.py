@@ -170,12 +170,15 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
 
 # ---------- hashing / drift ----------
 def binding_hash(body):  # implements: CORE-DRIFT-003
-    """Hash only the semantically binding sections, not rationale/links."""
+    """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
+    Everything else (Verify-intent, Notes, Current-implementation, links) is
+    commentary and may drift freely without tripping the gate. (Legacy docs used
+    Input/Output/Acceptance; those headers are still honored for back-compat.)"""
     keep, grab = [], False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = any(s in h for s in ("input", "output", "acceptan"))
+            grab = any(s in h for s in ("contract", "acceptan", "input", "output"))
             continue
         if grab and line.strip():
             keep.append(line.strip())
@@ -308,26 +311,32 @@ superseded_by:       # <ID>, if replaced
 
 # Short name
 
-> One line: what this is, in plain language.
+> WHY: one line — what this is, in plain language.
 
-## Input
-- What the caller / runtime provides.
+## WHAT — Contract (normative)
+- The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
+  no function names; true regardless of how the code is implemented).
+- Output shape + allowed values; required vs optional inputs and how it degrades
+  when an optional input is missing/invalid; the decision logic that selects each
+  output (say so explicitly if it is delegated to a model/heuristic).
 
-## Description
-What it does between input and output, and why it exists. The "why" goes here —
-code can never recover it. Keep it short; this is the part a human reads cold.
+## WHAT — Verify intent (open questions for the human)
+- Observed: <a behavior that may be an AI accident — swallowed error, empty-string
+  fallback, magic constant, unreachable branch>. Intended, or a bug to fix?
 
-## Output
-- What it produces. This defines the boundary.
+## WHAT — Notes & known limitations (informative)
+- A known fragility/footgun the implementer should know but which is NOT enforced.
 
-## Acceptance (= tests)
-- A checkable statement that becomes a test.
-- An edge case -> expected result.
-- A failure mode -> expected error.
+## HOW — Acceptance (= tests)
+AC-1
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
+## WHERE — Current implementation
+- How the code does it today (the volatile narrative — may drift from the contract).
+
+## WHERE — Members in code (auto)
 """
 
 
@@ -617,10 +626,17 @@ def cmd_map(reqs, members, reqs_dir):  # implements: REQ-MAP-007
             "area": m.get("area", ""),
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
+            # new emission schema (Contract / Verify-intent / Notes / Current-impl)
+            "contract": _bullets(r["body"], "contract"),
+            "verify": _bullets(r["body"], "verify"),
+            "notes": _bullets(r["body"], "notes"),
+            "current_impl": _bullets(r["body"], "current implementation"),
+            "acc": _bullets(r["body"], "acceptan"),          # AC bullets if any
+            "accept": _section_raw(r["body"], "acceptan"),    # raw acceptance (AC blocks, line breaks kept)
+            # legacy schema (Input / Description / Output) — kept so old docs still render
             "input": _section(r["body"], "input"),
             "output": _section(r["body"], "output"),
             "desc": _section(r["body"], "description"),
-            "acc": _bullets(r["body"], "acceptan"),
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
@@ -664,6 +680,20 @@ def _section(body, name):  # implements: REQ-MAP-007
         if grab and line.strip() and not line.strip().startswith("<!--"):
             out.append(line.strip().lstrip("- "))
     return " ".join(out)
+
+
+def _section_raw(body, name):  # implements: REQ-MAP-007
+    """Like _section but preserves line breaks + indentation — used for the
+    multi-line Given/When/Then acceptance blocks so they read as written."""
+    out, grab = [], False
+    for line in body.splitlines():
+        h = line.strip().lower()
+        if h.startswith("## "):
+            grab = name in h
+            continue
+        if grab and not line.strip().startswith("<!--"):
+            out.append(line.rstrip())
+    return "\n".join(out).strip()
 
 
 def _bullets(body, name):  # implements: REQ-MAP-007
@@ -840,21 +870,6 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
-def _mermaid_behavioral(data):  # implements: REQ-MAP-007
-    lines = ["flowchart LR"]
-    for n in data["nodes"]:
-        sid  = _safe_id(n["id"])
-        inp  = _mlabel(n["input"])[:50]
-        out  = _mlabel(n["output"])[:50]
-        in_id  = "in_"  + sid
-        out_id = "out_" + sid
-        lines.append('  {}["{}"]'.format(in_id,  inp))    # rectangle, not stadium pill
-        lines.append('  {}["{}"]'.format(sid, _node_label(n)))
-        lines.append('  {}["{}"]'.format(out_id, out))     # rectangle, not stadium pill
-        lines.append("  {} --> {} --> {}".format(in_id, sid, out_id))
-    return "\n".join(lines)
-
-
 def _risk_signals(node, dependents_count):
     signals = []
     if node["status"] == "confirmed" and not node["members"]:
@@ -913,7 +928,6 @@ _LEGEND_HTML = [
     'requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · '
     '<span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · '
     '<span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet',
-    '<b>Input → Requirement → Output</b> for each capability — the data thread',
     'area-level coupling: one box per area (<b>N caps</b>), arrow A→B = some capability in A depends on one in B · the System Map has the per-capability detail',
     'requirements needing attention · '
     '<span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · '
@@ -923,7 +937,6 @@ _LEGEND_HTML = [
 _LEGEND_MD = [
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
-    "`Input → Requirement → Output` for each capability — the data thread.",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
     "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents).",
 ]
@@ -940,7 +953,6 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     diagrams = [
         ("System Map",          _mermaid_system(data)),
         ("Requirement-to-Code", _mermaid_req_to_code(data)),
-        ("Behavioral Flow",     _mermaid_behavioral(data)),
         ("Dependency Map",      _mermaid_deps(data)),
         ("Risk & Unknowns",     _mermaid_risk(data)),
     ]
@@ -1082,11 +1094,13 @@ function sel(id){
   document.getElementById('p').innerHTML=`
     <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr title="center this requirement in the current diagram" onclick="centerNode('${n.id}')"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
     <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
-    <div class=lbl>WHAT</div>
-    <div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div>
-    <div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>
-    <div class=lbl>HOW</div><div class=k>Acceptance (= tests)</div><ul>${li(n.acc)}</ul>
-    <div class=lbl>WHERE</div><div class=k>Members in code</div>${mem}
+    ${(n.contract&&n.contract.length)
+      ? `<div class=lbl>WHAT — Contract</div><ul>${li(n.contract)}</ul>`
+        + ((n.verify&&n.verify.length)?`<div class=lbl style="color:#b8860b">Verify intent</div><ul>${li(n.verify)}</ul>`:'')
+        + ((n.notes&&n.notes.length)?`<div class=k style="margin-top:6px">Notes &amp; limitations</div><ul>${li(n.notes)}</ul>`:'')
+      : `<div class=lbl>WHAT</div><div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div><div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>`}
+    <div class=lbl>HOW — Acceptance</div>${(n.acc&&n.acc.length)?`<ul>${li(n.acc)}</ul>`:`<pre style="white-space:pre-wrap;font:12px/1.45 ui-monospace,monospace;background:var(--sur);border-radius:6px;padding:8px;margin:4px 0">${esc(n.accept)||'—'}</pre>`}
+    <div class=lbl>WHERE</div>${(n.current_impl&&n.current_impl.length)?`<div class=k>Current implementation</div><ul>${li(n.current_impl)}</ul>`:''}<div class=k>Members in code</div>${mem}
     <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
     <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
     ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
@@ -1096,7 +1110,7 @@ let _hits=[];
 function search(q){
   q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
   if(!q){box.innerHTML='';_hits=[];return;}
-  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,(n.contract||[]).join(' '),(n.notes||[]).join(' '),n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
   box.innerHTML=_hits.length
     ? _hits.map(n=>`<div class="qhit" onclick="pick('${n.id}')">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
     : '<div class="qhit nohit">no match</div>';
@@ -1139,7 +1153,6 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     diagrams = [
         ("System Map",      _add_clicks(_mermaid_system(data),        data)),
         ("Req→Code",   _add_clicks(_mermaid_req_to_code(data),   data)),
-        ("Behavioral Flow", _add_clicks(_mermaid_behavioral(data),    data)),
         ("Dependencies",    _mermaid_deps(data)),   # area-level: nodes are areas, not requirements
         ("Risk",            _add_clicks(_mermaid_risk(data),          data)),
     ]

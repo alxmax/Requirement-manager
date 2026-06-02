@@ -19,7 +19,7 @@ Text listings do not show shape — which capabilities sit on the bus, what depe
 on what, where the code lives. The map is a derived view (never a source of truth):
 two output files are generated together:
 - `_map.html`: multi-tab interactive viewer with mermaid.js and a clickable detail panel.
-- `_map.md`: five Mermaid diagrams for GitHub/GitLab static rendering.
+- `_map.md`: four Mermaid diagrams for GitHub/GitLab static rendering.
 
 Both are regenerated, never edited, and live under `requirements/` so they travel
 with the registry. For legibility at scale the System Map clusters nodes into
@@ -34,13 +34,13 @@ requirement in whichever diagram is currently open.
 ## Output
 - `requirements/_map.html`: multi-tab HTML viewer with mermaid.js; clicking a node opens
   its WHY / WHAT / WHERE / HOW detail panel.
-- `requirements/_map.md`: 5 Mermaid diagrams + YAML frontmatter with node/edge counts.
+- `requirements/_map.md`: 4 Mermaid diagrams + YAML frontmatter with node/edge counts.
 
 ## Acceptance (= tests)
 - The generated files contain one node per requirement and one edge per `depends_on`.
-- `_map.md` contains exactly 5 Mermaid code blocks, one per view.
-- `_map.html` has a tab bar with 5 tabs: System Map, Req→Code, Behavioral Flow, Dependencies, Risk, and each pane carries a legend.
-- Behavioral Flow shows `Input[...] --> REQ-ID --> Output[...]` for every requirement.
+- `_map.md` contains exactly 4 Mermaid code blocks, one per view.
+- `_map.html` has a tab bar with 4 tabs: System Map, Req→Code, Dependencies, Risk, and each pane carries a legend.
+- The detail panel renders the `WHAT — Contract` / `Verify intent` / `Notes` split and the Given/When/Then acceptance for new-format requirements, and falls back to Input/Output/Description for legacy ones.
 - System Map groups nodes into per-area subgraphs, collapses single-node areas into a `misc` box, and omits edges whose target is a bus node.
 - Dependency Map is area-level: one node per area (with a capability count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
 - Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents), each paired with a scripted recommendation.

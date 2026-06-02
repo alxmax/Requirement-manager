@@ -153,8 +153,28 @@ present (a list of `{id, layer, files[]}`), else one candidate per file — and 
 each derives docstrings + top-level signatures (Python via `ast`, JS/TS via regex),
 the import graph as `depends_on`, test-file coverage, fan-in (a `bus` hint), and an
 `existing_req` flag for files already tagged. An agent (or you) then authors a real
-`requirements/<ID>.md` per candidate from that plan: filling Input → Description →
-Output → Acceptance, choosing `bus`/`feature`, and **referencing existing
-capabilities instead of duplicating them**. Author bus capabilities first so feature
+`requirements/<ID>.md` per candidate, choosing `bus`/`feature` and referencing
+existing capabilities instead of duplicating them. Author bus first so feature
 `depends_on` resolve, then tag the member files (`# implements: <ID>`) and run
 `check --update-lock`. Promote `draft → baseline → confirmed` at human review.
+
+**Emission rules (you are reconstructing intent from code, not authoring it).**
+The code was often AI-written, so the danger is **laundering its accidents into a
+contract**. Sort every observed behavior into one of three homes:
+- **`## WHAT — Contract` (normative)** — binding, testable "shall" statements, one
+  behavior per line, **no function names**; output shape + allowed values, required
+  vs optional inputs and how it degrades, and the **decision logic** selecting each
+  output (say so if delegated to a model/heuristic). Litmus: *can this be a
+  pass/fail test, true regardless of implementation?* If no, it isn't contract.
+- **`## WHAT — Verify intent`** — observed behaviors whose intent is unconfirmed
+  (swallowed `except`, empty-string/`None` fallback, magic constant, dead param).
+  State the observation, then the question; **never** promote these to a "shall".
+  These are the highest-value lines — where the AI most likely did something unasked.
+- **`## WHAT — Notes & known limitations`** — real fragilities that are not enforced.
+
+Acceptance goes under **`## HOW — Acceptance (= tests)`** as numbered Given/When/Then
+`AC-n` (one test each → maps to `tested-by`). The volatile "function X does A then
+B" walkthrough goes under **`## WHERE — Current implementation`**, never the
+contract. When intent is genuinely ambiguous, write "observed: X; intent
+unconfirmed" rather than guessing. The drift gate tracks only Contract + Acceptance
+— commentary may change freely.

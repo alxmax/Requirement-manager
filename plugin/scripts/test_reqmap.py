@@ -101,6 +101,18 @@ class Gate(unittest.TestCase):
             R.save_lock(missing, {"A": "b"})  # must not raise
             self.assertTrue(os.path.exists(os.path.join(missing, "_reqlock.json")))
 
+    def test_binding_hash_tracks_contract_not_commentary(self):  # tested-by: CORE-DRIFT-003
+        base = ("# T\n\n## WHAT — Contract (normative)\n- shall do X\n\n"
+                "## HOW — Acceptance (= tests)\nAC-1\n  Then X holds\n")
+        notes_a = base + "\n## WHAT — Notes & known limitations\n- footgun A\n"
+        notes_b = base + "\n## WHAT — Verify intent\n- Observed: weird thing. Bug?\n"
+        # commentary (Notes / Verify-intent) must NOT change the binding hash
+        self.assertEqual(R.binding_hash(notes_a), R.binding_hash(notes_b))
+        # changing the Contract MUST change it
+        self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("shall do X", "shall do Y")))
+        # changing an acceptance criterion MUST change it
+        self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("X holds", "Y holds")))
+
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-FOO-001.md"),
@@ -246,7 +258,7 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("bus (shared foundation)", self._html(d, "T"))
             R.render_md(self._data("T"), d)
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
-            self.assertIn("data thread", md)   # behavioral-flow legend line present
+            self.assertIn("area-level coupling", md)   # dependency-map legend line present
 
     def test_deps_is_area_level_overview(self):
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
@@ -341,7 +353,8 @@ class New(unittest.TestCase):  # tested-by: REQ-NEW-004
             content = open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8").read()
             self.assertIn("CORE-FOO-001", content)
             self.assertNotIn("AREA-NAME-NNN", content)
-            self.assertIn("## Acceptance (= tests)", content)   # from the built-in scaffold
+            self.assertIn("## WHAT — Contract", content)        # new emission schema
+            self.assertIn("Acceptance (= tests)", content)      # from the built-in scaffold
 
     def test_new_refuses_to_overwrite_existing(self):
         with tempfile.TemporaryDirectory() as d:
