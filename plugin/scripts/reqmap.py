@@ -638,22 +638,32 @@ def _node_label(n):
     return "{}<br><small>{}</small>".format(title, _mlabel(n["id"]))
 
 
+def _area_of(rid):  # implements: REQ-MAP-007
+    """Capability 'area' = the first id segment (BUS-PATHS-001 -> BUS). Used to
+    cluster a large System Map into per-area subgraphs so 40+ nodes stay legible."""
+    return rid.split("-", 1)[0] or rid
+
+
 def _mermaid_system(data):  # implements: REQ-MAP-007
+    # Cluster nodes into per-area subgraphs (by id prefix) rather than one flat
+    # graph: past ~20 nodes a single graph is unreadable, so area boxes keep it
+    # navigable. Bus nodes get a thicker stroke so the bus stays identifiable now
+    # that it is no longer its own subgraph.
     lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
-    feats = [n for n in data["nodes"] if n["layer"] != "bus"]
-    bus   = [n for n in data["nodes"] if n["layer"] == "bus"]
-    if feats:
-        lines.append("  subgraph Features")
-        for n in feats:
+    areas, bus_ids = {}, []
+    for n in data["nodes"]:
+        areas.setdefault(_area_of(n["id"]), []).append(n)
+    for area in sorted(areas):
+        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(area), area))
+        for n in areas[area]:
             lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
-        lines.append("  end")
-    if bus:
-        lines.append("  subgraph Bus")
-        for n in bus:
-            lines.append('    {}["{}"]'.format(_safe_id(n["id"]), _node_label(n)))
+            if n.get("layer") == "bus":
+                bus_ids.append(n["id"])
         lines.append("  end")
     for a, b in data["edges"]:
         lines.append("  {} --> {}".format(_safe_id(a), _safe_id(b)))
+    for bid in bus_ids:
+        lines.append("  style {} stroke-width:3px".format(_safe_id(bid)))
     return "\n".join(lines)
 
 
@@ -680,7 +690,12 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
         sid = _safe_id(rid)
         lines.append('  {}["{}"]'.format(sid, _node_label(n)))
         if not n["members"]:
-            lines.append("  style {} fill:#fee,stroke:#c66".format(sid))
+            # enforced-but-unlinked is a real gap (red); a baseline/draft not yet
+            # tagged is expected, so render it muted grey rather than alarming red
+            if n.get("status") in ENFORCED:
+                lines.append("  style {} fill:#fee,stroke:#c66".format(sid))
+            else:
+                lines.append("  style {} fill:#eee,stroke:#bbb,color:#888".format(sid))
             continue
         # group by role+file, compute min/max line numbers
         groups = {}
