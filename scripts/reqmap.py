@@ -415,6 +415,68 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
+def _add_clicks(diagram, data):
+    """Append Mermaid click statements for every requirement node."""
+    clicks = "\n".join(
+        "  click {} \"sel_{}\"".format(_safe_id(n["id"]), _safe_id(n["id"]))
+        for n in data["nodes"]
+    )
+    return diagram + "\n" + clicks
+
+
+def render_md(data, reqs_dir):  # implements: REQ-MAP-007
+    from datetime import datetime
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    dep_count = {n["id"]: 0 for n in data["nodes"]}
+    for _, b in data["edges"]:
+        dep_count[b] = dep_count.get(b, 0) + 1
+
+    diagrams = [
+        ("System Map",          _mermaid_system(data)),
+        ("Requirement-to-Code", _mermaid_req_to_code(data)),
+        ("Behavioral Flow",     _mermaid_behavioral(data)),
+        ("Dependency Map",      _mermaid_deps(data)),
+        ("Risk & Unknowns",     _mermaid_risk(data)),
+    ]
+
+    lines = [
+        "---",
+        "generated: {}".format(ts),
+        "nodes: {}".format(len(data["nodes"])),
+        "edges: {}".format(len(data["edges"])),
+        "---",
+        "",
+        "# Requirement Map",
+        "",
+    ]
+    for title, diagram in diagrams:
+        lines += ["## {}".format(title), "", "```mermaid", diagram, "```", ""]
+
+    # risk table
+    risk_rows = []
+    for n in data["nodes"]:
+        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
+        if sigs:
+            risk_rows.append((n["id"], n["status"],
+                              len(n["members"]), dep_count.get(n["id"], 0),
+                              ", ".join(sigs)))
+    if risk_rows:
+        lines += [
+            "### Risk Table", "",
+            "| ID | status | members | dependents | risks |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+        for row in risk_rows:
+            lines.append("| {} | {} | {} | {} | {} |".format(*row))
+        lines.append("")
+
+    out = os.path.join(reqs_dir, "_map.md")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+    return out
+
+
 MAP_HTML = r"""<!doctype html><meta charset=utf-8><title>Requirement map</title>
 <style>
 :root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
