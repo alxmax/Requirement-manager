@@ -545,7 +545,7 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     ]
 
     tab_btns = "".join(
-        '<button class="tab{}" data-tab="{}" onclick="switchTab({}">{}</button>'.format(
+        '<button class="tab{}" data-tab="{}" onclick="switchTab({})">{}</button>'.format(
             " active" if i == 0 else "", i, i, title)
         for i, (title, _) in enumerate(diagrams)
     )
