@@ -526,7 +526,14 @@ h1{font-size:18px;font-weight:500;margin:0 0 12px}
 .tab{padding:6px 14px;cursor:pointer;border-radius:6px;border:1px solid var(--bor);background:var(--sur);color:var(--fg);font:14px system-ui,sans-serif}
 .tab.active{background:var(--acc);color:#fff;border-color:var(--acc)}
 .pane{display:none}.pane.active{display:block}
-.mermaid{background:var(--sur);border-radius:8px;padding:16px;overflow-x:auto}
+.mwrap{position:relative}
+.mermaid{background:var(--sur);border-radius:8px;height:72vh;overflow:hidden;cursor:grab;touch-action:none}
+.mermaid:active{cursor:grabbing}
+.mermaid svg{transform-origin:0 0}
+.mctrl{position:absolute;top:10px;right:10px;display:flex;gap:4px;z-index:5}
+.mctrl button{width:30px;height:30px;border:1px solid var(--bor);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer;font:16px/1 system-ui;opacity:.85}
+.mctrl button:hover{opacity:1;border-color:var(--acc)}
+.mhint{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--mut);pointer-events:none}
 #p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
 #p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
 .pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
@@ -547,8 +554,34 @@ function switchTab(i){
   document.querySelector('[data-tab="'+i+'"]').classList.add('active');
   const pane=document.getElementById('pane'+i);
   pane.classList.add('active');
-  if(!rendered.has(i)){mermaid.run({nodes:pane.querySelectorAll('.mermaid')});rendered.add(i);}
+  if(!rendered.has(i)){
+    rendered.add(i);
+    mermaid.run({nodes:pane.querySelectorAll('.mermaid')})
+      .then(()=>pane.querySelectorAll('.mermaid').forEach(initPanZoom));
+  }
 }
+function paneBox(i){return document.getElementById('pane'+i).querySelector('.mermaid');}
+function initPanZoom(box){
+  const svg=box.querySelector('svg');if(!svg||box._pz)return;
+  svg.style.maxWidth='none';
+  const st={s:1,x:0,y:0};box._pz=st;
+  const apply=()=>{svg.style.transform='translate('+st.x+'px,'+st.y+'px) scale('+st.s+')';};
+  box.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=box.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const ns=Math.min(8,Math.max(.15,st.s*(e.deltaY<0?1.1:1/1.1)));
+    st.x=mx-(mx-st.x)*(ns/st.s);st.y=my-(my-st.y)*(ns/st.s);st.s=ns;apply();
+  },{passive:false});
+  let drag=false,lx=0,ly=0,moved=0;
+  box.addEventListener('pointerdown',e=>{drag=true;moved=0;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;moved+=Math.abs(dx)+Math.abs(dy);st.x+=dx;st.y+=dy;lx=e.clientX;ly=e.clientY;apply();});
+  window.addEventListener('pointerup',()=>{drag=false;});
+  // suppress node-click only when an actual drag happened
+  box.addEventListener('click',e=>{if(moved>4){e.stopPropagation();e.preventDefault();}},true);
+  box._apply=apply;
+}
+function pz(i,f){const b=paneBox(i),st=b._pz;if(!st)return;const r=b.getBoundingClientRect(),cx=r.width/2,cy=r.height/2;const ns=Math.min(8,Math.max(.15,st.s*f));st.x=cx-(cx-st.x)*(ns/st.s);st.y=cy-(cy-st.y)*(ns/st.s);st.s=ns;b._apply();}
+function pzReset(i){const b=paneBox(i),st=b._pz;if(!st)return;st.s=1;st.x=0;st.y=0;b._apply();}
 const D=REQMAP_DATA;
 const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
 function sel(id){
@@ -588,8 +621,13 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     )
 
     panes = "".join(
-        '<div id="pane{}" class="pane{}"><div class="mermaid">{}</div></div>'.format(
-            i, " active" if i == 0 else "", diagram)
+        ('<div id="pane{0}" class="pane{1}"><div class="mwrap">'
+         '<div class="mctrl"><button onclick="pz({0},1.25)">+</button>'
+         '<button onclick="pz({0},0.8)">−</button>'
+         '<button onclick="pzReset({0})" title="reset">↺</button></div>'
+         '<div class="mermaid">{2}</div>'
+         '<div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div>'
+         '</div></div>').format(i, " active" if i == 0 else "", diagram)
         for i, (_, diagram) in enumerate(diagrams)
     )
 
