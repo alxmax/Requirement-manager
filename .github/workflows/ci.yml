@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      # The engine is stdlib-only — no dependencies to install.
+      - name: Requirement drift gate
+        working-directory: plugin
+        run: python scripts/reqmap.py check
+      - name: Engine regression tests
+        working-directory: plugin/scripts
+        run: python -m unittest test_reqmap -v
