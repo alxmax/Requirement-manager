@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# requirement-manager drift gate (git pre-commit hook).
+#
+# Blocks a commit that breaks requirement<->code sync: a dangling code tag, a
+# missing depends_on target, or a `confirmed` requirement with no `implements:`
+# tag. Drift (a changed confirmed contract) is advisory — it prints a WARN naming
+# the member locations to re-check, but does not block the commit.
+#
+# Install (from your repo root, after seeding scripts/reqmap.py):
+#   cp scripts/../hooks/pre-commit .git/hooks/pre-commit   # adjust the source path
+#   chmod +x .git/hooks/pre-commit
+# Team-shared alternative (tracked in the repo):
+#   mkdir -p .githooks && cp <this file> .githooks/pre-commit
+#   git config core.hooksPath .githooks
+# Bypass once:  git commit --no-verify
+if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
+if ! "$PY" scripts/reqmap.py check; then
+  echo "" >&2
+  echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
+  exit 1
+fi

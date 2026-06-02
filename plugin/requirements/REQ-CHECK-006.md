@@ -21,7 +21,8 @@ invariants a human review would otherwise have to remember: no dangling tags, va
 status and layer, existing `depends_on` targets, and at least one `implements` for
 any enforced (in-progress/implemented/confirmed) requirement. Drift is reported as
 a warning, not an error, because a changed contract needs human attention, not a
-hard block. Errors exit non-zero so CI stops; warnings do not.
+hard block; the drift WARN names the member locations (`file:line`) to re-check so
+it is actionable. Errors exit non-zero so CI stops; warnings do not.
 
 ## Output
 - Printed `ERROR`/`WARN` lines plus a summary; exit code 1 if any error, else 0.
@@ -30,7 +31,7 @@ hard block. Errors exit non-zero so CI stops; warnings do not.
 - A tag referencing a non-existent capability produces an `ERROR` and exit 1.
 - A `confirmed` requirement with no `implements` member produces an `ERROR`.
 - A `depends_on` pointing at a missing id produces an `ERROR`.
-- A `confirmed` requirement whose binding hash differs from the lock produces a `WARN`, not an error.
+- A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) that names the member locations (`file:line`) to re-check.
 - `--update-lock` writes the current hashes to `requirements/_reqlock.json`.
 
 ## Links

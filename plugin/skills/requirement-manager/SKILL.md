@@ -85,10 +85,34 @@ output) so the registry stays about *your* code, not tooling.
   requirement has ≥1 member; no dangling refs; `depends_on` targets exist.
 - **behavior sync** — acceptance criteria run as tests (wire `tested-by` into CI).
 - **drift** — content hash of each requirement compared to the lock; a changed
-  `confirmed` requirement whose members were not re-touched is flagged stale.
+  `confirmed` requirement is flagged stale, and the WARN **names the member
+  locations to re-check** (`file:line, …`) so it is actionable, not just "its members".
 
 Intent sync is *not* automatable — it surfaces at human review (promote
 `baseline → confirmed`).
+
+### Make the gate non-optional
+Run `check` on every commit (locally) and every push/PR (CI):
+
+- **pre-commit hook** — ship `hooks/pre-commit` into the repo. From the repo root:
+  `cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit`
+  (or team-shared: put it in `.githooks/` and `git config core.hooksPath .githooks`).
+  It blocks a commit on **errors** only; drift stays advisory. Bypass once with
+  `git commit --no-verify`.
+- **CI** — gate every PR (stdlib-only, no deps to install):
+  ```yaml
+  # .github/workflows/reqmap.yml
+  name: reqmap
+  on: [push, pull_request]
+  jobs:
+    gate:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v5
+          with: { python-version: "3.x" }
+        - run: python scripts/reqmap.py check
+  ```
 
 ## Commands
 

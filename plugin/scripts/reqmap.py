@@ -251,7 +251,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         new_lock[rid] = h
         old = lock.get(rid)
         if old and old != h and r["meta"].get("status") == "confirmed":
-            warns.append(f"{rid}: DRIFT — contract changed since lock; re-check its members")
+            # name the member locations so the warning is actionable, not "its members"
+            locs = [f"{fp}:{ln}" for (_role, fp, ln) in members.get(rid, [])]
+            where = ", ".join(locs) if locs else "no members tagged — add an implements: tag"
+            warns.append(f"{rid}: DRIFT — contract changed since lock; "
+                         f"re-check {len(locs)} member(s): {where}")
 
     for w in warns:
         print("WARN ", w)
