@@ -3,6 +3,7 @@
 Run: python -m unittest test_reqmap   (from plugin/scripts/)
 """
 import io
+import json
 import os
 import sys
 import tempfile
@@ -267,6 +268,68 @@ class Scan(unittest.TestCase):  # tested-by: REQ-SCAN-005
         self.assertIn("implements", out)
         self.assertIn("src/foo.py:12", out)
         self.assertIn("(no members found)", out)  # CORE-BAR-002 has none
+
+
+class Candidates(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def _plan(self, d):
+        reqs_dir = os.path.join(d, "requirements")
+        reqs = R.load_requirements(reqs_dir)
+        members = R.scan_members(d, reqs_dir)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_candidates(reqs, members, d, reqs_dir, None)
+        return json.loads(buf.getvalue())
+
+    def test_writes_no_md_and_valid_json(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), '"""mod a."""\ndef f(x):\n    return x\n')
+            plan = self._plan(d)
+            self.assertIn("candidates", plan)
+            self.assertEqual([n for n in os.listdir(d) if n.endswith(".md")], [])
+
+    def test_respects_reqmapignore(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "keep.py"), "x = 1\n")
+            _write(os.path.join(d, "skip.py"), "y = 2\n")
+            _write(os.path.join(d, ".reqmapignore"), "skip.py\n")
+            allfiles = [f for c in self._plan(d)["candidates"] for f in c["files"]]
+            self.assertIn("keep.py", allfiles)
+            self.assertNotIn("skip.py", allfiles)
+
+    def test_derives_depends_on_from_imports(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "paths.py"), "ROOT = '.'\n")
+            _write(os.path.join(d, "app.py"), "import paths\n")
+            cands = self._plan(d)["candidates"]
+            app = next(c for c in cands if "app.py" in c["files"])
+            paths = next(c for c in cands if "paths.py" in c["files"])
+            self.assertIn(paths["suggested_id"], app["depends_on"])
+
+    def test_capmap_groups_files(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), "x=1\n")
+            _write(os.path.join(d, "b.py"), "y=2\n")
+            _write(os.path.join(d, "requirements", "_capmap.json"),
+                   json.dumps({"capabilities": [
+                       {"id": "CORE-AB-001", "layer": "bus", "files": ["a.py", "b.py"]}]}))
+            ab = [c for c in self._plan(d)["candidates"] if c["suggested_id"] == "CORE-AB-001"]
+            self.assertEqual(len(ab), 1)
+            self.assertEqual(sorted(ab[0]["files"]), ["a.py", "b.py"])
+            self.assertEqual(ab[0]["suggested_layer"], "bus")
+
+    def test_existing_req_for_tagged_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), tag("CORE-FOO-001") + "\n")
+            m = next(c for c in self._plan(d)["candidates"] if "m.py" in c["files"])
+            self.assertEqual(m["existing_req"], "CORE-FOO-001")
+
+    def test_unparseable_python_does_not_abort(self):  # one bad file != crash
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "bad.py"), "def (:\n")     # SyntaxError
+            _write(os.path.join(d, "good.py"), "z = 1\n")
+            files = [f for c in self._plan(d)["candidates"] for f in c["files"]]
+            self.assertIn("good.py", files)
+            self.assertIn("bad.py", files)
 
 
 if __name__ == "__main__":

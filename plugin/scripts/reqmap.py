@@ -12,7 +12,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, fnmatch, hashlib, json, os, re, sys
+import argparse, ast, fnmatch, hashlib, json, os, re, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
@@ -339,6 +339,198 @@ def _risk(src):  # implements: REQ-EXTRACT-008
     if "# noqa" in src or "eslint-disable" in src: score += 1
     if len(src.splitlines()) > 300: score += 1
     return score
+
+
+# ---------- candidates (capability extraction plan) ----------
+# Stage 1 of AI extraction: gather the raw material an authoring step (a human or
+# an LLM agent) needs to write a real, capability-level requirement. READ-ONLY —
+# emits a JSON plan, writes NO .md, so it cannot repeat extract's empty-stub failure.
+CANDIDATE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx")
+BUS_FANIN_THRESHOLD = 5      # a module this many capabilities depend on is bus-like
+SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not auto-split
+
+
+def _py_facts(src):  # implements: REQ-CANDIDATES-009
+    """Module/symbol docstrings, top-level signatures and import targets via the
+    stdlib `ast`. A SyntaxError yields empty facts so one unparseable file never
+    aborts the whole plan."""
+    facts = {"signatures": [], "docstrings": {}, "imports": []}
+    try:
+        tree = ast.parse(src)
+    except SyntaxError:
+        return facts
+    mod_doc = ast.get_docstring(tree)
+    if mod_doc:
+        facts["docstrings"]["module"] = mod_doc.strip().splitlines()[0][:200]
+    for node in tree.body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            facts["signatures"].append("def {}({})".format(
+                node.name, ", ".join(a.arg for a in node.args.args)))
+        elif isinstance(node, ast.ClassDef):
+            facts["signatures"].append("class {}".format(node.name))
+        else:
+            continue
+        d = ast.get_docstring(node)
+        if d:
+            facts["docstrings"][node.name] = d.strip().splitlines()[0][:200]
+    imports = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for n in node.names:
+                imports.add(n.name.split(".")[0])
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            imports.add(node.module.split(".")[0])
+    facts["imports"] = sorted(imports)
+    return facts
+
+
+def _js_facts(src):  # implements: REQ-CANDIDATES-009
+    """Best-effort JS/TS facts via regex (no stdlib JS parser): the leading block
+    comment as the module doc, and top-level function/binding names. Imports are
+    not resolved for JS in v1 (the agent and _capmap.json fill that gap)."""
+    facts = {"signatures": [], "docstrings": {}, "imports": []}
+    m = re.match(r"\s*/\*+(.*?)\*/", src, re.S)
+    if m:
+        head = [ln.strip(" *") for ln in m.group(1).strip().splitlines() if ln.strip(" *")]
+        if head:
+            facts["docstrings"]["module"] = head[0][:200]
+    names = re.findall(r"(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)", src)
+    names += re.findall(r"(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=", src)
+    facts["signatures"] = list(dict.fromkeys(names))   # dedupe, keep order
+    return facts
+
+
+def _file_facts(path, rel):  # implements: REQ-CANDIDATES-009
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            src = f.read()
+    except OSError:
+        return {"signatures": [], "docstrings": {}, "imports": [], "loc": 0}
+    facts = _py_facts(src) if rel.endswith(".py") else _js_facts(src)
+    facts["loc"] = len(src.splitlines())
+    facts["signatures"] = facts["signatures"][:40]
+    return facts
+
+
+def _load_capmap(reqs_dir):  # implements: REQ-CANDIDATES-009
+    """Optional `requirements/_capmap.json`: a hand-authored capability grouping,
+    authoritative when present. Shape: {"capabilities": [{id, layer, files:[...]}]}
+    (a bare list is also accepted). Returns []; fail-open on absent/unreadable."""
+    try:
+        with open(os.path.join(reqs_dir, "_capmap.json"), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    caps = data.get("capabilities", []) if isinstance(data, dict) else data
+    out = []
+    if isinstance(caps, list):
+        for c in caps:
+            if isinstance(c, dict) and c.get("id") and c.get("files"):
+                out.append({"id": c["id"], "layer": c.get("layer"),
+                            "files": [f.replace(os.sep, "/") for f in _as_list(c["files"])]})
+    return out
+
+
+def _mint_cap_id(rel):  # implements: REQ-CANDIDATES-009
+    """A TAG_RE-valid suggested id from a path stem (Stage 2 may rename it)."""
+    slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
+    return (slug or "MOD") + "-001"
+
+
+def _collect_files(code_root, reqs_dir):  # implements: REQ-CANDIDATES-009
+    """Sorted rel paths of candidate source files, honoring _prune_dirs (noise +
+    the SSOT dir) and .reqmapignore — the same exclusions scan_members uses."""
+    ignore = load_ignore(code_root)
+    out = []
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        dirs.sort()
+        for fn in sorted(files):
+            if not fn.endswith(CANDIDATE_EXTS):
+                continue
+            rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
+            if not any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                out.append(rel)
+    return out
+
+
+def cmd_candidates(reqs, members, code_root, reqs_dir, out):  # implements: REQ-CANDIDATES-009
+    """Emit a deterministic JSON capability-extraction plan and write NO .md.
+    Grouping: authoritative `requirements/_capmap.json` when present, else one
+    candidate per file (the Stage-2 agent merges/splits using judgment)."""
+    files = _collect_files(code_root, reqs_dir)
+    facts_by_file = {rel: _file_facts(os.path.join(code_root, rel), rel) for rel in files}
+
+    tagged = {}   # file -> already-implemented requirement id (idempotency hint)
+    for cap, hits in members.items():
+        for role, fp, _ln in hits:
+            if role == "implements":
+                tagged.setdefault(fp, cap)
+
+    stem_of = {os.path.splitext(os.path.basename(r))[0]: r for r in files}  # for depends_on
+
+    # ----- grouping: _capmap.json wins; uncovered files fall back to one-per-file
+    groups, claimed = [], set()
+    for entry in _load_capmap(reqs_dir):
+        present = [f for f in entry["files"] if f in facts_by_file]
+        if present:
+            groups.append({"id": entry["id"], "layer": entry.get("layer"), "files": present})
+            claimed.update(present)
+    for rel in files:
+        if rel not in claimed:
+            groups.append({"id": _mint_cap_id(rel), "layer": None, "files": [rel]})
+
+    group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
+
+    cands = []
+    for g in groups:
+        sigs, docs, imps, loc = [], {}, set(), 0
+        my_stems = set()
+        for f in g["files"]:
+            ff = facts_by_file[f]
+            sigs += ["{}: {}".format(f, s) for s in ff["signatures"]]
+            for k, v in ff["docstrings"].items():
+                docs["{}:{}".format(f, k)] = v
+            imps.update(ff["imports"])
+            loc += ff.get("loc", 0)
+            my_stems.add(os.path.splitext(os.path.basename(f))[0])
+        own = set(g["files"])
+        deps = sorted({group_id_of_file[stem_of[m]] for m in imps
+                       if m in stem_of and stem_of[m] not in own})
+        tested_by = sorted(
+            r for r in files
+            if os.path.basename(r).startswith("test_")
+            and os.path.splitext(os.path.basename(r))[0][len("test_"):] in my_stems)
+        existing = next((tagged[f] for f in g["files"] if f in tagged), None)
+        cands.append({
+            "suggested_id": g["id"], "_layer": g["layer"], "files": g["files"],
+            "docstrings": docs, "signatures": sigs[:60], "imports": sorted(imps),
+            "depends_on": deps, "tested_by": tested_by, "loc": loc,
+            "existing_req": existing, "split_candidate": loc > SPLIT_LOC_THRESHOLD,
+        })
+
+    fanin = {}
+    for c in cands:
+        for d in c["depends_on"]:
+            fanin[d] = fanin.get(d, 0) + 1
+    for c in cands:
+        n = fanin.get(c["suggested_id"], 0)
+        c["importer_count"] = n
+        c["suggested_layer"] = c.pop("_layer") or ("bus" if n >= BUS_FANIN_THRESHOLD else "feature")
+
+    plan = {
+        "engine_version": MAP_ENGINE_VERSION,
+        "bus": sorted(c["suggested_id"] for c in cands if c["suggested_layer"] == "bus"),
+        "candidates": cands,
+    }
+    text = json.dumps(plan, indent=2, ensure_ascii=False)
+    if out and out != "-":
+        with open(out, "w", encoding="utf-8") as f:
+            f.write(text)
+        print("wrote {} ({} candidates)".format(out, len(cands)))
+    else:
+        print(text)
+    return 0
 
 
 # ---------- map (HTML) ----------
@@ -781,11 +973,12 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
 
 def main():
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract"])
+    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
     ap.add_argument("--code", default=None)
+    ap.add_argument("--out", default=None, help="candidates: write plan JSON here ('-' or omit = stdout)")
     ap.add_argument("--update-lock", action="store_true")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
@@ -808,6 +1001,8 @@ def main():
         return cmd_map(reqs, members, reqs_dir)
     if a.cmd == "extract":
         return cmd_extract(reqs, members, code_root, reqs_dir)
+    if a.cmd == "candidates":
+        return cmd_candidates(reqs, members, code_root, reqs_dir, a.out)
 
 
 if __name__ == "__main__":
