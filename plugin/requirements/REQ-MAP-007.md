@@ -28,8 +28,8 @@ single-node areas into one `misc` box, and hides `depends_on` edges into the bus
 high-fan-in hubs; the Dependency Map is an area-level coupling overview (one box
 per area, aggregated edges). Every tab carries a legend, Req→Code colors only an
 enforced-but-unlinked requirement red, the Risk tab pairs each signal with a
-scripted recommendation, and a search box centers a matching requirement in
-whichever diagram is currently open.
+scripted recommendation, and a search box plus a detail-panel ◎ button center a
+requirement in whichever diagram is currently open.
 
 ## Output
 - `requirements/_map.html`: multi-tab HTML viewer with mermaid.js; clicking a node opens
@@ -44,7 +44,7 @@ whichever diagram is currently open.
 - System Map groups nodes into per-area subgraphs, collapses single-node areas into a `misc` box, and omits edges whose target is a bus node.
 - Dependency Map is area-level: one node per area (with a capability count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
 - Risk diagram shows only requirements with at least one risk signal (confirmed+0 members, draft/baseline, or 3+ dependents), each paired with a scripted recommendation.
-- The HTML search box lists matching requirements, each with a ◎ target button that centers and highlights that requirement in the currently-open diagram (the active tab does not change).
+- The HTML search box lists matching requirements; selecting one opens its detail panel, whose header carries a ◎ button that centers and highlights that requirement in the currently-open diagram (the active tab does not change).
 - A node with no members renders "(no members found)" in the HTML detail panel.
 
 ## Links

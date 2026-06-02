@@ -259,11 +259,11 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
         self.assertEqual(out.count("a_AI --> a_BUS"), 1)  # two AI->bus edges aggregate to one
         self.assertNotIn("BUS_PATHS_001", out)           # no per-capability hub hairball
 
-    def test_search_target_centers_in_active_pane(self):
+    def test_detail_panel_center_button_in_active_pane(self):
         with tempfile.TemporaryDirectory() as d:
             html = self._html(d, "T")
-            self.assertIn('id="q"', html)
-            self.assertIn('class="qtarget"', html)        # per-result target button
+            self.assertIn('id="q"', html)                 # search box
+            self.assertIn("class=ctr", html)              # ◎ center button in the detail panel header
             self.assertIn("function focus(", html)
             self.assertIn(".pane.active", html)           # centers in the CURRENT tab
             self.assertNotIn("switchTab(0)", html.split("function focus(")[1].split("}")[0])  # focus must not switch tabs
