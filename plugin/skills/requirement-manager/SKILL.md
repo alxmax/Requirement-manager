@@ -18,30 +18,39 @@ A script reconciles the two and generates a navigable map.
 
 ## Setup (first use in a repo)
 
-The engine is a single stdlib-only script. Seed it — and everything else reqmap
-writes — under `requirements/`, so the tool leaves one tidy folder:
+The engine is a single stdlib-only script. Seed it into the target repo once:
 
 ```bash
-mkdir -p requirements
-cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" requirements/reqmap.py
-printf 'data/\narchive/\nbuild/\n' > requirements/.reqmapignore   # dirs to skip
+mkdir -p scripts templates requirements
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp "${CLAUDE_PLUGIN_ROOT}/templates/requirement.md" templates/requirement.md
 ```
 
-From then on run `python requirements/reqmap.py <cmd>`, and commit it so the gate
-works in CI without the plugin. Everything reqmap produces (`_map.html`, `_map.md`,
-`_reqlock.json`, the requirement `.md` files) lands in `requirements/` too.
+**Create `.reqmapignore` immediately after the copy** — `reqmap.py` carries its own
+`implements:` self-tags. Without this file the gate fails with dangling-ref errors
+on the first run:
 
-Because the engine lives **inside** `requirements/` — the one dir the scanner skips
-— its own `# implements: CORE-*` self-tags are ignored automatically; you don't
-list it in `.reqmapignore`. The requirement template is built into the engine, so
-no `templates/` dir is needed.
+```
+scripts/reqmap.py
+```
 
-**`.reqmapignore`** (in `requirements/`; fnmatch globs over repo-root-relative
-paths) keeps generated/vendored dirs out of scanning — `data/`, `archive/`, build
-output — so the registry stays about *your* code, not tooling.
+Add any other vendored or generated paths that should not be scanned (one fnmatch
+glob per line, `#` comments ok). The engine itself is always the first entry.
 
-> The plugin's own repo keeps the engine in `plugin/scripts/` instead — it
-> *dogfoods*, so its `CORE-*`/`REQ-*` requirements need `reqmap.py` to be scanned.
+From then on every command below runs against the repo's own `scripts/reqmap.py`.
+Commit both the script and `.reqmapignore` so the gate works in CI without the
+plugin present. When the plugin ships a newer `reqmap.py`, re-seed with:
+
+```bash
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+```
+
+**Plugin authors** — use `sync_reqmap.sh` (in the plugin source repo) to propagate
+engine changes to the cache and any registered consumer repos in one command:
+
+```bash
+./sync_reqmap.sh /path/to/consumer-repo1 /path/to/consumer-repo2
+```
 
 ## Core model
 
@@ -92,126 +101,67 @@ output — so the registry stays about *your* code, not tooling.
   requirement has ≥1 member; no dangling refs; `depends_on` targets exist.
 - **behavior sync** — acceptance criteria run as tests (wire `tested-by` into CI).
 - **drift** — content hash of each requirement compared to the lock; a changed
-  `confirmed` requirement is flagged stale, and the WARN **names the member
-  locations to re-check** (`file:line, …`) so it is actionable, not just "its members".
+  `confirmed` requirement whose members were not re-touched is flagged stale.
 
 Intent sync is *not* automatable — it surfaces at human review (promote
 `baseline → confirmed`).
 
-### Make the gate non-optional
-Run `check` on every commit (locally) and every push/PR (CI):
+### Wiring the gate
 
-- **pre-commit hook** — ship `hooks/pre-commit` into the repo. From the repo root:
-  `cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit`
-  (or team-shared: put it in `.githooks/` and `git config core.hooksPath .githooks`).
-  It blocks a commit on **errors** only; drift stays advisory. Bypass once with
-  `git commit --no-verify`.
-- **CI** — gate every PR (stdlib-only, no deps to install):
-  ```yaml
-  # .github/workflows/reqmap.yml
-  name: reqmap
-  on: [push, pull_request]
-  jobs:
-    gate:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-python@v5
-          with: { python-version: "3.x" }
-        - run: python scripts/reqmap.py check
-  ```
+**Git pre-commit hook** (one-time, per developer clone):
+
+```bash
+cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/sh
+python -X utf8 scripts/reqmap.py check
+EOF
+chmod +x .git/hooks/pre-commit
+```
+
+**GitHub Actions** (enforces the gate for the whole team):
+
+```yaml
+# .github/workflows/reqmap.yml
+name: reqmap gate
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -X utf8 scripts/reqmap.py check
+```
+
+The hook and the CI job are independent — wire both so the gate runs locally
+before push *and* on the remote for PRs.
 
 ## Commands
 
 - `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
-- `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer) + `requirements/_map.md` (4 Mermaid diagrams)
-- `python scripts/reqmap.py extract`           — quick one-draft-per-file scaffold (TODO bodies)
-- `python scripts/reqmap.py candidates`        — emit a JSON capability-extraction plan (read-only; feeds AI authoring)
-- `python scripts/reqmap.py findings`          — aggregate open `Verify intent` items into `requirements/_findings.md` (renders an AI-triage sidecar when present; `--raw` to ignore it)
+- `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer with search, yellow node highlight, ⊕ center button, fit-to-view) + `requirements/_map.md` (4 Mermaid diagrams)
+- `python scripts/reqmap.py extract`           — draft one requirement per untagged file (brownfield bootstrap)
+- `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`)
+- `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view
 
-## Legacy / brownfield
+**Workflow order** — after modifying requirement files, run these three as a unit
+so the lock and map stay in sync:
 
-Two ways to bootstrap a registry on existing code. **Neither invents intent** —
-they lower the cost of writing requirements you then review. Nothing is ever
-auto-`confirmed`: a bug is never canonized as correct.
+```bash
+python scripts/reqmap.py scan
+python scripts/reqmap.py check --update-lock
+python scripts/reqmap.py map
+```
 
-### `extract` — quick scaffold (one draft per file)
-`extract` walks untagged source and writes one `draft` requirement per file with a
-**TODO body** and a cheap risk score (counts of `TODO`/`FIXME`/`HACK` markers, lint
-suppressions, and file size). It does **not** read signatures or imports — the body
-is left as TODO for a human to fill (this is the contract, see `REQ-EXTRACT-008`).
-The console prints `auto-baseline` / `REVIEW` as a review *hint*; the file's
-`status` field is always `draft`. Use it only for a fast, throwaway inventory — it
-is one-draft-per-file, not capability-level, so it does not by itself produce a
-useful registry.
+## Legacy / brownfield (extract mode)
 
-### `candidates` + AI authoring — capability-level requirements (recommended)
-`candidates` is **read-only** (writes no `.md`) and emits a JSON *extraction plan*.
-It groups files into capabilities — authoritative `requirements/_capmap.json` when
-present (a list of `{id, layer, files[]}`), else one candidate per file — and for
-each derives docstrings + top-level signatures (Python via `ast`, JS/TS via regex),
-the import graph as `depends_on`, test-file coverage, fan-in (a `bus` hint), and an
-`existing_req` flag for files already tagged. An agent (or you) then authors a real
-`requirements/<ID>.md` per candidate, choosing `bus`/`feature` and referencing
-existing capabilities instead of duplicating them. Author bus first so feature
-`depends_on` resolve, then tag the member files (`# implements: <ID>`) and run
-`check --update-lock`. Promote `draft → baseline → confirmed` at human review.
-
-**Emission rules (you are reconstructing intent from code, not authoring it).**
-The code was often AI-written, so the danger is **laundering its accidents into a
-contract**. Sort every observed behavior into one of three homes:
-- **`## WHAT — Contract` (normative)** — binding, testable "shall" statements, one
-  behavior per line, **no function names**; output shape + allowed values, required
-  vs optional inputs and how it degrades, and the **decision logic** selecting each
-  output (say so if delegated to a model/heuristic). Litmus: *can this be a
-  pass/fail test, true regardless of implementation?* If no, it isn't contract.
-- **`## WHAT — Verify intent`** — observed behaviors whose intent is unconfirmed
-  (swallowed `except`, empty-string/`None` fallback, magic constant, dead param).
-  State the observation, then the question; **never** promote these to a "shall".
-  These are the highest-value lines — where the AI most likely did something unasked.
-- **`## WHAT — Notes & known limitations`** — real fragilities that are not enforced.
-
-Acceptance goes under **`## HOW — Acceptance (= tests)`** as numbered Given/When/Then
-`AC-n` (one test each → maps to `tested-by`). The volatile "function X does A then
-B" walkthrough goes under **`## WHERE — Current implementation`**, never the
-contract. When intent is genuinely ambiguous, write "observed: X; intent
-unconfirmed" rather than guessing. The drift gate tracks only Contract + Acceptance
-— commentary may change freely.
-
-## Findings — surfacing & triaging suspected bugs
-
-Verify-intent sections are where reconstruction parks suspected AI accidents.
-`reqmap.py findings` rolls them up so they are reviewable in one place rather than
-scattered one-per-requirement.
-
-- **Aggregate (deterministic, stdlib).** `python scripts/reqmap.py findings` scans
-  every requirement, collects each `## WHAT — Verify intent` bullet (skipping the
-  "None — …" placeholder), and writes `requirements/_findings.md` grouped by
-  requirement with counts. `check` also prints an advisory "N open findings" line.
-  This is pure aggregation — it does **not** judge whether a finding is a real bug.
-
-- **Triage (AI, in-session — do this before acting on a finding).** Each finding is
-  only a *suspicion*. Run a two-pass triage and write the result beside the report
-  as `requirements/_findings_triage.json`; `findings` then renders a verified,
-  prioritized `_findings.md` (confirmed bugs first, by severity):
-  1. **Verify** — for each finding, read the cited code and classify it
-     `REAL_BUG` / `INTENTIONAL` / `FALSE_POSITIVE` / `USER_DECISION`, with a
-     `severity`, `location` (file:line) and one-line `fix`.
-  2. **Challenge** — for every `REAL_BUG`, a skeptic pass tries to refute it (the
-     triggering input never occurs, an upstream guard prevents it, the "wrong" value
-     is harmless as used); keep only the ones that survive. This kills
-     plausible-but-wrong findings before they reach the report.
-
-  Sidecar schema:
-  ```json
-  { "generated_at": "<ISO-Z>",
-    "items": [ { "req_id": "AREA-NAME-NNN", "finding": "...",
-      "classification": "REAL_BUG|INTENTIONAL|FALSE_POSITIVE|USER_DECISION",
-      "severity": "high|medium|low|none",
-      "location": "file:line", "fix": "...", "note": "..." } ] }
-  ```
-
-Keeping the triage in the skill (not the engine) preserves the hermetic, stdlib-only
-gate — the same split as `candidates` (deterministic) vs AI-authoring.
+`extract` walks the code and proposes `draft` requirements (structure, input/output
+from signatures, `depends_on` from imports). It **cannot** recover intent — it only
+captures observed behavior, so:
+- Everything it emits is `draft`/`baseline`, never `confirmed`. It never canonizes a
+  bug as correct.
+- Routing to review is by **risk = blast radius × uncertainty × proximity to known
+  problems**, not by parsing ease (clean code can be a clean bug). High-risk →
+  review; low-risk → accept as `baseline` (tracked, not asserted correct).
+- Aim ~80% auto-`baseline` / ~20% human-`confirmed` as a *health signal*, not a quota.
