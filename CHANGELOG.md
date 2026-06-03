@@ -20,6 +20,15 @@ Non-code capability discovery + corpus-health visibility (`MAP_ENGINE_VERSION` 2
   all-baseline corpus (gate enforces nothing yet) and an inactive `findings` visible.
 - **`extract`** now annotates the emitted `risk:` field as an author triage hint that
   the engine does not read.
+- **map risk signals** — two new signals surface on the Risk tab + `_map.md` table +
+  detail panel: `untested` (a requirement with an `implements` member but no
+  `tested-by`), suppressible per-requirement with a `test_exempt: <reason>` frontmatter
+  field; and `unverified-intent` (a requirement with an open `## WHAT — Verify intent`
+  item). Both reuse the existing risk machinery.
+- **map zoom-fit fix** — diagrams now fit their container on first open *and* on every
+  tab switch. Fit is measured after layout (double `requestAnimationFrame`, zero-size
+  guard) and centered, with a capped modest upscale (`FIT_MAX`) so small diagrams fill
+  the pane without over/under-zooming.
 
 ## check action `v1.0.0` — 2026-06-03
 

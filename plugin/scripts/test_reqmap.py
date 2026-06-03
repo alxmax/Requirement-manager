@@ -857,5 +857,79 @@ class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
         self.assertEqual(code, 0)   # non-blocking
 
 
+class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def _node(self, **kw):
+        n = {"status": "baseline", "members": [], "verify": [], "test_exempt": None}
+        n.update(kw)
+        return n
+
+    def test_untested_fires_when_implemented_but_no_test(self):
+        n = self._node(members=[{"role": "implements", "loc": "a.py:1"}])
+        self.assertIn("untested", R._risk_signals(n, 0))
+
+    def test_untested_silent_with_tested_by(self):
+        n = self._node(members=[{"role": "implements", "loc": "a.py:1"},
+                                {"role": "tested-by", "loc": "t.py:1"}])
+        self.assertNotIn("untested", R._risk_signals(n, 0))
+
+    def test_untested_not_fired_for_unimplemented_draft(self):  # gated on implements
+        n = self._node(members=[])
+        self.assertNotIn("untested", R._risk_signals(n, 0))
+
+    def test_test_exempt_suppresses_untested(self):
+        n = self._node(members=[{"role": "implements", "loc": "a.py:1"}], test_exempt="manual QA")
+        self.assertNotIn("untested", R._risk_signals(n, 0))
+
+    def test_unverified_intent_fires_on_open_findings(self):
+        n = self._node(verify=["is the empty-string fallback intended?"])
+        self.assertIn("unverified-intent", R._risk_signals(n, 0))
+
+    def test_unverified_intent_ignores_none_placeholder(self):  # mirror collect_findings
+        n = self._node(verify=["None — prompt is unambiguous."])
+        self.assertNotIn("unverified-intent", R._risk_signals(n, 0))
+
+    def test_member_roles_handles_tuple_and_dict_shapes(self):
+        self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
+        self.assertEqual(R._member_roles([{"role": "tested-by", "loc": "t.py:1"}]), ["tested-by"])
+
+    def test_new_signals_have_advice(self):  # else RISK_ADVICE[s] KeyErrors in map
+        for s in ("untested", "unverified-intent"):
+            self.assertIn(s, R.RISK_ADVICE)
+
+    def test_map_renders_new_signals_end_to_end(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            # implemented (tagged in code) but untested + has an open verify-intent item
+            _write(os.path.join(rd, "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["swallowed error — bug?"]))
+            _write(os.path.join(d, "x.py"), tag("AREA-X-001") + "\n")
+            reqs = R.load_requirements(rd)
+            members = R.scan_members(d, rd)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_map(reqs, members, rd)
+            md = open(os.path.join(rd, "_map.md"), encoding="utf-8").read()
+            self.assertIn("untested", md)
+            self.assertIn("unverified-intent", md)
+
+
+class ZoomFit(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def _html(self, d):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-A-001.md"),
+               REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+        R.cmd_map(R.load_requirements(rd), {}, rd)
+        return open(os.path.join(rd, "_map.html"), encoding="utf-8").read()
+
+    def test_refit_on_tab_switch_and_init(self):
+        with tempfile.TemporaryDirectory() as d:
+            html = self._html(d)
+            self.assertIn("function refit(box)", html)      # dedicated re-fit
+            self.assertIn("forEach(refit)", html)           # called on tab show
+            self.assertIn("refit(box)", html)               # called on init
+            self.assertIn("FIT_MAX", html)                  # capped upscale
+            self.assertIn("requestAnimationFrame", html)    # measure after layout
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
