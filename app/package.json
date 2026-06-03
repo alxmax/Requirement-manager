@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Requirement Manager — the four product surfaces (Map · Problems · Console · Spec) as a real React app, fed by the reqmap engine's JSON export.",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173 --strictPort",
     "build": "vite build",
     "preview": "vite preview",
     "sync": "node scripts/sync-data.mjs",
