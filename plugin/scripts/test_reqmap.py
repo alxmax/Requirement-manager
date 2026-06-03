@@ -772,5 +772,90 @@ class TriageFolding(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
             self.assertIn("1 product/config decision", md)  # counted in a real bucket
 
 
+class MdDiscovery(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def _plan(self, d, md_globs=None):
+        reqs_dir = os.path.join(d, "requirements")
+        reqs = R.load_requirements(reqs_dir)
+        members = R.scan_members(d, reqs_dir)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_candidates(reqs, members, d, reqs_dir, None, md_globs)
+        return json.loads(buf.getvalue())
+
+    def test_md_facts_extracts_title_intent_h2(self):
+        src = "# Generator\n\n> the proposing voice.\n\n## Role\ntext\n## Output\nmore\n"
+        f = R._md_facts(src)
+        self.assertEqual(f["docstrings"]["title"], "Generator")
+        self.assertEqual(f["docstrings"]["module"], "the proposing voice.")
+        self.assertEqual(f["signatures"], ["## Role", "## Output"])
+
+    def test_md_excluded_without_glob(self):  # default: no .md ever collected
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), "x = 1\n")
+            _write(os.path.join(d, "prompts", "voice.md"), "# Voice\n\n> a voice.\n")
+            files = [f for c in self._plan(d)["candidates"] for f in c["files"]]
+            self.assertNotIn("prompts/voice.md", files)
+
+    def test_md_included_only_when_glob_matches(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "prompts", "voice.md"), "# Voice\n\n> a voice.\n")
+            _write(os.path.join(d, "docs", "readme.md"), "# Docs\n")  # not in allowlist
+            files = [f for c in self._plan(d, ["prompts/**"])["candidates"] for f in c["files"]]
+            self.assertIn("prompts/voice.md", files)
+            self.assertNotIn("docs/readme.md", files)   # allowlist bounds scope
+
+    def test_plan_has_coverage_summary_and_lineage_note(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), "x = 1\n")
+            plan = self._plan(d)
+            self.assertEqual(plan["coverage_summary"]["total_candidates"], len(plan["candidates"]))
+            self.assertIn("with_existing_req", plan["coverage_summary"])
+            self.assertIn("lineage", plan["lineage_note"].lower())
+
+    def test_tag_in_md_is_scanned_as_member(self):  # .md now in CODE_EXTS
+        with tempfile.TemporaryDirectory() as d:
+            md_tag = "<!-- {}: CONSILIUM-VOICE-001 -->".format(_ROLE)
+            _write(os.path.join(d, "prompts", "generator.md"), "# Generator\n" + md_tag + "\n")
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            self.assertIn("CONSILIUM-VOICE-001", members)
+            roles = [m[0] for m in members["CONSILIUM-VOICE-001"]]
+            self.assertIn("implements", roles)
+
+
+class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def _check(self, files):
+        with tempfile.TemporaryDirectory() as d:
+            for name, body in files.items():
+                _write(os.path.join(d, name), body)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, False)
+            return code, buf.getvalue()
+
+    def test_summary_reports_confirmed_count(self):
+        files = {
+            "AREA-A-001.md": _req_with_verify("AREA-A-001", ["q?"]).replace(
+                "status: baseline", "status: confirmed"),
+            "AREA-B-002.md": _req_with_verify("AREA-B-002", ["q?"]),
+            "impl.py": tag("AREA-A-001") + "\n",   # member so the confirmed req does not error
+        }
+        code, out = self._check(files)
+        self.assertIn("1 confirmed", out)
+        self.assertIn("0 legacy-schema", out)   # both reqs use the new schema
+        self.assertEqual(code, 0)
+
+    def test_legacy_schema_is_flagged_nonblocking(self):
+        # a legacy-schema requirement (no Verify-intent section) must warn but not error
+        legacy = REQ.format(id="AREA-L-001", status="baseline", layer="feature",
+                            extra="", title="Legacy") + "\n## Input\n- x\n## Output\n- y\n"
+        code, out = self._check({"AREA-L-001.md": legacy})
+        self.assertIn("legacy schema", out)
+        self.assertIn("findings` is inactive", out)
+        self.assertIn("1 legacy-schema", out)
+        self.assertEqual(code, 0)   # non-blocking
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
