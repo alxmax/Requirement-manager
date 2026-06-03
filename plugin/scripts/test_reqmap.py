@@ -386,6 +386,18 @@ class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
             self.assertFalse(any("README" in f for f in drafts), drafts)
 
+    def test_tagged_capability_prose_not_redrafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            # a prompts/ file (bucket 3) that already carries a member tag must be
+            # skipped by the `rel in tagged` guard, not re-drafted
+            _write(os.path.join(d, "prompts", "foo.md"),
+                   "# Foo\n" + tag("PROMPTS-FOO-001") + "\n## Role\n")
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            self.assertIn("PROMPTS-FOO-001", members)   # it IS a member
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertFalse(any("FOO" in f for f in drafts), drafts)
+
 
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10

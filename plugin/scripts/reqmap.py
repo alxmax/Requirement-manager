@@ -589,6 +589,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                 review = "REVIEW"   # intent is unrecoverable from prose — always author
                 hint = "\n".join("  - {}".format(h) for h in headings) \
                     or "  - (no section headings detected)"
+                # str.format (not f-string): the template embeds literal {cap}/{rel} inside backticked instructions
                 with open(dest, "w", encoding="utf-8") as f:
                     f.write("---\nid: {cap}\nstatus: draft\nlayer: feature\n"
                             "owner: auto\ndepends_on: []\n"
