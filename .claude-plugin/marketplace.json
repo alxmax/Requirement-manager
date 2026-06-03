@@ -1,6 +1,6 @@
 {
   "name": "requirement-manager",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Requirement manager: a single source of truth between intent and code, with a drift gate and a navigable requirement map.",
   "owner": {
     "name": "Schipor Alexandru",
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "requirement-manager",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "source": "./plugin"
     }
   ]

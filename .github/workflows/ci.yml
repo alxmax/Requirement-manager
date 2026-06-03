@@ -24,6 +24,9 @@ jobs:
       - name: Requirement drift gate
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py check
+      - name: Map freshness
+        working-directory: plugin
+        run: python -X utf8 scripts/reqmap.py map --check
       - name: Engine regression tests
         working-directory: plugin/scripts
         run: python -X utf8 -m unittest test_reqmap -v

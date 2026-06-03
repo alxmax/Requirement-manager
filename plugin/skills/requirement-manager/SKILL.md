@@ -169,6 +169,11 @@ python scripts/reqmap.py check --update-lock
 python scripts/reqmap.py map
 ```
 
+`reqmap.py map --check` is the freshness gate (no write): it rebuilds the map in
+memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
+edit shifted it). Wire it next to `check` in your pre-commit hook / CI so a stale
+map can't be committed. A repo that doesn't track a map passes silently.
+
 ## Legacy / brownfield (extract mode)
 
 `extract` walks the code and proposes `draft` requirements (structure, input/output

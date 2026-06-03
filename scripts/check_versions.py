@@ -23,6 +23,7 @@ missing or unreadable. stdlib only.
 """
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import json
 import re
@@ -45,7 +46,30 @@ def _load_json(path: Path) -> dict:
         raise SystemExit(2)
 
 
-def main() -> int:
+def _fix(canonical: str) -> int:
+    """Propagate the canonical plugin.json version into every marketplace.json
+    occurrence, so a bump is one edit + one command instead of three hand-edits.
+    Rewrites only when something changed; preserves 2-space indent + trailing NL."""
+    market = _load_json(MARKETPLACE_JSON)
+    before = json.dumps(market, sort_keys=True)
+    market["version"] = canonical
+    for plug in market.get("plugins", []):
+        if isinstance(plug, dict):
+            plug["version"] = canonical
+    if json.dumps(market, sort_keys=True) == before:
+        print(f"OK  marketplace.json already at {canonical!r} — nothing to fix.")
+        return 0
+    MARKETPLACE_JSON.write_text(json.dumps(market, indent=2) + "\n", encoding="utf-8")
+    print(f"fixed  marketplace.json synced to {canonical!r}.")
+    return 0
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description="Assert (or --fix) version coherence across the manifests.")
+    ap.add_argument("--fix", action="store_true",
+                    help="rewrite marketplace.json to match plugin.json's version, then verify")
+    a = ap.parse_args(argv)
+
     errors: list[str] = []
 
     plugin = _load_json(PLUGIN_JSON)
@@ -53,6 +77,11 @@ def main() -> int:
     if not canonical:
         print(f"ERROR  no `version` in {PLUGIN_JSON.relative_to(REPO_ROOT)}")
         return 2
+
+    if a.fix:
+        rc = _fix(canonical)
+        if rc:
+            return rc
 
     # Every semver occurrence in marketplace.json must equal the canonical source.
     market = _load_json(MARKETPLACE_JSON)

@@ -1,5 +1,22 @@
 # Changelog
 
+## engine `1.4.0` — 2026-06-03
+
+Drift gates to prevent the version/map skew that slipped past in 1.3.x.
+
+- **`reqmap.py map --check`** — freshness gate: regenerates the map in memory and
+  compares it to the committed `_map.html`/`_map.md` (ignoring the volatile
+  `generated:` timestamp), exiting non-zero if stale. A map that was never generated
+  passes (consumers who don't track maps are unaffected). Wired into the shared
+  pre-commit hook and CI so a code/requirement edit that shifts the map can't be
+  committed without regenerating it.
+- **`check_versions.py --fix`** — propagates `plugin.json`'s version into every
+  `marketplace.json` occurrence, so a bump is one edit + one command instead of three
+  hand-edits (the exact drift that failed CI in 1.3.0).
+- **dev pre-commit hook** (`.githooks/pre-commit`, enable with
+  `git config core.hooksPath .githooks`) — runs version coherence + the drift gate +
+  map freshness locally, before CI.
+
 ## engine `1.3.0` — 2026-06-03
 
 Non-code capability discovery + corpus-health visibility (`MAP_ENGINE_VERSION` 2026-06-03).

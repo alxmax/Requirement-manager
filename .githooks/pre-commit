@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+# requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
+# Catches the two drifts that previously only failed in CI / went unnoticed:
+#   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
+#   2. map staleness  — committed _map.* vs current code   (fix: reqmap.py map)
+# plus the standard requirement<->code drift gate.
+#
+# Enable once (from the repo root):  git config core.hooksPath .githooks
+# Bypass once:  git commit --no-verify
+if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
+
+if ! "$PY" scripts/check_versions.py; then
+  echo "" >&2
+  echo "version drift — run 'python scripts/check_versions.py --fix' to sync, then re-stage." >&2
+  exit 1
+fi
+if ! "$PY" -X utf8 plugin/scripts/reqmap.py check --root plugin; then
+  echo "" >&2
+  echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
+  exit 1
+fi
+if ! "$PY" -X utf8 plugin/scripts/reqmap.py map --check --root plugin; then
+  echo "" >&2
+  echo "reqmap: committed map is stale — run 'python plugin/scripts/reqmap.py map --root plugin' and stage it." >&2
+  exit 1
+fi
