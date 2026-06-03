@@ -56,7 +56,7 @@ RISK_ADVICE = {
 # Bumped on any change to this engine. `check` warns a seeded repo when its
 # vendored copy is older than the installed plugin's. ISO date: lexicographic
 # order == chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-03"
+MAP_ENGINE_VERSION = "2026-06-03.1"
 
 
 # ---------- parsing ----------
@@ -382,6 +382,8 @@ superseded_by:       # <ID>, if replaced
 > WHY: one line — what this is, in plain language.
 
 ## WHAT — Contract (normative)
+<!-- Audience: a developer new to THIS project. Define project-specific terms inline
+     on first use; attach roles to named components; keep "shall" phrasing. -->
 - The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
   no function names; true regardless of how the code is implemented).
 - Output shape + allowed values; required vs optional inputs and how it degrades
@@ -396,6 +398,8 @@ superseded_by:       # <ID>, if replaced
 - A known fragility/footgun the implementer should know but which is NOT enforced.
 
 ## HOW — Acceptance (= tests)
+<!-- Audience: a developer new to THIS project. Keep Given/When/Then concrete and
+     self-explanatory; spell out any term the Contract introduced. -->
 AC-1
   Given  <precondition>
   When   <action>
