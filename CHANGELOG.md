@@ -1,5 +1,20 @@
 # Changelog
 
+## engine `1.8.0` — 2026-06-03
+
+- **Added**: `extract`/`init` now discover prose capabilities (`.md`/`.html`) by
+  default, classified by `classify_prose` into three buckets — ignore
+  (meta/boilerplate), sync-only (`README*`, `docs/`, `*.html`), and
+  capability-source (prompts/specs). Capability-source prose is auto-drafted as a
+  `draft` stub from its title + `##` headings (`_prose_facts`). An advisory
+  doc-sync step is emitted in the skill for sync-only docs tagged `generated-from`.
+- **Behavior change**: on first post-upgrade `init`/`extract`, repos with
+  prompt/spec markdown will see new `draft` requirements. Drafts are NOT enforced
+  by the gate (`draft` is not in `ENFORCED`), so this cannot break an existing
+  `check`. Review, edit, and `promote` the real ones; delete the rest.
+  README/docs/HTML and meta files (`CLAUDE.md`, `SKILL.md`, `TODO.md`,
+  `CHANGELOG.md`, `LICENSE*`) are never auto-drafted.
+
 ## engine `1.5.0` — 2026-06-03
 
 - **`reqmap.py promote <ID>`** — one-command human-validation step: flips a reviewed

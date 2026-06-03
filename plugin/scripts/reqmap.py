@@ -66,7 +66,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-03.2"
+MAP_ENGINE_VERSION = "2026-06-03.3"
 
 
 # ---------- parsing ----------
