@@ -33,8 +33,8 @@ After any action, summarize what changed and, when useful, point to
 
 | Action | What it does | Commands to run (in order) |
 |---|---|---|
-| **init / reinit everything** | First-time setup, or re-initialize / refresh the whole registry. Idempotent — re-drafts untagged code and rebuilds the lock + map; never clobbers `.reqmapignore` or any authored requirement (no destructive wipe). | `python scripts/reqmap.py init` |
-| **regenerate requirements** | Draft requirements for new / untagged code only. Authored and `confirmed` requirements are left untouched. Afterwards, tell the user which drafts were created and remind them to review + `promote` the real ones. | `python scripts/reqmap.py extract` → `scan` → `check --update-lock` → `map` |
+| **init / reinit everything** | First-time setup, or re-initialize / refresh the whole registry. Idempotent — re-drafts untagged code and prose, and rebuilds the lock + map; never clobbers `.reqmapignore` or any authored requirement (no destructive wipe). | `python scripts/reqmap.py init` |
+| **regenerate requirements** | Draft requirements for new / untagged code and prose (`.md`/`.html`) only. Authored and `confirmed` requirements are left untouched. Afterwards, tell the user which drafts were created and remind them to review + `promote` the real ones. | `python scripts/reqmap.py extract` → `scan` → `check --update-lock` → `map` |
 | **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
 | **regenerate map** | Refresh the generated artifacts (lock + interactive HTML + Mermaid map) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` → advisory doc-sync |
 
