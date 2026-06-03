@@ -33,6 +33,14 @@ def gtag_html(cap):  # runtime-built so THIS .py source registers no phantom mem
     return "<!-- {}-from: {} -->".format("generated", cap)
 
 
+_TB_ROLE = "tested" + "-by"
+
+
+def tb_tag(cap):
+    return "# {}: {}".format(_TB_ROLE, cap)
+
+
+
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
@@ -1255,12 +1263,17 @@ class Next(unittest.TestCase):  # tested-by: REQ-NEXT-013
 
 
 class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
-    def _init(self, code_root):
+    def _init(self, code_root, wipe=False):
         reqs_dir = os.path.join(code_root, "requirements")
         buf = io.StringIO()
         with redirect_stdout(buf):
-            code = R.cmd_init(reqs_dir, code_root)
+            code = R.cmd_init(reqs_dir, code_root, wipe=wipe)
         return code, buf.getvalue(), reqs_dir
+
+    def _req_file(self, d, rid="CORE-FOO-001"):
+        path = os.path.join(d, "requirements", rid + ".md")
+        _write(path, "---\nid: {}\nstatus: confirmed\n---\n\n# Cap\n".format(rid))
+        return path
 
     def test_scaffolds_dir_ignore_lock_and_map(self):
         with tempfile.TemporaryDirectory() as d:
@@ -1326,6 +1339,60 @@ class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
             self.assertEqual(code, 0)
             self.assertIn("no requirements were extracted", out)
             self.assertEqual([n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")], [])
+
+    # --wipe tests
+    def test_wipe_deletes_existing_requirements(self):
+        with tempfile.TemporaryDirectory() as d:
+            req_path = self._req_file(d)
+            _write(os.path.join(d, "requirements", "_map.md"), "generated\n")
+            _write(os.path.join(d, "app.py"), "def f(): pass\n")
+            code, _, _ = self._init(d, wipe=True)
+            self.assertEqual(code, 0)
+            self.assertFalse(os.path.exists(req_path))       # authored requirement deleted
+            self.assertTrue(os.path.exists(                  # generated file stays (or re-created)
+                os.path.join(d, "requirements", "_map.md")))
+
+    def test_wipe_strips_tags_from_source(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._req_file(d)
+            _write(os.path.join(d, "app.py"),
+                   "def f():  " + tag("CORE-FOO-001") + "\n    pass\n")
+            self._init(d, wipe=True)
+            content = open(os.path.join(d, "app.py"), encoding="utf-8").read()
+            self.assertNotIn(_ROLE + ":", content)
+            self.assertIn("def f():", content)               # code line preserved
+
+    def test_wipe_strips_tested_by_tag(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._req_file(d)
+            _write(os.path.join(d, "test_app.py"),
+                   "class T:  " + tb_tag("CORE-FOO-001") + "\n    pass\n")
+            self._init(d, wipe=True)
+            content = open(os.path.join(d, "test_app.py"), encoding="utf-8").read()
+            self.assertNotIn(_TB_ROLE + ":", content)
+            self.assertIn("class T:", content)
+
+    def test_wipe_left_boundary_guard(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"),
+                   "# re" + _ROLE + ": CORE-FOO-001\ndef f(): pass\n")
+            self._init(d, wipe=True)
+            content = open(os.path.join(d, "app.py"), encoding="utf-8").read()
+            self.assertIn("re" + _ROLE + ":", content)      # NOT stripped
+
+    def test_wipe_preserves_non_tag_comments(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"),
+                   "# regular comment\ndef f(): pass\n")
+            self._init(d, wipe=True)
+            content = open(os.path.join(d, "app.py"), encoding="utf-8").read()
+            self.assertIn("# regular comment", content)
+
+    def test_no_wipe_preserves_requirements(self):
+        with tempfile.TemporaryDirectory() as d:
+            req_path = self._req_file(d)
+            self._init(d, wipe=False)
+            self.assertTrue(os.path.exists(req_path))       # untouched without --wipe
 
 
 def _kv(extra):
