@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   gate-and-tests:
     runs-on: ubuntu-latest
@@ -14,6 +17,10 @@ jobs:
         with:
           python-version: "3.x"
       # The engine is stdlib-only — no dependencies to install.
+      - name: Manifest version coherence
+        run: python scripts/check_versions.py
+      # This repo runs the gate directly (not via check/action.yml) to avoid
+      # depending on its own unpublished action.
       - name: Requirement drift gate
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py check
