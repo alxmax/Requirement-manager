@@ -1,0 +1,203 @@
+<!doctype html><meta charset=utf-8><title>Requirement map</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{--bg:#fff;--fg:#1a1a18;--mut:#73726c;--sur:#f4f2ec;--bor:#d8d6cc;--acc:#534ab7;--ok:#3b6d11;--wip:#854f0b}
+@media(prefers-color-scheme:dark){:root{--bg:#1f1e1c;--fg:#e9e7df;--mut:#9c9a92;--sur:#2a2926;--bor:#3a3935;--acc:#afa9ec;--ok:#97c459;--wip:#fac775}}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,sans-serif;padding:24px}
+h1{font-size:18px;font-weight:500;margin:0 0 12px}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:6px 14px;cursor:pointer;border-radius:6px;border:1px solid var(--bor);background:var(--sur);color:var(--fg);font:14px system-ui,sans-serif}
+.tab.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pane{display:none}.pane.active{display:block}
+.mwrap{position:relative}
+.mermaid{background:var(--sur);border-radius:8px;height:72vh;overflow:hidden;cursor:grab;touch-action:none}
+.mermaid:active{cursor:grabbing}
+.mermaid svg{transform-origin:0 0}
+/* sharp rectangle nodes across every diagram (override the neutral theme's rounded corners) */
+.mermaid .node rect,.mermaid .node polygon{rx:0;ry:0}
+.mctrl{position:absolute;top:10px;right:10px;display:flex;gap:4px;z-index:5}
+.mctrl button{width:30px;height:30px;border:1px solid var(--bor);background:var(--bg);color:var(--fg);border-radius:6px;cursor:pointer;font:16px/1 system-ui;opacity:.85}
+.mctrl button:hover{opacity:1;border-color:var(--acc)}
+.mhint{position:absolute;bottom:8px;left:12px;font-size:11px;color:var(--mut);pointer-events:none}
+.legend{font-size:12px;color:var(--mut);margin:0 0 8px;line-height:1.7}
+.legend b{color:var(--fg);font-weight:600}
+.sw{display:inline-block;width:11px;height:11px;border:1px solid var(--bor);border-radius:2px;vertical-align:middle;margin:0 3px 0 2px}
+.search{position:relative;margin:0 0 12px;max-width:560px}
+#q{width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid var(--bor);border-radius:8px;background:var(--sur);color:var(--fg);font:14px system-ui}
+#qres{position:absolute;left:0;right:0;z-index:20;background:var(--bg);border:1px solid var(--bor);border-radius:8px;margin-top:4px;max-height:340px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+#qres:empty{display:none}
+.qhit{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--bor);font-size:13px}
+.qhit:last-child{border-bottom:none}.qhit:hover{background:var(--sur)}.qhit.nohit{cursor:default;color:var(--mut)}
+.ctr{display:inline-flex;align-items:center;justify-content:center;border:1px solid #e0a800;background:var(--bg);color:#caa000;border-radius:8px;cursor:pointer;padding:4px 8px;vertical-align:middle;margin-left:8px}
+.ctr:hover{background:#f5c518;color:#000;border-color:#e0a800}
+.ctr svg{display:block}
+.mermaid g.node.hl>rect,.mermaid g.node.hl>polygon{stroke:#e0a800 !important;stroke-width:4px !important;fill:#fff6cc !important;filter:drop-shadow(0 0 7px #ffcc00)}
+#p{margin-top:16px;border:1px solid var(--bor);border-radius:12px;padding:16px 20px;background:var(--bg)}
+#p h2{font-size:16px;margin:0 0 4px}.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
+.pill{font-size:12px;padding:2px 10px;border-radius:8px;background:var(--sur);color:var(--mut);margin-left:6px}
+.io{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.io div{background:var(--sur);border-radius:8px;padding:10px}.io .k{font-size:12px;color:var(--mut)}
+ul{margin:4px 0;padding-left:18px}.k{font-size:12px;color:var(--mut)}
+.lbl{font-size:11px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.05em;margin-top:10px}
+</style>
+<h1>Requirement map</h1>
+<div class="search"><input id="q" placeholder="Search requirements / keyword…  (then the ⌖ crosshair in the panel centers it)" oninput="search(this.value)" onkeydown="if(event.key==='Enter')searchEnter()" autocomplete="off"><div id="qres"></div></div>
+<div class="tabs"><button class="tab active" data-tab="0" onclick="switchTab(0)">System Map</button><button class="tab" data-tab="1" onclick="switchTab(1)">Req→Code</button><button class="tab" data-tab="2" onclick="switchTab(2)">Dependencies</button><button class="tab" data-tab="3" onclick="switchTab(3)">Risk</button></div>
+<div id="pane0" class="pane active"><div class="legend"><span class="sw" style="border-width:3px"></span>bus (shared foundation) · arrows = <b>depends_on</b> · <i>edges into the bus/hubs are hidden (Dependencies tab shows area-level coupling) · open a requirement (click a node / search) then press the ⌖ crosshair in its panel to center it here</i></div><div class="mwrap"><div class="mctrl"><button onclick="pz(0,1.25)">+</button><button onclick="pz(0,0.8)">−</button><button onclick="pzReset(0)" title="reset">↺</button></div><div class="mermaid">graph LR
+</div><div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div></div></div><div id="pane1" class="pane"><div class="legend">requirement → its code · arrow label = role (<b>implements</b> / <b>tested-by</b>) · <span class="sw" style="background:#fee;border-color:#c66"></span>confirmed but no code (gap) · <span class="sw" style="background:#eee;border-color:#bbb"></span>baseline/draft, not linked yet</div><div class="mwrap"><div class="mctrl"><button onclick="pz(1,1.25)">+</button><button onclick="pz(1,0.8)">−</button><button onclick="pzReset(1)" title="reset">↺</button></div><div class="mermaid">graph LR
+</div><div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div></div></div><div id="pane2" class="pane"><div class="legend">area-level coupling: one box per area (<b>N caps</b>), arrow A→B = some capability in A depends on one in B · the System Map has the per-capability detail</div><div class="mwrap"><div class="mctrl"><button onclick="pz(2,1.25)">+</button><button onclick="pz(2,0.8)">−</button><button onclick="pzReset(2)" title="reset">↺</button></div><div class="mermaid">graph LR
+  none["(no requirements)"]</div><div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div></div></div><div id="pane3" class="pane"><div class="legend">requirements needing attention · <span class="sw" style="background:#fee;border-color:#c00"></span>unimplemented (confirmed, no code) · <span class="sw" style="background:#fff3cd;border-color:#a66"></span>unreviewed (promote after review) · <span class="sw" style="background:#fff9c4;border-color:#aa0"></span>blast-radius (≥3 dependents) · untested (implemented, no tested-by) · unverified-intent (open verify-intent question)</div><div class="mwrap"><div class="mctrl"><button onclick="pz(3,1.25)">+</button><button onclick="pz(3,0.8)">−</button><button onclick="pzReset(3)" title="reset">↺</button></div><div class="mermaid">graph LR
+  ok["No risk signals detected"]
+</div><div class="mhint">scroll = zoom · drag = pan · ↺ = reset</div></div></div>
+<div id="p"><p style="color:var(--mut);font-style:italic">Click a node in any diagram to see details.</p></div>
+<script>
+mermaid.initialize({startOnLoad:false,securityLevel:'loose',theme:'neutral'});
+const rendered=new Set();
+function switchTab(i){
+  document.querySelectorAll('.tab,.pane').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-tab="'+i+'"]').classList.add('active');
+  const pane=document.getElementById('pane'+i);
+  pane.classList.add('active');
+  if(!rendered.has(i)){
+    rendered.add(i);
+    mermaid.run({nodes:pane.querySelectorAll('.mermaid')})
+      .then(()=>pane.querySelectorAll('.mermaid').forEach(initPanZoom))
+      .catch(()=>{rendered.delete(i);pane.querySelectorAll('.mermaid').forEach(mapFallback);});
+  }else{
+    pane.querySelectorAll('.mermaid').forEach(refit);   // re-fit an already-rendered pane on show
+  }
+}
+function paneBox(i){return document.getElementById('pane'+i).querySelector('.mermaid');}
+// render failed (CDN blocked / parse error / no svg): restore a scrollable pane so content isn't silently clipped
+function mapFallback(box){box.style.overflow='auto';box.style.cursor='default';}
+// content size from the viewBox (mermaid's true drawn bounds), falling back to attrs
+function _svgDims(svg){
+  const vb=svg.getAttribute('viewBox');
+  if(vb){const p=vb.trim().split(/[\s,]+/);const w=+p[2],h=+p[3];if(w>0&&h>0)return {w:w,h:h};}
+  return {w:parseFloat(svg.getAttribute('width'))||0,h:parseFloat(svg.getAttribute('height'))||0};
+}
+// Pin the svg element's layout size to its viewBox so element-size == content-size.
+// Mermaid ships width="100%"; without this the element lays out at container width
+// and our scale/center (computed from the viewBox) fight the real box -> the
+// huge-offset / right-shifted diagram. Cached on the box as _vw/_vh.
+function _normalizeSvg(box){
+  const svg=box.querySelector('svg');if(!svg)return null;
+  const d=_svgDims(svg);
+  if(d.w>0&&d.h>0){svg.setAttribute('width',d.w);svg.setAttribute('height',d.h);}
+  svg.style.maxWidth='none';
+  box._vw=d.w;box._vh=d.h;
+  return svg;
+}
+// fit-to-container scale: whole diagram visible, modest upscale cap so a tiny
+// diagram fills the pane without becoming a blurry giant. null = not measurable yet.
+const FIT_MAX=1.4, FIT_PAD=24;
+function computeFit(box){
+  const br=box.getBoundingClientRect();
+  if(!(br.width>0&&br.height>0&&box._vw>0&&box._vh>0))return null;
+  return Math.max(0.05,Math.min(FIT_MAX,(br.width-FIT_PAD)/box._vw,(br.height-FIT_PAD)/box._vh));
+}
+// re-fit + center, measured AFTER layout (double rAF) so a just-revealed pane
+// reports its true size instead of 0 — the over/under-zoom bug on tab switch.
+function refit(box){
+  if(!box._pz)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const f=computeFit(box);if(f==null)return;
+    const br=box.getBoundingClientRect(),st=box._pz;
+    st.s=f;box._fitS=f;
+    st.x=Math.max(0,(br.width-box._vw*f)/2);
+    st.y=Math.max(0,(br.height-box._vh*f)/2);
+    box._apply();
+  }));
+}
+function initPanZoom(box){
+  const svg=_normalizeSvg(box);if(!svg){mapFallback(box);return;}if(box._pz)return;
+  const st={s:1,x:0,y:0};box._pz=st;box._fitS=1;
+  const apply=()=>{svg.style.transform='translate('+st.x+'px,'+st.y+'px) scale('+st.s+')';};
+  box._apply=apply;apply();
+  box.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const r=box.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+    const ns=Math.min(8,Math.max(.15,st.s*(e.deltaY<0?1.1:1/1.1)));
+    st.x=mx-(mx-st.x)*(ns/st.s);st.y=my-(my-st.y)*(ns/st.s);st.s=ns;apply();
+  },{passive:false});
+  let drag=false,lx=0,ly=0,moved=0;
+  box.addEventListener('pointerdown',e=>{drag=true;moved=0;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;moved+=Math.abs(dx)+Math.abs(dy);st.x+=dx;st.y+=dy;lx=e.clientX;ly=e.clientY;apply();});
+  window.addEventListener('pointerup',()=>{drag=false;});
+  // suppress node-click only when an actual drag happened
+  box.addEventListener('click',e=>{if(moved>4){e.stopPropagation();e.preventDefault();}},true);
+  refit(box);   // initial fit, measured after layout
+}
+function pz(i,f){const b=paneBox(i),st=b._pz;if(!st)return;const r=b.getBoundingClientRect(),cx=r.width/2,cy=r.height/2;const ns=Math.min(8,Math.max(.15,st.s*f));st.x=cx-(cx-st.x)*(ns/st.s);st.y=cy-(cy-st.y)*(ns/st.s);st.s=ns;b._apply();}
+function pzReset(i){refit(paneBox(i));}
+const D={"nodes": [], "edges": []};
+const byId=Object.fromEntries(D.nodes.map(n=>[n.id,n]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function sel(id){
+  const n=byId[id];if(!n)return;
+  const li=a=>a.map(x=>'<li>'+esc(x)+'</li>').join('');
+  const mem=n.members.length?(()=>{const g={};n.members.forEach(m=>{const c=m.loc.lastIndexOf(':');const f=m.loc.slice(0,c),l=+m.loc.slice(c+1);const k=m.role+'|'+f;if(!g[k])g[k]={role:m.role,f,min:l,max:l};else{g[k].min=Math.min(g[k].min,l);g[k].max=Math.max(g[k].max,l)}});return Object.values(g).map(e=>`<div class=mono>${esc(e.role)}: ${esc(e.f)}:${e.min===e.max?e.min:e.min+'-'+e.max}</div>`).join('')})():'<div class=k>(no members found)</div>';
+  const sc=n.status==='confirmed'?'var(--ok)':n.status==='in-progress'?'var(--wip)':'var(--mut)';
+  document.getElementById('p').innerHTML=`
+    <h2>${esc(n.id)} <span class=pill style="color:${sc}">${esc(n.status)}</span><span class=pill>${esc(n.layer)}</span><button class=ctr id=ctrBtn title="center this requirement in the current diagram"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 0v6M12 18v6M0 12h6M18 12h6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button></h2>
+    <div class=lbl>WHY</div><p style="margin:2px 0 8px;font-style:italic">${esc(n.intent)||'—'}</p>
+    ${(n.contract&&n.contract.length)
+      ? `<div class=lbl>WHAT — Contract</div><ul>${li(n.contract)}</ul>`
+        + ((n.verify&&n.verify.length)?`<div class=lbl style="color:#b8860b">Verify intent</div><ul>${li(n.verify)}</ul>`:'')
+        + ((n.notes&&n.notes.length)?`<div class=k style="margin-top:6px">Notes &amp; limitations</div><ul>${li(n.notes)}</ul>`:'')
+      : `<div class=lbl>WHAT</div><div class=io><div><div class=k>Input</div>${esc(n.input)||'—'}</div><div><div class=k>Output</div>${esc(n.output)||'—'}</div></div><div class=k>Description</div><p style="margin:2px 0 10px">${esc(n.desc)||'—'}</p>`}
+    <div class=lbl>HOW — Acceptance</div>${(n.acc&&n.acc.length)?`<ul>${li(n.acc)}</ul>`:`<pre style="white-space:pre-wrap;font:12px/1.45 ui-monospace,monospace;background:var(--sur);border-radius:6px;padding:8px;margin:4px 0">${esc(n.accept)||'—'}</pre>`}
+    <div class=lbl>WHERE</div>${(n.current_impl&&n.current_impl.length)?`<div class=k>Current implementation</div><ul>${li(n.current_impl)}</ul>`:''}<div class=k>Members in code</div>${mem}
+    <div class=k style="margin-top:8px">Depends on</div><div class=mono>${esc(n.deps.join(' · '))||'— (bus)'}</div>
+    <div class=k>Used by</div><div class=mono>${esc(n.used_by.join(' · '))||'—'}</div>
+    ${(n.risks&&n.risks.length)?'<div class=lbl style="color:#b00;margin-top:10px">Risk — recommended action</div>'+n.risks.map(r=>`<div class=k style="margin:3px 0"><b>${esc(r.signal)}</b> — ${esc(r.advice)}</div>`).join(''):''}`;
+  // wire the center button in JS so the id stays a variable, never interpolated into
+  // markup (an id with a quote would otherwise break out of the onclick string).
+  const _cb=document.getElementById('ctrBtn');if(_cb)_cb.onclick=()=>centerNode(n.id);
+  highlight(id);   // selecting a requirement also yellow-highlights it in the current diagram
+}
+let _hits=[];
+function search(q){
+  q=(q||'').trim().toLowerCase();const box=document.getElementById('qres');
+  if(!q){box.innerHTML='';_hits=[];return;}
+  _hits=D.nodes.filter(n=>[n.id,n.title,n.area,n.layer,n.intent,(n.contract||[]).join(' '),(n.notes||[]).join(' '),n.desc,n.input,n.output].join(' ').toLowerCase().includes(q)).slice(0,15);
+  box.innerHTML=_hits.length
+    ? _hits.map(n=>`<div class="qhit" data-id="${esc(n.id)}">${esc(n.id)} — ${esc(n.title||'')} <span class=k>${esc(n.area||n.layer)}</span></div>`).join('')
+    : '<div class="qhit nohit">no match</div>';
+  // delegate the click off a data-id attribute (HTML-escaped) instead of an inline
+  // onclick with the raw id — dataset.id reaches pick() as a plain decoded string,
+  // never as interpolated code. Assigning .onclick is idempotent across re-renders.
+  box.onclick=e=>{const h=e.target.closest('.qhit');if(h&&h.dataset.id)pick(h.dataset.id);};
+}
+function pick(id){document.getElementById('qres').innerHTML='';document.getElementById('q').value='';sel(id);}
+function searchEnter(){ if(_hits.length) pick(_hits[0].id); }
+// center + highlight a node IN THE CURRENTLY-OPEN diagram — never switches tabs.
+// NB: named centerNode (not focus) — an inline onclick="focus(...)" on a <button>
+// would resolve to the element's built-in .focus(), shadowing a global focus().
+function _findNode(id){
+  const pane=document.querySelector('.pane.active');
+  const box=pane&&pane.querySelector('.mermaid');
+  const svg=box&&box.querySelector('svg');
+  if(!svg)return null;
+  svg.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
+  const safe=id.replace(/[^A-Za-z0-9]/g,'_');
+  let g=null;svg.querySelectorAll('g.node').forEach(el=>{if(!g&&(el.id||'').indexOf('-'+safe+'-')>=0)g=el;});
+  if(g)g.classList.add('hl');    // requirement may not be drawn in this view (e.g. Dependencies) -> g null
+  return {box:box,g:g};
+}
+function highlight(id){_findNode(id);}             // yellow-highlight in the current diagram
+function centerNode(id){
+  const r=_findNode(id);if(!r||!r.g)return;
+  const box=r.box,g=r.g,st=box._pz;if(!st)return;
+  try{
+    st.s=Math.max(st.s,1);box._apply&&box._apply();          // not zoomed out; apply before measuring
+    const gr=g.getBoundingClientRect(),br=box.getBoundingClientRect();    // current on-screen rects
+    st.x+=(br.left+br.width/2)-(gr.left+gr.width/2);         // shift pan by the pixel delta -> node to center
+    st.y+=(br.top+br.height/2)-(gr.top+gr.height/2);
+    box._apply&&box._apply();
+  }catch(e){}
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))document.getElementById('qres').innerHTML='';});
+
+switchTab(0);
+</script>
