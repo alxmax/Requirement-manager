@@ -12,7 +12,8 @@ Two independent axes are checked:
               (top-level `version` + each `plugins[].version`).
   - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap.py is an ISO date with a
               different purpose (staleness compare); it is only sanity-checked for
-              valid YYYY-MM-DD shape, never compared against the semver.
+              valid YYYY-MM-DD shape, with an optional `.N` (N>=1) same-day revision
+              suffix, never compared against the semver.
 
 This deliberately does NOT live inside reqmap.py's `check` subcommand: reqmap.py is
 copied verbatim into consumer repos that have no plugin.json / marketplace.json, so
@@ -104,10 +105,20 @@ def main(argv=None) -> int:
         engine = None
     else:
         engine = m.group(1)
+        # YYYY-MM-DD with an optional `.N` same-day revision suffix (N a positive
+        # integer) — lets a second engine bump on the same calendar day get a
+        # distinct, still lexicographically-ordered version.
+        base, sep, rev = engine.partition(".")
+        valid = True
         try:
-            dt.date.fromisoformat(engine)
+            dt.date.fromisoformat(base)
         except ValueError:
-            errors.append(f"  reqmap.py: MAP_ENGINE_VERSION {engine!r} is not a valid ISO date (YYYY-MM-DD)")
+            valid = False
+        if sep and not (rev.isdigit() and int(rev) >= 1):
+            valid = False
+        if not valid:
+            errors.append(f"  reqmap.py: MAP_ENGINE_VERSION {engine!r} is not a valid YYYY-MM-DD date "
+                          f"with an optional .N (N>=1) same-day revision")
 
     if errors:
         print("FAIL  version drift detected:")
