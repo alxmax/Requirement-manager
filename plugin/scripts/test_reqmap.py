@@ -240,23 +240,6 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
                            "intent": "", "input": "", "output": "", "desc": "", "acc": [],
                            "deps": [], "used_by": [], "members": []}], "edges": []}
 
-    def _html(self, d, title):
-        R.render_html(self._data(title), d)
-        with open(os.path.join(d, "_map.html"), encoding="utf-8") as f:
-            return f.read()
-
-    def test_script_breakout_neutralized(self):  # bug #7
-        with tempfile.TemporaryDirectory() as d:
-            html = self._html(d, "Login </script><img src=x>")
-            # the only </script> are the template's own (CDN tag + inline block)
-            self.assertEqual(html.count("</script>"), 2)
-            self.assertNotIn("</script><img", html)  # the injected breakout is gone
-            self.assertIn("\\u003c", html)            # the data block escaped <
-
-    def test_sel_has_html_escaper(self):  # bug #8
-        with tempfile.TemporaryDirectory() as d:
-            self.assertIn("const esc=", self._html(d, "T"))
-
     def test_node_label_sanitizes_id(self):  # bug #9
         out = R._node_label({"id": "A<img>", "title": "T"})
         self.assertNotIn("<img>", out)
@@ -265,9 +248,10 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_map_into_missing_dir_no_crash(self):  # bug #21
         with tempfile.TemporaryDirectory() as d:
             missing = os.path.join(d, "new", "requirements")
-            R.render_html(self._data("T"), missing)
             R.render_md(self._data("T"), missing)
-            self.assertTrue(os.path.exists(os.path.join(missing, "_map.html")))
+            R.render_json(self._data("T"), missing)
+            self.assertTrue(os.path.exists(os.path.join(missing, "_map.md")))
+            self.assertTrue(os.path.exists(os.path.join(missing, "_map.json")))
 
     def _node(self, rid, status="baseline", layer="feature", members=None):
         return {"id": rid, "layer": layer, "status": status, "title": rid,
@@ -308,9 +292,8 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
         out = R._mermaid_system({"nodes": [a, b], "edges": []})
         self.assertIn('subgraph sg_ANALYSIS["ANALYSIS"]', out)   # grouped by area:, not id prefix
 
-    def test_render_html_and_md_carry_legends(self):
+    def test_render_md_carries_legends(self):
         with tempfile.TemporaryDirectory() as d:
-            self.assertIn("bus (shared foundation)", self._html(d, "T"))
             R.render_md(self._data("T"), d)
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
             self.assertIn("area-level coupling", md)   # dependency-map legend line present
@@ -325,17 +308,6 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
         self.assertIn('a_AI["AI', out)
         self.assertEqual(out.count("a_AI --> a_BUS"), 1)  # two AI->bus edges aggregate to one
         self.assertNotIn("BUS_PATHS_001", out)           # no per-capability hub hairball
-
-    def test_detail_panel_center_button_in_active_pane(self):
-        with tempfile.TemporaryDirectory() as d:
-            html = self._html(d, "T")
-            self.assertIn('id="q"', html)                 # search box
-            self.assertIn("class=ctr", html)              # ◎ center button in the detail panel header
-            self.assertIn("function centerNode(", html)   # NOT 'focus' (shadowed by element.focus in inline onclick)
-            self.assertIn("centerNode(n.id)", html)       # button wired in JS (id stays a var, not interpolated markup)
-            self.assertNotIn("centerNode('${n.id}')", html)  # the unsafe inline-onclick interpolation is gone
-            self.assertIn(".pane.active", html)           # centers in the CURRENT tab
-            self.assertNotIn("switchTab(0)", html.split("function centerNode(")[1].split("}")[0])  # must not switch tabs
 
     def test_risk_grouped_no_edges_flags_baseline(self):
         data = {"nodes": [self._node("AI-X-001", status="baseline"),
@@ -352,12 +324,6 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
             self.assertIn("recommendation", md)            # new table column
             self.assertIn("promote to `confirmed`", md)    # unreviewed advice text
-
-    def test_search_bar_in_html(self):
-        with tempfile.TemporaryDirectory() as d:
-            html = self._html(d, "T")
-            self.assertIn('id="q"', html)
-            self.assertIn("function search(", html)
 
 
 class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
@@ -666,35 +632,38 @@ class Findings(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
 
 # ---- regression tests for the 2026-06-02 audit fixes + previously-untested code ----
 
-def _map_html_for(node):
-    """render_html for a single node dict (defaults filled), return the HTML."""
+def _export_doc_for(node):
+    """Serialize a single node dict (defaults filled) via _build_json_text, parse back."""
     base = {"id": "A-1", "layer": "feature", "status": "draft", "title": "t", "intent": "",
             "input": "", "output": "", "desc": "", "acc": [], "deps": [], "used_by": [],
-            "members": []}
+            "members": [], "contract": [], "verify": [], "notes": [], "current_impl": [],
+            "accept": "", "risks": []}
     base.update(node)
-    with tempfile.TemporaryDirectory() as d:
-        R.render_html({"nodes": [base], "edges": []}, d)
-        return open(os.path.join(d, "_map.html"), encoding="utf-8").read()
+    return json.loads(R._build_json_text({"nodes": [base], "edges": []}))
 
 
-class Security(unittest.TestCase):  # tested-by: REQ-MAP-007
-    def test_js_str_escapes_angle_brackets_and_amp(self):
-        self.assertEqual(R._js_str("a<b>&"), '"a\\u003cb\\u003e\\u0026"')
+class JsonExport(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_export_writes_nodes_edges_and_version(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_export(R.load_requirements(rd), {}, rd)
+            doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+            self.assertEqual(doc["engine_version"], R.MAP_ENGINE_VERSION)
+            self.assertEqual(len(doc["nodes"]), 1)
+            self.assertIn("edges", doc)
 
-    def test_id_with_quote_does_not_break_out_of_callback(self):  # bug: id-js-string-breakout-xss
-        html = _map_html_for({"id": "x');};alert(1);y=function(){sel('"})
-        self.assertNotIn("sel('x');};alert(1)", html)   # NOT executable: no raw breakout
-        self.assertIn('sel("x', html)                    # id passed as a JSON string arg
+    def test_hostile_title_roundtrips_as_data_not_injection(self):  # bug: id-js-string-breakout-xss
+        doc = _export_doc_for({"id": "a</script><img src=x>", "title": "x\");alert(1)//"})
+        # the value survives intact as a JSON string — there is no markup context to break out of
+        self.assertEqual(doc["nodes"][0]["id"], "a</script><img src=x>")
+        self.assertEqual(doc["nodes"][0]["title"], "x\");alert(1)//")
 
-    def test_id_with_script_close_is_escaped(self):  # bug: id-js-string-breakout-xss
-        html = _map_html_for({"id": "a</script><img src=x>"})
-        self.assertEqual(html.count("</script>"), 2)     # only the template's own two
-        self.assertIn("\\u003c", html)                   # the id's < was escaped
-
-    def test_search_results_use_data_id_not_inline_onclick(self):
-        html = _map_html_for({"id": "A-1"})
-        self.assertNotIn("onclick=\"pick(", html)        # no raw-id inline onclick
-        self.assertIn("data-id=", html)                  # delegated off a data attribute
+    def test_node_with_no_members_has_empty_list(self):
+        self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
 
 class JsFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
@@ -1046,26 +1015,6 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("unverified-intent", md)
 
 
-class ZoomFit(unittest.TestCase):  # tested-by: REQ-MAP-007
-    def _html(self, d):
-        rd = os.path.join(d, "requirements")
-        _write(os.path.join(rd, "AREA-A-001.md"),
-               REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
-        R.cmd_map(R.load_requirements(rd), {}, rd)
-        return open(os.path.join(rd, "_map.html"), encoding="utf-8").read()
-
-    def test_refit_on_tab_switch_and_init(self):
-        with tempfile.TemporaryDirectory() as d:
-            html = self._html(d)
-            self.assertIn("function refit(box)", html)      # dedicated re-fit
-            self.assertIn("forEach(refit)", html)           # called on tab show
-            self.assertIn("refit(box)", html)               # called on init
-            self.assertIn("FIT_MAX", html)                  # capped upscale
-            self.assertIn("requestAnimationFrame", html)    # measure after layout
-            self.assertIn("_normalizeSvg", html)            # pin element size to viewBox
-            self.assertIn("box._vw", html)                  # fit measured against content size
-
-
 class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _map(self, d, check=False):
         rd = os.path.join(d, "requirements")
@@ -1283,7 +1232,7 @@ class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
             self.assertTrue(os.path.isdir(reqs_dir))
             ignore = open(os.path.join(d, ".reqmapignore"), encoding="utf-8").read()
             self.assertIn("scripts/reqmap.py", ignore)
-            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.html")))
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.json")))
             self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.md")))
             self.assertTrue(os.path.exists(R.lock_path(reqs_dir)))
 

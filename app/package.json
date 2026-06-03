@@ -1,0 +1,22 @@
+{
+  "name": "requirement-manager-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Requirement Manager — the four product surfaces (Map · Problems · Console · Spec) as a real React app, fed by the reqmap engine's JSON export.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "sync": "node scripts/sync-data.mjs",
+    "smoke": "node scripts/run-ssr-smoke.mjs"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}

@@ -1,0 +1,240 @@
+/* ============================================================================
+   REQUIREMENT MANAGER — colors_and_type.css
+   Single source of visual truth. WARM-CREAM default (light), editorial palette:
+   deep indigo-navy + amber + raspberry-magenta + coral, on a cream canvas.
+   Slab-serif display, clean grotesque UI, mono code. Dark navy-indigo variant
+   via <html data-theme="dark">.
+
+   Load order in a page:
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Geist:wght@300..600&family=Geist+Mono:wght@400..500&display=swap" rel="stylesheet">
+     <link rel="stylesheet" href="colors_and_type.css">
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Geist:wght@300..600&family=Geist+Mono:wght@400..500&display=swap');
+
+:root {
+  /* ---- RAW PALETTE · warm cream neutrals (default / light) -------------- */
+  --paper-0:  #f1ede3;  /* page — warm cream */
+  --paper-1:  #f6f3ea;  /* raised page / rails */
+  --paper-2:  #fbfaf4;  /* cards, surfaces (near-white warm) */
+  --paper-3:  #ece6d8;  /* surface hover */
+  --line-1:   #e7e1d2;  /* hairline divider */
+  --line-2:   #d9d2c0;  /* border */
+  --line-3:   #c3bba6;  /* strong border / focus track */
+  --ink-3:    #9a9aa6;  /* faint / disabled text */
+  --ink-2:    #6e7085;  /* muted body text */
+  --ink-1:    #45465f;  /* secondary text */
+  --ink-0:    #23243f;  /* primary text (deep indigo-ink) */
+
+  /* ---- BRAND · indigo-navy (primary / confirmed) ----------------------- */
+  --indigo-700: #163f86;
+  --indigo-600: #1b53a6;
+  --indigo-500: #2160c6;  /* PRIMARY accent — brand, verified, links, focus */
+  --indigo-400: #5586d8;
+  --indigo-300: #a6c2ea;
+  --indigo-tint:#e6eef9;
+
+  /* ---- BRAND · amber (secondary / drift) ------------------------------- */
+  --amber-700: #9a6a0c;
+  --amber-600: #c9870f;
+  --amber-500: #f5a623;
+  --amber-400: #f8bb52;
+  --amber-tint:#faedd3;
+
+  /* ---- BRAND · raspberry-magenta (bus / punch) ------------------------- */
+  --magenta-700: #8e1853;
+  --magenta-600: #b01f63;
+  --magenta-500: #c0206a;
+  --magenta-400: #d8559a;
+  --magenta-tint:#f6dbe9;
+
+  /* ---- BRAND · coral (error / late) ------------------------------------ */
+  --coral-600: #cf2f4c;
+  --coral-500: #e8526a;
+  --coral-tint:#fbe0e3;
+
+  /* ---- STATUS · the requirement lifecycle ------------------------------ */
+  --status-confirmed:    var(--indigo-500);
+  --status-confirmed-bg: var(--indigo-tint);
+  --status-confirmed-ln: #c4c5e2;
+  --status-drift:        var(--amber-700);   /* readable amber on cream */
+  --status-drift-bg:     var(--amber-tint);
+  --status-drift-ln:     #ecd29a;
+  --status-error:        var(--coral-600);
+  --status-error-bg:     var(--coral-tint);
+  --status-error-ln:     #f0b6bf;
+  --status-draft:        var(--ink-2);
+  --status-draft-bg:     #efeade;
+  --status-draft-ln:     var(--line-2);
+  --status-bus:          var(--magenta-600); /* shared foundation */
+  --status-bus-bg:       var(--magenta-tint);
+  --status-bus-ln:       #e6abca;
+  --signal-gold:         #e89b16;            /* locate crosshair / highlight */
+  --signal-gold-hi:      #fbe7c4;
+
+  /* ---- COVERAGE · computed per-clause health (separate axis from status) */
+  --cov-tested:    #2e8f63;  /* every contract clause has a live test */
+  --cov-tested-bg: #e3f1ea;
+  --cov-tested-ln: #b1d8c3;
+  --cov-partial:   var(--amber-700);  /* some clauses uncovered */
+  --cov-untested:  var(--coral-600);  /* no live test, or stale ref */
+  --cov-exempt:    var(--ink-3);      /* deprecated — skipped */
+
+  /* ---- SEMANTIC SURFACES ----------------------------------------------- */
+  --bg:           var(--paper-0);
+  --bg-raised:    var(--paper-1);
+  --surface:      var(--paper-2);
+  --surface-hov:  var(--paper-3);
+  --border:       var(--line-2);
+  --border-soft:  var(--line-1);
+  --border-strong:var(--line-3);
+  --fg:           var(--ink-0);
+  --fg-secondary: var(--ink-1);
+  --fg-muted:     var(--ink-2);
+  --fg-faint:     var(--ink-3);
+  --accent:       var(--indigo-500);
+  --accent-hov:   var(--indigo-600);
+  --accent-soft:  var(--indigo-tint);
+  --accent-2:     var(--amber-500);
+  --on-accent:    #ffffff;
+  --focus-ring:   color-mix(in oklch, var(--indigo-500) 32%, transparent);
+
+  /* ---- TYPE FAMILIES --------------------------------------------------- */
+  --font-serif: "Roboto Slab", "Roboto Serif", Georgia, serif;
+  --font-sans:  "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:  "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ---- TYPE SCALE ------------------------------------------------------ */
+  --text-display: 700 46px/1.06 var(--font-serif);
+  --text-h1:      700 31px/1.14 var(--font-serif);
+  --text-h2:      600 24px/1.22 var(--font-serif);
+  --text-h3:      600 20px/1.28 var(--font-sans);
+  --text-title:   600 16px/1.35 var(--font-sans);
+  --text-body:    400 15px/1.6  var(--font-sans);
+  --text-small:   400 13px/1.55 var(--font-sans);
+  --text-caption: 500 11px/1.4  var(--font-sans);
+  --text-code:    450 13px/1.55 var(--font-mono);
+  --text-id:      500 12px/1.3  var(--font-mono);
+
+  --track-tight:  -0.01em;
+  --track-normal:  0em;
+  --track-caps:    0.1em;
+
+  /* ---- SPACING · 4px grid ---------------------------------------------- */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+
+  /* ---- RADII · soft, rounded ------------------------------------------- */
+  --radius-1: 8px; --radius-2: 12px; --radius-3: 16px;
+  --radius-pill: 999px; --radius-circle: 50%;
+
+  /* ---- ELEVATION · soft on cream --------------------------------------- */
+  --shadow-1: 0 1px 2px rgba(35,36,63,0.06);
+  --shadow-2: 0 6px 20px -8px rgba(35,36,63,0.16), 0 1px 0 rgba(35,36,63,0.03);
+  --shadow-pop: 0 16px 42px -12px rgba(35,36,63,0.24);
+  --ring-soft: 0 0 0 1px var(--border-soft);
+
+  /* ---- MOTION ---------------------------------------------------------- */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+
+  /* texture: faint dotted grid (matches the reference) */
+  --dot-color: rgba(35,36,63,0.05);
+}
+
+/* ============================================================================
+   DARK THEME — opt-in via <html data-theme="dark">
+   Deep navy-indigo canvas; same amber/magenta/coral accents, brightened.
+   ========================================================================== */
+[data-theme="dark"] {
+  --paper-0:  #14152a;
+  --paper-1:  #191b32;
+  --paper-2:  #20223e;
+  --paper-3:  #2a2c4d;
+  --line-1:   #262842;
+  --line-2:   #343761;
+  --line-3:   #454979;
+  --ink-3:    #6f7197;
+  --ink-2:    #9a9cc0;
+  --ink-1:    #c3c4e0;
+  --ink-0:    #edecf7;
+
+  --indigo-700: #5b8fe0;
+  --indigo-600: #6f9fe8;
+  --indigo-500: #84afef;   /* brightened for dark bg */
+  --indigo-400: #a3c4f4;
+  --indigo-300: #c2d6f8;
+  --indigo-tint:#1a2f55;
+
+  --amber-700: #f3b052;
+  --amber-600: #f7b13f;
+  --amber-500: #f5a623;
+  --amber-400: #f8bb52;
+  --amber-tint:#3a2c10;
+
+  --magenta-700: #ef72ab;
+  --magenta-600: #e85a9a;
+  --magenta-500: #d8559a;
+  --magenta-400: #e07cb0;
+  --magenta-tint:#3a1d36;
+
+  --coral-600: #f0697e;
+  --coral-500: #ef5a72;
+  --coral-tint:#3a1c22;
+
+  --status-confirmed:    var(--indigo-400);
+  --status-confirmed-bg: var(--indigo-tint);
+  --status-confirmed-ln: #3a3d72;
+  --status-drift:        var(--amber-500);
+  --status-drift-bg:     var(--amber-tint);
+  --status-drift-ln:     #5c4519;
+  --status-error:        var(--coral-500);
+  --status-error-bg:     var(--coral-tint);
+  --status-error-ln:     #5c2c33;
+  --status-draft:        var(--ink-2);
+  --status-draft-bg:     #20223e;
+  --status-draft-ln:     var(--line-2);
+  --status-bus:          var(--magenta-600);
+  --status-bus-bg:       var(--magenta-tint);
+  --status-bus-ln:       #5a2a4d;
+  --signal-gold:         #f5be4a;
+  --signal-gold-hi:      #3e310f;
+
+  --cov-tested:    #4cc08a;
+  --cov-tested-bg: #143226;
+  --cov-tested-ln: #2c5a3f;
+  --cov-partial:   var(--amber-500);
+  --cov-untested:  var(--coral-500);
+  --cov-exempt:    var(--ink-3);
+
+  --on-accent: #14152a;
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-2: 0 6px 22px -8px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.03) inset;
+  --shadow-pop: 0 18px 48px -14px rgba(0,0,0,0.7);
+  --focus-ring: color-mix(in oklch, var(--indigo-400) 45%, transparent);
+  --dot-color: rgba(255,255,255,0.05);
+}
+
+/* ============================================================================
+   SEMANTIC HELPER CLASSES
+   ========================================================================== */
+.rm-type-base {
+  font: var(--text-body); letter-spacing: var(--track-normal); color: var(--fg);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.rm-display { font: var(--text-display); letter-spacing: var(--track-tight); color: var(--fg); }
+.rm-h1 { font: var(--text-h1); letter-spacing: var(--track-tight); color: var(--fg); }
+.rm-h2 { font: var(--text-h2); color: var(--fg); }
+.rm-h3 { font: var(--text-h3); color: var(--fg); }
+.rm-title { font: var(--text-title); color: var(--fg); }
+.rm-body { font: var(--text-body); color: var(--fg-secondary); }
+.rm-small { font: var(--text-small); color: var(--fg-muted); }
+.rm-eyebrow {
+  font: var(--text-caption); letter-spacing: var(--track-caps);
+  text-transform: uppercase; color: var(--accent); font-weight: 600;
+}
+.rm-code { font: var(--text-code); color: var(--fg); }
+.rm-id { font: var(--text-id); color: var(--fg); }
