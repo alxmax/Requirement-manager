@@ -1149,6 +1149,64 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     return 0
 
 
+def _strip_line_tag(line):
+    """Remove a reqmap membership-tag comment from a source line.
+    Finds the comment marker (#, //, <!--) closest to the tag and cuts from
+    there to end-of-line, preserving the code before it.
+    Lines with no tag are returned unchanged."""
+    m = TAG_RE.search(line)
+    if m is None:
+        return line
+    pre = line[:m.start()]
+    nl = "\n" if line.endswith("\n") else ""
+    cut = -1
+    for marker in ("#", "//", "<!--"):
+        idx = pre.rfind(marker)
+        if idx > cut:
+            cut = idx
+    if cut >= 0:
+        return line[:cut].rstrip() + nl
+    return line  # no recognisable comment marker — leave unchanged
+
+
+def _wipe(reqs_dir, code_root):
+    """Hard-reset: delete non-generated requirement files (names not starting
+    with `_`) and strip membership tags from every scanned source file so that
+    `cmd_extract` can re-draft from a clean slate."""
+    deleted = 0
+    if os.path.isdir(reqs_dir):
+        for fn in os.listdir(reqs_dir):
+            if fn.endswith(".md") and not fn.startswith("_"):
+                try:
+                    os.remove(os.path.join(reqs_dir, fn))
+                    deleted += 1
+                except OSError:
+                    pass
+    stripped_files = 0
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        for fn in files:
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+                new_lines = [_strip_line_tag(l) for l in lines]
+                if new_lines != lines:
+                    with open(fp, "w", encoding="utf-8") as f:
+                        f.writelines(new_lines)
+                    stripped_files += 1
+            except OSError:
+                continue
+    print("wipe: deleted {} requirement file(s), stripped tags from {} source file(s).".format(
+        deleted, stripped_files))
+
+
 def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
     """Content for a freshly-seeded `.reqmapignore`. Normally ignores the vendored
     engine at `scripts/reqmap.py` — its `implements:` self-tags would otherwise read
@@ -1176,11 +1234,14 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
             "scripts/reqmap.py\n")
 
 
-def cmd_init(reqs_dir, code_root):  # implements: REQ-INIT-012
+def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
     .reqmapignore (idempotent — never clobbers an existing one), draft requirements
     from existing code, build the lock + map, then print guided next steps.
-    Re-running on an already-initialized repo is safe (refresh, no destruction)."""
+    Pass wipe=True (--wipe flag) for a hard reset: all non-generated requirement
+    files are deleted and membership tags stripped from source before re-extracting."""
+    if wipe:
+        _wipe(reqs_dir, code_root)
     created = []
     if not os.path.isdir(reqs_dir):
         os.makedirs(reqs_dir, exist_ok=True)
@@ -1919,6 +1980,9 @@ def main():
     ap.add_argument("--all", dest="show_all", action="store_true",
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--update-lock", action="store_true")
+    ap.add_argument("--wipe", action="store_true",
+                    help="init: hard-reset — delete all non-generated requirements and strip "
+                         "membership tags from source files before re-extracting")
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
     a = ap.parse_args()
@@ -1936,7 +2000,7 @@ def main():
             print("usage: reqmap new AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
     if a.cmd == "init":
-        return cmd_init(reqs_dir, code_root)
+        return cmd_init(reqs_dir, code_root, wipe=a.wipe)
 
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir)
