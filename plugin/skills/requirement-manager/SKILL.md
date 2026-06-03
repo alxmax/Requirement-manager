@@ -122,19 +122,30 @@ EOF
 chmod +x .git/hooks/pre-commit
 ```
 
-**GitHub Actions** (enforces the gate for the whole team):
+**GitHub Actions** (enforces the gate for the whole team) — use the published
+action, pinned to `@v1`:
 
 ```yaml
 # .github/workflows/reqmap.yml
 name: reqmap gate
 on: [push, pull_request]
+permissions:
+  contents: read            # least privilege — the gate only reads the tree
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python -X utf8 scripts/reqmap.py check
+      - uses: alxmax/requirement-manager/check@v1
+        # with:
+        #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
+        #   working-directory: .             # where requirements/ lives
 ```
+
+`warn_if_stale` (the vendored-copy staleness notice) is gated on `CLAUDE_PLUGIN_ROOT`,
+unset in CI — so it is silent and exit-neutral there by design; the action enforces
+only the gate proper. If you prefer not to depend on the action, run the engine
+directly instead of the `uses:` line: `- run: python -X utf8 scripts/reqmap.py check`.
 
 The hook and the CI job are independent — wire both so the gate runs locally
 before push *and* on the remote for PRs.

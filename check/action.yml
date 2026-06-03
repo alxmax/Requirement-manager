@@ -1,0 +1,62 @@
+# Requirement-manager drift gate — published GitHub Action.
+#
+# Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
+# `<dir>/action.yml`, so this file is consumed as:
+#
+#     uses: alxmax/requirement-manager/check@v1
+#
+# Usage (in a consumer repo that has vendored scripts/reqmap.py per the skill setup):
+#
+#     name: reqmap gate
+#     on: [push, pull_request]
+#     permissions:
+#       contents: read            # least privilege — the gate only reads the tree
+#     jobs:
+#       check:
+#         runs-on: ubuntu-latest
+#         steps:
+#           - uses: actions/checkout@v4
+#           - uses: alxmax/requirement-manager/check@v1
+#
+# Versioning: `@v1` is the git tag the maintainer pushes; it pins the engine to the
+# repo content at that tag. Pin to `@v1` (moves with backward-compatible fixes) or to
+# an exact tag / commit SHA for full reproducibility. The tag is independent of the
+# plugin semver and of reqmap.py's MAP_ENGINE_VERSION.
+#
+# Scope note: reqmap's vendored-copy staleness warning (warn_if_stale) is gated on the
+# CLAUDE_PLUGIN_ROOT env var, which is unset in CI — so it is silent and exit-neutral
+# here by design. This action enforces only the gate proper: link sync + drift + depends_on.
+#
+# Fork-PR safety: keep `permissions: contents: read` in the caller workflow. The gate
+# needs no secrets and no write scope; do not grant them.
+
+name: 'Requirement drift gate'
+description: 'Run the requirement-manager reqmap check gate (link sync + drift + depends_on) on every push / PR.'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  reqmap-path:
+    description: 'Path to the vendored reqmap.py, relative to working-directory.'
+    required: false
+    default: 'scripts/reqmap.py'
+  working-directory:
+    description: 'Directory the gate runs from (where requirements/ lives).'
+    required: false
+    default: '.'
+  python-version:
+    description: 'Python to set up for the gate (stdlib-only; any 3.x works).'
+    required: false
+    default: '3.x'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: reqmap check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: python -X utf8 "${{ inputs.reqmap-path }}" check

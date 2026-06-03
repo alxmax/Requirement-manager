@@ -1,5 +1,7 @@
 # requirement-manager
 
+[![ci](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml)
+
 A capability registry that sits between intent and code. Each capability is one
 markdown file (the single source of truth); code points back to it with a tag; a
 small stdlib-only script reconciles the two and generates a navigable map.
@@ -62,6 +64,28 @@ python scripts/reqmap.py extract           # draft requirements from legacy code
 python scripts/reqmap.py candidates        # read-only JSON extraction plan (AI-assist, writes no .md)
 python scripts/reqmap.py findings          # aggregate open verify-intent items into _findings.md
 ```
+
+## Use the gate in CI
+
+Run the drift gate on every push and PR with the published action (pin to `@v1`):
+
+```yaml
+# .github/workflows/reqmap.yml
+name: reqmap gate
+on: [push, pull_request]
+permissions:
+  contents: read            # least privilege — the gate only reads the tree
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: alxmax/requirement-manager/check@v1
+```
+
+The action just runs `reqmap.py check` (link sync + drift + `depends_on`); inputs
+`reqmap-path` and `working-directory` adapt it to where you vendored the engine. See
+[`check/action.yml`](check/action.yml).
 
 ## Dogfooded
 
