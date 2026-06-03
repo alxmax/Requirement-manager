@@ -14,6 +14,8 @@ superseded_by:
 ## WHAT — Contract (normative)
 - It shall walk untagged source files (`.py`/`.js`/`.ts`/`.c`/`.cpp`) and propose one
   `requirements/DRAFT-*.md` per file, skipping files that already carry a member tag.
+- It shall honor `.reqmapignore` (the same fnmatch globs `scan` respects): a file matching an
+  ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.
 - Every proposal shall be `status: draft` with a TODO body — it captures observed behavior,
   never canonizing intent or correctness.
 - It shall assign a cheap risk score (TODO/FIXME/HACK/XXX markers, suppressions, file size)
@@ -32,6 +34,7 @@ superseded_by:
 ## HOW — Acceptance (= tests)
 - An untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file yields one `DRAFT-*` draft.
 - A file already carrying a member tag is skipped.
+- A file matching a `.reqmapignore` pattern is skipped (no draft proposed for it).
 - A file containing `TODO`/`FIXME` scores higher risk and is flagged `REVIEW`.
 - Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide.
 

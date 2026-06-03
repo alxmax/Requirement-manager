@@ -2,10 +2,13 @@
 """reqmap — requirement manager engine (stdlib only).
 
 Subcommands:
+  init              first-use bootstrap: scaffold requirements/ + .reqmapignore, draft
+                    requirements from existing code, build the lock + map, print next steps
   new AREA-NAME-NNN   scaffold a requirement from the built-in template
   scan              list code members (implements/generated-from/... tags) per capability
   check             the gate: link sync + drift; exit non-zero on error (use in pre-commit/CI)
   map               generate requirements/_map.html (navigable graph)
+  next              terminal 'what should I do next': counted, actionable risk buckets
   extract           draft requirements from legacy code (status: draft, risk-scored)
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
@@ -486,6 +489,7 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
+    ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
     proposed, used = 0, set()
     os.makedirs(reqs_dir, exist_ok=True)
     for dirpath, dirs, files in os.walk(code_root):
@@ -495,6 +499,8 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
             if not fn.endswith((".py", ".js", ".ts", ".cpp", ".c")):
                 continue
             rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):  # ignored -> never draft
+                continue
             if rel in tagged:
                 continue
             cap = base = _draft_id(rel)
@@ -974,6 +980,117 @@ def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
     return 0
 
 
+def _risk_score(meta):  # implements: REQ-NEXT-013
+    """Extract's per-file risk hint (0-3) from frontmatter, or 0 when absent /
+    unparseable. Used only to float REVIEW-flagged drafts to the top of a bucket —
+    never to gate. Hand-authored requirements have no `risk:` field -> 0."""
+    try:
+        return int(str(meta.get("risk")).strip())
+    except (TypeError, ValueError):
+        return 0
+
+
+def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-013
+    """Terminal 'what should I do next': a focused, counted worklist over the same
+    `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
+    header, leads with the most-urgent bucket, shows the top few per bucket (the
+    extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
+    item names the requirement file to open. Read-only, always exit 0."""
+    total = len(reqs)
+    if total == 0:   # distinguish "nothing set up yet" from "all clean"
+        print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
+              "code, or `reqmap.py new AREA-NAME-NNN` to author one.")
+        return 0
+    confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
+    tested = sum(1 for rid in reqs if any(role == "tested-by" for role, *_ in members.get(rid, [])))
+    drafts = sum(1 for r in reqs.values() if r["meta"].get("status", "draft") == "draft")
+    print("{} requirement(s) · {} confirmed · {} tested · {} draft(s)\n".format(
+        total, confirmed, tested, drafts))
+
+    dependents = {rid: 0 for rid in reqs}
+    for rid, r in reqs.items():
+        for dep in _as_list(r["meta"].get("depends_on")):
+            if dep in dependents:
+                dependents[dep] += 1
+    buckets = {}  # signal -> [(rid, risk_score)]
+    for rid, r in reqs.items():
+        m = r["meta"]
+        node = {"status": m.get("status", "draft"), "members": members.get(rid, []),
+                "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")}
+        for sig in _risk_signals(node, dependents.get(rid, 0)):
+            buckets.setdefault(sig, []).append((rid, _risk_score(m)))
+    # Action buckets, MOST-URGENT FIRST: an unimplemented contract outranks an
+    # unreviewed draft. blast-radius is a caution (a property, not a task) so `next`
+    # omits it — it stays on the Risk tab. Each bucket is shown and truncated
+    # independently, so a high-priority bucket is never hidden below a long low one.
+    PLAN = [
+        ("unimplemented",     "Orphans (confirmed, no code)"),
+        ("untested",          "Needs tests"),
+        ("unverified-intent", "Needs intent review"),
+        ("unreviewed",        "Drafts to review"),
+    ]
+    pending = [(sig, label, sorted(buckets[sig], key=lambda x: (-x[1], x[0])))
+               for sig, label in PLAN if buckets.get(sig)]
+    if not pending:
+        print("Nothing pending — every confirmed requirement is implemented, tested and intent-checked.")
+        return 0
+    total_actions = sum(len(ids) for _, _, ids in pending)
+    print("{} item(s) need attention across {} {}:\n".format(
+        total_actions, len(pending), "category" if len(pending) == 1 else "categories"))
+    for sig, label, ids in pending:
+        print("{} ({})".format(label, len(ids)))
+        shown = ids if show_all else ids[:top_n]
+        for rid, score in shown:
+            flag = "  [REVIEW]" if score >= 2 else ""
+            print("  {}{}   requirements/{}.md".format(rid, flag, rid))
+        if not show_all and len(ids) > top_n:
+            print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
+        print("  -> {}\n".format(RISK_ADVICE[sig]))
+    return 0
+
+
+def cmd_init(reqs_dir, code_root):  # implements: REQ-INIT-012
+    """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
+    .reqmapignore (idempotent — never clobbers an existing one), draft requirements
+    from existing code, build the lock + map, then print guided next steps.
+    Re-running on an already-initialized repo is safe (refresh, no destruction)."""
+    created = []
+    if not os.path.isdir(reqs_dir):
+        os.makedirs(reqs_dir, exist_ok=True)
+        created.append(os.path.relpath(reqs_dir, code_root).replace(os.sep, "/") + "/")
+    ignore = os.path.join(code_root, ".reqmapignore")
+    if not os.path.exists(ignore):
+        with open(ignore, "w", encoding="utf-8") as f:
+            f.write("# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
+                    "# The engine carries its own `implements:` self-tags; ignore it so the\n"
+                    "# gate does not flag them as dangling refs.\n"
+                    "scripts/reqmap.py\n")
+        created.append(".reqmapignore")
+    print("Bootstrapping draft requirements from existing code...\n")
+    reqs = load_requirements(reqs_dir)
+    members = scan_members(code_root, reqs_dir)
+    cmd_extract(reqs, members, code_root, reqs_dir)
+    # extract wrote new files -> reload before locking + mapping
+    reqs = load_requirements(reqs_dir)
+    members = scan_members(code_root, reqs_dir)
+    cmd_check(reqs, members, reqs_dir, update_lock=True)
+    cmd_map(reqs, members, reqs_dir)
+    print("\n" + "=" * 60)
+    if not reqs:   # nothing to extract — don't masquerade as "all clean"
+        print("reqmap initialized, but no requirements were extracted")
+        print("(no supported source files found, or all are ignored by .reqmapignore).")
+        if created:
+            print("created: " + ", ".join(created))
+        print("\nNext: author your first requirement with `reqmap.py new AREA-NAME-NNN`.")
+        return 0
+    print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
+    if created:
+        print("created: " + ", ".join(created))
+    print("\nNext: run `reqmap.py next` — it shows what to do, most important first.")
+    print("Then wire the gate: add `python scripts/reqmap.py check` to your pre-commit hook.")
+    return 0
+
+
 def _strip_generated(text):
     """Drop the volatile `generated: <timestamp>` frontmatter line so a freshness
     diff compares content, not the regeneration time."""
@@ -1245,8 +1362,13 @@ def _risk_signals(node, dependents_count):
         signals.append("untested")
     # open verify-intent questions reconstructed from code — surface them on the map,
     # not just in the detail panel / _findings.md. Mirror collect_findings: a "None —"
-    # placeholder bullet is not an open finding.
-    if any(b and not b.lstrip("*_ ").lower().startswith("none") for b in (node.get("verify") or [])):
+    # placeholder bullet is not an open finding. A *draft* is suppressed here: its
+    # intent questions are subsumed by 'unreviewed' (the whole draft is unreviewed),
+    # and every auto-extracted draft carries a template verify TODO — flagging both
+    # would double-count every draft. Re-surfaces once promoted past draft. This
+    # rule lives in the shared signal source so `next` and the Risk tab agree.
+    if node["status"] != "draft" and any(
+            b and not b.lstrip("*_ ").lower().startswith("none") for b in (node.get("verify") or [])):
         signals.append("unverified-intent")
     if dependents_count >= 3:
         signals.append("blast-radius")
@@ -1659,7 +1781,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "next", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -1670,6 +1792,8 @@ def main():
                          "comma-separated ok). Off unless given. e.g. --md-glob 'prompts/**' --md-glob 'modes/**'")
     ap.add_argument("--raw", action="store_true",
                     help="findings: ignore the triage sidecar and emit the raw grouped list")
+    ap.add_argument("--all", dest="show_all", action="store_true",
+                    help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
@@ -1687,11 +1811,15 @@ def main():
         if not a.arg:
             print("usage: reqmap new AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
+    if a.cmd == "init":
+        return cmd_init(reqs_dir, code_root)
 
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
+    if a.cmd == "next":
+        return cmd_next(reqs, members, a.show_all)
     if a.cmd == "check":
         return cmd_check(reqs, members, reqs_dir, a.update_lock)
     if a.cmd == "map":
