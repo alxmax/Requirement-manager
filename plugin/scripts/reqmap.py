@@ -24,6 +24,15 @@ TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tes
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
+
+# ---- prose auto-draft classification (cmd_extract) ----
+# These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
+# explicit tag on ANY file, regardless of bucket — buckets never suppress a real tag.
+PROSE_EXTS = (".md", ".html")
+# Bucket 1 — meta/boilerplate: never auto-drafted, never sync-checked. Basename match.
+META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
+                     "SKILL.md", "TODO.md"}
+
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature"}
 ENFORCED = {"in-progress", "implemented", "confirmed"}
@@ -489,6 +498,31 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
     the name has no usable A-Z0-9 token (e.g. `_.py`, non-ASCII stems)."""
     slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
     return "DRAFT-" + (slug or "FILE")
+
+
+def classify_prose(rel):  # implements: REQ-EXTRACT-008
+    """Bucket a POSIX-relative .md/.html path for the auto-draft path. Returns
+    'ignore' (meta/boilerplate, invisible), 'sync_only' (README/docs/*.html — never
+    drafted, but a drift- and semantic-checked member when explicitly tagged), or
+    'capability' (prompt/spec prose — auto-drafted as a `draft` stub). Governs AUTO
+    behavior only: scan_members still honors an explicit tag on any file."""
+    base = os.path.basename(rel)
+    # Bucket 1 — meta/boilerplate.
+    if base in META_IGNORE_NAMES:
+        return "ignore"
+    if base == "LICENSE" or base.startswith("LICENSE."):
+        return "ignore"
+    if base.startswith("_"):                      # generated _map.*, _findings.md
+        return "ignore"
+    # Bucket 2 — sync-only.
+    if base == "README" or base.startswith("README."):
+        return "sync_only"
+    if rel == "docs" or rel.startswith("docs/"):
+        return "sync_only"
+    if rel.endswith(".html"):                      # all HTML is an overview/derived doc
+        return "sync_only"
+    # Bucket 3 — capability source (prompts/specs/modes and other prose .md).
+    return "capability"
 
 
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008

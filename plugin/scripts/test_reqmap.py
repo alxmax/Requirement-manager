@@ -179,6 +179,24 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertIn("FOO-BAR-001", R.scan_members(d, None))
 
 
+class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_meta_files_are_ignored(self):
+        for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
+                    "SKILL.md", "TODO.md", "LICENSE", "LICENSE.md",
+                    "_map.md", "_findings.md", "_map.html"):
+            self.assertEqual(R.classify_prose(rel), "ignore", rel)
+
+    def test_readme_and_docs_and_html_are_sync_only(self):
+        for rel in ("README", "README.md", "docs/senate.md",
+                    "docs/sub/guide.md", "docs/architecture.html", "x.html"):
+            self.assertEqual(R.classify_prose(rel), "sync_only", rel)
+
+    def test_prompts_and_specs_are_capability(self):
+        for rel in ("prompts/senators/aurelius.md", "specs/foo.md",
+                    "modes/bar.md", "notes.md"):
+            self.assertEqual(R.classify_prose(rel), "capability", rel)
+
+
 class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _data(self, title):
         return {"nodes": [{"id": "A-1", "layer": "bus", "status": "draft", "title": title,
