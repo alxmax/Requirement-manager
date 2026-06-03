@@ -29,6 +29,10 @@ def tag(cap):
     return "# {}: {}".format(_ROLE, cap)
 
 
+def gtag_html(cap):  # runtime-built so THIS .py source registers no phantom member
+    return "<!-- {}-from: {} -->".format("generated", cap)
+
+
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
@@ -379,7 +383,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_explicitly_tagged_prose_not_redrafted(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "README.md"),
-                   "# P\n<!-- generated-from: SENATE-SYNTH-001 -->\n")
+                   "# P\n" + gtag_html("SENATE-SYNTH-001") + "\n")
             members = R.scan_members(d, None)
             self.assertIn("SENATE-SYNTH-001", members)   # rider #1 guard
             rdir = self._extract(d)
@@ -403,7 +407,7 @@ class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_tag_inside_html_comment_is_a_member(self):  # rider #1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"),
-                   "<!-- generated-from: SENATE-SYNTH-001 -->\n<h1>x</h1>\n")
+                   gtag_html("SENATE-SYNTH-001") + "\n<h1>x</h1>\n")
             members = R.scan_members(d, None)
             self.assertIn("SENATE-SYNTH-001", members)
             roles = [r for (r, _f, _l) in members["SENATE-SYNTH-001"]]
