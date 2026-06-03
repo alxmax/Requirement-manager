@@ -1082,8 +1082,11 @@ def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
 
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
+    html_out = render_html(data, reqs_dir)
     print("wrote {}".format(md_out))
     print("wrote {}".format(json_out))
+    if html_out:
+        print("wrote {}".format(html_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
 
@@ -1239,7 +1242,9 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
     file carries membership tags that resolve to requirements already present, the
     engine IS the managed code and must stay scanned, so the line is omitted (a
     comment explains why) to avoid orphaning those requirements."""
-    header = "# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
+    header = ("# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
+              "# The bundled single-file viewer is a generated artifact, never a member.\n"
+              "scripts/_map_viewer.html\n")
     engine = os.path.join(code_root, "scripts", "reqmap.py")
     req_ids = set(load_requirements(reqs_dir))
     if req_ids and os.path.isfile(engine):
@@ -1706,6 +1711,43 @@ def render_json(data, reqs_dir):  # implements: REQ-MAP-007
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write(_build_json_text(data))
+    return out
+
+
+# A pre-built, single-file React viewer ships next to this engine as
+# `_map_viewer.html`. It carries the marker `<!--REQMAP_DATA-->`; the engine
+# swaps that for a <script> assigning this repo's graph to window.__REQMAP_DATA__,
+# producing a self-contained `_map.html` that opens by double-click (no server).
+VIEWER_TEMPLATE = "_map_viewer.html"
+_REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
+
+
+def _viewer_template_path():  # implements: REQ-MAP-007
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), VIEWER_TEMPLATE)
+
+
+def _inject_viewer(template_text, data):  # implements: REQ-MAP-007
+    """Replace the data marker with an inline <script> assigning the graph to
+    window.__REQMAP_DATA__. `</` is escaped to `<\\/` so a requirement that
+    contains `</script>` cannot break out of the script element."""
+    blob = _build_json_text(data).replace("</", "<\\/")
+    script = "<script>window.__REQMAP_DATA__=" + blob + ";</script>"
+    return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
+
+
+def render_html(data, reqs_dir):  # implements: REQ-MAP-007
+    """Write the self-contained viewer `_map.html` by injecting `data` into the
+    vendored template. Returns the path, or None when no template is present
+    (the engine still emits _map.md + _map.json — the viewer is optional)."""
+    tpl = _viewer_template_path()
+    if not os.path.exists(tpl):
+        return None
+    with open(tpl, encoding="utf-8") as f:
+        template_text = f.read()
+    out = os.path.join(reqs_dir, "_map.html")
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(_inject_viewer(template_text, data))
     return out
 
 

@@ -29,8 +29,20 @@ export function adaptNode(n) {
   };
 }
 
-/** Try the engine export; replace the registry when present. Never throws. */
+/** Data source precedence, all non-throwing:
+ *  1. window.__REQMAP_DATA__  — inlined by the engine into the self-contained
+ *     _map.html viewer (double-click, no server).
+ *  2. ./data.json (or _map.json) — fetched when served over http (dev / preview).
+ *  3. the baked fallback dataset already in data.js.
+ */
 export async function loadData() {
+  // 1. inlined single-file viewer
+  const inl = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
+  if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
+    setRegistry(inl.nodes.map(adaptNode));
+    return { source: "inline", engineVersion: inl.engine_version || null, count: inl.nodes.length };
+  }
+  // 2. fetched export (only meaningful over http; file:// will throw → fallback)
   try {
     const res = await fetch(`${import.meta.env.BASE_URL}data.json`, { cache: "no-store" });
     if (!res.ok) return { source: "baked" };

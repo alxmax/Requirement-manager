@@ -20,9 +20,23 @@ theme toggles via the top bar (`<html data-theme="dark">`).
 ```bash
 cd app
 npm install
-npm run dev        # http://localhost:5173
-npm run build      # → dist/
+npm run dev          # http://localhost:5173 (live, hot-reload)
+npm run build        # → dist/  (standard multi-file bundle)
+npm run build:viewer # → one self-contained file, installed into the plugin (see below)
 ```
+
+## The self-contained viewer (`_map.html`)
+
+`npm run build:viewer` builds `viewer.html` into **one file** (JS + CSS inlined via
+`vite-plugin-singlefile`) and copies it to `plugin/scripts/_map_viewer.html`. That
+file carries a `<!--REQMAP_DATA-->` marker. The stdlib engine (`reqmap.py map`) swaps
+the marker for `<script>window.__REQMAP_DATA__ = {…this repo's graph…}</script>` and
+writes `requirements/_map.html` — the **same app** as `npm run dev`, but a single file
+you open by double-click, no server, no npm. `loadData()` reads the inlined data first,
+then a fetched `_map.json`, then the baked fallback.
+
+Re-run `npm run build:viewer` only when the **app UI** changes (it re-bakes the
+template). Day-to-day, `reqmap.py map` refreshes the **data** in `_map.html`.
 
 ## Data: fed by the engine
 

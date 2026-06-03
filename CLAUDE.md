@@ -9,7 +9,7 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
 python scripts/reqmap.py check              # gate: link sync + drift — run before every commit
-python scripts/reqmap.py map                # generate requirements/_map.md (Mermaid) + _map.json (graph)
+python scripts/reqmap.py map                # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
@@ -48,13 +48,14 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 
 **Gate logic** (`check`): three checks — link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence.
 
-**Generated outputs** (all under `plugin/requirements/`, committed):
-- `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk)
-- `_map.json` — `{engine_version, nodes, edges}` registry graph for an external front-end (the React app under `app/`); also written standalone by `export`
-- `_reqlock.json` — content hash baseline for drift detection
-- `_findings.md` — aggregated verify-intent triage
+**Generated outputs** (under `plugin/requirements/`):
+- `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*
+- `_map.json` — `{engine_version, nodes, edges}` registry graph; consumed by the viewer and any external front-end; also written standalone by `export` *(committed)*
+- `_map.html` — a self-contained single-file copy of the React viewer (`app/`) with this repo's `_map.json` inlined; opens by double-click, no server. *Regenerable (template + `_map.json`), gitignored — not committed.*
+- `_reqlock.json` — content hash baseline for drift detection *(committed)*
+- `_findings.md` — aggregated verify-intent triage *(committed)*
 
-The engine ships no HTML UI of its own (stdlib-only); the interactive viewer is the separate Vite + React app under `app/`, which consumes `_map.json`.
+The viewer is the Vite + React app under `app/`. Its single-file build is vendored beside the engine as `plugin/scripts/_map_viewer.html` (carries a `<!--REQMAP_DATA-->` marker); the stdlib engine injects each repo's `_map.json` into that marker to produce `_map.html`. So the engine ships a rich UI without itself depending on Node/npm — and emits only `_map.md` + `_map.json` if the template is absent.
 
 **Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`candidates --md-glob`) is separate and opt-in.
 

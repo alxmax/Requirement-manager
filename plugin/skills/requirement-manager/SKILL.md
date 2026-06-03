@@ -35,7 +35,7 @@ After any action, summarize what changed and, when useful, point to
 |---|---|---|
 | **init / reinit everything** | Hard reset: delete all non-generated requirement files and strip membership tags (`implements:`, `tested-by:`, etc.) from source code, then re-initialize from scratch. Re-drafts all code/prose into fresh requirements and rebuilds the lock + map. Never clobbers `.reqmapignore`. | `python scripts/reqmap.py init --wipe` |
 | **regenerate requirements** | Hard reset: delete all non-generated requirement files and strip membership tags from source code, then re-extract from scratch. Covers code and prose (`.md`/`.html`). After extraction run `check` and report the draft count + gate result (`N errors`). Remind the user to review + `promote` the real ones. | `python scripts/reqmap.py init --wipe` → report draft count + `check` result |
-| **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
+| **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
 | **regenerate map** | Refresh the generated artifacts (lock + Mermaid map + JSON graph) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` → advisory doc-sync |
 
 **Advisory doc-sync (assistant step, not the engine).** After `map`, for each
@@ -52,7 +52,13 @@ The engine is a single stdlib-only script. Seed it into the target repo once:
 ```bash
 mkdir -p scripts requirements
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # optional: the self-contained UI viewer template
 ```
+
+`_map_viewer.html` is the pre-built single-file React viewer. When it sits beside
+`reqmap.py`, `map` also emits a double-click-openable `requirements/_map.html` (the
+full UI, this repo's data inlined, no server). It is optional — omit it and the
+engine still emits `_map.md` + `_map.json`.
 
 **Then run the one-shot bootstrap** — `python scripts/reqmap.py init` creates the
 `requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`),
@@ -82,6 +88,7 @@ plugin present. When the plugin ships a newer `reqmap.py`, re-seed with:
 
 ```bash
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # if you use the viewer
 ```
 
 **Plugin authors** — use `sync_reqmap.sh` (in the plugin source repo) to propagate
@@ -241,7 +248,7 @@ before push *and* on the remote for PRs.
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (extract `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
-- `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges}` registry graph). The engine ships no HTML UI; the interactive viewer is the separate Vite + React app under `app/`, which consumes `_map.json`. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
+- `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
 - `python scripts/reqmap.py export`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
 - `python scripts/reqmap.py extract`           — draft one requirement per untagged file. Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
 - `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.

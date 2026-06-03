@@ -111,7 +111,7 @@ const BAKED = [
   { id:"REQ-MAP-007", area:"REQ", title:"Requirement map (HTML + MD)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
     contract:[
-      "It shall generate `_map.md` (Mermaid blocks) and `_map.json` (a `{nodes, edges}` graph for an external front-end).",
+      "It shall generate `_map.md` (Mermaid blocks), `_map.json` (a `{nodes, edges}` graph), and `_map.html` (a self-contained viewer with the graph inlined) when the viewer template is present.",
       "There shall be one node per requirement and one edge per `depends_on`.",
       "All requirement-derived text shall be JSON-encoded in `_map.json` (no markup context to break out of)." ],
     acc:[
