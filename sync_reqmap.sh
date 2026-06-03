@@ -15,6 +15,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"
+# The pre-built single-file viewer ships beside the engine; propagate it too so
+# `map` can emit the self-contained _map.html wherever the engine lands.
+VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
 # Derive the cache path from the plugin's declared version (NOT a hard-coded one,
 # which silently no-ops once the published version moves on). Fall back to whatever
 # version dir is actually installed if that exact one is absent.
@@ -38,6 +41,7 @@ echo "syncing reqmap.py  version=$VERSION"
 # ── 2. push to plugin cache ─────────────────────────────────────────────────
 if [[ -d "$CACHE" ]]; then
   cp "$SRC" "$CACHE/scripts/reqmap.py"
+  [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$CACHE/scripts/_map_viewer.html" && echo "  → viewer template updated"
   echo "  → plugin cache updated"
   # regenerate the plugin's own map
   (cd "$CACHE" && python -X utf8 scripts/reqmap.py map 2>&1 | sed 's/^/     /')
@@ -55,6 +59,7 @@ for REPO in "$@"; do
     echo "  WARN: $DEST not found — skipping (run init first)"; continue
   fi
   cp "$SRC" "$DEST"
+  [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$REPO/scripts/_map_viewer.html"
   echo "  → $REPO synced"
   (cd "$REPO" && python -X utf8 scripts/reqmap.py scan \
     && python -X utf8 scripts/reqmap.py check --update-lock \
