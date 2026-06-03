@@ -197,6 +197,31 @@ class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertEqual(R.classify_prose(rel), "capability", rel)
 
 
+class ProseFacts(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_markdown_frontmatter_title_and_headings(self):
+        src = ("---\ntitle: Senator Aurelius\n---\n\n"
+               "## Role\nrisk lens\n## Specialty\nreversibility\n### sub\n")
+        title, heads = R._prose_facts(src)
+        self.assertEqual(title, "Senator Aurelius")
+        self.assertEqual(heads, ["Role", "Specialty"])  # H2 only, not H3
+
+    def test_markdown_h1_title_when_no_frontmatter(self):
+        title, heads = R._prose_facts("# My Cap\n\n## A\n## B\n")
+        self.assertEqual(title, "My Cap")
+        self.assertEqual(heads, ["A", "B"])
+
+    def test_html_title_and_h2(self):
+        src = "<title>Project Map</title><h2>Section One</h2><h2>Two</h2>"
+        title, heads = R._prose_facts(src)
+        self.assertEqual(title, "Project Map")
+        self.assertEqual(heads, ["Section One", "Two"])
+
+    def test_no_title_returns_none(self):
+        title, heads = R._prose_facts("just text, no headings\n")
+        self.assertIsNone(title)
+        self.assertEqual(heads, [])
+
+
 class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _data(self, title):
         return {"nodes": [{"id": "A-1", "layer": "bus", "status": "draft", "title": title,

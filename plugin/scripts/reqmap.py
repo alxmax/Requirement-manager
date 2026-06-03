@@ -525,6 +525,33 @@ def classify_prose(rel):  # implements: REQ-EXTRACT-008
     return "capability"
 
 
+def _prose_facts(src):  # implements: REQ-EXTRACT-008
+    """(title, [headings]) from markdown/HTML prose, for a draft scaffold.
+    Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
+    Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
+    The scaffold lists headings as an authoring hint — never the contract."""
+    meta, _body = parse_frontmatter(src)
+    title = meta.get("title") or None
+    headings = []
+    for line in src.splitlines():
+        s = line.strip()
+        if title is None:
+            m = re.match(r"#\s+(.+)", s)                      # markdown H1
+            if m:
+                title = m.group(1).strip()
+                continue
+            m = re.search(r"<(?:title|h1)[^>]*>(.*?)</(?:title|h1)>", s, re.I)
+            if m:
+                title = re.sub(r"<[^>]+>", "", m.group(1)).strip()
+        m = re.match(r"##\s+(.+)", s)                         # markdown H2 (not H3)
+        if m:
+            headings.append(m.group(1).strip())
+            continue
+        for inner in re.findall(r"<h2[^>]*>(.*?)</h2>", s, re.I):  # html H2
+            headings.append(re.sub(r"<[^>]+>", "", inner).strip())
+    return title, headings
+
+
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
