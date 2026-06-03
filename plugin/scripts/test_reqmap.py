@@ -399,6 +399,21 @@ class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertFalse(any("FOO" in f for f in drafts), drafts)
 
 
+class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_tag_inside_html_comment_is_a_member(self):  # rider #1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"),
+                   "<!-- generated-from: SENATE-SYNTH-001 -->\n<h1>x</h1>\n")
+            members = R.scan_members(d, None)
+            self.assertIn("SENATE-SYNTH-001", members)
+            roles = [r for (r, _f, _l) in members["SENATE-SYNTH-001"]]
+            self.assertIn("generated-from", roles)
+
+    def test_draft_status_is_not_enforced(self):  # rider #3
+        self.assertNotIn("draft", R.ENFORCED)
+        self.assertEqual(R.ENFORCED, {"in-progress", "implemented", "confirmed"})
+
+
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10
         self.assertNotEqual(R._draft_id("src/utils.py"), R._draft_id("lib/utils.js"))
