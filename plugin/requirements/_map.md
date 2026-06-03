@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-03 10:59
+generated: 2026-06-03 11:22
 nodes: 10
 edges: 11
 ---
@@ -73,8 +73,8 @@ graph LR
   f_scripts_test_reqmap_py_461_758["scripts/test_reqmap.py:461-758"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_461_758
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_878_1497["scripts/reqmap.py:878-1497"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_878_1497
+  f_scripts_reqmap_py_878_1505["scripts/reqmap.py:878-1505"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_878_1505
   f_scripts_test_reqmap_py_182_916["scripts/test_reqmap.py:182-916"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_182_916
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
