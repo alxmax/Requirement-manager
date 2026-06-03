@@ -7,14 +7,21 @@ depends_on: [CORE-PARSE-001, CORE-SCAN-002]
 superseded_by:
 ---
 
-# Requirement map (Mermaid MD + JSON)
+# Requirement map (Mermaid MD + JSON + self-contained viewer)
 
-> Render the whole registry as navigable diagrams and a machine-readable graph a human or a front-end can read at a glance.
+> Render the whole registry as navigable diagrams, a machine-readable graph, and a double-click-openable viewer a human or a front-end can read at a glance.
 
 ## WHAT — Contract (normative)
 - It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for
   static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, nodes, edges}`
   graph for an external front-end). Both are derived views, regenerated, never edited.
+- It shall also generate `_map.html` — a self-contained, single-file copy of the React
+  viewer with this repo's graph inlined as `window.__REQMAP_DATA__`, openable by
+  double-click with no server — WHEN the viewer template `_map_viewer.html` is vendored
+  beside the engine. Absent the template it emits only `_map.md` + `_map.json` (the viewer
+  is optional, so the stdlib engine still works with no extra files).
+- The injected graph shall be escaped (`</` → `<\/`) so a `</script>` sequence in any
+  requirement field cannot break out of the inline data `<script>` (HTML-injection guard).
 - There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall
   contain exactly 4 Mermaid code blocks — System Map, Req→Code, Dependencies, Risk — and
   each shall carry a legend.
@@ -39,10 +46,14 @@ superseded_by:
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
-- `_map.json` is consumed by the standalone front-end under `app/` (a Vite + React viewer);
-  the engine stays stdlib-only and ships no HTML UI of its own.
+- The viewer is the Vite + React app under `app/`. Its single-file build (`app/` →
+  `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html`
+  with a `<!--REQMAP_DATA-->` marker; the engine (stdlib only) swaps the marker for the
+  inline data. So the engine ships a rich UI without itself depending on Node/npm.
+- `_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild
+  with `map`. `_map.json` is the committed source of its data.
 - `export` is a thin alias that writes only `_map.json` (or to stdout / `--out PATH`) for
-  ad-hoc piping; `map` writes both `_map.md` and `_map.json`.
+  ad-hoc piping; `map` writes `_map.md` + `_map.json` (+ `_map.html` when the template is present).
 
 ## HOW — Acceptance (= tests)
 - The generated files contain one node per requirement and one edge per `depends_on`.
@@ -53,9 +64,10 @@ superseded_by:
 - Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
 - Risk shows only requirements with at least one risk signal, each with a scripted recommendation.
 - A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.
+- Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.
 
 ## WHERE — Current implementation
-- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `_build_json_text`, the `_mermaid_*` generators in `reqmap.py`.
+- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`.
 
 ## Links
 - Used by: (auto)

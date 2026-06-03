@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite --port 5173 --strictPort",
     "build": "vite build",
+    "build:viewer": "vite build --config vite.viewer.config.js && node scripts/install-viewer.mjs",
     "preview": "vite preview",
     "sync": "node scripts/sync-data.mjs",
     "smoke": "node scripts/run-ssr-smoke.mjs"
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }

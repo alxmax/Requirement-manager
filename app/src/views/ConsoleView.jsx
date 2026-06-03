@@ -58,7 +58,7 @@ function ConsoleOutput({ which }) {
       <div>{S("grn","✓")} wrote requirements/_map.md{"   "}{S("dim","(4 mermaid blocks)")}</div>
       <div>{S("grn","✓")} wrote requirements/_map.json{"  "}{S("dim","(13 nodes · 16 edges)")}</div>
       <div>{" "}</div>
-      <div>{S("dim","open the app to browse the map")}</div>
+      <div>{S("dim","open requirements/_map.html (self-contained) to browse the map")}</div>
       <div>{S("prompt","$ ")}{S("cursor","█")}</div>
     </>
   );

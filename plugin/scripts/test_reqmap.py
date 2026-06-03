@@ -666,6 +666,33 @@ class JsonExport(unittest.TestCase):  # tested-by: REQ-MAP-007
         self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
 
+class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_marker_replaced_with_inline_data(self):
+        out = R._inject_viewer("<head><!--REQMAP_DATA--></head>",
+                               {"nodes": [{"id": "A-1"}], "edges": []})
+        self.assertNotIn("<!--REQMAP_DATA-->", out)   # marker consumed
+        self.assertIn("window.__REQMAP_DATA__=", out) # data assigned
+        self.assertIn('"A-1"', out)                   # node present
+
+    def test_script_close_in_field_is_escaped(self):  # bug: viewer-data-script-breakout-xss
+        out = R._inject_viewer("<!--REQMAP_DATA-->",
+                               {"nodes": [{"id": "a</script><img src=x>"}], "edges": []})
+        self.assertNotIn("</script><img", out)        # NOT a raw breakout
+        self.assertIn("<\\/script>", out)             # escaped form instead
+
+    def test_render_html_writes_self_contained_file(self):
+        if not os.path.exists(R._viewer_template_path()):
+            self.skipTest("viewer template not vendored beside the engine")
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            out = R.render_html({"nodes": [{"id": "A-1"}], "edges": []}, rd)
+            self.assertIsNotNone(out)
+            self.assertTrue(os.path.exists(out))
+            html = open(out, encoding="utf-8").read()
+            self.assertIn("window.__REQMAP_DATA__=", html)
+            self.assertNotIn("<!--REQMAP_DATA-->", html)
+
+
 class JsFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
     def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested
         f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){}\nconst bar = 1;\n")
