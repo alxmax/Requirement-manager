@@ -69,7 +69,7 @@ superseded_by:
   member of `<ID>`.
 
 ## WHERE — Current implementation
-- `cmd_extract`, `_draft_id`, `_risk` in `reqmap.py`.
+- `cmd_extract`, `_draft_id`, `_risk`, `classify_prose`, `_prose_facts` in `reqmap.py`.
 
 ## Links
 - Used by: (auto)
