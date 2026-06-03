@@ -348,6 +348,45 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("function search(", html)
 
 
+class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def _extract(self, d):
+        reqs = R.load_requirements(os.path.join(d, "requirements"))
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_extract(reqs, members, d, os.path.join(d, "requirements"))
+        return os.path.join(d, "requirements")
+
+    def test_capability_prose_is_drafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "prompts", "aurelius.md"),
+                   "---\ntitle: Aurelius\n---\n## Role\nx\n")
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertTrue(any("PROMPTS-AURELIUS" in f for f in drafts), drafts)
+
+    def test_sync_only_and_meta_prose_not_drafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "README.md"), "# Project\n## Overview\n")
+            _write(os.path.join(d, "docs", "guide.md"), "# Guide\n## How\n")
+            _write(os.path.join(d, "report.html"), "<title>R</title><h2>S</h2>")
+            _write(os.path.join(d, "CLAUDE.md"), "# Claude\n## Rules\n")
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            for bad in ("README", "GUIDE", "REPORT", "CLAUDE"):
+                self.assertFalse(any(bad in f for f in drafts), (bad, drafts))
+
+    def test_explicitly_tagged_prose_not_redrafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "README.md"),
+                   "# P\n<!-- generated-from: SENATE-SYNTH-001 -->\n")
+            members = R.scan_members(d, None)
+            self.assertIn("SENATE-SYNTH-001", members)   # rider #1 guard
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertFalse(any("README" in f for f in drafts), drafts)
+
+
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_same_basename_different_dirs_no_collision(self):  # bug #10
         self.assertNotEqual(R._draft_id("src/utils.py"), R._draft_id("lib/utils.js"))
