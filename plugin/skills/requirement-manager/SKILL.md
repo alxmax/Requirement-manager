@@ -36,7 +36,14 @@ After any action, summarize what changed and, when useful, point to
 | **init / reinit everything** | First-time setup, or re-initialize / refresh the whole registry. Idempotent — re-drafts untagged code and rebuilds the lock + map; never clobbers `.reqmapignore` or any authored requirement (no destructive wipe). | `python scripts/reqmap.py init` |
 | **regenerate requirements** | Draft requirements for new / untagged code only. Authored and `confirmed` requirements are left untouched. Afterwards, tell the user which drafts were created and remind them to review + `promote` the real ones. | `python scripts/reqmap.py extract` → `scan` → `check --update-lock` → `map` |
 | **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
-| **regenerate map** | Refresh the generated artifacts (lock + interactive HTML + Mermaid map) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` |
+| **regenerate map** | Refresh the generated artifacts (lock + interactive HTML + Mermaid map) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` → advisory doc-sync |
+
+**Advisory doc-sync (assistant step, not the engine).** After `map`, for each
+sync-only doc (bucket 2) tagged `generated-from: <ID>`, the assistant reads the doc,
+its requirement(s), and the implementing code, then reports concrete mismatches
+(e.g. "the HTML says quorum 6/9; the code says 7/9"). This is judgment, not a gate —
+it surfaces findings and never blocks a commit. The engine's deterministic drift
+flag (stale-on-change) is the hard half of doc-sync; this is the semantic half.
 
 ## Setup (first use in a repo)
 
@@ -117,6 +124,27 @@ engine changes to the cache and any registered consumer repos in one command:
    silent truth).
 6. **Authoring is bidirectional**: you may start in code (explore), but the change
    is not "done" until the requirement is updated in the *same* commit.
+
+### Prose & doc capabilities (the three buckets)
+
+`extract`/`init` scan `.md`/`.html` by default and classify each prose file
+(prose = human-readable spec/prompt text, not source code):
+
+1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
+   `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`,
+   `_`-prefixed generated files) + anything in `.reqmapignore`. Invisible to reqmap.
+2. **Sync-only** — `README*`, everything under `docs/`, and every `*.html`.
+   Never turned into a requirement. Tag it `# generated-from: <ID>` (HTML:
+   `<!-- generated-from: <ID> -->`) to make it a member: the drift gate then flags
+   it stale when its requirement changes, and the advisory doc-sync step (below)
+   verifies its claims still match the code.
+3. **Capability source** — prompt/spec prose (`prompts/**`, `specs/**`, …).
+   Auto-drafted as a `draft` stub from its title + `##` headings; review, edit and
+   `promote`. `draft` is never enforced by the gate, so unreviewed prose is never
+   canonized as truth.
+
+The buckets govern auto-drafting only — an explicit tag on any file is always
+honored by the scanner.
 
 ## Audience & writing level
 
@@ -213,7 +241,7 @@ before push *and* on the remote for PRs.
 - `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (extract `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer with search, yellow node highlight, ⊕ center button, fit-to-view) + `requirements/_map.md` (4 Mermaid diagrams). The Risk tab/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
-- `python scripts/reqmap.py extract`           — draft one requirement per untagged file (brownfield bootstrap)
+- `python scripts/reqmap.py extract`           — draft one requirement per untagged file. Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
 - `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
 - `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view
 
