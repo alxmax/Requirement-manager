@@ -933,5 +933,50 @@ class ZoomFit(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("box._vw", html)                  # fit measured against content size
 
 
+class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def _map(self, d, check=False):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        members = R.scan_members(d, rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_map(reqs, members, rd, check)
+        return code, buf.getvalue()
+
+    def _seed(self, d, title="A"):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-A-001.md"),
+               REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title=title))
+
+    def test_absent_map_is_not_stale(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            code, out = self._map(d, check=True)   # never generated
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
+
+    def test_fresh_map_passes_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            self._map(d)                            # generate
+            code, _ = self._map(d, check=True)      # immediately check
+            self.assertEqual(code, 0)
+
+    def test_stale_map_fails_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, title="A")
+            self._map(d)                            # generate against title A
+            self._seed(d, title="A renamed")        # change the requirement
+            code, out = self._map(d, check=True)    # built-fresh != on-disk
+            self.assertEqual(code, 1)
+            self.assertIn("stale", out)
+
+    def test_timestamp_alone_is_not_stale(self):
+        # _strip_generated must ignore the volatile timestamp line
+        a = "---\ngenerated: 2026-01-01 00:00\nnodes: 1\n---\nbody"
+        b = "---\ngenerated: 2026-12-31 23:59\nnodes: 1\n---\nbody"
+        self.assertEqual(R._strip_generated(a), R._strip_generated(b))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

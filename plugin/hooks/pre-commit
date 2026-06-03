@@ -21,3 +21,10 @@ if ! "$PY" -X utf8 scripts/reqmap.py check; then
   echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
   exit 1
 fi
+# Map freshness: if you track requirements/_map.* , a code/requirement edit that
+# shifts them must be regenerated before commit. No committed map -> passes silently.
+if ! "$PY" -X utf8 scripts/reqmap.py map --check; then
+  echo "" >&2
+  echo "reqmap: committed map is stale — run 'reqmap.py map' and stage it, or commit with --no-verify." >&2
+  exit 1
+fi
