@@ -16,6 +16,28 @@ A capability registry that sits between intent and code. Each capability is one
 markdown file (the single source of truth). Code points back to it with a tag.
 A script reconciles the two and generates a navigable map.
 
+## Menu (entry point)
+
+When this skill is invoked, choose one of two paths:
+
+- **With an action argument** (e.g. `requirement-manager regenerate-map`) — skip the
+  menu and run that action directly. Accepted arguments: `init`,
+  `regenerate-requirements`, `update-engine`, `regenerate-map` (hyphen or space,
+  case-insensitive).
+- **Bare** (no argument) — present the four actions below with `AskUserQuestion` and
+  run the one the user picks.
+
+All actions run from the repo root where `scripts/reqmap.py` is vendored (see Setup).
+After any action, summarize what changed and, when useful, point to
+`python scripts/reqmap.py next` for the best follow-up.
+
+| Action | What it does | Commands to run (in order) |
+|---|---|---|
+| **init / reinit everything** | First-time setup, or re-initialize / refresh the whole registry. Idempotent — re-drafts untagged code and rebuilds the lock + map; never clobbers `.reqmapignore` or any authored requirement (no destructive wipe). | `python scripts/reqmap.py init` |
+| **regenerate requirements** | Draft requirements for new / untagged code only. Authored and `confirmed` requirements are left untouched. Afterwards, tell the user which drafts were created and remind them to review + `promote` the real ones. | `python scripts/reqmap.py extract` → `scan` → `check --update-lock` → `map` |
+| **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
+| **regenerate map** | Refresh the generated artifacts (lock + interactive HTML + Mermaid map) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` |
+
 ## Setup (first use in a repo)
 
 The engine is a single stdlib-only script. Seed it into the target repo once:
@@ -95,6 +117,31 @@ engine changes to the cache and any registered consumer repos in one command:
    silent truth).
 6. **Authoring is bidirectional**: you may start in code (explore), but the change
    is not "done" until the requirement is updated in the *same* commit.
+
+## Audience & writing level
+
+Write every requirement so a developer with basic programming experience but NO prior
+knowledge of this project can understand it without asking questions. Rules:
+
+1. Define each project-specific term briefly, inline, on first use — e.g.
+   "veto cascade (a fixed series of checks that can block or reroute the result)".
+   After the first definition, use the term freely.
+2. On first mention of a named component, attach its role — e.g.
+   "Conservator (the voice that looks for risk)".
+3. Keep normative "shall" phrasing for contract lines, but split any sentence that
+   runs long or stacks more than two conditions.
+4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
+   One clause, not a paragraph.
+5. Keep all file and function references (e.g. `strip_context.py`,
+   `aggregate_sequential()`) — they tell the reader where to look. The surrounding
+   prose must explain what they do.
+6. Acceptance criteria stay in Given / When / Then form.
+
+Apply this level fully to the Contract and Acceptance sections (everyone reads these).
+The "Notes & limitations" section MAY stay denser, since only deep readers reach it.
+
+Trade-off to accept: explained requirements run ~30–40% longer than terse ones. That is
+expected and acceptable.
 
 ## Statuses
 
