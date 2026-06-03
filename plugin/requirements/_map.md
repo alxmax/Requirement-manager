@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-03 11:36
-nodes: 10
-edges: 11
+generated: 2026-06-03 12:15
+nodes: 11
+edges: 12
 ---
 
 # Requirement Map
@@ -24,6 +24,7 @@ graph LR
     REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
     REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
     REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
+    REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   end
   style CORE_DRIFT_003 stroke-width:3px
@@ -53,8 +54,8 @@ graph LR
   f_scripts_test_reqmap_py_134["scripts/test_reqmap.py:134"]
   CORE_SCAN_002 -->|tested-by| f_scripts_test_reqmap_py_134
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
-  f_scripts_reqmap_py_503_650["scripts/reqmap.py:503-650"]
-  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_503_650
+  f_scripts_reqmap_py_552_699["scripts/reqmap.py:552-699"]
+  REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_552_699
   f_scripts_test_reqmap_py_388_775["scripts/test_reqmap.py:388-775"]
   REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_388_775
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
@@ -63,18 +64,18 @@ graph LR
   f_scripts_test_reqmap_py_81_825["scripts/test_reqmap.py:81-825"]
   REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_81_825
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
-  f_scripts_reqmap_py_429_486["scripts/reqmap.py:429-486"]
-  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_429_486
+  f_scripts_reqmap_py_478_535["scripts/reqmap.py:478-535"]
+  REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_478_535
   f_scripts_test_reqmap_py_308["scripts/test_reqmap.py:308"]
   REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_308
   REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
-  f_scripts_reqmap_py_756_843["scripts/reqmap.py:756-843"]
-  REQ_FINDINGS_010 -->|implements| f_scripts_reqmap_py_756_843
+  f_scripts_reqmap_py_805_892["scripts/reqmap.py:805-892"]
+  REQ_FINDINGS_010 -->|implements| f_scripts_reqmap_py_805_892
   f_scripts_test_reqmap_py_461_758["scripts/test_reqmap.py:461-758"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_461_758
   REQ_MAP_007["Requirement map (HTML + MD)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_878_1592["scripts/reqmap.py:878-1592"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_878_1592
+  f_scripts_reqmap_py_927_1641["scripts/reqmap.py:927-1641"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_927_1641
   f_scripts_test_reqmap_py_182_936["scripts/test_reqmap.py:182-936"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_182_936
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -82,6 +83,11 @@ graph LR
   REQ_NEW_004 -->|implements| f_scripts_reqmap_py_408
   f_scripts_test_reqmap_py_330["scripts/test_reqmap.py:330"]
   REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_330
+  REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
+  f_scripts_reqmap_py_429_444["scripts/reqmap.py:429-444"]
+  REQ_PROMOTE_011 -->|implements| f_scripts_reqmap_py_429_444
+  f_scripts_test_reqmap_py_981["scripts/test_reqmap.py:981"]
+  REQ_PROMOTE_011 -->|tested-by| f_scripts_test_reqmap_py_981
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_247["scripts/reqmap.py:247"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_247
@@ -96,7 +102,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>7 caps</small>"]
+  a_REQ["REQ<br><small>8 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
 ```
@@ -119,5 +125,5 @@ graph LR
 
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
-| CORE-PARSE-001 | confirmed | 6 | 5 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |
+| CORE-PARSE-001 | confirmed | 6 | 6 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |
 | CORE-SCAN-002 | confirmed | 4 | 5 | blast-radius | High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests, and treat it as shared foundation (bus). |

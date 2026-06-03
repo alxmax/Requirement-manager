@@ -368,7 +368,7 @@ REQUIREMENT_TEMPLATE = """\
 id: AREA-NAME-NNN
 status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
 layer: feature       # bus | feature
-owner: alex
+owner: Alex
 depends_on: []       # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
 # area:              # optional: System Map grouping label (else the id prefix is used)
@@ -423,6 +423,55 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
     print(f"created {dest}")
+    return 0
+
+
+def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
+    """Replace the value of the first `status:` line inside the leading frontmatter
+    block, preserving its indentation and any trailing inline comment. Returns
+    (new_text, n_replaced); n=0 when there is no frontmatter or no status line."""
+    body = text.lstrip("﻿")            # drop a BOM if present (rewritten without it)
+    if not body.startswith("---"):
+        return text, 0
+    end = body.find("\n---", 3)
+    if end == -1:
+        return text, 0
+    head, rest = body[:end], body[end:]     # only the frontmatter block, never the body
+    new_head, n = re.subn(r"(?m)^(\s*status\s*:\s*)(\S+)", r"\g<1>" + value, head, count=1)
+    return new_head + rest, n
+
+
+def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
+    """Flip a requirement's status to `confirmed` (the human-validation step) by a
+    single frontmatter edit. Refuses if the requirement has no `implements:` member
+    (a confirmed requirement must point to code — else the gate would error), and
+    warns when no `tested-by:` member is linked."""
+    r = reqs.get(cap_id)
+    if not r:
+        print(f"no requirement with id {cap_id} (expected requirements/{cap_id}.md)")
+        return 1
+    cur = r["meta"].get("status")
+    if cur == "confirmed":
+        print(f"{cap_id} is already confirmed.")
+        return 0
+    roles = [m[0] for m in members.get(cap_id, [])]
+    if "implements" not in roles:
+        print(f"refusing: {cap_id} has no `implements:` member — a confirmed requirement "
+              f"must point to code. Tag the implementing code `# implements: {cap_id}` first.")
+        return 1
+    with open(r["path"], encoding="utf-8-sig") as f:
+        text = f.read()
+    new_text, n = _set_frontmatter_status(text, "confirmed")
+    if n == 0:
+        print(f"could not find a `status:` line in {r['path']}")
+        return 1
+    with open(r["path"], "w", encoding="utf-8") as f:
+        f.write(new_text)
+    print(f"promoted {cap_id}: {cur or '(unset)'} -> confirmed")
+    if "tested-by" not in roles:
+        print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
+              f"or set `test_exempt: <reason>` to silence the untested signal.")
+    print("  next: reqmap.py check --update-lock  &&  reqmap.py map")
     return 0
 
 
@@ -1610,7 +1659,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates", "findings"])
+    ap.add_argument("cmd", choices=["new", "scan", "check", "map", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -1656,6 +1705,10 @@ def main():
         return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
     if a.cmd == "findings":
         return cmd_findings(reqs, reqs_dir, a.raw)
+    if a.cmd == "promote":
+        if not a.arg:
+            print("usage: reqmap promote AREA-NAME-NNN"); return 2
+        return cmd_promote(reqs, members, a.arg)
 
 
 if __name__ == "__main__":

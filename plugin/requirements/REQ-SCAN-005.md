@@ -2,7 +2,7 @@
 id: REQ-SCAN-005
 status: confirmed
 layer: feature
-owner: alex
+owner: Alex
 depends_on: [CORE-PARSE-001, CORE-SCAN-002]
 superseded_by:
 ---

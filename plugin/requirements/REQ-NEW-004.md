@@ -2,7 +2,7 @@
 id: REQ-NEW-004
 status: confirmed
 layer: feature
-owner: alex
+owner: Alex
 depends_on: [CORE-PARSE-001]
 superseded_by:
 ---

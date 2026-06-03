@@ -978,5 +978,65 @@ class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
         self.assertEqual(R._strip_generated(a), R._strip_generated(b))
 
 
+class Promote(unittest.TestCase):  # tested-by: REQ-PROMOTE-011
+    def _run(self, d, cap_id):
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_promote(reqs, members, cap_id)
+        return code, buf.getvalue()
+
+    def test_promotes_baseline_with_implements(self):  # AC-1
+        with tempfile.TemporaryDirectory() as d:
+            body = REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A") + "\nbody line\n"
+            _write(os.path.join(d, "AREA-A-001.md"), body)
+            _write(os.path.join(d, "a.py"), tag("AREA-A-001") + "\n")
+            code, out = self._run(d, "AREA-A-001")
+            self.assertEqual(code, 0)
+            after = open(os.path.join(d, "AREA-A-001.md"), encoding="utf-8").read()
+            self.assertIn("status: confirmed", after)
+            self.assertNotIn("status: baseline", after)
+            self.assertIn("body line", after)            # body preserved
+
+    def test_refuses_without_implements(self):  # AC-2
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "AREA-B-001.md")
+            _write(p, REQ.format(id="AREA-B-001", status="baseline", layer="bus", extra="", title="B"))
+            before = open(p, encoding="utf-8").read()
+            code, out = self._run(d, "AREA-B-001")
+            self.assertNotEqual(code, 0)
+            self.assertEqual(open(p, encoding="utf-8").read(), before)   # unchanged
+            self.assertIn("must point to code", out)
+
+    def test_idempotent_when_confirmed(self):  # AC-3
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "AREA-C-001.md")
+            _write(p, REQ.format(id="AREA-C-001", status="confirmed", layer="bus", extra="", title="C"))
+            _write(os.path.join(d, "c.py"), tag("AREA-C-001") + "\n")
+            before = open(p, encoding="utf-8").read()
+            code, out = self._run(d, "AREA-C-001")
+            self.assertEqual(code, 0)
+            self.assertEqual(open(p, encoding="utf-8").read(), before)
+            self.assertIn("already confirmed", out)
+
+    def test_unknown_id_errors(self):
+        with tempfile.TemporaryDirectory() as d:
+            code, out = self._run(d, "NOPE-X-001")
+            self.assertNotEqual(code, 0)
+
+    def test_preserves_trailing_comment(self):  # AC-4
+        new_text, n = R._set_frontmatter_status(
+            "---\nid: X-1\nstatus: baseline   # was draft\nlayer: bus\n---\n\nbody\n", "confirmed")
+        self.assertEqual(n, 1)
+        self.assertIn("status: confirmed   # was draft", new_text)
+        self.assertIn("\nbody\n", new_text)
+
+    def test_no_frontmatter_is_noop(self):
+        new_text, n = R._set_frontmatter_status("no frontmatter here", "confirmed")
+        self.assertEqual(n, 0)
+        self.assertEqual(new_text, "no frontmatter here")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

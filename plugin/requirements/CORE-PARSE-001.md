@@ -2,7 +2,7 @@
 id: CORE-PARSE-001
 status: confirmed
 layer: bus
-owner: alex
+owner: Alex
 depends_on: []
 superseded_by:
 ---
