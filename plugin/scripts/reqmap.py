@@ -24,6 +24,15 @@ TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tes
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
+
+# ---- prose auto-draft classification (cmd_extract) ----
+# These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
+# explicit tag on ANY file, regardless of bucket — buckets never suppress a real tag.
+PROSE_EXTS = (".md", ".html")
+# Bucket 1 — meta/boilerplate: never auto-drafted, never sync-checked. Basename match.
+META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
+                     "SKILL.md", "TODO.md", "CHANGELOG.md"}
+
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature"}
 ENFORCED = {"in-progress", "implemented", "confirmed"}
@@ -57,7 +66,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-03.2"
+MAP_ENGINE_VERSION = "2026-06-03.3"
 
 
 # ---------- parsing ----------
@@ -491,6 +500,59 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
     return "DRAFT-" + (slug or "FILE")
 
 
+def classify_prose(rel):  # implements: REQ-EXTRACT-008
+    """Bucket a POSIX-relative .md/.html path for the auto-draft path. Returns
+    'ignore' (meta/boilerplate, invisible), 'sync_only' (README/docs/*.html — never
+    drafted, but a drift- and semantic-checked member when explicitly tagged), or
+    'capability' (prompt/spec prose — auto-drafted as a `draft` stub). Governs AUTO
+    behavior only: scan_members still honors an explicit tag on any file."""
+    base = os.path.basename(rel)
+    # Bucket 1 — meta/boilerplate.
+    if base in META_IGNORE_NAMES:
+        return "ignore"
+    if base == "LICENSE" or base.startswith("LICENSE."):
+        return "ignore"
+    if base.startswith("_"):                      # generated _map.*, _findings.md
+        return "ignore"
+    # Bucket 2 — sync-only.
+    if base == "README" or base.startswith("README."):
+        return "sync_only"
+    if rel == "docs" or rel.startswith("docs/"):
+        return "sync_only"
+    if rel.endswith(".html"):                      # all HTML is an overview/derived doc
+        return "sync_only"
+    # Bucket 3 — capability source (prompts/specs/modes and other prose .md).
+    return "capability"
+
+
+def _prose_facts(src):  # implements: REQ-EXTRACT-008
+    """(title, [headings]) from markdown/HTML prose, for a draft scaffold.
+    Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
+    Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
+    The scaffold lists headings as an authoring hint — never the contract."""
+    meta, body = parse_frontmatter(src)
+    title = meta.get("title") or None
+    headings = []
+    for line in body.splitlines():
+        s = line.strip()
+        if title is None:
+            m = re.match(r"#\s+(.+)", s)                      # markdown H1
+            if m:
+                title = m.group(1).strip()
+                continue
+            m = re.search(r"<(?:title|h1)[^>]*>(.*?)</(?:title|h1)>", s, re.I)
+            if m:
+                title = re.sub(r"<[^>]+>", "", m.group(1)).strip()
+                # no continue: a line may carry both <title> and <h2> (see test_html_title_and_h2)
+        m = re.match(r"##\s+(.+)", s)                         # markdown H2 (not H3)
+        if m:
+            headings.append(m.group(1).strip())
+            continue
+        for inner in re.findall(r"<h2[^>]*>(.*?)</h2>", s, re.I):  # html H2
+            headings.append(re.sub(r"<[^>]+>", "", inner).strip())
+    return title, headings
+
+
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
@@ -501,13 +563,17 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
         dirs.sort()                            # deterministic id/suffix assignment
         for fn in sorted(files):
-            if not fn.endswith((".py", ".js", ".ts", ".cpp", ".c")):
+            is_code = fn.endswith((".py", ".js", ".ts", ".cpp", ".c"))
+            is_prose = fn.endswith(PROSE_EXTS)
+            if not (is_code or is_prose):
                 continue
             rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):  # ignored -> never draft
                 continue
             if rel in tagged:
                 continue
+            if is_prose and classify_prose(rel) != "capability":
+                continue                           # bucket 1/2 -> never auto-drafted
             cap = base = _draft_id(rel)
             k = 2
             while cap in used:                 # residual collision (case/ext only)
@@ -518,25 +584,54 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                 continue
             with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
                 src = f.read()
-            risk = _risk(src)
-            review = "REVIEW" if risk >= 2 else "auto-baseline"
-            with open(dest, "w", encoding="utf-8") as f:
-                # new emission schema (Contract / Verify-intent / Acceptance / Current-impl),
-                # matching cmd_new so a promoted draft needs no reshaping
-                f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
-                        f"owner: auto\ndepends_on: []\n"
-                        f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
-                        f"# {os.path.splitext(fn)[0]}\n\n"
-                        f"> DRAFT extracted from {rel}. Describes observed behavior, "
-                        f"not validated intent.\n\n"
-                        f"## WHAT — Contract (normative)\n"
-                        f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
-                        f"## WHAT — Verify intent (open questions for the human)\n"
-                        f"- TODO: anything that looks like an accident (swallowed error, magic "
-                        f"constant, dead branch) — intended, or a bug to fix?\n\n"
-                        f"## HOW — Acceptance (= tests)\n"
-                        f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
-                        f"## WHERE — Current implementation\n- {rel}\n")
+            if is_prose:
+                title, headings = _prose_facts(src)
+                review = "REVIEW"   # intent is unrecoverable from prose — always author
+                hint = "\n".join("  - {}".format(h) for h in headings) \
+                    or "  - (no section headings detected)"
+                # str.format (not f-string): the template embeds literal {cap}/{rel} inside backticked instructions
+                with open(dest, "w", encoding="utf-8") as f:
+                    f.write("---\nid: {cap}\nstatus: draft\nlayer: feature\n"
+                            "owner: auto\ndepends_on: []\n"
+                            "risk: 2  # REVIEW — prose capability, author the contract "
+                            "before promoting\n---\n\n"
+                            "# {title}\n\n"
+                            "> DRAFT extracted from {rel} (prose capability). The source "
+                            "prose is NOT the contract — author the normative behavior "
+                            "below, then tag the source `# generated-from: {cap}` "
+                            "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
+                            "## WHAT — Contract (normative)\n"
+                            "- TODO: the capability this prose defines (author from "
+                            "intent, do not copy the prose).\n\n"
+                            "## WHAT — Verify intent (open questions for the human)\n"
+                            "- TODO: which source sections are normative vs illustrative?\n\n"
+                            "Source sections detected (authoring hint, not the contract):\n"
+                            "{hint}\n\n"
+                            "## HOW — Acceptance (= tests)\n"
+                            "- TODO: Given/When/Then checks for the contract above.\n\n"
+                            "## WHERE — Current implementation\n- {rel}\n".format(
+                                cap=cap, title=(title or os.path.splitext(fn)[0]),
+                                rel=rel, hint=hint))
+            else:
+                risk = _risk(src)
+                review = "REVIEW" if risk >= 2 else "auto-baseline"
+                with open(dest, "w", encoding="utf-8") as f:
+                    # new emission schema (Contract / Verify-intent / Acceptance / Current-impl),
+                    # matching cmd_new so a promoted draft needs no reshaping
+                    f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
+                            f"owner: auto\ndepends_on: []\n"
+                            f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
+                            f"# {os.path.splitext(fn)[0]}\n\n"
+                            f"> DRAFT extracted from {rel}. Describes observed behavior, "
+                            f"not validated intent.\n\n"
+                            f"## WHAT — Contract (normative)\n"
+                            f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
+                            f"## WHAT — Verify intent (open questions for the human)\n"
+                            f"- TODO: anything that looks like an accident (swallowed error, magic "
+                            f"constant, dead branch) — intended, or a bug to fix?\n\n"
+                            f"## HOW — Acceptance (= tests)\n"
+                            f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
+                            f"## WHERE — Current implementation\n- {rel}\n")
             proposed += 1
             print(f"{review:14} {cap}  <- {rel}")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")

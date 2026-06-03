@@ -29,6 +29,10 @@ def tag(cap):
     return "# {}: {}".format(_ROLE, cap)
 
 
+def gtag_html(cap):  # runtime-built so THIS .py source registers no phantom member
+    return "<!-- {}-from: {} -->".format("generated", cap)
+
+
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
@@ -179,6 +183,49 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertIn("FOO-BAR-001", R.scan_members(d, None))
 
 
+class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_meta_files_are_ignored(self):
+        for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
+                    "SKILL.md", "TODO.md", "CHANGELOG.md", "LICENSE", "LICENSE.md",
+                    "_map.md", "_findings.md", "_map.html"):
+            self.assertEqual(R.classify_prose(rel), "ignore", rel)
+
+    def test_readme_and_docs_and_html_are_sync_only(self):
+        for rel in ("README", "README.md", "docs/senate.md",
+                    "docs/sub/guide.md", "docs/architecture.html", "x.html"):
+            self.assertEqual(R.classify_prose(rel), "sync_only", rel)
+
+    def test_prompts_and_specs_are_capability(self):
+        for rel in ("prompts/senators/aurelius.md", "specs/foo.md",
+                    "modes/bar.md", "notes.md"):
+            self.assertEqual(R.classify_prose(rel), "capability", rel)
+
+
+class ProseFacts(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_markdown_frontmatter_title_and_headings(self):
+        src = ("---\ntitle: Senator Aurelius\n---\n\n"
+               "## Role\nrisk lens\n## Specialty\nreversibility\n### sub\n")
+        title, heads = R._prose_facts(src)
+        self.assertEqual(title, "Senator Aurelius")
+        self.assertEqual(heads, ["Role", "Specialty"])  # H2 only, not H3
+
+    def test_markdown_h1_title_when_no_frontmatter(self):
+        title, heads = R._prose_facts("# My Cap\n\n## A\n## B\n")
+        self.assertEqual(title, "My Cap")
+        self.assertEqual(heads, ["A", "B"])
+
+    def test_html_title_and_h2(self):
+        src = "<title>Project Map</title><h2>Section One</h2><h2>Two</h2>"
+        title, heads = R._prose_facts(src)
+        self.assertEqual(title, "Project Map")
+        self.assertEqual(heads, ["Section One", "Two"])
+
+    def test_no_title_returns_none(self):
+        title, heads = R._prose_facts("just text, no headings\n")
+        self.assertIsNone(title)
+        self.assertEqual(heads, [])
+
+
 class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _data(self, title):
         return {"nodes": [{"id": "A-1", "layer": "bus", "status": "draft", "title": title,
@@ -303,6 +350,72 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             html = self._html(d, "T")
             self.assertIn('id="q"', html)
             self.assertIn("function search(", html)
+
+
+class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def _extract(self, d):
+        reqs = R.load_requirements(os.path.join(d, "requirements"))
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_extract(reqs, members, d, os.path.join(d, "requirements"))
+        return os.path.join(d, "requirements")
+
+    def test_capability_prose_is_drafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "prompts", "aurelius.md"),
+                   "---\ntitle: Aurelius\n---\n## Role\nx\n")
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertTrue(any("PROMPTS-AURELIUS" in f for f in drafts), drafts)
+
+    def test_sync_only_and_meta_prose_not_drafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "README.md"), "# Project\n## Overview\n")
+            _write(os.path.join(d, "docs", "guide.md"), "# Guide\n## How\n")
+            _write(os.path.join(d, "report.html"), "<title>R</title><h2>S</h2>")
+            _write(os.path.join(d, "CLAUDE.md"), "# Claude\n## Rules\n")
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            for bad in ("README", "GUIDE", "REPORT", "CLAUDE"):
+                self.assertFalse(any(bad in f for f in drafts), (bad, drafts))
+
+    def test_explicitly_tagged_prose_not_redrafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "README.md"),
+                   "# P\n" + gtag_html("SENATE-SYNTH-001") + "\n")
+            members = R.scan_members(d, None)
+            self.assertIn("SENATE-SYNTH-001", members)   # rider #1 guard
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertFalse(any("README" in f for f in drafts), drafts)
+
+    def test_tagged_capability_prose_not_redrafted(self):
+        with tempfile.TemporaryDirectory() as d:
+            # a prompts/ file (bucket 3) that already carries a member tag must be
+            # skipped by the `rel in tagged` guard, not re-drafted
+            _write(os.path.join(d, "prompts", "foo.md"),
+                   "# Foo\n" + tag("PROMPTS-FOO-001") + "\n## Role\n")
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            self.assertIn("PROMPTS-FOO-001", members)   # it IS a member
+            rdir = self._extract(d)
+            drafts = [f for f in os.listdir(rdir) if f.endswith(".md")]
+            self.assertFalse(any("FOO" in f for f in drafts), drafts)
+
+
+class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_tag_inside_html_comment_is_a_member(self):  # rider #1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"),
+                   gtag_html("SENATE-SYNTH-001") + "\n<h1>x</h1>\n")
+            members = R.scan_members(d, None)
+            self.assertIn("SENATE-SYNTH-001", members)
+            roles = [r for (r, _f, _l) in members["SENATE-SYNTH-001"]]
+            self.assertIn("generated-from", roles)
+
+    def test_draft_status_is_not_enforced(self):  # rider #3
+        self.assertNotIn("draft", R.ENFORCED)
+        self.assertEqual(R.ENFORCED, {"in-progress", "implemented", "confirmed"})
 
 
 class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
