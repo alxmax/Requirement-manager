@@ -2,7 +2,7 @@
 id: REQ-CANDIDATES-009
 status: confirmed
 layer: feature
-owner: alex
+owner: Alex
 depends_on: [CORE-SCAN-002]
 superseded_by:
 ---

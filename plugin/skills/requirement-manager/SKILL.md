@@ -153,6 +153,7 @@ before push *and* on the remote for PRs.
 ## Commands
 
 - `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
+- `python scripts/reqmap.py promote <ID>`        — the human-validation step: flip a reviewed requirement's `status` to `confirmed` (one frontmatter edit). Refuses if it has no `implements:` member (a confirmed requirement must point to code); warns if it has no `tested-by:`. Re-run `check --update-lock` + `map` after.
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer with search, yellow node highlight, ⊕ center button, fit-to-view) + `requirements/_map.md` (4 Mermaid diagrams). The Risk tab/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).

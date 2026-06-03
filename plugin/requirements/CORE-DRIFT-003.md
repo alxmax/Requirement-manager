@@ -2,7 +2,7 @@
 id: CORE-DRIFT-003
 status: confirmed
 layer: bus
-owner: alex
+owner: Alex
 depends_on: []
 superseded_by:
 ---

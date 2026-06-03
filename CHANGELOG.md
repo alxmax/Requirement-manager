@@ -1,5 +1,16 @@
 # Changelog
 
+## engine `1.5.0` — 2026-06-03
+
+- **`reqmap.py promote <ID>`** — one-command human-validation step: flips a reviewed
+  requirement's `status` to `confirmed` via a single frontmatter edit (preserves
+  indentation + trailing comment, body untouched). Refuses when the requirement has
+  no `implements:` member (a confirmed requirement must point to code, else the gate
+  errors); warns when no `tested-by:` is linked; idempotent on an already-confirmed
+  requirement. Dogfooded as `REQ-PROMOTE-011`.
+- **owner standardized** to `Alex` across the repo's own requirements + the scaffold
+  default (`extract` still emits `owner: auto` for machine-drafted, unreviewed files).
+
 ## engine `1.4.0` — 2026-06-03
 
 Drift gates to prevent the version/map skew that slipped past in 1.3.x.
