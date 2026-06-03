@@ -929,6 +929,8 @@ class ZoomFit(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("refit(box)", html)               # called on init
             self.assertIn("FIT_MAX", html)                  # capped upscale
             self.assertIn("requestAnimationFrame", html)    # measure after layout
+            self.assertIn("_normalizeSvg", html)            # pin element size to viewBox
+            self.assertIn("box._vw", html)                  # fit measured against content size
 
 
 if __name__ == "__main__":
