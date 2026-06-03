@@ -1,5 +1,26 @@
 # Changelog
 
+## engine `1.3.0` — 2026-06-03
+
+Non-code capability discovery + corpus-health visibility (`MAP_ENGINE_VERSION` 2026-06-03).
+
+- **`candidates --md-glob`** — discover capabilities in authoritative **non-code** files
+  (prompt/spec markdown), advisory-only and allowlist-bounded. Off unless a glob is
+  given; writes no `.md`. A new `_md_facts()` extractor pulls the H1 title, the first
+  blockquote after it (intent), and `## ` H2 headings (no parser). The plan now carries
+  `coverage_summary {total_candidates, with_existing_req}` and a `lineage_note` so an
+  unfilled plan can't masquerade as coverage, and so a `generated-from`/`implements`
+  tag is understood as authoring lineage — not auto-tracking of later source edits.
+- **`.md` added to the scan extensions** so prose capabilities can carry membership
+  tags (`<!-- implements: ID -->`). The drift hash still anchors only on the authored
+  Contract+Acceptance, so source prose may drift freely.
+- **`check` health line** — the summary now reports `(N confirmed, M legacy-schema)`,
+  and legacy-schema requirements (no `## WHAT — Verify intent` section, for which
+  `findings` is silently inactive) are flagged with a non-blocking WARN. Makes an
+  all-baseline corpus (gate enforces nothing yet) and an inactive `findings` visible.
+- **`extract`** now annotates the emitted `risk:` field as an author triage hint that
+  the engine does not read.
+
 ## check action `v1.0.0` — 2026-06-03
 
 First published release of the `requirement-manager` CI action. Run the drift gate

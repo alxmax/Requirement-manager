@@ -157,7 +157,7 @@ before push *and* on the remote for PRs.
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer with search, yellow node highlight, ⊕ center button, fit-to-view) + `requirements/_map.md` (4 Mermaid diagrams)
 - `python scripts/reqmap.py extract`           — draft one requirement per untagged file (brownfield bootstrap)
-- `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`)
+- `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
 - `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view
 
 **Workflow order** — after modifying requirement files, run these three as a unit

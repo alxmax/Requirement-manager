@@ -51,7 +51,7 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 - `_reqlock.json` — content hash baseline for drift detection
 - `_findings.md` — aggregated verify-intent triage
 
-**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml`. Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically.
+**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`candidates --md-glob`) is separate and opt-in.
 
 ## Plugin packaging
 
