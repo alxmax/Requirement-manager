@@ -14,10 +14,6 @@ const SYS_POS = {
   "REQ-INIT-012":[560,370], "REQ-NEXT-013":[560,480],
   "DRAFT-cache-utils":[812,150], "REQ-SYNC-014":[812,40],
 };
-const SYS_EDGES = [
-  ["REQ-INIT-012","REQ-EXTRACT-008"],["REQ-INIT-012","REQ-CHECK-006"],
-  ["REQ-INIT-012","REQ-MAP-007"],["REQ-NEXT-013","REQ-MAP-007"],
-];
 const RISK_POS = {
   "CORE-PARSE-001":[80,70],"CORE-SCAN-002":[80,210],"CORE-DRIFT-003":[80,350],
   "REQ-SYNC-014":[440,110],"DRAFT-cache-utils":[440,290],
@@ -124,6 +120,11 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
   const [tab, setTab] = useState("system");
   const sel = selId ? REQ_BY_ID[selId] : null;
 
+  // every real depends_on edge between two positioned System-Map nodes
+  const sysEdges = REQUIREMENTS
+    .flatMap(r => (r.deps || []).map(d => [r.id, d]))
+    .filter(([a, b]) => SYS_POS[a] && SYS_POS[b]);
+
   const legend = {
     system: <><span className="pdot" style={{width:9,height:9,borderRadius:0,border:"3px solid var(--ink-0)",display:"inline-block"}} /> bus · arrows = depends_on</>,
     reqcode: <>requirement → its code · <span style={{color:"var(--accent)"}}>implements</span> / tested-by</>,
@@ -148,7 +149,7 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
             <div className="canvas-inner" style={{width:1000, height:600}}>
             <div className="subgraph-label" style={{left:60,top:30}}>CORE · bus</div>
             <div className="subgraph-label" style={{left:316,top:12}}>REQ · features</div>
-            <Edges pos={SYS_POS} edges={SYS_EDGES} />
+            <Edges pos={SYS_POS} edges={sysEdges} />
             {REQUIREMENTS.filter(r=>SYS_POS[r.id]).map(r=>(
               <NodeBox key={r.id} r={r} pos={SYS_POS} selected={selId===r.id}
                 highlighted={highlightId===r.id} onClick={setSelId} />

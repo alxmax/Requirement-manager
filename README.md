@@ -59,7 +59,8 @@ plugin/                                   the plugin (source of truth, self-cont
 python scripts/reqmap.py new AREA-NAME-NNN   # scaffold a requirement
 python scripts/reqmap.py scan              # list code members per capability
 python scripts/reqmap.py check             # the gate: link sync + drift (pre-commit/CI)
-python scripts/reqmap.py map               # generate requirements/_map.html + _map.md
+python scripts/reqmap.py map               # generate requirements/_map.md (Mermaid) + _map.json (graph)
+python scripts/reqmap.py export            # emit requirements/_map.json for the React app under app/
 python scripts/reqmap.py extract           # draft requirements from legacy code
 python scripts/reqmap.py candidates        # read-only JSON extraction plan (AI-assist, writes no .md)
 python scripts/reqmap.py findings          # aggregate open verify-intent items into _findings.md

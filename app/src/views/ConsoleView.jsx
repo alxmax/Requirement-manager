@@ -46,7 +46,7 @@ function ConsoleOutput({ which }) {
       <div>{S("grn","✓")} created requirements/ and .reqmapignore</div>
       <div>{S("grn","✓")} drafted {S("bold","2")} requirement(s) from untagged code</div>
       <div>{S("grn","✓")} wrote drift lock {S("dim","(requirements/_reqlock.json)")}</div>
-      <div>{S("grn","✓")} wrote requirements/_map.html + _map.md</div>
+      <div>{S("grn","✓")} wrote requirements/_map.md + _map.json</div>
       <div>{" "}</div>
       <div>Next: run {S("acc","req next")} to see your worklist.</div>
       <div>{S("prompt","$ ")}{S("cursor","█")}</div>
@@ -55,10 +55,10 @@ function ConsoleOutput({ which }) {
   return (
     <>
       <div>{S("prompt","$ ")}req map</div>
-      <div>{S("grn","✓")} wrote requirements/_map.html</div>
       <div>{S("grn","✓")} wrote requirements/_map.md{"   "}{S("dim","(4 mermaid blocks)")}</div>
+      <div>{S("grn","✓")} wrote requirements/_map.json{"  "}{S("dim","(13 nodes · 16 edges)")}</div>
       <div>{" "}</div>
-      <div>{S("dim","open requirements/_map.html")}</div>
+      <div>{S("dim","open the app to browse the map")}</div>
       <div>{S("prompt","$ ")}{S("cursor","█")}</div>
     </>
   );

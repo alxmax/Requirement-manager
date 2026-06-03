@@ -111,13 +111,13 @@ const BAKED = [
   { id:"REQ-MAP-007", area:"REQ", title:"Requirement map (HTML + MD)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
     contract:[
-      "It shall generate `_map.html` (a multi-tab interactive viewer) and `_map.md` (Mermaid blocks).",
+      "It shall generate `_map.md` (Mermaid blocks) and `_map.json` (a `{nodes, edges}` graph for an external front-end).",
       "There shall be one node per requirement and one edge per `depends_on`.",
-      "All requirement-derived text shall be escaped so a hostile id/title/body cannot inject HTML." ],
+      "All requirement-derived text shall be JSON-encoded in `_map.json` (no markup context to break out of)." ],
     acc:[
       "The generated files contain one node per requirement and one edge per `depends_on`.",
-      "`_map.html` has the 4 named tabs, each with a legend.",
-      "The detail panel renders the Contract / Verify-intent / Notes split." ],
+      "`_map.md` contains 4 Mermaid code blocks, each with a legend.",
+      "`_map.json` parses to `{engine_version, nodes, edges}` with one node per requirement." ],
     impl:["`cmd_map`, `render_html`, `render_md`, the `_mermaid_*` generators in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:1033-1948"},{role:"tested-by",loc:"scripts/test_reqmap.py:237-1069"}],
     deps:["CORE-PARSE-001","CORE-SCAN-002"], usedBy:["REQ-INIT-012","REQ-NEXT-013"], risks:[] },
@@ -167,7 +167,7 @@ const BAKED = [
       "It shall be safe to re-run: a second invocation refreshes lock + map without destroying authored work." ],
     acc:[
       "`init` on a fresh repo creates `requirements/` and a `.reqmapignore`.",
-      "After `init`, `_map.html`, `_map.md` and the drift lock exist.",
+      "After `init`, `_map.md`, `_map.json` and the drift lock exist.",
       "`init` on a repo with no extractable code prints the distinct \"no requirements were extracted\" message." ],
     impl:["`cmd_init` in `reqmap.py` — orchestrates extract → check → map."],
     members:[{role:"implements",loc:"scripts/reqmap.py:1210-1237"},{role:"tested-by",loc:"scripts/test_reqmap.py:1265"}],
