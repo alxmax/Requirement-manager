@@ -1168,6 +1168,24 @@ class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
             drafts = [n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")]
             self.assertTrue(drafts)
 
+    def test_selfhost_init_omits_engine_ignore(self):
+        # A self-hosting repo: scripts/reqmap.py carries a tag that resolves to an
+        # existing requirement => init must NOT ignore the engine (else it orphans it).
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "CORE-X-001.md"),
+                   "---\nid: CORE-X-001\nstatus: confirmed\n---\n\n# Cap\n")
+            _write(os.path.join(d, "scripts", "reqmap.py"),
+                   tag("CORE-X-001") + "\nx = 1\n")
+            self._init(d)
+            ignore = open(os.path.join(d, ".reqmapignore"), encoding="utf-8").read()
+            # No live (uncommented) glob ignoring the engine.
+            globs = [ln.strip() for ln in ignore.splitlines()
+                     if ln.strip() and not ln.strip().startswith("#")]
+            self.assertNotIn("scripts/reqmap.py", globs)
+            # And the engine is actually scanned as a member of the resolved requirement.
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            self.assertIn("CORE-X-001", members)
+
     def test_does_not_clobber_existing_reqmapignore(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, ".reqmapignore"), "my-custom-glob/**\n")

@@ -57,6 +57,6 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 
 ## Plugin packaging
 
-`plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root). Version is tracked in `plugin.json` and as `MAP_ENGINE_VERSION` (ISO date string) inside `reqmap.py` — bump both on engine changes so seeded repos can detect they are behind.
+`plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root). Version is tracked in `plugin.json` and as `MAP_ENGINE_VERSION` (ISO date `YYYY-MM-DD`, with an optional `.N` same-day revision suffix, e.g. `2026-06-03.2`) inside `reqmap.py` — bump both on engine changes so seeded repos can detect they are behind.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.

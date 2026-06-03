@@ -54,9 +54,10 @@ RISK_ADVICE = {
 }
 
 # Bumped on any change to this engine. `check` warns a seeded repo when its
-# vendored copy is older than the installed plugin's. ISO date: lexicographic
-# order == chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-03.1"
+# vendored copy is older than the installed plugin's. ISO date with an optional
+# `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
+# chronological order, so a plain string compare is enough.
+MAP_ENGINE_VERSION = "2026-06-03.2"
 
 
 # ---------- parsing ----------
@@ -1053,6 +1054,33 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     return 0
 
 
+def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
+    """Content for a freshly-seeded `.reqmapignore`. Normally ignores the vendored
+    engine at `scripts/reqmap.py` — its `implements:` self-tags would otherwise read
+    as dangling refs in a consumer repo. EXCEPTION — a self-hosting repo: when that
+    file carries membership tags that resolve to requirements already present, the
+    engine IS the managed code and must stay scanned, so the line is omitted (a
+    comment explains why) to avoid orphaning those requirements."""
+    header = "# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
+    engine = os.path.join(code_root, "scripts", "reqmap.py")
+    req_ids = set(load_requirements(reqs_dir))
+    if req_ids and os.path.isfile(engine):
+        try:
+            with open(engine, encoding="utf-8") as f:
+                tagged = {m.group(2) for m in TAG_RE.finditer(f.read())}
+        except OSError:
+            tagged = set()
+        if tagged & req_ids:   # self-hosting: the engine's tags point at local reqs
+            return (header +
+                    "# scripts/reqmap.py is intentionally NOT ignored: this repo hosts its own\n"
+                    "# requirements there (its membership tags resolve to local requirements), so\n"
+                    "# the engine must stay scanned. Add other vendored/generated paths below.\n")
+    return (header +
+            "# The engine carries its own `implements:` self-tags; ignore it so the\n"
+            "# gate does not flag them as dangling refs.\n"
+            "scripts/reqmap.py\n")
+
+
 def cmd_init(reqs_dir, code_root):  # implements: REQ-INIT-012
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
     .reqmapignore (idempotent — never clobbers an existing one), draft requirements
@@ -1065,10 +1093,7 @@ def cmd_init(reqs_dir, code_root):  # implements: REQ-INIT-012
     ignore = os.path.join(code_root, ".reqmapignore")
     if not os.path.exists(ignore):
         with open(ignore, "w", encoding="utf-8") as f:
-            f.write("# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
-                    "# The engine carries its own `implements:` self-tags; ignore it so the\n"
-                    "# gate does not flag them as dangling refs.\n"
-                    "scripts/reqmap.py\n")
+            f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
     print("Bootstrapping draft requirements from existing code...\n")
     reqs = load_requirements(reqs_dir)
