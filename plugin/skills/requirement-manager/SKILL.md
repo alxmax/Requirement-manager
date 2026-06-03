@@ -133,7 +133,8 @@ engine changes to the cache and any registered consumer repos in one command:
 1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
    `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`,
    `_`-prefixed generated files) + anything in `.reqmapignore`. Invisible to reqmap.
-2. **Sync-only** — `README*`, everything under `docs/`, and every `*.html`.
+2. **Sync-only** — `README*`, everything under `docs/`, and every other `*.html`
+   (a `_`-prefixed generated file like `_map.html` is ignored by rule 1 first).
    Never turned into a requirement. Tag it `# generated-from: <ID>` (HTML:
    `<!-- generated-from: <ID> -->`) to make it a member: the drift gate then flags
    it stale when its requirement changes, and the advisory doc-sync step (below)
