@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/data.json
+*.local
+.vite/
+scripts/.ssr-smoke.bundle.*
+preview.log

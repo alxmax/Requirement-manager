@@ -8,6 +8,7 @@ Subcommands:
   scan              list code members (implements/generated-from/... tags) per capability
   check             the gate: link sync + drift; exit non-zero on error (use in pre-commit/CI)
   map               generate requirements/_map.html (navigable graph)
+  export            emit the registry graph as requirements/_map.json (for a front-end)
   next              terminal 'what should I do next': counted, actionable risk buckets
   extract           draft requirements from legacy code (status: draft, risk-scored)
 
@@ -66,7 +67,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-03.3"
+MAP_ENGINE_VERSION = "2026-06-04"
 
 
 # ---------- parsing ----------
@@ -1030,7 +1031,9 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
 
 
 # ---------- map (HTML) ----------
-def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
+def _build_map_data(reqs, members):  # implements: REQ-MAP-007
+    """Assemble the {nodes, edges} registry graph that drives every rendered
+    surface (HTML map, Mermaid blocks, and the JSON export). Pure: no IO."""
     used_by = {rid: [] for rid in reqs}
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -1068,6 +1071,11 @@ def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
             data["edges"].append([rid, dep])
+    return data
+
+
+def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
+    data = _build_map_data(reqs, members)
 
     if check:
         return _map_check(data, reqs_dir)
@@ -1077,6 +1085,24 @@ def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
     print("wrote {}".format(html_out))
     print("wrote {}".format(md_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
+    return 0
+
+
+def cmd_export(reqs, members, reqs_dir, out=None):  # implements: REQ-MAP-007
+    """Emit the registry graph as JSON for an external front-end to consume.
+    Same {nodes, edges} shape that drives the HTML map; '-' / stdout when no
+    --out and no reqs_dir target. Writes requirements/_map.json by default."""
+    data = _build_map_data(reqs, members)
+    payload = {"engine_version": MAP_ENGINE_VERSION,
+               "nodes": data["nodes"], "edges": data["edges"]}
+    text = json.dumps(payload, indent=2, ensure_ascii=False)
+    target = out if out else os.path.join(reqs_dir, "_map.json")
+    if target == "-":
+        print(text)
+        return 0
+    with open(target, "w", encoding="utf-8") as f:
+        f.write(text)
+    print("wrote {} ({} nodes, {} edges)".format(target, len(data["nodes"]), len(data["edges"])))
     return 0
 
 
@@ -1966,12 +1992,13 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "next", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
     ap.add_argument("--code", default=None)
-    ap.add_argument("--out", default=None, help="candidates: write plan JSON here ('-' or omit = stdout)")
+    ap.add_argument("--out", default=None, help="candidates: write plan JSON here ('-' or omit = stdout); "
+                    "export: write graph JSON here ('-' = stdout, omit = requirements/_map.json)")
     ap.add_argument("--md-glob", action="append", default=None,
                     help="candidates: also discover .md files matching this glob (repeatable; "
                          "comma-separated ok). Off unless given. e.g. --md-glob 'prompts/**' --md-glob 'modes/**'")
@@ -2012,6 +2039,8 @@ def main():
         return cmd_check(reqs, members, reqs_dir, a.update_lock)
     if a.cmd == "map":
         return cmd_map(reqs, members, reqs_dir, a.check_fresh)
+    if a.cmd == "export":
+        return cmd_export(reqs, members, reqs_dir, a.out)
     if a.cmd == "extract":
         return cmd_extract(reqs, members, code_root, reqs_dir)
     if a.cmd == "candidates":

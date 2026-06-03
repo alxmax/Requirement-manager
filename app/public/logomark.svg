@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Requirement Manager">
+  <defs>
+    <linearGradient id="rmRing" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2160c6"></stop>
+      <stop offset="1" stop-color="#c0206a"></stop>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28.5" stroke="url(#rmRing)" stroke-width="3"></circle>
+  <line x1="25" y1="25" x2="39" y2="39" stroke="#8d8fa3" stroke-width="2.6"></line>
+  <rect x="17" y="17" width="14" height="14" rx="2.5" stroke="#2160c6" stroke-width="2.6"></rect>
+  <rect x="33" y="33" width="14" height="14" rx="2.5" fill="#f5a623"></rect>
+</svg>
