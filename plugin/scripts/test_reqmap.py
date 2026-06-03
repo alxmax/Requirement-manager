@@ -182,7 +182,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
 class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
-                    "SKILL.md", "TODO.md", "LICENSE", "LICENSE.md",
+                    "SKILL.md", "TODO.md", "CHANGELOG.md", "LICENSE", "LICENSE.md",
                     "_map.md", "_findings.md", "_map.html"):
             self.assertEqual(R.classify_prose(rel), "ignore", rel)
 

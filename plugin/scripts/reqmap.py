@@ -31,7 +31,7 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
 PROSE_EXTS = (".md", ".html")
 # Bucket 1 — meta/boilerplate: never auto-drafted, never sync-checked. Basename match.
 META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
-                     "SKILL.md", "TODO.md"}
+                     "SKILL.md", "TODO.md", "CHANGELOG.md"}
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature"}
