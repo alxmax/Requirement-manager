@@ -1,5 +1,25 @@
 # Changelog
 
+## engine `1.10.0` — 2026-06-04
+
+- **Added — React front-end (`app/`)**: the four product surfaces (Map · Problems ·
+  Console · Spec) as a real Vite + React app, recreated from the design system. Run
+  with `cd app && npm run dev` (dev server pinned to port 5173 via `--strictPort`).
+- **Added — `export` command**: `reqmap.py export` emits the registry graph as
+  `requirements/_map.json` (`{engine_version, nodes, edges}`) — to stdout (`--out -`),
+  a path (`--out PATH`), or the default file — for an external front-end to consume.
+- **Added — self-contained viewer (`_map.html`)**: `map` injects this repo's graph
+  into a pre-built single-file React viewer (`scripts/_map_viewer.html`, carrying a
+  `<!--REQMAP_DATA-->` marker) → a double-click-openable `requirements/_map.html`,
+  no server, no npm. Emitted only when the template is vendored beside the engine;
+  the injected data is escaped (`</` → `<\/`) against script-breakout. `_map.html` is
+  regenerable and gitignored.
+- **Behavior change — engine no longer hand-generates HTML**: `render_html` and the
+  inline HTML template were removed; `map` now writes `_map.md` + `_map.json`
+  (+ `_map.html` from the viewer template when present). The freshness gate
+  (`map --check`) now covers `_map.md` + `_map.json`. Re-seed consumer repos with both
+  `scripts/reqmap.py` and `scripts/_map_viewer.html` (see SKILL setup / `sync_reqmap.sh`).
+
 ## engine `1.8.0` — 2026-06-03
 
 - **Added**: `extract`/`init` now discover prose capabilities (`.md`/`.html`) by
