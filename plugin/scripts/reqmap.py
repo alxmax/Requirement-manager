@@ -530,10 +530,10 @@ def _prose_facts(src):  # implements: REQ-EXTRACT-008
     Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
     Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
     The scaffold lists headings as an authoring hint — never the contract."""
-    meta, _body = parse_frontmatter(src)
+    meta, body = parse_frontmatter(src)
     title = meta.get("title") or None
     headings = []
-    for line in src.splitlines():
+    for line in body.splitlines():
         s = line.strip()
         if title is None:
             m = re.match(r"#\s+(.+)", s)                      # markdown H1
@@ -543,6 +543,7 @@ def _prose_facts(src):  # implements: REQ-EXTRACT-008
             m = re.search(r"<(?:title|h1)[^>]*>(.*?)</(?:title|h1)>", s, re.I)
             if m:
                 title = re.sub(r"<[^>]+>", "", m.group(1)).strip()
+                # no continue: a line may carry both <title> and <h2> (see test_html_title_and_h2)
         m = re.match(r"##\s+(.+)", s)                         # markdown H2 (not H3)
         if m:
             headings.append(m.group(1).strip())
