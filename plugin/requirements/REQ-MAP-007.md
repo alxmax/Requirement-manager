@@ -26,7 +26,9 @@ superseded_by:
 - Req→Code shall color an enforced-but-unlinked requirement red and a baseline/draft not-yet-
   linked one muted grey, collapsing multiple members in one file to a min–max line range.
 - The Risk diagram shall show only requirements with ≥1 risk signal (confirmed+0 members,
-  draft/baseline, or ≥3 dependents), each paired with a scripted recommendation.
+  draft/baseline, or ≥3 dependents), each paired with a scripted recommendation. A `draft`'s
+  open verify-intent question is suppressed (subsumed by its `unreviewed` signal) so a draft is
+  not double-flagged; this dedup lives in `_risk_signals`, shared with the `next` worklist.
 - The detail panel shall render the new `Contract`/`Verify intent`/`Notes` split (falling back
   to Input/Output/Description for legacy requirements) and a search box plus a ◎ button that
   centers and highlights a requirement in the currently-open diagram without switching tabs.

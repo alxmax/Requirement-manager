@@ -326,6 +326,18 @@ class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             made = sorted(n for n in os.listdir(out) if n.startswith("DRAFT-"))
             self.assertEqual(made, ["DRAFT-LIB-UTILS.md", "DRAFT-SRC-UTILS.md"])
 
+    def test_extract_honors_reqmapignore(self):  # init surfaced: extract ignored .reqmapignore
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "keep.py"), "x = 1\n")
+            _write(os.path.join(d, "scripts", "reqmap.py"), "y = 2\n")
+            _write(os.path.join(d, ".reqmapignore"), "scripts/reqmap.py\n")
+            reqs_dir = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_extract({}, {}, d, reqs_dir)
+            made = sorted(n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-"))
+            self.assertEqual(made, ["DRAFT-KEEP.md"])   # the vendored engine is not drafted
+
 
 class New(unittest.TestCase):  # tested-by: REQ-NEW-004
     def test_new_scaffolds_from_template_and_substitutes_id(self):
@@ -1036,6 +1048,164 @@ class Promote(unittest.TestCase):  # tested-by: REQ-PROMOTE-011
         new_text, n = R._set_frontmatter_status("no frontmatter here", "confirmed")
         self.assertEqual(n, 0)
         self.assertEqual(new_text, "no frontmatter here")
+
+
+class Next(unittest.TestCase):  # tested-by: REQ-NEXT-013
+    def _next(self, reqs, members, show_all=False):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_next(reqs, members, show_all)
+        return code, buf.getvalue()
+
+    def _req(self, status, extra="", body="# T\n"):
+        return {"meta": {"status": status, **dict(_kv(extra))}, "body": body}
+
+    def test_progress_header_present(self):
+        reqs = {"CORE-FOO-001": self._req("confirmed"), "REQ-BAR-002": self._req("draft")}
+        members = {"CORE-FOO-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._next(reqs, members)
+        self.assertIn("2 requirement(s)", out)
+        self.assertIn("1 confirmed", out)
+        self.assertIn("1 tested", out)
+        self.assertIn("1 draft(s)", out)
+
+    def test_untested_confirmed_lands_in_needs_tests(self):
+        reqs = {"CORE-FOO-001": self._req("confirmed")}
+        members = {"CORE-FOO-001": [("implements", "src/foo.py", 1)]}  # no tested-by
+        code, out = self._next(reqs, members)
+        self.assertEqual(code, 0)
+        self.assertIn("Needs tests", out)
+        self.assertIn("requirements/CORE-FOO-001.md", out)   # names the file to open
+
+    def test_draft_lands_in_drafts_to_review(self):
+        reqs = {"REQ-BAR-002": self._req("draft")}
+        _, out = self._next(reqs, {})
+        self.assertIn("Drafts to review", out)
+        self.assertIn("REQ-BAR-002", out)
+
+    def test_draft_intent_deduped_not_in_intent_bucket(self):
+        # a draft with an open verify bullet must NOT appear under intent review:
+        # the source dedup folds it into 'unreviewed' (one bucket, honest count)
+        body = "# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
+        reqs = {"REQ-BAR-002": self._req("draft", body=body)}
+        _, out = self._next(reqs, {})
+        self.assertIn("Drafts to review", out)
+        self.assertNotIn("Needs intent review", out)
+
+    def test_open_verify_intent_lands_in_needs_intent_review(self):
+        body = "# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
+        reqs = {"CORE-FOO-001": self._req("confirmed", body=body)}
+        members = {"CORE-FOO-001": [("implements", "src/foo.py", 1),
+                                    ("tested-by", "t.py", 2)]}  # tested, so only intent fires
+        _, out = self._next(reqs, members)
+        self.assertIn("Needs intent review", out)
+
+    def test_review_flagged_drafts_ordered_first(self):
+        reqs = {"DRAFT-A-001": self._req("draft", "risk: 0"),
+                "DRAFT-B-002": self._req("draft", "risk: 2")}  # REVIEW
+        _, out = self._next(reqs, {})
+        self.assertLess(out.index("DRAFT-B-002"), out.index("DRAFT-A-001"))  # high-risk first
+        self.assertIn("[REVIEW]", out)
+
+    def test_top_n_truncates_and_all_expands(self):
+        reqs = {"DRAFT-{}-00{}".format(c, i): self._req("draft")
+                for i, c in enumerate("ABCDE", 1)}            # 5 drafts > top_n=3
+        _, out = self._next(reqs, {})
+        self.assertIn("more — run `reqmap.py next --all`", out)
+        _, out_all = self._next(reqs, {}, show_all=True)
+        self.assertNotIn("more — run", out_all)
+        for rid in reqs:
+            self.assertIn(rid, out_all)
+
+    def test_blast_radius_is_omitted(self):
+        # FOO has 3 dependents -> blast-radius signal, but next must not surface it
+        reqs = {"CORE-FOO-001": self._req("confirmed"),
+                "A-1": self._req("confirmed", "depends_on: [CORE-FOO-001]"),
+                "B-2": self._req("confirmed", "depends_on: [CORE-FOO-001]"),
+                "C-3": self._req("confirmed", "depends_on: [CORE-FOO-001]")}
+        members = {k: [("implements", "x.py", 1), ("tested-by", "t.py", 2)] for k in reqs}
+        _, out = self._next(reqs, members)
+        self.assertNotIn("blast-radius", out)
+
+    def test_all_clear_when_nothing_pending(self):
+        reqs = {"CORE-FOO-001": self._req("confirmed")}
+        members = {"CORE-FOO-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        code, out = self._next(reqs, members)
+        self.assertEqual(code, 0)
+        self.assertIn("Nothing pending", out)
+
+    def test_empty_registry_is_distinct_from_all_clear(self):
+        code, out = self._next({}, {})
+        self.assertEqual(code, 0)
+        self.assertIn("No requirements yet", out)
+        self.assertNotIn("Nothing pending", out)
+
+
+class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
+    def _init(self, code_root):
+        reqs_dir = os.path.join(code_root, "requirements")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_init(reqs_dir, code_root)
+        return code, buf.getvalue(), reqs_dir
+
+    def test_scaffolds_dir_ignore_lock_and_map(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
+            code, out, reqs_dir = self._init(d)
+            self.assertEqual(code, 0)
+            self.assertTrue(os.path.isdir(reqs_dir))
+            ignore = open(os.path.join(d, ".reqmapignore"), encoding="utf-8").read()
+            self.assertIn("scripts/reqmap.py", ignore)
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.html")))
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.md")))
+            self.assertTrue(os.path.exists(R.lock_path(reqs_dir)))
+
+    def test_drafts_from_existing_code(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "x = 1\n")
+            _, _, reqs_dir = self._init(d)
+            drafts = [n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")]
+            self.assertTrue(drafts)
+
+    def test_does_not_clobber_existing_reqmapignore(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, ".reqmapignore"), "my-custom-glob/**\n")
+            self._init(d)
+            kept = open(os.path.join(d, ".reqmapignore"), encoding="utf-8").read()
+            self.assertEqual(kept, "my-custom-glob/**\n")  # untouched
+
+    def test_rerun_is_safe(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "x = 1\n")
+            self._init(d)
+            code, _, _ = self._init(d)   # second run
+            self.assertEqual(code, 0)
+
+    def test_summary_points_at_next(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "app.py"), "x = 1\n")
+            _, out, _ = self._init(d)
+            self.assertIn("reqmap.py next", out)
+
+    def test_empty_extraction_is_distinct(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "README.txt"), "not code\n")   # nothing extractable
+            code, out, reqs_dir = self._init(d)
+            self.assertEqual(code, 0)
+            self.assertIn("no requirements were extracted", out)
+            self.assertEqual([n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-")], [])
+
+
+def _kv(extra):
+    """Parse the 'key: value' frontmatter lines a test passes as `extra` into meta,
+    so Next can build requirement dicts the same way the REQ template does."""
+    for line in extra.splitlines():
+        if ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        meta, _ = R.parse_frontmatter("---\n{}: {}\n---\n".format(k.strip(), v.strip()))
+        yield k.strip(), meta.get(k.strip())
 
 
 if __name__ == "__main__":

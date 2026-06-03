@@ -25,6 +25,13 @@ mkdir -p scripts requirements
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
 ```
 
+**Then run the one-shot bootstrap** — `python scripts/reqmap.py init` creates the
+`requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`),
+drafts requirements from the existing code, builds the lock + map, and prints guided
+next steps. It is idempotent (safe to re-run) and never clobbers an existing
+`.reqmapignore`. The manual steps below are what `init` automates — do them by hand
+only if you want finer control.
+
 The requirement template is **built into the engine** — `reqmap.py new` needs no
 template file. (Optionally, drop a `templates/requirement.md` in the repo to override
 the built-in scaffold; the engine uses it automatically when present.)
@@ -152,9 +159,11 @@ before push *and* on the remote for PRs.
 
 ## Commands
 
+- `python scripts/reqmap.py init`              — first-use bootstrap: scaffold `requirements/` + `.reqmapignore`, draft requirements from existing code, build the lock + map, and print guided next steps. Idempotent; never clobbers an existing `.reqmapignore`.
 - `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
 - `python scripts/reqmap.py promote <ID>`        — the human-validation step: flip a reviewed requirement's `status` to `confirmed` (one frontmatter edit). Refuses if it has no `implements:` member (a confirmed requirement must point to code); warns if it has no `tested-by:`. Re-run `check --update-lock` + `map` after.
 - `python scripts/reqmap.py scan`              — list code members per capability
+- `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (extract `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.html` (4-tab interactive viewer with search, yellow node highlight, ⊕ center button, fit-to-view) + `requirements/_map.md` (4 Mermaid diagrams). The Risk tab/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
 - `python scripts/reqmap.py extract`           — draft one requirement per untagged file (brownfield bootstrap)

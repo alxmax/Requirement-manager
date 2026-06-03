@@ -7,10 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 All commands run from `plugin/` (the engine resolves paths relative to its working directory):
 
 ```bash
+python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
 python scripts/reqmap.py check              # gate: link sync + drift — run before every commit
 python scripts/reqmap.py map                # generate requirements/_map.html + _map.md
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
+python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items
@@ -28,11 +30,11 @@ The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any 
 
 This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-manager`) that seeds `reqmap.py` into target repos. The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — ~1000 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — ~1000 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Two-layer requirement model:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
-- `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, check, map, extract, candidates, findings.
+- `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, check, map, extract, candidates, findings, init, next.
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
 
