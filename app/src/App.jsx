@@ -5,17 +5,15 @@ import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
-import { ConsoleView } from "./views/ConsoleView.jsx";
 import { SpecView } from "./views/SpecView.jsx";
 
 const NAV = [
   { key:"map",     label:"Map",     icon:"network" },
   { key:"problems",label:"Problems",icon:"triangle-alert" },
-  { key:"console", label:"Console", icon:"terminal" },
   { key:"spec",    label:"Spec",    icon:"file-text" },
 ];
 
-function TopBar({ query, setQuery, theme, setTheme, onSearchPick, gotoConsole }) {
+function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   const q = query.trim().toLowerCase();
   const hits = q ? REQUIREMENTS.filter(r =>
     (r.id+" "+r.title+" "+r.intent+" "+r.contract.join(" ")).toLowerCase().includes(q)
@@ -46,7 +44,6 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick, gotoConsole })
       <button className="btn-icon bare" title="toggle theme" onClick={()=>setTheme(theme==="light"?"dark":"light")}>
         <Icon name={theme==="light"?"moon":"sun"} size={17} />
       </button>
-      <Btn variant="primary" icon="shield-check" onClick={gotoConsole}>Run check</Btn>
     </header>
   );
 }
@@ -54,7 +51,7 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick, gotoConsole })
 function Rail({ view, setView }) {
   const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
-  const counts = { map:REQUIREMENTS.length, problems:problems.length, console:4, spec:REQUIREMENTS.length };
+  const counts = { map:REQUIREMENTS.length, problems:problems.length, spec:REQUIREMENTS.length };
 
   // registry stats derived from whatever data is loaded
   const by = (pred) => REQUIREMENTS.filter(pred).length;
@@ -108,13 +105,12 @@ export default function App() {
   return (
     <div className="app">
       <TopBar query={query} setQuery={setQuery} theme={theme} setTheme={setTheme}
-        onSearchPick={searchPick} gotoConsole={()=>setView("console")} />
+        onSearchPick={searchPick} />
       <div className="body">
         <Rail view={view} setView={setView} />
         {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
           highlightId={highlightId} setHighlightId={setHighlightId} />}
         {view==="problems" && <ProblemsView openSpec={openSpec} />}
-        {view==="console" && <ConsoleView />}
         {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
       </div>
     </div>
