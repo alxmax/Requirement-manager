@@ -67,7 +67,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-04.4"
+MAP_ENGINE_VERSION = "2026-06-04.5"
 
 
 # ---------- parsing ----------
@@ -316,7 +316,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         if m.get("status") in ENFORCED and not impls:
             errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
-        if m.get("status") == "confirmed" and not tests:
+        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
 
     lock = load_lock(reqs_dir)
@@ -1807,7 +1807,10 @@ def main():
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all)
     if a.cmd == "check":
-        return cmd_check(reqs, members, reqs_dir, a.update_lock)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
+        if a.update_lock:
+            cmd_map(reqs, members, reqs_dir)
+        return rc
     if a.cmd == "map":
         return cmd_map(reqs, members, reqs_dir, a.check_fresh)
     if a.cmd == "export":
