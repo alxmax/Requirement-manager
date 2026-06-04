@@ -22,9 +22,9 @@ When this skill is invoked, choose one of two paths:
 
 - **With an action argument** (e.g. `requirement-manager regenerate-map`) — skip the
   menu and run that action directly. Accepted arguments: `init`,
-  `regenerate-requirements`, `update-engine`, `regenerate-map` (hyphen or space,
+  `regenerate-requirements`, `update-engine`, `regenerate-map`, `intent-triage` (hyphen or space,
   case-insensitive).
-- **Bare** (no argument) — present the four actions below with `AskUserQuestion` and
+- **Bare** (no argument) — present the five actions below with `AskUserQuestion` and
   run the one the user picks.
 
 All actions run from the repo root where `scripts/reqmap.py` is vendored (see Setup).
@@ -37,6 +37,7 @@ After any action, summarize what changed and, when useful, point to
 | **regenerate requirements** | Hard reset: delete all non-generated requirement files and strip membership tags from source code, then re-extract from scratch. Covers code and prose (`.md`/`.html`). After extraction run `check` and report the draft count + gate result (`N errors`). Remind the user to review + `promote` the real ones. | `python scripts/reqmap.py init --wipe` → report draft count + `check` result |
 | **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
 | **regenerate map** | Refresh the generated artifacts (lock + Mermaid map + JSON graph) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` → advisory doc-sync |
+| **intent triage** | Classify all auto-extracted requirements as Core / Emergent / Accidental. Run when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py next` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → promote path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py scan` → `check --update-lock` → `map`. |
 
 **Advisory doc-sync (assistant step, not the engine).** After `map`, for each
 sync-only doc (bucket 2) tagged `generated-from: <ID>`, the assistant reads the doc,
@@ -44,6 +45,40 @@ its requirement(s), and the implementing code, then reports concrete mismatches
 (e.g. "the HTML says quorum 6/9; the code says 7/9"). This is judgment, not a gate —
 it surfaces findings and never blocks a commit. The engine's deterministic drift
 flag (stale-on-change) is the hard half of doc-sync; this is the semantic half.
+
+### Intent triage — when the corpus is vibe-coded
+
+A vibe-coded corpus is one where most requirements have `owner: auto` and none
+(or very few) are `confirmed` — the requirements were auto-extracted from code
+and never validated for intent. Triage surfaces what the project genuinely needs
+vs. what the AI invented during extraction, before those inventions get promoted
+to `confirmed` and start blocking real work.
+
+**When to offer proactively**: when `reqmap.py next` shows `0 confirmed` and
+the majority of requirements carry `owner: auto` in their frontmatter, offer
+intent triage before any other action.
+
+**The C/E/A framework:**
+
+- **Core** — the tool cannot work without this. Remove it and users notice
+  immediately. Candidate for `confirmed` after human review.
+- **Emergent** — logically implied by Core capabilities; the AI added it as a
+  natural extension. Useful but not essential. Keep as `baseline`.
+- **Accidental** — the AI invented it during extraction; no user asked for it
+  and removing it changes nothing visible. Deprecate and delete.
+
+**Process:**
+
+1. Read each requirement's `## WHAT — Contract` to the user in one sentence.
+2. User says C, E, or A.
+3. After classifying all: apply decisions in bulk.
+   - Core → leave for human review + promote path (`reqmap.py promote <ID>`).
+   - Emergent → keep as `baseline`; no action needed.
+   - Accidental → set `status: deprecated` in frontmatter; delete implementing
+     code (check for load-bearing callers first with `grep` before deleting).
+4. For Accidental code that IS still referenced: keep the code, strip the
+   `implements:` tag, delete only the requirement file.
+5. Run `reqmap.py scan` → `check --update-lock` → `map` to verify.
 
 ## Setup (first use in a repo)
 
