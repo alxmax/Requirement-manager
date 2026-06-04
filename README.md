@@ -56,9 +56,12 @@ plugin/                                   the plugin (source of truth, self-cont
 ## Commands
 
 ```bash
-python scripts/reqmap.py new AREA-NAME-NNN   # scaffold a requirement
+python scripts/reqmap.py init              # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
+python scripts/reqmap.py new AREA-NAME-NNN # scaffold a requirement
+python scripts/reqmap.py promote <ID>      # flip a reviewed requirement to confirmed (human validation step)
 python scripts/reqmap.py scan              # list code members per capability
 python scripts/reqmap.py check             # the gate: link sync + drift (pre-commit/CI)
+python scripts/reqmap.py next              # what to do next: counted actionable risk buckets
 python scripts/reqmap.py map               # generate _map.md (Mermaid) + _map.json (graph) + _map.html (self-contained viewer)
 python scripts/reqmap.py export            # emit requirements/_map.json (the graph the viewer/front-ends consume)
 python scripts/reqmap.py extract           # draft requirements from legacy code
@@ -91,6 +94,6 @@ The action just runs `reqmap.py check` (link sync + drift + `depends_on`); input
 ## Dogfooded
 
 This repo applies the skill to itself: `plugin/requirements/` describes `reqmap.py`'s
-own capabilities (3 `bus` + 7 `feature`), and `cd plugin && python scripts/reqmap.py
+own capabilities (3 `bus` + 10 `feature`), and `cd plugin && python scripts/reqmap.py
 check` passes with zero errors. See [SKILL.md](plugin/skills/requirement-manager/SKILL.md)
 for the full model and authoring rules.
