@@ -243,6 +243,7 @@ export function setRegistry(list) {
 /* coverage falls out of the clause↔acceptance mapping; a stale tested-by ref demotes to untested */
 export function coverageOf(r) {
   if (r.status === "deprecated") return "exempt";
+  if (r.test_exempt) return "exempt";
   const hasImpl = r.members.some(m => m.role === "implements");
   const hasTest = r.members.some(m => m.role === "tested-by");
   if (!hasImpl) return "untested";                 // orphan — nothing to cover

@@ -34,9 +34,6 @@ export function computeProblems() {
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     }
   });
-  // standalone advisory the gate prints
-  out.push({ id:"—", title:"Open findings", signal:"findings", sev:"WARN",
-    msg:"3 open verify-intent finding(s) across the registry.", fix:"Triage requirements/_findings.md.", loc:"requirements/_findings.md" });
   const order = { ERROR:0, WARN:1, REVIEW:2, CAUTION:3 };
   return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
 }
