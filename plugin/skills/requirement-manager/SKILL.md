@@ -131,6 +131,15 @@ engine changes to the cache and any registered consumer repos in one command:
    silent truth).
 6. **Authoring is bidirectional**: you may start in code (explore), but the change
    is not "done" until the requirement is updated in the *same* commit.
+7. **`## WHAT — Verify intent` asks the user, not the AI.** This section is for
+   open questions that only a human reviewer can answer — contract gaps, edge cases
+   not covered, design decisions left implicit, or behaviors that may be AI accidents
+   (swallowed error, magic constant, unreachable branch). Write 1–3 specific, answerable
+   questions per requirement. "None — doc is unambiguous." is a valid answer only when
+   the contract genuinely leaves nothing open; use it sparingly. The engine treats it
+   as a placeholder and `findings` skips it. Once the human answers, fold the answer
+   into the Contract (or Notes) and delete the bullet — the section should shrink toward
+   empty as the requirement matures.
 
 ### Prose & doc capabilities (the three buckets)
 
