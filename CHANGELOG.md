@@ -1,5 +1,32 @@
 # Changelog
 
+## engine `1.11.0` — 2026-06-04
+
+- **Fixed — viewer rendered only its demo fixture**: the `_map.html` graph tabs
+  positioned nodes through hardcoded coordinate maps keyed to the bundled sample ids,
+  so any real repo's requirements were filtered out and the canvas was blank (registry
+  counts were correct, masking it). The System Map, Risk and Dependencies tabs now
+  **compute their layout from the live registry** — they render any repo's data.
+- **Added — layered "main-bus" layout** (`app/src/lib/layout.js`): nodes are ranked by
+  dependency depth so `depends_on` flows left→right (consumers left, shared
+  foundation/`bus` nodes right), a barycenter pass minimises edge crossings, and
+  edge-less nodes are parked in a side grid.
+- **Added — colour-coded, selectable edges**: each dependency edge (arrowhead included,
+  via `context-stroke`) is drawn in its source requirement's colour, so overlapping
+  lines stay traceable; cards are kept neutral. Click a line to isolate it — it goes
+  bold, the rest dim, and its two endpoints are ringed, so `x → y` is unambiguous.
+- **Changed — card-avoiding orthogonal routing**: edges run their verticals in the
+  inter-column gutters and cross any intermediate column only through a gap between its
+  cards, so a line never passes through a card it doesn't connect to (no more
+  "x → y → z through a node" look). Rounded right-angle turns.
+- **Added — grab-to-pan**: drag anywhere on a map canvas to pan it (no need for the
+  scrollbars); a plain click (no drag) still selects a node or edge.
+- **Fixed — "center & highlight" button**: it set the highlight but never scrolled; it
+  now `scrollIntoView`s the highlighted node.
+- **Fixed — `_build_json` area**: emits the ID-prefix fallback (`_area_of`) when a
+  requirement has no explicit `area:`, matching the Mermaid path's grouping so the
+  JSON graph carries a usable `area` for external front-ends.
+
 ## engine `1.10.0` — 2026-06-04
 
 - **Added — React front-end (`app/`)**: the four product surfaces (Map · Problems ·

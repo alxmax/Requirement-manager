@@ -67,7 +67,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-04.3"
+MAP_ENGINE_VERSION = "2026-06-04.4"
 
 
 # ---------- parsing ----------
@@ -1045,7 +1045,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
             "status": m.get("status", "draft"),
-            "area": m.get("area", ""),
+            "area": (m.get("area") or "").strip() or _area_of(rid),
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
