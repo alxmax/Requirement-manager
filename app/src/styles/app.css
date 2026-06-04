@@ -146,22 +146,6 @@ button { font-family: inherit; cursor: pointer; }
 .locate-btn { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 1px solid var(--signal-gold); background: var(--bg); border-radius: var(--radius-1); color: var(--signal-gold); }
 .locate-btn:hover { background: var(--signal-gold-hi); }
 
-/* ---- Console ------------------------------------------------------------- */
-.console { padding: 18px; display: flex; flex-direction: column; gap: 14px; max-width: 920px; }
-.cmd-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.cmd-chip { font: var(--text-id); padding: 6px 11px; border: 1px solid var(--border); background: var(--bg); color: var(--fg-secondary); border-radius: var(--radius-1); }
-.cmd-chip:hover { border-color: var(--accent); color: var(--accent); }
-.cmd-chip.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
-.term { background: #0b1622; border: 1px solid #22323f; border-radius: var(--radius-2); padding: 16px 18px; font: var(--text-code); line-height: 1.7; color: #cdd6df; white-space: pre-wrap; min-height: 360px; }
-.term .prompt { color: #8a887f; }
-.term .dim { color: #8a887f; }
-.term .grn { color: #97c459; }
-.term .amb { color: #fac775; }
-.term .red { color: #ea8c83; }
-.term .acc { color: #afa9ec; }
-.term .bold { color: #f0eee6; font-weight: 600; }
-.term .cursor { color: #afa9ec; animation: blink 1.1s steps(2) infinite; }
-@keyframes blink { 0%,50%{opacity:1} 50.01%,100%{opacity:0} }
 
 /* ---- Spec doc ------------------------------------------------------------ */
 .spec { padding: 26px 32px; }
