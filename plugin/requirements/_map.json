@@ -1,11 +1,11 @@
 {
-  "engine_version": "2026-06-04.3",
+  "engine_version": "2026-06-04.4",
   "nodes": [
     {
       "id": "CORE-DRIFT-003",
       "layer": "bus",
       "status": "confirmed",
-      "area": "",
+      "area": "CORE",
       "title": "Contract hashing & lock",
       "intent": "Detect when a requirement's binding contract changes, so stale code can be re-checked.",
       "contract": [
@@ -71,7 +71,7 @@
       "id": "CORE-PARSE-001",
       "layer": "bus",
       "status": "confirmed",
-      "area": "",
+      "area": "CORE",
       "title": "Requirement reading",
       "intent": "Turn the requirement files on disk into structured records the rest of the tool reasons about.",
       "contract": [
@@ -148,7 +148,7 @@
       "id": "CORE-SCAN-002",
       "layer": "bus",
       "status": "confirmed",
-      "area": "",
+      "area": "CORE",
       "title": "Member discovery",
       "intent": "Find every place in the code that claims membership of a capability, by scanning for tags.",
       "contract": [
@@ -217,7 +217,7 @@
       "id": "REQ-CANDIDATES-009",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "Capability candidates (extraction plan)",
       "intent": "Stage 1 of AI extraction: emit a deterministic capability plan from legacy code, writing no requirement files.",
       "contract": [
@@ -313,7 +313,7 @@
       "id": "REQ-CHECK-006",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "The gate",
       "intent": "Fail the build when code and requirements have fallen out of sync.",
       "contract": [
@@ -394,7 +394,7 @@
       "id": "REQ-EXTRACT-008",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "Legacy extraction",
       "intent": "Bootstrap a registry on a brownfield codebase by proposing draft requirements from untagged code.",
       "contract": [
@@ -489,7 +489,7 @@
       "id": "REQ-FINDINGS-010",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "Open-findings report",
       "intent": "Roll up every requirement's open \"verify intent\" questions into one reviewable `_findings.md`, optionally enriched by an AI-triage sidecar.",
       "contract": [
@@ -544,7 +544,7 @@
       "id": "REQ-INIT-012",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "First-use bootstrap",
       "intent": "One command that turns a fresh repo into a tracked one — scaffold, draft from existing code, lock, map, and tell the human what to do next.",
       "contract": [
@@ -606,7 +606,7 @@
       "id": "REQ-MAP-007",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "Requirement map (Mermaid MD + JSON + self-contained viewer)",
       "intent": "Render the whole registry as navigable diagrams, a machine-readable graph, and a double-click-openable viewer a human or a front-end can read at a glance.",
       "contract": [
@@ -779,7 +779,7 @@
       "id": "REQ-NEW-004",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "Scaffold a requirement",
       "intent": "Create a new requirement file from the template, so every capability starts in the same shape.",
       "contract": [
@@ -827,7 +827,7 @@
       "id": "REQ-NEXT-013",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "What-should-I-do-next report",
       "intent": "Render the map's risk surface in the terminal as counted, actionable buckets, so a human knows where to start without opening the HTML map.",
       "contract": [
@@ -888,7 +888,7 @@
       "id": "REQ-PROMOTE-011",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "promote",
       "intent": "WHY: one command to perform the human-validation step — flip a reviewed requirement from baseline/draft to `confirmed` — instead of hand-editing frontmatter.",
       "contract": [
@@ -937,7 +937,7 @@
       "id": "REQ-SCAN-005",
       "layer": "feature",
       "status": "confirmed",
-      "area": "",
+      "area": "REQ",
       "title": "List members per capability",
       "intent": "Show, for every capability, which code claims it — and which capabilities have no code.",
       "contract": [
