@@ -1,6 +1,6 @@
 /* RoadmapView — Gantt-style chart: semver milestones on X, swim lanes on Y.
    Requirements with `milestone:` field + TODO.md items via TODOS. */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { REQUIREMENTS, TODOS } from "../lib/data.js";
 
 function semverCmp(a, b) {
@@ -26,11 +26,11 @@ const LANE_LABEL = { bus: "Bus", feature: "Feature", ops: "Ops" };
 const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)";
 
 const VARIANT = {
-  done:     { background: "#dff0e8", color: "#3a7055", dot: "#5aaa80", clipPath: ARROW, paddingRight: 20 },
-  progress: { background: "#dde8f5", color: "#2e5c8a", dot: "#5a8ac0", clipPath: ARROW, paddingRight: 20 },
-  draft:    { background: "#f5ede0", color: "#8a5e30", dot: "#c09050", border: "1.5px dashed #d4b898" },
-  planned:  { background: "#eeece8", color: "#8a8278", dot: "#b8b4ac", clipPath: ARROW, paddingRight: 20 },
-  todo:     { background: "#f5ede0", color: "#8a5e30", dot: "#c09050", border: "1.5px dashed #d4b898" },
+  done:     { background: "var(--cov-tested-bg)",  color: "var(--cov-tested)",   dot: "var(--cov-tested)",   clipPath: ARROW, paddingRight: 20 },
+  progress: { background: "var(--indigo-tint)",    color: "var(--indigo-500)",   dot: "var(--indigo-400)",   clipPath: ARROW, paddingRight: 20 },
+  draft:    { background: "var(--amber-tint)",     color: "var(--amber-700)",    dot: "var(--amber-600)",    border: "1.5px dashed var(--amber-400)" },
+  planned:  { background: "var(--surface-hov)",    color: "var(--fg-muted)",     dot: "var(--fg-faint)",     clipPath: ARROW, paddingRight: 20 },
+  todo:     { background: "var(--amber-tint)",     color: "var(--amber-700)",    dot: "var(--amber-600)",    border: "1.5px dashed var(--amber-400)" },
 };
 
 function Bar({ variant, id, label, onClick }) {
@@ -58,6 +58,30 @@ function Bar({ variant, id, label, onClick }) {
 
 export function RoadmapView({ openSpec }) {
   const [showUnscheduled, setShowUnscheduled] = useState(false);
+  const ref = useRef(null);
+  const drag = useRef(null);
+  function onMouseDown(e) {
+    if (e.button !== 0) return;
+    const el = ref.current; if (!el) return;
+    const d = { x: e.clientX, y: e.clientY, sl: el.scrollLeft, st: el.scrollTop, moved: false };
+    drag.current = d;
+    const move = (ev) => {
+      const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
+      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) { d.moved = true; el.classList.add("grabbing"); }
+      if (d.moved) { el.scrollLeft = d.sl - dx; el.scrollTop = d.st - dy; }
+    };
+    const up = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", up);
+      el.classList.remove("grabbing");
+      setTimeout(() => { drag.current = null; }, 0);
+    };
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+  }
+  function onClickCapture(e) {
+    if (drag.current && drag.current.moved) { e.stopPropagation(); e.preventDefault(); }
+  }
 
   const msSet = new Set();
   REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
@@ -90,22 +114,23 @@ export function RoadmapView({ openSpec }) {
   });
 
   const thBase = {
-    background: "#edeae4", color: "#6e6860", fontSize: 11, fontWeight: 600,
+    background: "var(--bg-raised)", color: "var(--fg-muted)", fontSize: 11, fontWeight: 600,
     letterSpacing: "0.4px", padding: "10px 14px", textAlign: "center",
-    borderBottom: "1px solid #dedad3", borderRight: "1px solid #dedad3", whiteSpace: "nowrap",
+    borderBottom: "1px solid var(--border)", borderRight: "1px solid var(--border)", whiteSpace: "nowrap",
   };
 
   return (
-    <div className="main" style={{ overflowX: "auto", padding: "24px 20px" }}>
-      <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "100%", minWidth: 560 }}>
+    <div ref={ref} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
+         className="main pan" style={{ overflow: "auto", padding: "24px 20px" }}>
+      <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "max-content", minWidth: 560 }}>
         <thead>
           <tr>
             <th style={{ ...thBase, background: "transparent", border: "none", width: 60 }} />
             {milestones.map(ms => (
-              <th key={ms} style={{ ...thBase, ...(ms === current ? { background: "#e8e2d8", color: "#3a3530", fontWeight: 700 } : {}) }}>
+              <th key={ms} style={{ ...thBase, ...(ms === current ? { background: "var(--surface-hov)", color: "var(--fg)", fontWeight: 700 } : {}) }}>
                 {ms}
                 {ms === current && (
-                  <span style={{ display: "inline-block", width: 6, height: 6, background: "#b07050",
+                  <span style={{ display: "inline-block", width: 6, height: 6, background: "var(--accent-2)",
                     borderRadius: "50%", marginLeft: 5, verticalAlign: "middle", position: "relative", top: -1 }} />
                 )}
               </th>
@@ -118,8 +143,8 @@ export function RoadmapView({ openSpec }) {
               {rowIdx === 0 && (
                 <td rowSpan={maxRows} style={{
                   fontSize: 10, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase",
-                  color: "#9c9690", padding: "0 14px", textAlign: "right", verticalAlign: "middle",
-                  borderRight: "1px solid #dedad3", whiteSpace: "nowrap", background: "#f5f3ef", minWidth: 60,
+                  color: "var(--fg-faint)", padding: "0 14px", textAlign: "right", verticalAlign: "middle",
+                  borderRight: "1px solid var(--border)", whiteSpace: "nowrap", background: "var(--bg-raised)", minWidth: 60,
                 }}>
                   {LANE_LABEL[lane]}
                 </td>
@@ -128,8 +153,8 @@ export function RoadmapView({ openSpec }) {
                 const item = byMs[ms][rowIdx];
                 return (
                   <td key={ms} style={{
-                    padding: "6px 10px", borderBottom: "1px solid #edeae4", borderRight: "1px solid #edeae4",
-                    background: "#faf9f7", verticalAlign: "middle",
+                    padding: "6px 10px", borderBottom: "1px solid var(--border-soft)", borderRight: "1px solid var(--border-soft)",
+                    background: "var(--surface)", verticalAlign: "middle",
                   }}>
                     {item?.type === "req" && (
                       <Bar variant={barVariant(item.r.status)} id={item.r.id} label={item.r.title}
@@ -151,7 +176,7 @@ export function RoadmapView({ openSpec }) {
           <button
             onClick={() => setShowUnscheduled(s => !s)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 0",
-                     color: "#9c9690", fontSize: 12, fontFamily: "inherit" }}
+                     color: "var(--fg-faint)", fontSize: 12, fontFamily: "inherit" }}
           >
             {showUnscheduled ? "▾" : "▸"} Unscheduled ({unscheduled.length})
           </button>
