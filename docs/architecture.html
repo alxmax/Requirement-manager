@@ -194,23 +194,30 @@ document.addEventListener('DOMContentLoaded', async function() {
   function inject(){
     if(document.getElementById('_arch_nav')) return;
     if(!document.body) return;
-    var nav = document.createElement('div');
+    var nav = document.createElement('nav');
     nav.id = '_arch_nav';
-    nav.style.cssText = 'position:fixed;bottom:12px;left:12px;display:flex;gap:10px;z-index:99999;font:12px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;';
-    LINKS.forEach(function(l){
-      var a = document.createElement('a');
-      a.href = l[0]; a.target = '_blank'; a.textContent = l[1];
-      a.style.cssText = 'color:#555;background:rgba(255,255,255,0.88);padding:5px 11px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.10);text-decoration:none;';
-      a.onmouseover = function(){ this.style.background='#fff'; this.style.color='#111'; };
-      a.onmouseout  = function(){ this.style.background='rgba(255,255,255,0.88)'; this.style.color='#555'; };
+    nav.style.cssText = 'flex:1;display:flex;justify-content:center;align-items:center;gap:0;min-width:0;white-space:nowrap;';
+    LINKS.forEach(function(l,i){
+      if(i>0){var sep=document.createElement('span');sep.textContent='·';sep.style.cssText='color:#9ca0b8;font:700 11px/1 sans-serif;padding:0 2px;flex-shrink:0;';nav.appendChild(sep);}
+      var a=document.createElement('a');
+      a.href=l[0];a.target='_blank';a.textContent=l[1];
+      a.style.cssText='color:#3d4270;text-decoration:none;font:700 10px/1 -apple-system,BlinkMacSystemFont,sans-serif;letter-spacing:0.12em;text-transform:uppercase;padding:2px 6px;flex-shrink:0;';
+      a.onmouseover=function(){this.style.color='#2160c6';};
+      a.onmouseout=function(){this.style.color='#3d4270';};
       nav.appendChild(a);
     });
-    document.body.appendChild(nav);
+    var header = document.querySelector('header');
+    if(header){
+      var eyebrow = header.lastElementChild;
+      header.insertBefore(nav, eyebrow);
+    } else {
+      nav.style.cssText = 'position:fixed;top:0;left:50%;transform:translateX(-50%);height:44px;display:flex;align-items:center;white-space:nowrap;z-index:99999;pointer-events:none;';
+      document.body.appendChild(nav);
+    }
   }
   window.addEventListener('load', function(){
     inject();
     var t = setInterval(function(){
-      if(document.getElementById('_arch_nav')){ clearInterval(t); return; }
       inject();
     }, 200);
     setTimeout(function(){ clearInterval(t); }, 8000);
