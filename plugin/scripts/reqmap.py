@@ -1083,22 +1083,22 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
 
 
 def _parse_todos_from_text(text):
-    """Parse TODO.md content → list of {name, lane, milestone, done} dicts. Pure."""
-    import re as _re
+    """Parse TODO.md content → list of {name, lane, milestone, done} dicts. Pure.
+    Items before the first ## vX.Y heading are silently ignored (milestone is required)."""
     todos, current_ms = [], None
     for line in text.splitlines():
-        ms_m = _re.match(r"^##\s+(v\d[\d.]*)\s*$", line.strip())
+        ms_m = re.match(r"^##\s+(v\d[\d.]*)\s*$", line.strip())
         if ms_m:
             current_ms = ms_m.group(1)
             continue
-        item_m = _re.match(r"^-\s+\[([ xX])\]\s+(.+)$", line.strip())
+        item_m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", line.strip())
         if item_m and current_ms:
             done = item_m.group(1).lower() == "x"
             rest = item_m.group(2)
             if "|" in rest:
                 name_part, meta = rest.rsplit("|", 1)
                 name = name_part.strip()
-                lane_m = _re.search(r"lane:\s*(\w+)", meta)
+                lane_m = re.search(r"lane:\s*(\w+)", meta)  # lane must be a single word (bus|feature|ops)
                 lane = lane_m.group(1) if lane_m else "feature"
             else:
                 name, lane = rest.strip(), "feature"
