@@ -8,3 +8,6 @@ plugin/requirements/_map.html
 # Dev-only shortcuts (Windows, localhost — not for seeded repos)
 *.cmd
 *.url
+
+# Superpowers plans and session artifacts
+docs/superpowers/

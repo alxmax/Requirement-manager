@@ -142,6 +142,46 @@ class Gate(unittest.TestCase):
             self.assertIn("re-check 1 member", out)   # actionable count
             self.assertIn("mod.py:1", out)            # names the member location
 
+    def test_confirmed_missing_contract_section_warns(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## HOW — Acceptance (= tests)\n- Given X When Y Then Z\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertIn("missing '## WHAT — Contract'", out)
+        self.assertEqual(code, 0)  # WARN, not error
+
+    def test_confirmed_missing_acceptance_section_warns(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## WHAT — Contract (normative)\n- It shall do X\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertIn("missing '## HOW — Acceptance'", out)
+        self.assertEqual(code, 0)  # WARN, not error
+
+    def test_confirmed_with_both_sections_no_section_lint_warn(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## WHAT — Contract (normative)\n- It shall do X\n\n"
+                "## HOW — Acceptance (= tests)\n- Given X When Y Then Z\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertNotIn("missing '## WHAT — Contract'", out)
+        self.assertNotIn("missing '## HOW — Acceptance'", out)
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_tag_re_left_boundary(self):  # bug #3
@@ -734,6 +774,27 @@ class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertNotIn("<!--REQMAP_DATA-->", html)
 
 
+class DocsPublish(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_docs_publish_path_nojekyll_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", ".nojekyll"), "")
+            self.assertEqual(R._docs_publish_path(d), os.path.join(d, "docs", "map.html"))
+
+    def test_docs_publish_path_index_html_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "index.html"), "<html></html>")
+            self.assertEqual(R._docs_publish_path(d), os.path.join(d, "docs", "map.html"))
+
+    def test_docs_publish_path_no_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            self.assertIsNone(R._docs_publish_path(d))
+
+    def test_docs_publish_path_no_docs_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R._docs_publish_path(d))
+
+
 class JsFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
     def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested
         f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){}\nconst bar = 1;\n")
@@ -1277,6 +1338,32 @@ class Next(unittest.TestCase):  # tested-by: REQ-NEXT-013
         self.assertEqual(code, 0)
         self.assertIn("No requirements yet", out)
         self.assertNotIn("Nothing pending", out)
+
+    def _req_with_acs(self, n):
+        acs = "".join(f"- AC-{i}: Given X When Y Then Z\n" for i in range(n))
+        body = (
+            "# Foo\n\n"
+            "## WHAT — Contract (normative)\n- It shall do X\n\n"
+            f"## HOW — Acceptance (= tests)\n{acs}"
+        )
+        return {"meta": {"status": "confirmed"}, "body": body}
+
+    def test_granularity_at_threshold_warns(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(5)}
+        _, out = self._next(reqs, {})
+        self.assertIn("consider splitting", out)
+        self.assertIn("AREA-FOO-001", out)
+
+    def test_granularity_below_threshold_no_warn(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(4)}
+        _, out = self._next(reqs, {})
+        self.assertNotIn("consider splitting", out)
+
+    def test_granularity_above_threshold_warns(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(8)}
+        _, out = self._next(reqs, {})
+        self.assertIn("consider splitting", out)
+        self.assertIn("AREA-FOO-001", out)
 
 
 class Init(unittest.TestCase):  # tested-by: REQ-INIT-012

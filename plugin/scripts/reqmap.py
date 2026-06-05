@@ -315,6 +315,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        if m.get("status") == "confirmed":
+            if not _has_section(r["body"], "contract"):
+                warns.append(
+                    f"{rid}: confirmed but missing '## WHAT — Contract' section — "
+                    "add the normative contract or drop status back to in-progress"
+                )
+            if not _has_section(r["body"], "acceptan"):
+                warns.append(
+                    f"{rid}: confirmed but missing '## HOW — Acceptance' section — "
+                    "add acceptance criteria or drop status back to in-progress"
+                )
 
     lock = load_lock(reqs_dir)
     # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
@@ -1084,6 +1095,11 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
+        docs_out = _docs_publish_path(root)
+        if docs_out:
+            with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
+                dst.write(src.read())
+            print("wrote {}".format(docs_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
 
@@ -1171,6 +1187,23 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
         if not show_all and len(ids) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors
+    AC_SPLIT_THRESHOLD = 5
+    oversize = sorted(
+        [(rid, len(_bullets(r["body"], "acceptan")))
+         for rid, r in reqs.items()
+         if len(_bullets(r["body"], "acceptan")) >= AC_SPLIT_THRESHOLD],
+        key=lambda x: (-x[1], x[0])
+    )
+    if oversize:
+        print("Granularity ({})".format(len(oversize)))
+        for rid, n in oversize:
+            print("  {}   ({} ACs) — consider splitting   requirements/{}.md".format(rid, n, rid))
+        print(
+            "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
+            "is a split candidate. Author two requirements, each with its own contract.\n"
+            .format(AC_SPLIT_THRESHOLD)
+        )
     return 0
 
 
@@ -1750,6 +1783,30 @@ def render_json(data, reqs_dir):  # implements: REQ-MAP-007
 # producing a self-contained `_map.html` that opens by double-click (no server).
 VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
+
+
+def _docs_publish_path(root):  # implements: REQ-MAP-007
+    """Return docs/map.html path when docs/ carries a GitHub Pages signal
+    (.nojekyll or index.html present), else None. Opt-in by folder contents —
+    repos without the signal are unaffected.
+
+    Uses the git root so repos where reqmap runs from a sub-directory (e.g.
+    plugin/) still find docs/ at the project root. Falls back to root itself
+    when git is absent or the tree is not a checkout."""
+    try:
+        git_root = subprocess.check_output(
+            ["git", "-C", root, "rev-parse", "--show-toplevel"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        git_root = root
+    docs = os.path.join(git_root, "docs")
+    if not os.path.isdir(docs):
+        return None
+    if (os.path.exists(os.path.join(docs, ".nojekyll")) or
+            os.path.exists(os.path.join(docs, "index.html"))):
+        return os.path.join(docs, "map.html")
+    return None
 
 
 def _viewer_template_path():  # implements: REQ-MAP-007

@@ -143,6 +143,9 @@ engine changes to the cache and any registered consumer repos in one command:
     config, logging, an invocation primitive). Crisp output → crisp boundary.
   - `layer: feature` — capabilities that compose the bus. They `depends_on` bus ids.
   - If you cannot tell where a requirement ends, factor the shared part onto the bus.
+  - **Both layers** require `## WHAT — Contract` and `## HOW — Acceptance` at
+    `confirmed` status. Bus capabilities are not exempt — unspecified bus
+    contracts are the most expensive to discover late.
 - **The thread**: code declares membership with a tag, by role:
   - `implements: <ID>`       — hand-written logic (reviewed + tested on change)
   - `generated-from: <ID>`   — derived artifact (regenerated on change)
@@ -152,14 +155,31 @@ engine changes to the cache and any registered consumer repos in one command:
 
 ## Authoring rules (read before touching anything)
 
+### What is a capability?
+
+A capability is a **behavior** that can fail independently — one thing a user or caller can observe breaking on its own. It is **not** a file, a class, or a module; implementation shape is irrelevant. The test: "if I removed just this behavior, would a distinct failure appear?" If yes, that is one capability.
+
+If two behaviors live in the same file but can break in isolation (e.g. a veto path and a majority-vote path in an aggregator), they are **two capabilities** — give each its own requirement file. "One file per capability" means one *behavior per file*, not one *file per class*.
+
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
 2. **A requirement is its contract.** Fill `WHAT — Contract` (the normative,
    testable behavior) first; the boundary follows from the contract. (Legacy
    requirements may still use `Input → Description → Output`; the engine reads both.)
+2a. **`confirmed` requires both `## WHAT — Contract` and `## HOW — Acceptance`.**
+    A contract-only requirement has unspecified acceptance tests. An acceptance-only
+    requirement has an unspecified normative contract. The gate warns on either
+    omission. Both `bus` and `feature` layers are subject to this rule.
 3. **Acceptance criteria are tests.** Write them as checkable statements; they map
    to `tested-by` test files.
+3a. **Split heuristic (smell, not a hard limit).** If a requirement accumulates
+    more than four or five acceptance criteria that cover behaviors which could
+    break **independently** of each other, it is a *split candidate*. Author two
+    or more requirements, each with its own contract and its own failure mode.
+    `reqmap.py next` flags these. A five-AC requirement with one root cause is
+    fine; a three-AC requirement covering three disjoint failure modes is already
+    overloaded.
 4. **One fact, one home.** Reference ids; never copy a contract into a README.
 5. **Authority is one-directional**: requirement → code. If they disagree, the
    requirement wins (fix the code, or fix the requirement — never let code be the
