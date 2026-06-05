@@ -1107,13 +1107,16 @@ def _parse_todos_from_text(text):
 
 
 def _parse_todos(root):
-    """Read TODO.md from repo root; return list of todo dicts (empty if absent)."""
-    path = os.path.join(root, "TODO.md")
-    try:
-        with open(path, encoding="utf-8") as f:
-            return _parse_todos_from_text(f.read())
-    except OSError:
-        return []
+    """Read TODO.md; tries root first, then one level up (covers plugin/ dogfood layout).
+    Returns list of todo dicts; empty list if absent in both locations."""
+    for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
+        path = os.path.join(base, "TODO.md")
+        try:
+            with open(path, encoding="utf-8") as f:
+                return _parse_todos_from_text(f.read())
+        except OSError:
+            continue
+    return []
 
 
 def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-MAP-007

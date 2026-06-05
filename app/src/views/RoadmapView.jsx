@@ -161,7 +161,7 @@ export function RoadmapView({ openSpec }) {
                            onClick={() => openSpec(item.r.id)} />
                     )}
                     {item?.type === "todo" && (
-                      <Bar variant="todo" label={item.t.name} />
+                      <Bar variant="todo" label={item.t.name} onClick={() => {}} />
                     )}
                   </td>
                 );
