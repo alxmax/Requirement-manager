@@ -46,6 +46,9 @@ superseded_by:
   not double-flagged; this dedup lives in `_risk_signals`, shared with the `next` worklist.
 - All requirement-derived text shall be JSON-encoded in `_map.json`, which neutralizes any
   hostile id/title/body by construction (no markup context to break out of).
+- When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub
+  Pages signal (`.nojekyll` or `index.html` present), it shall also copy `_map.html` to
+  `docs/map.html`. When no signal is present or git is absent, `docs/map.html` is not written.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -71,9 +74,11 @@ superseded_by:
 - Risk shows only requirements with at least one risk signal, each with a scripted recommendation.
 - A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.
 - Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.
+- When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html` (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.
+- When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the standard outputs.
 
 ## WHERE — Current implementation
-- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`.
+- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, `_docs_publish_path`, the `_mermaid_*` generators in `reqmap.py`.
 
 ## Links
 - Used by: (auto)

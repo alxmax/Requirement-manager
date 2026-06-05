@@ -774,6 +774,27 @@ class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertNotIn("<!--REQMAP_DATA-->", html)
 
 
+class DocsPublish(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_docs_publish_path_nojekyll_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", ".nojekyll"), "")
+            self.assertEqual(R._docs_publish_path(d), os.path.join(d, "docs", "map.html"))
+
+    def test_docs_publish_path_index_html_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "index.html"), "<html></html>")
+            self.assertEqual(R._docs_publish_path(d), os.path.join(d, "docs", "map.html"))
+
+    def test_docs_publish_path_no_signal(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            self.assertIsNone(R._docs_publish_path(d))
+
+    def test_docs_publish_path_no_docs_dir(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R._docs_publish_path(d))
+
+
 class JsFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
     def test_extracts_module_doc_and_top_level_names(self):  # bug: js-facts-untested
         f = R._js_facts("/* Module doc.\n * more */\nexport function foo(){}\nconst bar = 1;\n")

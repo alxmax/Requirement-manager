@@ -1095,6 +1095,11 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
+        docs_out = _docs_publish_path(root)
+        if docs_out:
+            with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
+                dst.write(src.read())
+            print("wrote {}".format(docs_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     return 0
 
@@ -1778,6 +1783,30 @@ def render_json(data, reqs_dir):  # implements: REQ-MAP-007
 # producing a self-contained `_map.html` that opens by double-click (no server).
 VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
+
+
+def _docs_publish_path(root):  # implements: REQ-MAP-007
+    """Return docs/map.html path when docs/ carries a GitHub Pages signal
+    (.nojekyll or index.html present), else None. Opt-in by folder contents —
+    repos without the signal are unaffected.
+
+    Uses the git root so repos where reqmap runs from a sub-directory (e.g.
+    plugin/) still find docs/ at the project root. Falls back to root itself
+    when git is absent or the tree is not a checkout."""
+    try:
+        git_root = subprocess.check_output(
+            ["git", "-C", root, "rev-parse", "--show-toplevel"],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        git_root = root
+    docs = os.path.join(git_root, "docs")
+    if not os.path.isdir(docs):
+        return None
+    if (os.path.exists(os.path.join(docs, ".nojekyll")) or
+            os.path.exists(os.path.join(docs, "index.html"))):
+        return os.path.join(docs, "map.html")
+    return None
 
 
 def _viewer_template_path():  # implements: REQ-MAP-007
