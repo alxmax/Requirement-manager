@@ -1,5 +1,6 @@
 {
-  "engine_version": "2026-06-04.5",
+  "engine_version": "2026-06-05",
+  "repo": "alxmax/requirement-manager",
   "nodes": [
     {
       "id": "CORE-DRIFT-003",
@@ -133,7 +134,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:796"
+          "loc": "scripts/test_reqmap.py:821"
         }
       ],
       "test_exempt": null,
@@ -281,19 +282,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:696"
+          "loc": "scripts/test_reqmap.py:721"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:834"
+          "loc": "scripts/test_reqmap.py:859"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:856"
+          "loc": "scripts/test_reqmap.py:881"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:904"
+          "loc": "scripts/test_reqmap.py:929"
         }
       ],
       "test_exempt": null,
@@ -366,15 +367,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:710"
+          "loc": "scripts/test_reqmap.py:735"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:741"
+          "loc": "scripts/test_reqmap.py:766"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:954"
+          "loc": "scripts/test_reqmap.py:979"
         }
       ],
       "test_exempt": null,
@@ -524,7 +525,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:887"
+          "loc": "scripts/test_reqmap.py:912"
         }
       ],
       "test_exempt": null,
@@ -578,15 +579,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1233"
+          "loc": "scripts/reqmap.py:1235"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1262"
+          "loc": "scripts/reqmap.py:1264"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1241"
+          "loc": "scripts/test_reqmap.py:1266"
         }
       ],
       "test_exempt": null,
@@ -601,6 +602,7 @@
       "intent": "Render the whole registry as navigable diagrams, a machine-readable graph, and a double-click-openable viewer a human or a front-end can read at a glance.",
       "contract": [
         "It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for",
+        "`_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the",
         "It shall also generate `_map.html` — a self-contained, single-file copy of the React",
         "The injected graph shall be escaped (`</` → `<\\/`) so a `</script>` sequence in any",
         "There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall",
@@ -620,19 +622,19 @@
         "`export` is a thin alias that writes only `_map.json` (or to stdout / `--out PATH`) for"
       ],
       "current_impl": [
-        "`cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`."
+        "`cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`."
       ],
       "acc": [
         "The generated files contain one node per requirement and one edge per `depends_on`.",
         "`_map.md` contains exactly 4 Mermaid code blocks, each with a legend.",
-        "`_map.json` parses to `{engine_version, nodes, edges}` and carries one node per requirement",
+        "`_map.json` parses to `{engine_version, repo, nodes, edges}` and carries one node per requirement",
         "System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.",
         "Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.",
         "Risk shows only requirements with at least one risk signal, each with a scripted recommendation.",
         "A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.",
         "Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early."
       ],
-      "accept": "- The generated files contain one node per requirement and one edge per `depends_on`.\n- `_map.md` contains exactly 4 Mermaid code blocks, each with a legend.\n- `_map.json` parses to `{engine_version, nodes, edges}` and carries one node per requirement\n  with its members and risk signals.\n- System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.\n- Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.\n- Risk shows only requirements with at least one risk signal, each with a scripted recommendation.\n- A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.\n- Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.",
+      "accept": "- The generated files contain one node per requirement and one edge per `depends_on`.\n- `_map.md` contains exactly 4 Mermaid code blocks, each with a legend.\n- `_map.json` parses to `{engine_version, repo, nodes, edges}` and carries one node per requirement\n  with its members and risk signals; `repo` is the project's `owner/repo` (or directory name, or null)\n  and is omitted from the freshness comparison.\n- System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.\n- Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.\n- Risk shows only requirements with at least one risk signal, each with a scripted recommendation.\n- A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.\n- Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.",
       "input": "",
       "output": "",
       "desc": "",
@@ -655,35 +657,31 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1090"
+          "loc": "scripts/reqmap.py:1091"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1310"
+          "loc": "scripts/reqmap.py:1316"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1333"
+          "loc": "scripts/reqmap.py:1339"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1341"
+          "loc": "scripts/reqmap.py:1347"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1348"
+          "loc": "scripts/reqmap.py:1354"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1360"
+          "loc": "scripts/reqmap.py:1366"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1374"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1418"
+          "loc": "scripts/reqmap.py:1380"
         },
         {
           "role": "implements",
@@ -691,51 +689,59 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1431"
+          "loc": "scripts/reqmap.py:1430"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1468"
+          "loc": "scripts/reqmap.py:1437"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1483"
+          "loc": "scripts/reqmap.py:1474"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1514"
+          "loc": "scripts/reqmap.py:1489"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1586"
+          "loc": "scripts/reqmap.py:1520"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1634"
+          "loc": "scripts/reqmap.py:1592"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1685"
+          "loc": "scripts/reqmap.py:1640"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1693"
+          "loc": "scripts/reqmap.py:1691"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1702"
+          "loc": "scripts/reqmap.py:1699"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1718"
+          "loc": "scripts/reqmap.py:1723"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1722"
+          "loc": "scripts/reqmap.py:1732"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1731"
+          "loc": "scripts/reqmap.py:1748"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1752"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1761"
         },
         {
           "role": "tested-by",
@@ -747,19 +753,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:669"
+          "loc": "scripts/test_reqmap.py:679"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:811"
+          "loc": "scripts/test_reqmap.py:694"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:989"
+          "loc": "scripts/test_reqmap.py:836"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1045"
+          "loc": "scripts/test_reqmap.py:1014"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1070"
         }
       ],
       "test_exempt": null,
@@ -860,15 +870,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1107"
+          "loc": "scripts/reqmap.py:1109"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1117"
+          "loc": "scripts/reqmap.py:1119"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1150"
+          "loc": "scripts/test_reqmap.py:1175"
         }
       ],
       "test_exempt": null,
@@ -917,7 +927,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1090"
+          "loc": "scripts/test_reqmap.py:1115"
         }
       ],
       "test_exempt": null,

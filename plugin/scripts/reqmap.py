@@ -16,7 +16,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, fnmatch, hashlib, json, os, re, sys
+import argparse, ast, fnmatch, hashlib, json, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
@@ -64,7 +64,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-04.5"
+MAP_ENGINE_VERSION = "2026-06-05"
 
 
 # ---------- parsing ----------
@@ -1070,8 +1070,9 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
     return data
 
 
-def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
+def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-MAP-007
     data = _build_map_data(reqs, members)
+    data["repo"] = _repo_name(root)
 
     if check:
         return _map_check(data, reqs_dir)
@@ -1087,11 +1088,12 @@ def cmd_map(reqs, members, reqs_dir, check=False):  # implements: REQ-MAP-007
     return 0
 
 
-def cmd_export(reqs, members, reqs_dir, out=None):  # implements: REQ-MAP-007
+def cmd_export(reqs, members, reqs_dir, root=".", out=None):  # implements: REQ-MAP-007
     """Emit the registry graph as JSON for an external front-end to consume.
     Same {nodes, edges} shape that drives the map; '-' = stdout, --out PATH, or
     requirements/_map.json by default."""
     data = _build_map_data(reqs, members)
+    data["repo"] = _repo_name(root)
     text = _build_json_text(data)
     target = out if out else os.path.join(reqs_dir, "_map.json")
     if target == "-":
@@ -1284,7 +1286,7 @@ def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir)
     cmd_check(reqs, members, reqs_dir, update_lock=True)
-    cmd_map(reqs, members, reqs_dir)
+    cmd_map(reqs, members, reqs_dir, code_root)
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
         print("reqmap initialized, but no requirements were extracted")
@@ -1302,9 +1304,13 @@ def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
 
 
 def _strip_generated(text):
-    """Drop the volatile `generated: <timestamp>` frontmatter line so a freshness
-    diff compares content, not the regeneration time."""
-    return "\n".join(l for l in text.splitlines() if not l.startswith("generated: "))
+    """Drop volatile lines so a freshness diff compares content, not the
+    environment: the `generated: <timestamp>` frontmatter line (`_map.md`) and the
+    `"repo": ...` field (`_map.json`), which is git-derived and differs across
+    forks/clones — comparing it would make `map --check` spuriously fail on a fork."""
+    return "\n".join(l for l in text.splitlines()
+                     if not l.startswith("generated: ")
+                     and not l.lstrip().startswith('"repo":'))
 
 
 def _map_check(data, reqs_dir):  # implements: REQ-MAP-007
@@ -1690,11 +1696,35 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     return out
 
 
+def _repo_name(root):  # implements: REQ-MAP-007
+    """Best-effort `owner/repo` (else the repo directory name) identifying the
+    project this map describes, for display in the viewer header. Tries the git
+    `remote.origin.url`, then the directory name; returns None when nothing
+    resolves. Never raises and never blocks map generation — git may be absent or
+    the tree may not be a checkout. Environment-derived (it differs across forks
+    and clones), so it is excluded from the `map --check` freshness diff (see
+    `_strip_generated`)."""
+    url = ""
+    try:
+        r = subprocess.run(["git", "-C", root, "config", "--get", "remote.origin.url"],
+                           capture_output=True, text=True, timeout=3)
+        if r.returncode == 0:
+            url = r.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        url = ""
+    if url:
+        slug = url[:-4] if url.endswith(".git") else url
+        parts = [p for p in re.split(r"[:/]", slug.rstrip("/")) if p]
+        if len(parts) >= 2:
+            return "/".join(parts[-2:])
+    return os.path.basename(os.path.abspath(root)) or None
+
+
 def _build_json_text(data):  # implements: REQ-MAP-007
-    """The registry graph as a JSON string: {engine_version, nodes, edges}.
+    """The registry graph as a JSON string: {engine_version, repo, nodes, edges}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
     no markup context to break out of — so no extra escaping is needed."""
-    payload = {"engine_version": MAP_ENGINE_VERSION,
+    payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
                "nodes": data["nodes"], "edges": data["edges"]}
     return json.dumps(payload, indent=2, ensure_ascii=False)
 
@@ -1802,12 +1832,12 @@ def main():
     if a.cmd == "check":
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
         if a.update_lock:
-            cmd_map(reqs, members, reqs_dir)
+            cmd_map(reqs, members, reqs_dir, code_root)
         return rc
     if a.cmd == "map":
-        return cmd_map(reqs, members, reqs_dir, a.check_fresh)
+        return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh)
     if a.cmd == "export":
-        return cmd_export(reqs, members, reqs_dir, a.out)
+        return cmd_export(reqs, members, reqs_dir, code_root, a.out)
     if a.cmd == "extract":
         return cmd_extract(reqs, members, code_root, reqs_dir)
     if a.cmd == "candidates":

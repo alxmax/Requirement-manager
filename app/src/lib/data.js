@@ -222,10 +222,13 @@ function applyBakedCoverage(list) {
   return list;
 }
 
-// ---- live bindings: reassigned by setRegistry() ----------------------------
+// ---- live bindings: reassigned by setRegistry() / setRepo() ----------------
 export let REQUIREMENTS = applyBakedCoverage(BAKED);
 export let REQ_EDGES = [];
 export let REQ_BY_ID = {};
+// owner/repo the loaded map describes (engine-emitted); null = no engine data,
+// header falls back to a generic label.
+export let REPO = null;
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -237,6 +240,11 @@ derive();
 export function setRegistry(list) {
   REQUIREMENTS = list;
   derive();
+}
+
+/** Set the owner/repo name the loaded map describes (engine-emitted). */
+export function setRepo(name) {
+  REPO = name || null;
 }
 
 /* ---- coverage + git-derived dates (computed, not stored) ----------------- */

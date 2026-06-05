@@ -665,6 +665,31 @@ class JsonExport(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_node_with_no_members_has_empty_list(self):
         self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
+    def test_json_carries_repo_field(self):  # dynamic repo name in viewer header
+        doc = json.loads(R._build_json_text(
+            {"repo": "owner/proj", "nodes": [], "edges": []}))
+        self.assertEqual(doc["repo"], "owner/proj")
+
+    def test_json_repo_is_null_when_absent(self):
+        # _build_json_text reads data.get("repo") — a graph without it stays valid (repo: null)
+        doc = json.loads(R._build_json_text({"nodes": [], "edges": []}))
+        self.assertIsNone(doc["repo"])
+
+
+class RepoName(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_falls_back_to_dir_name_without_git_remote(self):
+        # a bare temp dir has no remote.origin.url -> directory basename is used,
+        # and the call never raises (git absent / not a checkout must be tolerated)
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(R._repo_name(d), os.path.basename(os.path.abspath(d)))
+
+    def test_repo_excluded_from_freshness_diff(self):
+        # the git-derived repo line differs across forks -> map --check must ignore it
+        a = R._build_json_text({"repo": "owner/a", "nodes": [], "edges": []})
+        b = R._build_json_text({"repo": "fork/b", "nodes": [], "edges": []})
+        self.assertNotEqual(a, b)
+        self.assertEqual(R._strip_generated(a), R._strip_generated(b))
+
 
 class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_marker_replaced_with_inline_data(self):
@@ -1049,7 +1074,7 @@ class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
         members = R.scan_members(d, rd)
         buf = io.StringIO()
         with redirect_stdout(buf):
-            code = R.cmd_map(reqs, members, rd, check)
+            code = R.cmd_map(reqs, members, rd, d, check)
         return code, buf.getvalue()
 
     def _seed(self, d, title="A"):

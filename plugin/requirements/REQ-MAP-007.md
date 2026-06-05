@@ -13,8 +13,13 @@ superseded_by:
 
 ## WHAT — Contract (normative)
 - It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for
-  static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, nodes, edges}`
+  static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges}`
   graph for an external front-end). Both are derived views, regenerated, never edited.
+- `_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the
+  repo directory name, else null) identifying the project the map describes, for display in
+  the viewer header. It is derived from the git remote and so differs across forks/clones;
+  it is therefore excluded from the `map --check` freshness diff and resolving it shall never
+  raise or block map generation (git may be absent or the tree may not be a checkout).
 - It shall also generate `_map.html` — a self-contained, single-file copy of the React
   viewer with this repo's graph inlined as `window.__REQMAP_DATA__`, openable by
   double-click with no server — WHEN the viewer template `_map_viewer.html` is vendored
@@ -58,8 +63,9 @@ superseded_by:
 ## HOW — Acceptance (= tests)
 - The generated files contain one node per requirement and one edge per `depends_on`.
 - `_map.md` contains exactly 4 Mermaid code blocks, each with a legend.
-- `_map.json` parses to `{engine_version, nodes, edges}` and carries one node per requirement
-  with its members and risk signals.
+- `_map.json` parses to `{engine_version, repo, nodes, edges}` and carries one node per requirement
+  with its members and risk signals; `repo` is the project's `owner/repo` (or directory name, or null)
+  and is omitted from the freshness comparison.
 - System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.
 - Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
 - Risk shows only requirements with at least one risk signal, each with a scripted recommendation.
@@ -67,7 +73,7 @@ superseded_by:
 - Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.
 
 ## WHERE — Current implementation
-- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`.
+- `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`.
 
 ## Links
 - Used by: (auto)

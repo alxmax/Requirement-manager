@@ -1,6 +1,6 @@
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect } from "react";
-import { REQUIREMENTS } from "./lib/data.js";
+import { REQUIREMENTS, REPO } from "./lib/data.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { MapView } from "./views/MapView.jsx";
@@ -24,7 +24,7 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
         <Logomark size={26} />
         <span className="wm">Requirement<b> Manager</b></span>
       </div>
-      <span className="repo"><span className="dot" />acme/legacy-svc</span>
+      <span className="repo"><span className="dot" />{REPO || "local repo"}</span>
       <div className="spacer" />
       <div className="search">
         <span className="ico"><Icon name="search" size={15} /></span>
