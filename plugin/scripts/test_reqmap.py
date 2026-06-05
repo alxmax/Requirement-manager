@@ -690,6 +690,22 @@ class RepoName(unittest.TestCase):  # tested-by: REQ-MAP-007
         self.assertNotEqual(a, b)
         self.assertEqual(R._strip_generated(a), R._strip_generated(b))
 
+    def test_env_override_wins_over_git(self):
+        # REQMAP_REPO lets a private dev repo emit a public slug (or "" for none)
+        # instead of leaking its own remote into the inlined map data
+        old = os.environ.get("REQMAP_REPO")
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                os.environ["REQMAP_REPO"] = "owner/public"
+                self.assertEqual(R._repo_name(d), "owner/public")
+                os.environ["REQMAP_REPO"] = ""          # explicit blank -> no repo
+                self.assertIsNone(R._repo_name(d))
+        finally:
+            if old is None:
+                os.environ.pop("REQMAP_REPO", None)
+            else:
+                os.environ["REQMAP_REPO"] = old
+
 
 class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_marker_replaced_with_inline_data(self):

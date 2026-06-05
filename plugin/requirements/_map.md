@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-05 10:31
+generated: 2026-06-05 17:33
 nodes: 13
 edges: 16
 ---
@@ -52,8 +52,8 @@ graph LR
   CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
   f_scripts_reqmap_py_71_126["scripts/reqmap.py:71-126"]
   CORE_PARSE_001 -->|implements| f_scripts_reqmap_py_71_126
-  f_scripts_test_reqmap_py_47_821["scripts/test_reqmap.py:47-821"]
-  CORE_PARSE_001 -->|tested-by| f_scripts_test_reqmap_py_47_821
+  f_scripts_test_reqmap_py_47_837["scripts/test_reqmap.py:47-837"]
+  CORE_PARSE_001 -->|tested-by| f_scripts_test_reqmap_py_47_837
   CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
   f_scripts_reqmap_py_142_179["scripts/reqmap.py:142-179"]
   CORE_SCAN_002 -->|implements| f_scripts_reqmap_py_142_179
@@ -62,13 +62,13 @@ graph LR
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
   f_scripts_reqmap_py_656_803["scripts/reqmap.py:656-803"]
   REQ_CANDIDATES_009 -->|implements| f_scripts_reqmap_py_656_803
-  f_scripts_test_reqmap_py_487_929["scripts/test_reqmap.py:487-929"]
-  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_487_929
+  f_scripts_test_reqmap_py_487_945["scripts/test_reqmap.py:487-945"]
+  REQ_CANDIDATES_009 -->|tested-by| f_scripts_test_reqmap_py_487_945
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_245_294["scripts/reqmap.py:245-294"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_245_294
-  f_scripts_test_reqmap_py_93_979["scripts/test_reqmap.py:93-979"]
-  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_93_979
+  f_scripts_test_reqmap_py_93_995["scripts/test_reqmap.py:93-995"]
+  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_93_995
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_493_639["scripts/reqmap.py:493-639"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_493_639
@@ -77,18 +77,18 @@ graph LR
   REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
   f_scripts_reqmap_py_909_996["scripts/reqmap.py:909-996"]
   REQ_FINDINGS_010 -->|implements| f_scripts_reqmap_py_909_996
-  f_scripts_test_reqmap_py_560_912["scripts/test_reqmap.py:560-912"]
-  REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_560_912
+  f_scripts_test_reqmap_py_560_928["scripts/test_reqmap.py:560-928"]
+  REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_560_928
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
   f_scripts_reqmap_py_1235_1264["scripts/reqmap.py:1235-1264"]
   REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1235_1264
-  f_scripts_test_reqmap_py_1266["scripts/test_reqmap.py:1266"]
-  REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1266
+  f_scripts_test_reqmap_py_1282["scripts/test_reqmap.py:1282"]
+  REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1282
   REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1031_1761["scripts/reqmap.py:1031-1761"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1031_1761
-  f_scripts_test_reqmap_py_237_1070["scripts/test_reqmap.py:237-1070"]
-  REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_237_1070
+  f_scripts_reqmap_py_1031_1768["scripts/reqmap.py:1031-1768"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1031_1768
+  f_scripts_test_reqmap_py_237_1086["scripts/test_reqmap.py:237-1086"]
+  REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_237_1086
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
   f_scripts_reqmap_py_423["scripts/reqmap.py:423"]
   REQ_NEW_004 -->|implements| f_scripts_reqmap_py_423
@@ -97,13 +97,13 @@ graph LR
   REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
   f_scripts_reqmap_py_1109_1119["scripts/reqmap.py:1109-1119"]
   REQ_NEXT_013 -->|implements| f_scripts_reqmap_py_1109_1119
-  f_scripts_test_reqmap_py_1175["scripts/test_reqmap.py:1175"]
-  REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1175
+  f_scripts_test_reqmap_py_1191["scripts/test_reqmap.py:1191"]
+  REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1191
   REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
   f_scripts_reqmap_py_444_459["scripts/reqmap.py:444-459"]
   REQ_PROMOTE_011 -->|implements| f_scripts_reqmap_py_444_459
-  f_scripts_test_reqmap_py_1115["scripts/test_reqmap.py:1115"]
-  REQ_PROMOTE_011 -->|tested-by| f_scripts_test_reqmap_py_1115
+  f_scripts_test_reqmap_py_1131["scripts/test_reqmap.py:1131"]
+  REQ_PROMOTE_011 -->|tested-by| f_scripts_test_reqmap_py_1131
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_258["scripts/reqmap.py:258"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_258

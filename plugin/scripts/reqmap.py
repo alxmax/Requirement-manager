@@ -64,7 +64,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-05"
+MAP_ENGINE_VERSION = "2026-06-05.1"
 
 
 # ---------- parsing ----------
@@ -1703,7 +1703,14 @@ def _repo_name(root):  # implements: REQ-MAP-007
     resolves. Never raises and never blocks map generation — git may be absent or
     the tree may not be a checkout. Environment-derived (it differs across forks
     and clones), so it is excluded from the `map --check` freshness diff (see
-    `_strip_generated`)."""
+    `_strip_generated`).
+
+    `REQMAP_REPO` env var overrides the derived value: set it to a public-facing
+    slug (e.g. on a private dev repo that publishes elsewhere, so the inlined
+    `repo` never leaks the dev remote), or to "" to emit no repo at all."""
+    override = os.environ.get("REQMAP_REPO")
+    if override is not None:
+        return override or None
     url = ""
     try:
         r = subprocess.run(["git", "-C", root, "config", "--get", "remote.origin.url"],

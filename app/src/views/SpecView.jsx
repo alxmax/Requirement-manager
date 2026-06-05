@@ -14,7 +14,7 @@ function CovStrip({ r }) {
     <div className="cov-strip">
       <div className="cov-row">
         <span className={"cov-badge cov-"+state}><span className="cd" />{state}</span>
-        <span className="cov-count">{state==="exempt" ? "deprecated — skipped by the gate" : covered+" / "+clauses+" clauses covered"}</span>
+        <span className="cov-count">{state==="exempt" ? (r.status==="deprecated" ? "deprecated — skipped by the gate" : "test-exempt — skipped by the gate") : covered+" / "+clauses+" clauses covered"}</span>
         <div className="cov-bar">{segs.map((s,i)=><span key={i} className={"cseg "+s} />)}</div>
       </div>
       {gap && state==="partial" && <div className="cov-gap">gap · {gap}</div>}
