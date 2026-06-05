@@ -61,7 +61,7 @@ export function RoadmapView({ openSpec }) {
 
   const msSet = new Set();
   REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
-  TODOS.forEach(t => { if (!t.done) msSet.add(t.milestone); });
+  TODOS.forEach(t => { if (!t.done && t.milestone) msSet.add(t.milestone); });
   const milestones = Array.from(msSet).sort(semverCmp);
 
   const current =
