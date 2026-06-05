@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.consilium/
+
+# Generated, regenerable views — rebuild with: cd plugin && python scripts/reqmap.py map
+plugin/requirements/_map.html
+
+# Dev-only shortcuts (Windows, localhost — not for seeded repos)
+*.cmd
+*.url

@@ -1,0 +1,6 @@
+# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).
+# scripts/reqmap.py is intentionally NOT ignored: this repo hosts its own
+# requirements there (its membership tags resolve to local requirements), so
+# the engine must stay scanned. Add other vendored/generated paths below.
+# The bundled single-file viewer is a generated artifact, never a member.
+scripts/_map_viewer.html
