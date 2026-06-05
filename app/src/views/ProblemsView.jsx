@@ -10,7 +10,6 @@ export function computeProblems() {
     drift:         { sev:"WARN",   msg:"Contract drift — lock hash no longer matches the code.", fix:"Re-check the named members, then run `req check --update-lock`." },
     untested:      { sev:"WARN",   msg:"Confirmed, but no `tested-by:` member is linked.", fix:"Add a test tag, or set `test_exempt:` to silence." },
     unreviewed:    { sev:"REVIEW", msg:"Drafted from code by extract — intent not yet validated.", fix:"Review, then `req promote <ID>`." },
-    "blast-radius":{ sev:"CAUTION",msg:"High fan-in — many capabilities depend on this.", fix:"Change it only behind its contract; run the full gate + dependents' tests." },
   };
   const out = [];
   REQUIREMENTS.forEach(r => (r.risks||[]).forEach(rk => {
@@ -34,7 +33,7 @@ export function computeProblems() {
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     }
   });
-  const order = { ERROR:0, WARN:1, REVIEW:2, CAUTION:3 };
+  const order = { ERROR:0, WARN:1, REVIEW:2 };
   return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
 }
 
@@ -57,7 +56,6 @@ export function ProblemsView({ openSpec }) {
         <Tab k="ERROR" label="Errors" n={counts.ERROR||0} />
         <Tab k="WARN" label="Warnings" n={counts.WARN||0} />
         <Tab k="REVIEW" label="Review" n={counts.REVIEW||0} />
-        <Tab k="CAUTION" label="Cautions" n={counts.CAUTION||0} />
         <div className="tab-legend">
           {(counts.ERROR||0) > 0
             ? <><Icon name="triangle-alert" size={14} style={{color:"var(--status-error)"}} /> gate blocks the build — {counts.ERROR} error</>

@@ -221,7 +221,6 @@ button { font-family: inherit; cursor: pointer; }
 .sev-ERROR { background: var(--coral-600); }
 .sev-WARN { background: var(--amber-600); }
 .sev-REVIEW { background: var(--magenta-600); }
-.sev-CAUTION { background: var(--ink-2); }
 .prob-body { min-width: 0; }
 .prob-head { display: flex; align-items: baseline; gap: 9px; margin-bottom: 3px; flex-wrap: wrap; }
 .prob-id { font: var(--text-id); color: var(--fg); }
