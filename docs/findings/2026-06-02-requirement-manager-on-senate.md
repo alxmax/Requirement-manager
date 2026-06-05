@@ -6,6 +6,10 @@ defined in `prompts/senators/*.md`). Date: 2026-06-02.
 
 ---
 
+> **Resolution status (2026-06-05):** §1 resolved in v1.11.0 (`warn_if_stale`, `REQ-CHECK-006`). §4 deferred to `Next_Features.md` (P3). §6 resolved in v1.11.0 (`.md` added to `CODE_EXTS`). All other items are Senate-repo-specific observations with no open plugin action.
+
+---
+
 ## 1. The map renderer overlaps with many nodes (FIXED in plugin, stale in seeded repos)
 
 **Symptom.** `requirements/_map.html` rendered with overlapping nodes/edges.
@@ -61,7 +65,7 @@ the extractor literally never saw them. It's a structural blind spot of extracti
 
 ---
 
-## 4. Gap: ID minted from filename can mislabel a capability
+## 4. Gap: ID minted from filename can mislabel a capability *(deferred → Next_Features.md P3)*
 
 `SENATE-AUDIT-001`'s title is "TODO drift detector" — it documents
 `senate_todo_audit.py`, **not** the senate audit. The ID was minted from the
@@ -96,7 +100,7 @@ exercised through `SENATE-TEST-001`).
 
 ---
 
-## 6. Should requirements cover `.md` files at all? — Depends on role, and the scanner can't see them today
+## 6. Should requirements cover `.md` files at all? — Depends on role, and the scanner can't see them today *(resolved in v1.11.0)*
 
 **The scanner does not read `.md`.** `CODE_EXTS` (reqmap.py:19-20) =
 `.py .js .ts .tsx .jsx .c .cpp .h .hpp .cc .java .go .rs .html .css .sql .yaml .yml`

@@ -49,3 +49,28 @@ runnable argparse CLI, so the work is *packaging and distribution*, not new capa
 script, a release pipeline, and a decision on the optional standalone binary
 (stdlib-only Python already runs anywhere Python runs — the binary needs its own
 demand justification).
+
+---
+
+## P3 — `extract` warns on low-information ID tokens
+
+**Status:** deferred (Consilium deliberation, 2026-06-05 — `close_and_archive`,
+conf=0.73. Source: `docs/findings/2026-06-02-requirement-manager-on-senate.md` §4).
+
+**What it is.** When `extract` mints a requirement ID from a filename token, generic
+tokens ("audit", "util", "manager", "handler") can produce misleading-but-plausible
+IDs. Example: `senate_todo_audit.py` → `SENATE-AUDIT-001`, which *looks* like the
+9-senator deliberation but actually owns the TODO checker. A quality warning at mint
+time would flag these for human rename during the review step.
+
+**Why deferred (not rejected).**
+- **No demand evidence (n=0).** No external user has reported a confusing auto-generated
+  ID. The observation comes from a single internal field test on the Senate repo.
+- **Bounded blast radius.** The issue only affects the `extract` first-pass draft;
+  users review and rename IDs before confirming. The gate catches orphaned IDs if a
+  rename is forgotten.
+
+**Reopen when ANY of these is true:**
+- First external report of a confusing auto-generated ID that was not caught in review, **or**
+- A prompt-based repo (LLM agent/skill) adopts the plugin and the ID-minting pattern
+  produces 3+ misleading IDs in its first `extract` run.
