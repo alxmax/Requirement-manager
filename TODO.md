@@ -5,8 +5,8 @@
      Group by milestone version: ## vX.Y -->
 
 ## v1.13
-- [ ] Roadmap tab (Gantt viewer)         | lane: feature
-- [ ] TODO.md template + engine parsing  | lane: feature
+- [x] Roadmap tab (Gantt viewer)         | lane: feature
+- [x] TODO.md template + engine parsing  | lane: feature
 
 ## v1.14
 - [ ] promote-todo command               | lane: feature
