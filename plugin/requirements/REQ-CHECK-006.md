@@ -19,6 +19,10 @@ superseded_by:
 - It shall report drift as a `WARN` (never an error): a `confirmed` requirement whose
   binding hash differs from the lock, naming the member `file:line` locations to re-check.
 - A `confirmed` requirement with no `tested-by:` member shall be a `WARN`.
+- A `confirmed` requirement missing a `## WHAT — Contract` section shall be a `WARN`
+  (both `bus` and `feature` layers; does not affect the exit code).
+- A `confirmed` requirement missing a `## HOW — Acceptance` section shall be a `WARN`
+  (both `bus` and `feature` layers; does not affect the exit code).
 - A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).
 - It shall print an advisory line with the open verify-intent finding count when > 0,
   without affecting the exit code, and print a summary (requirements, members, errors, warnings).
@@ -37,6 +41,9 @@ superseded_by:
 - An invalid status or layer, and a `depends_on` pointing at a missing id, each produce an `ERROR`.
 - A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) naming the member `file:line` locations.
 - A present-but-corrupt lock file produces a `WARN` and does not change the exit code.
+- A `confirmed` requirement with no `## WHAT — Contract` section produces a `WARN` and does not affect the exit code.
+- A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.
+- A `confirmed` requirement with both sections present produces no section-lint warning.
 - `--update-lock` writes the current hashes to `requirements/_reqlock.json`.
 
 ## WHERE — Current implementation

@@ -311,6 +311,8 @@
         "It shall report an `ERROR` and exit non-zero for any of: a code tag referencing a",
         "It shall report drift as a `WARN` (never an error): a `confirmed` requirement whose",
         "A `confirmed` requirement with no `tested-by:` member shall be a `WARN`.",
+        "A `confirmed` requirement missing a `## WHAT — Contract` section shall be a `WARN`",
+        "A `confirmed` requirement missing a `## HOW — Acceptance` section shall be a `WARN`",
         "A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).",
         "It shall print an advisory line with the open verify-intent finding count when > 0,",
         "With `--update-lock` it shall write the current binding hashes to `requirements/_reqlock.json`."
@@ -330,9 +332,12 @@
         "An invalid status or layer, and a `depends_on` pointing at a missing id, each produce an `ERROR`.",
         "A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) naming the member `file:line` locations.",
         "A present-but-corrupt lock file produces a `WARN` and does not change the exit code.",
+        "A `confirmed` requirement with no `## WHAT — Contract` section produces a `WARN` and does not affect the exit code.",
+        "A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.",
+        "A `confirmed` requirement with both sections present produces no section-lint warning.",
         "`--update-lock` writes the current hashes to `requirements/_reqlock.json`."
       ],
-      "accept": "- A tag referencing a non-existent capability produces an `ERROR` and exit 1.\n- A `confirmed` requirement with no `implements` member produces an `ERROR`.\n- An invalid status or layer, and a `depends_on` pointing at a missing id, each produce an `ERROR`.\n- A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) naming the member `file:line` locations.\n- A present-but-corrupt lock file produces a `WARN` and does not change the exit code.\n- `--update-lock` writes the current hashes to `requirements/_reqlock.json`.",
+      "accept": "- A tag referencing a non-existent capability produces an `ERROR` and exit 1.\n- A `confirmed` requirement with no `implements` member produces an `ERROR`.\n- An invalid status or layer, and a `depends_on` pointing at a missing id, each produce an `ERROR`.\n- A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) naming the member `file:line` locations.\n- A present-but-corrupt lock file produces a `WARN` and does not change the exit code.\n- A `confirmed` requirement with no `## WHAT — Contract` section produces a `WARN` and does not affect the exit code.\n- A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.\n- A `confirmed` requirement with both sections present produces no section-lint warning.\n- `--update-lock` writes the current hashes to `requirements/_reqlock.json`.",
       "input": "",
       "output": "",
       "desc": "",
