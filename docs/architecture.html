@@ -196,6 +196,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   ];
   function inject(){
     if(document.getElementById('_arch_nav')) return;
+    if(!document.body) return;
     var nav = document.createElement('div');
     nav.id = '_arch_nav';
     LINKS.forEach(function(l){
@@ -203,10 +204,16 @@ document.addEventListener('DOMContentLoaded', async function() {
       a.href = l[0]; a.target = '_blank'; a.textContent = l[1];
       nav.appendChild(a);
     });
-    document.body && document.body.appendChild(nav);
+    document.body.appendChild(nav);
   }
-  document.addEventListener('DOMContentLoaded', inject);
-  new MutationObserver(inject).observe(document.documentElement, {childList:true, subtree:false});
+  window.addEventListener('load', function(){
+    inject();
+    var t = setInterval(function(){
+      if(document.getElementById('_arch_nav')){ clearInterval(t); return; }
+      inject();
+    }, 200);
+    setTimeout(function(){ clearInterval(t); }, 8000);
+  });
 })();
 </script>
 </body>
