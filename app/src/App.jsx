@@ -1,16 +1,18 @@
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect } from "react";
-import { REQUIREMENTS, REPO } from "./lib/data.js";
+import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
 import { SpecView } from "./views/SpecView.jsx";
+import { RoadmapView } from "./views/RoadmapView.jsx";
 
 const NAV = [
-  { key:"map",     label:"Map",     icon:"network" },
-  { key:"problems",label:"Problems",icon:"triangle-alert" },
-  { key:"spec",    label:"Spec",    icon:"file-text" },
+  { key:"map",     label:"Map",      icon:"network" },
+  { key:"problems",label:"Problems", icon:"triangle-alert" },
+  { key:"spec",    label:"Spec",     icon:"file-text" },
+  { key:"roadmap", label:"Roadmap",  icon:"list-checks" },
 ];
 
 function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
@@ -51,7 +53,8 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
 function Rail({ view, setView }) {
   const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
-  const counts = { map:REQUIREMENTS.length, problems:problems.length, spec:REQUIREMENTS.length };
+  const todoCount = TODOS.filter(t => !t.done).length;
+  const counts = { map:REQUIREMENTS.length, problems:problems.length, spec:REQUIREMENTS.length, roadmap:todoCount };
 
   // registry stats derived from whatever data is loaded
   const by = (pred) => REQUIREMENTS.filter(pred).length;
@@ -86,6 +89,17 @@ function Rail({ view, setView }) {
           <span style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-faint)"}}>{bound} members bound</span>
         </div>
       </div>
+      <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid var(--border-soft)",textAlign:"center"}}>
+        <a
+          href="https://github.com/alxmax/Requirement-manager"
+          target="_blank"
+          rel="noreferrer"
+          style={{fontSize:10,color:"var(--fg-faint)",textDecoration:"none",
+                  fontFamily:"var(--font-mono)",opacity:0.7}}
+        >
+          by requirement-manager
+        </a>
+      </div>
     </nav>
   );
 }
@@ -112,6 +126,7 @@ export default function App() {
           highlightId={highlightId} setHighlightId={setHighlightId} />}
         {view==="problems" && <ProblemsView openSpec={openSpec} />}
         {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
+        {view==="roadmap" && <RoadmapView openSpec={openSpec} />}
       </div>
     </div>
   );
