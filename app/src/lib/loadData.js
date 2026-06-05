@@ -26,6 +26,9 @@ export function adaptNode(n) {
     deps: Array.isArray(n.deps) ? n.deps : [],
     usedBy: Array.isArray(n.used_by) ? n.used_by : [],
     risks: Array.isArray(n.risks) ? n.risks : [],
+    // forward the gate's test-exemption so coverageOf() can return "exempt"
+    // instead of falsely flagging exempt requirements as "untested"
+    test_exempt: n.test_exempt,
   };
 }
 
