@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-05 20:57
+generated: 2026-06-05 22:03
 nodes: 13
 edges: 16
 ---
@@ -80,13 +80,13 @@ graph LR
   f_scripts_test_reqmap_py_600_989["scripts/test_reqmap.py:600-989"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_600_989
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
-  f_scripts_reqmap_py_1268_1297["scripts/reqmap.py:1268-1297"]
-  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1268_1297
+  f_scripts_reqmap_py_1304_1333["scripts/reqmap.py:1304-1333"]
+  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1304_1333
   f_scripts_test_reqmap_py_1369["scripts/test_reqmap.py:1369"]
   REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1369
   REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1042_1825["scripts/reqmap.py:1042-1825"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1825
+  f_scripts_reqmap_py_1042_1862["scripts/reqmap.py:1042-1862"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1862
   f_scripts_test_reqmap_py_277_1147["scripts/test_reqmap.py:277-1147"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_277_1147
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -95,8 +95,8 @@ graph LR
   f_scripts_test_reqmap_py_469["scripts/test_reqmap.py:469"]
   REQ_NEW_004 -->|tested-by| f_scripts_test_reqmap_py_469
   REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
-  f_scripts_reqmap_py_1125_1135["scripts/reqmap.py:1125-1135"]
-  REQ_NEXT_013 -->|implements| f_scripts_reqmap_py_1125_1135
+  f_scripts_reqmap_py_1161_1171["scripts/reqmap.py:1161-1171"]
+  REQ_NEXT_013 -->|implements| f_scripts_reqmap_py_1161_1171
   f_scripts_test_reqmap_py_1252_1362["scripts/test_reqmap.py:1252-1362"]
   REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1252_1362
   REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]

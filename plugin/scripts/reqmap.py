@@ -1071,6 +1071,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "used_by": used_by.get(rid, []),
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
             "test_exempt": m.get("test_exempt"),
+            "milestone": m.get("milestone"),
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "members": members.get(rid, []),
                  "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
@@ -1081,9 +1082,44 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
     return data
 
 
+def _parse_todos_from_text(text):
+    """Parse TODO.md content → list of {name, lane, milestone, done} dicts. Pure."""
+    import re as _re
+    todos, current_ms = [], None
+    for line in text.splitlines():
+        ms_m = _re.match(r"^##\s+(v\d[\d.]*)\s*$", line.strip())
+        if ms_m:
+            current_ms = ms_m.group(1)
+            continue
+        item_m = _re.match(r"^-\s+\[([ xX])\]\s+(.+)$", line.strip())
+        if item_m and current_ms:
+            done = item_m.group(1).lower() == "x"
+            rest = item_m.group(2)
+            if "|" in rest:
+                name_part, meta = rest.rsplit("|", 1)
+                name = name_part.strip()
+                lane_m = _re.search(r"lane:\s*(\w+)", meta)
+                lane = lane_m.group(1) if lane_m else "feature"
+            else:
+                name, lane = rest.strip(), "feature"
+            todos.append({"name": name, "lane": lane, "milestone": current_ms, "done": done})
+    return todos
+
+
+def _parse_todos(root):
+    """Read TODO.md from repo root; return list of todo dicts (empty if absent)."""
+    path = os.path.join(root, "TODO.md")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return _parse_todos_from_text(f.read())
+    except OSError:
+        return []
+
+
 def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-MAP-007
     data = _build_map_data(reqs, members)
     data["repo"] = _repo_name(root)
+    data["todos"] = _parse_todos(root)
 
     if check:
         return _map_check(data, reqs_dir)
@@ -1765,7 +1801,8 @@ def _build_json_text(data):  # implements: REQ-MAP-007
     json.dumps neutralizes any hostile id/title/body by construction — there is
     no markup context to break out of — so no extra escaping is needed."""
     payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
-               "nodes": data["nodes"], "edges": data["edges"]}
+               "nodes": data["nodes"], "edges": data["edges"],
+               "todos": data.get("todos", [])}
     return json.dumps(payload, indent=2, ensure_ascii=False)
 
 
