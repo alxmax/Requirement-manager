@@ -5,6 +5,7 @@ layer: feature
 owner: Alex
 depends_on: [CORE-SCAN-002]
 superseded_by:
+milestone: v1.06
 ---
 
 # Capability candidates (extraction plan)

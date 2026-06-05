@@ -11,3 +11,4 @@
 ## v1.14
 - [ ] promote-todo command               | lane: feature
 - [ ] Gate validation for milestone IDs  | lane: ops
+- [ ] Requirement quality checker (AI)   | lane: feature

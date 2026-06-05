@@ -5,6 +5,7 @@ layer: feature
 owner: Alex
 depends_on: [CORE-PARSE-001, CORE-SCAN-002]
 superseded_by:
+milestone: v1.04
 ---
 
 # List members per capability
