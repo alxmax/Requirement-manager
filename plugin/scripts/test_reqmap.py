@@ -142,6 +142,46 @@ class Gate(unittest.TestCase):
             self.assertIn("re-check 1 member", out)   # actionable count
             self.assertIn("mod.py:1", out)            # names the member location
 
+    def test_confirmed_missing_contract_section_warns(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## HOW — Acceptance (= tests)\n- Given X When Y Then Z\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertIn("missing '## WHAT — Contract'", out)
+        self.assertEqual(code, 0)  # WARN, not error
+
+    def test_confirmed_missing_acceptance_section_warns(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## WHAT — Contract (normative)\n- It shall do X\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertIn("missing '## HOW — Acceptance'", out)
+        self.assertEqual(code, 0)  # WARN, not error
+
+    def test_confirmed_with_both_sections_no_section_lint_warn(self):  # tested-by: REQ-CHECK-006
+        files = {
+            "AREA-FOO-001.md": (
+                "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                "# Foo\n\n"
+                "## WHAT — Contract (normative)\n- It shall do X\n\n"
+                "## HOW — Acceptance (= tests)\n- Given X When Y Then Z\n"
+            ),
+            "src.py": tag("AREA-FOO-001") + "\n" + tb_tag("AREA-FOO-001") + "\n",
+        }
+        code, out = self._check(files)
+        self.assertNotIn("missing '## WHAT — Contract'", out)
+        self.assertNotIn("missing '## HOW — Acceptance'", out)
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_tag_re_left_boundary(self):  # bug #3

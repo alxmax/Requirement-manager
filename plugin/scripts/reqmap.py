@@ -315,6 +315,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        if m.get("status") == "confirmed":
+            if not _has_section(r["body"], "contract"):
+                warns.append(
+                    f"{rid}: confirmed but missing '## WHAT — Contract' section — "
+                    "add the normative contract or drop status back to in-progress"
+                )
+            if not _has_section(r["body"], "acceptan"):
+                warns.append(
+                    f"{rid}: confirmed but missing '## HOW — Acceptance' section — "
+                    "add acceptance criteria or drop status back to in-progress"
+                )
 
     lock = load_lock(reqs_dir)
     # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
