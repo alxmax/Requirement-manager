@@ -52,9 +52,6 @@ RISK_ADVICE = {
     "unreviewed": "Draft/baseline, not yet validated: review the contract, wire its "
                   "`tested-by` tests, then promote to `confirmed`. Until then it is "
                   "tracked, not enforced.",
-    "blast-radius": "High fan-in — many capabilities depend on this. Change it only "
-                    "behind its contract, run the full gate + dependents' tests, and "
-                    "treat it as shared foundation (bus).",
     "untested": "Implemented but no `tested-by` member: write an acceptance test and tag "
                 "it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter "
                 "to acknowledge it intentionally and silence this signal.",
@@ -1065,8 +1062,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "test_exempt": m.get("test_exempt"),
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "members": members.get(rid, []),
-                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")},
-                len(used_by.get(rid, [])))],
+                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -1145,11 +1141,10 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
         m = r["meta"]
         node = {"status": m.get("status", "draft"), "members": members.get(rid, []),
                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")}
-        for sig in _risk_signals(node, dependents.get(rid, 0)):
+        for sig in _risk_signals(node):
             buckets.setdefault(sig, []).append((rid, _risk_score(m)))
     # Action buckets, MOST-URGENT FIRST: an unimplemented contract outranks an
-    # unreviewed draft. blast-radius is a caution (a property, not a task) so `next`
-    # omits it — it stays on the Risk tab. Each bucket is shown and truncated
+    # unreviewed draft. Each bucket is shown and truncated
     # independently, so a high-priority bucket is never hidden below a long low one.
     PLAN = [
         ("unimplemented",     "Orphans (confirmed, no code)"),
@@ -1563,7 +1558,7 @@ def _member_roles(members):
     return roles
 
 
-def _risk_signals(node, dependents_count):
+def _risk_signals(node):
     signals = []
     if node["status"] == "confirmed" and not node["members"]:
         signals.append("unimplemented")
@@ -1585,8 +1580,6 @@ def _risk_signals(node, dependents_count):
     if node["status"] != "draft" and any(
             b and not b.lstrip("*_ ").lower().startswith("none") for b in (node.get("verify") or [])):
         signals.append("unverified-intent")
-    if dependents_count >= 3:
-        signals.append("blast-radius")
     return signals
 
 
@@ -1595,7 +1588,7 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
     for _, b in data["edges"]:
         dep_count[b] = dep_count.get(b, 0) + 1
 
-    risky = [(n, _risk_signals(n, dep_count.get(n["id"], 0))) for n in data["nodes"]]
+    risky = [(n, _risk_signals(n)) for n in data["nodes"]]
     risky = [(n, s) for n, s in risky if s]
 
     lines = ["graph LR"]
@@ -1634,7 +1627,7 @@ _LEGEND_MD = [
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
-    "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = blast-radius (≥3 dependents), untested (implemented but no tested-by — set `test_exempt` to silence), or unverified-intent (open verify-intent question).",
+    "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = untested (implemented but no tested-by — set `test_exempt` to silence), or unverified-intent (open verify-intent question).",
 ]
 
 
@@ -1670,7 +1663,7 @@ def _build_md_text(data):  # implements: REQ-MAP-007
     # risk table — each flagged requirement with its scripted recommendation
     risk_rows = []
     for n in data["nodes"]:
-        sigs = _risk_signals(n, dep_count.get(n["id"], 0))
+        sigs = _risk_signals(n)
         if sigs:
             rec = " ".join(RISK_ADVICE[s] for s in sigs).replace("|", "/").replace("\n", " ")
             risk_rows.append((n["id"], n["status"],

@@ -23,9 +23,16 @@ Run tests (stdlib unittest, no install needed):
 
 ```bash
 python scripts/test_reqmap.py
+python scripts/reqmap.py map --check   # fails if committed _map.* is stale
 ```
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`.
+Version coherence gate (run from repo root, not `plugin/`):
+
+```bash
+python scripts/check_versions.py       # asserts plugin.json semver == marketplace.json; validates MAP_ENGINE_VERSION shape
+```
+
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all four checks: `check_versions.py` → `reqmap.py check` → `reqmap.py map --check` → `test_reqmap.py`.
 
 ## Architecture
 
@@ -57,6 +64,11 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 
 The viewer is the Vite + React app under `app/`. Its single-file build is vendored beside the engine as `plugin/scripts/_map_viewer.html` (carries a `<!--REQMAP_DATA-->` marker); the stdlib engine injects each repo's `_map.json` into that marker to produce `_map.html`. So the engine ships a rich UI without itself depending on Node/npm — and emits only `_map.md` + `_map.json` if the template is absent.
 
+**Rebuilding the vendored viewer** (required after any `app/` change):
+```bash
+cd app && npm run build:viewer   # rewrites plugin/scripts/_map_viewer.html
+```
+
 **Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`candidates --md-glob`) is separate and opt-in.
 
 ## Plugin packaging
@@ -64,3 +76,8 @@ The viewer is the Vite + React app under `app/`. Its single-file build is vendor
 `plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root). Version is tracked in `plugin.json` and as `MAP_ENGINE_VERSION` (ISO date `YYYY-MM-DD`, with an optional `.N` same-day revision suffix, e.g. `2026-06-03.2`) inside `reqmap.py` — bump both on engine changes so seeded repos can detect they are behind.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
+
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v1`. The `@v1` git tag is independent of the plugin semver and of `MAP_ENGINE_VERSION` — bump it manually when the action interface changes. Consumer repos use it as:
+```yaml
+- uses: alxmax/requirement-manager/check@v1
+```

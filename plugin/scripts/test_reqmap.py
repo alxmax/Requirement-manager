@@ -994,28 +994,28 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
 
     def test_untested_fires_when_implemented_but_no_test(self):
         n = self._node(members=[{"role": "implements", "loc": "a.py:1"}])
-        self.assertIn("untested", R._risk_signals(n, 0))
+        self.assertIn("untested", R._risk_signals(n))
 
     def test_untested_silent_with_tested_by(self):
         n = self._node(members=[{"role": "implements", "loc": "a.py:1"},
                                 {"role": "tested-by", "loc": "t.py:1"}])
-        self.assertNotIn("untested", R._risk_signals(n, 0))
+        self.assertNotIn("untested", R._risk_signals(n))
 
     def test_untested_not_fired_for_unimplemented_draft(self):  # gated on implements
         n = self._node(members=[])
-        self.assertNotIn("untested", R._risk_signals(n, 0))
+        self.assertNotIn("untested", R._risk_signals(n))
 
     def test_test_exempt_suppresses_untested(self):
         n = self._node(members=[{"role": "implements", "loc": "a.py:1"}], test_exempt="manual QA")
-        self.assertNotIn("untested", R._risk_signals(n, 0))
+        self.assertNotIn("untested", R._risk_signals(n))
 
     def test_unverified_intent_fires_on_open_findings(self):
         n = self._node(verify=["is the empty-string fallback intended?"])
-        self.assertIn("unverified-intent", R._risk_signals(n, 0))
+        self.assertIn("unverified-intent", R._risk_signals(n))
 
     def test_unverified_intent_ignores_none_placeholder(self):  # mirror collect_findings
         n = self._node(verify=["None — prompt is unambiguous."])
-        self.assertNotIn("unverified-intent", R._risk_signals(n, 0))
+        self.assertNotIn("unverified-intent", R._risk_signals(n))
 
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
