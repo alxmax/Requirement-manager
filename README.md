@@ -61,6 +61,7 @@ id: AUTH-LOGIN-001
 status: confirmed
 layer: feature
 depends_on: [CORE-SESSION-002]
+milestone: v1.4          # optional — shows this requirement in the Roadmap tab
 ---
 
 # User login
@@ -102,7 +103,7 @@ script, so there's nothing else to download.
 |---|---|
 | `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
 | `check` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit |
-| `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html`) |
+| `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Also reads `TODO.md` from the repo root and inlines a `todos` array into `_map.json` so the Roadmap tab can show planned work alongside requirements |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
 | `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template |
 | `scan` | List which code belongs to which requirement |
@@ -159,11 +160,22 @@ The action just runs `reqmap.py check`. Inputs `reqmap-path` and
 plugin/                                the plugin — self-contained
   .claude-plugin/plugin.json           plugin manifest
   skills/requirement-manager/SKILL.md  the full contract & authoring rules
-  scripts/reqmap.py                    the engine (Python stdlib only, ~1000 lines)
+  scripts/reqmap.py                    the engine (Python stdlib only, ~1900 lines)
   requirements/*.md                    the source of truth (one file per capability)
   requirements/_reqlock.json           the drift baseline (committed)
 app/                                   the React viewer (built into the single-file _map.html)
+TODO.md                                optional planning file — feeds the Roadmap tab in the viewer
 ```
+
+**`TODO.md` format** — group items under `## vX.Y` milestone headings; each item is a checkbox with an optional `| lane: bus|feature|ops` suffix. Completed items (`[x]`) are hidden in the chart.
+
+```markdown
+## v1.14
+- [ ] Promote-todo command    | lane: feature
+- [ ] Gate validation for milestone IDs | lane: ops
+```
+
+Items appear as amber dashed bars in the Roadmap tab until you replace them with a real requirement file.
 
 ## Want the full details?
 
