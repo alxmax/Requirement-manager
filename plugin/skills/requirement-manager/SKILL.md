@@ -333,6 +333,22 @@ memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
 edit shifted it). Wire it next to `check` in your pre-commit hook / CI so a stale
 map can't be committed. A repo that doesn't track a map passes silently.
 
+## Releasing a new version (plugin semver checklist)
+
+Before merging a feature branch, bump the semver **on that branch** so the version commit is part of the merge. Do not bump after merge.
+
+1. Update `plugin/.claude-plugin/plugin.json` → `"version": "X.Y.Z"`
+2. Update `.claude-plugin/marketplace.json` → `"version": "X.Y.Z"` in all three occurrences (root + plugins array)
+3. Run `python scripts/check_versions.py` from repo root — must print `OK semver aligned at 'X.Y.Z'`
+4. Mark shipped `TODO.md` items `[x]` so they disappear from the Roadmap tab
+5. Commit: `chore: bump version to X.Y.Z`
+6. After merge: `git tag vX.Y.Z <merge-sha> && git push origin vX.Y.Z`
+
+**When to bump which digit:**
+- **patch** (X.Y.**Z**) — bug fixes, doc corrections, gate/map regen with no new behavior
+- **minor** (X.**Y**.0) — new commands, new viewer tabs, new frontmatter fields, new generated outputs
+- **major** (**X**.0.0) — breaking changes to the requirement schema, gate behavior, or CLI interface
+
 ## Legacy / brownfield (extract mode)
 
 `extract` walks the code and proposes `draft` requirements (structure, input/output
