@@ -229,6 +229,7 @@ export let REQ_BY_ID = {};
 // owner/repo the loaded map describes (engine-emitted); null = no engine data,
 // header falls back to a generic label.
 export let REPO = null;
+export let TODOS = [];
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -245,6 +246,11 @@ export function setRegistry(list) {
 /** Set the owner/repo name the loaded map describes (engine-emitted). */
 export function setRepo(name) {
   REPO = name || null;
+}
+
+/** Replace the TODO list with data parsed from TODO.md (engine-emitted). */
+export function setTodos(list) {
+  TODOS = Array.isArray(list) ? list : [];
 }
 
 /* ---- coverage + git-derived dates (computed, not stored) ----------------- */

@@ -5,6 +5,7 @@ layer: bus
 owner: Alex
 depends_on: []
 superseded_by:
+milestone: v1.00
 ---
 
 # Requirement reading

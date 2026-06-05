@@ -1,12 +1,12 @@
 /* Bridge between the reqmap engine and the app.
  *
  * The engine's `export` command writes `requirements/_map.json` in a
- * {engine_version, nodes, edges} shape. `npm run sync` copies it to
+ * {engine_version, nodes, edges, todos} shape. `npm run sync` copies it to
  * `public/data.json`. At startup loadData() fetches it and adapts each node to
  * the app's requirement shape; on any miss it leaves the baked fallback in
  * place, so the app always renders. */
 
-import { setRegistry, setRepo } from "./data.js";
+import { setRegistry, setRepo, setTodos } from "./data.js";
 
 /** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
 export function adaptNode(n) {
@@ -29,6 +29,7 @@ export function adaptNode(n) {
     // forward the gate's test-exemption so coverageOf() can return "exempt"
     // instead of falsely flagging exempt requirements as "untested"
     test_exempt: n.test_exempt,
+    milestone: n.milestone || null,
   };
 }
 
@@ -44,6 +45,7 @@ export async function loadData() {
   if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
     setRegistry(inl.nodes.map(adaptNode));
     setRepo(inl.repo);
+    setTodos(inl.todos || []);
     return { source: "inline", engineVersion: inl.engine_version || null, count: inl.nodes.length };
   }
   // 2. fetched export (only meaningful over http; file:// will throw → fallback)
@@ -54,6 +56,7 @@ export async function loadData() {
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) return { source: "baked" };
     setRegistry(json.nodes.map(adaptNode));
     setRepo(json.repo);
+    setTodos(json.todos || []);
     return { source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length };
   } catch {
     return { source: "baked" };

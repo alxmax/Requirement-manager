@@ -5,6 +5,7 @@ layer: feature
 owner: Alex
 depends_on: [CORE-PARSE-001]
 superseded_by:
+milestone: v1.08
 ---
 
 # Open-findings report

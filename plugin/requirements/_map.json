@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-05.1",
+  "engine_version": "2026-06-05.2",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -66,6 +66,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.00",
       "risks": []
     },
     {
@@ -138,6 +139,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.00",
       "risks": []
     },
     {
@@ -202,6 +204,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.00",
       "risks": []
     },
     {
@@ -298,6 +301,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.06",
       "risks": []
     },
     {
@@ -396,6 +400,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.02",
       "risks": []
     },
     {
@@ -491,6 +496,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.06",
       "risks": []
     },
     {
@@ -546,6 +552,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.08",
       "risks": []
     },
     {
@@ -596,11 +603,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1268"
+          "loc": "scripts/reqmap.py:1307"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1297"
+          "loc": "scripts/reqmap.py:1336"
         },
         {
           "role": "tested-by",
@@ -608,6 +615,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.10",
       "risks": []
     },
     {
@@ -673,75 +681,67 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1084"
+          "loc": "scripts/reqmap.py:1122"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1107"
+          "loc": "scripts/reqmap.py:1146"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1349"
+          "loc": "scripts/reqmap.py:1388"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1372"
+          "loc": "scripts/reqmap.py:1411"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1380"
+          "loc": "scripts/reqmap.py:1419"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1387"
+          "loc": "scripts/reqmap.py:1426"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1399"
+          "loc": "scripts/reqmap.py:1438"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1413"
+          "loc": "scripts/reqmap.py:1452"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1457"
+          "loc": "scripts/reqmap.py:1496"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1463"
+          "loc": "scripts/reqmap.py:1502"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1470"
+          "loc": "scripts/reqmap.py:1509"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1507"
+          "loc": "scripts/reqmap.py:1546"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1522"
+          "loc": "scripts/reqmap.py:1561"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1553"
+          "loc": "scripts/reqmap.py:1592"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1625"
+          "loc": "scripts/reqmap.py:1664"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1673"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1724"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1732"
+          "loc": "scripts/reqmap.py:1712"
         },
         {
           "role": "implements",
@@ -749,11 +749,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1772"
+          "loc": "scripts/reqmap.py:1771"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1788"
+          "loc": "scripts/reqmap.py:1802"
         },
         {
           "role": "implements",
@@ -761,11 +761,19 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1816"
+          "loc": "scripts/reqmap.py:1828"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1825"
+          "loc": "scripts/reqmap.py:1852"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1856"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1865"
         },
         {
           "role": "tested-by",
@@ -801,6 +809,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.04",
       "risks": []
     },
     {
@@ -849,6 +858,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.02",
       "risks": []
     },
     {
@@ -898,11 +908,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1125"
+          "loc": "scripts/reqmap.py:1164"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1135"
+          "loc": "scripts/reqmap.py:1174"
         },
         {
           "role": "tested-by",
@@ -922,6 +932,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.12",
       "risks": []
     },
     {
@@ -971,6 +982,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.08",
       "risks": []
     },
     {
@@ -1019,6 +1031,7 @@
         }
       ],
       "test_exempt": null,
+      "milestone": "v1.04",
       "risks": []
     }
   ],
@@ -1087,5 +1100,37 @@
       "REQ-SCAN-005",
       "CORE-SCAN-002"
     ]
+  ],
+  "todos": [
+    {
+      "name": "Roadmap tab (Gantt viewer)",
+      "lane": "feature",
+      "milestone": "v1.13",
+      "done": false
+    },
+    {
+      "name": "TODO.md template + engine parsing",
+      "lane": "feature",
+      "milestone": "v1.13",
+      "done": false
+    },
+    {
+      "name": "promote-todo command",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": false
+    },
+    {
+      "name": "Gate validation for milestone IDs",
+      "lane": "ops",
+      "milestone": "v1.14",
+      "done": false
+    },
+    {
+      "name": "Requirement quality checker (AI)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": false
+    }
   ]
 }

@@ -1510,5 +1510,47 @@ def _kv(extra):
         yield k.strip(), meta.get(k.strip())
 
 
+class ParseTodos(unittest.TestCase):
+    def test_basic_items(self):
+        text = (
+            "# TODO\n\n"
+            "## v1.14\n"
+            "- [ ] Feature A | lane: feature\n"
+            "- [x] Done item | lane: ops\n\n"
+            "## v1.15\n"
+            "- [ ] Feature B\n"
+        )
+        todos = R._parse_todos_from_text(text)
+        self.assertEqual(len(todos), 3)
+        self.assertEqual(todos[0], {"name": "Feature A",  "lane": "feature", "milestone": "v1.14", "done": False})
+        self.assertEqual(todos[1], {"name": "Done item",  "lane": "ops",     "milestone": "v1.14", "done": True})
+        self.assertEqual(todos[2], {"name": "Feature B",  "lane": "feature", "milestone": "v1.15", "done": False})
+
+    def test_missing_file_returns_empty(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(R._parse_todos(d), [])
+
+    def test_milestone_in_node(self):
+        """_build_map_data emits milestone field on each node."""
+        with tempfile.TemporaryDirectory() as tmp:
+            req_dir = os.path.join(tmp, "requirements")
+            os.makedirs(req_dir)
+            _write(os.path.join(req_dir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: feature\nmilestone: v1.14\n---\n\n# Title\n")
+            reqs = R.load_requirements(req_dir)
+            members = R.scan_members(tmp)
+            data = R._build_map_data(reqs, members)
+            node = next(n for n in data["nodes"] if n["id"] == "REQ-A-001")
+            self.assertEqual(node["milestone"], "v1.14")
+
+    def test_todos_in_json_text(self):
+        """_build_json_text includes todos key."""
+        data = {"nodes": [], "edges": [], "repo": None,
+                "todos": [{"name": "X", "lane": "feature", "milestone": "v1.14", "done": False}]}
+        payload = json.loads(R._build_json_text(data))
+        self.assertEqual(payload["todos"][0]["name"], "X")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
