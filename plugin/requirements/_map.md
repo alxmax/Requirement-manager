@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-05 20:00
+generated: 2026-06-05 20:19
 nodes: 13
 edges: 16
 ---
@@ -80,13 +80,13 @@ graph LR
   f_scripts_test_reqmap_py_600_952["scripts/test_reqmap.py:600-952"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_600_952
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
-  f_scripts_reqmap_py_1246_1275["scripts/reqmap.py:1246-1275"]
-  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1246_1275
-  f_scripts_test_reqmap_py_1306["scripts/test_reqmap.py:1306"]
-  REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1306
+  f_scripts_reqmap_py_1263_1292["scripts/reqmap.py:1263-1292"]
+  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1263_1292
+  f_scripts_test_reqmap_py_1332["scripts/test_reqmap.py:1332"]
+  REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1332
   REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1042_1772["scripts/reqmap.py:1042-1772"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1772
+  f_scripts_reqmap_py_1042_1789["scripts/reqmap.py:1042-1789"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1789
   f_scripts_test_reqmap_py_277_1110["scripts/test_reqmap.py:277-1110"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_277_1110
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -97,8 +97,8 @@ graph LR
   REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
   f_scripts_reqmap_py_1120_1130["scripts/reqmap.py:1120-1130"]
   REQ_NEXT_013 -->|implements| f_scripts_reqmap_py_1120_1130
-  f_scripts_test_reqmap_py_1215["scripts/test_reqmap.py:1215"]
-  REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1215
+  f_scripts_test_reqmap_py_1215_1325["scripts/test_reqmap.py:1215-1325"]
+  REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1215_1325
   REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
   f_scripts_reqmap_py_455_470["scripts/reqmap.py:455-470"]
   REQ_PROMOTE_011 -->|implements| f_scripts_reqmap_py_455_470

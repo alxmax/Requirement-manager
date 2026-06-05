@@ -1318,6 +1318,32 @@ class Next(unittest.TestCase):  # tested-by: REQ-NEXT-013
         self.assertIn("No requirements yet", out)
         self.assertNotIn("Nothing pending", out)
 
+    def _req_with_acs(self, n):
+        acs = "".join(f"- AC-{i}: Given X When Y Then Z\n" for i in range(n))
+        body = (
+            "# Foo\n\n"
+            "## WHAT — Contract (normative)\n- It shall do X\n\n"
+            f"## HOW — Acceptance (= tests)\n{acs}"
+        )
+        return {"meta": {"status": "confirmed"}, "body": body}
+
+    def test_granularity_at_threshold_warns(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(5)}
+        _, out = self._next(reqs, {})
+        self.assertIn("consider splitting", out)
+        self.assertIn("AREA-FOO-001", out)
+
+    def test_granularity_below_threshold_no_warn(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(4)}
+        _, out = self._next(reqs, {})
+        self.assertNotIn("consider splitting", out)
+
+    def test_granularity_above_threshold_warns(self):  # tested-by: REQ-NEXT-013
+        reqs = {"AREA-FOO-001": self._req_with_acs(8)}
+        _, out = self._next(reqs, {})
+        self.assertIn("consider splitting", out)
+        self.assertIn("AREA-FOO-001", out)
+
 
 class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
     def _init(self, code_root, wipe=False):

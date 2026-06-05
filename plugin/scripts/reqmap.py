@@ -1182,6 +1182,23 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
         if not show_all and len(ids) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors
+    AC_SPLIT_THRESHOLD = 5
+    oversize = sorted(
+        [(rid, len(_bullets(r["body"], "acceptan")))
+         for rid, r in reqs.items()
+         if len(_bullets(r["body"], "acceptan")) >= AC_SPLIT_THRESHOLD],
+        key=lambda x: (-x[1], x[0])
+    )
+    if oversize:
+        print("Granularity ({})".format(len(oversize)))
+        for rid, n in oversize:
+            print("  {}   ({} ACs) — consider splitting   requirements/{}.md".format(rid, n, rid))
+        print(
+            "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
+            "is a split candidate. Author two requirements, each with its own contract.\n"
+            .format(AC_SPLIT_THRESHOLD)
+        )
     return 0
 
 
