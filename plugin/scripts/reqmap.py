@@ -1358,6 +1358,66 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
     return 0
 
 
+def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
+    """Print one consolidated, human-readable dossier for a single requirement: its
+    status/layer/intent, contract, dependencies (both directions), members grouped
+    by role, open verify-intent questions, and risk signals — the 'what does this do
+    / where is X' view in one command. Read-only; returns 1 on an unknown id so a
+    typo is visible to a caller or CI. Reuses the same signal source as next/findings."""
+    r = reqs.get(cap_id)
+    if not r:
+        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+        return 1
+    m, body = r["meta"], r["body"]
+    head = "{} · {} · {}".format(cap_id, m.get("status", "draft"), m.get("layer", "?"))
+    if m.get("milestone"):
+        head += " · " + m["milestone"]
+    print(head)
+    print(_req_title(body, cap_id))
+    for line in body.splitlines():          # intent: first blockquote under the title
+        if line.strip().startswith(">"):
+            print("  " + line.strip().lstrip(">").strip())
+            break
+
+    contract = _bullets(body, "contract")
+    print("\nContract:")
+    for b in contract:
+        print("  - " + b)
+    if not contract:
+        print("  (none — no '## WHAT — Contract' section)")
+
+    deps = _as_list(m.get("depends_on"))
+    dependents = sorted(rid for rid, rr in reqs.items()
+                        if cap_id in _as_list(rr["meta"].get("depends_on")))
+    print("\nDepends on: " + (", ".join(deps) if deps else "(none)"))
+    print("Depended on by: " + (", ".join(dependents) if dependents else "(none)"))
+
+    mem = members.get(cap_id, [])
+    print("\nMembers in code ({}):".format(len(mem)))
+    if mem:
+        for role, fp, ln in sorted(mem):
+            print("  {:18} {}:{}".format(role, fp, ln))
+    else:
+        print("  (none tagged)")
+
+    verify = [b for b in _bullets(body, "verify intent")
+              if b and not b.lstrip("*_ ").lower().startswith("none")]
+    if verify:
+        print("\nOpen verify-intent:")
+        for b in verify:
+            print("  - " + b)
+
+    node = {"status": m.get("status", "draft"), "members": mem,
+            "verify": _bullets(body, "verify intent"), "test_exempt": m.get("test_exempt")}
+    signals = _risk_signals(node)
+    if signals:
+        print("\nRisk signals:")
+        for s in signals:
+            print("  [{}] {}".format(s, RISK_ADVICE[s]))
+    print("\n{}".format(r["path"]))
+    return 0
+
+
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
     Finds the comment marker (#, //, <!--) closest to the tag and cuts from
@@ -2002,7 +2062,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2049,6 +2109,10 @@ def main():
         return cmd_next(reqs, members, a.show_all)
     if a.cmd == "lint":
         return cmd_lint(reqs, a.strict)
+    if a.cmd == "show":
+        if not a.arg:
+            print("usage: reqmap show <ID>"); return 2
+        return cmd_show(reqs, members, a.arg)
     if a.cmd == "check":
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
         if a.update_lock:

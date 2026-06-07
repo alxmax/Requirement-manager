@@ -111,7 +111,8 @@
         "REQ-MAP-007",
         "REQ-NEW-004",
         "REQ-PROMOTE-011",
-        "REQ-SCAN-005"
+        "REQ-SCAN-005",
+        "REQ-SHOW-015"
       ],
       "members": [
         {
@@ -184,7 +185,8 @@
         "REQ-CHECK-006",
         "REQ-EXTRACT-008",
         "REQ-MAP-007",
-        "REQ-SCAN-005"
+        "REQ-SCAN-005",
+        "REQ-SHOW-015"
       ],
       "members": [
         {
@@ -604,11 +606,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1419"
+          "loc": "scripts/reqmap.py:1479"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1448"
+          "loc": "scripts/reqmap.py:1508"
         },
         {
           "role": "tested-by",
@@ -766,91 +768,91 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1500"
+          "loc": "scripts/reqmap.py:1560"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1523"
+          "loc": "scripts/reqmap.py:1583"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1531"
+          "loc": "scripts/reqmap.py:1591"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1538"
+          "loc": "scripts/reqmap.py:1598"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1550"
+          "loc": "scripts/reqmap.py:1610"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1564"
+          "loc": "scripts/reqmap.py:1624"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1608"
+          "loc": "scripts/reqmap.py:1668"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1614"
+          "loc": "scripts/reqmap.py:1674"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1621"
+          "loc": "scripts/reqmap.py:1681"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1658"
+          "loc": "scripts/reqmap.py:1718"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1673"
+          "loc": "scripts/reqmap.py:1733"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1704"
+          "loc": "scripts/reqmap.py:1764"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1776"
+          "loc": "scripts/reqmap.py:1836"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1824"
+          "loc": "scripts/reqmap.py:1884"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1875"
+          "loc": "scripts/reqmap.py:1935"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1883"
+          "loc": "scripts/reqmap.py:1943"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1914"
+          "loc": "scripts/reqmap.py:1974"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1924"
+          "loc": "scripts/reqmap.py:1984"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1940"
+          "loc": "scripts/reqmap.py:2000"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1964"
+          "loc": "scripts/reqmap.py:2024"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1968"
+          "loc": "scripts/reqmap.py:2028"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1977"
+          "loc": "scripts/reqmap.py:2037"
         },
         {
           "role": "tested-by",
@@ -1110,6 +1112,64 @@
       "test_exempt": null,
       "milestone": "v1.04",
       "risks": []
+    },
+    {
+      "id": "REQ-SHOW-015",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Single-requirement dossier",
+      "intent": "Print everything about one requirement in a single terminal view, so a reader answers \"what does this do and where is it\" without opening files.",
+      "contract": [
+        "The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.",
+        "It shall print a header line with the id, status, and layer. When the requirement carries a `milestone` field, the header shall append it.",
+        "It shall print the title and the intent line (the first blockquote of the body).",
+        "It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.",
+        "It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).",
+        "It shall list the code members grouped by role, each with its `file:line`. When no member is tagged, it shall say so.",
+        "It shall list the open `## WHAT — Verify intent` questions, skipping the \"None\" placeholder, using the same filter as `findings`.",
+        "It shall list the requirement's risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab.",
+        "It shall return zero when the id is found, and a non-zero code when the id is unknown, so a typo is visible to a caller or to CI."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The view is read-only and never edits the requirement. To change a status, use `promote`; to change the contract, edit the file.",
+        "The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached."
+      ],
+      "current_impl": [
+        "`cmd_show` in `reqmap.py` — looks the id up in the loaded requirements, then prints the header, intent, contract, both dependency directions, members, open verify-intent, and risk signals. It reuses `_bullets`, `_req_title`, `_as_list`, `_risk_signals` and `RISK_ADVICE`, so the view agrees with `next`, `findings`, and the map."
+      ],
+      "acc": [
+        "Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.",
+        "Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.",
+        "Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".",
+        "Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.",
+        "Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not."
+      ],
+      "accept": "- Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.\n- Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.\n- Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".\n- Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.\n- Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "CORE-SCAN-002"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1361"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1616"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "risks": []
     }
   ],
   "edges": [
@@ -1180,6 +1240,14 @@
     [
       "REQ-SCAN-005",
       "CORE-SCAN-002"
+    ],
+    [
+      "REQ-SHOW-015",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-SHOW-015",
+      "CORE-SCAN-002"
     ]
   ],
   "todos": [
@@ -1197,6 +1265,12 @@
     },
     {
       "name": "Requirement readability linter (lint)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Single-requirement dossier (show)",
       "lane": "feature",
       "milestone": "v1.14",
       "done": true

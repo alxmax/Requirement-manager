@@ -1613,5 +1613,49 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         self.assertEqual(code, 1)
 
 
+class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
+    def _show(self, reqs, members, cap_id):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_show(reqs, members, cap_id)
+        return code, buf.getvalue()
+
+    def _req(self, status="confirmed", extra="", body="# T\n"):
+        return {"meta": {"status": status, "layer": "feature", **dict(_kv(extra))},
+                "body": body, "path": "requirements/X.md"}
+
+    def test_known_id_header_and_zero(self):
+        code, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
+        self.assertEqual(code, 0)
+        self.assertIn("REQ-X-001", out)
+        self.assertIn("confirmed", out)
+        self.assertIn("feature", out)
+
+    def test_unknown_id_returns_one(self):
+        code, out = self._show({}, {}, "NOPE-000")
+        self.assertEqual(code, 1)
+        self.assertIn("no requirement with id NOPE-000", out)
+
+    def test_reverse_dependency_listed(self):
+        reqs = {"CORE-A-001": self._req(),
+                "REQ-B-002": self._req(extra="depends_on: [CORE-A-001]")}
+        _, out = self._show(reqs, {}, "CORE-A-001")
+        self.assertIn("Depended on by", out)
+        self.assertIn("REQ-B-002", out)
+
+    def test_member_role_and_location(self):
+        members = {"REQ-X-001": [("implements", "src/foo.py", 42)]}
+        _, out = self._show({"REQ-X-001": self._req()}, members, "REQ-X-001")
+        self.assertIn("implements", out)
+        self.assertIn("src/foo.py:42", out)
+
+    def test_open_verify_shown_placeholder_skipped(self):
+        body = ("# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
+                "- None — doc is unambiguous.\n")
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("magic constant", out)
+        self.assertNotIn("None — doc is unambiguous", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
