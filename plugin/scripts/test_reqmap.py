@@ -1552,5 +1552,217 @@ class ParseTodos(unittest.TestCase):
         self.assertEqual(payload["todos"][0]["name"], "X")
 
 
+class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
+    CONTRACT = "## WHAT — Contract (normative)"
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def _lint(self, reqs, strict=False):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_lint(reqs, strict)
+        return code, buf.getvalue()
+
+    def _req(self, status, body):
+        return {"meta": {"status": status}, "body": body}
+
+    def _body(self, contract="- ok.\n", acceptance="- ok.\n"):
+        return "# T\n\n{}\n{}\n{}\n{}\n".format(self.CONTRACT, contract, self.ACCEPT, acceptance)
+
+    def test_missing_acceptance_section_is_error(self):
+        body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no acceptance heading
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertIn(("error", "missing-section"),
+                      [(f["severity"], f["check"]) for f in fs])
+
+    def test_draft_is_out_of_scope(self):
+        long_sent = " ".join(["word"] * 50) + "."
+        reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}
+        code, out = self._lint(reqs)
+        self.assertEqual(code, 0)
+        self.assertNotIn("DRAFT-X-001", out)   # drafts are not linted
+
+    def test_long_sentence_warns_with_count(self):
+        long_sent = " ".join(["word"] * 40) + "."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract="- " + long_sent + "\n")))
+        longs = [f for f in fs if f["check"] == "long-sentence"]
+        self.assertTrue(longs)
+        self.assertEqual(longs[0]["severity"], "warn")
+        self.assertIn("40-word", longs[0]["detail"])
+
+    def test_stacked_conditions_warns(self):
+        line = "- It shall do A and B and C and D."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
+        self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
+
+    def test_code_fence_line_not_flagged(self):
+        long_sent = " ".join(["word"] * 50) + "."
+        accept = "```\n" + long_sent + "\n```\n"
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertFalse(any(f["check"] == "long-sentence" for f in fs))
+
+    def test_strict_zero_on_warnings_only(self):
+        long_sent = " ".join(["word"] * 40) + "."
+        reqs = {"REQ-X-001": self._req("confirmed", self._body(contract="- " + long_sent + "\n"))}
+        code, _ = self._lint(reqs, strict=True)
+        self.assertEqual(code, 0)   # warnings never fail --strict
+
+    def test_strict_nonzero_on_missing_section(self):
+        body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no acceptance
+        reqs = {"REQ-X-001": self._req("confirmed", body)}
+        code, _ = self._lint(reqs, strict=True)
+        self.assertEqual(code, 1)
+
+
+class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
+    def _show(self, reqs, members, cap_id):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_show(reqs, members, cap_id)
+        return code, buf.getvalue()
+
+    def _req(self, status="confirmed", extra="", body="# T\n"):
+        return {"meta": {"status": status, "layer": "feature", **dict(_kv(extra))},
+                "body": body, "path": "requirements/X.md"}
+
+    def test_known_id_header_and_zero(self):
+        code, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
+        self.assertEqual(code, 0)
+        self.assertIn("REQ-X-001", out)
+        self.assertIn("confirmed", out)
+        self.assertIn("feature", out)
+
+    def test_unknown_id_returns_one(self):
+        code, out = self._show({}, {}, "NOPE-000")
+        self.assertEqual(code, 1)
+        self.assertIn("no requirement with id NOPE-000", out)
+
+    def test_reverse_dependency_listed(self):
+        reqs = {"CORE-A-001": self._req(),
+                "REQ-B-002": self._req(extra="depends_on: [CORE-A-001]")}
+        _, out = self._show(reqs, {}, "CORE-A-001")
+        self.assertIn("Depended on by", out)
+        self.assertIn("REQ-B-002", out)
+
+    def test_member_role_and_location(self):
+        members = {"REQ-X-001": [("implements", "src/foo.py", 42)]}
+        _, out = self._show({"REQ-X-001": self._req()}, members, "REQ-X-001")
+        self.assertIn("implements", out)
+        self.assertIn("src/foo.py:42", out)
+
+    def test_open_verify_shown_placeholder_skipped(self):
+        body = ("# T\n\n## WHAT — Verify intent\n- is this magic constant a bug?\n"
+                "- None — doc is unambiguous.\n")
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("magic constant", out)
+        self.assertNotIn("None — doc is unambiguous", out)
+
+
+class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
+    def _sim(self, reqs, threshold=0.35):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_similar(reqs, threshold)
+        return code, buf.getvalue()
+
+    def _req(self, title, contract):
+        return {"body": "# {t}\n\n> {t} intent.\n\n## WHAT — Contract (normative)\n- {c}\n".format(
+            t=title, c=contract)}
+
+    def test_near_identical_pair_reported(self):
+        c = "validate user input and reject malformed payloads from the client"
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        code, out = self._sim(reqs, 0.35)
+        self.assertEqual(code, 0)
+        self.assertIn("REQ-A-001", out)
+        self.assertIn("REQ-B-002", out)
+        self.assertIn("<->", out)
+
+    def test_unrelated_not_reported(self):
+        reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
+                "REQ-B-002": self._req("Roadmap", "render mermaid gantt diagrams for milestones")}
+        _, out = self._sim(reqs, 0.35)
+        self.assertIn("No overlapping", out)
+
+    def test_too_few_docs(self):
+        code, out = self._sim({"REQ-A-001": self._req("Solo", "does one thing well")}, 0.35)
+        self.assertEqual(code, 0)
+        self.assertIn("at least two", out)
+
+    def test_threshold_above_score_hides_pair(self):
+        c = "validate user input and reject malformed payloads"
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        _, out = self._sim(reqs, 1.01)   # cosine maxes at 1.0, so nothing qualifies
+        self.assertIn("No overlapping", out)
+
+
+class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
+    def _health(self, reqs, members, as_json=False):
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            code = R.cmd_health(reqs, members, d, as_json)   # empty dir -> load_lock fails open
+        return code, buf.getvalue()
+
+    def _green(self):
+        return {"meta": {"status": "confirmed"},
+                "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"}
+
+    def test_all_green_is_100(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        code, out = self._health({"REQ-A-001": self._green()}, members)
+        self.assertEqual(code, 0)
+        self.assertIn("100/100", out)
+
+    def test_all_draft_is_zero(self):
+        reqs = {"REQ-A-001": {"meta": {"status": "draft"}, "body": "# T\n"}}
+        _, out = self._health(reqs, {})
+        self.assertIn("0/100", out)
+
+    def test_json_has_score_and_total(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 100)
+        self.assertEqual(obj["total"], 1)
+
+    def test_orphan_not_green(self):
+        # confirmed but no implements member -> orphan, drops out of green
+        _, out = self._health({"REQ-A-001": self._green()}, {})
+        self.assertIn("orphans", out)
+        self.assertIn("0/100", out)
+
+    def test_empty_corpus(self):
+        code, out = self._health({}, {})
+        self.assertEqual(code, 0)
+        self.assertIn("0/100", out)
+
+
+class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
+    def test_link_problem_missing_file(self):
+        self.assertIn("does not exist", R._test_link_problem("/no/such/file_xyz.py"))
+
+    def test_link_problem_real_test_file(self):
+        self.assertEqual("", R._test_link_problem(__file__))   # this file has def test_
+
+    def test_link_problem_testless_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "notests.py")
+            _write(p, "def helper():\n    return 1\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_check_warns_warn_only_on_broken_link(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = {"REQ-A-001": {"meta": {"status": "confirmed", "layer": "feature"},
+                                  "body": "# T\n", "path": os.path.join(d, "REQ-A-001.md")}}
+            members = {"REQ-A-001": [("implements", "src/foo.py", 1),
+                                     ("tested-by", "tests/missing_test.py", 2)]}
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            out = buf.getvalue()
+            self.assertEqual(code, 0)                              # warn-only -> still passes
+            self.assertIn("tested-by tests/missing_test.py", out)
+            self.assertIn("does not exist", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

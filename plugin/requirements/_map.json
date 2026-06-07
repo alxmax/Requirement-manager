@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-05.2",
+  "engine_version": "2026-06-07.1",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -37,7 +37,8 @@
       "desc": "",
       "deps": [],
       "used_by": [
-        "REQ-CHECK-006"
+        "REQ-CHECK-006",
+        "REQ-HEALTH-017"
       ],
       "members": [
         {
@@ -107,10 +108,14 @@
       "used_by": [
         "REQ-CHECK-006",
         "REQ-FINDINGS-010",
+        "REQ-HEALTH-017",
+        "REQ-LINT-014",
         "REQ-MAP-007",
         "REQ-NEW-004",
         "REQ-PROMOTE-011",
-        "REQ-SCAN-005"
+        "REQ-SCAN-005",
+        "REQ-SHOW-015",
+        "REQ-SIMILAR-016"
       ],
       "members": [
         {
@@ -182,8 +187,10 @@
         "REQ-CANDIDATES-009",
         "REQ-CHECK-006",
         "REQ-EXTRACT-008",
+        "REQ-HEALTH-017",
         "REQ-MAP-007",
-        "REQ-SCAN-005"
+        "REQ-SCAN-005",
+        "REQ-SHOW-015"
       ],
       "members": [
         {
@@ -249,35 +256,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:667"
+          "loc": "scripts/reqmap.py:699"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:701"
+          "loc": "scripts/reqmap.py:733"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:724"
+          "loc": "scripts/reqmap.py:756"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:747"
+          "loc": "scripts/reqmap.py:779"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:764"
+          "loc": "scripts/reqmap.py:796"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:783"
+          "loc": "scripts/reqmap.py:815"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:789"
+          "loc": "scripts/reqmap.py:821"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:814"
+          "loc": "scripts/reqmap.py:846"
         },
         {
           "role": "tested-by",
@@ -351,7 +358,8 @@
         "CORE-DRIFT-003"
       ],
       "used_by": [
-        "REQ-INIT-012"
+        "REQ-INIT-012",
+        "REQ-TESTLINK-018"
       ],
       "members": [
         {
@@ -364,7 +372,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:294"
+          "loc": "scripts/reqmap.py:319"
         },
         {
           "role": "tested-by",
@@ -456,23 +464,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:504"
+          "loc": "scripts/reqmap.py:536"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:512"
+          "loc": "scripts/reqmap.py:544"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:537"
+          "loc": "scripts/reqmap.py:569"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:565"
+          "loc": "scripts/reqmap.py:597"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:650"
+          "loc": "scripts/reqmap.py:682"
         },
         {
           "role": "tested-by",
@@ -536,11 +544,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:920"
+          "loc": "scripts/reqmap.py:952"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1007"
+          "loc": "scripts/reqmap.py:1039"
         },
         {
           "role": "tested-by",
@@ -553,6 +561,65 @@
       ],
       "test_exempt": null,
       "milestone": "v1.08",
+      "risks": []
+    },
+    {
+      "id": "REQ-HEALTH-017",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Corpus health snapshot",
+      "intent": "Reduce the whole requirement registry to one coherence score plus a few component counts, so a CI badge or a reviewer can see at a glance how healthy the corpus is.",
+      "contract": [
+        "The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.",
+        "It shall compute a headline score: the percentage of requirements that are green on every axis.",
+        "A requirement is green when it passes every axis at once.",
+        "The axes are: status `confirmed`, an `implements` member, a `tested-by` member or `test_exempt` reason, no open verify-intent question, and no drift from the lock.",
+        "It shall print component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.",
+        "With `--json` it shall emit the same numbers as a JSON object, so the console output and a CI badge never disagree.",
+        "It shall return zero on an empty corpus, printing a score of zero and a hint to bootstrap.",
+        "It shall always return zero. The snapshot is a report, not a gate."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The score is deliberately strict: one open question or one drifted contract drops a requirement out of the green count. This makes the number move when real work remains.",
+        "The \"tested\" line counts actual `tested-by` members, while the green test counts a `test_exempt` reason as covered. The two can differ by the number of exempted requirements.",
+        "Drift reuses the lock that `check` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses."
+      ],
+      "current_impl": [
+        "`cmd_health` in `reqmap.py` — walks every requirement, classifies each axis using `_member_roles`, `_bullets`, and the lock via `load_lock` + `binding_hash`, then prints the score and counts. `--json` dumps the assembled dictionary instead of the text view."
+      ],
+      "acc": [
+        "Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.",
+        "Given an all-draft corpus, when `health` runs, then the score is zero.",
+        "Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.",
+        "Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.",
+        "Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero."
+      ],
+      "accept": "- Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.\n- Given an all-draft corpus, when `health` runs, then the score is zero.\n- Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.\n- Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.\n- Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "CORE-SCAN-002",
+        "CORE-DRIFT-003"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1549"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1698"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
       "risks": []
     },
     {
@@ -603,11 +670,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1307"
+          "loc": "scripts/reqmap.py:1661"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1336"
+          "loc": "scripts/reqmap.py:1690"
         },
         {
           "role": "tested-by",
@@ -616,6 +683,82 @@
       ],
       "test_exempt": null,
       "milestone": "v1.10",
+      "risks": []
+    },
+    {
+      "id": "REQ-LINT-014",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Requirement readability linter",
+      "intent": "Mechanically check that requirement prose follows the \"Audience & writing level\" rules, so requirements stay easy to understand without a human re-reading every file.",
+      "contract": [
+        "The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.",
+        "It shall scope its checks to non-draft requirements only (status `baseline`, `in-progress`, `implemented`, or `confirmed`). Drafts are auto-extracted TODO stubs, so linting them would only add noise.",
+        "It shall run two kinds of check. A structural check is severity `error`. A prose-readability check is severity `warn`.",
+        "The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.",
+        "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
+        "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
+        "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
+        "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
+        "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check.",
+        "Sentence splitting is a deterministic split on `.`, `!`, and `?`. It is crude — an abbreviation can over-split — but it never reads code and only feeds a word count, so the worst case is a missed long sentence, not a false alarm on code.",
+        "The thresholds are module constants, not configurable from the command line. A single well-named constant is enough until a real project needs a different value."
+      ],
+      "current_impl": [
+        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count check. The `missing-section` check reuses `_has_section` (shared with the gate in `cmd_check`)."
+      ],
+      "acc": [
+        "Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.",
+        "Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.",
+        "Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.",
+        "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
+        "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
+        "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
+        "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
+      ],
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1293"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1319"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1325"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1330"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1363"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1555"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
       "risks": []
     },
     {
@@ -677,95 +820,43 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1042"
+          "loc": "scripts/reqmap.py:1074"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1122"
+          "loc": "scripts/reqmap.py:1154"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1146"
+          "loc": "scripts/reqmap.py:1178"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1388"
+          "loc": "scripts/reqmap.py:1742"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1411"
+          "loc": "scripts/reqmap.py:1765"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1419"
+          "loc": "scripts/reqmap.py:1773"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1426"
+          "loc": "scripts/reqmap.py:1780"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1438"
+          "loc": "scripts/reqmap.py:1792"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1452"
+          "loc": "scripts/reqmap.py:1806"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1496"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1502"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1509"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1546"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1561"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1592"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1664"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1712"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1763"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1771"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1802"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1812"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1828"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1852"
+          "loc": "scripts/reqmap.py:1850"
         },
         {
           "role": "implements",
@@ -773,7 +864,59 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1865"
+          "loc": "scripts/reqmap.py:1863"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1900"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1915"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1946"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2018"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2066"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2117"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2125"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2156"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2166"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2182"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2206"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2210"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2219"
         },
         {
           "role": "tested-by",
@@ -850,7 +993,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:434"
+          "loc": "scripts/reqmap.py:466"
         },
         {
           "role": "tested-by",
@@ -908,11 +1051,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1164"
+          "loc": "scripts/reqmap.py:1196"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1174"
+          "loc": "scripts/reqmap.py:1206"
         },
         {
           "role": "tested-by",
@@ -970,11 +1113,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:455"
+          "loc": "scripts/reqmap.py:487"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:470"
+          "loc": "scripts/reqmap.py:502"
         },
         {
           "role": "tested-by",
@@ -1033,6 +1176,195 @@
       "test_exempt": null,
       "milestone": "v1.04",
       "risks": []
+    },
+    {
+      "id": "REQ-SHOW-015",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Single-requirement dossier",
+      "intent": "Print everything about one requirement in a single terminal view, so a reader answers \"what does this do and where is it\" without opening files.",
+      "contract": [
+        "The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.",
+        "It shall print a header line with the id, status, and layer. When the requirement carries a `milestone` field, the header shall append it.",
+        "It shall print the title and the intent line (the first blockquote of the body).",
+        "It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.",
+        "It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).",
+        "It shall list the code members grouped by role, each with its `file:line`. When no member is tagged, it shall say so.",
+        "It shall list the open `## WHAT — Verify intent` questions, skipping the \"None\" placeholder, using the same filter as `findings`.",
+        "It shall list the requirement's risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab.",
+        "It shall return zero when the id is found, and a non-zero code when the id is unknown, so a typo is visible to a caller or to CI."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The view is read-only and never edits the requirement. To change a status, use `promote`; to change the contract, edit the file.",
+        "The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached."
+      ],
+      "current_impl": [
+        "`cmd_show` in `reqmap.py` — looks the id up in the loaded requirements, then prints the header, intent, contract, both dependency directions, members, open verify-intent, and risk signals. It reuses `_bullets`, `_req_title`, `_as_list`, `_risk_signals` and `RISK_ADVICE`, so the view agrees with `next`, `findings`, and the map."
+      ],
+      "acc": [
+        "Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.",
+        "Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.",
+        "Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".",
+        "Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.",
+        "Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not."
+      ],
+      "accept": "- Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.\n- Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.\n- Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".\n- Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.\n- Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "CORE-SCAN-002"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1393"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1616"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "risks": []
+    },
+    {
+      "id": "REQ-SIMILAR-016",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Duplicate-capability detector",
+      "intent": "Flag requirement pairs whose contracts describe the same capability, so a reviewer can merge or differentiate them before two divergent implementations appear.",
+      "contract": [
+        "The `similar` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
+        "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
+        "It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.",
+        "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
+        "It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.",
+        "The threshold shall default to `0.35` and shall be overridable with `--threshold`.",
+        "It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.",
+        "It shall always return zero. The report is advisory: a human decides whether a flagged pair is a real duplicate."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The default threshold is a starting point, not a proven value. A reviewer tunes it with `--threshold` for the corpus at hand.",
+        "Detection is lexical, not semantic. Two contracts that mean the same thing in different words may score low. The command surfaces likely duplicates; it does not prove duplication.",
+        "Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `candidates`."
+      ],
+      "current_impl": [
+        "`cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf` and `_cosine` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, and `_cosine` scores each pair. `cmd_similar` sorts the pairs and prints them with their shared terms."
+      ],
+      "acc": [
+        "Given two requirements with near-identical Contract text, when `similar` runs, then the pair is reported with a high score.",
+        "Given two requirements about unrelated topics, when `similar` runs at the default threshold, then the pair is not reported.",
+        "Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a \"need at least two\" message and returns zero.",
+        "Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.",
+        "Given any corpus, when `similar` runs, then it returns zero."
+      ],
+      "accept": "- Given two requirements with near-identical Contract text, when `similar` runs, then the pair is reported with a high score.\n- Given two requirements about unrelated topics, when `similar` runs at the default threshold, then the pair is not reported.\n- Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a \"need at least two\" message and returns zero.\n- Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.\n- Given any corpus, when `similar` runs, then it returns zero.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1465"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1472"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1484"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1502"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1512"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1660"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "risks": []
+    },
+    {
+      "id": "REQ-TESTLINK-018",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Test-link integrity check",
+      "intent": "Make a `tested-by` link mean something: the gate warns when the linked file is missing or holds no tests, so a broken link cannot pose as test coverage.",
+      "contract": [
+        "The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.",
+        "For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.",
+        "A test function is recognized lexically: a Python `def test...(`, a JavaScript `function test...(`, or a `it(` or `test(` call.",
+        "When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.",
+        "The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.",
+        "The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "This does not prove that each acceptance criterion is tested. It proves only that real tests exist at the link target. Per-criterion mapping needs a per-criterion tag and is deferred.",
+        "Detection is lexical, not a parse. A file that mentions a test-shaped call in a string could pass without real tests. The check targets the common failure: a renamed, deleted, or placeholder file, not a deliberate fake.",
+        "Only confirmed requirements are checked. A draft or baseline requirement is exempt, matching the rest of the gate's enforcement scope."
+      ],
+      "current_impl": [
+        "`_test_link_problem` in `reqmap.py`, called from `cmd_check` — `_test_link_problem` returns a short reason a file fails the check or an empty string when it passes; `cmd_check` resolves each distinct `tested-by` file against the scan root and appends one warning per failing link."
+      ],
+      "acc": [
+        "Given a confirmed requirement whose `tested-by` file is missing, when the gate runs, then it adds a warning that names the requirement and the file.",
+        "Given a confirmed requirement whose `tested-by` file exists and contains a `def test...(`, when the gate runs, then it adds no warning for that link.",
+        "Given a confirmed requirement whose `tested-by` file exists but contains no test function, when the gate runs, then it adds a warning.",
+        "Given any of the above, when the gate runs, then the error count is unchanged (the check is warn-only)."
+      ],
+      "accept": "- Given a confirmed requirement whose `tested-by` file is missing, when the gate runs, then it adds a warning that names the requirement and the file.\n- Given a confirmed requirement whose `tested-by` file exists and contains a `def test...(`, when the gate runs, then it adds no warning for that link.\n- Given a confirmed requirement whose `tested-by` file exists but contains no test function, when the gate runs, then it adds a warning.\n- Given any of the above, when the gate runs, then the error count is unchanged (the check is warn-only).",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-CHECK-006"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:301"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:346"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1739"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.15",
+      "risks": []
     }
   ],
   "edges": [
@@ -1061,6 +1393,18 @@
       "CORE-PARSE-001"
     ],
     [
+      "REQ-HEALTH-017",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-HEALTH-017",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-HEALTH-017",
+      "CORE-DRIFT-003"
+    ],
+    [
       "REQ-INIT-012",
       "REQ-EXTRACT-008"
     ],
@@ -1071,6 +1415,10 @@
     [
       "REQ-INIT-012",
       "REQ-MAP-007"
+    ],
+    [
+      "REQ-LINT-014",
+      "CORE-PARSE-001"
     ],
     [
       "REQ-MAP-007",
@@ -1099,6 +1447,22 @@
     [
       "REQ-SCAN-005",
       "CORE-SCAN-002"
+    ],
+    [
+      "REQ-SHOW-015",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-SHOW-015",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-SIMILAR-016",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-TESTLINK-018",
+      "REQ-CHECK-006"
     ]
   ],
   "todos": [
@@ -1112,6 +1476,30 @@
       "name": "TODO.md template + engine parsing",
       "lane": "feature",
       "milestone": "v1.13",
+      "done": true
+    },
+    {
+      "name": "Requirement readability linter (lint)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Single-requirement dossier (show)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Duplicate-capability detector (similar)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Corpus health snapshot (health)",
+      "lane": "ops",
+      "milestone": "v1.14",
       "done": true
     },
     {
@@ -1130,6 +1518,18 @@
       "name": "Requirement quality checker (AI)",
       "lane": "feature",
       "milestone": "v1.14",
+      "done": false
+    },
+    {
+      "name": "Test-link integrity gate check (testlink)",
+      "lane": "ops",
+      "milestone": "v1.15",
+      "done": true
+    },
+    {
+      "name": "Scan cache (opt-in only, if a real bottleneck appears) — deferred",
+      "lane": "ops",
+      "milestone": "v1.15",
       "done": false
     }
   ]

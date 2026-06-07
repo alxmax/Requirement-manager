@@ -16,7 +16,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, fnmatch, hashlib, json, os, re, subprocess, sys
+import argparse, ast, fnmatch, hashlib, json, math, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
@@ -64,7 +64,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-05.2"
+MAP_ENGINE_VERSION = "2026-06-07.1"
 
 
 # ---------- parsing ----------
@@ -291,7 +291,32 @@ def warn_if_stale():  # implements: REQ-CHECK-006
         return
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-006
+# A test function across the scanned languages: Python `def test...(`, JS/TS
+# `function test...(`, or a Jest/Mocha `it(` / `test(` call. Used only to confirm a
+# tested-by file actually holds tests — not to count or map them.
+_TEST_FN_RE = re.compile(
+    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|\b(?:it|test)\s*\(", re.IGNORECASE)
+
+
+def _test_link_problem(path):  # implements: REQ-TESTLINK-018
+    """Return a short reason a `tested-by` file fails the behavior-sync check, or ''
+    when it is fine. A file that is missing, unreadable, or holds no recognizable
+    test function means the link asserts coverage it does not have. Deterministic
+    and warn-only — it never proves per-criterion coverage, only that real tests
+    exist at the link target (per-AC mapping needs a per-AC tag, deferred)."""
+    if not os.path.isfile(path):
+        return "does not exist (broken tested-by link)"
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            src = f.read()
+    except OSError:
+        return "is unreadable"
+    if not _TEST_FN_RE.search(src):
+        return "contains no test function (def test.../function test.../it(/test()"
+    return ""
+
+
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implements: REQ-CHECK-006
     errors, warns = [], []
     warn_if_stale()
     cap_ids = set(reqs)
@@ -315,6 +340,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        # behavior-sync (warn-only): a tested-by link must point at a file that
+        # exists and actually holds tests, else it asserts coverage it lacks.
+        if m.get("status") == "confirmed" and tests:
+            for fp in sorted({t[1] for t in tests}):  # implements: REQ-TESTLINK-018
+                problem = _test_link_problem(os.path.join(code_root, fp))
+                if problem:
+                    warns.append(f"{rid}: tested-by {fp} {problem}")
         if m.get("status") == "confirmed":
             if not _has_section(r["body"], "contract"):
                 warns.append(
@@ -1246,6 +1278,328 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     return 0
 
 
+# ---------- lint (readability / structure of requirement prose) ----------
+# Makes the SKILL.md "Audience & writing level" rules mechanical so requirements
+# stay easy to understand. Scoped narrowly to keep false positives near zero: only
+# non-draft requirements (drafts are TODO stubs), only the Contract and Acceptance
+# sections (Notes may stay dense by design). Jargon-before-definition is deliberately
+# NOT checked in v1 — without a term dictionary it is too false-positive-prone on
+# prose that carries code references.
+LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
+LINT_SENTENCE_WORDS = 35       # a single sentence longer than this is flagged (warn)
+LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
+
+
+def _lint_prose(body, name):  # implements: REQ-LINT-014
+    """Yield the prose text lines under the first `## ` heading whose text contains
+    `name`, up to the next `## `. A bullet's leading `-` is stripped so its text is
+    linted as a sentence. Non-prose lines — headings, table rows, blockquotes, and
+    anything inside a ``` fence — are skipped so the linter never flags code or
+    markup as unreadable."""
+    out, grab, fenced = [], False, False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("## "):
+            grab = name in s.lower()
+            continue
+        if not grab:
+            continue
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced or not s or s.startswith(("|", ">", "#")):
+            continue
+        if s.startswith("-"):
+            s = s[1:].strip()
+        if s:
+            out.append(s)
+    return out
+
+
+def _sentences(text):  # implements: REQ-LINT-014
+    """Split a prose line into sentences on '.', '!', '?' boundaries. Crude but
+    deterministic — enough to count words per sentence for the length check."""
+    return [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
+
+
+def _clip(s, n=60):  # implements: REQ-LINT-014
+    """Shorten a snippet for one-line finding output."""
+    return s if len(s) <= n else s[:n - 1] + "…"
+
+
+def lint_requirement(rid, r):  # implements: REQ-LINT-014
+    """Return a list of {severity, check, detail} findings for one requirement;
+    an empty list means clean. Checks the Contract + Acceptance sections only."""
+    findings = []
+    body = r["body"]
+    # structural (error): a non-draft must carry both load-bearing sections
+    if not _has_section(body, "contract"):
+        findings.append({"severity": "error", "check": "missing-section",
+                         "detail": "no '## WHAT — Contract' section"})
+    if not _has_section(body, "acceptan"):
+        findings.append({"severity": "error", "check": "missing-section",
+                         "detail": "no '## HOW — Acceptance' section"})
+    # prose readability (warn): only on the Contract + Acceptance sections
+    for name in ("contract", "acceptan"):
+        for ln in _lint_prose(body, name):
+            for sent in _sentences(ln):
+                words = len(sent.split())
+                if words > LINT_SENTENCE_WORDS:
+                    findings.append({
+                        "severity": "warn", "check": "long-sentence",
+                        "detail": "{}-word sentence (>{}): {}".format(
+                            words, LINT_SENTENCE_WORDS, _clip(sent))})
+            low = ln.lower()
+            if "shall" in low or "must" in low:
+                joins = len(re.findall(r"\b(?:and|or)\b", low))
+                if joins >= LINT_STACKED_CONNECTORS:
+                    findings.append({
+                        "severity": "warn", "check": "stacked-conditions",
+                        "detail": "{} 'and'/'or' joins in one normative line: {}".format(
+                            joins, _clip(ln))})
+    return findings
+
+
+def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
+    """Report readability/structure violations on non-draft requirements so they
+    stay easy to understand — the SKILL.md 'Audience & writing level' rules made
+    mechanical. Checks: missing-section (error), long-sentence (warn),
+    stacked-conditions (warn). Read-only. Exit-neutral by default; with --strict it
+    exits non-zero on any error-severity finding (warnings never change the exit)."""
+    targets = [(rid, r) for rid, r in sorted(reqs.items())
+               if r["meta"].get("status") in LINT_STATUSES]
+    errors = warns = 0
+    for rid, r in targets:
+        fs = lint_requirement(rid, r)
+        if not fs:
+            continue
+        print("{}   requirements/{}.md".format(rid, rid))
+        for f in fs:
+            if f["severity"] == "error":
+                errors += 1; mark = "ERROR"
+            else:
+                warns += 1; mark = "warn "
+            print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
+    print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
+        len(targets), errors, warns))
+    if errors == 0 and warns == 0:
+        print("All clean — every linted requirement is well-formed and readable.")
+    if strict and errors:
+        print("FAIL (--strict): {} structural error(s).".format(errors))
+        return 1
+    return 0
+
+
+def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
+    """Print one consolidated, human-readable dossier for a single requirement: its
+    status/layer/intent, contract, dependencies (both directions), members grouped
+    by role, open verify-intent questions, and risk signals — the 'what does this do
+    / where is X' view in one command. Read-only; returns 1 on an unknown id so a
+    typo is visible to a caller or CI. Reuses the same signal source as next/findings."""
+    r = reqs.get(cap_id)
+    if not r:
+        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+        return 1
+    m, body = r["meta"], r["body"]
+    head = "{} · {} · {}".format(cap_id, m.get("status", "draft"), m.get("layer", "?"))
+    if m.get("milestone"):
+        head += " · " + m["milestone"]
+    print(head)
+    print(_req_title(body, cap_id))
+    for line in body.splitlines():          # intent: first blockquote under the title
+        if line.strip().startswith(">"):
+            print("  " + line.strip().lstrip(">").strip())
+            break
+
+    contract = _bullets(body, "contract")
+    print("\nContract:")
+    for b in contract:
+        print("  - " + b)
+    if not contract:
+        print("  (none — no '## WHAT — Contract' section)")
+
+    deps = _as_list(m.get("depends_on"))
+    dependents = sorted(rid for rid, rr in reqs.items()
+                        if cap_id in _as_list(rr["meta"].get("depends_on")))
+    print("\nDepends on: " + (", ".join(deps) if deps else "(none)"))
+    print("Depended on by: " + (", ".join(dependents) if dependents else "(none)"))
+
+    mem = members.get(cap_id, [])
+    print("\nMembers in code ({}):".format(len(mem)))
+    if mem:
+        for role, fp, ln in sorted(mem):
+            print("  {:18} {}:{}".format(role, fp, ln))
+    else:
+        print("  (none tagged)")
+
+    verify = [b for b in _bullets(body, "verify intent")
+              if b and not b.lstrip("*_ ").lower().startswith("none")]
+    if verify:
+        print("\nOpen verify-intent:")
+        for b in verify:
+            print("  - " + b)
+
+    node = {"status": m.get("status", "draft"), "members": mem,
+            "verify": _bullets(body, "verify intent"), "test_exempt": m.get("test_exempt")}
+    signals = _risk_signals(node)
+    if signals:
+        print("\nRisk signals:")
+        for s in signals:
+            print("  [{}] {}".format(s, RISK_ADVICE[s]))
+    print("\n{}".format(r["path"]))
+    return 0
+
+
+# ---------- similar (duplicate-capability detection) ----------
+# Flags requirement pairs whose contracts overlap, so a human can catch a divergent
+# re-implementation before it lands. Stdlib TF-IDF + cosine over the normative text
+# (title + intent + Contract); Notes is excluded as too dense/noisy.
+SIMILAR_THRESHOLD = 0.35       # cosine above this -> reported as a probable-duplicate pair
+_SIMILAR_STOP = frozenset((
+    "the", "and", "for", "shall", "with", "that", "this", "from", "into", "its",
+    "not", "are", "has", "have", "when", "then", "given", "each", "one", "any",
+    "per", "via", "use", "used", "must", "code", "requirement", "requirements",
+))
+
+
+def _sim_tokens(text):  # implements: REQ-SIMILAR-016
+    """Lowercase alphanumeric tokens of length >= 3, minus stopwords and pure
+    numbers — the bag of words a requirement is compared on. Deterministic."""
+    return [t for t in re.findall(r"[a-z0-9]+", text.lower())
+            if len(t) >= 3 and not t.isdigit() and t not in _SIMILAR_STOP]
+
+
+def _sim_text(body):  # implements: REQ-SIMILAR-016
+    """The text similarity is computed on: title, intent line, and Contract bullets.
+    Notes & limitations is left out — it is dense and would only add noise."""
+    parts = [_req_title(body, "")]
+    for line in body.splitlines():
+        if line.strip().startswith(">"):
+            parts.append(line.strip().lstrip(">").strip())
+            break
+    parts += _bullets(body, "contract")
+    return " ".join(parts)
+
+
+def _tfidf(docs):  # implements: REQ-SIMILAR-016
+    """docs: {id: token_list}. Returns {id: {term: weight}} with smoothed idf =
+    log((1 + N) / (1 + df)) + 1 — always positive (so a 2-doc corpus does not
+    collapse to zero), while still down-weighting terms common across requirements."""
+    N = len(docs)
+    df = {}
+    for toks in docs.values():
+        for t in set(toks):
+            df[t] = df.get(t, 0) + 1
+    vecs = {}
+    for rid, toks in docs.items():
+        tf = {}
+        for t in toks:
+            tf[t] = tf.get(t, 0) + 1
+        vecs[rid] = {t: c * (math.log((1 + N) / (1 + df[t])) + 1) for t, c in tf.items()}
+    return vecs
+
+
+def _cosine(a, b):  # implements: REQ-SIMILAR-016
+    """Cosine similarity of two {term: weight} vectors, in [0, 1]."""
+    if not a or not b:
+        return 0.0
+    dot = sum(a[t] * b[t] for t in set(a) & set(b))
+    na = math.sqrt(sum(v * v for v in a.values()))
+    nb = math.sqrt(sum(v * v for v in b.values()))
+    return dot / (na * nb) if na and nb else 0.0
+
+
+def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-016
+    """Report requirement pairs whose contracts overlap above `threshold` (cosine
+    over TF-IDF of title + intent + Contract), most-similar-first, so a human can
+    spot a probable duplicate or a capability that should be merged. Read-only and
+    always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
+    does not inflate the score."""
+    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
+    docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
+    if len(docs) < 2:
+        print("Need at least two requirements with contract text to compare.")
+        return 0
+    vecs = _tfidf(docs)
+    ids = sorted(vecs)
+    pairs = []
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            s = _cosine(vecs[ids[i]], vecs[ids[j]])
+            if s >= threshold:
+                shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
+                                key=lambda t: -(vecs[ids[i]][t] + vecs[ids[j]][t]))[:5]
+                pairs.append((s, ids[i], ids[j], shared))
+    pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
+    if not pairs:
+        print("No overlapping requirement pairs above {:.2f}. {} requirement(s) compared.".format(
+            threshold, len(docs)))
+        return 0
+    print("{} probable-duplicate pair(s) above {:.2f} (of {} requirement(s)):\n".format(
+        len(pairs), threshold, len(docs)))
+    for s, a, b, shared in pairs:
+        print("  {:.2f}  {}  <->  {}".format(s, a, b))
+        print("        shared terms: {}".format(", ".join(shared) or "(none)"))
+    print("\nThese contracts overlap — check they are not the same capability "
+          "implemented twice. Merge or differentiate, then re-run.")
+    return 0
+
+
+# ---------- health (corpus coherence snapshot) ----------
+def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALTH-017
+    """Print a corpus coherence snapshot: a headline score plus component counts.
+    The score is transparent — the percentage of requirements green on EVERY axis
+    (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
+    verify-intent, not drifted vs the lock). `--json` emits the same numbers as a
+    parseable object for a CI badge. Read-only, always exit 0."""
+    total = len(reqs)
+    lock = load_lock(reqs_dir)
+    confirmed = implemented = tested = orphans = untested = open_intent = drifted = drafts = healthy = 0
+    for rid, r in reqs.items():
+        m, body = r["meta"], r["body"]
+        status = m.get("status", "draft")
+        roles = _member_roles(members.get(rid, []))
+        has_impl = "implements" in roles
+        has_test_member = "tested-by" in roles
+        has_test = has_test_member or bool(m.get("test_exempt"))
+        is_confirmed = status == "confirmed"
+        open_now = status != "draft" and any(
+            b and not b.lstrip("*_ ").lower().startswith("none")
+            for b in _bullets(body, "verify intent"))
+        old = lock.get(rid)
+        is_drifted = bool(old) and old != binding_hash(body) and is_confirmed
+        confirmed += is_confirmed
+        implemented += has_impl
+        tested += has_test_member
+        drafts += status == "draft"
+        orphans += is_confirmed and not has_impl
+        untested += has_impl and not has_test_member and not m.get("test_exempt")
+        open_intent += open_now
+        drifted += is_drifted
+        if is_confirmed and has_impl and has_test and not open_now and not is_drifted:
+            healthy += 1
+    score = round(100 * healthy / total) if total else 0
+    data = {"score": score, "total": total, "healthy": healthy,
+            "confirmed": confirmed, "implemented": implemented, "tested": tested,
+            "drafts": drafts, "orphans": orphans, "untested": untested,
+            "open_intent": open_intent, "drift": drifted}
+    if as_json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    print("  confirmed:   {}/{}".format(confirmed, total))
+    print("  implemented: {}/{}".format(implemented, total))
+    print("  tested:      {}/{}".format(tested, total))
+    print("  drafts:      {}".format(drafts))
+    if orphans:     print("  orphans (confirmed, no code):     {}".format(orphans))
+    if untested:    print("  untested (code, no tests):        {}".format(untested))
+    if open_intent: print("  open verify-intent:               {}".format(open_intent))
+    if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
+    if total == 0:
+        print("  (no requirements yet — run `reqmap.py init` or `new`)")
+    return 0
+
+
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
     Finds the comment marker (#, //, <!--) closest to the tag and cuts from
@@ -1357,7 +1711,7 @@ def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
     # extract wrote new files -> reload before locking + mapping
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir)
-    cmd_check(reqs, members, reqs_dir, update_lock=True)
+    cmd_check(reqs, members, reqs_dir, update_lock=True, code_root=code_root)
     cmd_map(reqs, members, reqs_dir, code_root)
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
@@ -1890,7 +2244,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -1904,6 +2258,12 @@ def main():
                     help="findings: ignore the triage sidecar and emit the raw grouped list")
     ap.add_argument("--all", dest="show_all", action="store_true",
                     help="next: list every pending item instead of the top few per bucket")
+    ap.add_argument("--strict", action="store_true",
+                    help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
+    ap.add_argument("--threshold", type=float, default=None,
+                    help="similar: cosine cutoff for reporting a pair (default 0.35)")
+    ap.add_argument("--json", dest="as_json", action="store_true",
+                    help="health: emit the snapshot as a JSON object (for a CI badge)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
@@ -1933,8 +2293,18 @@ def main():
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all)
+    if a.cmd == "lint":
+        return cmd_lint(reqs, a.strict)
+    if a.cmd == "show":
+        if not a.arg:
+            print("usage: reqmap show <ID>"); return 2
+        return cmd_show(reqs, members, a.arg)
+    if a.cmd == "similar":
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
+    if a.cmd == "health":
+        return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root)
         if a.update_lock:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc

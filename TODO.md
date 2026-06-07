@@ -9,6 +9,14 @@
 - [x] TODO.md template + engine parsing  | lane: feature
 
 ## v1.14
+- [x] Requirement readability linter (lint) | lane: feature
+- [x] Single-requirement dossier (show)   | lane: feature
+- [x] Duplicate-capability detector (similar) | lane: feature
+- [x] Corpus health snapshot (health)     | lane: ops
 - [ ] promote-todo command               | lane: feature
 - [ ] Gate validation for milestone IDs  | lane: ops
 - [ ] Requirement quality checker (AI)   | lane: feature
+
+## v1.15
+- [x] Test-link integrity gate check (testlink) | lane: ops
+- [ ] Scan cache (opt-in only, if a real bottleneck appears) — deferred | lane: ops

@@ -1,0 +1,45 @@
+---
+id: REQ-HEALTH-017
+status: confirmed
+layer: feature
+owner: Alex
+depends_on: [CORE-PARSE-001, CORE-SCAN-002, CORE-DRIFT-003]
+superseded_by:
+milestone: v1.14
+---
+
+# Corpus health snapshot
+
+> Reduce the whole requirement registry to one coherence score plus a few component counts, so a CI badge or a reviewer can see at a glance how healthy the corpus is.
+
+## WHAT — Contract (normative)
+- The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.
+- It shall compute a headline score: the percentage of requirements that are green on every axis.
+- A requirement is green when it passes every axis at once.
+- The axes are: status `confirmed`, an `implements` member, a `tested-by` member or `test_exempt` reason, no open verify-intent question, and no drift from the lock.
+- It shall print component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.
+- With `--json` it shall emit the same numbers as a JSON object, so the console output and a CI badge never disagree.
+- It shall return zero on an empty corpus, printing a score of zero and a hint to bootstrap.
+- It shall always return zero. The snapshot is a report, not a gate.
+
+## WHAT — Verify intent (open questions for the human)
+- None — authored from known intent, not reconstructed from code.
+
+## WHAT — Notes & known limitations (informative)
+- The score is deliberately strict: one open question or one drifted contract drops a requirement out of the green count. This makes the number move when real work remains.
+- The "tested" line counts actual `tested-by` members, while the green test counts a `test_exempt` reason as covered. The two can differ by the number of exempted requirements.
+- Drift reuses the lock that `check` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses.
+
+## HOW — Acceptance (= tests)
+- Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.
+- Given an all-draft corpus, when `health` runs, then the score is zero.
+- Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.
+- Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.
+- Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero.
+
+## WHERE — Current implementation
+- `cmd_health` in `reqmap.py` — walks every requirement, classifies each axis using `_member_roles`, `_bullets`, and the lock via `load_lock` + `binding_hash`, then prints the score and counts. `--json` dumps the assembled dictionary instead of the text view.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)

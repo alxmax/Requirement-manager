@@ -8,12 +8,16 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
-python scripts/reqmap.py check              # gate: link sync + drift — run before every commit
+python scripts/reqmap.py check              # gate: link sync + drift + test-link integrity (warn) — run before every commit
 python scripts/reqmap.py map                # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
 python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
+python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
+python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
+python scripts/reqmap.py similar            # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py health             # corpus coherence score + component counts (--json for a CI badge)
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items
@@ -53,7 +57,7 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 ```
 `TAG_RE` in the engine enforces a left-boundary guard so `reimplements:` or `x-implements:` are not picked up as real tags. The member list is discovered by scanning — never hand-maintained.
 
-**Gate logic** (`check`): three checks — link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence.
+**Gate logic** (`check`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence — all error-level. Plus a warn-only **test-link integrity** check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync; per-criterion AC mapping is deferred (needs a per-AC tag).
 
 **Generated outputs** (under `plugin/requirements/`):
 - `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*
