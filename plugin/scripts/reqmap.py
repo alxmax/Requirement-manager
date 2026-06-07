@@ -1524,21 +1524,35 @@ def _tfidf(docs):  # implements: REQ-SIMILAR-016
 
 
 def _cosine(a, b):  # implements: REQ-SIMILAR-016
-    """Cosine similarity of two {term: weight} vectors, in [0, 1]."""
+    """Cosine similarity of two {term: weight} vectors, in [0, 1]. The result is
+    clamped to 1.0 because floating-point rounding can push parallel vectors a hair
+    over 1.0 (e.g. 1.0000000000000002), which would break the documented range."""
     if not a or not b:
         return 0.0
     dot = sum(a[t] * b[t] for t in set(a) & set(b))
     na = math.sqrt(sum(v * v for v in a.values()))
     nb = math.sqrt(sum(v * v for v in b.values()))
-    return dot / (na * nb) if na and nb else 0.0
+    return min(1.0, dot / (na * nb)) if na and nb else 0.0
+
+
+def _threshold_arg(v):  # implements: REQ-SIMILAR-016
+    """argparse type for `--threshold`: a finite number in (0, 1]. Rejects nan/inf
+    (which silently swallow or admit every pair under `>=`) and out-of-range cutoffs."""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError("threshold must be a number")
+    if not math.isfinite(f) or not (0.0 < f <= 1.0):
+        raise argparse.ArgumentTypeError("threshold must be a finite number in (0, 1]")
+    return f
 
 
 def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-016
-    """Report requirement pairs whose contracts overlap above `threshold` (cosine
-    over TF-IDF of title + intent + Contract), most-similar-first, so a human can
-    spot a probable duplicate or a capability that should be merged. Read-only and
+    """Report requirement pairs whose contracts overlap at or above `threshold`
+    (cosine over TF-IDF of title + intent + Contract), most-similar-first, so a human
+    can spot a probable duplicate or a capability that should be merged. Read-only and
     always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
-    does not inflate the score."""
+    does not inflate the score. Callers pass a validated threshold in (0, 1]."""
     docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
     docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
     if len(docs) < 2:
@@ -1552,14 +1566,14 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
             s = _cosine(vecs[ids[i]], vecs[ids[j]])
             if s >= threshold:
                 shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
-                                key=lambda t: -(vecs[ids[i]][t] + vecs[ids[j]][t]))[:5]
+                                key=lambda t: (-(vecs[ids[i]][t] + vecs[ids[j]][t]), t))[:5]
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
     if not pairs:
-        print("No overlapping requirement pairs above {:.2f}. {} requirement(s) compared.".format(
+        print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared.".format(
             threshold, len(docs)))
         return 0
-    print("{} probable-duplicate pair(s) above {:.2f} (of {} requirement(s)):\n".format(
+    print("{} probable-duplicate pair(s) at or above {:.2f} (of {} requirement(s)):\n".format(
         len(pairs), threshold, len(docs)))
     for s, a, b, shared in pairs:
         print("  {:.2f}  {}  <->  {}".format(s, a, b))
@@ -2294,8 +2308,8 @@ def main():
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--strict", action="store_true",
                     help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
-    ap.add_argument("--threshold", type=float, default=None,
-                    help="similar: cosine cutoff for reporting a pair (default 0.35)")
+    ap.add_argument("--threshold", type=_threshold_arg, default=None,
+                    help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="health: emit the snapshot as a JSON object (for a CI badge)")
     ap.add_argument("--update-lock", action="store_true")

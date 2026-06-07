@@ -1720,13 +1720,37 @@ class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
             t=title, c=contract)}
 
     def test_near_identical_pair_reported(self):
+        # DISTINCT titles so only the Contract text overlaps — this forces the match
+        # through the contract path AC-1 names (bug-hunt #8: identical titles let a
+        # contract-dropping mutation survive)
         c = "validate user input and reject malformed payloads from the client"
-        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Checker", c)}
         code, out = self._sim(reqs, 0.35)
         self.assertEqual(code, 0)
         self.assertIn("REQ-A-001", out)
         self.assertIn("REQ-B-002", out)
         self.assertIn("<->", out)
+
+    def test_cosine_clamped_to_one(self):  # bug-hunt #16
+        v = R._tfidf({"a": ["foo", "bar", "foo", "baz"]})["a"]
+        self.assertLessEqual(R._cosine(v, v), 1.0)
+
+    def test_threshold_arg_rejects_bad_values(self):  # bug-hunt #3/#4
+        import argparse as _ap
+        for bad in ("nan", "inf", "0", "-1", "2", "abc"):
+            with self.assertRaises(_ap.ArgumentTypeError):
+                R._threshold_arg(bad)
+        self.assertEqual(R._threshold_arg("0.35"), 0.35)
+
+    def test_shared_terms_deterministic_on_weight_ties(self):  # bug-hunt #15
+        # identical contracts -> every shared term ties on weight; the tiebreaker
+        # must make the printed shared-terms list deterministic (alphabetical)
+        c = "alpha bravo charlie delta echo foxtrot golf hotel"
+        reqs = {"REQ-A-001": self._req("Aaa", c), "REQ-B-002": self._req("Bbb", c)}
+        _, out = self._sim(reqs, 0.1)
+        line = [ln for ln in out.splitlines() if "shared terms:" in ln][0]
+        terms = line.split("shared terms:")[1].strip().split(", ")
+        self.assertEqual(terms, sorted(terms))
 
     def test_unrelated_not_reported(self):
         reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
