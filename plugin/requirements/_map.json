@@ -112,7 +112,8 @@
         "REQ-NEW-004",
         "REQ-PROMOTE-011",
         "REQ-SCAN-005",
-        "REQ-SHOW-015"
+        "REQ-SHOW-015",
+        "REQ-SIMILAR-016"
       ],
       "members": [
         {
@@ -606,11 +607,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1479"
+          "loc": "scripts/reqmap.py:1574"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1508"
+          "loc": "scripts/reqmap.py:1603"
         },
         {
           "role": "tested-by",
@@ -768,91 +769,91 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1560"
+          "loc": "scripts/reqmap.py:1655"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1583"
+          "loc": "scripts/reqmap.py:1678"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1591"
+          "loc": "scripts/reqmap.py:1686"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1598"
+          "loc": "scripts/reqmap.py:1693"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1610"
+          "loc": "scripts/reqmap.py:1705"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1624"
+          "loc": "scripts/reqmap.py:1719"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1668"
+          "loc": "scripts/reqmap.py:1763"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1674"
+          "loc": "scripts/reqmap.py:1769"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1681"
+          "loc": "scripts/reqmap.py:1776"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1718"
+          "loc": "scripts/reqmap.py:1813"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1733"
+          "loc": "scripts/reqmap.py:1828"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1764"
+          "loc": "scripts/reqmap.py:1859"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1836"
+          "loc": "scripts/reqmap.py:1931"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1884"
+          "loc": "scripts/reqmap.py:1979"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1935"
+          "loc": "scripts/reqmap.py:2030"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1943"
+          "loc": "scripts/reqmap.py:2038"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1974"
+          "loc": "scripts/reqmap.py:2069"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1984"
+          "loc": "scripts/reqmap.py:2079"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2000"
+          "loc": "scripts/reqmap.py:2095"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2024"
+          "loc": "scripts/reqmap.py:2119"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2028"
+          "loc": "scripts/reqmap.py:2123"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2037"
+          "loc": "scripts/reqmap.py:2132"
         },
         {
           "role": "tested-by",
@@ -1170,6 +1171,79 @@
       "test_exempt": null,
       "milestone": "v1.14",
       "risks": []
+    },
+    {
+      "id": "REQ-SIMILAR-016",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Duplicate-capability detector",
+      "intent": "Flag requirement pairs whose contracts describe the same capability, so a reviewer can merge or differentiate them before two divergent implementations appear.",
+      "contract": [
+        "The `similar` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
+        "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
+        "It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.",
+        "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
+        "It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.",
+        "The threshold shall default to `0.35` and shall be overridable with `--threshold`.",
+        "It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.",
+        "It shall always return zero. The report is advisory: a human decides whether a flagged pair is a real duplicate."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The default threshold is a starting point, not a proven value. A reviewer tunes it with `--threshold` for the corpus at hand.",
+        "Detection is lexical, not semantic. Two contracts that mean the same thing in different words may score low. The command surfaces likely duplicates; it does not prove duplication.",
+        "Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `candidates`."
+      ],
+      "current_impl": [
+        "`cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf` and `_cosine` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, and `_cosine` scores each pair. `cmd_similar` sorts the pairs and prints them with their shared terms."
+      ],
+      "acc": [
+        "Given two requirements with near-identical Contract text, when `similar` runs, then the pair is reported with a high score.",
+        "Given two requirements about unrelated topics, when `similar` runs at the default threshold, then the pair is not reported.",
+        "Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a \"need at least two\" message and returns zero.",
+        "Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.",
+        "Given any corpus, when `similar` runs, then it returns zero."
+      ],
+      "accept": "- Given two requirements with near-identical Contract text, when `similar` runs, then the pair is reported with a high score.\n- Given two requirements about unrelated topics, when `similar` runs at the default threshold, then the pair is not reported.\n- Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a \"need at least two\" message and returns zero.\n- Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.\n- Given any corpus, when `similar` runs, then it returns zero.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1433"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1440"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1452"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1470"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1480"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1660"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "risks": []
     }
   ],
   "edges": [
@@ -1248,6 +1322,10 @@
     [
       "REQ-SHOW-015",
       "CORE-SCAN-002"
+    ],
+    [
+      "REQ-SIMILAR-016",
+      "CORE-PARSE-001"
     ]
   ],
   "todos": [
@@ -1271,6 +1349,12 @@
     },
     {
       "name": "Single-requirement dossier (show)",
+      "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Duplicate-capability detector (similar)",
       "lane": "feature",
       "milestone": "v1.14",
       "done": true

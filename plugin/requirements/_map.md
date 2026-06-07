@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-07 19:24
-nodes: 15
-edges: 19
+generated: 2026-06-07 19:29
+nodes: 16
+edges: 20
 ---
 
 # Requirement Map
@@ -30,6 +30,7 @@ graph LR
     REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
     REQ_SHOW_015["Single-requirement dossier<br><small>REQ-SHOW-015</small>"]
+    REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
   end
   REQ_INIT_012 --> REQ_EXTRACT_008
   REQ_INIT_012 --> REQ_CHECK_006
@@ -82,8 +83,8 @@ graph LR
   f_scripts_test_reqmap_py_600_989["scripts/test_reqmap.py:600-989"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_600_989
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
-  f_scripts_reqmap_py_1479_1508["scripts/reqmap.py:1479-1508"]
-  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1479_1508
+  f_scripts_reqmap_py_1574_1603["scripts/reqmap.py:1574-1603"]
+  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1574_1603
   f_scripts_test_reqmap_py_1369["scripts/test_reqmap.py:1369"]
   REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1369
   REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
@@ -92,8 +93,8 @@ graph LR
   f_scripts_test_reqmap_py_1555["scripts/test_reqmap.py:1555"]
   REQ_LINT_014 -->|tested-by| f_scripts_test_reqmap_py_1555
   REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1042_2037["scripts/reqmap.py:1042-2037"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_2037
+  f_scripts_reqmap_py_1042_2132["scripts/reqmap.py:1042-2132"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_2132
   f_scripts_test_reqmap_py_277_1147["scripts/test_reqmap.py:277-1147"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_277_1147
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -121,6 +122,11 @@ graph LR
   REQ_SHOW_015 -->|implements| f_scripts_reqmap_py_1361
   f_scripts_test_reqmap_py_1616["scripts/test_reqmap.py:1616"]
   REQ_SHOW_015 -->|tested-by| f_scripts_test_reqmap_py_1616
+  REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
+  f_scripts_reqmap_py_1433_1480["scripts/reqmap.py:1433-1480"]
+  REQ_SIMILAR_016 -->|implements| f_scripts_reqmap_py_1433_1480
+  f_scripts_test_reqmap_py_1660["scripts/test_reqmap.py:1660"]
+  REQ_SIMILAR_016 -->|tested-by| f_scripts_test_reqmap_py_1660
 ```
 
 ## Dependency Map
@@ -130,7 +136,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>12 caps</small>"]
+  a_REQ["REQ<br><small>13 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
 ```

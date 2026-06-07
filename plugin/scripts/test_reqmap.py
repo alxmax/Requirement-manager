@@ -1657,5 +1657,43 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         self.assertNotIn("None — doc is unambiguous", out)
 
 
+class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
+    def _sim(self, reqs, threshold=0.35):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_similar(reqs, threshold)
+        return code, buf.getvalue()
+
+    def _req(self, title, contract):
+        return {"body": "# {t}\n\n> {t} intent.\n\n## WHAT — Contract (normative)\n- {c}\n".format(
+            t=title, c=contract)}
+
+    def test_near_identical_pair_reported(self):
+        c = "validate user input and reject malformed payloads from the client"
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        code, out = self._sim(reqs, 0.35)
+        self.assertEqual(code, 0)
+        self.assertIn("REQ-A-001", out)
+        self.assertIn("REQ-B-002", out)
+        self.assertIn("<->", out)
+
+    def test_unrelated_not_reported(self):
+        reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
+                "REQ-B-002": self._req("Roadmap", "render mermaid gantt diagrams for milestones")}
+        _, out = self._sim(reqs, 0.35)
+        self.assertIn("No overlapping", out)
+
+    def test_too_few_docs(self):
+        code, out = self._sim({"REQ-A-001": self._req("Solo", "does one thing well")}, 0.35)
+        self.assertEqual(code, 0)
+        self.assertIn("at least two", out)
+
+    def test_threshold_above_score_hides_pair(self):
+        c = "validate user input and reject malformed payloads"
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        _, out = self._sim(reqs, 1.01)   # cosine maxes at 1.0, so nothing qualifies
+        self.assertIn("No overlapping", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

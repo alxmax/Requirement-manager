@@ -16,6 +16,7 @@ python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from th
 python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
 python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
+python scripts/reqmap.py similar            # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items

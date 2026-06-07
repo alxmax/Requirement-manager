@@ -16,7 +16,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, fnmatch, hashlib, json, os, re, subprocess, sys
+import argparse, ast, fnmatch, hashlib, json, math, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
@@ -1418,6 +1418,101 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
     return 0
 
 
+# ---------- similar (duplicate-capability detection) ----------
+# Flags requirement pairs whose contracts overlap, so a human can catch a divergent
+# re-implementation before it lands. Stdlib TF-IDF + cosine over the normative text
+# (title + intent + Contract); Notes is excluded as too dense/noisy.
+SIMILAR_THRESHOLD = 0.35       # cosine above this -> reported as a probable-duplicate pair
+_SIMILAR_STOP = frozenset((
+    "the", "and", "for", "shall", "with", "that", "this", "from", "into", "its",
+    "not", "are", "has", "have", "when", "then", "given", "each", "one", "any",
+    "per", "via", "use", "used", "must", "code", "requirement", "requirements",
+))
+
+
+def _sim_tokens(text):  # implements: REQ-SIMILAR-016
+    """Lowercase alphanumeric tokens of length >= 3, minus stopwords and pure
+    numbers — the bag of words a requirement is compared on. Deterministic."""
+    return [t for t in re.findall(r"[a-z0-9]+", text.lower())
+            if len(t) >= 3 and not t.isdigit() and t not in _SIMILAR_STOP]
+
+
+def _sim_text(body):  # implements: REQ-SIMILAR-016
+    """The text similarity is computed on: title, intent line, and Contract bullets.
+    Notes & limitations is left out — it is dense and would only add noise."""
+    parts = [_req_title(body, "")]
+    for line in body.splitlines():
+        if line.strip().startswith(">"):
+            parts.append(line.strip().lstrip(">").strip())
+            break
+    parts += _bullets(body, "contract")
+    return " ".join(parts)
+
+
+def _tfidf(docs):  # implements: REQ-SIMILAR-016
+    """docs: {id: token_list}. Returns {id: {term: weight}} with smoothed idf =
+    log((1 + N) / (1 + df)) + 1 — always positive (so a 2-doc corpus does not
+    collapse to zero), while still down-weighting terms common across requirements."""
+    N = len(docs)
+    df = {}
+    for toks in docs.values():
+        for t in set(toks):
+            df[t] = df.get(t, 0) + 1
+    vecs = {}
+    for rid, toks in docs.items():
+        tf = {}
+        for t in toks:
+            tf[t] = tf.get(t, 0) + 1
+        vecs[rid] = {t: c * (math.log((1 + N) / (1 + df[t])) + 1) for t, c in tf.items()}
+    return vecs
+
+
+def _cosine(a, b):  # implements: REQ-SIMILAR-016
+    """Cosine similarity of two {term: weight} vectors, in [0, 1]."""
+    if not a or not b:
+        return 0.0
+    dot = sum(a[t] * b[t] for t in set(a) & set(b))
+    na = math.sqrt(sum(v * v for v in a.values()))
+    nb = math.sqrt(sum(v * v for v in b.values()))
+    return dot / (na * nb) if na and nb else 0.0
+
+
+def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-016
+    """Report requirement pairs whose contracts overlap above `threshold` (cosine
+    over TF-IDF of title + intent + Contract), most-similar-first, so a human can
+    spot a probable duplicate or a capability that should be merged. Read-only and
+    always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
+    does not inflate the score."""
+    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
+    docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
+    if len(docs) < 2:
+        print("Need at least two requirements with contract text to compare.")
+        return 0
+    vecs = _tfidf(docs)
+    ids = sorted(vecs)
+    pairs = []
+    for i in range(len(ids)):
+        for j in range(i + 1, len(ids)):
+            s = _cosine(vecs[ids[i]], vecs[ids[j]])
+            if s >= threshold:
+                shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
+                                key=lambda t: -(vecs[ids[i]][t] + vecs[ids[j]][t]))[:5]
+                pairs.append((s, ids[i], ids[j], shared))
+    pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
+    if not pairs:
+        print("No overlapping requirement pairs above {:.2f}. {} requirement(s) compared.".format(
+            threshold, len(docs)))
+        return 0
+    print("{} probable-duplicate pair(s) above {:.2f} (of {} requirement(s)):\n".format(
+        len(pairs), threshold, len(docs)))
+    for s, a, b, shared in pairs:
+        print("  {:.2f}  {}  <->  {}".format(s, a, b))
+        print("        shared terms: {}".format(", ".join(shared) or "(none)"))
+    print("\nThese contracts overlap — check they are not the same capability "
+          "implemented twice. Merge or differentiate, then re-run.")
+    return 0
+
+
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
     Finds the comment marker (#, //, <!--) closest to the tag and cuts from
@@ -2062,7 +2157,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2078,6 +2173,8 @@ def main():
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--strict", action="store_true",
                     help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
+    ap.add_argument("--threshold", type=float, default=None,
+                    help="similar: cosine cutoff for reporting a pair (default 0.35)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
@@ -2113,6 +2210,8 @@ def main():
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
         return cmd_show(reqs, members, a.arg)
+    if a.cmd == "similar":
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "check":
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
         if a.update_lock:
