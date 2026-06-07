@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-05 22:44
-nodes: 13
-edges: 16
+generated: 2026-06-07 19:19
+nodes: 14
+edges: 17
 ---
 
 # Requirement Map
@@ -23,6 +23,7 @@ graph LR
     REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
     REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
     REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
+    REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
     REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
     REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
     REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
@@ -80,13 +81,18 @@ graph LR
   f_scripts_test_reqmap_py_600_989["scripts/test_reqmap.py:600-989"]
   REQ_FINDINGS_010 -->|tested-by| f_scripts_test_reqmap_py_600_989
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
-  f_scripts_reqmap_py_1307_1336["scripts/reqmap.py:1307-1336"]
-  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1307_1336
+  f_scripts_reqmap_py_1419_1448["scripts/reqmap.py:1419-1448"]
+  REQ_INIT_012 -->|implements| f_scripts_reqmap_py_1419_1448
   f_scripts_test_reqmap_py_1369["scripts/test_reqmap.py:1369"]
   REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1369
+  REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
+  f_scripts_reqmap_py_1261_1331["scripts/reqmap.py:1261-1331"]
+  REQ_LINT_014 -->|implements| f_scripts_reqmap_py_1261_1331
+  f_scripts_test_reqmap_py_1555["scripts/test_reqmap.py:1555"]
+  REQ_LINT_014 -->|tested-by| f_scripts_test_reqmap_py_1555
   REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1042_1865["scripts/reqmap.py:1042-1865"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1865
+  f_scripts_reqmap_py_1042_1977["scripts/reqmap.py:1042-1977"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1042_1977
   f_scripts_test_reqmap_py_277_1147["scripts/test_reqmap.py:277-1147"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_277_1147
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -118,7 +124,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>10 caps</small>"]
+  a_REQ["REQ<br><small>11 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
 ```

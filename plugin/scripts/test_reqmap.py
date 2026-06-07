@@ -1552,5 +1552,66 @@ class ParseTodos(unittest.TestCase):
         self.assertEqual(payload["todos"][0]["name"], "X")
 
 
+class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
+    CONTRACT = "## WHAT — Contract (normative)"
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def _lint(self, reqs, strict=False):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_lint(reqs, strict)
+        return code, buf.getvalue()
+
+    def _req(self, status, body):
+        return {"meta": {"status": status}, "body": body}
+
+    def _body(self, contract="- ok.\n", acceptance="- ok.\n"):
+        return "# T\n\n{}\n{}\n{}\n{}\n".format(self.CONTRACT, contract, self.ACCEPT, acceptance)
+
+    def test_missing_acceptance_section_is_error(self):
+        body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no acceptance heading
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertIn(("error", "missing-section"),
+                      [(f["severity"], f["check"]) for f in fs])
+
+    def test_draft_is_out_of_scope(self):
+        long_sent = " ".join(["word"] * 50) + "."
+        reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}
+        code, out = self._lint(reqs)
+        self.assertEqual(code, 0)
+        self.assertNotIn("DRAFT-X-001", out)   # drafts are not linted
+
+    def test_long_sentence_warns_with_count(self):
+        long_sent = " ".join(["word"] * 40) + "."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract="- " + long_sent + "\n")))
+        longs = [f for f in fs if f["check"] == "long-sentence"]
+        self.assertTrue(longs)
+        self.assertEqual(longs[0]["severity"], "warn")
+        self.assertIn("40-word", longs[0]["detail"])
+
+    def test_stacked_conditions_warns(self):
+        line = "- It shall do A and B and C and D."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
+        self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
+
+    def test_code_fence_line_not_flagged(self):
+        long_sent = " ".join(["word"] * 50) + "."
+        accept = "```\n" + long_sent + "\n```\n"
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertFalse(any(f["check"] == "long-sentence" for f in fs))
+
+    def test_strict_zero_on_warnings_only(self):
+        long_sent = " ".join(["word"] * 40) + "."
+        reqs = {"REQ-X-001": self._req("confirmed", self._body(contract="- " + long_sent + "\n"))}
+        code, _ = self._lint(reqs, strict=True)
+        self.assertEqual(code, 0)   # warnings never fail --strict
+
+    def test_strict_nonzero_on_missing_section(self):
+        body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no acceptance
+        reqs = {"REQ-X-001": self._req("confirmed", body)}
+        code, _ = self._lint(reqs, strict=True)
+        self.assertEqual(code, 1)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

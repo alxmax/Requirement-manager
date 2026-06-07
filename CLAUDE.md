@@ -14,6 +14,7 @@ python scripts/reqmap.py export             # emit requirements/_map.json for an
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
 python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
+python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items

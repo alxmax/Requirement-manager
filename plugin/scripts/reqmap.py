@@ -64,7 +64,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-05.2"
+MAP_ENGINE_VERSION = "2026-06-07"
 
 
 # ---------- parsing ----------
@@ -1246,6 +1246,118 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     return 0
 
 
+# ---------- lint (readability / structure of requirement prose) ----------
+# Makes the SKILL.md "Audience & writing level" rules mechanical so requirements
+# stay easy to understand. Scoped narrowly to keep false positives near zero: only
+# non-draft requirements (drafts are TODO stubs), only the Contract and Acceptance
+# sections (Notes may stay dense by design). Jargon-before-definition is deliberately
+# NOT checked in v1 — without a term dictionary it is too false-positive-prone on
+# prose that carries code references.
+LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
+LINT_SENTENCE_WORDS = 35       # a single sentence longer than this is flagged (warn)
+LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
+
+
+def _lint_prose(body, name):  # implements: REQ-LINT-014
+    """Yield the prose text lines under the first `## ` heading whose text contains
+    `name`, up to the next `## `. A bullet's leading `-` is stripped so its text is
+    linted as a sentence. Non-prose lines — headings, table rows, blockquotes, and
+    anything inside a ``` fence — are skipped so the linter never flags code or
+    markup as unreadable."""
+    out, grab, fenced = [], False, False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("## "):
+            grab = name in s.lower()
+            continue
+        if not grab:
+            continue
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced or not s or s.startswith(("|", ">", "#")):
+            continue
+        if s.startswith("-"):
+            s = s[1:].strip()
+        if s:
+            out.append(s)
+    return out
+
+
+def _sentences(text):  # implements: REQ-LINT-014
+    """Split a prose line into sentences on '.', '!', '?' boundaries. Crude but
+    deterministic — enough to count words per sentence for the length check."""
+    return [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
+
+
+def _clip(s, n=60):  # implements: REQ-LINT-014
+    """Shorten a snippet for one-line finding output."""
+    return s if len(s) <= n else s[:n - 1] + "…"
+
+
+def lint_requirement(rid, r):  # implements: REQ-LINT-014
+    """Return a list of {severity, check, detail} findings for one requirement;
+    an empty list means clean. Checks the Contract + Acceptance sections only."""
+    findings = []
+    body = r["body"]
+    # structural (error): a non-draft must carry both load-bearing sections
+    if not _has_section(body, "contract"):
+        findings.append({"severity": "error", "check": "missing-section",
+                         "detail": "no '## WHAT — Contract' section"})
+    if not _has_section(body, "acceptan"):
+        findings.append({"severity": "error", "check": "missing-section",
+                         "detail": "no '## HOW — Acceptance' section"})
+    # prose readability (warn): only on the Contract + Acceptance sections
+    for name in ("contract", "acceptan"):
+        for ln in _lint_prose(body, name):
+            for sent in _sentences(ln):
+                words = len(sent.split())
+                if words > LINT_SENTENCE_WORDS:
+                    findings.append({
+                        "severity": "warn", "check": "long-sentence",
+                        "detail": "{}-word sentence (>{}): {}".format(
+                            words, LINT_SENTENCE_WORDS, _clip(sent))})
+            low = ln.lower()
+            if "shall" in low or "must" in low:
+                joins = len(re.findall(r"\b(?:and|or)\b", low))
+                if joins >= LINT_STACKED_CONNECTORS:
+                    findings.append({
+                        "severity": "warn", "check": "stacked-conditions",
+                        "detail": "{} 'and'/'or' joins in one normative line: {}".format(
+                            joins, _clip(ln))})
+    return findings
+
+
+def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
+    """Report readability/structure violations on non-draft requirements so they
+    stay easy to understand — the SKILL.md 'Audience & writing level' rules made
+    mechanical. Checks: missing-section (error), long-sentence (warn),
+    stacked-conditions (warn). Read-only. Exit-neutral by default; with --strict it
+    exits non-zero on any error-severity finding (warnings never change the exit)."""
+    targets = [(rid, r) for rid, r in sorted(reqs.items())
+               if r["meta"].get("status") in LINT_STATUSES]
+    errors = warns = 0
+    for rid, r in targets:
+        fs = lint_requirement(rid, r)
+        if not fs:
+            continue
+        print("{}   requirements/{}.md".format(rid, rid))
+        for f in fs:
+            if f["severity"] == "error":
+                errors += 1; mark = "ERROR"
+            else:
+                warns += 1; mark = "warn "
+            print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
+    print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
+        len(targets), errors, warns))
+    if errors == 0 and warns == 0:
+        print("All clean — every linted requirement is well-formed and readable.")
+    if strict and errors:
+        print("FAIL (--strict): {} structural error(s).".format(errors))
+        return 1
+    return 0
+
+
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
     Finds the comment marker (#, //, <!--) closest to the tag and cuts from
@@ -1890,7 +2002,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -1904,6 +2016,8 @@ def main():
                     help="findings: ignore the triage sidecar and emit the raw grouped list")
     ap.add_argument("--all", dest="show_all", action="store_true",
                     help="next: list every pending item instead of the top few per bucket")
+    ap.add_argument("--strict", action="store_true",
+                    help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
@@ -1933,6 +2047,8 @@ def main():
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all)
+    if a.cmd == "lint":
+        return cmd_lint(reqs, a.strict)
     if a.cmd == "check":
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
         if a.update_lock:

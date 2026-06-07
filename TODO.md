@@ -9,6 +9,7 @@
 - [x] TODO.md template + engine parsing  | lane: feature
 
 ## v1.14
+- [x] Requirement readability linter (lint) | lane: feature
 - [ ] promote-todo command               | lane: feature
 - [ ] Gate validation for milestone IDs  | lane: ops
 - [ ] Requirement quality checker (AI)   | lane: feature

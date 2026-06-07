@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-05.2",
+  "engine_version": "2026-06-07",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -107,6 +107,7 @@
       "used_by": [
         "REQ-CHECK-006",
         "REQ-FINDINGS-010",
+        "REQ-LINT-014",
         "REQ-MAP-007",
         "REQ-NEW-004",
         "REQ-PROMOTE-011",
@@ -603,11 +604,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1307"
+          "loc": "scripts/reqmap.py:1419"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1336"
+          "loc": "scripts/reqmap.py:1448"
         },
         {
           "role": "tested-by",
@@ -616,6 +617,82 @@
       ],
       "test_exempt": null,
       "milestone": "v1.10",
+      "risks": []
+    },
+    {
+      "id": "REQ-LINT-014",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Requirement readability linter",
+      "intent": "Mechanically check that requirement prose follows the \"Audience & writing level\" rules, so requirements stay easy to understand without a human re-reading every file.",
+      "contract": [
+        "The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.",
+        "It shall scope its checks to non-draft requirements only (status `baseline`, `in-progress`, `implemented`, or `confirmed`). Drafts are auto-extracted TODO stubs, so linting them would only add noise.",
+        "It shall run two kinds of check. A structural check is severity `error`. A prose-readability check is severity `warn`.",
+        "The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.",
+        "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
+        "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
+        "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
+        "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
+        "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check.",
+        "Sentence splitting is a deterministic split on `.`, `!`, and `?`. It is crude — an abbreviation can over-split — but it never reads code and only feeds a word count, so the worst case is a missed long sentence, not a false alarm on code.",
+        "The thresholds are module constants, not configurable from the command line. A single well-named constant is enough until a real project needs a different value."
+      ],
+      "current_impl": [
+        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count check. The `missing-section` check reuses `_has_section` (shared with the gate in `cmd_check`)."
+      ],
+      "acc": [
+        "Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.",
+        "Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.",
+        "Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.",
+        "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
+        "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
+        "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
+        "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
+      ],
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1261"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1287"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1293"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1298"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1331"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1555"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
       "risks": []
     },
     {
@@ -689,91 +766,91 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1388"
+          "loc": "scripts/reqmap.py:1500"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1411"
+          "loc": "scripts/reqmap.py:1523"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1419"
+          "loc": "scripts/reqmap.py:1531"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1426"
+          "loc": "scripts/reqmap.py:1538"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1438"
+          "loc": "scripts/reqmap.py:1550"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1452"
+          "loc": "scripts/reqmap.py:1564"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1496"
+          "loc": "scripts/reqmap.py:1608"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1502"
+          "loc": "scripts/reqmap.py:1614"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1509"
+          "loc": "scripts/reqmap.py:1621"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1546"
+          "loc": "scripts/reqmap.py:1658"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1561"
+          "loc": "scripts/reqmap.py:1673"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1592"
+          "loc": "scripts/reqmap.py:1704"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1664"
+          "loc": "scripts/reqmap.py:1776"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1712"
+          "loc": "scripts/reqmap.py:1824"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1763"
+          "loc": "scripts/reqmap.py:1875"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1771"
+          "loc": "scripts/reqmap.py:1883"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1802"
+          "loc": "scripts/reqmap.py:1914"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1812"
+          "loc": "scripts/reqmap.py:1924"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1828"
+          "loc": "scripts/reqmap.py:1940"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1852"
+          "loc": "scripts/reqmap.py:1964"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1856"
+          "loc": "scripts/reqmap.py:1968"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1865"
+          "loc": "scripts/reqmap.py:1977"
         },
         {
           "role": "tested-by",
@@ -1073,6 +1150,10 @@
       "REQ-MAP-007"
     ],
     [
+      "REQ-LINT-014",
+      "CORE-PARSE-001"
+    ],
+    [
       "REQ-MAP-007",
       "CORE-PARSE-001"
     ],
@@ -1112,6 +1193,12 @@
       "name": "TODO.md template + engine parsing",
       "lane": "feature",
       "milestone": "v1.13",
+      "done": true
+    },
+    {
+      "name": "Requirement readability linter (lint)",
+      "lane": "feature",
+      "milestone": "v1.14",
       "done": true
     },
     {
