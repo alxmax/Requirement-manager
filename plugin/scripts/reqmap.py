@@ -204,6 +204,15 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
 
 
 # ---------- hashing / drift ----------
+# A normative section heading: the canonical `## WHAT — Contract …` / `## HOW —
+# Acceptance …`, or a legacy bare `## Contract`/`## Acceptance`/`## Input`/`## Output`.
+# Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
+# prefix), NOT anywhere in the heading — otherwise a commentary heading like
+# `## Notes — contract caveats` would leak into the drift hash.
+_NORMATIVE_HEADING_RE = re.compile(
+    r"^##\s+(?:(?:what|how)\s*[—–-]\s*)?(?:contract|acceptan|input|output)", re.I)
+
+
 def binding_hash(body):  # implements: CORE-DRIFT-003
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
@@ -213,7 +222,7 @@ def binding_hash(body):  # implements: CORE-DRIFT-003
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = any(s in h for s in ("contract", "acceptan", "input", "output"))
+            grab = bool(_NORMATIVE_HEADING_RE.match(h))
             continue
         if grab and line.strip():
             keep.append(line.strip())
@@ -230,8 +239,11 @@ def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
         try:
             with open(p, encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return {}  # empty / corrupt / merge-conflicted lock: treat as no lock
+        except (ValueError, OSError):
+            # empty / corrupt / merge-conflicted / non-UTF-8 lock: treat as no lock.
+            # ValueError covers both json.JSONDecodeError and UnicodeDecodeError, so
+            # a binary-garbage lock fails open here instead of crashing the gate.
+            return {}
     return {}
 
 
@@ -368,7 +380,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
         try:
             with open(lp, encoding="utf-8") as f:
                 json.load(f)
-        except (json.JSONDecodeError, OSError):
+        except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
             warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
     new_lock = {}
@@ -1778,11 +1790,13 @@ def _first_quote(body):  # implements: REQ-MAP-007
 
 
 def _section(body, name):  # implements: REQ-MAP-007
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and line.strip() and not line.strip().startswith("<!--"):
             out.append(line.strip().lstrip("- "))
@@ -1792,11 +1806,13 @@ def _section(body, name):  # implements: REQ-MAP-007
 def _section_raw(body, name):  # implements: REQ-MAP-007
     """Like _section but preserves line breaks + indentation — used for the
     multi-line Given/When/Then acceptance blocks so they read as written."""
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and not line.strip().startswith("<!--"):
             out.append(line.rstrip())
@@ -1804,11 +1820,13 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
 
 
 def _bullets(body, name):  # implements: REQ-MAP-007
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and line.strip().startswith("-"):
             out.append(line.strip()[1:].strip())
@@ -1992,14 +2010,18 @@ def _member_roles(members):
 
 def _risk_signals(node):
     signals = []
-    if node["status"] == "confirmed" and not node["members"]:
+    # 'unimplemented' must mirror the gate, which errors when an ENFORCED requirement
+    # has no `implements:` member (a `tested-by`-only member must not satisfy it).
+    # Keying on the implements ROLE (not raw member-list emptiness) keeps next/show/
+    # the Risk map agreeing with `check`.
+    roles = _member_roles(node.get("members"))
+    if node["status"] in ENFORCED and "implements" not in roles:
         signals.append("unimplemented")
     if node["status"] in ("draft", "baseline"):
         signals.append("unreviewed")
     # implemented-but-untested: has hand-written code linked but no acceptance test.
     # Gated on an implements member so not-yet-built drafts (already 'unreviewed')
     # are not double-flagged. Opt out per requirement with `test_exempt: <reason>`.
-    roles = _member_roles(node.get("members"))
     if "implements" in roles and "tested-by" not in roles and not node.get("test_exempt"):
         signals.append("untested")
     # open verify-intent questions reconstructed from code — surface them on the map,

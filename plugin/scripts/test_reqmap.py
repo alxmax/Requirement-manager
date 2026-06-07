@@ -106,6 +106,9 @@ class Gate(unittest.TestCase):
             self.assertEqual(R.load_lock(d), {})
             _write(os.path.join(d, "_reqlock.json"), "{not json")  # garbage
             self.assertEqual(R.load_lock(d), {})
+            with open(os.path.join(d, "_reqlock.json"), "wb") as f:
+                f.write(b'{"A": "\xff\xfe\x80"}')               # non-UTF-8 / binary
+            self.assertEqual(R.load_lock(d), {})                # must fail open, not crash
 
     def test_update_lock_missing_dir_no_crash(self):  # bug #13
         with tempfile.TemporaryDirectory() as d:
@@ -124,6 +127,11 @@ class Gate(unittest.TestCase):
         self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("shall do X", "shall do Y")))
         # changing an acceptance criterion MUST change it
         self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("X holds", "Y holds")))
+        # a commentary heading that merely CONTAINS a normative keyword must NOT leak in
+        trap = base + "\n## Notes — contract caveats\n- not normative.\n"
+        self.assertEqual(R.binding_hash(base), R.binding_hash(trap))
+        # ...and editing that non-normative section must not trip drift
+        self.assertEqual(R.binding_hash(trap), R.binding_hash(trap.replace("not normative", "EDITED")))
 
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
@@ -1118,6 +1126,20 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_unverified_intent_ignores_none_placeholder(self):  # mirror collect_findings
         n = self._node(verify=["None — prompt is unambiguous."])
         self.assertNotIn("unverified-intent", R._risk_signals(n))
+
+    def test_unimplemented_uses_implements_role_not_raw_members(self):  # bug-hunt #8
+        # confirmed with ONLY a tested-by member (no implements) must flag 'unimplemented',
+        # mirroring the gate which errors on a confirmed req lacking an implements: tag
+        n = self._node(status="confirmed", members=[{"role": "tested-by", "loc": "t.py:1"}])
+        self.assertIn("unimplemented", R._risk_signals(n))
+        # with an implements member it must NOT flag unimplemented
+        ok = self._node(status="confirmed", members=[{"role": "implements", "loc": "x.py:1"}])
+        self.assertNotIn("unimplemented", R._risk_signals(ok))
+
+    def test_bullets_grabs_first_matching_section_only(self):  # bug-hunt #1
+        body = ("# T\n\n## WHAT — Contract\n- real.\n\n"
+                "## Notes — contract caveats\n- not normative.\n")
+        self.assertEqual(R._bullets(body, "contract"), ["real."])
 
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
