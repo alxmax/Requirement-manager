@@ -1513,6 +1513,61 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
     return 0
 
 
+# ---------- health (corpus coherence snapshot) ----------
+def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALTH-017
+    """Print a corpus coherence snapshot: a headline score plus component counts.
+    The score is transparent — the percentage of requirements green on EVERY axis
+    (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
+    verify-intent, not drifted vs the lock). `--json` emits the same numbers as a
+    parseable object for a CI badge. Read-only, always exit 0."""
+    total = len(reqs)
+    lock = load_lock(reqs_dir)
+    confirmed = implemented = tested = orphans = untested = open_intent = drifted = drafts = healthy = 0
+    for rid, r in reqs.items():
+        m, body = r["meta"], r["body"]
+        status = m.get("status", "draft")
+        roles = _member_roles(members.get(rid, []))
+        has_impl = "implements" in roles
+        has_test_member = "tested-by" in roles
+        has_test = has_test_member or bool(m.get("test_exempt"))
+        is_confirmed = status == "confirmed"
+        open_now = status != "draft" and any(
+            b and not b.lstrip("*_ ").lower().startswith("none")
+            for b in _bullets(body, "verify intent"))
+        old = lock.get(rid)
+        is_drifted = bool(old) and old != binding_hash(body) and is_confirmed
+        confirmed += is_confirmed
+        implemented += has_impl
+        tested += has_test_member
+        drafts += status == "draft"
+        orphans += is_confirmed and not has_impl
+        untested += has_impl and not has_test_member and not m.get("test_exempt")
+        open_intent += open_now
+        drifted += is_drifted
+        if is_confirmed and has_impl and has_test and not open_now and not is_drifted:
+            healthy += 1
+    score = round(100 * healthy / total) if total else 0
+    data = {"score": score, "total": total, "healthy": healthy,
+            "confirmed": confirmed, "implemented": implemented, "tested": tested,
+            "drafts": drafts, "orphans": orphans, "untested": untested,
+            "open_intent": open_intent, "drift": drifted}
+    if as_json:
+        print(json.dumps(data, indent=2))
+        return 0
+    print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    print("  confirmed:   {}/{}".format(confirmed, total))
+    print("  implemented: {}/{}".format(implemented, total))
+    print("  tested:      {}/{}".format(tested, total))
+    print("  drafts:      {}".format(drafts))
+    if orphans:     print("  orphans (confirmed, no code):     {}".format(orphans))
+    if untested:    print("  untested (code, no tests):        {}".format(untested))
+    if open_intent: print("  open verify-intent:               {}".format(open_intent))
+    if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
+    if total == 0:
+        print("  (no requirements yet — run `reqmap.py init` or `new`)")
+    return 0
+
+
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
     Finds the comment marker (#, //, <!--) closest to the tag and cuts from
@@ -2157,7 +2212,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2175,6 +2230,8 @@ def main():
                     help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
     ap.add_argument("--threshold", type=float, default=None,
                     help="similar: cosine cutoff for reporting a pair (default 0.35)")
+    ap.add_argument("--json", dest="as_json", action="store_true",
+                    help="health: emit the snapshot as a JSON object (for a CI badge)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
@@ -2212,6 +2269,8 @@ def main():
         return cmd_show(reqs, members, a.arg)
     if a.cmd == "similar":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
+    if a.cmd == "health":
+        return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
         if a.update_lock:

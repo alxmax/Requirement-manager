@@ -37,7 +37,8 @@
       "desc": "",
       "deps": [],
       "used_by": [
-        "REQ-CHECK-006"
+        "REQ-CHECK-006",
+        "REQ-HEALTH-017"
       ],
       "members": [
         {
@@ -107,6 +108,7 @@
       "used_by": [
         "REQ-CHECK-006",
         "REQ-FINDINGS-010",
+        "REQ-HEALTH-017",
         "REQ-LINT-014",
         "REQ-MAP-007",
         "REQ-NEW-004",
@@ -185,6 +187,7 @@
         "REQ-CANDIDATES-009",
         "REQ-CHECK-006",
         "REQ-EXTRACT-008",
+        "REQ-HEALTH-017",
         "REQ-MAP-007",
         "REQ-SCAN-005",
         "REQ-SHOW-015"
@@ -560,6 +563,65 @@
       "risks": []
     },
     {
+      "id": "REQ-HEALTH-017",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Corpus health snapshot",
+      "intent": "Reduce the whole requirement registry to one coherence score plus a few component counts, so a CI badge or a reviewer can see at a glance how healthy the corpus is.",
+      "contract": [
+        "The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.",
+        "It shall compute a headline score: the percentage of requirements that are green on every axis.",
+        "A requirement is green when it passes every axis at once.",
+        "The axes are: status `confirmed`, an `implements` member, a `tested-by` member or `test_exempt` reason, no open verify-intent question, and no drift from the lock.",
+        "It shall print component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.",
+        "With `--json` it shall emit the same numbers as a JSON object, so the console output and a CI badge never disagree.",
+        "It shall return zero on an empty corpus, printing a score of zero and a hint to bootstrap.",
+        "It shall always return zero. The snapshot is a report, not a gate."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The score is deliberately strict: one open question or one drifted contract drops a requirement out of the green count. This makes the number move when real work remains.",
+        "The \"tested\" line counts actual `tested-by` members, while the green test counts a `test_exempt` reason as covered. The two can differ by the number of exempted requirements.",
+        "Drift reuses the lock that `check` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses."
+      ],
+      "current_impl": [
+        "`cmd_health` in `reqmap.py` — walks every requirement, classifies each axis using `_member_roles`, `_bullets`, and the lock via `load_lock` + `binding_hash`, then prints the score and counts. `--json` dumps the assembled dictionary instead of the text view."
+      ],
+      "acc": [
+        "Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.",
+        "Given an all-draft corpus, when `health` runs, then the score is zero.",
+        "Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.",
+        "Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.",
+        "Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero."
+      ],
+      "accept": "- Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.\n- Given an all-draft corpus, when `health` runs, then the score is zero.\n- Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.\n- Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.\n- Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "CORE-SCAN-002",
+        "CORE-DRIFT-003"
+      ],
+      "used_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1517"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1698"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "risks": []
+    },
+    {
       "id": "REQ-INIT-012",
       "layer": "feature",
       "status": "confirmed",
@@ -607,11 +669,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1574"
+          "loc": "scripts/reqmap.py:1629"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1603"
+          "loc": "scripts/reqmap.py:1658"
         },
         {
           "role": "tested-by",
@@ -769,91 +831,91 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1655"
+          "loc": "scripts/reqmap.py:1710"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1678"
+          "loc": "scripts/reqmap.py:1733"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1686"
+          "loc": "scripts/reqmap.py:1741"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1693"
+          "loc": "scripts/reqmap.py:1748"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1705"
+          "loc": "scripts/reqmap.py:1760"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1719"
+          "loc": "scripts/reqmap.py:1774"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1763"
+          "loc": "scripts/reqmap.py:1818"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1769"
+          "loc": "scripts/reqmap.py:1824"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1776"
+          "loc": "scripts/reqmap.py:1831"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1813"
+          "loc": "scripts/reqmap.py:1868"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1828"
+          "loc": "scripts/reqmap.py:1883"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1859"
+          "loc": "scripts/reqmap.py:1914"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1931"
+          "loc": "scripts/reqmap.py:1986"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1979"
+          "loc": "scripts/reqmap.py:2034"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2030"
+          "loc": "scripts/reqmap.py:2085"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2038"
+          "loc": "scripts/reqmap.py:2093"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2069"
+          "loc": "scripts/reqmap.py:2124"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2079"
+          "loc": "scripts/reqmap.py:2134"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2095"
+          "loc": "scripts/reqmap.py:2150"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2119"
+          "loc": "scripts/reqmap.py:2174"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2123"
+          "loc": "scripts/reqmap.py:2178"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2132"
+          "loc": "scripts/reqmap.py:2187"
         },
         {
           "role": "tested-by",
@@ -1272,6 +1334,18 @@
       "CORE-PARSE-001"
     ],
     [
+      "REQ-HEALTH-017",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-HEALTH-017",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-HEALTH-017",
+      "CORE-DRIFT-003"
+    ],
+    [
       "REQ-INIT-012",
       "REQ-EXTRACT-008"
     ],
@@ -1356,6 +1430,12 @@
     {
       "name": "Duplicate-capability detector (similar)",
       "lane": "feature",
+      "milestone": "v1.14",
+      "done": true
+    },
+    {
+      "name": "Corpus health snapshot (health)",
+      "lane": "ops",
       "milestone": "v1.14",
       "done": true
     },

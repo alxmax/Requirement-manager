@@ -17,6 +17,7 @@ python scripts/reqmap.py next               # 'what should I do next': counted, 
 python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
 python scripts/reqmap.py similar            # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py health             # corpus coherence score + component counts (--json for a CI badge)
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items

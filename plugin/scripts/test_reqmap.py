@@ -1695,5 +1695,46 @@ class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
         self.assertIn("No overlapping", out)
 
 
+class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
+    def _health(self, reqs, members, as_json=False):
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            code = R.cmd_health(reqs, members, d, as_json)   # empty dir -> load_lock fails open
+        return code, buf.getvalue()
+
+    def _green(self):
+        return {"meta": {"status": "confirmed"},
+                "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"}
+
+    def test_all_green_is_100(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        code, out = self._health({"REQ-A-001": self._green()}, members)
+        self.assertEqual(code, 0)
+        self.assertIn("100/100", out)
+
+    def test_all_draft_is_zero(self):
+        reqs = {"REQ-A-001": {"meta": {"status": "draft"}, "body": "# T\n"}}
+        _, out = self._health(reqs, {})
+        self.assertIn("0/100", out)
+
+    def test_json_has_score_and_total(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 100)
+        self.assertEqual(obj["total"], 1)
+
+    def test_orphan_not_green(self):
+        # confirmed but no implements member -> orphan, drops out of green
+        _, out = self._health({"REQ-A-001": self._green()}, {})
+        self.assertIn("orphans", out)
+        self.assertIn("0/100", out)
+
+    def test_empty_corpus(self):
+        code, out = self._health({}, {})
+        self.assertEqual(code, 0)
+        self.assertIn("0/100", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
