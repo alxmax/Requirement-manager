@@ -1421,10 +1421,19 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    for line in body.splitlines():          # intent: first blockquote under the title
-        if line.strip().startswith(">"):
-            print("  " + line.strip().lstrip(">").strip())
-            break
+    in_fence = False
+    for line in body.splitlines():          # intent: first non-empty blockquote, outside fences
+        s = line.strip()
+        if s.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if s.startswith(">"):
+            content = s.lstrip(">").strip()
+            if content:                     # skip an empty '>' lead line in a multi-line quote
+                print("  " + content)
+                break
 
     contract = _bullets(body, "contract")
     print("\nContract:")

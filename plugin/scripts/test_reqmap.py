@@ -1696,6 +1696,17 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         self.assertIn("magic constant", out)
         self.assertNotIn("None — doc is unambiguous", out)
 
+    def test_intent_skips_fenced_blockquote(self):  # bug-hunt #2
+        body = "# T\n\n## WHAT — Contract\n```\n> not the intent\n```\n\n> The real intent.\n"
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("The real intent.", out)
+        self.assertNotIn("not the intent", out)
+
+    def test_intent_skips_empty_blockquote_line(self):  # bug-hunt #11
+        body = "# T\n>\n> The real intent.\n\n## WHAT — Contract\n- x.\n"
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("The real intent.", out)
+
 
 class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
     def _sim(self, reqs, threshold=0.35):
