@@ -87,7 +87,7 @@ class Gate(unittest.TestCase):
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_bare_scalar_depends_on_no_percharacter_errors(self):  # bug #5  tested-by: REQ-CHECK-006
@@ -857,7 +857,7 @@ class GateErrors(unittest.TestCase):  # tested-by: REQ-CHECK-006
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_invalid_status_errors_and_exits_nonzero(self):  # bug: gate-never-asserted-to-fail
@@ -1070,7 +1070,7 @@ class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_summary_reports_confirmed_count(self):
@@ -1792,12 +1792,25 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         _, out = self._health(reqs, {})
         self.assertIn("0/100", out)
 
-    def test_json_has_score_and_total(self):
+    def test_json_has_all_component_fields(self):  # bug-hunt #18: assert every emitted key
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
-        obj = json.loads(out)
-        self.assertEqual(obj["score"], 100)
-        self.assertEqual(obj["total"], 1)
+        self.assertEqual(json.loads(out), {
+            "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
+            "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0})
+
+    def test_drift_drops_out_of_green(self):  # bug-hunt #18: exercise the drift axis
+        reqs = {"REQ-A-001": self._green()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_reqlock.json"), '{"REQ-A-001": "staleHASH0000"}')
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(reqs, members, d, as_json=True)
+            obj = json.loads(buf.getvalue())
+        self.assertEqual(obj["drift"], 1)
+        self.assertEqual(obj["healthy"], 0)
+        self.assertLess(obj["score"], 100)
 
     def test_orphan_not_green(self):
         # confirmed but no implements member -> orphan, drops out of green

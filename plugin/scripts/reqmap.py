@@ -10,7 +10,14 @@ Subcommands:
   map               generate requirements/_map.md (Mermaid) + _map.json (graph)
   export            emit the registry graph as requirements/_map.json (for a front-end)
   next              terminal 'what should I do next': counted, actionable risk buckets
+  lint [--strict]   readability/structure check on non-draft requirements (warn; --strict fails on errors)
+  show <ID>         consolidated dossier for one requirement (contract, deps, members, risk)
+  similar [--threshold T]  flag requirement pairs with overlapping contracts (TF-IDF cosine)
+  health [--json]   corpus coherence score + component counts (--json for a CI badge)
   extract           draft requirements from legacy code (status: draft, risk-scored)
+  candidates        read-only JSON capability-extraction plan (writes no .md)
+  findings          aggregate open verify-intent items into requirements/_findings.md
+  promote <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
@@ -64,7 +71,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-07.1"
+MAP_ENGINE_VERSION = "2026-06-07.2"
 
 
 # ---------- parsing ----------
