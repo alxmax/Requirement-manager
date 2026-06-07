@@ -1622,6 +1622,24 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
         self.assertFalse(any(f["check"] == "long-sentence" for f in fs))
 
+    def test_in_fence_heading_does_not_disable_linter(self):  # bug-hunt #10/#14
+        # a '## ' comment INSIDE a fence must not be read as a heading and silently
+        # disable the linter for the rest of the section
+        long_sent = " ".join(["word"] * 50) + "."
+        accept = "```\n## not a heading\n```\n" + long_sent + "\n"
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertTrue(any(f["check"] == "long-sentence" for f in fs))
+
+    def test_lint_prose_first_section_only(self):  # bug-hunt #1
+        long_sent = " ".join(["word"] * 50) + "."
+        body = ("# T\n\n## WHAT — Contract\n- short.\n\n"
+                "## Notes — contract addendum\n- " + long_sent + "\n")
+        self.assertEqual(R._lint_prose(body, "contract"), ["short."])
+
+    def test_lint_prose_keeps_option_flag_hyphen(self):  # bug-hunt #13
+        body = "## WHAT — Contract\n--strict makes it fail.\n"
+        self.assertEqual(R._lint_prose(body, "contract"), ["--strict makes it fail."])
+
     def test_strict_zero_on_warnings_only(self):
         long_sent = " ".join(["word"] * 40) + "."
         reqs = {"REQ-X-001": self._req("confirmed", self._body(contract="- " + long_sent + "\n"))}

@@ -1303,25 +1303,28 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 
 
 def _lint_prose(body, name):  # implements: REQ-LINT-014
-    """Yield the prose text lines under the first `## ` heading whose text contains
-    `name`, up to the next `## `. A bullet's leading `-` is stripped so its text is
+    """Yield the prose text lines under the FIRST `## ` heading whose text contains
+    `name`, up to the next `## `. A bullet's leading `- ` is stripped so its text is
     linted as a sentence. Non-prose lines — headings, table rows, blockquotes, and
     anything inside a ``` fence — are skipped so the linter never flags code or
-    markup as unreadable."""
-    out, grab, fenced = [], False, False
+    markup as unreadable. Fence state is tracked BEFORE heading detection, so a
+    `## ` comment inside a fenced block is treated as code, not a section boundary."""
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
-        if s.startswith("## "):
-            grab = name in s.lower()
-            continue
-        if not grab:
-            continue
-        if s.startswith("```"):
+        if s.startswith("```"):          # fence first: an in-fence `## ` is code, not a heading
             fenced = not fenced
             continue
-        if fenced or not s or s.startswith(("|", ">", "#")):
+        if fenced:
             continue
-        if s.startswith("-"):
+        if s.startswith("## "):
+            grab = (not seen) and (name in s.lower())   # first matching section only
+            if grab:
+                seen = True
+            continue
+        if not grab or not s or s.startswith(("|", ">", "#")):
+            continue
+        if s == "-" or s.startswith("- "):   # a real bullet marker (not '--strict' / '-5')
             s = s[1:].strip()
         if s:
             out.append(s)
