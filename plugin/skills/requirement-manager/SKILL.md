@@ -255,10 +255,16 @@ expected and acceptable.
 
 ## The gate (run at commit/merge — keep it non-optional)
 
-`python scripts/reqmap.py check` verifies three syncs and exits non-zero on error:
+`python scripts/reqmap.py check` verifies these syncs and exits non-zero on error:
 - **link sync**  — every code tag points to a real requirement; every confirmed
   requirement has ≥1 member; no dangling refs; `depends_on` targets exist.
 - **behavior sync** — acceptance criteria run as tests (wire `tested-by` into CI).
+  The gate's deterministic half is **test-link integrity** (warn-only): a confirmed
+  requirement's `tested-by` file must exist and contain a test function (`def test…(`,
+  `function test…(`, `it(`/`test(`), else the link asserts coverage it lacks. It is
+  silent on a well-formed corpus. Per-criterion AC→test mapping is deferred (it needs
+  a per-AC tag convention — a shared, class-tagged test file makes per-AC counting
+  non-deterministic).
 - **drift** — content hash of each requirement compared to the lock; a changed
   `confirmed` requirement whose members were not re-touched is flagged stale.
 

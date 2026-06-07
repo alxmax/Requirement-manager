@@ -11,7 +11,7 @@
      <script>window.__REQMAP_DATA__ = { ...this repo's _map.json... }</script>
      It must run before the app module, so loadData() finds the inlined data. -->
 <script>window.__REQMAP_DATA__={
-  "engine_version": "2026-06-07",
+  "engine_version": "2026-06-07.1",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -114,6 +114,18 @@
       "name": "Requirement quality checker (AI)",
       "lane": "feature",
       "milestone": "v1.14",
+      "done": false
+    },
+    {
+      "name": "Test-link integrity gate check (testlink)",
+      "lane": "ops",
+      "milestone": "v1.15",
+      "done": true
+    },
+    {
+      "name": "Scan cache + check --since (perf)",
+      "lane": "ops",
+      "milestone": "v1.15",
       "done": false
     }
   ]

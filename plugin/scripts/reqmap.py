@@ -64,7 +64,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-07"
+MAP_ENGINE_VERSION = "2026-06-07.1"
 
 
 # ---------- parsing ----------
@@ -291,7 +291,32 @@ def warn_if_stale():  # implements: REQ-CHECK-006
         return
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-006
+# A test function across the scanned languages: Python `def test...(`, JS/TS
+# `function test...(`, or a Jest/Mocha `it(` / `test(` call. Used only to confirm a
+# tested-by file actually holds tests — not to count or map them.
+_TEST_FN_RE = re.compile(
+    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|\b(?:it|test)\s*\(", re.IGNORECASE)
+
+
+def _test_link_problem(path):  # implements: REQ-TESTLINK-018
+    """Return a short reason a `tested-by` file fails the behavior-sync check, or ''
+    when it is fine. A file that is missing, unreadable, or holds no recognizable
+    test function means the link asserts coverage it does not have. Deterministic
+    and warn-only — it never proves per-criterion coverage, only that real tests
+    exist at the link target (per-AC mapping needs a per-AC tag, deferred)."""
+    if not os.path.isfile(path):
+        return "does not exist (broken tested-by link)"
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            src = f.read()
+    except OSError:
+        return "is unreadable"
+    if not _TEST_FN_RE.search(src):
+        return "contains no test function (def test.../function test.../it(/test()"
+    return ""
+
+
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implements: REQ-CHECK-006
     errors, warns = [], []
     warn_if_stale()
     cap_ids = set(reqs)
@@ -315,6 +340,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock):  # implements: REQ-CHECK-00
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        # behavior-sync (warn-only): a tested-by link must point at a file that
+        # exists and actually holds tests, else it asserts coverage it lacks.
+        if m.get("status") == "confirmed" and tests:
+            for fp in sorted({t[1] for t in tests}):  # implements: REQ-TESTLINK-018
+                problem = _test_link_problem(os.path.join(code_root, fp))
+                if problem:
+                    warns.append(f"{rid}: tested-by {fp} {problem}")
         if m.get("status") == "confirmed":
             if not _has_section(r["body"], "contract"):
                 warns.append(
@@ -1679,7 +1711,7 @@ def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
     # extract wrote new files -> reload before locking + mapping
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir)
-    cmd_check(reqs, members, reqs_dir, update_lock=True)
+    cmd_check(reqs, members, reqs_dir, update_lock=True, code_root=code_root)
     cmd_map(reqs, members, reqs_dir, code_root)
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
@@ -2272,7 +2304,7 @@ def main():
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root)
         if a.update_lock:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc

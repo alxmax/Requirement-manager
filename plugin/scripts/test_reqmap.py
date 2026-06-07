@@ -1736,5 +1736,33 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         self.assertIn("0/100", out)
 
 
+class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
+    def test_link_problem_missing_file(self):
+        self.assertIn("does not exist", R._test_link_problem("/no/such/file_xyz.py"))
+
+    def test_link_problem_real_test_file(self):
+        self.assertEqual("", R._test_link_problem(__file__))   # this file has def test_
+
+    def test_link_problem_testless_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "notests.py")
+            _write(p, "def helper():\n    return 1\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_check_warns_warn_only_on_broken_link(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = {"REQ-A-001": {"meta": {"status": "confirmed", "layer": "feature"},
+                                  "body": "# T\n", "path": os.path.join(d, "REQ-A-001.md")}}
+            members = {"REQ-A-001": [("implements", "src/foo.py", 1),
+                                     ("tested-by", "tests/missing_test.py", 2)]}
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            out = buf.getvalue()
+            self.assertEqual(code, 0)                              # warn-only -> still passes
+            self.assertIn("tested-by tests/missing_test.py", out)
+            self.assertIn("does not exist", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

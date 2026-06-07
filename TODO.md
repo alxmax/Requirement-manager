@@ -16,3 +16,7 @@
 - [ ] promote-todo command               | lane: feature
 - [ ] Gate validation for milestone IDs  | lane: ops
 - [ ] Requirement quality checker (AI)   | lane: feature
+
+## v1.15
+- [x] Test-link integrity gate check (testlink) | lane: ops
+- [ ] Scan cache + check --since (perf)   | lane: ops
