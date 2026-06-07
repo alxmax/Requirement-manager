@@ -10,7 +10,14 @@ Subcommands:
   map               generate requirements/_map.md (Mermaid) + _map.json (graph)
   export            emit the registry graph as requirements/_map.json (for a front-end)
   next              terminal 'what should I do next': counted, actionable risk buckets
+  lint [--strict]   readability/structure check on non-draft requirements (warn; --strict fails on errors)
+  show <ID>         consolidated dossier for one requirement (contract, deps, members, risk)
+  similar [--threshold T]  flag requirement pairs with overlapping contracts (TF-IDF cosine)
+  health [--json]   corpus coherence score + component counts (--json for a CI badge)
   extract           draft requirements from legacy code (status: draft, risk-scored)
+  candidates        read-only JSON capability-extraction plan (writes no .md)
+  findings          aggregate open verify-intent items into requirements/_findings.md
+  promote <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
@@ -64,7 +71,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-07.1"
+MAP_ENGINE_VERSION = "2026-06-07.2"
 
 
 # ---------- parsing ----------
@@ -204,6 +211,15 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
 
 
 # ---------- hashing / drift ----------
+# A normative section heading: the canonical `## WHAT — Contract …` / `## HOW —
+# Acceptance …`, or a legacy bare `## Contract`/`## Acceptance`/`## Input`/`## Output`.
+# Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
+# prefix), NOT anywhere in the heading — otherwise a commentary heading like
+# `## Notes — contract caveats` would leak into the drift hash.
+_NORMATIVE_HEADING_RE = re.compile(
+    r"^##\s+(?:(?:what|how)\s*[—–-]\s*)?(?:contract|acceptan|input|output)", re.I)
+
+
 def binding_hash(body):  # implements: CORE-DRIFT-003
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
@@ -213,7 +229,7 @@ def binding_hash(body):  # implements: CORE-DRIFT-003
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = any(s in h for s in ("contract", "acceptan", "input", "output"))
+            grab = bool(_NORMATIVE_HEADING_RE.match(h))
             continue
         if grab and line.strip():
             keep.append(line.strip())
@@ -230,8 +246,11 @@ def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
         try:
             with open(p, encoding="utf-8") as f:
                 return json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return {}  # empty / corrupt / merge-conflicted lock: treat as no lock
+        except (ValueError, OSError):
+            # empty / corrupt / merge-conflicted / non-UTF-8 lock: treat as no lock.
+            # ValueError covers both json.JSONDecodeError and UnicodeDecodeError, so
+            # a binary-garbage lock fails open here instead of crashing the gate.
+            return {}
     return {}
 
 
@@ -291,11 +310,18 @@ def warn_if_stale():  # implements: REQ-CHECK-006
         return
 
 
-# A test function across the scanned languages: Python `def test...(`, JS/TS
-# `function test...(`, or a Jest/Mocha `it(` / `test(` call. Used only to confirm a
-# tested-by file actually holds tests — not to count or map them.
-_TEST_FN_RE = re.compile(
-    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|\b(?:it|test)\s*\(", re.IGNORECASE)
+# Unambiguous test markers, trusted in ANY file: Python `def test…(`, JS/TS
+# `function test…(`, Go `func TestX/Benchmark/Example/Fuzz(`, Rust `#[test]` /
+# `#[tokio::test]`. Used only to confirm a tested-by file holds tests — not to count.
+_DEF_TEST_RE = re.compile(
+    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|"
+    r"func\s+(?:Test|Benchmark|Example|Fuzz)\w*\s*\(|"
+    r"#\[\s*(?:[\w:]+::)?test\b", re.IGNORECASE)
+# The bare Jest/Mocha `it(` / `test(` call is too common a word to trust in prose or
+# config (e.g. "it (the parser) returns None" in a .md), so it is honored ONLY in a
+# JS/TS source file, where it is a genuine test idiom.
+_CALL_TEST_RE = re.compile(r"\b(?:it|test)\s*\(", re.IGNORECASE)
+_CALL_TEST_EXTS = (".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs")
 
 
 def _test_link_problem(path):  # implements: REQ-TESTLINK-018
@@ -311,9 +337,11 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
             src = f.read()
     except OSError:
         return "is unreadable"
-    if not _TEST_FN_RE.search(src):
-        return "contains no test function (def test.../function test.../it(/test()"
-    return ""
+    if _DEF_TEST_RE.search(src):
+        return ""
+    if path.lower().endswith(_CALL_TEST_EXTS) and _CALL_TEST_RE.search(src):
+        return ""
+    return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
 def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implements: REQ-CHECK-006
@@ -368,7 +396,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
         try:
             with open(lp, encoding="utf-8") as f:
                 json.load(f)
-        except (json.JSONDecodeError, OSError):
+        except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
             warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
     new_lock = {}
@@ -1291,25 +1319,28 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 
 
 def _lint_prose(body, name):  # implements: REQ-LINT-014
-    """Yield the prose text lines under the first `## ` heading whose text contains
-    `name`, up to the next `## `. A bullet's leading `-` is stripped so its text is
+    """Yield the prose text lines under the FIRST `## ` heading whose text contains
+    `name`, up to the next `## `. A bullet's leading `- ` is stripped so its text is
     linted as a sentence. Non-prose lines — headings, table rows, blockquotes, and
     anything inside a ``` fence — are skipped so the linter never flags code or
-    markup as unreadable."""
-    out, grab, fenced = [], False, False
+    markup as unreadable. Fence state is tracked BEFORE heading detection, so a
+    `## ` comment inside a fenced block is treated as code, not a section boundary."""
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
-        if s.startswith("## "):
-            grab = name in s.lower()
-            continue
-        if not grab:
-            continue
-        if s.startswith("```"):
+        if s.startswith("```"):          # fence first: an in-fence `## ` is code, not a heading
             fenced = not fenced
             continue
-        if fenced or not s or s.startswith(("|", ">", "#")):
+        if fenced:
             continue
-        if s.startswith("-"):
+        if s.startswith("## "):
+            grab = (not seen) and (name in s.lower())   # first matching section only
+            if grab:
+                seen = True
+            continue
+        if not grab or not s or s.startswith(("|", ">", "#")):
+            continue
+        if s == "-" or s.startswith("- "):   # a real bullet marker (not '--strict' / '-5')
             s = s[1:].strip()
         if s:
             out.append(s)
@@ -1406,10 +1437,19 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    for line in body.splitlines():          # intent: first blockquote under the title
-        if line.strip().startswith(">"):
-            print("  " + line.strip().lstrip(">").strip())
-            break
+    in_fence = False
+    for line in body.splitlines():          # intent: first non-empty blockquote, outside fences
+        s = line.strip()
+        if s.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if s.startswith(">"):
+            content = s.lstrip(">").strip()
+            if content:                     # skip an empty '>' lead line in a multi-line quote
+                print("  " + content)
+                break
 
     contract = _bullets(body, "contract")
     print("\nContract:")
@@ -1500,21 +1540,35 @@ def _tfidf(docs):  # implements: REQ-SIMILAR-016
 
 
 def _cosine(a, b):  # implements: REQ-SIMILAR-016
-    """Cosine similarity of two {term: weight} vectors, in [0, 1]."""
+    """Cosine similarity of two {term: weight} vectors, in [0, 1]. The result is
+    clamped to 1.0 because floating-point rounding can push parallel vectors a hair
+    over 1.0 (e.g. 1.0000000000000002), which would break the documented range."""
     if not a or not b:
         return 0.0
     dot = sum(a[t] * b[t] for t in set(a) & set(b))
     na = math.sqrt(sum(v * v for v in a.values()))
     nb = math.sqrt(sum(v * v for v in b.values()))
-    return dot / (na * nb) if na and nb else 0.0
+    return min(1.0, dot / (na * nb)) if na and nb else 0.0
+
+
+def _threshold_arg(v):  # implements: REQ-SIMILAR-016
+    """argparse type for `--threshold`: a finite number in (0, 1]. Rejects nan/inf
+    (which silently swallow or admit every pair under `>=`) and out-of-range cutoffs."""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        raise argparse.ArgumentTypeError("threshold must be a number")
+    if not math.isfinite(f) or not (0.0 < f <= 1.0):
+        raise argparse.ArgumentTypeError("threshold must be a finite number in (0, 1]")
+    return f
 
 
 def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-016
-    """Report requirement pairs whose contracts overlap above `threshold` (cosine
-    over TF-IDF of title + intent + Contract), most-similar-first, so a human can
-    spot a probable duplicate or a capability that should be merged. Read-only and
+    """Report requirement pairs whose contracts overlap at or above `threshold`
+    (cosine over TF-IDF of title + intent + Contract), most-similar-first, so a human
+    can spot a probable duplicate or a capability that should be merged. Read-only and
     always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
-    does not inflate the score."""
+    does not inflate the score. Callers pass a validated threshold in (0, 1]."""
     docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
     docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
     if len(docs) < 2:
@@ -1528,14 +1582,14 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
             s = _cosine(vecs[ids[i]], vecs[ids[j]])
             if s >= threshold:
                 shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
-                                key=lambda t: -(vecs[ids[i]][t] + vecs[ids[j]][t]))[:5]
+                                key=lambda t: (-(vecs[ids[i]][t] + vecs[ids[j]][t]), t))[:5]
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
     if not pairs:
-        print("No overlapping requirement pairs above {:.2f}. {} requirement(s) compared.".format(
+        print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared.".format(
             threshold, len(docs)))
         return 0
-    print("{} probable-duplicate pair(s) above {:.2f} (of {} requirement(s)):\n".format(
+    print("{} probable-duplicate pair(s) at or above {:.2f} (of {} requirement(s)):\n".format(
         len(pairs), threshold, len(docs)))
     for s, a, b, shared in pairs:
         print("  {:.2f}  {}  <->  {}".format(s, a, b))
@@ -1778,11 +1832,13 @@ def _first_quote(body):  # implements: REQ-MAP-007
 
 
 def _section(body, name):  # implements: REQ-MAP-007
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and line.strip() and not line.strip().startswith("<!--"):
             out.append(line.strip().lstrip("- "))
@@ -1792,11 +1848,13 @@ def _section(body, name):  # implements: REQ-MAP-007
 def _section_raw(body, name):  # implements: REQ-MAP-007
     """Like _section but preserves line breaks + indentation — used for the
     multi-line Given/When/Then acceptance blocks so they read as written."""
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and not line.strip().startswith("<!--"):
             out.append(line.rstrip())
@@ -1804,11 +1862,13 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
 
 
 def _bullets(body, name):  # implements: REQ-MAP-007
-    out, grab = [], False
+    out, grab, seen = [], False, False
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = name in h
+            grab = (not seen) and (name in h)   # first matching section only
+            if grab:
+                seen = True
             continue
         if grab and line.strip().startswith("-"):
             out.append(line.strip()[1:].strip())
@@ -1992,14 +2052,18 @@ def _member_roles(members):
 
 def _risk_signals(node):
     signals = []
-    if node["status"] == "confirmed" and not node["members"]:
+    # 'unimplemented' must mirror the gate, which errors when an ENFORCED requirement
+    # has no `implements:` member (a `tested-by`-only member must not satisfy it).
+    # Keying on the implements ROLE (not raw member-list emptiness) keeps next/show/
+    # the Risk map agreeing with `check`.
+    roles = _member_roles(node.get("members"))
+    if node["status"] in ENFORCED and "implements" not in roles:
         signals.append("unimplemented")
     if node["status"] in ("draft", "baseline"):
         signals.append("unreviewed")
     # implemented-but-untested: has hand-written code linked but no acceptance test.
     # Gated on an implements member so not-yet-built drafts (already 'unreviewed')
     # are not double-flagged. Opt out per requirement with `test_exempt: <reason>`.
-    roles = _member_roles(node.get("members"))
     if "implements" in roles and "tested-by" not in roles and not node.get("test_exempt"):
         signals.append("untested")
     # open verify-intent questions reconstructed from code — surface them on the map,
@@ -2260,8 +2324,8 @@ def main():
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--strict", action="store_true",
                     help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
-    ap.add_argument("--threshold", type=float, default=None,
-                    help="similar: cosine cutoff for reporting a pair (default 0.35)")
+    ap.add_argument("--threshold", type=_threshold_arg, default=None,
+                    help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="health: emit the snapshot as a JSON object (for a CI badge)")
     ap.add_argument("--update-lock", action="store_true")

@@ -87,7 +87,7 @@ class Gate(unittest.TestCase):
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_bare_scalar_depends_on_no_percharacter_errors(self):  # bug #5  tested-by: REQ-CHECK-006
@@ -106,6 +106,9 @@ class Gate(unittest.TestCase):
             self.assertEqual(R.load_lock(d), {})
             _write(os.path.join(d, "_reqlock.json"), "{not json")  # garbage
             self.assertEqual(R.load_lock(d), {})
+            with open(os.path.join(d, "_reqlock.json"), "wb") as f:
+                f.write(b'{"A": "\xff\xfe\x80"}')               # non-UTF-8 / binary
+            self.assertEqual(R.load_lock(d), {})                # must fail open, not crash
 
     def test_update_lock_missing_dir_no_crash(self):  # bug #13
         with tempfile.TemporaryDirectory() as d:
@@ -124,6 +127,11 @@ class Gate(unittest.TestCase):
         self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("shall do X", "shall do Y")))
         # changing an acceptance criterion MUST change it
         self.assertNotEqual(R.binding_hash(base), R.binding_hash(base.replace("X holds", "Y holds")))
+        # a commentary heading that merely CONTAINS a normative keyword must NOT leak in
+        trap = base + "\n## Notes — contract caveats\n- not normative.\n"
+        self.assertEqual(R.binding_hash(base), R.binding_hash(trap))
+        # ...and editing that non-normative section must not trip drift
+        self.assertEqual(R.binding_hash(trap), R.binding_hash(trap.replace("not normative", "EDITED")))
 
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
@@ -849,7 +857,7 @@ class GateErrors(unittest.TestCase):  # tested-by: REQ-CHECK-006
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_invalid_status_errors_and_exits_nonzero(self):  # bug: gate-never-asserted-to-fail
@@ -1062,7 +1070,7 @@ class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_check(reqs, members, d, False)
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
     def test_summary_reports_confirmed_count(self):
@@ -1118,6 +1126,20 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_unverified_intent_ignores_none_placeholder(self):  # mirror collect_findings
         n = self._node(verify=["None — prompt is unambiguous."])
         self.assertNotIn("unverified-intent", R._risk_signals(n))
+
+    def test_unimplemented_uses_implements_role_not_raw_members(self):  # bug-hunt #8
+        # confirmed with ONLY a tested-by member (no implements) must flag 'unimplemented',
+        # mirroring the gate which errors on a confirmed req lacking an implements: tag
+        n = self._node(status="confirmed", members=[{"role": "tested-by", "loc": "t.py:1"}])
+        self.assertIn("unimplemented", R._risk_signals(n))
+        # with an implements member it must NOT flag unimplemented
+        ok = self._node(status="confirmed", members=[{"role": "implements", "loc": "x.py:1"}])
+        self.assertNotIn("unimplemented", R._risk_signals(ok))
+
+    def test_bullets_grabs_first_matching_section_only(self):  # bug-hunt #1
+        body = ("# T\n\n## WHAT — Contract\n- real.\n\n"
+                "## Notes — contract caveats\n- not normative.\n")
+        self.assertEqual(R._bullets(body, "contract"), ["real."])
 
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
@@ -1600,6 +1622,24 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
         self.assertFalse(any(f["check"] == "long-sentence" for f in fs))
 
+    def test_in_fence_heading_does_not_disable_linter(self):  # bug-hunt #10/#14
+        # a '## ' comment INSIDE a fence must not be read as a heading and silently
+        # disable the linter for the rest of the section
+        long_sent = " ".join(["word"] * 50) + "."
+        accept = "```\n## not a heading\n```\n" + long_sent + "\n"
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertTrue(any(f["check"] == "long-sentence" for f in fs))
+
+    def test_lint_prose_first_section_only(self):  # bug-hunt #1
+        long_sent = " ".join(["word"] * 50) + "."
+        body = ("# T\n\n## WHAT — Contract\n- short.\n\n"
+                "## Notes — contract addendum\n- " + long_sent + "\n")
+        self.assertEqual(R._lint_prose(body, "contract"), ["short."])
+
+    def test_lint_prose_keeps_option_flag_hyphen(self):  # bug-hunt #13
+        body = "## WHAT — Contract\n--strict makes it fail.\n"
+        self.assertEqual(R._lint_prose(body, "contract"), ["--strict makes it fail."])
+
     def test_strict_zero_on_warnings_only(self):
         long_sent = " ".join(["word"] * 40) + "."
         reqs = {"REQ-X-001": self._req("confirmed", self._body(contract="- " + long_sent + "\n"))}
@@ -1656,6 +1696,17 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         self.assertIn("magic constant", out)
         self.assertNotIn("None — doc is unambiguous", out)
 
+    def test_intent_skips_fenced_blockquote(self):  # bug-hunt #2
+        body = "# T\n\n## WHAT — Contract\n```\n> not the intent\n```\n\n> The real intent.\n"
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("The real intent.", out)
+        self.assertNotIn("not the intent", out)
+
+    def test_intent_skips_empty_blockquote_line(self):  # bug-hunt #11
+        body = "# T\n>\n> The real intent.\n\n## WHAT — Contract\n- x.\n"
+        _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
+        self.assertIn("The real intent.", out)
+
 
 class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
     def _sim(self, reqs, threshold=0.35):
@@ -1669,13 +1720,37 @@ class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
             t=title, c=contract)}
 
     def test_near_identical_pair_reported(self):
+        # DISTINCT titles so only the Contract text overlaps — this forces the match
+        # through the contract path AC-1 names (bug-hunt #8: identical titles let a
+        # contract-dropping mutation survive)
         c = "validate user input and reject malformed payloads from the client"
-        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Validator", c)}
+        reqs = {"REQ-A-001": self._req("Validator", c), "REQ-B-002": self._req("Checker", c)}
         code, out = self._sim(reqs, 0.35)
         self.assertEqual(code, 0)
         self.assertIn("REQ-A-001", out)
         self.assertIn("REQ-B-002", out)
         self.assertIn("<->", out)
+
+    def test_cosine_clamped_to_one(self):  # bug-hunt #16
+        v = R._tfidf({"a": ["foo", "bar", "foo", "baz"]})["a"]
+        self.assertLessEqual(R._cosine(v, v), 1.0)
+
+    def test_threshold_arg_rejects_bad_values(self):  # bug-hunt #3/#4
+        import argparse as _ap
+        for bad in ("nan", "inf", "0", "-1", "2", "abc"):
+            with self.assertRaises(_ap.ArgumentTypeError):
+                R._threshold_arg(bad)
+        self.assertEqual(R._threshold_arg("0.35"), 0.35)
+
+    def test_shared_terms_deterministic_on_weight_ties(self):  # bug-hunt #15
+        # identical contracts -> every shared term ties on weight; the tiebreaker
+        # must make the printed shared-terms list deterministic (alphabetical)
+        c = "alpha bravo charlie delta echo foxtrot golf hotel"
+        reqs = {"REQ-A-001": self._req("Aaa", c), "REQ-B-002": self._req("Bbb", c)}
+        _, out = self._sim(reqs, 0.1)
+        line = [ln for ln in out.splitlines() if "shared terms:" in ln][0]
+        terms = line.split("shared terms:")[1].strip().split(", ")
+        self.assertEqual(terms, sorted(terms))
 
     def test_unrelated_not_reported(self):
         reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
@@ -1717,12 +1792,25 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         _, out = self._health(reqs, {})
         self.assertIn("0/100", out)
 
-    def test_json_has_score_and_total(self):
+    def test_json_has_all_component_fields(self):  # bug-hunt #18: assert every emitted key
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
-        obj = json.loads(out)
-        self.assertEqual(obj["score"], 100)
-        self.assertEqual(obj["total"], 1)
+        self.assertEqual(json.loads(out), {
+            "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
+            "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0})
+
+    def test_drift_drops_out_of_green(self):  # bug-hunt #18: exercise the drift axis
+        reqs = {"REQ-A-001": self._green()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_reqlock.json"), '{"REQ-A-001": "staleHASH0000"}')
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(reqs, members, d, as_json=True)
+            obj = json.loads(buf.getvalue())
+        self.assertEqual(obj["drift"], 1)
+        self.assertEqual(obj["healthy"], 0)
+        self.assertLess(obj["score"], 100)
 
     def test_orphan_not_green(self):
         # confirmed but no implements member -> orphan, drops out of green
@@ -1748,6 +1836,30 @@ class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
             p = os.path.join(d, "notests.py")
             _write(p, "def helper():\n    return 1\n")
             self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_prose_it_call_is_not_a_test(self):  # bug-hunt #6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "spec.md")
+            _write(p, "The engine scans files; it (the parser) returns None.\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_js_it_call_is_a_test(self):  # bug-hunt #6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "spec.test.js")
+            _write(p, "it('works', () => { expect(1).toBe(1); });\n")
+            self.assertEqual("", R._test_link_problem(p))
+
+    def test_go_test_func_recognized(self):  # bug-hunt #21
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "scan_test.go")
+            _write(p, 'package main\nimport "testing"\nfunc TestScan(t *testing.T) {}\n')
+            self.assertEqual("", R._test_link_problem(p))
+
+    def test_rust_test_attr_recognized(self):  # bug-hunt #21
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "lib.rs")
+            _write(p, "#[cfg(test)]\nmod t {\n  #[test]\n  fn checks() {}\n}\n")
+            self.assertEqual("", R._test_link_problem(p))
 
     def test_check_warns_warn_only_on_broken_link(self):
         with tempfile.TemporaryDirectory() as d:
