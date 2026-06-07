@@ -1824,6 +1824,30 @@ class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
             _write(p, "def helper():\n    return 1\n")
             self.assertIn("no test function", R._test_link_problem(p))
 
+    def test_prose_it_call_is_not_a_test(self):  # bug-hunt #6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "spec.md")
+            _write(p, "The engine scans files; it (the parser) returns None.\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+    def test_js_it_call_is_a_test(self):  # bug-hunt #6
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "spec.test.js")
+            _write(p, "it('works', () => { expect(1).toBe(1); });\n")
+            self.assertEqual("", R._test_link_problem(p))
+
+    def test_go_test_func_recognized(self):  # bug-hunt #21
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "scan_test.go")
+            _write(p, 'package main\nimport "testing"\nfunc TestScan(t *testing.T) {}\n')
+            self.assertEqual("", R._test_link_problem(p))
+
+    def test_rust_test_attr_recognized(self):  # bug-hunt #21
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "lib.rs")
+            _write(p, "#[cfg(test)]\nmod t {\n  #[test]\n  fn checks() {}\n}\n")
+            self.assertEqual("", R._test_link_problem(p))
+
     def test_check_warns_warn_only_on_broken_link(self):
         with tempfile.TemporaryDirectory() as d:
             reqs = {"REQ-A-001": {"meta": {"status": "confirmed", "layer": "feature"},

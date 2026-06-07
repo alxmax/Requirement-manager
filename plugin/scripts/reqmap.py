@@ -303,11 +303,18 @@ def warn_if_stale():  # implements: REQ-CHECK-006
         return
 
 
-# A test function across the scanned languages: Python `def test...(`, JS/TS
-# `function test...(`, or a Jest/Mocha `it(` / `test(` call. Used only to confirm a
-# tested-by file actually holds tests — not to count or map them.
-_TEST_FN_RE = re.compile(
-    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|\b(?:it|test)\s*\(", re.IGNORECASE)
+# Unambiguous test markers, trusted in ANY file: Python `def test…(`, JS/TS
+# `function test…(`, Go `func TestX/Benchmark/Example/Fuzz(`, Rust `#[test]` /
+# `#[tokio::test]`. Used only to confirm a tested-by file holds tests — not to count.
+_DEF_TEST_RE = re.compile(
+    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|"
+    r"func\s+(?:Test|Benchmark|Example|Fuzz)\w*\s*\(|"
+    r"#\[\s*(?:[\w:]+::)?test\b", re.IGNORECASE)
+# The bare Jest/Mocha `it(` / `test(` call is too common a word to trust in prose or
+# config (e.g. "it (the parser) returns None" in a .md), so it is honored ONLY in a
+# JS/TS source file, where it is a genuine test idiom.
+_CALL_TEST_RE = re.compile(r"\b(?:it|test)\s*\(", re.IGNORECASE)
+_CALL_TEST_EXTS = (".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs")
 
 
 def _test_link_problem(path):  # implements: REQ-TESTLINK-018
@@ -323,9 +330,11 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
             src = f.read()
     except OSError:
         return "is unreadable"
-    if not _TEST_FN_RE.search(src):
-        return "contains no test function (def test.../function test.../it(/test()"
-    return ""
+    if _DEF_TEST_RE.search(src):
+        return ""
+    if path.lower().endswith(_CALL_TEST_EXTS) and _CALL_TEST_RE.search(src):
+        return ""
+    return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
 def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implements: REQ-CHECK-006
