@@ -29,6 +29,11 @@ ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
 # `x-implements:` from being picked up as a real `implements:` tag
 TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
+# Per-acceptance-criterion coverage tag, placed in a test: `# verifies: REQ-X#AC-1`.
+# Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
+# "Verifiable" becomes machine-checked per criterion, not just per requirement. The
+# `#AC-N` suffix is what distinguishes it from a plain requirement reference.
+AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
@@ -42,7 +47,7 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
                      "SKILL.md", "TODO.md", "CHANGELOG.md"}
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
-VALID_LAYER = {"bus", "feature"}
+VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
 # depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
@@ -71,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-08"
+MAP_ENGINE_VERSION = "2026-06-09.2"
 
 
 # ---------- parsing ----------
@@ -208,6 +213,53 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
             except OSError:
                 continue
     return members
+
+
+def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
+    """Walk the code for `# verifies: REQ-X#AC-N` tags and return
+    `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
+    covers. Same walk discipline as `scan_members` (respects .reqmapignore, prunes
+    .git/node_modules). Empty when no `verifies:` tag exists anywhere."""
+    cover = {}  # cap_id -> {ac_label -> [(file, line)]}
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        for fn in files:
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    for i, line in enumerate(f, 1):
+                        for cap, ac in AC_VERIFY_RE.findall(line):
+                            cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+            except OSError:
+                continue
+    return cover
+
+
+def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
+    """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
+    Empty when the requirement writes bullet ACs without labels — per-AC coverage
+    only applies to requirements that label their criteria, so unlabelled ones are
+    silently exempt (no false 'unverified' warning)."""
+    out, grab, seen = [], False, False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.lower().startswith("## "):
+            grab = (not seen) and ("acceptan" in s.lower())
+            if grab:
+                seen = True
+            continue
+        if not grab:
+            continue
+        m = re.match(r"^(AC-\d+)\b", s)
+        if m and m.group(1) not in out:
+            out.append(m.group(1))
+    return out
 
 
 # ---------- hashing / drift ----------
@@ -348,6 +400,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
     errors, warns = [], []
     warn_if_stale()
     cap_ids = set(reqs)
+    ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
+    satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
+    for _rid, _r in reqs.items():
+        for _up in _as_list(_r["meta"].get("satisfies")):
+            if _up in satisfied_by:
+                satisfied_by[_up].append(_rid)
 
     for cap, hits in members.items():
         if cap not in cap_ids:
@@ -362,11 +420,20 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
         for dep in _as_list(m.get("depends_on")):
             if dep not in cap_ids:
                 errors.append(f"{rid}: depends_on missing {dep}")
+        # upstream traceability (warn-only): a `satisfies` id should resolve to a real
+        # requirement, but a dangling one is a WARN not an ERROR — an upstream need may
+        # be authored later or live in an external tracker.  # implements: REQ-TRACE-020
+        for up in _as_list(m.get("satisfies")):
+            if up not in cap_ids:
+                warns.append(f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)")
+        # a `need` is a stakeholder requirement: satisfied-by other requirements, not
+        # implemented or tested by code directly — so it is exempt from the code-coverage gates.
+        is_need = m.get("layer") == "need"
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
-        if m.get("status") in ENFORCED and not impls:
+        if m.get("status") in ENFORCED and not impls and not is_need:
             errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
-        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
+        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not is_need:
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
         # behavior-sync (warn-only): a tested-by link must point at a file that
         # exists and actually holds tests, else it asserts coverage it lacks.
@@ -375,6 +442,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
                 problem = _test_link_problem(os.path.join(code_root, fp))
                 if problem:
                     warns.append(f"{rid}: tested-by {fp} {problem}")
+        # per-AC coverage (warn-only): a confirmed requirement that LABELS its criteria
+        # (AC-1, AC-2, ...) should have a `# verifies: <id>#AC-N` tag for each. Only
+        # fires once at least one criterion is covered, so adopting per-AC tagging is
+        # opt-in: a requirement with zero verifies tags keeps the coarse tested-by check.
+        if m.get("status") == "confirmed":  # implements: REQ-ACVERIFY-019
+            labels = _labeled_acs(r["body"])
+            covered = ac_cover.get(rid, {})
+            if labels and covered:
+                for ac in labels:
+                    if ac not in covered:
+                        warns.append(f"{rid}: {ac} has no `# verifies: {rid}#{ac}` tag — criterion unverified")
         if m.get("status") == "confirmed":
             if not _has_section(r["body"], "contract"):
                 warns.append(
@@ -386,6 +464,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
                     f"{rid}: confirmed but missing '## HOW — Acceptance' section — "
                     "add acceptance criteria or drop status back to in-progress"
                 )
+        # reverse upstream traceability (warn-only): a stakeholder `need` that nothing
+        # satisfies is unaddressed — surface it so a need does not silently lack a
+        # requirement that fulfils it.  # implements: REQ-TRACE-020
+        if is_need and m.get("status") in ENFORCED and not satisfied_by.get(rid):
+            warns.append(f"{rid}: need has no requirement that satisfies it (upstream trace unaddressed)")
 
     lock = load_lock(reqs_dir)
     # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
@@ -1119,7 +1202,12 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
         for dep in _as_list(r["meta"].get("depends_on")):
             if dep in used_by:
                 used_by[dep].append(rid)
-    data = {"nodes": [], "edges": []}
+    satisfied_by = {rid: [] for rid in reqs}  # reverse upstream edges  # implements: REQ-TRACE-020
+    for rid, r in reqs.items():
+        for up in _as_list(r["meta"].get("satisfies")):
+            if up in satisfied_by:
+                satisfied_by[up].append(rid)
+    data = {"nodes": [], "edges": [], "upstream_edges": []}
     for rid, r in reqs.items():
         m = r["meta"]
         data["nodes"].append({
@@ -1141,6 +1229,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "desc": _section(r["body"], "description"),
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
+            "satisfies": _as_list(m.get("satisfies")),       # upstream needs this fulfils
+            "satisfied_by": satisfied_by.get(rid, []),       # requirements fulfilling this need
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
             "test_exempt": m.get("test_exempt"),
             "milestone": m.get("milestone"),
@@ -1152,6 +1242,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
             data["edges"].append([rid, dep])
+        for up in _as_list(r["meta"].get("satisfies")):  # implements: REQ-TRACE-020
+            data["upstream_edges"].append([rid, up])
     return data
 
 
@@ -1339,6 +1431,18 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+# Closed list of vague QUALITY words that make a normative bullet un-testable
+# (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
+# and weak modals — they are too often legitimately precise in this domain, and a
+# false positive trains authors to ignore lint. Only words with no testable meaning.
+LINT_VAGUE_TERMS = frozenset({
+    "appropriate", "appropriately", "adequate", "adequately", "sufficient",
+    "sufficiently", "reasonable", "reasonably", "robust", "robustly", "flexible",
+    "efficient", "efficiently", "optimal", "scalable", "performant", "fast", "slow",
+    "quick", "quickly", "easy", "easily", "simple", "user-friendly", "seamless",
+    "seamlessly", "intuitive", "various", "etc",
+})
+_WORD_RE = re.compile(r"[A-Za-z][A-Za-z-]*")
 
 
 def _lint_prose(body, name):  # implements: REQ-LINT-014
@@ -1454,6 +1558,20 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # vague terms (warn): a Contract bullet using a non-testable quality word is
+    # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
+    # backticked identifier is never flagged. One finding per distinct term.
+    seen_vague = set()
+    for ln in _lint_prose(body, "contract"):
+        bare = re.sub(r"`[^`]*`", " ", ln)
+        for w in _WORD_RE.findall(bare):
+            lw = w.lower()
+            if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
+                seen_vague.add(lw)
+                findings.append({
+                    "severity": "warn", "check": "vague-term",
+                    "detail": "vague word '{}' (no testable meaning): {}".format(
+                        w, _clip(ln))})
     return findings
 
 
@@ -1462,8 +1580,8 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
-    ac-count-high (warn). Read-only. Exit-neutral by default; with --strict it
-    exits non-zero on any error-severity finding (warnings never change the exit)."""
+    ac-count-high (warn), vague-term (warn). Read-only. Exit-neutral by default; with
+    --strict it exits non-zero on any error-severity finding (warnings never change exit)."""
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
     errors = warns = 0
@@ -1522,6 +1640,15 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
                         if cap_id in _as_list(rr["meta"].get("depends_on")))
     print("\nDepends on: " + (", ".join(deps) if deps else "(none)"))
     print("Depended on by: " + (", ".join(dependents) if dependents else "(none)"))
+
+    # upstream traceability: only shown when the requirement participates in it,  # implements: REQ-TRACE-020
+    # so requirements that don't use `satisfies` get no extra noise.
+    upstream = _as_list(m.get("satisfies"))
+    satisfiers = sorted(rid for rid, rr in reqs.items()
+                        if cap_id in _as_list(rr["meta"].get("satisfies")))
+    if upstream or satisfiers:
+        print("Satisfies (upstream): " + (", ".join(upstream) if upstream else "(none)"))
+        print("Satisfied by: " + (", ".join(satisfiers) if satisfiers else "(none)"))
 
     mem = members.get(cap_id, [])
     print("\nMembers in code ({}):".format(len(mem)))

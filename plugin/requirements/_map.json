@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-08",
+  "engine_version": "2026-06-09.2",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -40,22 +40,24 @@
         "REQ-CHECK-006",
         "REQ-HEALTH-017"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:223"
+          "loc": "scripts/reqmap.py:275"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:239"
+          "loc": "scripts/reqmap.py:291"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:243"
+          "loc": "scripts/reqmap.py:295"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:257"
+          "loc": "scripts/reqmap.py:309"
         },
         {
           "role": "tested-by",
@@ -116,16 +118,15 @@
         "REQ-PROMOTE-011",
         "REQ-SCAN-005",
         "REQ-SHOW-015",
-        "REQ-SIMILAR-016"
+        "REQ-SIMILAR-016",
+        "REQ-TRACE-020"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:78"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:88"
+          "loc": "scripts/reqmap.py:83"
         },
         {
           "role": "implements",
@@ -133,7 +134,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:133"
+          "loc": "scripts/reqmap.py:98"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:138"
         },
         {
           "role": "tested-by",
@@ -186,6 +191,7 @@
       "desc": "",
       "deps": [],
       "used_by": [
+        "REQ-ACVERIFY-019",
         "REQ-CANDIDATES-009",
         "REQ-CHECK-006",
         "REQ-EXTRACT-008",
@@ -194,18 +200,20 @@
         "REQ-SCAN-005",
         "REQ-SHOW-015"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:149"
+          "loc": "scripts/reqmap.py:154"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:166"
+          "loc": "scripts/reqmap.py:171"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:186"
+          "loc": "scripts/reqmap.py:191"
         },
         {
           "role": "tested-by",
@@ -215,6 +223,115 @@
       "test_exempt": null,
       "milestone": "v1.00",
       "priority": "",
+      "risks": []
+    },
+    {
+      "id": "NEED-SSOT-001",
+      "layer": "need",
+      "status": "confirmed",
+      "area": "NEED",
+      "title": "Stakeholder need — specs and code stay in sync",
+      "intent": "On most projects the \"spec\" lives in someone's head, a stale wiki, or a ticket nobody reads, so over time the code says one thing and the docs say another. The people who own this project need the opposite: a single written source of truth for each capability that the build itself keeps honest. This is the underlying need the whole tool exists to serve — every feature below is here because it fulfils part of it.",
+      "contract": [
+        "The project shall keep a single written source of truth for each capability, living next to the code.",
+        "Drift between a capability's description and its code shall be caught before it ships, not after.",
+        "A reader shall be able to navigate from any capability to the code that implements it and the tests that verify it."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see \"Satisfied by\"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks."
+      ],
+      "current_impl": [
+        "Not implemented by code — a stakeholder need is fulfilled by the requirements that declare `satisfies: NEED-SSOT-001` (the gate, the map, the dossier, and the traceability feature itself)."
+      ],
+      "acc": [
+        "Given a repo where a requirement and its code disagree, when the gate runs, then the build fails.",
+        "Given a confirmed capability, when the gate runs, then it has linked, existing code and tests.",
+        "Given any capability, when a reader runs `show`, then they see its code locations and what depends on it."
+      ],
+      "accept": "- Given a repo where a requirement and its code disagree, when the gate runs, then the build fails.\n- Given a confirmed capability, when the gate runs, then it has linked, existing code and tests.\n- Given any capability, when a reader runs `show`, then they see its code locations and what depends on it.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [
+        "REQ-CHECK-006",
+        "REQ-MAP-007",
+        "REQ-TRACE-020"
+      ],
+      "members": [],
+      "test_exempt": null,
+      "milestone": "v1.00",
+      "priority": "must-have",
+      "risks": [
+        {
+          "signal": "unimplemented",
+          "advice": "Confirmed but no code linked: tag the implementing code `# implements: <ID>`, or drop status back to in-progress/draft until it is built. A confirmed requirement must point to code."
+        }
+      ]
+    },
+    {
+      "id": "REQ-ACVERIFY-019",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Per-criterion test coverage",
+      "intent": "Today the gate can tell you a requirement has *some* test, but not that *each* of its acceptance criteria is actually checked — so a requirement with five criteria and one test looks just as \"covered\" as one with five tests. This links each labelled criterion to the test that verifies it, so the gate can name the exact criterion that nobody tests. Without it, \"Verifiable\" is only true at the whole-requirement level and a half-tested requirement passes silently.",
+      "contract": [
+        "The gate shall scan code for `# verifies: <id>#AC-N` tags and map each tag to the labelled acceptance criterion it covers. This is the per-criterion half of behaviour-sync.",
+        "A `verifies` tag shall be recognized only with an `#AC-N` suffix, so a plain requirement reference is never mistaken for a per-criterion one.",
+        "For a confirmed requirement that labels its criteria (`AC-1`, `AC-2`, ...) and carries at least one `verifies` tag, the gate shall warn for each labelled criterion that has no `verifies` tag.",
+        "A confirmed requirement with no `verifies` tag shall be exempt, so adopting per-criterion tagging stays opt-in and the coarse `tested-by` check still applies.",
+        "A requirement whose criteria are unlabelled bullets shall be exempt, because there is no criterion label to address.",
+        "The check shall be warn-only and shall never change the gate's exit code."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The link asserts a test *exists* for a criterion, not that the test's assertions actually exercise it — same lexical-trust limitation as `tested-by` (REQ-TESTLINK-018).",
+        "A criterion can carry more than one `verifies` tag (several tests for one criterion); the check only asks for at least one."
+      ],
+      "current_impl": [
+        "`scan_ac_verifies`, `_labeled_acs`, `AC_VERIFY_RE` in `reqmap.py`, consumed by `cmd_check` — `scan_ac_verifies` collects `# verifies: <id>#AC-N` tags into `{cap: {AC-N: locations}}`, `_labeled_acs` lists a requirement's labelled criteria, and `cmd_check` warns for each labelled criterion missing from the coverage map (only when the requirement has at least one tag)."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a requirement with labelled AC-1 and AC-2 and a test tagging `# verifies: REQ-X#AC-1`\n  When   the gate runs\n  Then   it warns that AC-2 is unverified and says nothing about AC-1\nAC-2\n  Given  a requirement whose every labelled criterion has a matching `verifies` tag\n  When   the gate runs\n  Then   it adds no per-criterion warning\nAC-3\n  Given  a confirmed requirement with labelled criteria but zero `verifies` tags\n  When   the gate runs\n  Then   it adds no per-criterion warning (per-criterion tagging is opt-in)\nAC-4\n  Given  a confirmed requirement whose criteria are unlabelled bullets\n  When   the gate runs\n  Then   it adds no per-criterion warning",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-CHECK-006",
+        "CORE-SCAN-002"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:218"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:244"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:449"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1981"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.16",
+      "priority": "should-have",
       "risks": []
     },
     {
@@ -256,38 +373,40 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:739"
+          "loc": "scripts/reqmap.py:822"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:773"
+          "loc": "scripts/reqmap.py:856"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:796"
+          "loc": "scripts/reqmap.py:879"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:819"
+          "loc": "scripts/reqmap.py:902"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:836"
+          "loc": "scripts/reqmap.py:919"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:855"
+          "loc": "scripts/reqmap.py:938"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:861"
+          "loc": "scripts/reqmap.py:944"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:886"
+          "loc": "scripts/reqmap.py:969"
         },
         {
           "role": "tested-by",
@@ -362,21 +481,27 @@
         "CORE-DRIFT-003"
       ],
       "used_by": [
+        "REQ-ACVERIFY-019",
         "REQ-INIT-012",
-        "REQ-TESTLINK-018"
+        "REQ-TESTLINK-018",
+        "REQ-TRACE-020"
       ],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:264"
+          "loc": "scripts/reqmap.py:316"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:296"
+          "loc": "scripts/reqmap.py:348"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:347"
+          "loc": "scripts/reqmap.py:399"
         },
         {
           "role": "tested-by",
@@ -466,26 +591,28 @@
       "used_by": [
         "REQ-INIT-012"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:576"
+          "loc": "scripts/reqmap.py:659"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:584"
+          "loc": "scripts/reqmap.py:667"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:609"
+          "loc": "scripts/reqmap.py:692"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:637"
+          "loc": "scripts/reqmap.py:720"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:722"
+          "loc": "scripts/reqmap.py:805"
         },
         {
           "role": "tested-by",
@@ -549,14 +676,16 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:992"
+          "loc": "scripts/reqmap.py:1075"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1079"
+          "loc": "scripts/reqmap.py:1162"
         },
         {
           "role": "tested-by",
@@ -617,14 +746,16 @@
         "CORE-DRIFT-003"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1662"
+          "loc": "scripts/reqmap.py:1789"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1845"
+          "loc": "scripts/test_reqmap.py:1863"
         }
       ],
       "test_exempt": null,
@@ -677,14 +808,16 @@
         "REQ-MAP-007"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1774"
+          "loc": "scripts/reqmap.py:1901"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1803"
+          "loc": "scripts/reqmap.py:1930"
         },
         {
           "role": "tested-by",
@@ -713,6 +846,8 @@
         "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
         "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3).",
         "The `ac-count-high` check (warn) shall flag an Acceptance section holding more than `LINT_AC_MAX` (default 7) criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
+        "The `vague-term` check (warn) shall flag a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words like `appropriate`, `robust`, or `user-friendly`.",
+        "Before the `vague-term` scan, backticked code spans are stripped, and one finding is emitted per distinct term.",
         "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
         "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
         "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
@@ -736,11 +871,12 @@
         "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
         "Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.",
         "Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.",
+        "Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.",
         "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
         "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
         "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
       ],
-      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
       "input": "",
       "output": "",
       "desc": "",
@@ -748,26 +884,28 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1344"
+          "loc": "scripts/reqmap.py:1448"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1373"
+          "loc": "scripts/reqmap.py:1477"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1379"
+          "loc": "scripts/reqmap.py:1483"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1402"
+          "loc": "scripts/reqmap.py:1506"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1460"
+          "loc": "scripts/reqmap.py:1578"
         },
         {
           "role": "tested-by",
@@ -835,58 +973,38 @@
         "REQ-INIT-012",
         "REQ-NEXT-013"
       ],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1114"
+          "loc": "scripts/reqmap.py:1197"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1195"
+          "loc": "scripts/reqmap.py:1287"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1219"
+          "loc": "scripts/reqmap.py:1311"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1855"
+          "loc": "scripts/reqmap.py:1982"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1878"
+          "loc": "scripts/reqmap.py:2005"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1886"
+          "loc": "scripts/reqmap.py:2013"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1909"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1923"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1939"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1985"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1991"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1998"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2035"
+          "loc": "scripts/reqmap.py:2036"
         },
         {
           "role": "implements",
@@ -894,47 +1012,71 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2081"
+          "loc": "scripts/reqmap.py:2066"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2157"
+          "loc": "scripts/reqmap.py:2112"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2205"
+          "loc": "scripts/reqmap.py:2118"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2256"
+          "loc": "scripts/reqmap.py:2125"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2264"
+          "loc": "scripts/reqmap.py:2162"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2295"
+          "loc": "scripts/reqmap.py:2177"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2305"
+          "loc": "scripts/reqmap.py:2208"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2321"
+          "loc": "scripts/reqmap.py:2284"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2345"
+          "loc": "scripts/reqmap.py:2332"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2349"
+          "loc": "scripts/reqmap.py:2383"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2358"
+          "loc": "scripts/reqmap.py:2391"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2422"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2432"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2448"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2472"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2476"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2485"
         },
         {
           "role": "tested-by",
@@ -1009,10 +1151,12 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:506"
+          "loc": "scripts/reqmap.py:589"
         },
         {
           "role": "tested-by",
@@ -1071,14 +1215,16 @@
         "REQ-MAP-007"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1237"
+          "loc": "scripts/reqmap.py:1329"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1250"
+          "loc": "scripts/reqmap.py:1342"
         },
         {
           "role": "tested-by",
@@ -1134,14 +1280,16 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:527"
+          "loc": "scripts/reqmap.py:610"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:542"
+          "loc": "scripts/reqmap.py:625"
         },
         {
           "role": "tested-by",
@@ -1188,10 +1336,12 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:277"
+          "loc": "scripts/reqmap.py:329"
         },
         {
           "role": "tested-by",
@@ -1250,14 +1400,16 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1491"
+          "loc": "scripts/reqmap.py:1609"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1719"
+          "loc": "scripts/test_reqmap.py:1737"
         }
       ],
       "test_exempt": null,
@@ -1308,34 +1460,36 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1564"
+          "loc": "scripts/reqmap.py:1691"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1571"
+          "loc": "scripts/reqmap.py:1698"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1583"
+          "loc": "scripts/reqmap.py:1710"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1601"
+          "loc": "scripts/reqmap.py:1728"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1613"
+          "loc": "scripts/reqmap.py:1740"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1625"
+          "loc": "scripts/reqmap.py:1752"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1783"
+          "loc": "scripts/test_reqmap.py:1801"
         }
       ],
       "test_exempt": null,
@@ -1383,27 +1537,107 @@
         "REQ-CHECK-006"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:327"
+          "loc": "scripts/reqmap.py:379"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:374"
+          "loc": "scripts/reqmap.py:441"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1899"
+          "loc": "scripts/test_reqmap.py:1917"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.15",
       "priority": "",
       "risks": []
+    },
+    {
+      "id": "REQ-TRACE-020",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Upstream traceability",
+      "intent": "A requirement file tells you what a capability does and which code builds it, but not *why it exists* — which stakeholder need it serves. This lets a requirement point upward with a `satisfies:` field, so you can trace from a stakeholder need down to every requirement that fulfils it, and back up from any requirement to the need behind it. Without it, requirements float free of the needs that justify them, and a need can quietly go unaddressed.",
+      "contract": [
+        "A requirement may declare a `satisfies:` frontmatter list of upstream ids (a stakeholder `need`, or a higher-level requirement) that it fulfils.",
+        "The gate shall warn (never error) when a `satisfies:` id resolves to no requirement, because an upstream anchor may be authored later or tracked externally.",
+        "The gate shall warn when a confirmed `need` has no requirement that satisfies it, so an unaddressed stakeholder need is visible.",
+        "The `need` layer shall be exempt from the implements and tested-by checks, because a need is satisfied by other requirements, not implemented or tested by code.",
+        "The dossier (`show`) shall print the upstream ids a requirement satisfies and the requirements that satisfy it, but only when the requirement participates in traceability.",
+        "The map data shall carry `satisfies` and `satisfied_by` per node and a list of upstream edges, so a front-end can draw the trace."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "A dangling `satisfies:` is a warning, not an error, so the field can hold an external reference (a ticket id) that the engine cannot resolve — at the cost of not catching a typo in an internal id.",
+        "Traceability is opt-in: a requirement with no `satisfies:` is never flagged, matching the tool's subtle-guidance philosophy."
+      ],
+      "current_impl": [
+        "`cmd_check` (satisfies validation + need exemptions + orphan-need warn), `cmd_show` (upstream lines), and `_build_map_data` (`satisfies`/`satisfied_by` node fields + `upstream_edges`) in `reqmap.py`, plus `VALID_LAYER` gaining `need`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a requirement with `satisfies: [GHOST-X-999]` and no such requirement\n  When   the gate runs\n  Then   it warns about the dangling upstream trace and does NOT raise an error\nAC-2\n  Given  a confirmed `need` that no requirement satisfies\n  When   the gate runs\n  Then   it warns that the need is unaddressed\nAC-3\n  Given  a confirmed `layer: need` requirement with no implements or tested-by tag\n  When   the gate runs\n  Then   it raises no implements/tested-by finding for that need\nAC-4\n  Given  a requirement that satisfies a need\n  When   `show` runs on either the requirement or the need\n  Then   the upstream/satisfied-by relationship is printed",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "REQ-CHECK-006"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:425"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:469"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1205"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1245"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1644"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:2051"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.17",
+      "priority": "should-have",
+      "risks": []
     }
   ],
   "edges": [
+    [
+      "REQ-ACVERIFY-019",
+      "REQ-CHECK-006"
+    ],
+    [
+      "REQ-ACVERIFY-019",
+      "CORE-SCAN-002"
+    ],
     [
       "REQ-CANDIDATES-009",
       "CORE-SCAN-002"
@@ -1498,6 +1732,14 @@
     ],
     [
       "REQ-TESTLINK-018",
+      "REQ-CHECK-006"
+    ],
+    [
+      "REQ-TRACE-020",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-TRACE-020",
       "REQ-CHECK-006"
     ]
   ],

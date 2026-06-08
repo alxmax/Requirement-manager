@@ -1715,6 +1715,24 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
                 "AC-2\n  Given a\n  When b\n  Then c\n")
         self.assertEqual(R._count_ac(body), 2)
 
+    def test_vague_term_warns(self):
+        body = self._body(contract="- It shall be appropriate and user-friendly.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        vague = [f for f in fs if f["check"] == "vague-term"]
+        self.assertEqual(len(vague), 2)            # 'appropriate' + 'user-friendly'
+        self.assertEqual(vague[0]["severity"], "warn")
+
+    def test_vague_term_skips_code_spans(self):
+        # a backticked identifier that happens to contain a vague word is not flagged
+        body = self._body(contract="- It shall return `fast_path` within the limit.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertFalse(any(f["check"] == "vague-term" for f in fs))
+
+    def test_vague_term_silent_on_precise_bullet(self):
+        body = self._body(contract="- It shall return HTTP 200 within 2 seconds.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertFalse(any(f["check"] == "vague-term" for f in fs))
+
 
 class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
     def _show(self, reqs, members, cap_id):
@@ -1946,6 +1964,176 @@ class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
             self.assertEqual(code, 0)                              # warn-only -> still passes
             self.assertIn("tested-by tests/missing_test.py", out)
             self.assertIn("does not exist", out)
+
+
+_VERIFY_ROLE = "verifies"  # runtime-built so synthetic tags don't pollute the repo scan
+
+
+def v_tag(cap, ac):
+    return "# {}: {}#{}".format(_VERIFY_ROLE, cap, ac)
+
+
+def _ac_body(contract="- It shall do the thing.", acceptance="AC-1\n  Given x\n  When y\n  Then z"):
+    return ("# T\n\n## WHAT — Contract (normative)\n{}\n\n"
+            "## HOW — Acceptance (= tests)\n{}\n".format(contract, acceptance))
+
+
+class AcVerify(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019
+    def _check(self, files):
+        with tempfile.TemporaryDirectory() as d:
+            for name, body in files.items():
+                _write(os.path.join(d, name), body)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            return code, buf.getvalue()
+
+    def _req(self, acceptance, impl=True, tested=True):
+        body = "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + \
+               _ac_body(acceptance=acceptance)
+        files = {"A-FOO-001.md": body}
+        code = "x=1\n"
+        if impl:
+            code += "# {}: A-FOO-001\n".format("implements")
+        if tested:
+            code += "# {}: A-FOO-001\ndef test_x():\n    pass\n".format("tested" + "-by")
+        files["mod.py"] = code
+        return files
+
+    def test_scan_ac_verifies_parses_tag(self):  # verifies: REQ-ACVERIFY-019#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "t.py"), v_tag("REQ-X-001", "AC-1") + "\n")
+            cover = R.scan_ac_verifies(d, d)
+            self.assertIn("REQ-X-001", cover)
+            self.assertIn("AC-1", cover["REQ-X-001"])
+
+    def test_scan_ac_verifies_requires_ac_suffix(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "t.py"), "# {}: REQ-X-001\n".format(_VERIFY_ROLE))  # no #AC
+            self.assertEqual(R.scan_ac_verifies(d, d), {})
+
+    def test_labeled_acs_extracts_labels(self):
+        body = _ac_body(acceptance="AC-1\n  Given a\nAC-2\n  Given b")
+        self.assertEqual(R._labeled_acs(body), ["AC-1", "AC-2"])
+
+    def test_labeled_acs_empty_on_bullet_acs(self):
+        body = _ac_body(acceptance="- a bullet criterion.\n- another one.")
+        self.assertEqual(R._labeled_acs(body), [])
+
+    def test_partial_coverage_warns_the_uncovered(self):  # verifies: REQ-ACVERIFY-019#AC-1
+        files = self._req("AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d")
+        files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n"   # only AC-1 covered
+        code, out = self._check(files)
+        self.assertIn("AC-2 has no", out)
+        self.assertNotIn("AC-1 has no", out)
+        self.assertEqual(code, 0)                              # warn-only
+
+    def test_full_coverage_silent(self):  # verifies: REQ-ACVERIFY-019#AC-2
+        files = self._req("AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d")
+        files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n" + v_tag("A-FOO-001", "AC-2") + "\n"
+        _, out = self._check(files)
+        self.assertNotIn("criterion unverified", out)
+
+    def test_no_verify_tags_is_optin_silent(self):  # verifies: REQ-ACVERIFY-019#AC-3
+        files = self._req("AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d")  # zero verifies tags
+        _, out = self._check(files)
+        self.assertNotIn("criterion unverified", out)
+
+    def test_bullet_acs_exempt(self):  # verifies: REQ-ACVERIFY-019#AC-4
+        files = self._req("- a bullet criterion.\n- another one.")
+        files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n"   # tag present but ACs unlabelled
+        _, out = self._check(files)
+        self.assertNotIn("criterion unverified", out)
+
+
+class Traceability(unittest.TestCase):  # tested-by: REQ-TRACE-020
+    def _check(self, files):
+        with tempfile.TemporaryDirectory() as d:
+            for name, body in files.items():
+                _write(os.path.join(d, name), body)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            return code, buf.getvalue()
+
+    def _feature(self, rid, extra=""):
+        body = REQ.format(id=rid, status="confirmed", layer="feature", extra=extra, title="T")
+        body += ("\n## WHAT — Contract (normative)\n- It shall x.\n\n"
+                 "## HOW — Acceptance (= tests)\n- a.\n")
+        return body
+
+    def test_need_layer_is_valid(self):
+        self.assertIn("need", R.VALID_LAYER)
+
+    def test_dangling_satisfies_warns_not_errors(self):  # verifies: REQ-TRACE-020#AC-1
+        files = {"A-FOO-001.md": self._feature("A-FOO-001", "satisfies: [GHOST-X-999]\n"),
+                 "mod.py": "# {}: A-FOO-001\ndef test_a():\n    pass\n".format("tested" + "-by") +
+                           "# {}: A-FOO-001\n".format("implements")}
+        code, out = self._check(files)
+        self.assertIn("satisfies GHOST-X-999", out)
+        self.assertEqual(code, 0)                              # warn, not error
+
+    def test_orphan_need_warns(self):  # verifies: REQ-TRACE-020#AC-2
+        need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
+        need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+        _, out = self._check({"NEED-X-001.md": need})
+        self.assertIn("need has no requirement that satisfies it", out)
+
+    def test_satisfied_need_not_orphan(self):  # verifies: REQ-TRACE-020#AC-2
+        need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
+        need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+        files = {"NEED-X-001.md": need,
+                 "A-FOO-001.md": self._feature("A-FOO-001", "satisfies: [NEED-X-001]\n"),
+                 "mod.py": "# {}: A-FOO-001\ndef test_a():\n    pass\n".format("tested" + "-by") +
+                           "# {}: A-FOO-001\n".format("implements")}
+        _, out = self._check(files)
+        self.assertNotIn("unaddressed", out)
+        self.assertNotIn("NEED-X-001: need has no", out)
+
+    def test_need_exempt_from_implements_and_tested(self):  # verifies: REQ-TRACE-020#AC-3
+        need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
+        need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+        # satisfied so the orphan warn is silent; assert NO implements/tested-by finding for the need
+        files = {"NEED-X-001.md": need,
+                 "A-FOO-001.md": self._feature("A-FOO-001", "satisfies: [NEED-X-001]\n"),
+                 "mod.py": "# {}: A-FOO-001\ndef test_a():\n    pass\n".format("tested" + "-by") +
+                           "# {}: A-FOO-001\n".format("implements")}
+        code, out = self._check(files)
+        self.assertNotIn("NEED-X-001: status", out)            # no "no implements" error
+        self.assertNotIn("NEED-X-001: confirmed but no tested-by", out)
+        self.assertEqual(code, 0)
+
+    def test_show_prints_upstream_both_directions(self):  # verifies: REQ-TRACE-020#AC-4
+        need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
+        feat = self._feature("A-FOO-001", "satisfies: [NEED-X-001]\n")
+        reqs = {"NEED-X-001": {"meta": {"status": "confirmed", "layer": "need"}, "body": need,
+                               "path": "requirements/NEED-X-001.md"},
+                "A-FOO-001": {"meta": {"status": "confirmed", "layer": "feature",
+                                       "satisfies": ["NEED-X-001"]}, "body": feat,
+                              "path": "requirements/A-FOO-001.md"}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(reqs, {}, "A-FOO-001")
+        self.assertIn("Satisfies (upstream): NEED-X-001", buf.getvalue())
+        buf2 = io.StringIO()
+        with redirect_stdout(buf2):
+            R.cmd_show(reqs, {}, "NEED-X-001")
+        self.assertIn("Satisfied by: A-FOO-001", buf2.getvalue())
+
+    def test_map_data_carries_upstream(self):
+        reqs = {"NEED-X-001": {"meta": {"status": "confirmed", "layer": "need"}, "body": "# N\n"},
+                "A-FOO-001": {"meta": {"status": "confirmed", "layer": "feature",
+                                       "satisfies": ["NEED-X-001"]}, "body": "# T\n"}}
+        data = R._build_map_data(reqs, {})
+        node = next(n for n in data["nodes"] if n["id"] == "A-FOO-001")
+        need = next(n for n in data["nodes"] if n["id"] == "NEED-X-001")
+        self.assertEqual(node["satisfies"], ["NEED-X-001"])
+        self.assertEqual(need["satisfied_by"], ["A-FOO-001"])
+        self.assertIn(["A-FOO-001", "NEED-X-001"], data["upstream_edges"])
 
 
 if __name__ == "__main__":

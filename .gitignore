@@ -15,3 +15,6 @@ docs/superpowers/
 # IEEE 29148 comparison presentations + their generator scripts (local artifacts)
 docs/ieee29148_comparison.*
 docs/before_after_ieee29148.*
+
+# Superpowers session artifacts (top-level)
+.superpowers/

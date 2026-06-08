@@ -44,9 +44,10 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 
 **Single engine file:** `plugin/scripts/reqmap.py` — ~1000 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
-**Two-layer requirement model:**
+**Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
 - `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, check, map, extract, candidates, findings, init, next.
+- `layer: need` — an upstream stakeholder need (`NEED-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `REQ-TRACE-020`).
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
 
@@ -57,7 +58,7 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 ```
 `TAG_RE` in the engine enforces a left-boundary guard so `reimplements:` or `x-implements:` are not picked up as real tags. The member list is discovered by scanning — never hand-maintained.
 
-**Gate logic** (`check`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence — all error-level. Plus a warn-only **test-link integrity** check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync; per-criterion AC mapping is deferred (needs a per-AC tag).
+**Gate logic** (`check`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member), drift (content hash vs `_reqlock.json`), and `depends_on` target existence — all error-level. Plus a warn-only **test-link integrity** check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync. Per-criterion coverage (`REQ-ACVERIFY-019`) is the finer-grained sibling: a `# verifies: <id>#AC-N` tag links one test to one labelled criterion, and the gate warns (warn-only, opt-in) for each labelled `AC-N` left untagged once a requirement carries at least one `verifies` tag.
 
 **Generated outputs** (under `plugin/requirements/`):
 - `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*
