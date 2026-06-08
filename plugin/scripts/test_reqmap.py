@@ -940,6 +940,23 @@ class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
         for ch in "|[]{}`\\":
             self.assertNotIn(ch, out)
 
+    def test_first_quote_single_line(self):
+        self.assertEqual(R._first_quote("# T\n\n> one line why.\n\n## WHAT — Contract\n- x."),
+                         "one line why.")
+
+    def test_first_quote_gathers_multiline_why(self):
+        body = "# T\n\n> why line one\n> why line two\n> why line three\n\n## WHAT — Contract\n- x."
+        self.assertEqual(R._first_quote(body), "why line one why line two why line three")
+
+    def test_first_quote_stops_at_first_block(self):
+        # a later blockquote (e.g. an Example story) must NOT join the intent
+        body = "# T\n\n> the why.\n\n## Example\n> a different story.\n"
+        self.assertEqual(R._first_quote(body), "the why.")
+
+    def test_first_quote_skips_fenced(self):
+        self.assertEqual(R._first_quote("# T\n```\n> not a quote\n```\n> real why.\n"),
+                         "real why.")
+
 
 class CapmapMalformed(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
     def test_corrupt_json_returns_empty(self):  # bug: load-capmap-malformed-untested

@@ -10,7 +10,9 @@ milestone: v1.02
 
 # The gate
 
-> Fail the build when code and requirements have fallen out of sync.
+> Specs rot when the code moves on and nobody updates the file that describes it.
+> This is the guard that catches that: run before every commit, it fails the build when
+> code and requirements no longer match. The whole tool exists so this check can run.
 
 ## WHAT — Contract (normative)
 - It shall report an `ERROR` and exit non-zero for any of: a code tag referencing a
@@ -46,6 +48,14 @@ milestone: v1.02
 - A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.
 - A `confirmed` requirement with both sections present produces no section-lint warning.
 - `--update-lock` writes the current hashes to `requirements/_reqlock.json`.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana tags a function `# implements: AUTH-LOGIN-001`, but there is no such requirement
+  file. She commits. The gate prints `ERROR: dangling tag` and exits non-zero, so the
+  commit is blocked until she either fixes the typo or writes the requirement.
+- Later she edits a confirmed requirement's contract text. Next commit, the gate warns
+  `DRIFT — contract changed since lock`, reminding her to re-check the linked code.
 
 ## WHERE — Current implementation
 - `cmd_check`, `warn_if_stale` in `reqmap.py`.

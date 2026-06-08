@@ -459,7 +459,8 @@ superseded_by:       # <ID>, if replaced
 
 # Short name
 
-> WHY: one line — what this is, in plain language.
+> WHY: 1–3 plain sentences anyone can follow — what this is, why it exists, and
+> what breaks without it. No jargon; this is the angle a non-expert reads first.
 
 ## WHAT — Contract (normative)
 <!-- Audience: a developer new to THIS project. Define project-specific terms inline
@@ -486,6 +487,14 @@ AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
   Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
+
+## Example — in practice (optional, non-binding)
+<!-- A short plain-language story of the feature in use — the angle anyone reads
+     to "get it" fast. NON-BINDING illustration: the Given/When/Then above is the
+     precise version; on any conflict the Contract + Acceptance win. This section is
+     not hashed and not linted, so it never trips drift. -->
+- e.g. Ana marks AUTH-001 confirmed, later edits its contract text; at commit
+  `check` tells her "DRIFT — contract changed since lock" so she re-reviews.
 
 ## WHERE — Current implementation
 - How the code does it today (the volatile narrative — may drift from the contract).
@@ -1497,19 +1506,9 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    in_fence = False
-    for line in body.splitlines():          # intent: first non-empty blockquote, outside fences
-        s = line.strip()
-        if s.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        if s.startswith(">"):
-            content = s.lstrip(">").strip()
-            if content:                     # skip an empty '>' lead line in a multi-line quote
-                print("  " + content)
-                break
+    intent = _first_quote(body)             # the full WHY block, gathered (not just line 1)
+    if intent:
+        print("  " + intent)
 
     contract = _bullets(body, "contract")
     print("\nContract:")
@@ -1885,10 +1884,26 @@ def _title(body):  # implements: REQ-MAP-007
 
 
 def _first_quote(body):  # implements: REQ-MAP-007
+    """The requirement's intent: the FIRST contiguous blockquote (the WHY), joined into
+    one line. A multi-line `>` WHY (a richer plain-language summary) is gathered whole,
+    not truncated to its first line. Fenced code is skipped so a `>` inside a fence
+    never counts."""
+    out, started, in_fence = [], False, False
     for line in body.splitlines():
-        if line.strip().startswith(">"):
-            return line.strip()[1:].strip()
-    return ""
+        s = line.strip()
+        if s.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if s.startswith(">"):
+            content = s.lstrip(">").strip()
+            if content:
+                out.append(content)
+            started = True
+        elif started:            # first non-quote line after the block ends it
+            break
+    return " ".join(out)
 
 
 def _section(body, name):  # implements: REQ-MAP-007

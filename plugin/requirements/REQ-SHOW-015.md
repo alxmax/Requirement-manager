@@ -17,7 +17,7 @@ milestone: v1.14
 - It shall print a header line with the id, status, and layer.
 - When the requirement carries a `priority` field the header shall append it after the layer, and a `milestone` field after that.
 - An absent optional field shall add no empty segment to the header.
-- It shall print the title and the intent line (the first blockquote of the body).
+- It shall print the title and the intent (the first blockquote of the body, gathered whole when the WHY spans several `>` lines, not truncated to the first line).
 - It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.
 - It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).
 - It shall list the code members grouped by role, each with its `file:line`. When no member is tagged, it shall say so.
