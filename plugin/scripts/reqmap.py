@@ -47,7 +47,7 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
                      "SKILL.md", "TODO.md", "CHANGELOG.md"}
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
-VALID_LAYER = {"bus", "feature"}
+VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
 # depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09"
+MAP_ENGINE_VERSION = "2026-06-09.2"
 
 
 # ---------- parsing ----------
@@ -401,6 +401,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
     warn_if_stale()
     cap_ids = set(reqs)
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
+    satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
+    for _rid, _r in reqs.items():
+        for _up in _as_list(_r["meta"].get("satisfies")):
+            if _up in satisfied_by:
+                satisfied_by[_up].append(_rid)
 
     for cap, hits in members.items():
         if cap not in cap_ids:
@@ -415,11 +420,20 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
         for dep in _as_list(m.get("depends_on")):
             if dep not in cap_ids:
                 errors.append(f"{rid}: depends_on missing {dep}")
+        # upstream traceability (warn-only): a `satisfies` id should resolve to a real
+        # requirement, but a dangling one is a WARN not an ERROR — an upstream need may
+        # be authored later or live in an external tracker.  # implements: REQ-TRACE-020
+        for up in _as_list(m.get("satisfies")):
+            if up not in cap_ids:
+                warns.append(f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)")
+        # a `need` is a stakeholder requirement: satisfied-by other requirements, not
+        # implemented or tested by code directly — so it is exempt from the code-coverage gates.
+        is_need = m.get("layer") == "need"
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
-        if m.get("status") in ENFORCED and not impls:
+        if m.get("status") in ENFORCED and not impls and not is_need:
             errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
-        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt"):
+        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not is_need:
             warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
         # behavior-sync (warn-only): a tested-by link must point at a file that
         # exists and actually holds tests, else it asserts coverage it lacks.
@@ -450,6 +464,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
                     f"{rid}: confirmed but missing '## HOW — Acceptance' section — "
                     "add acceptance criteria or drop status back to in-progress"
                 )
+        # reverse upstream traceability (warn-only): a stakeholder `need` that nothing
+        # satisfies is unaddressed — surface it so a need does not silently lack a
+        # requirement that fulfils it.  # implements: REQ-TRACE-020
+        if is_need and m.get("status") in ENFORCED and not satisfied_by.get(rid):
+            warns.append(f"{rid}: need has no requirement that satisfies it (upstream trace unaddressed)")
 
     lock = load_lock(reqs_dir)
     # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
@@ -1183,7 +1202,12 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
         for dep in _as_list(r["meta"].get("depends_on")):
             if dep in used_by:
                 used_by[dep].append(rid)
-    data = {"nodes": [], "edges": []}
+    satisfied_by = {rid: [] for rid in reqs}  # reverse upstream edges  # implements: REQ-TRACE-020
+    for rid, r in reqs.items():
+        for up in _as_list(r["meta"].get("satisfies")):
+            if up in satisfied_by:
+                satisfied_by[up].append(rid)
+    data = {"nodes": [], "edges": [], "upstream_edges": []}
     for rid, r in reqs.items():
         m = r["meta"]
         data["nodes"].append({
@@ -1205,6 +1229,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "desc": _section(r["body"], "description"),
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
+            "satisfies": _as_list(m.get("satisfies")),       # upstream needs this fulfils
+            "satisfied_by": satisfied_by.get(rid, []),       # requirements fulfilling this need
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
             "test_exempt": m.get("test_exempt"),
             "milestone": m.get("milestone"),
@@ -1216,6 +1242,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
             data["edges"].append([rid, dep])
+        for up in _as_list(r["meta"].get("satisfies")):  # implements: REQ-TRACE-020
+            data["upstream_edges"].append([rid, up])
     return data
 
 
@@ -1612,6 +1640,15 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
                         if cap_id in _as_list(rr["meta"].get("depends_on")))
     print("\nDepends on: " + (", ".join(deps) if deps else "(none)"))
     print("Depended on by: " + (", ".join(dependents) if dependents else "(none)"))
+
+    # upstream traceability: only shown when the requirement participates in it,  # implements: REQ-TRACE-020
+    # so requirements that don't use `satisfies` get no extra noise.
+    upstream = _as_list(m.get("satisfies"))
+    satisfiers = sorted(rid for rid, rr in reqs.items()
+                        if cap_id in _as_list(rr["meta"].get("satisfies")))
+    if upstream or satisfiers:
+        print("Satisfies (upstream): " + (", ".join(upstream) if upstream else "(none)"))
+        print("Satisfied by: " + (", ".join(satisfiers) if satisfiers else "(none)"))
 
     mem = members.get(cap_id, [])
     print("\nMembers in code ({}):".format(len(mem)))

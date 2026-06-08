@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-09",
+  "engine_version": "2026-06-09.2",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -40,6 +40,8 @@
         "REQ-CHECK-006",
         "REQ-HEALTH-017"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -116,8 +118,11 @@
         "REQ-PROMOTE-011",
         "REQ-SCAN-005",
         "REQ-SHOW-015",
-        "REQ-SIMILAR-016"
+        "REQ-SIMILAR-016",
+        "REQ-TRACE-020"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -195,6 +200,8 @@
         "REQ-SCAN-005",
         "REQ-SHOW-015"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -217,6 +224,55 @@
       "milestone": "v1.00",
       "priority": "",
       "risks": []
+    },
+    {
+      "id": "NEED-SSOT-001",
+      "layer": "need",
+      "status": "confirmed",
+      "area": "NEED",
+      "title": "Stakeholder need — specs and code stay in sync",
+      "intent": "On most projects the \"spec\" lives in someone's head, a stale wiki, or a ticket nobody reads, so over time the code says one thing and the docs say another. The people who own this project need the opposite: a single written source of truth for each capability that the build itself keeps honest. This is the underlying need the whole tool exists to serve — every feature below is here because it fulfils part of it.",
+      "contract": [
+        "The project shall keep a single written source of truth for each capability, living next to the code.",
+        "Drift between a capability's description and its code shall be caught before it ships, not after.",
+        "A reader shall be able to navigate from any capability to the code that implements it and the tests that verify it."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see \"Satisfied by\"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks."
+      ],
+      "current_impl": [
+        "Not implemented by code — a stakeholder need is fulfilled by the requirements that declare `satisfies: NEED-SSOT-001` (the gate, the map, the dossier, and the traceability feature itself)."
+      ],
+      "acc": [
+        "Given a repo where a requirement and its code disagree, when the gate runs, then the build fails.",
+        "Given a confirmed capability, when the gate runs, then it has linked, existing code and tests.",
+        "Given any capability, when a reader runs `show`, then they see its code locations and what depends on it."
+      ],
+      "accept": "- Given a repo where a requirement and its code disagree, when the gate runs, then the build fails.\n- Given a confirmed capability, when the gate runs, then it has linked, existing code and tests.\n- Given any capability, when a reader runs `show`, then they see its code locations and what depends on it.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [
+        "REQ-CHECK-006",
+        "REQ-MAP-007",
+        "REQ-TRACE-020"
+      ],
+      "members": [],
+      "test_exempt": null,
+      "milestone": "v1.00",
+      "priority": "must-have",
+      "risks": [
+        {
+          "signal": "unimplemented",
+          "advice": "Confirmed but no code linked: tag the implementing code `# implements: <ID>`, or drop status back to in-progress/draft until it is built. A confirmed requirement must point to code."
+        }
+      ]
     },
     {
       "id": "REQ-ACVERIFY-019",
@@ -253,6 +309,8 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -264,7 +322,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:435"
+          "loc": "scripts/reqmap.py:449"
         },
         {
           "role": "tested-by",
@@ -315,26 +373,24 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:803"
+          "loc": "scripts/reqmap.py:822"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:837"
+          "loc": "scripts/reqmap.py:856"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:860"
+          "loc": "scripts/reqmap.py:879"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:883"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:900"
+          "loc": "scripts/reqmap.py:902"
         },
         {
           "role": "implements",
@@ -342,11 +398,15 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:925"
+          "loc": "scripts/reqmap.py:938"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:950"
+          "loc": "scripts/reqmap.py:944"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:969"
         },
         {
           "role": "tested-by",
@@ -423,8 +483,13 @@
       "used_by": [
         "REQ-ACVERIFY-019",
         "REQ-INIT-012",
-        "REQ-TESTLINK-018"
+        "REQ-TESTLINK-018",
+        "REQ-TRACE-020"
       ],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -526,26 +591,28 @@
       "used_by": [
         "REQ-INIT-012"
       ],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:640"
+          "loc": "scripts/reqmap.py:659"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:648"
+          "loc": "scripts/reqmap.py:667"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:673"
+          "loc": "scripts/reqmap.py:692"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:701"
+          "loc": "scripts/reqmap.py:720"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:786"
+          "loc": "scripts/reqmap.py:805"
         },
         {
           "role": "tested-by",
@@ -609,14 +676,16 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1056"
+          "loc": "scripts/reqmap.py:1075"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1143"
+          "loc": "scripts/reqmap.py:1162"
         },
         {
           "role": "tested-by",
@@ -677,10 +746,12 @@
         "CORE-DRIFT-003"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1752"
+          "loc": "scripts/reqmap.py:1789"
         },
         {
           "role": "tested-by",
@@ -737,14 +808,16 @@
         "REQ-MAP-007"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1864"
+          "loc": "scripts/reqmap.py:1901"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1893"
+          "loc": "scripts/reqmap.py:1930"
         },
         {
           "role": "tested-by",
@@ -811,26 +884,28 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1420"
+          "loc": "scripts/reqmap.py:1448"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1449"
+          "loc": "scripts/reqmap.py:1477"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1455"
+          "loc": "scripts/reqmap.py:1483"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1478"
+          "loc": "scripts/reqmap.py:1506"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1550"
+          "loc": "scripts/reqmap.py:1578"
         },
         {
           "role": "tested-by",
@@ -898,34 +973,30 @@
         "REQ-INIT-012",
         "REQ-NEXT-013"
       ],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1178"
+          "loc": "scripts/reqmap.py:1197"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1259"
+          "loc": "scripts/reqmap.py:1287"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1283"
+          "loc": "scripts/reqmap.py:1311"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1945"
+          "loc": "scripts/reqmap.py:1982"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1968"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1976"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1999"
+          "loc": "scripts/reqmap.py:2005"
         },
         {
           "role": "implements",
@@ -933,19 +1004,23 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2029"
+          "loc": "scripts/reqmap.py:2036"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2075"
+          "loc": "scripts/reqmap.py:2050"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2081"
+          "loc": "scripts/reqmap.py:2066"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2088"
+          "loc": "scripts/reqmap.py:2112"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2118"
         },
         {
           "role": "implements",
@@ -953,51 +1028,55 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2140"
+          "loc": "scripts/reqmap.py:2162"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2171"
+          "loc": "scripts/reqmap.py:2177"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2247"
+          "loc": "scripts/reqmap.py:2208"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2295"
+          "loc": "scripts/reqmap.py:2284"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2346"
+          "loc": "scripts/reqmap.py:2332"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2354"
+          "loc": "scripts/reqmap.py:2383"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2385"
+          "loc": "scripts/reqmap.py:2391"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2395"
+          "loc": "scripts/reqmap.py:2422"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2411"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2435"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2439"
+          "loc": "scripts/reqmap.py:2432"
         },
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:2448"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2472"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2476"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2485"
         },
         {
           "role": "tested-by",
@@ -1072,10 +1151,12 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:570"
+          "loc": "scripts/reqmap.py:589"
         },
         {
           "role": "tested-by",
@@ -1134,14 +1215,16 @@
         "REQ-MAP-007"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1301"
+          "loc": "scripts/reqmap.py:1329"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1314"
+          "loc": "scripts/reqmap.py:1342"
         },
         {
           "role": "tested-by",
@@ -1197,14 +1280,16 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:591"
+          "loc": "scripts/reqmap.py:610"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:606"
+          "loc": "scripts/reqmap.py:625"
         },
         {
           "role": "tested-by",
@@ -1251,6 +1336,8 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -1313,10 +1400,12 @@
         "CORE-SCAN-002"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1581"
+          "loc": "scripts/reqmap.py:1609"
         },
         {
           "role": "tested-by",
@@ -1371,30 +1460,32 @@
         "CORE-PARSE-001"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1654"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1661"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1673"
-        },
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:1691"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1703"
+          "loc": "scripts/reqmap.py:1698"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1715"
+          "loc": "scripts/reqmap.py:1710"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1728"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1740"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1752"
         },
         {
           "role": "tested-by",
@@ -1446,6 +1537,8 @@
         "REQ-CHECK-006"
       ],
       "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
       "members": [
         {
           "role": "implements",
@@ -1453,7 +1546,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:427"
+          "loc": "scripts/reqmap.py:441"
         },
         {
           "role": "tested-by",
@@ -1463,6 +1556,76 @@
       "test_exempt": null,
       "milestone": "v1.15",
       "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-TRACE-020",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Upstream traceability",
+      "intent": "A requirement file tells you what a capability does and which code builds it, but not *why it exists* — which stakeholder need it serves. This lets a requirement point upward with a `satisfies:` field, so you can trace from a stakeholder need down to every requirement that fulfils it, and back up from any requirement to the need behind it. Without it, requirements float free of the needs that justify them, and a need can quietly go unaddressed.",
+      "contract": [
+        "A requirement may declare a `satisfies:` frontmatter list of upstream ids (a stakeholder `need`, or a higher-level requirement) that it fulfils.",
+        "The gate shall warn (never error) when a `satisfies:` id resolves to no requirement, because an upstream anchor may be authored later or tracked externally.",
+        "The gate shall warn when a confirmed `need` has no requirement that satisfies it, so an unaddressed stakeholder need is visible.",
+        "The `need` layer shall be exempt from the implements and tested-by checks, because a need is satisfied by other requirements, not implemented or tested by code.",
+        "The dossier (`show`) shall print the upstream ids a requirement satisfies and the requirements that satisfy it, but only when the requirement participates in traceability.",
+        "The map data shall carry `satisfies` and `satisfied_by` per node and a list of upstream edges, so a front-end can draw the trace."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "A dangling `satisfies:` is a warning, not an error, so the field can hold an external reference (a ticket id) that the engine cannot resolve — at the cost of not catching a typo in an internal id.",
+        "Traceability is opt-in: a requirement with no `satisfies:` is never flagged, matching the tool's subtle-guidance philosophy."
+      ],
+      "current_impl": [
+        "`cmd_check` (satisfies validation + need exemptions + orphan-need warn), `cmd_show` (upstream lines), and `_build_map_data` (`satisfies`/`satisfied_by` node fields + `upstream_edges`) in `reqmap.py`, plus `VALID_LAYER` gaining `need`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a requirement with `satisfies: [GHOST-X-999]` and no such requirement\n  When   the gate runs\n  Then   it warns about the dangling upstream trace and does NOT raise an error\nAC-2\n  Given  a confirmed `need` that no requirement satisfies\n  When   the gate runs\n  Then   it warns that the need is unaddressed\nAC-3\n  Given  a confirmed `layer: need` requirement with no implements or tested-by tag\n  When   the gate runs\n  Then   it raises no implements/tested-by finding for that need\nAC-4\n  Given  a requirement that satisfies a need\n  When   `show` runs on either the requirement or the need\n  Then   the upstream/satisfied-by relationship is printed",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "REQ-CHECK-006"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:425"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:469"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1205"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1245"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1644"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:2051"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.17",
+      "priority": "should-have",
       "risks": []
     }
   ],
@@ -1569,6 +1732,14 @@
     ],
     [
       "REQ-TESTLINK-018",
+      "REQ-CHECK-006"
+    ],
+    [
+      "REQ-TRACE-020",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-TRACE-020",
       "REQ-CHECK-006"
     ]
   ],

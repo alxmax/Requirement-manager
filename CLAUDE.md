@@ -44,9 +44,10 @@ This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-ma
 
 **Single engine file:** `plugin/scripts/reqmap.py` — ~1000 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
-**Two-layer requirement model:**
+**Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
 - `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, check, map, extract, candidates, findings, init, next.
+- `layer: need` — an upstream stakeholder need (`NEED-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `REQ-TRACE-020`).
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
 
