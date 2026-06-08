@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; background: #1b1b18; color: #d4c9a8; font-family: 'Courier New', monospace; padding: 24px; }
+  h2 { color: #f0a030; margin: 0 0 4px 0; font-size: 18px; letter-spacing: 1px; }
+  .subtitle { color: #8a7e60; font-size: 12px; margin-bottom: 20px; }
+
+  .gantt-wrap { overflow-x: auto; }
+  .gantt { border-collapse: collapse; width: 100%; min-width: 700px; }
+
+  /* header row — version columns */
+  .gantt thead th {
+    background: #2a2a22; color: #f0a030; font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; padding: 6px 12px; border: 1px solid #3a3a2e;
+    text-align: center;
+  }
+  .gantt thead th.lane-header { background: transparent; border: none; }
+
+  /* today marker column */
+  .today-col { position: relative; }
+  .today-marker {
+    display: inline-block; background: #e05c30; color: #fff;
+    font-size: 9px; padding: 2px 6px; border-radius: 2px;
+    position: relative; top: -2px;
+  }
+  .today-marker::after {
+    content: '▼'; display: block; text-align: center; color: #e05c30;
+    font-size: 10px; line-height: 1;
+  }
+
+  /* swim lane label */
+  .lane-label {
+    background: #f0a030; color: #1b1b18; font-weight: 700; font-size: 11px;
+    padding: 6px 10px; text-align: center; vertical-align: middle;
+    border: 1px solid #c07020; white-space: nowrap; min-width: 70px;
+    letter-spacing: 0.5px;
+  }
+  .lane-label.bus   { background: #f0a030; }
+  .lane-label.core  { background: #30a060; color: #fff; }
+  .lane-label.feature { background: #4a7cc0; color: #fff; }
+  .lane-label.ops   { background: #a04040; color: #fff; }
+
+  /* cells */
+  .gantt tbody td {
+    background: #1e1e18; border: 1px solid #2e2e24;
+    padding: 5px 8px; vertical-align: middle;
+  }
+  .gantt tbody tr:hover td { background: #252520; }
+
+  /* arrows / bars */
+  .bar {
+    display: inline-flex; align-items: center;
+    height: 22px; border-radius: 3px 0 0 3px;
+    padding: 0 10px 0 8px; font-size: 10px; font-weight: 600;
+    white-space: nowrap; position: relative; cursor: default;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+    padding-right: 18px;
+  }
+  .bar.done     { background: #2d6a3f; color: #7fd99a; border-left: 3px solid #51cf66; }
+  .bar.progress { background: #1e4a7a; color: #74b0f4; border-left: 3px solid #339af0; }
+  .bar.planned  { background: #3a3a2e; color: #8a7e60; border-left: 3px solid #5c5c44; }
+  .bar.draft    { background: #3a2e1e; color: #c09050; border-left: 3px solid #f0a030; border-style: dashed solid solid solid; }
+
+  .bar .id   { opacity: 0.7; font-size: 9px; margin-right: 5px; }
+  .bar .name { }
+
+  /* empty cell indicator */
+  .empty { color: #2e2e24; font-size: 10px; text-align: center; }
+
+  /* grid lines */
+  .grid-line { border-left: 1px dashed #2e2e24 !important; }
+
+  /* legend */
+  .legend { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+  .leg { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #8a7e60; }
+  .leg-dot { width: 12px; height: 12px; border-radius: 2px; }
+
+  .version-current { color: #f0a030 !important; background: #2e2800 !important; }
+</style>
+</head>
+<body>
+
+<h2>⚙ REQUIREMENT ROADMAP</h2>
+<p class="subtitle">Gantt view — versiuni pe X, swim lanes pe layer/arie — temă Factorio</p>
+
+<div class="gantt-wrap">
+<table class="gantt">
+  <thead>
+    <tr>
+      <th class="lane-header" style="width:80px"></th>
+      <th>v1.11</th>
+      <th>v1.12 ◀ done</th>
+      <th class="version-current">v1.13 ● now</th>
+      <th>v1.14</th>
+      <th>v1.15</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- BUS lane -->
+    <tr>
+      <td class="lane-label bus" rowspan="2">BUS</td>
+      <td><span class="bar done"><span class="id">CORE-PARSE</span>Requirement reading</span></td>
+      <td><span class="bar done"><span class="id">CORE-SCAN</span>Member discovery</span></td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+    </tr>
+    <tr>
+      <td><span class="bar done"><span class="id">CORE-DRIFT</span>Contract hashing</span></td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+    </tr>
+
+    <!-- FEATURE lane -->
+    <tr>
+      <td class="lane-label feature" rowspan="3">FEATURE</td>
+      <td><span class="bar done"><span class="id">REQ-CHECK</span>Gate</span></td>
+      <td><span class="bar done"><span class="id">REQ-MAP</span>Req map HTML</span></td>
+      <td><span class="bar progress"><span class="id">REQ-ROADMAP</span>Roadmap tab</span></td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+    </tr>
+    <tr>
+      <td class="empty">·</td>
+      <td><span class="bar done"><span class="id">REQ-NEXT</span>Next report</span></td>
+      <td><span class="bar progress"><span class="id">REQ-TODO</span>TODO template</span></td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+    </tr>
+    <tr>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+      <td><span class="bar draft"><span class="id">REQ-REGEN</span>Regen outdated reqs</span></td>
+      <td><span class="bar planned"><span class="id">REQ-???</span>Slot liber</span></td>
+      <td class="empty">·</td>
+    </tr>
+
+    <!-- OPS lane -->
+    <tr>
+      <td class="lane-label ops">OPS</td>
+      <td class="empty">·</td>
+      <td><span class="bar done"><span class="id">CI</span>GitHub Action @v1</span></td>
+      <td><span class="bar planned"><span class="id">CI</span>Action @v2 (roadmap gate)</span></td>
+      <td class="empty">·</td>
+      <td class="empty">·</td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<div class="legend">
+  <div class="leg"><div class="leg-dot" style="background:#2d6a3f;border-left:3px solid #51cf66"></div> confirmed/done</div>
+  <div class="leg"><div class="leg-dot" style="background:#1e4a7a;border-left:3px solid #339af0"></div> in-progress</div>
+  <div class="leg"><div class="leg-dot" style="background:#3a2e1e;border-left:3px solid #f0a030;border-style:dashed solid solid solid"></div> draft</div>
+  <div class="leg"><div class="leg-dot" style="background:#3a3a2e;border-left:3px solid #5c5c44"></div> planned</div>
+</div>
+
+<p style="color:#5c5c44;font-size:10px;margin-top:20px">
+  ↑ mockup — datele reale vin din _map.json + câmpul <code style="color:#8a7e60">milestone: v1.13</code> din frontmatter
+</p>
+
+</body>
+</html>

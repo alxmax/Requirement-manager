@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f5f3ef; color: #3a3530;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    padding: 32px; font-size: 13px;
+  }
+  h2 { font-size: 18px; font-weight: 600; color: #2c2826; margin: 0 0 4px 0; }
+  .subtitle { color: #9c9690; font-size: 12px; margin-bottom: 28px; }
+
+  .split { display: flex; gap: 20px; flex-wrap: wrap; }
+  .option {
+    flex: 1; min-width: 260px; background: #faf9f7;
+    border: 2px solid #dedad3; border-radius: 12px; padding: 20px;
+    cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+  }
+  .option:hover { border-color: #b07050; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .option.selected { border-color: #b07050; box-shadow: 0 0 0 3px rgba(176,112,80,0.12); }
+  .option-letter {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 11px; font-weight: 700; color: #c0bbb5;
+    letter-spacing: 0.5px;
+  }
+
+  h3 { font-size: 13px; font-weight: 600; margin: 0 0 6px 0; color: #2c2826; }
+  p  { font-size: 11px; color: #8a8278; margin: 0 0 16px 0; line-height: 1.5; }
+
+  .gantt-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; border-bottom: 1px solid #edeae4;
+  }
+  .gantt-row:last-child { border-bottom: none; }
+  .lane-tag {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
+    color: #9c9690; width: 52px; text-align: right; flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  /* bars shared */
+  .bar {
+    display: inline-flex; align-items: center; gap: 5px;
+    height: 24px; border-radius: 5px; padding: 0 14px 0 9px;
+    font-size: 10px; font-weight: 500; white-space: nowrap;
+    clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%);
+    padding-right: 18px;
+  }
+  .bar::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+  }
+  .bar.req    { background: #dde8f5; color: #2e5c8a; }
+  .bar.req::before { background: #5a8ac0; }
+
+  /* option A — TODO e identic ca stil dar cu bordura dashed */
+  .bar.todo-a {
+    background: #eeece8; color: #6a6460;
+    clip-path: none; border-radius: 5px;
+    border: 1.5px dashed #c8c4bc;
+    padding: 0 12px;
+  }
+  .bar.todo-a::before { background: #b8b4ac; }
+
+  /* option B — TODO cu iconiță + culoare distinctă warm */
+  .bar.todo-b {
+    background: #f5ede0; color: #8a5e30;
+    clip-path: none; border-radius: 5px;
+    border: 1.5px dashed #d4b898;
+    padding: 0 12px;
+  }
+  .bar.todo-b::before { background: #c09050; }
+
+  /* option C — TODO e mai mic, italic, fără săgeată */
+  .bar.todo-c {
+    background: #f0eee9; color: #9c9690;
+    clip-path: none; border-radius: 4px;
+    height: 20px; font-style: italic; font-size: 10px;
+    padding: 0 10px;
+  }
+  .bar.todo-c::before { background: #c8c4bc; }
+
+  .label { font-size: 9px; opacity: 0.5; }
+  .note { font-size: 10px; color: #b0aba5; margin-top: 10px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<h2>Cum arată TODO-urile față de requirements?</h2>
+<p class="subtitle">Alege vizualul pentru itemele din TODO.md în graficul Roadmap</p>
+
+<div class="split">
+
+  <!-- A -->
+  <div class="option" data-choice="a" onclick="this.classList.toggle('selected')">
+    <div class="option-letter">A</div>
+    <h3>Bordură punctată, gri neutru</h3>
+    <p>TODO-ul se distinge discret — aceeași formă, fără săgeată, bordură dashed gri.</p>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar req"><span class="label">REQ-MAP</span> Map HTML</span>
+    </div>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar todo-a"><span class="label">TODO</span> Roadmap regen</span>
+    </div>
+    <p class="note">Curat, nu distrage — TODO-ul e pur și simplu "nerealizat"</p>
+  </div>
+
+  <!-- B -->
+  <div class="option" data-choice="b" onclick="this.classList.toggle('selected')">
+    <div class="option-letter">B</div>
+    <h3>Bordură punctată, warm amber</h3>
+    <p>TODO-ul are culoare caldă (amber/crem) — vizibil că e ceva de făcut, nu doar planificat.</p>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar req"><span class="label">REQ-MAP</span> Map HTML</span>
+    </div>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar todo-b"><span class="label">TODO</span> Roadmap regen</span>
+    </div>
+    <p class="note">Atrage atenția fără să fie agresiv — "acesta e next action"</p>
+  </div>
+
+  <!-- C -->
+  <div class="option" data-choice="c" onclick="this.classList.toggle('selected')">
+    <div class="option-letter">C</div>
+    <h3>Mai mic, italic, fără săgeată</h3>
+    <p>TODO-ul e clar secundar față de un requirement — vizual mai ușor, scrie cu italic.</p>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar req"><span class="label">REQ-MAP</span> Map HTML</span>
+    </div>
+    <div class="gantt-row">
+      <span class="lane-tag">Feature</span>
+      <span class="bar todo-c">Roadmap regen</span>
+    </div>
+    <p class="note">Ierarhie clară: requirement &gt; TODO</p>
+  </div>
+
+</div>
+
+</body>
+</html>

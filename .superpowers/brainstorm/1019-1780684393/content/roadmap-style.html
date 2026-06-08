@@ -1,0 +1,80 @@
+<h2>Cum vrei să arate tab-ul Roadmap?</h2>
+<p class="subtitle">Alege stilul vizual pentru al 4-lea tab din viewer</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="kanban" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="display:flex;gap:8px;padding:12px;background:#f8f9fa;border-radius:6px;min-height:140px">
+        <div style="flex:1;background:#e9ecef;border-radius:4px;padding:8px">
+          <div style="font-size:10px;font-weight:700;color:#868e96;margin-bottom:6px">DRAFT</div>
+          <div style="background:#fff;border-radius:3px;padding:6px;margin-bottom:4px;font-size:10px;border-left:3px solid #adb5bd">DRAFT-cache-utils</div>
+        </div>
+        <div style="flex:1;background:#e9ecef;border-radius:4px;padding:8px">
+          <div style="font-size:10px;font-weight:700;color:#868e96;margin-bottom:6px">IN-PROGRESS</div>
+          <div style="background:#fff;border-radius:3px;padding:6px;margin-bottom:4px;font-size:10px;border-left:3px solid #4dabf7">REQ-SYNC-014</div>
+        </div>
+        <div style="flex:1;background:#e9ecef;border-radius:4px;padding:8px">
+          <div style="font-size:10px;font-weight:700;color:#868e96;margin-bottom:6px">CONFIRMED</div>
+          <div style="background:#fff;border-radius:3px;padding:6px;margin-bottom:4px;font-size:10px;border-left:3px solid #51cf66">REQ-MAP-007</div>
+          <div style="background:#fff;border-radius:3px;padding:6px;margin-bottom:4px;font-size:10px;border-left:3px solid #51cf66">REQ-CHECK-006</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Kanban</h3>
+      <p>Coloane pe status: draft → in-progress → implemented → confirmed. Simplu, fără date. Datele din <code>_map.json</code> sunt suficiente — fără modificări la engine.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="timeline" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding:12px;background:#f8f9fa;border-radius:6px;min-height:140px">
+        <div style="font-size:10px;font-weight:700;color:#868e96;margin-bottom:8px">MILESTONE: v1.13.0</div>
+        <div style="display:flex;align-items:center;margin-bottom:6px">
+          <div style="width:80px;font-size:9px;color:#495057">REQ-ROADMAP</div>
+          <div style="flex:1;height:16px;background:#4dabf7;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;color:#fff">in-progress</div>
+        </div>
+        <div style="display:flex;align-items:center;margin-bottom:6px">
+          <div style="width:80px;font-size:9px;color:#495057">REQ-TODO</div>
+          <div style="width:30%;height:16px;background:#e9ecef;border-radius:3px;margin-left:20%;display:flex;align-items:center;padding-left:6px;font-size:9px;color:#868e96">planned</div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <div style="width:80px;font-size:9px;color:#495057">REQ-MAP-007</div>
+          <div style="width:60%;height:16px;background:#51cf66;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;color:#fff">done</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Timeline / Gantt</h3>
+      <p>Bare orizontale pe milestone-uri. Necesită câmpuri noi în frontmatter (<code>milestone</code>, <code>target</code>) și modificări mici la engine pentru a le emite în <code>_map.json</code>.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="padding:12px;background:#f8f9fa;border-radius:6px;min-height:140px">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div style="background:#dee2e6;border-radius:12px;padding:2px 8px;font-size:9px;font-weight:600">v1.12 ✓</div>
+          <div style="background:#4dabf7;color:#fff;border-radius:12px;padding:2px 8px;font-size:9px;font-weight:600">v1.13 ●</div>
+          <div style="background:#e9ecef;border-radius:12px;padding:2px 8px;font-size:9px;color:#868e96">v1.14</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="background:#fff;border:1px solid #dee2e6;border-radius:4px;padding:6px 8px;font-size:9px;border-top:3px solid #4dabf7">
+            <div style="font-weight:600">REQ-ROADMAP</div>
+            <div style="color:#868e96">Roadmap tab</div>
+          </div>
+          <div style="background:#fff;border:1px solid #dee2e6;border-radius:4px;padding:6px 8px;font-size:9px;border-top:3px solid #adb5bd">
+            <div style="font-weight:600">REQ-TODO</div>
+            <div style="color:#868e96">TODO template</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Milestone + Kanban hibrid</h3>
+      <p>Milestone-uri ca grupuri (v1.13, v1.14…), carduri cu status în interior. Necesită câmpul <code>milestone</code> în frontmatter. Engine change mic.</p>
+    </div>
+  </div>
+
+</div>

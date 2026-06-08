@@ -29,6 +29,11 @@ ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
 # `x-implements:` from being picked up as a real `implements:` tag
 TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
+# Per-acceptance-criterion coverage tag, placed in a test: `# verifies: REQ-X#AC-1`.
+# Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
+# "Verifiable" becomes machine-checked per criterion, not just per requirement. The
+# `#AC-N` suffix is what distinguishes it from a plain requirement reference.
+AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
@@ -71,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-08"
+MAP_ENGINE_VERSION = "2026-06-09"
 
 
 # ---------- parsing ----------
@@ -208,6 +213,53 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
             except OSError:
                 continue
     return members
+
+
+def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
+    """Walk the code for `# verifies: REQ-X#AC-N` tags and return
+    `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
+    covers. Same walk discipline as `scan_members` (respects .reqmapignore, prunes
+    .git/node_modules). Empty when no `verifies:` tag exists anywhere."""
+    cover = {}  # cap_id -> {ac_label -> [(file, line)]}
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        for fn in files:
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    for i, line in enumerate(f, 1):
+                        for cap, ac in AC_VERIFY_RE.findall(line):
+                            cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+            except OSError:
+                continue
+    return cover
+
+
+def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
+    """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
+    Empty when the requirement writes bullet ACs without labels — per-AC coverage
+    only applies to requirements that label their criteria, so unlabelled ones are
+    silently exempt (no false 'unverified' warning)."""
+    out, grab, seen = [], False, False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.lower().startswith("## "):
+            grab = (not seen) and ("acceptan" in s.lower())
+            if grab:
+                seen = True
+            continue
+        if not grab:
+            continue
+        m = re.match(r"^(AC-\d+)\b", s)
+        if m and m.group(1) not in out:
+            out.append(m.group(1))
+    return out
 
 
 # ---------- hashing / drift ----------
@@ -348,6 +400,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
     errors, warns = [], []
     warn_if_stale()
     cap_ids = set(reqs)
+    ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
 
     for cap, hits in members.items():
         if cap not in cap_ids:
@@ -375,6 +428,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
                 problem = _test_link_problem(os.path.join(code_root, fp))
                 if problem:
                     warns.append(f"{rid}: tested-by {fp} {problem}")
+        # per-AC coverage (warn-only): a confirmed requirement that LABELS its criteria
+        # (AC-1, AC-2, ...) should have a `# verifies: <id>#AC-N` tag for each. Only
+        # fires once at least one criterion is covered, so adopting per-AC tagging is
+        # opt-in: a requirement with zero verifies tags keeps the coarse tested-by check.
+        if m.get("status") == "confirmed":  # implements: REQ-ACVERIFY-019
+            labels = _labeled_acs(r["body"])
+            covered = ac_cover.get(rid, {})
+            if labels and covered:
+                for ac in labels:
+                    if ac not in covered:
+                        warns.append(f"{rid}: {ac} has no `# verifies: {rid}#{ac}` tag — criterion unverified")
         if m.get("status") == "confirmed":
             if not _has_section(r["body"], "contract"):
                 warns.append(
@@ -1339,6 +1403,18 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+# Closed list of vague QUALITY words that make a normative bullet un-testable
+# (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
+# and weak modals — they are too often legitimately precise in this domain, and a
+# false positive trains authors to ignore lint. Only words with no testable meaning.
+LINT_VAGUE_TERMS = frozenset({
+    "appropriate", "appropriately", "adequate", "adequately", "sufficient",
+    "sufficiently", "reasonable", "reasonably", "robust", "robustly", "flexible",
+    "efficient", "efficiently", "optimal", "scalable", "performant", "fast", "slow",
+    "quick", "quickly", "easy", "easily", "simple", "user-friendly", "seamless",
+    "seamlessly", "intuitive", "various", "etc",
+})
+_WORD_RE = re.compile(r"[A-Za-z][A-Za-z-]*")
 
 
 def _lint_prose(body, name):  # implements: REQ-LINT-014
@@ -1454,6 +1530,20 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # vague terms (warn): a Contract bullet using a non-testable quality word is
+    # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
+    # backticked identifier is never flagged. One finding per distinct term.
+    seen_vague = set()
+    for ln in _lint_prose(body, "contract"):
+        bare = re.sub(r"`[^`]*`", " ", ln)
+        for w in _WORD_RE.findall(bare):
+            lw = w.lower()
+            if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
+                seen_vague.add(lw)
+                findings.append({
+                    "severity": "warn", "check": "vague-term",
+                    "detail": "vague word '{}' (no testable meaning): {}".format(
+                        w, _clip(ln))})
     return findings
 
 
@@ -1462,8 +1552,8 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
-    ac-count-high (warn). Read-only. Exit-neutral by default; with --strict it
-    exits non-zero on any error-severity finding (warnings never change the exit)."""
+    ac-count-high (warn), vague-term (warn). Read-only. Exit-neutral by default; with
+    --strict it exits non-zero on any error-severity finding (warnings never change exit)."""
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
     errors = warns = 0
