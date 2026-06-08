@@ -71,7 +71,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-07.2"
+MAP_ENGINE_VERSION = "2026-06-08"
 
 
 # ---------- parsing ----------
@@ -451,6 +451,7 @@ id: AREA-NAME-NNN
 status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
 layer: feature       # bus | feature
 owner: Alex
+priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: []       # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
 # area:              # optional: System Map grouping label (else the id prefix is used)
@@ -458,13 +459,16 @@ superseded_by:       # <ID>, if replaced
 
 # Short name
 
-> WHY: one line — what this is, in plain language.
+> WHY: 1–3 plain sentences anyone can follow — what this is, why it exists, and
+> what breaks without it. No jargon; this is the angle a non-expert reads first.
 
 ## WHAT — Contract (normative)
 <!-- Audience: a developer new to THIS project. Define project-specific terms inline
-     on first use; attach roles to named components; keep "shall" phrasing. -->
+     on first use; attach roles to named components; keep "shall" phrasing.
+     Assumptions & constraints (external deps, explicit out-of-scope): note them here. -->
 - The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
   no function names; true regardless of how the code is implemented).
+  <!-- Rationale: why this specific behavior -->
 - Output shape + allowed values; required vs optional inputs and how it degrades
   when an optional input is missing/invalid; the decision logic that selects each
   output (say so explicitly if it is delegated to a model/heuristic).
@@ -479,10 +483,18 @@ superseded_by:       # <ID>, if replaced
 ## HOW — Acceptance (= tests)
 <!-- Audience: a developer new to THIS project. Keep Given/When/Then concrete and
      self-explanatory; spell out any term the Contract introduced. -->
-AC-1
+AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
   Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
+
+## Example — in practice (optional, non-binding)
+<!-- A short plain-language story of the feature in use — the angle anyone reads
+     to "get it" fast. NON-BINDING illustration: the Given/When/Then above is the
+     precise version; on any conflict the Contract + Acceptance win. This section is
+     not hashed and not linted, so it never trips drift. -->
+- e.g. Ana marks AUTH-001 confirmed, later edits its contract text; at commit
+  `check` tells her "DRIFT — contract changed since lock" so she re-reviews.
 
 ## WHERE — Current implementation
 - How the code does it today (the volatile narrative — may drift from the contract).
@@ -1132,6 +1144,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "members": [{"role": x[0], "loc": f"{x[1]}:{x[2]}"} for x in members.get(rid, [])],
             "test_exempt": m.get("test_exempt"),
             "milestone": m.get("milestone"),
+            "priority": m.get("priority", ""),
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "members": members.get(rid, []),
                  "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
@@ -1231,6 +1244,9 @@ def _risk_score(meta):  # implements: REQ-NEXT-013
         return 0
 
 
+_PRIORITY_ORDER = {"must-have": 0, "should-have": 1, "could-have": 2, "wont-have": 3}
+
+
 def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-013
     """Terminal 'what should I do next': a focused, counted worklist over the same
     `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
@@ -1269,7 +1285,11 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
         ("unverified-intent", "Needs intent review"),
         ("unreviewed",        "Drafts to review"),
     ]
-    pending = [(sig, label, sorted(buckets[sig], key=lambda x: (-x[1], x[0])))
+    def _priority_ord(rid):
+        p = reqs[rid]["meta"].get("priority", "")
+        return _PRIORITY_ORDER.get(p, 99)
+
+    pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
     if not pending:
         print("Nothing pending — every confirmed requirement is implemented, tested and intent-checked.")
@@ -1316,6 +1336,9 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
 LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
 LINT_SENTENCE_WORDS = 35       # a single sentence longer than this is flagged (warn)
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
+LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
+LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
+LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
 
 
 def _lint_prose(body, name):  # implements: REQ-LINT-014
@@ -1358,6 +1381,24 @@ def _clip(s, n=60):  # implements: REQ-LINT-014
     return s if len(s) <= n else s[:n - 1] + "…"
 
 
+def _count_ac(body):
+    """Count acceptance criteria in the HOW — Acceptance section.
+    Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...)."""
+    grab, seen, count = False, False, 0
+    for line in body.splitlines():
+        s = line.strip()
+        if s.lower().startswith("## "):
+            grab = (not seen) and ("acceptan" in s.lower())
+            if grab:
+                seen = True
+            continue
+        if not grab:
+            continue
+        if s.startswith("- ") or re.match(r"^AC-\d+\b", s):
+            count += 1
+    return count
+
+
 def lint_requirement(rid, r):  # implements: REQ-LINT-014
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only."""
@@ -1388,6 +1429,31 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                         "severity": "warn", "check": "stacked-conditions",
                         "detail": "{} 'and'/'or' joins in one normative line: {}".format(
                             joins, _clip(ln))})
+    # statement atomicity (warn): a Contract bullet that packs >N words across MULTIPLE
+    # sentences is a stacked statement (split it). A single long sentence is already
+    # `long-sentence`'s job — gating on len(sents) > 1 keeps the two checks orthogonal
+    # so the same line is never flagged twice.
+    for ln in _lint_prose(body, "contract"):
+        sents = _sentences(ln)
+        words = len(ln.split())
+        if len(sents) > 1 and words > LINT_CONTRACT_WORDS:
+            findings.append({
+                "severity": "warn", "check": "statement-too-long",
+                "detail": "{}-word statement across {} sentences (>{}): {}".format(
+                    words, len(sents), LINT_CONTRACT_WORDS, _clip(ln))})
+    # ac count (warn): too few = under-specified; too many = over-scoped
+    if _has_section(body, "acceptan"):
+        ac_n = _count_ac(body)
+        if 0 < ac_n < LINT_AC_MIN:
+            findings.append({
+                "severity": "warn", "check": "ac-count-low",
+                "detail": "{} AC (< {}): requirement may be under-specified".format(
+                    ac_n, LINT_AC_MIN)})
+        elif ac_n > LINT_AC_MAX:
+            findings.append({
+                "severity": "warn", "check": "ac-count-high",
+                "detail": "{} AC (> {}): consider splitting into two requirements".format(
+                    ac_n, LINT_AC_MAX)})
     return findings
 
 
@@ -1395,7 +1461,8 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
-    stacked-conditions (warn). Read-only. Exit-neutral by default; with --strict it
+    stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
+    ac-count-high (warn). Read-only. Exit-neutral by default; with --strict it
     exits non-zero on any error-severity finding (warnings never change the exit)."""
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
@@ -1433,23 +1500,15 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         return 1
     m, body = r["meta"], r["body"]
     head = "{} · {} · {}".format(cap_id, m.get("status", "draft"), m.get("layer", "?"))
+    if m.get("priority"):
+        head += " · " + m["priority"]
     if m.get("milestone"):
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    in_fence = False
-    for line in body.splitlines():          # intent: first non-empty blockquote, outside fences
-        s = line.strip()
-        if s.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
-        if s.startswith(">"):
-            content = s.lstrip(">").strip()
-            if content:                     # skip an empty '>' lead line in a multi-line quote
-                print("  " + content)
-                break
+    intent = _first_quote(body)             # the full WHY block, gathered (not just line 1)
+    if intent:
+        print("  " + intent)
 
     contract = _bullets(body, "contract")
     print("\nContract:")
@@ -1825,10 +1884,26 @@ def _title(body):  # implements: REQ-MAP-007
 
 
 def _first_quote(body):  # implements: REQ-MAP-007
+    """The requirement's intent: the FIRST contiguous blockquote (the WHY), joined into
+    one line. A multi-line `>` WHY (a richer plain-language summary) is gathered whole,
+    not truncated to its first line. Fenced code is skipped so a `>` inside a fence
+    never counts."""
+    out, started, in_fence = [], False, False
     for line in body.splitlines():
-        if line.strip().startswith(">"):
-            return line.strip()[1:].strip()
-    return ""
+        s = line.strip()
+        if s.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if s.startswith(">"):
+            content = s.lstrip(">").strip()
+            if content:
+                out.append(content)
+            started = True
+        elif started:            # first non-quote line after the block ends it
+            break
+    return " ".join(out)
 
 
 def _section(body, name):  # implements: REQ-MAP-007

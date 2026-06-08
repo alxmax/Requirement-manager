@@ -30,6 +30,7 @@ export function adaptNode(n) {
     // instead of falsely flagging exempt requirements as "untested"
     test_exempt: n.test_exempt,
     milestone: n.milestone || null,
+    priority: n.priority || "",
   };
 }
 

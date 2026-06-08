@@ -10,7 +10,10 @@ milestone: v1.00
 
 # Requirement reading
 
-> Turn the requirement files on disk into structured records the rest of the tool reasons about.
+> Every command in the tool — the gate, the map, the next-steps list — needs the
+> requirement files as structured data, not raw text. This is the part that reads each
+> Markdown file and hands the rest of the tool clean records to work with. If it breaks,
+> nothing downstream can run.
 
 ## WHAT — Contract (normative)
 - It shall parse each `requirements/*.md` file into a record `{meta, body, path}`, where
@@ -37,6 +40,13 @@ milestone: v1.00
 - A file without a leading `---` block returns empty `meta` and the whole text as body.
 - Files starting with `_` are excluded from the result.
 - A block-style list and an unclosed inline list both parse to the intended list.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- You have `requirements/AUTH-001.md`: a small header block (`id: AUTH-001`,
+  `priority: must-have`) then prose. This reader opens the file, lifts the header
+  into a `meta` table (so `priority` becomes a field the map can show) and keeps the
+  rest as `body`. A stray `_reqlock.json` next to it is skipped — its name starts `_`.
 
 ## WHERE — Current implementation
 - `parse_frontmatter` (with `_clean_item`) and `load_requirements` in `reqmap.py`.

@@ -10,7 +10,12 @@ milestone: v1.06
 
 # Capability candidates (extraction plan)
 
-> Stage 1 of AI extraction: emit a deterministic capability plan from legacy code, writing no requirement files.
+> When you point this tool at an old codebase that has no requirements written down yet,
+> this is the first, look-but-don't-touch step. It reads the code and produces a tidy
+> machine-readable plan that guesses what each capability is — which files belong together,
+> what they depend on, how central each one is — without writing or changing a single
+> requirement file. An author (or an AI assistant) then uses that plan to decide what to
+> actually write up. Without it, you would face a wall of untagged code with no starting map.
 
 ## WHAT — Contract (normative)
 - It shall emit a single JSON object (stdout or `--out PATH`) `{engine_version, bus[],
@@ -42,6 +47,14 @@ milestone: v1.06
 - When `requirements/_capmap.json` groups two files under one id, they appear as a single candidate carrying both files with the declared layer.
 - A file already carrying an `implements:` tag is reported via `existing_req`.
 - A module imported by `BUS_FANIN_THRESHOLD` or more candidates is suggested as `bus`.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana inherits a large untagged service and runs the candidates command. It prints a JSON
+  plan listing each file as a proposed capability, with a suggested id, the functions it
+  defines, and which other proposed capabilities it depends on. The shared `db.py` is
+  imported by many files, so it is suggested as a `bus` capability — giving Ana a ranked
+  starting point to author real requirements, and not one `.md` file was created.
 
 ## WHERE — Current implementation
 - `cmd_candidates` and the `_py_facts`/`_js_facts`/`_file_facts`/`_load_capmap`/`_collect_files` helpers in `reqmap.py`.

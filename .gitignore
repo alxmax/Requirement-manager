@@ -11,3 +11,7 @@ plugin/requirements/_map.html
 
 # Superpowers plans and session artifacts
 docs/superpowers/
+
+# IEEE 29148 comparison presentations + their generator scripts (local artifacts)
+docs/ieee29148_comparison.*
+docs/before_after_ieee29148.*

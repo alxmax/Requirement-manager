@@ -10,7 +10,10 @@ milestone: v1.04
 
 # Requirement map (Mermaid MD + JSON + self-contained viewer)
 
-> Render the whole registry as navigable diagrams, a machine-readable graph, and a double-click-openable viewer a human or a front-end can read at a glance.
+> A list of requirement files tells you what exists but not how it all connects. This
+> draws the picture: which capability depends on which, what has code, what is at risk —
+> as diagrams you can read on GitHub and a viewer you open with a double-click. It turns
+> the registry into something a person can take in at a glance.
 
 ## WHAT — Contract (normative)
 - It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for
@@ -77,6 +80,12 @@ milestone: v1.04
 - Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.
 - When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html` (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.
 - When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the standard outputs.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana runs `reqmap.py map`. She opens `_map.html` by double-click — no server — and
+  sees AUTH-LOGIN-001 as a box wired to the session capability it depends on, coloured
+  amber because it has no tests yet. One glance tells her where the gap is.
 
 ## WHERE — Current implementation
 - `cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, `_docs_publish_path`, the `_mermaid_*` generators in `reqmap.py`.

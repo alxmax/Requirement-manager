@@ -10,7 +10,11 @@ milestone: v1.14
 
 # Corpus health snapshot
 
-> Reduce the whole requirement registry to one coherence score plus a few component counts, so a CI badge or a reviewer can see at a glance how healthy the corpus is.
+> A project can have dozens of requirements slowly rotting — some never coded, some
+> untested, some out of sync with the code — and nobody notices until it is a mess. This
+> boils the whole registry down to a single health score plus a few counts, so a CI badge
+> or a reviewer sees at a glance whether things are in good shape. Without it, corpus decay
+> stays invisible until it is expensive to fix.
 
 ## WHAT — Contract (normative)
 - The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.
@@ -36,6 +40,12 @@ milestone: v1.14
 - Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.
 - Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.
 - Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana runs `reqmap.py health` and sees `94/100`, with lines noting 2 requirements have
+  no tests and 1 has drifted from its lock. The number is high, so the corpus is healthy;
+  she wires `health --json` into CI so the score shows as a badge on every pull request.
 
 ## WHERE — Current implementation
 - `cmd_health` in `reqmap.py` — walks every requirement, classifies each axis using `_member_roles`, `_bullets`, and the lock via `load_lock` + `binding_hash`, then prints the score and counts. `--json` dumps the assembled dictionary instead of the text view.

@@ -10,7 +10,10 @@ milestone: v1.08
 
 # Open-findings report
 
-> Roll up every requirement's open "verify intent" questions into one reviewable `_findings.md`, optionally enriched by an AI-triage sidecar.
+> Every requirement file can carry open questions the author still wants a human to double-check.
+> Scattered across dozens of files, those questions are easy to forget. This command gathers them
+> all into one review list (`_findings.md`) — optionally sorted by an AI helper into real bugs,
+> judgement calls, and false alarms. Without it, the open questions stay buried and never get answered.
 
 ## WHAT — Contract (normative)
 - The command shall scan all requirements and aggregate the bullet items under each one's `## WHAT — Verify intent` section into a single `_findings.md` written in the requirements directory.
@@ -55,8 +58,12 @@ AC-5
   When   `check` runs
   Then   it prints an advisory line naming the open-findings count without affecting the error count
 
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana has 30 requirement files and can't remember which ones still have unanswered questions. She runs `reqmap.py findings` and opens `_findings.md`: it lists "2 open finding(s) across 1 requirement(s)" with both questions quoted under the requirement they came from. After an AI triage pass fills in `_findings_triage.json`, she re-runs and now sees a HIGH-severity confirmed bug at the top, with its file location and a suggested fix — so she knows exactly what to tackle first.
+
 ## WHERE — Current implementation
-`collect_findings(reqs)` pulls each requirement's `## WHAT — Verify intent` bullets via `_bullets`, dropping the "None" placeholder, and returns `(id, title, items)` groups. `cmd_findings` reads an optional `_findings_triage.json`; with valid items it calls `_render_findings_triaged` (buckets by classification, sorts REAL_BUG by `_SEV_RANK`, emits a staleness note when raw≠triaged), otherwise `_render_findings_raw`. `cmd_check` calls `collect_findings` to print the advisory count before its summary.
+- `collect_findings(reqs)` pulls each requirement's `## WHAT — Verify intent` bullets via `_bullets`, dropping the "None" placeholder, and returns `(id, title, items)` groups. `cmd_findings` reads an optional `_findings_triage.json`; with valid items it calls `_render_findings_triaged` (buckets by classification, sorts REAL_BUG by `_SEV_RANK`, emits a staleness note when raw≠triaged), otherwise `_render_findings_raw`. `cmd_check` calls `collect_findings` to print the advisory count before its summary.
 
 ## Links
 - Used by: (auto)
