@@ -451,6 +451,7 @@ id: AREA-NAME-NNN
 status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
 layer: feature       # bus | feature
 owner: Alex
+priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: []       # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
 # area:              # optional: System Map grouping label (else the id prefix is used)
@@ -462,9 +463,11 @@ superseded_by:       # <ID>, if replaced
 
 ## WHAT — Contract (normative)
 <!-- Audience: a developer new to THIS project. Define project-specific terms inline
-     on first use; attach roles to named components; keep "shall" phrasing. -->
+     on first use; attach roles to named components; keep "shall" phrasing.
+     Assumptions & constraints (external deps, explicit out-of-scope): note them here. -->
 - The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
   no function names; true regardless of how the code is implemented).
+  <!-- Rationale: why this specific behavior -->
 - Output shape + allowed values; required vs optional inputs and how it degrades
   when an optional input is missing/invalid; the decision logic that selects each
   output (say so explicitly if it is delegated to a model/heuristic).
@@ -479,7 +482,7 @@ superseded_by:       # <ID>, if replaced
 ## HOW — Acceptance (= tests)
 <!-- Audience: a developer new to THIS project. Keep Given/When/Then concrete and
      self-explanatory; spell out any term the Contract introduced. -->
-AC-1
+AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
   Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
