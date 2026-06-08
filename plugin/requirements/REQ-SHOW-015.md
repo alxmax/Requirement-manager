@@ -14,7 +14,9 @@ milestone: v1.14
 
 ## WHAT — Contract (normative)
 - The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.
-- It shall print a header line with the id, status, and layer. When the requirement carries a `milestone` field, the header shall append it.
+- It shall print a header line with the id, status, and layer.
+- When the requirement carries a `priority` field the header shall append it after the layer, and a `milestone` field after that.
+- An absent optional field shall add no empty segment to the header.
 - It shall print the title and the intent line (the first blockquote of the body).
 - It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.
 - It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).
@@ -32,6 +34,7 @@ milestone: v1.14
 
 ## HOW — Acceptance (= tests)
 - Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.
+- Given a requirement with a `priority` field, when `show` runs, then the priority value appears on the header line; given none, the header carries no empty priority segment.
 - Given an unknown id, when `show` runs, then it prints a "no requirement with id" message and returns a non-zero code.
 - Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under "Depended on by".
 - Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.

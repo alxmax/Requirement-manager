@@ -27,6 +27,27 @@ function CovStrip({ r }) {
   );
 }
 
+const PRIORITY_COLOR = {
+  "must-have":    { bg: "#F38BA8", color: "#5c0011" },
+  "should-have":  { bg: "#F9E2AF", color: "#5c3d00" },
+  "could-have":   { bg: "#A6E3A1", color: "#1a4d17" },
+  "wont-have":    { bg: "#BAC2DE", color: "#3b3f5c" },
+};
+
+function PriorityBadge({ priority }) {
+  const c = PRIORITY_COLOR[priority];
+  if (!c) return null;
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center",
+      font: "var(--text-caption)", fontWeight: 600,
+      padding: "4px 10px", borderRadius: "var(--radius-pill)",
+      background: c.bg, color: c.color,
+      border: "1px solid transparent", whiteSpace: "nowrap",
+    }}>{priority}</span>
+  );
+}
+
 function SpecDoc({ r, onNav }) {
   if (!r) return null;
   return (
@@ -45,6 +66,7 @@ function SpecDoc({ r, onNav }) {
       <div className="head-row">
         <Pill kind={statusKind(r.status)}>{r.status}</Pill>
         <Pill kind={r.layer}>{r.layer}</Pill>
+        {r.priority && <PriorityBadge priority={r.priority} />}
       </div>
       <h1>{r.title}</h1>
       <div className="sec why-sec">

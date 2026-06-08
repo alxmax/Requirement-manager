@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-07.2",
+  "engine_version": "2026-06-08",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -68,6 +68,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.00",
+      "priority": "",
       "risks": []
     },
     {
@@ -145,6 +146,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.00",
+      "priority": "",
       "risks": []
     },
     {
@@ -212,6 +214,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.00",
+      "priority": "",
       "risks": []
     },
     {
@@ -309,6 +312,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.06",
+      "priority": "",
       "risks": []
     },
     {
@@ -409,6 +413,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.02",
+      "priority": "",
       "risks": []
     },
     {
@@ -505,6 +510,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.06",
+      "priority": "",
       "risks": []
     },
     {
@@ -561,6 +567,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.08",
+      "priority": "",
       "risks": []
     },
     {
@@ -611,15 +618,16 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1606"
+          "loc": "scripts/reqmap.py:1663"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1773"
+          "loc": "scripts/test_reqmap.py:1828"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.14",
+      "priority": "",
       "risks": []
     },
     {
@@ -670,19 +678,20 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1718"
+          "loc": "scripts/reqmap.py:1775"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1747"
+          "loc": "scripts/reqmap.py:1804"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1391"
+          "loc": "scripts/test_reqmap.py:1400"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.10",
+      "priority": "",
       "risks": []
     },
     {
@@ -699,6 +708,9 @@
         "The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.",
         "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
         "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
+        "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
+        "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3).",
+        "The `ac-count-high` check (warn) shall flag an Acceptance section holding more than `LINT_AC_MAX` (default 7) criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
         "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
         "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
         "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
@@ -707,23 +719,26 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "`statement-too-long` deliberately ignores a single over-long sentence (that is `long-sentence`'s job), so the two checks never flag the same line twice.",
         "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check.",
         "Sentence splitting is a deterministic split on `.`, `!`, and `?`. It is crude — an abbreviation can over-split — but it never reads code and only feeds a word count, so the worst case is a missed long sentence, not a false alarm on code.",
         "The thresholds are module constants, not configurable from the command line. A single well-named constant is enough until a real project needs a different value."
       ],
       "current_impl": [
-        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count check. The `missing-section` check reuses `_has_section` (shared with the gate in `cmd_check`)."
+        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences`, `_count_ac` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count checks; `_count_ac` counts acceptance criteria. The `missing-section` and `ac-count` checks reuse `_has_section` (shared with the gate in `cmd_check`)."
       ],
       "acc": [
         "Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.",
         "Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.",
         "Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.",
         "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
+        "Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.",
+        "Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.",
         "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
         "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
         "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
       ],
-      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
       "input": "",
       "output": "",
       "desc": "",
@@ -734,15 +749,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1324"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1353"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1359"
+          "loc": "scripts/reqmap.py:1335"
         },
         {
           "role": "implements",
@@ -750,15 +757,24 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1397"
+          "loc": "scripts/reqmap.py:1370"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1393"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1451"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1577"
+          "loc": "scripts/test_reqmap.py:1586"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.14",
+      "priority": "",
       "risks": []
     },
     {
@@ -824,83 +840,71 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1185"
+          "loc": "scripts/reqmap.py:1186"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1209"
+          "loc": "scripts/reqmap.py:1210"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1799"
+          "loc": "scripts/reqmap.py:1856"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1822"
+          "loc": "scripts/reqmap.py:1879"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1830"
+          "loc": "scripts/reqmap.py:1887"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1837"
+          "loc": "scripts/reqmap.py:1894"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1851"
+          "loc": "scripts/reqmap.py:1908"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1867"
+          "loc": "scripts/reqmap.py:1924"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1913"
+          "loc": "scripts/reqmap.py:1970"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1919"
+          "loc": "scripts/reqmap.py:1976"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1926"
+          "loc": "scripts/reqmap.py:1983"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1963"
+          "loc": "scripts/reqmap.py:2020"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1978"
+          "loc": "scripts/reqmap.py:2035"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2009"
+          "loc": "scripts/reqmap.py:2066"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2085"
+          "loc": "scripts/reqmap.py:2142"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2133"
+          "loc": "scripts/reqmap.py:2190"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2184"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2192"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2223"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2233"
+          "loc": "scripts/reqmap.py:2241"
         },
         {
           "role": "implements",
@@ -908,15 +912,27 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2273"
+          "loc": "scripts/reqmap.py:2280"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2277"
+          "loc": "scripts/reqmap.py:2290"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2286"
+          "loc": "scripts/reqmap.py:2306"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2330"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2334"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2343"
         },
         {
           "role": "tested-by",
@@ -953,6 +969,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.04",
+      "priority": "",
       "risks": []
     },
     {
@@ -1002,6 +1019,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.02",
+      "priority": "",
       "risks": []
     },
     {
@@ -1015,7 +1033,9 @@
         "It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` + `RISK_ADVICE` that drive the Risk tab — the dedup of a draft's intent question lives in that shared source, so `next` and the Risk tab show the same signals for the same requirement.",
         "It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.",
         "It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).",
-        "Within each bucket it shall order items by descending extract `risk:` score then by id (so REVIEW-flagged drafts come first), tag items with `risk: >= 2` as `[REVIEW]`, and name the requirement file to open (`requirements/<ID>.md`).",
+        "Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.",
+        "Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.",
+        "It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).",
         "By default it shall show at most the top few items per bucket and, when a bucket has more, print a `... N more — run \\`reqmap.py next --all\\`` line; with `--all` it shall list every item. Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.",
         "With a registry that has no requirements it shall print a distinct \"no requirements yet\" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.",
         "It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate)."
@@ -1038,9 +1058,10 @@
         "Given a confirmed requirement with an open Verify-intent bullet, `next` lists it under \"Needs intent review\".",
         "Given a bucket with more items than the top-N, the default view truncates and prints a `... N more` line; `--all` lists every item.",
         "Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.",
+        "Within a bucket, a `must-have` requirement is ordered before a `should-have` one, and a requirement with no `priority` ranks after both.",
         "Given an empty registry, `next` prints the \"no requirements yet\" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0."
       ],
-      "accept": "- The output starts with a progress header carrying the confirmed/tested/draft counts.\n- Given a confirmed requirement with implementing code but no `tested-by`, `next` lists it under \"Needs tests\" with `requirements/<ID>.md`.\n- Given a draft requirement, `next` lists it under \"Drafts to review\" and NOT under \"Needs intent review\" even when it has an open verify bullet (source dedup).\n- Given a confirmed requirement with an open Verify-intent bullet, `next` lists it under \"Needs intent review\".\n- Given a bucket with more items than the top-N, the default view truncates and prints a `... N more` line; `--all` lists every item.\n- Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.\n- Given an empty registry, `next` prints the \"no requirements yet\" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0.",
+      "accept": "- The output starts with a progress header carrying the confirmed/tested/draft counts.\n- Given a confirmed requirement with implementing code but no `tested-by`, `next` lists it under \"Needs tests\" with `requirements/<ID>.md`.\n- Given a draft requirement, `next` lists it under \"Drafts to review\" and NOT under \"Needs intent review\" even when it has an open verify bullet (source dedup).\n- Given a confirmed requirement with an open Verify-intent bullet, `next` lists it under \"Needs intent review\".\n- Given a bucket with more items than the top-N, the default view truncates and prints a `... N more` line; `--all` lists every item.\n- Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.\n- Within a bucket, a `must-have` requirement is ordered before a `should-have` one, and a requirement with no `priority` ranks after both.\n- Given an empty registry, `next` prints the \"no requirements yet\" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0.",
       "input": "",
       "output": "",
       "desc": "",
@@ -1051,11 +1072,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1227"
+          "loc": "scripts/reqmap.py:1228"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1237"
+          "loc": "scripts/reqmap.py:1241"
         },
         {
           "role": "tested-by",
@@ -1063,19 +1084,20 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1373"
+          "loc": "scripts/test_reqmap.py:1382"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1379"
+          "loc": "scripts/test_reqmap.py:1388"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1384"
+          "loc": "scripts/test_reqmap.py:1393"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.12",
+      "priority": "",
       "risks": []
     },
     {
@@ -1126,6 +1148,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.08",
+      "priority": "",
       "risks": []
     },
     {
@@ -1175,6 +1198,7 @@
       ],
       "test_exempt": null,
       "milestone": "v1.04",
+      "priority": "",
       "risks": []
     },
     {
@@ -1186,7 +1210,9 @@
       "intent": "Print everything about one requirement in a single terminal view, so a reader answers \"what does this do and where is it\" without opening files.",
       "contract": [
         "The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.",
-        "It shall print a header line with the id, status, and layer. When the requirement carries a `milestone` field, the header shall append it.",
+        "It shall print a header line with the id, status, and layer.",
+        "When the requirement carries a `priority` field the header shall append it after the layer, and a `milestone` field after that.",
+        "An absent optional field shall add no empty segment to the header.",
         "It shall print the title and the intent line (the first blockquote of the body).",
         "It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.",
         "It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).",
@@ -1207,12 +1233,13 @@
       ],
       "acc": [
         "Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.",
+        "Given a requirement with a `priority` field, when `show` runs, then the priority value appears on the header line; given none, the header carries no empty priority segment.",
         "Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.",
         "Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".",
         "Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.",
         "Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not."
       ],
-      "accept": "- Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.\n- Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.\n- Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".\n- Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.\n- Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not.",
+      "accept": "- Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.\n- Given a requirement with a `priority` field, when `show` runs, then the priority value appears on the header line; given none, the header carries no empty priority segment.\n- Given an unknown id, when `show` runs, then it prints a \"no requirement with id\" message and returns a non-zero code.\n- Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under \"Depended on by\".\n- Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.\n- Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a \"None\" placeholder bullet does not.",
       "input": "",
       "output": "",
       "desc": "",
@@ -1224,15 +1251,16 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1427"
+          "loc": "scripts/reqmap.py:1482"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1656"
+          "loc": "scripts/test_reqmap.py:1702"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.14",
+      "priority": "",
       "risks": []
     },
     {
@@ -1281,35 +1309,36 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1508"
+          "loc": "scripts/reqmap.py:1565"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1515"
+          "loc": "scripts/reqmap.py:1572"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1527"
+          "loc": "scripts/reqmap.py:1584"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1545"
+          "loc": "scripts/reqmap.py:1602"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1557"
+          "loc": "scripts/reqmap.py:1614"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1569"
+          "loc": "scripts/reqmap.py:1626"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1711"
+          "loc": "scripts/test_reqmap.py:1766"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.14",
+      "priority": "",
       "risks": []
     },
     {
@@ -1363,11 +1392,12 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1827"
+          "loc": "scripts/test_reqmap.py:1882"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.15",
+      "priority": "",
       "risks": []
     }
   ],

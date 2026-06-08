@@ -1321,6 +1321,15 @@ class Next(unittest.TestCase):  # tested-by: REQ-NEXT-013
         _, out = self._next(reqs, members)
         self.assertIn("Needs intent review", out)
 
+    def test_priority_orders_within_bucket(self):
+        # both untested-confirmed → same 'Needs tests' bucket. The must-have id sorts
+        # AFTER the should-have id alphabetically, so only priority can put it first.
+        reqs = {"AAA-LOW-001": self._req("confirmed", extra="priority: should-have"),
+                "ZZZ-HIGH-002": self._req("confirmed", extra="priority: must-have")}
+        members = {rid: [("implements", "x.py", 1)] for rid in reqs}  # untested
+        _, out = self._next(reqs, members)
+        self.assertLess(out.index("ZZZ-HIGH-002"), out.index("AAA-LOW-001"))
+
     def test_review_flagged_drafts_ordered_first(self):
         reqs = {"DRAFT-A-001": self._req("draft", "risk: 0"),
                 "DRAFT-B-002": self._req("draft", "risk: 2")}  # REVIEW
@@ -1652,6 +1661,43 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         code, _ = self._lint(reqs, strict=True)
         self.assertEqual(code, 1)
 
+    def test_statement_too_long_warns_on_multi_sentence_bullet(self):
+        # two sentences, >30 words total → a stacked statement (atomicity smell)
+        stmt = "- It shall do the first thing. " + " ".join(["then"] * 30) + " it acts."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=stmt + "\n")))
+        hits = [f for f in fs if f["check"] == "statement-too-long"]
+        self.assertTrue(hits)
+        self.assertEqual(hits[0]["severity"], "warn")
+        self.assertIn("sentences", hits[0]["detail"])
+
+    def test_statement_too_long_silent_on_single_long_sentence(self):
+        # a single long sentence is `long-sentence`'s job — must NOT double-flag here
+        one = "- " + " ".join(["word"] * 40) + "."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=one + "\n")))
+        self.assertTrue(any(f["check"] == "long-sentence" for f in fs))
+        self.assertFalse(any(f["check"] == "statement-too-long" for f in fs))
+
+    def test_ac_count_low_warns(self):
+        body = self._body(contract="- ok.\n", acceptance="- only one AC.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertTrue(any(f["check"] == "ac-count-low" for f in fs))
+
+    def test_ac_count_high_warns(self):
+        accept = "".join("- AC number {}.\n".format(i) for i in range(8))  # 8 > 7
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertTrue(any(f["check"] == "ac-count-high" for f in fs))
+
+    def test_ac_count_clean_in_band(self):
+        accept = "".join("- AC number {}.\n".format(i) for i in range(4))  # 4 in [3,7]
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(acceptance=accept)))
+        self.assertFalse(any(f["check"].startswith("ac-count") for f in fs))
+
+    def test_count_ac_handles_labeled_blocks(self):
+        body = ("# T\n\n## HOW — Acceptance (= tests)\n"
+                "AC-1\n  Given x\n  When y\n  Then z\n"
+                "AC-2\n  Given a\n  When b\n  Then c\n")
+        self.assertEqual(R._count_ac(body), 2)
+
 
 class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
     def _show(self, reqs, members, cap_id):
@@ -1675,6 +1721,15 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         code, out = self._show({}, {}, "NOPE-000")
         self.assertEqual(code, 1)
         self.assertIn("no requirement with id NOPE-000", out)
+
+    def test_priority_shown_in_header_when_set(self):
+        reqs = {"REQ-X-001": self._req(extra="priority: must-have")}
+        _, out = self._show(reqs, {}, "REQ-X-001")
+        self.assertIn("must-have", out.splitlines()[0])
+
+    def test_priority_absent_header_has_no_blank_segment(self):
+        _, out = self._show({"REQ-X-001": self._req()}, {}, "REQ-X-001")
+        self.assertNotIn("·  ·", out.splitlines()[0])   # no empty priority slot
 
     def test_reverse_dependency_listed(self):
         reqs = {"CORE-A-001": self._req(),

@@ -16,7 +16,9 @@ milestone: v1.12
 - It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` + `RISK_ADVICE` that drive the Risk tab — the dedup of a draft's intent question lives in that shared source, so `next` and the Risk tab show the same signals for the same requirement.
 - It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.
 - It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).
-- Within each bucket it shall order items by descending extract `risk:` score then by id (so REVIEW-flagged drafts come first), tag items with `risk: >= 2` as `[REVIEW]`, and name the requirement file to open (`requirements/<ID>.md`).
+- Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.
+- Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.
+- It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).
 - By default it shall show at most the top few items per bucket and, when a bucket has more, print a `... N more — run \`reqmap.py next --all\`` line; with `--all` it shall list every item. Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
 - With a registry that has no requirements it shall print a distinct "no requirements yet" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.
 - It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate).
@@ -36,6 +38,7 @@ milestone: v1.12
 - Given a confirmed requirement with an open Verify-intent bullet, `next` lists it under "Needs intent review".
 - Given a bucket with more items than the top-N, the default view truncates and prints a `... N more` line; `--all` lists every item.
 - Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.
+- Within a bucket, a `must-have` requirement is ordered before a `should-have` one, and a requirement with no `priority` ranks after both.
 - Given an empty registry, `next` prints the "no requirements yet" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0.
 
 ## WHERE — Current implementation
