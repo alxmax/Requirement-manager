@@ -10,7 +10,11 @@ milestone: v1.10
 
 # First-use bootstrap
 
-> One command that turns a fresh repo into a tracked one — scaffold, draft from existing code, lock, map, and tell the human what to do next.
+> Setting up requirement tracking on a fresh project means doing five fiddly steps in the right order.
+> This is the single "get started" command that does all of them for you: it makes the folder, reads
+> your existing code and drafts requirements from it, records a baseline, builds the navigable map, and
+> tells you the one next thing to do. Without it, a newcomer has to learn and chain those steps by hand,
+> and most give up before the project is in a usable state.
 
 ## WHAT — Contract (normative)
 - It shall create the requirements directory if it does not exist.
@@ -36,6 +40,10 @@ milestone: v1.10
 - After `init`, `requirements/_map.html`, `requirements/_map.md` and the drift lock exist.
 - `init` over existing untagged code drafts at least one requirement, reports the tracked count, and its summary points at `reqmap.py next`.
 - `init` on a repo with no extractable code prints the distinct "no requirements were extracted" message (not a tracked-count summary).
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana inherits a codebase with no requirements at all. She runs `reqmap.py init` once: it creates the `requirements/` folder, seeds a `.reqmapignore`, drafts requirements from her untagged code, builds the drift lock and the map, then prints a short summary that ends with "now run `reqmap.py next`". In one command her repo went from untracked to gate-passing and navigable, and she knows exactly where to go next.
 
 ## WHERE — Current implementation
 - `cmd_init` in `reqmap.py` — creates `requirements/`, conditionally seeds `.reqmapignore` via `_reqmapignore_seed` (which applies the self-hosting exception), then calls `cmd_extract` → `cmd_check(update_lock=True)` → `cmd_map`, and prints the guided summary.

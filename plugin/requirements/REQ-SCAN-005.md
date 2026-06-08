@@ -10,7 +10,11 @@ milestone: v1.04
 
 # List members per capability
 
-> Show, for every capability, which code claims it — and which capabilities have no code.
+> This is the human-readable report that answers two everyday questions: "where is this
+> capability actually built?" and "what have we written down but never built?" It lists every
+> capability alongside the exact files and lines that claim it, and flags the ones with no
+> code behind them at all. Without it, you would have to grep through the whole codebase by
+> hand to find out where a feature lives or whether it exists yet.
 
 ## WHAT — Contract (normative)
 - It shall print every capability id (the union of loaded requirements and discovered
@@ -30,6 +34,13 @@ milestone: v1.04
 - A capability with two tags prints both `role file:line` lines under its id.
 - A requirement with no members prints `(no members found)`.
 - A tag pointing at an id with no requirement still appears in the listing.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana runs the scan command before a review. The output lists LOGIN-001 with two lines
+  pointing at the exact files that implement and test it, and shows REPORT-EXPORT-004 with
+  `(no members found)` — instantly telling her that one capability was written down but
+  never built yet.
 
 ## WHERE — Current implementation
 - `cmd_scan` in `reqmap.py`.

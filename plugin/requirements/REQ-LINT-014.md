@@ -10,7 +10,12 @@ milestone: v1.14
 
 # Requirement readability linter
 
-> Mechanically check that requirement prose follows the "Audience & writing level" rules, so requirements stay easy to understand without a human re-reading every file.
+> Requirement documents are only useful if people can actually read them. This is an
+> automatic proofreader: it flags writing that has drifted into hard-to-follow territory —
+> missing key sections, sentences that run too long, lines that pile up too many conditions
+> at once, or a list of acceptance tests that is suspiciously short or bloated. Without it,
+> the clear-writing rules rely on someone re-reading every file by hand, and prose slowly
+> degrades until the documents stop being worth opening.
 
 ## WHAT — Contract (normative)
 - The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.
@@ -45,6 +50,13 @@ milestone: v1.14
 - Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.
 - Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.
 - Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana finishes editing a requirement and runs `reqmap.py lint`. It warns that one Contract
+  bullet is a 44-word sentence and another line stacks four "and" clauses. She splits both
+  and reruns — the warnings are gone. In CI she uses `lint --strict`, which stays green on
+  warnings but fails the build the day a teammate deletes a requirement's Acceptance section.
 
 ## WHERE — Current implementation
 - `cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences`, `_count_ac` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count checks; `_count_ac` counts acceptance criteria. The `missing-section` and `ac-count` checks reuse `_has_section` (shared with the gate in `cmd_check`).

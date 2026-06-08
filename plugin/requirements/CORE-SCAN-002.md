@@ -10,7 +10,11 @@ milestone: v1.00
 
 # Member discovery
 
-> Find every place in the code that claims membership of a capability, by scanning for tags.
+> Developers mark a piece of code as belonging to a capability by writing a short note in a
+> comment, like "implements: LOGIN-001." This reads through all the project's source files
+> and collects every one of those notes, so the tool always knows which code answers to
+> which requirement. Without it, the link between a written requirement and the real code
+> behind it would have to be tracked by hand, and would quickly fall out of date.
 
 ## WHAT — Contract (normative)
 - It shall walk a code root and, for every source file in a known extension, find inline
@@ -37,6 +41,13 @@ milestone: v1.00
 - Excluded directories (`.git`, `node_modules`, `__pycache__`, the SSOT `requirements/`) are not scanned.
 - A duplicate tag on a single line is deduplicated; member paths are POSIX-relative.
 - An unreadable file is skipped without aborting the scan.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana adds a comment `# implements: CORE-SCAN-002` at the top of a new file and saves it.
+  The scan walks the project, skipping folders like `node_modules`, and reports that file —
+  with its exact path and line number — as a member of CORE-SCAN-002. A stray comment
+  reading `reimplements:` nearby is correctly ignored and never mistaken for a real tag.
 
 ## WHERE — Current implementation
 - `scan_members`, `_prune_dirs`, `load_ignore`, `TAG_RE` in `reqmap.py`.

@@ -9,7 +9,10 @@ milestone: v1.08
 
 # promote
 
-> WHY: one command to perform the human-validation step — flip a reviewed requirement from baseline/draft to `confirmed` — instead of hand-editing frontmatter.
+> A requirement starts life as a draft and only becomes official once a human has reviewed it. This
+> command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks
+> that it actually points at real code and warns if no test is linked. Doing this by hand means editing
+> the file's header directly, which is easy to get subtly wrong; this command does it safely every time.
 
 ## WHAT — Contract (normative)
 - `promote <ID>` shall set the requirement's `status` to `confirmed` by editing only the value of the first `status:` line in its leading frontmatter block, preserving indentation and any trailing inline comment, and leaving the body untouched.
@@ -44,6 +47,10 @@ AC-4
   Given  a status line carrying a trailing `# comment`
   When   `promote <ID>` runs
   Then   the comment is preserved and only the status value changed
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana has finished reviewing a draft requirement that already has code behind it. She runs `reqmap.py promote AUTH-LOGIN-001`: its status flips to `confirmed`, the rest of the file is untouched, and it reminds her to refresh the drift lock. When she tries the same on a requirement with no code yet, it refuses, leaves the file alone, and tells her exactly which `implements:` tag to add first.
 
 ## WHERE — Current implementation
 - plugin/scripts/reqmap.py (`cmd_promote`, `_set_frontmatter_status`)

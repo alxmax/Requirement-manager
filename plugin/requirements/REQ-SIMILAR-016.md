@@ -10,7 +10,10 @@ milestone: v1.14
 
 # Duplicate-capability detector
 
-> Flag requirement pairs whose contracts describe the same capability, so a reviewer can merge or differentiate them before two divergent implementations appear.
+> When two requirements quietly describe the same capability, you do not notice until each
+> has grown its own divergent implementation — and now there is a mess to untangle. This
+> compares requirement pairs by their wording and flags the ones that overlap, so a reviewer
+> can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.
 
 ## WHAT — Contract (normative)
 - The `similar` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.
@@ -36,6 +39,12 @@ milestone: v1.14
 - Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a "need at least two" message and returns zero.
 - Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.
 - Given any corpus, when `similar` runs, then it returns zero.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana suspects two of her requirements overlap. She runs `reqmap.py similar` and sees a pair
+  scored `0.82` with the shared words "token, session, expire" listed. She opens both, realises
+  one is a subset of the other, and merges them before either grows its own divergent code.
 
 ## WHERE — Current implementation
 - `cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf` and `_cosine` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, and `_cosine` scores each pair. `cmd_similar` sorts the pairs and prints them with their shared terms.

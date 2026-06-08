@@ -10,7 +10,11 @@ milestone: v1.12
 
 # What-should-I-do-next report
 
-> Render the map's risk surface in the terminal as counted, actionable buckets, so a human knows where to start without opening the HTML map.
+> Faced with a whole project of requirements, it's hard to know what to work on first. This command
+> looks at every requirement, spots the gaps — ones with no code, no tests, or unanswered questions —
+> and prints them as a short, prioritised to-do list right in the terminal. It puts the most urgent
+> work at the top so you can just start. Without it, you'd have to open the visual map and eyeball the
+> risk yourself to figure out where to begin.
 
 ## WHAT — Contract (normative)
 - It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` + `RISK_ADVICE` that drive the Risk tab — the dedup of a draft's intent question lives in that shared source, so `next` and the Risk tab show the same signals for the same requirement.
@@ -40,6 +44,10 @@ milestone: v1.12
 - Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.
 - Within a bucket, a `must-have` requirement is ordered before a `should-have` one, and a requirement with no `priority` ranks after both.
 - Given an empty registry, `next` prints the "no requirements yet" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana starts her day unsure what's most important. She runs `reqmap.py next` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 draft(s)" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
 
 ## WHERE — Current implementation
 - `cmd_next` and `_risk_score` in `reqmap.py` — prints the header, builds a minimal node per requirement, collects `_risk_signals`, orders each bucket by `risk:` score then id, truncates to the top-N unless `--all`, and prints `RISK_ADVICE` text. The draft intent-dedup is in `_risk_signals` (shared with the Risk tab).

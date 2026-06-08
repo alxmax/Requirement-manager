@@ -10,7 +10,12 @@ milestone: v1.06
 
 # Legacy extraction
 
-> Bootstrap a registry on a brownfield codebase by proposing draft requirements from untagged code.
+> When an existing project has lots of code but no requirements written down, this gives you
+> a running start: it reads each untagged file and writes a rough draft requirement for it,
+> clearly marked as a draft so no one mistakes a guess for a settled decision. It also looks
+> at human-readable spec and prompt documents, not just code. Without it, someone would have
+> to sit down and describe every existing capability from scratch before the tool was useful
+> on an older project.
 
 ## WHAT — Contract (normative)
 - It shall walk untagged source files (`.py`/`.js`/`.ts`/`.c`/`.cpp`) and propose one
@@ -68,6 +73,14 @@ milestone: v1.06
 - Given a file tagged `generated-from: <ID>` inside an HTML comment
   (`<!-- generated-from: <ID> -->`), When `scan_members` runs, Then that file is a
   member of `<ID>`.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana runs extract on a brownfield repo. For each untagged source file it drops a
+  `DRAFT-*.md` capturing what the file appears to do; one file full of `TODO` and `FIXME`
+  markers scores higher risk and is flagged `REVIEW`. The engine's own `reqmap.py` is in
+  `.reqmapignore`, so it is skipped, and a prompt file under `prompts/` gets its own draft
+  too — leaving Ana a pile of starting points to promote into real requirements.
 
 ## WHERE — Current implementation
 - `cmd_extract`, `_draft_id`, `_risk`, `classify_prose`, `_prose_facts` in `reqmap.py`.
