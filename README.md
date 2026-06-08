@@ -37,31 +37,6 @@ tool turns the spec into a real file that lives **next to the code** and is
 4. **The map shows the big picture.** `reqmap.py map` generates diagrams and a
    double-click-to-open HTML viewer of how requirements and code connect.
 
-## How much of IEEE 29148 does it cover?
-
-The international standard for requirements engineering, **ISO/IEC/IEEE 29148**,
-lists nine quality characteristics every individual requirement should have. This
-tool's template and gate address **about 70% of them (roughly 6–7 of 9)** — and,
-importantly, **about half are machine-enforced**, not just suggested:
-
-| IEEE 29148 characteristic | Here | How |
-|---|---|---|
-| Necessary | ✅ | the `WHY` line |
-| Unambiguous | ✅ enforced | `vague-term` lint flags untestable words |
-| Singular (atomic) | ✅ enforced | `statement-too-long` / `ac-count` lint |
-| Verifiable | ✅ enforced | per-criterion `# verifies: <id>#AC-N` tags, checked by the gate |
-| Conforming | ✅ enforced | one template + readability lint |
-| Complete | ◐ partial | Contract required; Assumptions hint |
-| Correct (traces to a stakeholder need) | ◐ partial | `satisfies:` upstream traceability + `need` layer |
-| Appropriate | ◐ partial | plain-language angles for any reader |
-| Feasible | ✗ | not modelled |
-
-> **This is not a conformance claim.** Full ISO/IEC/IEEE 29148 conformance also
-> covers process, stakeholder elicitation, and document structure that this tool
-> does not address. The figure above is coverage of the *individual-requirement
-> quality characteristics* only — the part a lightweight, code-adjacent tool can
-> actually keep honest.
-
 ## Try it in 2 minutes
 
 ```bash
