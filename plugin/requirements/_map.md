@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-09 15:30
-nodes: 24
-edges: 31
+generated: 2026-06-09 16:21
+nodes: 25
+edges: 32
 ---
 
 # Requirement Map
@@ -32,6 +32,7 @@ graph LR
     REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
     REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
     REQ_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>REQ-PROMOTE-TODO-001</small>"]
+    REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
     REQ_SHOW_015["Single-requirement dossier<br><small>REQ-SHOW-015</small>"]
     REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
@@ -150,6 +151,13 @@ graph LR
   REQ_PROMOTE_TODO_001 -->|implements| f_scripts_reqmap_py_635_681
   f_scripts_test_reqmap_py_2286["scripts/test_reqmap.py:2286"]
   REQ_PROMOTE_TODO_001 -->|tested-by| f_scripts_test_reqmap_py_2286
+  REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
+  f_scripts_reqmap_py_2655["scripts/reqmap.py:2655"]
+  REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_2655
+  f_scripts_test_reqmap_py_2328["scripts/test_reqmap.py:2328"]
+  REQ_REVIEW_022 -->|tested-by| f_scripts_test_reqmap_py_2328
+  f_skills_requirement_quality_review_SKILL_md_6["skills/requirement-quality-review/SKILL.md:6"]
+  REQ_REVIEW_022 -->|implements| f_skills_requirement_quality_review_SKILL_md_6
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_345["scripts/reqmap.py:345"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_345
@@ -189,7 +197,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>20 caps</small>"]
+  a_REQ["REQ<br><small>21 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px

@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.10"
+MAP_ENGINE_VERSION = "2026-06-09.11"
 
 
 # ---------- parsing ----------
@@ -2652,6 +2652,60 @@ def render_html(data, reqs_dir):  # implements: REQ-VIEWER-007
     return out
 
 
+def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
+    """Emit a DETERMINISTIC, read-only review PLAN as JSON for an out-of-band AI quality
+    pass. The engine never calls an LLM and writes no file — it gathers each requirement's
+    prose (WHY/contract/acceptance/verify-intent) plus cheap STRUCTURAL anchors the AI
+    consumer should focus on, a corpus coverage_summary, and the finding contract. The plan
+    is byte-reproducible across runs; the AI findings DERIVED from it are advisory and NOT
+    reproducible, and no gate path reads this output or any AI sidecar."""
+    ids = [one_id] if one_id else sorted(reqs)
+    items = []
+    for rid in ids:
+        r = reqs.get(rid)
+        if not r:
+            continue
+        body = r["body"]
+        contract = _bullets(body, "contract")
+        intent = _first_quote(body)
+        ac_n = _count_ac(body)
+        intent_words = len(intent.split())
+        items.append({
+            "id": rid,
+            "title": _title(body),
+            "layer": r["meta"].get("layer", "feature"),
+            "status": r["meta"].get("status", "draft"),
+            "intent": intent,
+            "contract": contract,
+            "acceptance": _bullets(body, "acceptan"),
+            "verify_intent": _bullets(body, "verify"),
+            # cheap STRUCTURAL anchors (deterministic facts, NOT judgments) the AI examines:
+            "anchors": {
+                "contract_clauses": len(contract),
+                "acceptance_count": ac_n,
+                "intent_words": intent_words,
+                "intent_terse": intent_words < 12,                    # WHY may merely restate the title
+                "more_contract_than_acceptance": len(contract) > ac_n,  # a clause may be uncovered
+            },
+        })
+    plan = {
+        "engine_version": MAP_ENGINE_VERSION,
+        "advisory": ("DETERMINISTIC read-only review plan. AI findings derived from it are ADVISORY "
+                     "and NON-reproducible; they are never part of the gate and never auto-applied."),
+        "categories": [
+            {"key": "untestable-contract", "desc": "a contract clause so vague it cannot be verified"},
+            {"key": "why-restates-title", "desc": "the WHY restates the title instead of explaining why it exists"},
+            {"key": "acceptance-doesnt-cover-contract", "desc": "a contract clause with no acceptance criterion exercising it"},
+        ],
+        "finding_contract": ("every AI finding MUST carry a concrete suggested_rewrite; emit only "
+                             "high-confidence findings; severity is advisory-only (never error/warn, never the gate)."),
+        "coverage_summary": {"total_requirements": len(reqs), "requirements_in_plan": len(items)},
+        "requirements": items,
+    }
+    print(json.dumps(plan, indent=2, ensure_ascii=False))
+    return 0
+
+
 def main():
     # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
     # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
@@ -2664,7 +2718,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2749,6 +2803,8 @@ def main():
         return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
     if a.cmd == "findings":
         return cmd_findings(reqs, reqs_dir, a.raw)
+    if a.cmd == "review":
+        return cmd_review(reqs, a.arg)
     if a.cmd == "promote":
         if not a.arg:
             print("usage: reqmap promote AREA-NAME-NNN"); return 2

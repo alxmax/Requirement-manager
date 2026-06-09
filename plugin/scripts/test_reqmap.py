@@ -2325,5 +2325,57 @@ class PromoteTodo(unittest.TestCase):  # tested-by: REQ-PROMOTE-TODO-001
             self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 1)     # id taken
 
 
+class Review(unittest.TestCase):  # tested-by: REQ-REVIEW-022
+    BODY = ("---\nid: A-R-001\nstatus: confirmed\nlayer: feature\n---\n\n"
+            "# Thing\n\n> WHY: it does the thing for a reason that matters to readers here.\n\n"
+            "## WHAT — Contract\n- It shall do x.\n- It shall do y.\n\n"
+            "## HOW — Acceptance\n- x happens.\n")
+
+    def _seed(self, d):
+        _write(os.path.join(d, "A-R-001.md"), self.BODY)
+        _write(os.path.join(d, "a.py"), tag("A-R-001") + "\n")
+
+    def _review(self, reqs, one=None):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_review(reqs, one)
+        return buf.getvalue()
+
+    def test_plan_structure_and_coverage(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            plan = json.loads(self._review(R.load_requirements(d)))
+            self.assertEqual(plan["coverage_summary"], {"total_requirements": 1, "requirements_in_plan": 1})
+            self.assertEqual([c["key"] for c in plan["categories"]],
+                             ["untestable-contract", "why-restates-title", "acceptance-doesnt-cover-contract"])
+            self.assertIn("suggested_rewrite", plan["finding_contract"])
+            anchors = plan["requirements"][0]["anchors"]
+            self.assertEqual(anchors["contract_clauses"], 2)
+            self.assertTrue(anchors["more_contract_than_acceptance"])     # 2 contract > 1 AC
+
+    def test_review_is_byte_deterministic(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs = R.load_requirements(d)
+            self.assertEqual(self._review(reqs), self._review(reqs))
+
+    def test_gate_ignores_ai_sidecar(self):  # DETERMINISM WALL — verifies: REQ-REVIEW-022
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+
+            def gate():
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+                return code, buf.getvalue()
+
+            before = gate()
+            _write(os.path.join(d, "_ai_review.md"),
+                   "# AI — advisory (non-deterministic). NOT a gate.\n- something\n")
+            self.assertEqual(before, gate())   # check never reads the AI sidecar
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -15,7 +15,7 @@
 - [x] Corpus health snapshot (health)     | lane: ops
 - [x] promote-todo command               | lane: feature
 - [x] Gate validation for milestone IDs  | lane: ops
-- [ ] Requirement quality checker (AI)   | lane: feature
+- [x] Requirement quality checker (AI)   | lane: feature
 
 ## v1.15
 - [x] Test-link integrity gate check (testlink) | lane: ops
