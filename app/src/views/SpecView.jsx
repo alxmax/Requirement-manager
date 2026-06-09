@@ -120,6 +120,7 @@ export function SpecView({ selId, setSelId }) {
   const req = REQUIREMENTS.filter(x=>x.area!=="CORE");
   const statusColor = (s) => s==="in-progress" ? "var(--status-drift)"
     : s==="draft" ? "var(--status-draft)"
+    : s==="deprecated" ? "var(--fg-faint)"
     : s==="confirmed" ? "transparent" : "var(--status-draft)";
   const statusTint = (s) => s==="in-progress" ? "var(--status-drift-bg)"
     : s==="draft" ? "var(--status-draft-bg)"

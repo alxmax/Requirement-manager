@@ -18,5 +18,6 @@ export function Btn({ variant = "secondary", icon, children, ...rest }) {
 export function statusKind(s) {
   return s === "confirmed" ? "confirmed"
     : s === "in-progress" ? "in-progress"
+    : s === "deprecated" ? "deprecated"
     : s === "draft" ? "draft" : "draft";
 }

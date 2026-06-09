@@ -212,6 +212,8 @@ button { font-family: inherit; cursor: pointer; }
 .pill.feature .pdot { background: var(--fg-muted); }
 .pill.error { background: var(--status-error-bg); border-color: var(--status-error-ln); color: var(--status-error); }
 .pill.error .pdot { background: var(--status-error); }
+.pill.deprecated { background: var(--surface-hov); border-color: var(--border); color: var(--fg-faint); }
+.pill.deprecated .pdot { background: var(--fg-faint); }
 
 /* ---- Problems inbox ------------------------------------------------------ */
 .problems { padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; max-width: 920px; }
