@@ -1266,6 +1266,25 @@ class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertEqual(code, 0)
             self.assertIn("fresh", out)
 
+    def test_docs_map_repo_field_change_is_not_stale(self):
+        # the git-derived repo field differs across forks/clones; like _map.json,
+        # it must be excluded from the docs/map.html freshness diff
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _write(os.path.join(d, "docs", ".nojekyll"), "")
+            self._map(d)
+            docs = os.path.join(d, "docs", "map.html")
+            html = open(docs, encoding="utf-8").read()
+            # replace whatever repo value the build produced with a different slug
+            i = html.index('"repo": "')
+            j = html.index('"', i + len('"repo": "'))
+            swapped = html[:i] + '"repo": "somefork/clone"' + html[j + 1:]
+            self.assertNotEqual(swapped, html)        # the substitution actually fired
+            _write(docs, swapped)
+            code, out = self._map(d, check=True)      # only repo changed -> still fresh
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
+
 
 class Promote(unittest.TestCase):  # tested-by: REQ-PROMOTE-011
     def _run(self, d, cap_id):

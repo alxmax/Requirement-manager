@@ -59,8 +59,9 @@ milestone: v1.04
   and the viewer template are both present and `docs/map.html` already exists. A copy that was
   never generated is not stale (the same absent-file rule applied to `_map.*`). The on-disk copy
   is read as text so platform newline differences (CRLF vs LF) never raise a false positive, and
-  the injected data carries only the stable `engine_version` (no wall-clock), so the comparison
-  is deterministic. This stops the published GitHub Pages copy from silently drifting from the registry.
+  the git-derived `repo` field is excluded from this comparison too (as it is for `_map.json`), so a
+  fork/clone with a different remote is not spuriously flagged. This stops the published GitHub Pages
+  copy from silently drifting from the registry.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

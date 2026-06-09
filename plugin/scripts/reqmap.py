@@ -2001,14 +2001,16 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
             stale.append(name)
     # Published GitHub Pages copy: docs/map.html must equal a fresh viewer render.
     # Reading text-mode (not bytes) normalises CRLF/LF so a copy written on Windows
-    # is not falsely flagged against the LF in-memory render; the injected blob
-    # carries only the stable engine_version date (no wall-clock) so it is stable.
+    # is not falsely flagged against the LF in-memory render. The comparison runs
+    # through _strip_generated for the same reason _map.json does: the injected blob
+    # embeds the git-derived `repo` field, which differs across forks/clones — left
+    # in, it would make `map --check` spuriously fail on any fork.
     docs_out = _docs_publish_path(root)
     tpl = _viewer_template_path()
     if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
             fresh_html = _inject_viewer(f.read(), data)
-        if open(docs_out, encoding="utf-8").read() != fresh_html:
+        if _strip_generated(open(docs_out, encoding="utf-8").read()) != _strip_generated(fresh_html):
             stale.append(os.path.basename(docs_out))
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py map` and commit the result."
