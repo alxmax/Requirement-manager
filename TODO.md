@@ -13,8 +13,8 @@
 - [x] Single-requirement dossier (show)   | lane: feature
 - [x] Duplicate-capability detector (similar) | lane: feature
 - [x] Corpus health snapshot (health)     | lane: ops
-- [ ] promote-todo command               | lane: feature
-- [ ] Gate validation for milestone IDs  | lane: ops
+- [x] promote-todo command               | lane: feature
+- [x] Gate validation for milestone IDs  | lane: ops
 - [ ] Requirement quality checker (AI)   | lane: feature
 
 ## v1.15
