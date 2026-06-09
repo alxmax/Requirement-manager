@@ -782,7 +782,7 @@ class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertNotIn("<!--REQMAP_DATA-->", html)
 
 
-class DocsPublish(unittest.TestCase):  # tested-by: REQ-MAP-007
+class DocsPublish(unittest.TestCase):  # tested-by: REQ-PAGES-021
     def test_docs_publish_path_nojekyll_signal(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", ".nojekyll"), "")
@@ -1184,6 +1184,7 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
 
 
 class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
+    # tested-by: REQ-PAGES-021  (the docs/map.html freshness cases below)
     def _map(self, d, check=False):
         rd = os.path.join(d, "requirements")
         reqs = R.load_requirements(rd)

@@ -1299,7 +1299,7 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
-        docs_out = _docs_publish_path(root)
+        docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
         if docs_out:
             with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
                 dst.write(src.read())
@@ -2005,7 +2005,7 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
     # through _strip_generated for the same reason _map.json does: the injected blob
     # embeds the git-derived `repo` field, which differs across forks/clones — left
     # in, it would make `map --check` spuriously fail on any fork.
-    docs_out = _docs_publish_path(root)
+    docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
     tpl = _viewer_template_path()
     if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
@@ -2463,7 +2463,7 @@ VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
 
 
-def _docs_publish_path(root):  # implements: REQ-MAP-007
+def _docs_publish_path(root):  # implements: REQ-PAGES-021
     """Return docs/map.html path when docs/ carries a GitHub Pages signal
     (.nojekyll or index.html present), else None. Opt-in by folder contents —
     repos without the signal are unaffected.
