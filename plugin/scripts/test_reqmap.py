@@ -1727,6 +1727,13 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
         self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
 
+    def test_empty_section_flags_contentless_heading(self):
+        empty = "# T\n\n{}\n{}\n".format(self.CONTRACT, self.ACCEPT)         # both headings, no content
+        fs = R.lint_requirement("REQ-E-001", self._req("confirmed", empty))
+        self.assertIn("empty-section", [f["check"] for f in fs])
+        self.assertNotIn("empty-section",                                    # content present => silent
+                         [f["check"] for f in R.lint_requirement("REQ-F-001", self._req("confirmed", self._body()))])
+
     def test_draft_is_out_of_scope(self):
         long_sent = " ".join(["word"] * 50) + "."
         reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}

@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.7"
+MAP_ENGINE_VERSION = "2026-06-09.8"
 
 
 # ---------- parsing ----------
@@ -1537,6 +1537,15 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
     if not _has_section(body, "acceptan"):
         findings.append({"severity": "error", "check": "missing-section",
                          "detail": "no '## HOW — Acceptance' section"})
+    # empty-section (warn): the heading is present but carries no clauses/criteria — it
+    # passes `missing-section` yet documents nothing (and `ac-count-low` skips the zero
+    # case). Precise zero/non-zero test, so near-zero false positive.
+    if _has_section(body, "contract") and not _bullets(body, "contract"):
+        findings.append({"severity": "warn", "check": "empty-section",
+                         "detail": "'## WHAT — Contract' section present but has no clauses"})
+    if _has_section(body, "acceptan") and _count_ac(body) == 0:
+        findings.append({"severity": "warn", "check": "empty-section",
+                         "detail": "'## HOW — Acceptance' section present but has no criteria"})
     # prose readability (warn): only on the Contract + Acceptance sections
     for name in ("contract", "acceptan"):
         for ln in _lint_prose(body, name):
