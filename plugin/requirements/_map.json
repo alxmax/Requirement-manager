@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-09.2",
+  "engine_version": "2026-06-09.3",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -261,6 +261,7 @@
       "satisfied_by": [
         "REQ-CHECK-006",
         "REQ-MAP-007",
+        "REQ-PAGES-021",
         "REQ-TRACE-020"
       ],
       "members": [],
@@ -326,7 +327,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1981"
+          "loc": "scripts/test_reqmap.py:2040"
         }
       ],
       "test_exempt": null,
@@ -755,7 +756,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1863"
+          "loc": "scripts/test_reqmap.py:1922"
         }
       ],
       "test_exempt": null,
@@ -821,7 +822,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1417"
+          "loc": "scripts/test_reqmap.py:1476"
         }
       ],
       "test_exempt": null,
@@ -909,7 +910,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1603"
+          "loc": "scripts/test_reqmap.py:1662"
         }
       ],
       "test_exempt": null,
@@ -936,7 +937,7 @@
         "Req→Code shall color an enforced-but-unlinked requirement red and a baseline/draft not-yet-",
         "The Risk diagram shall show only requirements with ≥1 risk signal (confirmed+0 members,",
         "All requirement-derived text shall be JSON-encoded in `_map.json`, which neutralizes any",
-        "When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub"
+        "Publishing `_map.html` to a repo's GitHub Pages folder and gating that copy's freshness is a"
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -947,7 +948,7 @@
         "`export` is a thin alias that writes only `_map.json` (or to stdout / `--out PATH`) for"
       ],
       "current_impl": [
-        "`cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, `_docs_publish_path`, the `_mermaid_*` generators in `reqmap.py`."
+        "`cmd_map`, `cmd_export`, `render_md`, `render_json`, `render_html`, `_build_json_text`, `_repo_name`, `_inject_viewer`, `_viewer_template_path`, the `_mermaid_*` generators in `reqmap.py`. (Pages publish/gate moved to [[REQ-PAGES-021]].)"
       ],
       "acc": [
         "The generated files contain one node per requirement and one edge per `depends_on`.",
@@ -957,11 +958,9 @@
         "Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.",
         "Risk shows only requirements with at least one risk signal, each with a scripted recommendation.",
         "A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.",
-        "Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.",
-        "When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html` (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.",
-        "When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the standard outputs."
+        "Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early."
       ],
-      "accept": "- The generated files contain one node per requirement and one edge per `depends_on`.\n- `_map.md` contains exactly 4 Mermaid code blocks, each with a legend.\n- `_map.json` parses to `{engine_version, repo, nodes, edges}` and carries one node per requirement\n  with its members and risk signals; `repo` is the project's `owner/repo` (or directory name, or null)\n  and is omitted from the freshness comparison.\n- System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.\n- Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.\n- Risk shows only requirements with at least one risk signal, each with a scripted recommendation.\n- A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.\n- Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.\n- When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html` (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.\n- When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the standard outputs.",
+      "accept": "- The generated files contain one node per requirement and one edge per `depends_on`.\n- `_map.md` contains exactly 4 Mermaid code blocks, each with a legend.\n- `_map.json` parses to `{engine_version, repo, nodes, edges}` and carries one node per requirement\n  with its members and risk signals; `repo` is the project's `owner/repo` (or directory name, or null)\n  and is omitted from the freshness comparison.\n- System Map groups nodes into per-area subgraphs, collapses single-node areas into `misc`, and omits edges whose target is a bus node.\n- Dependency Map is area-level: one node per area (with a count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.\n- Risk shows only requirements with at least one risk signal, each with a scripted recommendation.\n- A requirement id/title containing a quote or `</script>` round-trips through `_map.json` as data (no injection) and a node with no members reports an empty member list.\n- Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.",
       "input": "",
       "output": "",
       "desc": "",
@@ -971,7 +970,8 @@
       ],
       "used_by": [
         "REQ-INIT-012",
-        "REQ-NEXT-013"
+        "REQ-NEXT-013",
+        "REQ-PAGES-021"
       ],
       "satisfies": [
         "NEED-SSOT-001"
@@ -996,87 +996,83 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2005"
+          "loc": "scripts/reqmap.py:2023"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2013"
+          "loc": "scripts/reqmap.py:2031"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2036"
+          "loc": "scripts/reqmap.py:2054"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2050"
+          "loc": "scripts/reqmap.py:2068"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2066"
+          "loc": "scripts/reqmap.py:2084"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2112"
+          "loc": "scripts/reqmap.py:2130"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2118"
+          "loc": "scripts/reqmap.py:2136"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2125"
+          "loc": "scripts/reqmap.py:2143"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2162"
+          "loc": "scripts/reqmap.py:2180"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2177"
+          "loc": "scripts/reqmap.py:2195"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2208"
+          "loc": "scripts/reqmap.py:2226"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2284"
+          "loc": "scripts/reqmap.py:2302"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2332"
+          "loc": "scripts/reqmap.py:2350"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2383"
+          "loc": "scripts/reqmap.py:2401"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2391"
+          "loc": "scripts/reqmap.py:2409"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2422"
+          "loc": "scripts/reqmap.py:2440"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2432"
+          "loc": "scripts/reqmap.py:2450"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2448"
+          "loc": "scripts/reqmap.py:2490"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2472"
+          "loc": "scripts/reqmap.py:2494"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2476"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:2485"
+          "loc": "scripts/reqmap.py:2503"
         },
         {
           "role": "tested-by",
@@ -1093,10 +1089,6 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_reqmap.py:758"
-        },
-        {
-          "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:785"
         },
         {
           "role": "tested-by",
@@ -1228,23 +1220,91 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1291"
+          "loc": "scripts/test_reqmap.py:1350"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1399"
+          "loc": "scripts/test_reqmap.py:1458"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1405"
+          "loc": "scripts/test_reqmap.py:1464"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1410"
+          "loc": "scripts/test_reqmap.py:1469"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.12",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-PAGES-021",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Publish & gate the GitHub Pages map copy",
+      "intent": "The map viewer is most useful when it is published — a URL anyone can open, no checkout required. This capability copies the freshly-built viewer into a repo's GitHub Pages folder and then guards that published copy, so the page people actually read can never quietly fall behind the registry it claims to show.",
+      "contract": [
+        "When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub",
+        "`map --check` (the no-write freshness gate) shall additionally flag `docs/map.html` as stale",
+        "The freshness comparison shall read the on-disk copy as text so a platform newline"
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "The Pages signal is detected at the git root (so the engine running from a sub-directory",
+        "This depends on REQ-MAP-007: the published copy and its freshness check both operate on the"
+      ],
+      "current_impl": [
+        "`_docs_publish_path` (Pages-signal resolution) and the `docs/map.html` branches of `cmd_map`"
+      ],
+      "acc": [
+        "When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html`",
+        "When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the",
+        "After `map`, `map --check` exits 0; if `docs/map.html` is then edited to differ from a fresh",
+        "When the Pages signal is present but `docs/map.html` does not exist (never generated, or",
+        "A change to only the git-derived `repo` value inside `docs/map.html` leaves `map --check` fresh"
+      ],
+      "accept": "- When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html`\n  (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.\n- When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the\n  standard outputs.\n- After `map`, `map --check` exits 0; if `docs/map.html` is then edited to differ from a fresh\n  render, `map --check` exits non-zero and names `map.html`.\n- When the Pages signal is present but `docs/map.html` does not exist (never generated, or\n  removed), `map --check` does not flag it stale.\n- A change to only the git-derived `repo` value inside `docs/map.html` leaves `map --check` fresh\n  (the field is excluded from the diff).",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-MAP-007"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1302"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2008"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2466"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:785"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1187"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.04",
       "priority": "",
       "risks": []
     },
@@ -1293,7 +1353,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1231"
+          "loc": "scripts/test_reqmap.py:1290"
         }
       ],
       "test_exempt": null,
@@ -1409,7 +1469,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1737"
+          "loc": "scripts/test_reqmap.py:1796"
         }
       ],
       "test_exempt": null,
@@ -1489,7 +1549,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1801"
+          "loc": "scripts/test_reqmap.py:1860"
         }
       ],
       "test_exempt": null,
@@ -1550,7 +1610,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1917"
+          "loc": "scripts/test_reqmap.py:1976"
         }
       ],
       "test_exempt": null,
@@ -1620,7 +1680,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2051"
+          "loc": "scripts/test_reqmap.py:2110"
         }
       ],
       "test_exempt": null,
@@ -1704,6 +1764,10 @@
     ],
     [
       "REQ-NEXT-013",
+      "REQ-MAP-007"
+    ],
+    [
+      "REQ-PAGES-021",
       "REQ-MAP-007"
     ],
     [
