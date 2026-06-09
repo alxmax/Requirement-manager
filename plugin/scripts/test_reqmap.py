@@ -133,6 +133,25 @@ class Gate(unittest.TestCase):
         # ...and editing that non-normative section must not trip drift
         self.assertEqual(R.binding_hash(trap), R.binding_hash(trap.replace("not normative", "EDITED")))
 
+    def test_dashless_normative_heading_is_hashed_and_detected(self):  # tested-by: CORE-DRIFT-003
+        # `## WHAT Contract` (no em-dash) must be (a) detected as a Contract section by the
+        # gate AND (b) folded into the drift hash — else a confirmed req passes the gate but
+        # silently never drifts (empty hash). Regression guard for the heading-match gap.
+        nodash = ("# T\n\n## WHAT Contract\n- shall do X\n\n"
+                  "## HOW Acceptance\nAC-1\n  Then X holds\n")
+        self.assertTrue(R._has_section(nodash, "contract"))
+        self.assertTrue(R._has_section(nodash, "acceptan"))
+        self.assertNotEqual(R.binding_hash(nodash), R.binding_hash(""))               # not the empty hash
+        self.assertNotEqual(R.binding_hash(nodash),
+                            R.binding_hash(nodash.replace("shall do X", "shall do Y")))  # tracks edits
+
+    def test_has_section_anchored_to_label(self):  # tested-by: REQ-CHECK-006
+        # a commentary heading that merely mentions the keyword is NOT the section
+        self.assertFalse(R._has_section("# T\n\n## Notes — contract caveats\n- x\n", "contract"))
+        # canonical, bare, and dash-less label forms all count
+        for h in ("## WHAT — Contract (normative)", "## Contract", "## WHAT Contract"):
+            self.assertTrue(R._has_section("# T\n\n" + h + "\n- x\n", "contract"), h)
+
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-FOO-001.md"),

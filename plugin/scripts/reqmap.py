@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.4"
+MAP_ENGINE_VERSION = "2026-06-09.5"
 
 
 # ---------- parsing ----------
@@ -269,7 +269,20 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
 # prefix), NOT anywhere in the heading — otherwise a commentary heading like
 # `## Notes — contract caveats` would leak into the drift hash.
 _NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|how)\s*[—–-]\s*)?(?:contract|acceptan|input|output)", re.I)
+    r"^##\s+(?:(?:what|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
+
+
+def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
+    """True if a `## ` heading's LABEL is `name` (case-insensitive), allowing an
+    optional `WHAT`/`HOW` prefix whose dash is optional — so `## WHAT — Contract`,
+    `## WHAT Contract`, and bare `## Contract` all match name='contract'. Anchored
+    to the label start so a commentary heading like `## Notes — contract caveats`
+    does NOT match name='contract'. Keeps section detection (the gate, the linter)
+    in agreement with the drift hash (_NORMATIVE_HEADING_RE) — see the silent-drift
+    inconsistency this guards against."""
+    return bool(re.match(
+        r"##\s+(?:(?:what|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
+        heading.strip().lower()))
 
 
 def binding_hash(body):  # implements: CORE-DRIFT-003
@@ -314,14 +327,16 @@ def save_lock(reqs_dir, lock):  # implements: CORE-DRIFT-003
 
 # ---------- commands ----------
 def _has_section(body, name):  # implements: REQ-CHECK-006
-    """True if the body has a `## ` heading whose text contains `name` (case-insensitive).
-    Used to detect legacy-schema requirements that lack a `## WHAT — Verify intent`
-    section — `findings` mines only that section, so its absence means findings is
-    silently inactive for that requirement."""
-    name = name.lower()
+    """True if the body has a normative `## ` heading whose LABEL is `name`
+    (case-insensitive), e.g. `## WHAT — Verify intent` for name='verify intent'.
+    Anchored to the label (see `_heading_label_is`) so a commentary heading that
+    merely mentions the word — `## Notes — contract caveats` — does not count as a
+    Contract section, and a dash-less `## WHAT Contract` does. This keeps the gate's
+    section-presence check in agreement with the drift hash, closing the
+    silent-drift gap where a heading passed the gate but produced an empty hash."""
     for line in body.splitlines():
-        s = line.strip().lower()
-        if s.startswith("## ") and name in s:
+        s = line.strip()
+        if s.startswith("## ") and _heading_label_is(s, name):
             return True
     return False
 
