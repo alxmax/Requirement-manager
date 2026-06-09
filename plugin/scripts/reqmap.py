@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.11"
+MAP_ENGINE_VERSION = "2026-06-09.12"
 
 
 # ---------- parsing ----------
@@ -189,9 +189,61 @@ def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     return pats
 
 
-def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+def _scan_file_tags(fp):  # implements: CORE-SCAN-002
+    """Read one file; return its membership tags as [[role, cap, line], ...] in file
+    order, or None on read error (the caller skips the file)."""
+    out = []
+    try:
+        with open(fp, encoding="utf-8", errors="ignore") as f:
+            for i, line in enumerate(f, 1):
+                seen = set()
+                for role, cap in TAG_RE.findall(line):
+                    key = (role, cap)
+                    if key in seen:        # same tag twice on one line
+                        continue
+                    seen.add(key)
+                    out.append([role, cap, i])
+    except OSError:
+        return None
+    return out
+
+
+def _scancache_path(reqs_dir):  # implements: REQ-SCANCACHE-023
+    return os.path.join(reqs_dir, "_scancache.json")
+
+
+def _load_scancache(reqs_dir):  # implements: REQ-SCANCACHE-023
+    """Read the opt-in scan-cache sidecar; {} when absent/corrupt (fails open)."""
+    try:
+        with open(_scancache_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_scancache(reqs_dir, cache):  # implements: REQ-SCANCACHE-023
+    """Write the scan cache, best-effort — an unwritable cache must never fail the scan."""
+    try:
+        with open(_scancache_path(reqs_dir), "w", encoding="utf-8") as f:
+            json.dump(cache, f, indent=2, sort_keys=True)
+    except OSError:
+        pass
+
+
+def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCAN-002
+    """Walk the code root for `implements:`/`tested-by:` tags → {cap_id: [(role, file, line)]}.
+
+    Opt-in (cache=True with reqs_dir set): a sidecar keyed by (mtime_ns, size) lets an
+    unchanged file skip the read+parse. The cache is a PURE performance optimization —
+    results are byte-identical to cache=False — and is OFF by default, so the gate/CI
+    path is unaffected. A changed/new file is re-parsed and refreshed; a vanished file is
+    pruned (it is absent from the rewritten cache)."""
     members = {}  # cap_id -> list[(role, file, line)]
     ignore = load_ignore(code_root, reqs_dir)
+    use_cache = bool(cache and reqs_dir)
+    old = _load_scancache(reqs_dir) if use_cache else {}
+    new = {}
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
@@ -201,18 +253,27 @@ def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    for i, line in enumerate(f, 1):
-                        seen = set()
-                        for role, cap in TAG_RE.findall(line):
-                            key = (role, cap)
-                            if key in seen:        # same tag twice on one line
-                                continue
-                            seen.add(key)
-                            members.setdefault(cap, []).append((role, rel, i))
-            except OSError:
-                continue
+            if use_cache:
+                try:
+                    st = os.stat(fp)
+                except OSError:
+                    continue
+                ent = old.get(rel)
+                if ent and ent.get("mtime_ns") == st.st_mtime_ns and ent.get("size") == st.st_size:
+                    tags = ent.get("tags") or []
+                else:
+                    tags = _scan_file_tags(fp)
+                    if tags is None:
+                        continue
+                new[rel] = {"mtime_ns": st.st_mtime_ns, "size": st.st_size, "tags": tags}
+            else:
+                tags = _scan_file_tags(fp)
+                if tags is None:
+                    continue
+            for role, cap, line in tags:
+                members.setdefault(cap, []).append((role, rel, line))
+    if use_cache:
+        _save_scancache(reqs_dir, new)   # `new` omits vanished files → prune
     return members
 
 
@@ -2748,6 +2809,9 @@ def main():
                     help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
     ap.add_argument("--mark-done", dest="mark_done", action="store_true",
                     help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
+    ap.add_argument("--cache", action="store_true",
+                    help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
+                         "files skip re-parsing. Off by default; results are identical with or without it.")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -2770,7 +2834,7 @@ def main():
         return cmd_init(reqs_dir, code_root, wipe=a.wipe)
 
     reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root, reqs_dir)
+    members = scan_members(code_root, reqs_dir, cache=a.cache)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":

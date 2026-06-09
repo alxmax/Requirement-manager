@@ -2377,5 +2377,57 @@ class Review(unittest.TestCase):  # tested-by: REQ-REVIEW-022
             self.assertEqual(before, gate())   # check never reads the AI sidecar
 
 
+class ScanCache(unittest.TestCase):  # tested-by: REQ-SCANCACHE-023
+    def _tree(self, d):
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        _write(os.path.join(d, "a.py"), tag("A-X-001") + "\n# {}: A-X-001\n".format("tested" + "-by"))
+        _write(os.path.join(d, "b.py"), tag("B-Y-002") + "\n")
+        return rq
+
+    def test_cache_results_byte_identical(self):  # verifies: REQ-SCANCACHE-023
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            no = R.scan_members(d, rq, cache=False)
+            c1 = R.scan_members(d, rq, cache=True)    # builds cache
+            c2 = R.scan_members(d, rq, cache=True)    # reuses cache
+            self.assertEqual(no, c1)
+            self.assertEqual(no, c2)
+            self.assertTrue(os.path.exists(os.path.join(rq, "_scancache.json")))
+
+    def test_cache_invalidates_on_change(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            p = os.path.join(d, "a.py")
+            R.scan_members(d, rq, cache=True)                       # cache A-X-001
+            _write(p, tag("C-Z-003") + "\n# changed, different size\n")   # size differs -> invalidate
+            m = R.scan_members(d, rq, cache=True)
+            self.assertIn("C-Z-003", m)
+            self.assertNotIn("A-X-001", m)
+
+    def test_cache_prunes_deleted_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            R.scan_members(d, rq, cache=True)
+            os.remove(os.path.join(d, "b.py"))
+            m = R.scan_members(d, rq, cache=True)
+            self.assertNotIn("B-Y-002", m)
+            cache = json.load(open(os.path.join(rq, "_scancache.json"), encoding="utf-8"))
+            self.assertNotIn("b.py", cache)
+
+    def test_cache_off_by_default_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            R.scan_members(d, rq)                                   # no cache arg
+            self.assertFalse(os.path.exists(os.path.join(rq, "_scancache.json")))
+
+    def test_corrupt_cache_fails_open(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            _write(os.path.join(rq, "_scancache.json"), "{ not json")
+            self.assertEqual(R.scan_members(d, rq, cache=False),
+                             R.scan_members(d, rq, cache=True))     # corrupt cache -> full re-scan, same result
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

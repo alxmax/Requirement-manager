@@ -19,4 +19,4 @@
 
 ## v1.15
 - [x] Test-link integrity gate check (testlink) | lane: ops
-- [ ] Scan cache (opt-in only, if a real bottleneck appears) — deferred | lane: ops
+- [x] Scan cache (opt-in `--cache` flag — REQ-SCANCACHE-023) | lane: ops

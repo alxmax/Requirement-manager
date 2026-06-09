@@ -5,6 +5,9 @@ __pycache__/
 # Generated, regenerable views — rebuild with: cd plugin && python scripts/reqmap.py map
 plugin/requirements/_map.html
 
+# Opt-in scan cache (machine-local, keyed by file mtime — never committed; REQ-SCANCACHE-023)
+plugin/requirements/_scancache.json
+
 # Dev-only shortcuts (Windows, localhost — not for seeded repos)
 *.cmd
 *.url
