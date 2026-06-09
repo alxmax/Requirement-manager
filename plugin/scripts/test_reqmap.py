@@ -1177,7 +1177,7 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             members = R.scan_members(d, rd)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_map(reqs, members, rd)
+                R.cmd_map(reqs, members, rd, d)   # isolated root: never the real repo docs/
             md = open(os.path.join(rd, "_map.md"), encoding="utf-8").read()
             self.assertIn("untested", md)
             self.assertIn("unverified-intent", md)
@@ -1226,6 +1226,45 @@ class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
         a = "---\ngenerated: 2026-01-01 00:00\nnodes: 1\n---\nbody"
         b = "---\ngenerated: 2026-12-31 23:59\nnodes: 1\n---\nbody"
         self.assertEqual(R._strip_generated(a), R._strip_generated(b))
+
+    # ---- docs/map.html (GitHub Pages copy) freshness --------------------------
+    def test_fresh_docs_map_passes_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _write(os.path.join(d, "docs", ".nojekyll"), "")  # Pages signal
+            self._map(d)                              # writes docs/map.html too
+            self.assertTrue(os.path.exists(os.path.join(d, "docs", "map.html")))
+            code, out = self._map(d, check=True)
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
+
+    def test_stale_docs_map_fails_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _write(os.path.join(d, "docs", ".nojekyll"), "")
+            self._map(d)                              # generate everything fresh
+            _write(os.path.join(d, "docs", "map.html"), "<html>stale</html>")
+            code, out = self._map(d, check=True)      # only the docs copy drifted
+            self.assertEqual(code, 1)
+            self.assertIn("map.html", out)
+
+    def test_absent_docs_map_is_not_stale(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _write(os.path.join(d, "docs", ".nojekyll"), "")  # signal present
+            self._map(d)
+            os.remove(os.path.join(d, "docs", "map.html"))    # but copy never kept
+            code, out = self._map(d, check=True)
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
+
+    def test_no_pages_signal_skips_docs_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            self._map(d)                              # no docs/ dir at all
+            code, out = self._map(d, check=True)
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
 
 
 class Promote(unittest.TestCase):  # tested-by: REQ-PROMOTE-011
