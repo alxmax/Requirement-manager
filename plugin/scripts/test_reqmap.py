@@ -211,6 +211,28 @@ class Gate(unittest.TestCase):
 
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def test_scan_members_deterministic_across_walk_order(self):  # cross-platform parity (Windows-generated map vs Linux CI)
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "z_pkg"))
+            _write(os.path.join(d, "a.py"), tag("X-CAP-001") + "\n")
+            _write(os.path.join(d, "m.py"), tag("X-CAP-001") + "\n")
+            _write(os.path.join(d, "z_pkg", "q.py"), tag("X-CAP-001") + "\n")
+            normal = R.scan_members(d, None)
+            real = os.walk
+
+            def rev(top, *a, **k):                 # simulate a different filesystem order (e.g. Linux vs NTFS)
+                for dp, dirs, files in real(top, *a, **k):
+                    dirs.sort(reverse=True)
+                    files.sort(reverse=True)
+                    yield dp, dirs, files
+            try:
+                os.walk = rev
+                flipped = R.scan_members(d, None)
+            finally:
+                os.walk = real
+            # member order must NOT depend on walk order, else a Windows-generated map fails CI on Linux
+            self.assertEqual(normal["X-CAP-001"], flipped["X-CAP-001"])
+
     def test_tag_re_left_boundary(self):  # bug #3
         self.assertEqual(R.TAG_RE.findall(tag("FOO-BAR-001")), [("implements", "FOO-BAR-001")])
         self.assertEqual(R.TAG_RE.findall("# re" + _ROLE + ": FOO-BAR-001"), [])

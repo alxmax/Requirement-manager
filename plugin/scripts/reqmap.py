@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.13"
+MAP_ENGINE_VERSION = "2026-06-09.14"
 
 
 # ---------- parsing ----------
@@ -246,7 +246,8 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     new = {}
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
-        for fn in files:
+        dirs.sort()                  # deterministic descent — raw os.walk order is filesystem/OS-dependent
+        for fn in sorted(files):     # deterministic file order so the generated map is identical across platforms
             if not fn.endswith(CODE_EXTS):
                 continue
             fp = os.path.join(dirpath, fn)
@@ -286,7 +287,8 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
-        for fn in files:
+        dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
+        for fn in sorted(files):
             if not fn.endswith(CODE_EXTS):
                 continue
             fp = os.path.join(dirpath, fn)
