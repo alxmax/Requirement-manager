@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.3"
+MAP_ENGINE_VERSION = "2026-06-09.4"
 
 
 # ---------- parsing ----------
@@ -1236,7 +1236,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "milestone": m.get("milestone"),
             "priority": m.get("priority", ""),
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
-                {"status": m.get("status", "draft"), "members": members.get(rid, []),
+                {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
+                 "members": members.get(rid, []),
                  "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
         })
     for rid, r in reqs.items():
@@ -1364,7 +1365,8 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     buckets = {}  # signal -> [(rid, risk_score)]
     for rid, r in reqs.items():
         m = r["meta"]
-        node = {"status": m.get("status", "draft"), "members": members.get(rid, []),
+        node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
+                "members": members.get(rid, []),
                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")}
         for sig in _risk_signals(node):
             buckets.setdefault(sig, []).append((rid, _risk_score(m)))
@@ -1665,7 +1667,7 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         for b in verify:
             print("  - " + b)
 
-    node = {"status": m.get("status", "draft"), "members": mem,
+    node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"), "members": mem,
             "verify": _bullets(body, "verify intent"), "test_exempt": m.get("test_exempt")}
     signals = _risk_signals(node)
     if signals:
@@ -2090,8 +2092,15 @@ def _bullets(body, name):  # implements: REQ-MAP-007
             if grab:
                 seen = True
             continue
-        if grab and line.strip().startswith("-"):
-            out.append(line.strip()[1:].strip())
+        if not grab:
+            continue
+        s = line.strip()
+        if s.startswith("-"):
+            out.append(s[1:].strip())
+        elif s and not s.startswith("<!--") and out:
+            # hanging-indent continuation of the current bullet — fold it back in
+            # so multi-line clauses are not truncated to their first physical line.
+            out[-1] = (out[-1] + " " + s).strip()
     return out
 
 
@@ -2275,9 +2284,11 @@ def _risk_signals(node):
     # 'unimplemented' must mirror the gate, which errors when an ENFORCED requirement
     # has no `implements:` member (a `tested-by`-only member must not satisfy it).
     # Keying on the implements ROLE (not raw member-list emptiness) keeps next/show/
-    # the Risk map agreeing with `check`.
+    # the Risk map agreeing with `check`. A `layer: need` is satisfied-by other
+    # requirements, not implemented by code, so the gate exempts it (REQ-TRACE-020) —
+    # mirror that here, else the Risk/Problems views flag a passing gate as failing.
     roles = _member_roles(node.get("members"))
-    if node["status"] in ENFORCED and "implements" not in roles:
+    if node["status"] in ENFORCED and "implements" not in roles and node.get("layer") != "need":
         signals.append("unimplemented")
     if node["status"] in ("draft", "baseline"):
         signals.append("unreviewed")

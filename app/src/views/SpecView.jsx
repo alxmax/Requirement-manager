@@ -93,7 +93,9 @@ function SpecDoc({ r, onNav }) {
         <div className="members-box">
           {r.members.length
             ? r.members.map((m,i)=><div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
-            : <div className="member" style={{color:"var(--status-error)"}}>(no members found — orphan)</div>}
+            : r.layer === "need"
+              ? <div className="member" style={{color:"var(--fg-muted)"}}>(satisfied-by other requirements — no direct code)</div>
+              : <div className="member" style={{color:"var(--status-error)"}}>(no members found — orphan)</div>}
         </div>
       </div>
 

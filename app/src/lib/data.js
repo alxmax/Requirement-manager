@@ -258,6 +258,7 @@ export function setTodos(list) {
 export function coverageOf(r) {
   if (r.status === "deprecated") return "exempt";
   if (r.test_exempt) return "exempt";
+  if (r.layer === "need") return "exempt";          // satisfied-by, not implemented/tested by code (REQ-TRACE-020)
   const hasImpl = r.members.some(m => m.role === "implements");
   const hasTest = r.members.some(m => m.role === "tested-by");
   if (!hasImpl) return "untested";                 // orphan — nothing to cover

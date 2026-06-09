@@ -129,7 +129,9 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
       <div className="members">
         {r.members.length
           ? r.members.map((m, i) => <div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
-          : <div className="member" style={{ color: "var(--status-error)" }}>(no members found)</div>}
+          : r.layer === "need"
+            ? <div className="member" style={{ color: "var(--fg-muted)" }}>(satisfied-by other requirements — no direct code)</div>
+            : <div className="member" style={{ color: "var(--status-error)" }}>(no members found)</div>}
       </div>
 
       <div className="kv"><span className="k">Depends on</span><span className="v">{r.deps.join(" · ") || "— (bus)"}</span></div>
@@ -274,7 +276,9 @@ function ReqCodeView({ selId, setSelId }) {
               <div key={i} style={{ font: "var(--text-code)", color: "var(--fg-muted)" }}>
                 <span style={{ color: m.role === "implements" ? "var(--accent)" : "var(--fg-muted)" }}>{m.role}:</span> {m.loc}
               </div>
-            )) : <div style={{ font: "var(--text-code)", color: "var(--status-error)" }}>(no members — orphan, gate ERROR)</div>}
+            )) : r.layer === "need"
+              ? <div style={{ font: "var(--text-code)", color: "var(--fg-muted)" }}>(satisfied-by — no direct code, gate-exempt)</div>
+              : <div style={{ font: "var(--text-code)", color: "var(--status-error)" }}>(no members — orphan, gate ERROR)</div>}
           </div>
         </div>
       ))}

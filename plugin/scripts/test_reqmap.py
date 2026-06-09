@@ -1153,10 +1153,28 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
         ok = self._node(status="confirmed", members=[{"role": "implements", "loc": "x.py:1"}])
         self.assertNotIn("unimplemented", R._risk_signals(ok))
 
+    def test_unimplemented_exempts_need_layer(self):  # mirror the gate: a need is satisfied-by, not implemented
+        need = self._node(status="confirmed", layer="need", members=[])
+        self.assertNotIn("unimplemented", R._risk_signals(need))
+        # exemption is layer-scoped: a confirmed feature with no implements still flags
+        feat = self._node(status="confirmed", layer="feature", members=[])
+        self.assertIn("unimplemented", R._risk_signals(feat))
+
     def test_bullets_grabs_first_matching_section_only(self):  # bug-hunt #1
         body = ("# T\n\n## WHAT — Contract\n- real.\n\n"
                 "## Notes — contract caveats\n- not normative.\n")
         self.assertEqual(R._bullets(body, "contract"), ["real."])
+
+    def test_bullets_folds_multiline_continuation(self):  # a wrapped clause must not be truncated to its first line
+        body = ("# T\n\n## WHAT — Contract\n"
+                "- It shall do the first thing across\n"
+                "  a wrapped second line and\n"
+                "  a third line.\n"
+                "- A short clause.\n")
+        self.assertEqual(
+            R._bullets(body, "contract"),
+            ["It shall do the first thing across a wrapped second line and a third line.",
+             "A short clause."])
 
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
@@ -2193,6 +2211,15 @@ class Traceability(unittest.TestCase):  # tested-by: REQ-TRACE-020
         self.assertEqual(node["satisfies"], ["NEED-X-001"])
         self.assertEqual(need["satisfied_by"], ["A-FOO-001"])
         self.assertIn(["A-FOO-001", "NEED-X-001"], data["upstream_edges"])
+
+    def test_map_data_need_has_no_unimplemented_risk(self):  # wiring guard: layer reaches _risk_signals at build
+        reqs = {"NEED-X-001": {"meta": {"status": "confirmed", "layer": "need"}, "body": "# N\n"},
+                "A-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"}, "body": "# T\n"}}
+        data = R._build_map_data(reqs, {})   # neither has members
+        need = next(n for n in data["nodes"] if n["id"] == "NEED-X-001")
+        feat = next(n for n in data["nodes"] if n["id"] == "A-FOO-001")
+        self.assertNotIn("unimplemented", [r["signal"] for r in need["risks"]])   # gate-exempt
+        self.assertIn("unimplemented", [r["signal"] for r in feat["risks"]])      # feature still flags
 
 
 if __name__ == "__main__":
