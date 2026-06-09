@@ -782,7 +782,7 @@ class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertNotIn("<!--REQMAP_DATA-->", html)
 
 
-class DocsPublish(unittest.TestCase):  # tested-by: REQ-PAGES-021
+class DocsPublish(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_docs_publish_path_nojekyll_signal(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", ".nojekyll"), "")
@@ -1177,14 +1177,13 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             members = R.scan_members(d, rd)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_map(reqs, members, rd, d)   # isolated root: never the real repo docs/
+                R.cmd_map(reqs, members, rd)
             md = open(os.path.join(rd, "_map.md"), encoding="utf-8").read()
             self.assertIn("untested", md)
             self.assertIn("unverified-intent", md)
 
 
 class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
-    # tested-by: REQ-PAGES-021  (the docs/map.html freshness cases below)
     def _map(self, d, check=False):
         rd = os.path.join(d, "requirements")
         reqs = R.load_requirements(rd)
@@ -1227,64 +1226,6 @@ class MapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
         a = "---\ngenerated: 2026-01-01 00:00\nnodes: 1\n---\nbody"
         b = "---\ngenerated: 2026-12-31 23:59\nnodes: 1\n---\nbody"
         self.assertEqual(R._strip_generated(a), R._strip_generated(b))
-
-    # ---- docs/map.html (GitHub Pages copy) freshness --------------------------
-    def test_fresh_docs_map_passes_check(self):
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            _write(os.path.join(d, "docs", ".nojekyll"), "")  # Pages signal
-            self._map(d)                              # writes docs/map.html too
-            self.assertTrue(os.path.exists(os.path.join(d, "docs", "map.html")))
-            code, out = self._map(d, check=True)
-            self.assertEqual(code, 0)
-            self.assertIn("fresh", out)
-
-    def test_stale_docs_map_fails_check(self):
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            _write(os.path.join(d, "docs", ".nojekyll"), "")
-            self._map(d)                              # generate everything fresh
-            _write(os.path.join(d, "docs", "map.html"), "<html>stale</html>")
-            code, out = self._map(d, check=True)      # only the docs copy drifted
-            self.assertEqual(code, 1)
-            self.assertIn("map.html", out)
-
-    def test_absent_docs_map_is_not_stale(self):
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            _write(os.path.join(d, "docs", ".nojekyll"), "")  # signal present
-            self._map(d)
-            os.remove(os.path.join(d, "docs", "map.html"))    # but copy never kept
-            code, out = self._map(d, check=True)
-            self.assertEqual(code, 0)
-            self.assertIn("fresh", out)
-
-    def test_no_pages_signal_skips_docs_check(self):
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            self._map(d)                              # no docs/ dir at all
-            code, out = self._map(d, check=True)
-            self.assertEqual(code, 0)
-            self.assertIn("fresh", out)
-
-    def test_docs_map_repo_field_change_is_not_stale(self):
-        # the git-derived repo field differs across forks/clones; like _map.json,
-        # it must be excluded from the docs/map.html freshness diff
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            _write(os.path.join(d, "docs", ".nojekyll"), "")
-            self._map(d)
-            docs = os.path.join(d, "docs", "map.html")
-            html = open(docs, encoding="utf-8").read()
-            # replace whatever repo value the build produced with a different slug
-            i = html.index('"repo": "')
-            j = html.index('"', i + len('"repo": "'))
-            swapped = html[:i] + '"repo": "somefork/clone"' + html[j + 1:]
-            self.assertNotEqual(swapped, html)        # the substitution actually fired
-            _write(docs, swapped)
-            code, out = self._map(d, check=True)      # only repo changed -> still fresh
-            self.assertEqual(code, 0)
-            self.assertIn("fresh", out)
 
 
 class Promote(unittest.TestCase):  # tested-by: REQ-PROMOTE-011

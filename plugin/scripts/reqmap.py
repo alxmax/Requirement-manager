@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.3"
+MAP_ENGINE_VERSION = "2026-06-09.2"
 
 
 # ---------- parsing ----------
@@ -1290,7 +1290,7 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     data["todos"] = _parse_todos(root)
 
     if check:
-        return _map_check(data, reqs_dir, root)
+        return _map_check(data, reqs_dir)
 
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
@@ -1299,7 +1299,7 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
-        docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
+        docs_out = _docs_publish_path(root)
         if docs_out:
             with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
                 dst.write(src.read())
@@ -1979,17 +1979,12 @@ def _strip_generated(text):
                      and not l.lstrip().startswith('"repo":'))
 
 
-def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
+def _map_check(data, reqs_dir):  # implements: REQ-MAP-007
     """Freshness gate: regenerate the map in memory and compare to the committed
     files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
     that shifts the map can't be committed without regenerating it. A map that was
     never generated (file absent) is NOT stale — consumers who don't track maps pass.
-    The `generated:` timestamp is ignored so an unchanged map never trips on time.
-
-    Also asserts the published `docs/map.html` (when docs/ carries a Pages signal
-    and the viewer template is present) matches a fresh viewer render — so the
-    GitHub Pages copy cannot silently drift from the registry. Skipped when that
-    copy was never generated, matching the file-absent convention above."""
+    The `generated:` timestamp is ignored so an unchanged map never trips on time."""
     stale = []
     for name, fresh in (("_map.md", _build_md_text(data)),
                         ("_map.json", _build_json_text(data))):
@@ -1999,19 +1994,6 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
         on_disk = open(path, encoding="utf-8").read()
         if _strip_generated(on_disk) != _strip_generated(fresh):
             stale.append(name)
-    # Published GitHub Pages copy: docs/map.html must equal a fresh viewer render.
-    # Reading text-mode (not bytes) normalises CRLF/LF so a copy written on Windows
-    # is not falsely flagged against the LF in-memory render. The comparison runs
-    # through _strip_generated for the same reason _map.json does: the injected blob
-    # embeds the git-derived `repo` field, which differs across forks/clones — left
-    # in, it would make `map --check` spuriously fail on any fork.
-    docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
-    tpl = _viewer_template_path()
-    if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
-        with open(tpl, encoding="utf-8") as f:
-            fresh_html = _inject_viewer(f.read(), data)
-        if _strip_generated(open(docs_out, encoding="utf-8").read()) != _strip_generated(fresh_html):
-            stale.append(os.path.basename(docs_out))
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py map` and commit the result."
               .format(", ".join(stale)))
@@ -2463,7 +2445,7 @@ VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
 
 
-def _docs_publish_path(root):  # implements: REQ-PAGES-021
+def _docs_publish_path(root):  # implements: REQ-MAP-007
     """Return docs/map.html path when docs/ carries a GitHub Pages signal
     (.nojekyll or index.html present), else None. Opt-in by folder contents —
     repos without the signal are unaffected.
