@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.8"
+MAP_ENGINE_VERSION = "2026-06-09.9"
 
 
 # ---------- parsing ----------
@@ -2540,11 +2540,11 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     return None
 
 
-def _viewer_template_path():  # implements: REQ-MAP-007
+def _viewer_template_path():  # implements: REQ-VIEWER-007
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), VIEWER_TEMPLATE)
 
 
-def _inject_viewer(template_text, data):  # implements: REQ-MAP-007
+def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
     """Replace the data marker with an inline <script> assigning the graph to
     window.__REQMAP_DATA__. `</` is escaped to `<\\/` so a requirement that
     contains `</script>` cannot break out of the script element."""
@@ -2553,7 +2553,7 @@ def _inject_viewer(template_text, data):  # implements: REQ-MAP-007
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
 
 
-def render_html(data, reqs_dir):  # implements: REQ-MAP-007
+def render_html(data, reqs_dir):  # implements: REQ-VIEWER-007
     """Write the self-contained viewer `_map.html` by injecting `data` into the
     vendored template. Returns the path, or None when no template is present
     (the engine still emits _map.md + _map.json — the viewer is optional)."""

@@ -774,7 +774,7 @@ class RepoName(unittest.TestCase):  # tested-by: REQ-MAP-007
                 os.environ["REQMAP_REPO"] = old
 
 
-class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
+class ViewerInject(unittest.TestCase):  # tested-by: REQ-VIEWER-007
     def test_marker_replaced_with_inline_data(self):
         out = R._inject_viewer("<head><!--REQMAP_DATA--></head>",
                                {"nodes": [{"id": "A-1"}], "edges": []})

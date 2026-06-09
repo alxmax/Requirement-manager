@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-09 15:02
-nodes: 22
-edges: 29
+generated: 2026-06-09 15:09
+nodes: 23
+edges: 30
 ---
 
 # Requirement Map
@@ -26,7 +26,7 @@ graph LR
     REQ_HEALTH_017["Corpus health snapshot<br><small>REQ-HEALTH-017</small>"]
     REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
     REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
-    REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
+    REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
     REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
     REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
     REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
@@ -36,6 +36,7 @@ graph LR
     REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
     REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
     REQ_TRACE_020["Upstream traceability<br><small>REQ-TRACE-020</small>"]
+    REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
   end
   subgraph sg_misc["misc"]
     NEED_SSOT_001["Stakeholder need — specs and code stay in sync<br><small>NEED-SSOT-001</small>"]
@@ -48,6 +49,7 @@ graph LR
   REQ_PAGES_021 --> REQ_MAP_007
   REQ_TESTLINK_018 --> REQ_CHECK_006
   REQ_TRACE_020 --> REQ_CHECK_006
+  REQ_VIEWER_007 --> REQ_MAP_007
   style CORE_DRIFT_003 stroke-width:3px
   style CORE_PARSE_001 stroke-width:3px
   style CORE_SCAN_002 stroke-width:3px
@@ -116,9 +118,9 @@ graph LR
   REQ_LINT_014 -->|implements| f_scripts_reqmap_py_1470_1622
   f_scripts_test_reqmap_py_1699["scripts/test_reqmap.py:1699"]
   REQ_LINT_014 -->|tested-by| f_scripts_test_reqmap_py_1699
-  REQ_MAP_007["Requirement map (Mermaid MD + JSON + self-contained viewer)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1215_2556["scripts/reqmap.py:1215-2556"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1215_2556
+  REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
+  f_scripts_reqmap_py_1215_2503["scripts/reqmap.py:1215-2503"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1215_2503
   f_scripts_test_reqmap_py_304_1223["scripts/test_reqmap.py:304-1223"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_304_1223
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -166,6 +168,11 @@ graph LR
   REQ_TRACE_020 -->|implements| f_scripts_reqmap_py_440_1688
   f_scripts_test_reqmap_py_2163["scripts/test_reqmap.py:2163"]
   REQ_TRACE_020 -->|tested-by| f_scripts_test_reqmap_py_2163
+  REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
+  f_scripts_reqmap_py_2543_2556["scripts/reqmap.py:2543-2556"]
+  REQ_VIEWER_007 -->|implements| f_scripts_reqmap_py_2543_2556
+  f_scripts_test_reqmap_py_777["scripts/test_reqmap.py:777"]
+  REQ_VIEWER_007 -->|tested-by| f_scripts_test_reqmap_py_777
 ```
 
 ## Dependency Map
@@ -175,7 +182,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>18 caps</small>"]
+  a_REQ["REQ<br><small>19 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
