@@ -54,6 +54,13 @@ milestone: v1.04
 - When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub
   Pages signal (`.nojekyll` or `index.html` present), it shall also copy `_map.html` to
   `docs/map.html`. When no signal is present or git is absent, `docs/map.html` is not written.
+- `map --check` (the freshness gate) shall additionally flag `docs/map.html` as stale when it
+  differs from a fresh viewer render of the current registry — but only when the Pages signal
+  and the viewer template are both present and `docs/map.html` already exists. A copy that was
+  never generated is not stale (the same absent-file rule applied to `_map.*`). The on-disk copy
+  is read as text so platform newline differences (CRLF vs LF) never raise a false positive, and
+  the injected data carries only the stable `engine_version` (no wall-clock), so the comparison
+  is deterministic. This stops the published GitHub Pages copy from silently drifting from the registry.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -81,6 +88,8 @@ milestone: v1.04
 - Injecting the graph into the viewer template replaces the `<!--REQMAP_DATA-->` marker with a `window.__REQMAP_DATA__` assignment carrying one node per requirement; a `</script>` in any field is escaped so it cannot close the script early.
 - When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html` (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.
 - When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the standard outputs.
+- After `map`, `map --check` exits 0; if `docs/map.html` is then edited to differ from a fresh render, `map --check` exits non-zero and names `map.html`.
+- When the Pages signal is present but `docs/map.html` does not exist (never generated, or removed), `map --check` does not flag it stale.
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
