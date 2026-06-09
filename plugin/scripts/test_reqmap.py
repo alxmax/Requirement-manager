@@ -133,6 +133,25 @@ class Gate(unittest.TestCase):
         # ...and editing that non-normative section must not trip drift
         self.assertEqual(R.binding_hash(trap), R.binding_hash(trap.replace("not normative", "EDITED")))
 
+    def test_dashless_normative_heading_is_hashed_and_detected(self):  # tested-by: CORE-DRIFT-003
+        # `## WHAT Contract` (no em-dash) must be (a) detected as a Contract section by the
+        # gate AND (b) folded into the drift hash — else a confirmed req passes the gate but
+        # silently never drifts (empty hash). Regression guard for the heading-match gap.
+        nodash = ("# T\n\n## WHAT Contract\n- shall do X\n\n"
+                  "## HOW Acceptance\nAC-1\n  Then X holds\n")
+        self.assertTrue(R._has_section(nodash, "contract"))
+        self.assertTrue(R._has_section(nodash, "acceptan"))
+        self.assertNotEqual(R.binding_hash(nodash), R.binding_hash(""))               # not the empty hash
+        self.assertNotEqual(R.binding_hash(nodash),
+                            R.binding_hash(nodash.replace("shall do X", "shall do Y")))  # tracks edits
+
+    def test_has_section_anchored_to_label(self):  # tested-by: REQ-CHECK-006
+        # a commentary heading that merely mentions the keyword is NOT the section
+        self.assertFalse(R._has_section("# T\n\n## Notes — contract caveats\n- x\n", "contract"))
+        # canonical, bare, and dash-less label forms all count
+        for h in ("## WHAT — Contract (normative)", "## Contract", "## WHAT Contract"):
+            self.assertTrue(R._has_section("# T\n\n" + h + "\n- x\n", "contract"), h)
+
     def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-FOO-001.md"),
@@ -192,6 +211,28 @@ class Gate(unittest.TestCase):
 
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def test_scan_members_deterministic_across_walk_order(self):  # cross-platform parity (Windows-generated map vs Linux CI)
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "z_pkg"))
+            _write(os.path.join(d, "a.py"), tag("X-CAP-001") + "\n")
+            _write(os.path.join(d, "m.py"), tag("X-CAP-001") + "\n")
+            _write(os.path.join(d, "z_pkg", "q.py"), tag("X-CAP-001") + "\n")
+            normal = R.scan_members(d, None)
+            real = os.walk
+
+            def rev(top, *a, **k):                 # simulate a different filesystem order (e.g. Linux vs NTFS)
+                for dp, dirs, files in real(top, *a, **k):
+                    dirs.sort(reverse=True)
+                    files.sort(reverse=True)
+                    yield dp, dirs, files
+            try:
+                os.walk = rev
+                flipped = R.scan_members(d, None)
+            finally:
+                os.walk = real
+            # member order must NOT depend on walk order, else a Windows-generated map fails CI on Linux
+            self.assertEqual(normal["X-CAP-001"], flipped["X-CAP-001"])
+
     def test_tag_re_left_boundary(self):  # bug #3
         self.assertEqual(R.TAG_RE.findall(tag("FOO-BAR-001")), [("implements", "FOO-BAR-001")])
         self.assertEqual(R.TAG_RE.findall("# re" + _ROLE + ": FOO-BAR-001"), [])
@@ -755,7 +796,7 @@ class RepoName(unittest.TestCase):  # tested-by: REQ-MAP-007
                 os.environ["REQMAP_REPO"] = old
 
 
-class ViewerInject(unittest.TestCase):  # tested-by: REQ-MAP-007
+class ViewerInject(unittest.TestCase):  # tested-by: REQ-VIEWER-007
     def test_marker_replaced_with_inline_data(self):
         out = R._inject_viewer("<head><!--REQMAP_DATA--></head>",
                                {"nodes": [{"id": "A-1"}], "edges": []})
@@ -1153,10 +1194,28 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
         ok = self._node(status="confirmed", members=[{"role": "implements", "loc": "x.py:1"}])
         self.assertNotIn("unimplemented", R._risk_signals(ok))
 
+    def test_unimplemented_exempts_need_layer(self):  # mirror the gate: a need is satisfied-by, not implemented
+        need = self._node(status="confirmed", layer="need", members=[])
+        self.assertNotIn("unimplemented", R._risk_signals(need))
+        # exemption is layer-scoped: a confirmed feature with no implements still flags
+        feat = self._node(status="confirmed", layer="feature", members=[])
+        self.assertIn("unimplemented", R._risk_signals(feat))
+
     def test_bullets_grabs_first_matching_section_only(self):  # bug-hunt #1
         body = ("# T\n\n## WHAT — Contract\n- real.\n\n"
                 "## Notes — contract caveats\n- not normative.\n")
         self.assertEqual(R._bullets(body, "contract"), ["real."])
+
+    def test_bullets_folds_multiline_continuation(self):  # a wrapped clause must not be truncated to its first line
+        body = ("# T\n\n## WHAT — Contract\n"
+                "- It shall do the first thing across\n"
+                "  a wrapped second line and\n"
+                "  a third line.\n"
+                "- A short clause.\n")
+        self.assertEqual(
+            R._bullets(body, "contract"),
+            ["It shall do the first thing across a wrapped second line and a third line.",
+             "A short clause."])
 
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
@@ -1681,6 +1740,32 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         self.assertIn(("error", "missing-section"),
                       [(f["severity"], f["check"]) for f in fs])
 
+    def test_over_scoped_fires_only_on_both_ceilings(self):  # composite cohesion signal
+        big_contract = "".join("- clause {}.\n".format(i) for i in range(R.LINT_CONTRACT_MAX + 1))
+        big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
+        small_ac = "".join("- AC {}.\n".format(i) for i in range(3))
+        over = R.lint_requirement("REQ-BIG-001", self._req("confirmed", self._body(big_contract, big_ac)))
+        self.assertIn("over-scoped", [f["check"] for f in over])             # both ceilings => fires
+        one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
+        self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
+
+    def test_empty_section_flags_contentless_heading(self):
+        empty = "# T\n\n{}\n{}\n".format(self.CONTRACT, self.ACCEPT)         # both headings, no content
+        fs = R.lint_requirement("REQ-E-001", self._req("confirmed", empty))
+        self.assertIn("empty-section", [f["check"] for f in fs])
+        self.assertNotIn("empty-section",                                    # content present => silent
+                         [f["check"] for f in R.lint_requirement("REQ-F-001", self._req("confirmed", self._body()))])
+
+    def test_file_spread_warns_across_many_files(self):  # senate-driven; validates the positive branch via a synthetic multi-file fixture
+        r = self._req("confirmed", self._body())
+        spread = [("implements", "a.py", 1), ("implements", "b.py", 2), ("implements", "c.py", 3)]
+        self.assertIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-D-001", r, spread)])
+        # implements within a single file (tested-by files don't count) => silent in single-file repos
+        one = [("implements", "a.py", 1), ("implements", "a.py", 9), ("tested-by", "t.py", 1)]
+        self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-E-001", r, one)])
+        # no member data supplied => check is skipped
+        self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-G-001", r)])
+
     def test_draft_is_out_of_scope(self):
         long_sent = " ".join(["word"] * 50) + "."
         reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}
@@ -2193,6 +2278,187 @@ class Traceability(unittest.TestCase):  # tested-by: REQ-TRACE-020
         self.assertEqual(node["satisfies"], ["NEED-X-001"])
         self.assertEqual(need["satisfied_by"], ["A-FOO-001"])
         self.assertIn(["A-FOO-001", "NEED-X-001"], data["upstream_edges"])
+
+    def test_map_data_need_has_no_unimplemented_risk(self):  # wiring guard: layer reaches _risk_signals at build
+        reqs = {"NEED-X-001": {"meta": {"status": "confirmed", "layer": "need"}, "body": "# N\n"},
+                "A-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"}, "body": "# T\n"}}
+        data = R._build_map_data(reqs, {})   # neither has members
+        need = next(n for n in data["nodes"] if n["id"] == "NEED-X-001")
+        feat = next(n for n in data["nodes"] if n["id"] == "A-FOO-001")
+        self.assertNotIn("unimplemented", [r["signal"] for r in need["risks"]])   # gate-exempt
+        self.assertIn("unimplemented", [r["signal"] for r in feat["risks"]])      # feature still flags
+
+
+class MilestoneGate(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def _warns(self, milestone, status="confirmed"):
+        with tempfile.TemporaryDirectory() as d:
+            body = ("---\nid: A-X-001\nstatus: {}\nlayer: feature\nmilestone: {}\n---\n\n"
+                    "# T\n\n## WHAT — Contract\n- x.\n\n## HOW — Acceptance\n- a.\n").format(status, milestone)
+            _write(os.path.join(d, "A-X-001.md"), body)
+            _write(os.path.join(d, "x.py"), tag("A-X-001") + "\n")   # implements so no orphan error
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            return buf.getvalue()
+
+    def test_malformed_milestone_warns(self):
+        for bad in ("next", "1.14", "V1.0", "v1.14-beta"):
+            self.assertIn("malformed", self._warns(bad), bad)
+
+    def test_valid_milestone_silent(self):
+        for ok in ("v1.14", "v1.04", "v2"):
+            self.assertNotIn("malformed", self._warns(ok), ok)
+
+    def test_deprecated_milestone_exempt(self):
+        self.assertNotIn("malformed", self._warns("next", status="deprecated"))
+
+
+class PromoteTodo(unittest.TestCase):  # tested-by: REQ-PROMOTE-TODO-001
+    TODO = "## v1.14\n- [ ] Build the thing | lane: ops\n- [x] Done already | lane: feature\n"
+
+    def _setup(self, d):
+        _write(os.path.join(d, "TODO.md"), self.TODO)
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        return rq
+
+    def _run(self, rq, name, cap_id, mark_done=False, root="."):
+        with redirect_stdout(io.StringIO()):
+            return R.cmd_promote_todo(rq, None, name, cap_id, mark_done=mark_done, root=root)
+
+    def test_scaffolds_draft_from_todo(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 0)
+            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
+            self.assertIn("# Build the thing", text)
+            self.assertIn("milestone: v1.14", text)
+            self.assertIn("layer: feature", text)            # lane ops -> feature
+            self.assertIn("status: draft", text)
+            self.assertIn("- [ ] Build the thing", open(os.path.join(d, "TODO.md"), encoding="utf-8").read())  # unchanged
+
+    def test_mark_done_flips_only_matched_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self._run(rq, "Build the thing", "REQ-T-001", mark_done=True, root=d)
+            todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
+            self.assertIn("- [x] Build the thing", todo)
+            self.assertIn("- [x] Done already", todo)        # other lines untouched
+
+    def test_errors_write_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self.assertEqual(self._run(rq, "Build the thing", None, root=d), 2)            # no --id
+            self.assertEqual(self._run(rq, "nope", "REQ-T-001", root=d), 1)                # not found
+            self.assertFalse(os.path.exists(os.path.join(rq, "REQ-T-001.md")))
+            _write(os.path.join(rq, "REQ-T-001.md"), "x")
+            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 1)     # id taken
+
+
+class Review(unittest.TestCase):  # tested-by: REQ-REVIEW-022
+    BODY = ("---\nid: A-R-001\nstatus: confirmed\nlayer: feature\n---\n\n"
+            "# Thing\n\n> WHY: it does the thing for a reason that matters to readers here.\n\n"
+            "## WHAT — Contract\n- It shall do x.\n- It shall do y.\n\n"
+            "## HOW — Acceptance\n- x happens.\n")
+
+    def _seed(self, d):
+        _write(os.path.join(d, "A-R-001.md"), self.BODY)
+        _write(os.path.join(d, "a.py"), tag("A-R-001") + "\n")
+
+    def _review(self, reqs, one=None):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_review(reqs, one)
+        return buf.getvalue()
+
+    def test_plan_structure_and_coverage(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            plan = json.loads(self._review(R.load_requirements(d)))
+            self.assertEqual(plan["coverage_summary"], {"total_requirements": 1, "requirements_in_plan": 1})
+            self.assertEqual([c["key"] for c in plan["categories"]],
+                             ["untestable-contract", "why-restates-title", "acceptance-doesnt-cover-contract"])
+            self.assertIn("suggested_rewrite", plan["finding_contract"])
+            anchors = plan["requirements"][0]["anchors"]
+            self.assertEqual(anchors["contract_clauses"], 2)
+            self.assertTrue(anchors["more_contract_than_acceptance"])     # 2 contract > 1 AC
+
+    def test_review_is_byte_deterministic(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs = R.load_requirements(d)
+            self.assertEqual(self._review(reqs), self._review(reqs))
+
+    def test_gate_ignores_ai_sidecar(self):  # DETERMINISM WALL — verifies: REQ-REVIEW-022
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+
+            def gate():
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+                return code, buf.getvalue()
+
+            before = gate()
+            _write(os.path.join(d, "_ai_review.md"),
+                   "# AI — advisory (non-deterministic). NOT a gate.\n- something\n")
+            self.assertEqual(before, gate())   # check never reads the AI sidecar
+
+
+class ScanCache(unittest.TestCase):  # tested-by: REQ-SCANCACHE-023
+    def _tree(self, d):
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        _write(os.path.join(d, "a.py"), tag("A-X-001") + "\n# {}: A-X-001\n".format("tested" + "-by"))
+        _write(os.path.join(d, "b.py"), tag("B-Y-002") + "\n")
+        return rq
+
+    def test_cache_results_byte_identical(self):  # verifies: REQ-SCANCACHE-023
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            no = R.scan_members(d, rq, cache=False)
+            c1 = R.scan_members(d, rq, cache=True)    # builds cache
+            c2 = R.scan_members(d, rq, cache=True)    # reuses cache
+            self.assertEqual(no, c1)
+            self.assertEqual(no, c2)
+            self.assertTrue(os.path.exists(os.path.join(rq, "_scancache.json")))
+
+    def test_cache_invalidates_on_change(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            p = os.path.join(d, "a.py")
+            R.scan_members(d, rq, cache=True)                       # cache A-X-001
+            _write(p, tag("C-Z-003") + "\n# changed, different size\n")   # size differs -> invalidate
+            m = R.scan_members(d, rq, cache=True)
+            self.assertIn("C-Z-003", m)
+            self.assertNotIn("A-X-001", m)
+
+    def test_cache_prunes_deleted_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            R.scan_members(d, rq, cache=True)
+            os.remove(os.path.join(d, "b.py"))
+            m = R.scan_members(d, rq, cache=True)
+            self.assertNotIn("B-Y-002", m)
+            cache = json.load(open(os.path.join(rq, "_scancache.json"), encoding="utf-8"))
+            self.assertNotIn("b.py", cache)
+
+    def test_cache_off_by_default_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            R.scan_members(d, rq)                                   # no cache arg
+            self.assertFalse(os.path.exists(os.path.join(rq, "_scancache.json")))
+
+    def test_corrupt_cache_fails_open(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._tree(d)
+            _write(os.path.join(rq, "_scancache.json"), "{ not json")
+            self.assertEqual(R.scan_members(d, rq, cache=False),
+                             R.scan_members(d, rq, cache=True))     # corrupt cache -> full re-scan, same result
 
 
 if __name__ == "__main__":

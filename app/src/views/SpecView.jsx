@@ -93,7 +93,9 @@ function SpecDoc({ r, onNav }) {
         <div className="members-box">
           {r.members.length
             ? r.members.map((m,i)=><div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
-            : <div className="member" style={{color:"var(--status-error)"}}>(no members found — orphan)</div>}
+            : r.layer === "need"
+              ? <div className="member" style={{color:"var(--fg-muted)"}}>(satisfied-by other requirements — no direct code)</div>
+              : <div className="member" style={{color:"var(--status-error)"}}>(no members found — orphan)</div>}
         </div>
       </div>
 
@@ -118,6 +120,7 @@ export function SpecView({ selId, setSelId }) {
   const req = REQUIREMENTS.filter(x=>x.area!=="CORE");
   const statusColor = (s) => s==="in-progress" ? "var(--status-drift)"
     : s==="draft" ? "var(--status-draft)"
+    : s==="deprecated" ? "var(--fg-faint)"
     : s==="confirmed" ? "transparent" : "var(--status-draft)";
   const statusTint = (s) => s==="in-progress" ? "var(--status-drift-bg)"
     : s==="draft" ? "var(--status-draft-bg)"

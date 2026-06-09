@@ -48,6 +48,7 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
+MILESTONE_RE = re.compile(r"^v\d[\d.]*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
 # depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
@@ -76,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.3"
+MAP_ENGINE_VERSION = "2026-06-09.14"
 
 
 # ---------- parsing ----------
@@ -188,30 +189,92 @@ def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     return pats
 
 
-def scan_members(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+def _scan_file_tags(fp):  # implements: CORE-SCAN-002
+    """Read one file; return its membership tags as [[role, cap, line], ...] in file
+    order, or None on read error (the caller skips the file)."""
+    out = []
+    try:
+        with open(fp, encoding="utf-8", errors="ignore") as f:
+            for i, line in enumerate(f, 1):
+                seen = set()
+                for role, cap in TAG_RE.findall(line):
+                    key = (role, cap)
+                    if key in seen:        # same tag twice on one line
+                        continue
+                    seen.add(key)
+                    out.append([role, cap, i])
+    except OSError:
+        return None
+    return out
+
+
+def _scancache_path(reqs_dir):  # implements: REQ-SCANCACHE-023
+    return os.path.join(reqs_dir, "_scancache.json")
+
+
+def _load_scancache(reqs_dir):  # implements: REQ-SCANCACHE-023
+    """Read the opt-in scan-cache sidecar; {} when absent/corrupt (fails open)."""
+    try:
+        with open(_scancache_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_scancache(reqs_dir, cache):  # implements: REQ-SCANCACHE-023
+    """Write the scan cache, best-effort — an unwritable cache must never fail the scan."""
+    try:
+        with open(_scancache_path(reqs_dir), "w", encoding="utf-8") as f:
+            json.dump(cache, f, indent=2, sort_keys=True)
+    except OSError:
+        pass
+
+
+def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCAN-002
+    """Walk the code root for `implements:`/`tested-by:` tags → {cap_id: [(role, file, line)]}.
+
+    Opt-in (cache=True with reqs_dir set): a sidecar keyed by (mtime_ns, size) lets an
+    unchanged file skip the read+parse. The cache is a PURE performance optimization —
+    results are byte-identical to cache=False — and is OFF by default, so the gate/CI
+    path is unaffected. A changed/new file is re-parsed and refreshed; a vanished file is
+    pruned (it is absent from the rewritten cache)."""
     members = {}  # cap_id -> list[(role, file, line)]
     ignore = load_ignore(code_root, reqs_dir)
+    use_cache = bool(cache and reqs_dir)
+    old = _load_scancache(reqs_dir) if use_cache else {}
+    new = {}
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
-        for fn in files:
+        dirs.sort()                  # deterministic descent — raw os.walk order is filesystem/OS-dependent
+        for fn in sorted(files):     # deterministic file order so the generated map is identical across platforms
             if not fn.endswith(CODE_EXTS):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    for i, line in enumerate(f, 1):
-                        seen = set()
-                        for role, cap in TAG_RE.findall(line):
-                            key = (role, cap)
-                            if key in seen:        # same tag twice on one line
-                                continue
-                            seen.add(key)
-                            members.setdefault(cap, []).append((role, rel, i))
-            except OSError:
-                continue
+            if use_cache:
+                try:
+                    st = os.stat(fp)
+                except OSError:
+                    continue
+                ent = old.get(rel)
+                if ent and ent.get("mtime_ns") == st.st_mtime_ns and ent.get("size") == st.st_size:
+                    tags = ent.get("tags") or []
+                else:
+                    tags = _scan_file_tags(fp)
+                    if tags is None:
+                        continue
+                new[rel] = {"mtime_ns": st.st_mtime_ns, "size": st.st_size, "tags": tags}
+            else:
+                tags = _scan_file_tags(fp)
+                if tags is None:
+                    continue
+            for role, cap, line in tags:
+                members.setdefault(cap, []).append((role, rel, line))
+    if use_cache:
+        _save_scancache(reqs_dir, new)   # `new` omits vanished files → prune
     return members
 
 
@@ -224,7 +287,8 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
-        for fn in files:
+        dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
+        for fn in sorted(files):
             if not fn.endswith(CODE_EXTS):
                 continue
             fp = os.path.join(dirpath, fn)
@@ -269,7 +333,20 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
 # prefix), NOT anywhere in the heading — otherwise a commentary heading like
 # `## Notes — contract caveats` would leak into the drift hash.
 _NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|how)\s*[—–-]\s*)?(?:contract|acceptan|input|output)", re.I)
+    r"^##\s+(?:(?:what|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
+
+
+def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
+    """True if a `## ` heading's LABEL is `name` (case-insensitive), allowing an
+    optional `WHAT`/`HOW` prefix whose dash is optional — so `## WHAT — Contract`,
+    `## WHAT Contract`, and bare `## Contract` all match name='contract'. Anchored
+    to the label start so a commentary heading like `## Notes — contract caveats`
+    does NOT match name='contract'. Keeps section detection (the gate, the linter)
+    in agreement with the drift hash (_NORMATIVE_HEADING_RE) — see the silent-drift
+    inconsistency this guards against."""
+    return bool(re.match(
+        r"##\s+(?:(?:what|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
+        heading.strip().lower()))
 
 
 def binding_hash(body):  # implements: CORE-DRIFT-003
@@ -314,14 +391,16 @@ def save_lock(reqs_dir, lock):  # implements: CORE-DRIFT-003
 
 # ---------- commands ----------
 def _has_section(body, name):  # implements: REQ-CHECK-006
-    """True if the body has a `## ` heading whose text contains `name` (case-insensitive).
-    Used to detect legacy-schema requirements that lack a `## WHAT — Verify intent`
-    section — `findings` mines only that section, so its absence means findings is
-    silently inactive for that requirement."""
-    name = name.lower()
+    """True if the body has a normative `## ` heading whose LABEL is `name`
+    (case-insensitive), e.g. `## WHAT — Verify intent` for name='verify intent'.
+    Anchored to the label (see `_heading_label_is`) so a commentary heading that
+    merely mentions the word — `## Notes — contract caveats` — does not count as a
+    Contract section, and a dash-less `## WHAT Contract` does. This keeps the gate's
+    section-presence check in agreement with the drift hash, closing the
+    silent-drift gap where a heading passed the gate but produced an empty hash."""
     for line in body.splitlines():
-        s = line.strip().lower()
-        if s.startswith("## ") and name in s:
+        s = line.strip()
+        if s.startswith("## ") and _heading_label_is(s, name):
             return True
     return False
 
@@ -417,6 +496,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
             errors.append(f"{rid}: invalid status {m.get('status')!r}")
         if m.get("layer") not in VALID_LAYER:
             errors.append(f"{rid}: invalid layer {m.get('layer')!r}")
+        # milestone (warn): an optional, roadmap-only field. A malformed value silently fails
+        # to sort in the Roadmap (semverCmp treats junk as 0) rather than breaking the build,
+        # so it warns (never errors), only when present and not deprecated.
+        ms = m.get("milestone")
+        if ms and m.get("status") != "deprecated" and not MILESTONE_RE.match(str(ms).strip()):
+            warns.append(f"{rid}: milestone {ms!r} is malformed (expected v<digits>[.<digits>…], e.g. v1.14)")
         for dep in _as_list(m.get("depends_on")):
             if dep not in cap_ids:
                 errors.append(f"{rid}: depends_on missing {dep}")
@@ -548,7 +633,10 @@ superseded_by:       # <ID>, if replaced
 ## WHAT — Contract (normative)
 <!-- Audience: a developer new to THIS project. Define project-specific terms inline
      on first use; attach roles to named components; keep "shall" phrasing.
-     Assumptions & constraints (external deps, explicit out-of-scope): note them here. -->
+     Assumptions & constraints (external deps, explicit out-of-scope): note them here.
+     Scope: one capability = one behavior that can fail independently. If you accumulate
+     many contract clauses AND many acceptance criteria, you are likely describing several
+     capabilities — split them (the linter flags this as 'over-scoped'). -->
 - The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
   no function names; true regardless of how the code is implemented).
   <!-- Rationale: why this specific behavior -->
@@ -604,6 +692,82 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
     print(f"created {dest}")
+    return 0
+
+
+def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root="."):  # implements: REQ-PROMOTE-TODO-001
+    """Scaffold a requirement draft from an unfinished TODO.md item (matched by name),
+    seeding title / layer / milestone from the item. Requires an explicit cap_id — the
+    engine runs headless (CI, pre-commit hook), so there is no interactive prompt. With
+    mark_done it flips the matched TODO line to [x]; otherwise TODO.md is never touched."""
+    if not cap_id:
+        print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+    key = name.strip().casefold()
+    open_todos = [t for t in _parse_todos(root) if not t["done"]]
+    matches = [t for t in open_todos if t["name"].strip().casefold() == key]
+    if not matches:
+        avail = "; ".join(t["name"] for t in open_todos) or "(none)"
+        print(f"no open TODO named {name!r}. Open items: {avail}"); return 1
+    if len(matches) > 1:
+        where = ", ".join(t["milestone"] for t in matches)
+        print(f"ambiguous: {len(matches)} open TODOs named {name!r} (milestones {where}) — rename to disambiguate")
+        return 1
+    todo = matches[0]
+    dest = os.path.join(reqs_dir, cap_id + ".md")
+    if os.path.exists(dest):
+        print(f"exists: {dest}"); return 1
+    t = None
+    if tmpl_path:
+        try:
+            with open(tmpl_path, encoding="utf-8") as f:
+                t = f.read()
+        except OSError:
+            t = None
+    if t is None:
+        t = REQUIREMENT_TEMPLATE
+    layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
+    t = t.replace("AREA-NAME-NNN", cap_id)
+    t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
+    t = t.replace("# Short name", "# " + todo["name"], 1)
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write(t)
+    print(f"created {dest} (draft, milestone {todo['milestone']}, layer {layer}) from TODO {todo['name']!r}")
+    if mark_done:
+        n = _mark_todo_done(root, todo["name"])
+        print(f"marked TODO {todo['name']!r} done in TODO.md" if n
+              else "warning: could not mark the TODO done (TODO.md not writable or line not found)")
+    return 0
+
+
+def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
+    """Flip the first unfinished TODO.md line whose name matches to [x]. Best-effort:
+    returns 1 if a line was rewritten, 0 if TODO.md is absent/unwritable or no line matched."""
+    key = name.strip().casefold()
+    for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
+        path = os.path.join(base, "TODO.md")
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError:
+            return 0
+        changed = 0
+        for i, line in enumerate(lines):
+            m = re.match(r"^(\s*-\s+\[)[ ](\]\s+)(.+?)(\r?\n?)$", line)
+            if m and m.group(3).split("|", 1)[0].strip().casefold() == key:
+                lines[i] = m.group(1) + "x" + m.group(2) + m.group(3) + m.group(4)
+                changed = 1
+                break
+        if changed:
+            try:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.writelines(lines)
+            except OSError:
+                return 0
+        return changed
     return 0
 
 
@@ -1236,7 +1400,8 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "milestone": m.get("milestone"),
             "priority": m.get("priority", ""),
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
-                {"status": m.get("status", "draft"), "members": members.get(rid, []),
+                {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
+                 "members": members.get(rid, []),
                  "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
         })
     for rid, r in reqs.items():
@@ -1364,7 +1529,8 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
     buckets = {}  # signal -> [(rid, risk_score)]
     for rid, r in reqs.items():
         m = r["meta"]
-        node = {"status": m.get("status", "draft"), "members": members.get(rid, []),
+        node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
+                "members": members.get(rid, []),
                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")}
         for sig in _risk_signals(node):
             buckets.setdefault(sig, []).append((rid, _risk_score(m)))
@@ -1431,6 +1597,11 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
+                               # is the composite 'over-scoped' cohesion signal (warn)
+LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
+                               # 'file-spread' diffuseness signal (warn) — auto-off below it,
+                               # so silent in single-file repos (near-zero false positive)
 # Closed list of vague QUALITY words that make a normative bullet un-testable
 # (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
 # and weak modals — they are too often legitimately precise in this domain, and a
@@ -1503,9 +1674,11 @@ def _count_ac(body):
     return count
 
 
-def lint_requirement(rid, r):  # implements: REQ-LINT-014
+def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014
     """Return a list of {severity, check, detail} findings for one requirement;
-    an empty list means clean. Checks the Contract + Acceptance sections only."""
+    an empty list means clean. Checks the Contract + Acceptance sections only.
+    `member_list` (optional [(role, file, line), ...]) enables the member-based
+    file-spread check; when omitted, that check is skipped."""
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
@@ -1515,6 +1688,15 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
     if not _has_section(body, "acceptan"):
         findings.append({"severity": "error", "check": "missing-section",
                          "detail": "no '## HOW — Acceptance' section"})
+    # empty-section (warn): the heading is present but carries no clauses/criteria — it
+    # passes `missing-section` yet documents nothing (and `ac-count-low` skips the zero
+    # case). Precise zero/non-zero test, so near-zero false positive.
+    if _has_section(body, "contract") and not _bullets(body, "contract"):
+        findings.append({"severity": "warn", "check": "empty-section",
+                         "detail": "'## WHAT — Contract' section present but has no clauses"})
+    if _has_section(body, "acceptan") and _count_ac(body) == 0:
+        findings.append({"severity": "warn", "check": "empty-section",
+                         "detail": "'## HOW — Acceptance' section present but has no criteria"})
     # prose readability (warn): only on the Contract + Acceptance sections
     for name in ("contract", "acceptan"):
         for ln in _lint_prose(body, name):
@@ -1558,6 +1740,19 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # cohesion (warn): over BOTH the contract and acceptance ceilings at once is a strong
+    # "several capabilities bundled into one" signal — each contract clause is a separate
+    # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
+    # false positives near zero: a large-but-cohesive capability rarely maxes both. Advisory
+    # only — it surfaces split candidates; the split decision stays with the human.
+    if _has_section(body, "contract") and _has_section(body, "acceptan"):
+        contract_n, ac_count = len(_bullets(body, "contract")), _count_ac(body)
+        if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
+            findings.append({
+                "severity": "warn", "check": "over-scoped",
+                "detail": "{} contract clauses + {} AC (both over {}/{}): likely several "
+                          "capabilities — consider splitting".format(
+                              contract_n, ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
@@ -1572,10 +1767,22 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                     "severity": "warn", "check": "vague-term",
                     "detail": "vague word '{}' (no testable meaning): {}".format(
                         w, _clip(ln))})
+    # file-spread (warn): a requirement whose implements members span many distinct FILES is
+    # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
+    # cannot see, since a tight contract can still be smeared across many files. Auto-off when
+    # the members live in fewer than LINT_FILE_SPREAD_MAX files, so it is silent in a single-file
+    # repo (near-zero false positive). Needs member_list; skipped when not supplied.
+    if member_list:
+        impl_files = {m[1] for m in member_list if m and m[0] == "implements"}
+        if len(impl_files) >= LINT_FILE_SPREAD_MAX:
+            findings.append({
+                "severity": "warn", "check": "file-spread",
+                "detail": "implements span {} files (>= {}): capability may be diffuse — "
+                          "confirm cohesion or split".format(len(impl_files), LINT_FILE_SPREAD_MAX)})
     return findings
 
 
-def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
+def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
@@ -1586,7 +1793,7 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
                if r["meta"].get("status") in LINT_STATUSES]
     errors = warns = 0
     for rid, r in targets:
-        fs = lint_requirement(rid, r)
+        fs = lint_requirement(rid, r, (members or {}).get(rid))
         if not fs:
             continue
         print("{}   requirements/{}.md".format(rid, rid))
@@ -1665,7 +1872,7 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         for b in verify:
             print("  - " + b)
 
-    node = {"status": m.get("status", "draft"), "members": mem,
+    node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"), "members": mem,
             "verify": _bullets(body, "verify intent"), "test_exempt": m.get("test_exempt")}
     signals = _risk_signals(node)
     if signals:
@@ -2090,8 +2297,15 @@ def _bullets(body, name):  # implements: REQ-MAP-007
             if grab:
                 seen = True
             continue
-        if grab and line.strip().startswith("-"):
-            out.append(line.strip()[1:].strip())
+        if not grab:
+            continue
+        s = line.strip()
+        if s.startswith("-"):
+            out.append(s[1:].strip())
+        elif s and not s.startswith("<!--") and out:
+            # hanging-indent continuation of the current bullet — fold it back in
+            # so multi-line clauses are not truncated to their first physical line.
+            out[-1] = (out[-1] + " " + s).strip()
     return out
 
 
@@ -2275,9 +2489,11 @@ def _risk_signals(node):
     # 'unimplemented' must mirror the gate, which errors when an ENFORCED requirement
     # has no `implements:` member (a `tested-by`-only member must not satisfy it).
     # Keying on the implements ROLE (not raw member-list emptiness) keeps next/show/
-    # the Risk map agreeing with `check`.
+    # the Risk map agreeing with `check`. A `layer: need` is satisfied-by other
+    # requirements, not implemented by code, so the gate exempts it (REQ-TRACE-020) —
+    # mirror that here, else the Risk/Problems views flag a passing gate as failing.
     roles = _member_roles(node.get("members"))
-    if node["status"] in ENFORCED and "implements" not in roles:
+    if node["status"] in ENFORCED and "implements" not in roles and node.get("layer") != "need":
         signals.append("unimplemented")
     if node["status"] in ("draft", "baseline"):
         signals.append("unreviewed")
@@ -2487,11 +2703,11 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     return None
 
 
-def _viewer_template_path():  # implements: REQ-MAP-007
+def _viewer_template_path():  # implements: REQ-VIEWER-007
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), VIEWER_TEMPLATE)
 
 
-def _inject_viewer(template_text, data):  # implements: REQ-MAP-007
+def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
     """Replace the data marker with an inline <script> assigning the graph to
     window.__REQMAP_DATA__. `</` is escaped to `<\\/` so a requirement that
     contains `</script>` cannot break out of the script element."""
@@ -2500,7 +2716,7 @@ def _inject_viewer(template_text, data):  # implements: REQ-MAP-007
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
 
 
-def render_html(data, reqs_dir):  # implements: REQ-MAP-007
+def render_html(data, reqs_dir):  # implements: REQ-VIEWER-007
     """Write the self-contained viewer `_map.html` by injecting `data` into the
     vendored template. Returns the path, or None when no template is present
     (the engine still emits _map.md + _map.json — the viewer is optional)."""
@@ -2516,6 +2732,60 @@ def render_html(data, reqs_dir):  # implements: REQ-MAP-007
     return out
 
 
+def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
+    """Emit a DETERMINISTIC, read-only review PLAN as JSON for an out-of-band AI quality
+    pass. The engine never calls an LLM and writes no file — it gathers each requirement's
+    prose (WHY/contract/acceptance/verify-intent) plus cheap STRUCTURAL anchors the AI
+    consumer should focus on, a corpus coverage_summary, and the finding contract. The plan
+    is byte-reproducible across runs; the AI findings DERIVED from it are advisory and NOT
+    reproducible, and no gate path reads this output or any AI sidecar."""
+    ids = [one_id] if one_id else sorted(reqs)
+    items = []
+    for rid in ids:
+        r = reqs.get(rid)
+        if not r:
+            continue
+        body = r["body"]
+        contract = _bullets(body, "contract")
+        intent = _first_quote(body)
+        ac_n = _count_ac(body)
+        intent_words = len(intent.split())
+        items.append({
+            "id": rid,
+            "title": _title(body),
+            "layer": r["meta"].get("layer", "feature"),
+            "status": r["meta"].get("status", "draft"),
+            "intent": intent,
+            "contract": contract,
+            "acceptance": _bullets(body, "acceptan"),
+            "verify_intent": _bullets(body, "verify"),
+            # cheap STRUCTURAL anchors (deterministic facts, NOT judgments) the AI examines:
+            "anchors": {
+                "contract_clauses": len(contract),
+                "acceptance_count": ac_n,
+                "intent_words": intent_words,
+                "intent_terse": intent_words < 12,                    # WHY may merely restate the title
+                "more_contract_than_acceptance": len(contract) > ac_n,  # a clause may be uncovered
+            },
+        })
+    plan = {
+        "engine_version": MAP_ENGINE_VERSION,
+        "advisory": ("DETERMINISTIC read-only review plan. AI findings derived from it are ADVISORY "
+                     "and NON-reproducible; they are never part of the gate and never auto-applied."),
+        "categories": [
+            {"key": "untestable-contract", "desc": "a contract clause so vague it cannot be verified"},
+            {"key": "why-restates-title", "desc": "the WHY restates the title instead of explaining why it exists"},
+            {"key": "acceptance-doesnt-cover-contract", "desc": "a contract clause with no acceptance criterion exercising it"},
+        ],
+        "finding_contract": ("every AI finding MUST carry a concrete suggested_rewrite; emit only "
+                             "high-confidence findings; severity is advisory-only (never error/warn, never the gate)."),
+        "coverage_summary": {"total_requirements": len(reqs), "requirements_in_plan": len(items)},
+        "requirements": items,
+    }
+    print(json.dumps(plan, indent=2, ensure_ascii=False))
+    return 0
+
+
 def main():
     # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
     # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
@@ -2528,7 +2798,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2554,6 +2824,13 @@ def main():
                          "membership tags from source files before re-extracting")
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
+    ap.add_argument("--id", dest="new_id", default=None,
+                    help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+    ap.add_argument("--mark-done", dest="mark_done", action="store_true",
+                    help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
+    ap.add_argument("--cache", action="store_true",
+                    help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
+                         "files skip re-parsing. Off by default; results are identical with or without it.")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -2568,17 +2845,21 @@ def main():
         if not a.arg:
             print("usage: reqmap new AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
+    if a.cmd == "promote-todo":
+        if not a.arg:
+            print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+        return cmd_promote_todo(reqs_dir, tmpl, a.arg, a.new_id, a.mark_done, code_root)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe)
 
     reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root, reqs_dir)
+    members = scan_members(code_root, reqs_dir, cache=a.cache)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all)
     if a.cmd == "lint":
-        return cmd_lint(reqs, a.strict)
+        return cmd_lint(reqs, a.strict, members)
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
@@ -2605,6 +2886,8 @@ def main():
         return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
     if a.cmd == "findings":
         return cmd_findings(reqs, reqs_dir, a.raw)
+    if a.cmd == "review":
+        return cmd_review(reqs, a.arg)
     if a.cmd == "promote":
         if not a.arg:
             print("usage: reqmap promote AREA-NAME-NNN"); return 2

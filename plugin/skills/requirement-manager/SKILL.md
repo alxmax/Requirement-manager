@@ -138,7 +138,7 @@ engine changes to the cache and any registered consumer repos in one command:
 - **Source of truth**: one `.md` per capability in `requirements/`, with YAML
   frontmatter (machine-readable) + prose body (human-readable). Nothing else
   restates the contract — code and docs *reference* it by id, never re-describe it.
-- **Optional frontmatter fields**: `milestone: vX.Y` places a requirement on the Roadmap tab (e.g. `milestone: v1.04`). Use zero-padded minor versions (`v1.04`, not `v1.4`) to avoid ambiguity. The field is informational — the gate does not enforce it.
+- **Optional frontmatter fields**: `milestone: vX.Y` places a requirement on the Roadmap tab (e.g. `milestone: v1.04`). It must be a version of the shape `v<digits>[.<digits>…]` — start with `v`, digits and dots only; the gate WARNs on a malformed value (advisory metadata, never build-critical). Use zero-padded minor versions (`v1.04`, not `v1.4`) to avoid ambiguity.
 - **Two layers** (think Factorio main bus + cells):
   - `layer: bus` — foundation capabilities, defined once, shared (telemetry,
     config, logging, an invocation primitive). Crisp output → crisp boundary.

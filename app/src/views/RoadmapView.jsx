@@ -20,8 +20,8 @@ function barVariant(status) {
   return "planned";
 }
 
-const LANES      = ["bus", "feature", "ops"];
-const LANE_LABEL = { bus: "Bus", feature: "Feature", ops: "Ops" };
+const LANES      = ["bus", "feature", "need", "ops"];
+const LANE_LABEL = { bus: "Bus", feature: "Feature", need: "Need", ops: "Ops" };
 
 const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)";
 

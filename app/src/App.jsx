@@ -61,7 +61,7 @@ function Rail({ view, setView }) {
   const confirmed = by(r=>r.status==="confirmed");
   const inProgress = by(r=>r.status==="in-progress");
   const draft = by(r=>r.status==="draft");
-  const orphan = by(r=>r.status!=="deprecated" && !r.members.some(m=>m.role==="implements"));
+  const orphan = by(r=>r.status!=="deprecated" && r.layer!=="need" && !r.members.some(m=>m.role==="implements"));
   const deprecated = by(r=>r.status==="deprecated");
   const bound = REQUIREMENTS.reduce((a,r)=>a+r.members.length,0);
 
