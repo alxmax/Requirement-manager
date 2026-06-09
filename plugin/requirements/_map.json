@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-09.6",
+  "engine_version": "2026-06-09.7",
   "repo": "alxmax/requirement-manager",
   "nodes": [
     {
@@ -326,7 +326,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2077"
+          "loc": "scripts/test_reqmap.py:2086"
         }
       ],
       "test_exempt": null,
@@ -378,35 +378,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:837"
+          "loc": "scripts/reqmap.py:840"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:871"
+          "loc": "scripts/reqmap.py:874"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:894"
+          "loc": "scripts/reqmap.py:897"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:917"
+          "loc": "scripts/reqmap.py:920"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:934"
+          "loc": "scripts/reqmap.py:937"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:953"
+          "loc": "scripts/reqmap.py:956"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:959"
+          "loc": "scripts/reqmap.py:962"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:984"
+          "loc": "scripts/reqmap.py:987"
         },
         {
           "role": "tested-by",
@@ -604,23 +604,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:674"
+          "loc": "scripts/reqmap.py:677"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:682"
+          "loc": "scripts/reqmap.py:685"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:707"
+          "loc": "scripts/reqmap.py:710"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:735"
+          "loc": "scripts/reqmap.py:738"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:820"
+          "loc": "scripts/reqmap.py:823"
         },
         {
           "role": "tested-by",
@@ -689,11 +689,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1090"
+          "loc": "scripts/reqmap.py:1093"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1177"
+          "loc": "scripts/reqmap.py:1180"
         },
         {
           "role": "tested-by",
@@ -759,11 +759,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1806"
+          "loc": "scripts/reqmap.py:1824"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1959"
+          "loc": "scripts/test_reqmap.py:1968"
         }
       ],
       "test_exempt": null,
@@ -821,11 +821,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1918"
+          "loc": "scripts/reqmap.py:1936"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1947"
+          "loc": "scripts/reqmap.py:1965"
         },
         {
           "role": "tested-by",
@@ -854,6 +854,7 @@
         "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
         "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3).",
         "The `ac-count-high` check (warn) shall flag an Acceptance section holding more than `LINT_AC_MAX` (default 7) criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
+        "The `over-scoped` check (warn) shall flag a requirement whose Contract exceeds `LINT_CONTRACT_MAX` (default 10) clauses AND whose Acceptance exceeds `LINT_AC_MAX` — a composite signal that several capabilities are bundled into one. Requiring both axes at once keeps false positives near zero.",
         "The `vague-term` check (warn) shall flag a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words like `appropriate`, `robust`, or `user-friendly`.",
         "Before the `vague-term` scan, backticked code spans are stripped, and one finding is emitted per distinct term.",
         "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
@@ -870,7 +871,7 @@
         "The thresholds are module constants, not configurable from the command line. A single well-named constant is enough until a real project needs a different value."
       ],
       "current_impl": [
-        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences`, `_count_ac` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count checks; `_count_ac` counts acceptance criteria. The `missing-section` and `ac-count` checks reuse `_has_section` (shared with the gate in `cmd_check`)."
+        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences`, `_count_ac` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count checks; `_count_ac` counts acceptance criteria. The `missing-section` and `ac-count` checks reuse `_has_section` (shared with the gate in `cmd_check`). The `over-scoped` check pairs the Contract clause count (`_bullets`) with `_count_ac` against `LINT_CONTRACT_MAX`/`LINT_AC_MAX`."
       ],
       "acc": [
         "Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.",
@@ -879,12 +880,13 @@
         "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
         "Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.",
         "Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.",
+        "Given a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria), when `lint` runs, then it reports an `over-scoped` warning; given one over only a single ceiling, it reports no `over-scoped`.",
         "Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.",
         "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
         "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
         "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
       ],
-      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria), when `lint` runs, then it reports an `over-scoped` warning; given one over only a single ceiling, it reports no `over-scoped`.\n- Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
       "input": "",
       "output": "",
       "desc": "",
@@ -897,23 +899,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1465"
+          "loc": "scripts/reqmap.py:1470"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1494"
+          "loc": "scripts/reqmap.py:1499"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1500"
+          "loc": "scripts/reqmap.py:1505"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1523"
+          "loc": "scripts/reqmap.py:1528"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1595"
+          "loc": "scripts/reqmap.py:1613"
         },
         {
           "role": "tested-by",
@@ -987,99 +989,99 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1212"
+          "loc": "scripts/reqmap.py:1215"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1303"
+          "loc": "scripts/reqmap.py:1306"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1327"
+          "loc": "scripts/reqmap.py:1330"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1999"
+          "loc": "scripts/reqmap.py:2017"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2040"
+          "loc": "scripts/reqmap.py:2058"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2048"
+          "loc": "scripts/reqmap.py:2066"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2071"
+          "loc": "scripts/reqmap.py:2089"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2085"
+          "loc": "scripts/reqmap.py:2103"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2101"
+          "loc": "scripts/reqmap.py:2119"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2154"
+          "loc": "scripts/reqmap.py:2172"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2160"
+          "loc": "scripts/reqmap.py:2178"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2167"
+          "loc": "scripts/reqmap.py:2185"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2204"
+          "loc": "scripts/reqmap.py:2222"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2219"
+          "loc": "scripts/reqmap.py:2237"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2250"
+          "loc": "scripts/reqmap.py:2268"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2328"
+          "loc": "scripts/reqmap.py:2346"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2376"
+          "loc": "scripts/reqmap.py:2394"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2427"
+          "loc": "scripts/reqmap.py:2445"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2435"
+          "loc": "scripts/reqmap.py:2453"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2466"
+          "loc": "scripts/reqmap.py:2484"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2476"
+          "loc": "scripts/reqmap.py:2494"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2516"
+          "loc": "scripts/reqmap.py:2534"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2520"
+          "loc": "scripts/reqmap.py:2538"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2529"
+          "loc": "scripts/reqmap.py:2547"
         },
         {
           "role": "tested-by",
@@ -1155,7 +1157,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:604"
+          "loc": "scripts/reqmap.py:607"
         },
         {
           "role": "tested-by",
@@ -1219,11 +1221,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1345"
+          "loc": "scripts/reqmap.py:1348"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1358"
+          "loc": "scripts/reqmap.py:1361"
         },
         {
           "role": "tested-by",
@@ -1291,15 +1293,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1318"
+          "loc": "scripts/reqmap.py:1321"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2025"
+          "loc": "scripts/reqmap.py:2043"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2492"
+          "loc": "scripts/reqmap.py:2510"
         },
         {
           "role": "tested-by",
@@ -1352,11 +1354,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:625"
+          "loc": "scripts/reqmap.py:628"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:640"
+          "loc": "scripts/reqmap.py:643"
         },
         {
           "role": "tested-by",
@@ -1472,11 +1474,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1626"
+          "loc": "scripts/reqmap.py:1644"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1833"
+          "loc": "scripts/test_reqmap.py:1842"
         }
       ],
       "test_exempt": null,
@@ -1532,15 +1534,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1708"
+          "loc": "scripts/reqmap.py:1726"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1715"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1727"
+          "loc": "scripts/reqmap.py:1733"
         },
         {
           "role": "implements",
@@ -1548,15 +1546,19 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1757"
+          "loc": "scripts/reqmap.py:1763"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1769"
+          "loc": "scripts/reqmap.py:1775"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1787"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1897"
+          "loc": "scripts/test_reqmap.py:1906"
         }
       ],
       "test_exempt": null,
@@ -1617,7 +1619,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2013"
+          "loc": "scripts/test_reqmap.py:2022"
         }
       ],
       "test_exempt": null,
@@ -1675,19 +1677,19 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1220"
+          "loc": "scripts/reqmap.py:1223"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1261"
+          "loc": "scripts/reqmap.py:1264"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1661"
+          "loc": "scripts/reqmap.py:1679"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2147"
+          "loc": "scripts/test_reqmap.py:2156"
         }
       ],
       "test_exempt": null,

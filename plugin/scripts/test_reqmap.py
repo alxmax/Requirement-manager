@@ -1718,6 +1718,15 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         self.assertIn(("error", "missing-section"),
                       [(f["severity"], f["check"]) for f in fs])
 
+    def test_over_scoped_fires_only_on_both_ceilings(self):  # composite cohesion signal
+        big_contract = "".join("- clause {}.\n".format(i) for i in range(R.LINT_CONTRACT_MAX + 1))
+        big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
+        small_ac = "".join("- AC {}.\n".format(i) for i in range(3))
+        over = R.lint_requirement("REQ-BIG-001", self._req("confirmed", self._body(big_contract, big_ac)))
+        self.assertIn("over-scoped", [f["check"] for f in over])             # both ceilings => fires
+        one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
+        self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
+
     def test_draft_is_out_of_scope(self):
         long_sent = " ".join(["word"] * 50) + "."
         reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}

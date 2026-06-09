@@ -76,7 +76,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.6"
+MAP_ENGINE_VERSION = "2026-06-09.7"
 
 
 # ---------- parsing ----------
@@ -563,7 +563,10 @@ superseded_by:       # <ID>, if replaced
 ## WHAT — Contract (normative)
 <!-- Audience: a developer new to THIS project. Define project-specific terms inline
      on first use; attach roles to named components; keep "shall" phrasing.
-     Assumptions & constraints (external deps, explicit out-of-scope): note them here. -->
+     Assumptions & constraints (external deps, explicit out-of-scope): note them here.
+     Scope: one capability = one behavior that can fail independently. If you accumulate
+     many contract clauses AND many acceptance criteria, you are likely describing several
+     capabilities — split them (the linter flags this as 'over-scoped'). -->
 - The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
   no function names; true regardless of how the code is implemented).
   <!-- Rationale: why this specific behavior -->
@@ -1448,6 +1451,8 @@ LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' join
 LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
+                               # is the composite 'over-scoped' cohesion signal (warn)
 # Closed list of vague QUALITY words that make a normative bullet un-testable
 # (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
 # and weak modals — they are too often legitimately precise in this domain, and a
@@ -1575,6 +1580,19 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # cohesion (warn): over BOTH the contract and acceptance ceilings at once is a strong
+    # "several capabilities bundled into one" signal — each contract clause is a separate
+    # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
+    # false positives near zero: a large-but-cohesive capability rarely maxes both. Advisory
+    # only — it surfaces split candidates; the split decision stays with the human.
+    if _has_section(body, "contract") and _has_section(body, "acceptan"):
+        contract_n, ac_count = len(_bullets(body, "contract")), _count_ac(body)
+        if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
+            findings.append({
+                "severity": "warn", "check": "over-scoped",
+                "detail": "{} contract clauses + {} AC (both over {}/{}): likely several "
+                          "capabilities — consider splitting".format(
+                              contract_n, ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
