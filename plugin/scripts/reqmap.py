@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.12"
+MAP_ENGINE_VERSION = "2026-06-09.13"
 
 
 # ---------- parsing ----------
@@ -1597,6 +1597,9 @@ LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (w
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
                                # is the composite 'over-scoped' cohesion signal (warn)
+LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
+                               # 'file-spread' diffuseness signal (warn) — auto-off below it,
+                               # so silent in single-file repos (near-zero false positive)
 # Closed list of vague QUALITY words that make a normative bullet un-testable
 # (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
 # and weak modals — they are too often legitimately precise in this domain, and a
@@ -1669,9 +1672,11 @@ def _count_ac(body):
     return count
 
 
-def lint_requirement(rid, r):  # implements: REQ-LINT-014
+def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014
     """Return a list of {severity, check, detail} findings for one requirement;
-    an empty list means clean. Checks the Contract + Acceptance sections only."""
+    an empty list means clean. Checks the Contract + Acceptance sections only.
+    `member_list` (optional [(role, file, line), ...]) enables the member-based
+    file-spread check; when omitted, that check is skipped."""
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
@@ -1760,10 +1765,22 @@ def lint_requirement(rid, r):  # implements: REQ-LINT-014
                     "severity": "warn", "check": "vague-term",
                     "detail": "vague word '{}' (no testable meaning): {}".format(
                         w, _clip(ln))})
+    # file-spread (warn): a requirement whose implements members span many distinct FILES is
+    # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
+    # cannot see, since a tight contract can still be smeared across many files. Auto-off when
+    # the members live in fewer than LINT_FILE_SPREAD_MAX files, so it is silent in a single-file
+    # repo (near-zero false positive). Needs member_list; skipped when not supplied.
+    if member_list:
+        impl_files = {m[1] for m in member_list if m and m[0] == "implements"}
+        if len(impl_files) >= LINT_FILE_SPREAD_MAX:
+            findings.append({
+                "severity": "warn", "check": "file-spread",
+                "detail": "implements span {} files (>= {}): capability may be diffuse — "
+                          "confirm cohesion or split".format(len(impl_files), LINT_FILE_SPREAD_MAX)})
     return findings
 
 
-def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
+def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
@@ -1774,7 +1791,7 @@ def cmd_lint(reqs, strict=False):  # implements: REQ-LINT-014
                if r["meta"].get("status") in LINT_STATUSES]
     errors = warns = 0
     for rid, r in targets:
-        fs = lint_requirement(rid, r)
+        fs = lint_requirement(rid, r, (members or {}).get(rid))
         if not fs:
             continue
         print("{}   requirements/{}.md".format(rid, rid))
@@ -2840,7 +2857,7 @@ def main():
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all)
     if a.cmd == "lint":
-        return cmd_lint(reqs, a.strict)
+        return cmd_lint(reqs, a.strict, members)
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2

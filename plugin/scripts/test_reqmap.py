@@ -1734,6 +1734,16 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
         self.assertNotIn("empty-section",                                    # content present => silent
                          [f["check"] for f in R.lint_requirement("REQ-F-001", self._req("confirmed", self._body()))])
 
+    def test_file_spread_warns_across_many_files(self):  # senate-driven; validates the positive branch via a synthetic multi-file fixture
+        r = self._req("confirmed", self._body())
+        spread = [("implements", "a.py", 1), ("implements", "b.py", 2), ("implements", "c.py", 3)]
+        self.assertIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-D-001", r, spread)])
+        # implements within a single file (tested-by files don't count) => silent in single-file repos
+        one = [("implements", "a.py", 1), ("implements", "a.py", 9), ("tested-by", "t.py", 1)]
+        self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-E-001", r, one)])
+        # no member data supplied => check is skipped
+        self.assertNotIn("file-spread", [f["check"] for f in R.lint_requirement("REQ-G-001", r)])
+
     def test_draft_is_out_of_scope(self):
         long_sent = " ".join(["word"] * 50) + "."
         reqs = {"DRAFT-X-001": self._req("draft", self._body(contract="- " + long_sent + "\n"))}
