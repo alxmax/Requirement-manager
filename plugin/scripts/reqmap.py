@@ -48,6 +48,7 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
+MILESTONE_RE = re.compile(r"^v\d[\d.]*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
 # depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
@@ -76,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.9"
+MAP_ENGINE_VERSION = "2026-06-09.10"
 
 
 # ---------- parsing ----------
@@ -432,6 +433,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
             errors.append(f"{rid}: invalid status {m.get('status')!r}")
         if m.get("layer") not in VALID_LAYER:
             errors.append(f"{rid}: invalid layer {m.get('layer')!r}")
+        # milestone (warn): an optional, roadmap-only field. A malformed value silently fails
+        # to sort in the Roadmap (semverCmp treats junk as 0) rather than breaking the build,
+        # so it warns (never errors), only when present and not deprecated.
+        ms = m.get("milestone")
+        if ms and m.get("status") != "deprecated" and not MILESTONE_RE.match(str(ms).strip()):
+            warns.append(f"{rid}: milestone {ms!r} is malformed (expected v<digits>[.<digits>…], e.g. v1.14)")
         for dep in _as_list(m.get("depends_on")):
             if dep not in cap_ids:
                 errors.append(f"{rid}: depends_on missing {dep}")
@@ -622,6 +629,82 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
     print(f"created {dest}")
+    return 0
+
+
+def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root="."):  # implements: REQ-PROMOTE-TODO-001
+    """Scaffold a requirement draft from an unfinished TODO.md item (matched by name),
+    seeding title / layer / milestone from the item. Requires an explicit cap_id — the
+    engine runs headless (CI, pre-commit hook), so there is no interactive prompt. With
+    mark_done it flips the matched TODO line to [x]; otherwise TODO.md is never touched."""
+    if not cap_id:
+        print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+    key = name.strip().casefold()
+    open_todos = [t for t in _parse_todos(root) if not t["done"]]
+    matches = [t for t in open_todos if t["name"].strip().casefold() == key]
+    if not matches:
+        avail = "; ".join(t["name"] for t in open_todos) or "(none)"
+        print(f"no open TODO named {name!r}. Open items: {avail}"); return 1
+    if len(matches) > 1:
+        where = ", ".join(t["milestone"] for t in matches)
+        print(f"ambiguous: {len(matches)} open TODOs named {name!r} (milestones {where}) — rename to disambiguate")
+        return 1
+    todo = matches[0]
+    dest = os.path.join(reqs_dir, cap_id + ".md")
+    if os.path.exists(dest):
+        print(f"exists: {dest}"); return 1
+    t = None
+    if tmpl_path:
+        try:
+            with open(tmpl_path, encoding="utf-8") as f:
+                t = f.read()
+        except OSError:
+            t = None
+    if t is None:
+        t = REQUIREMENT_TEMPLATE
+    layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
+    t = t.replace("AREA-NAME-NNN", cap_id)
+    t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
+    t = t.replace("# Short name", "# " + todo["name"], 1)
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write(t)
+    print(f"created {dest} (draft, milestone {todo['milestone']}, layer {layer}) from TODO {todo['name']!r}")
+    if mark_done:
+        n = _mark_todo_done(root, todo["name"])
+        print(f"marked TODO {todo['name']!r} done in TODO.md" if n
+              else "warning: could not mark the TODO done (TODO.md not writable or line not found)")
+    return 0
+
+
+def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
+    """Flip the first unfinished TODO.md line whose name matches to [x]. Best-effort:
+    returns 1 if a line was rewritten, 0 if TODO.md is absent/unwritable or no line matched."""
+    key = name.strip().casefold()
+    for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
+        path = os.path.join(base, "TODO.md")
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                lines = f.readlines()
+        except OSError:
+            return 0
+        changed = 0
+        for i, line in enumerate(lines):
+            m = re.match(r"^(\s*-\s+\[)[ ](\]\s+)(.+?)(\r?\n?)$", line)
+            if m and m.group(3).split("|", 1)[0].strip().casefold() == key:
+                lines[i] = m.group(1) + "x" + m.group(2) + m.group(3) + m.group(4)
+                changed = 1
+                break
+        if changed:
+            try:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.writelines(lines)
+            except OSError:
+                return 0
+        return changed
     return 0
 
 
@@ -2581,7 +2664,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -2607,6 +2690,10 @@ def main():
                          "membership tags from source files before re-extracting")
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
+    ap.add_argument("--id", dest="new_id", default=None,
+                    help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+    ap.add_argument("--mark-done", dest="mark_done", action="store_true",
+                    help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -2621,6 +2708,10 @@ def main():
         if not a.arg:
             print("usage: reqmap new AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
+    if a.cmd == "promote-todo":
+        if not a.arg:
+            print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+        return cmd_promote_todo(reqs_dir, tmpl, a.arg, a.new_id, a.mark_done, code_root)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe)
 

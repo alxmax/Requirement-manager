@@ -2257,5 +2257,73 @@ class Traceability(unittest.TestCase):  # tested-by: REQ-TRACE-020
         self.assertIn("unimplemented", [r["signal"] for r in feat["risks"]])      # feature still flags
 
 
+class MilestoneGate(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def _warns(self, milestone, status="confirmed"):
+        with tempfile.TemporaryDirectory() as d:
+            body = ("---\nid: A-X-001\nstatus: {}\nlayer: feature\nmilestone: {}\n---\n\n"
+                    "# T\n\n## WHAT — Contract\n- x.\n\n## HOW — Acceptance\n- a.\n").format(status, milestone)
+            _write(os.path.join(d, "A-X-001.md"), body)
+            _write(os.path.join(d, "x.py"), tag("A-X-001") + "\n")   # implements so no orphan error
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            return buf.getvalue()
+
+    def test_malformed_milestone_warns(self):
+        for bad in ("next", "1.14", "V1.0", "v1.14-beta"):
+            self.assertIn("malformed", self._warns(bad), bad)
+
+    def test_valid_milestone_silent(self):
+        for ok in ("v1.14", "v1.04", "v2"):
+            self.assertNotIn("malformed", self._warns(ok), ok)
+
+    def test_deprecated_milestone_exempt(self):
+        self.assertNotIn("malformed", self._warns("next", status="deprecated"))
+
+
+class PromoteTodo(unittest.TestCase):  # tested-by: REQ-PROMOTE-TODO-001
+    TODO = "## v1.14\n- [ ] Build the thing | lane: ops\n- [x] Done already | lane: feature\n"
+
+    def _setup(self, d):
+        _write(os.path.join(d, "TODO.md"), self.TODO)
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        return rq
+
+    def _run(self, rq, name, cap_id, mark_done=False, root="."):
+        with redirect_stdout(io.StringIO()):
+            return R.cmd_promote_todo(rq, None, name, cap_id, mark_done=mark_done, root=root)
+
+    def test_scaffolds_draft_from_todo(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 0)
+            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
+            self.assertIn("# Build the thing", text)
+            self.assertIn("milestone: v1.14", text)
+            self.assertIn("layer: feature", text)            # lane ops -> feature
+            self.assertIn("status: draft", text)
+            self.assertIn("- [ ] Build the thing", open(os.path.join(d, "TODO.md"), encoding="utf-8").read())  # unchanged
+
+    def test_mark_done_flips_only_matched_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self._run(rq, "Build the thing", "REQ-T-001", mark_done=True, root=d)
+            todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
+            self.assertIn("- [x] Build the thing", todo)
+            self.assertIn("- [x] Done already", todo)        # other lines untouched
+
+    def test_errors_write_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            self.assertEqual(self._run(rq, "Build the thing", None, root=d), 2)            # no --id
+            self.assertEqual(self._run(rq, "nope", "REQ-T-001", root=d), 1)                # not found
+            self.assertFalse(os.path.exists(os.path.join(rq, "REQ-T-001.md")))
+            _write(os.path.join(rq, "REQ-T-001.md"), "x")
+            self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 1)     # id taken
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
