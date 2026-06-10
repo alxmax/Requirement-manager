@@ -1999,16 +1999,25 @@ def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALT
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
-    verify-intent, not drifted vs the lock). `--json` emits the same numbers as a
+    verify-intent, not drifted vs the lock). A `layer: need` is covered by ≥1
+    `satisfies:` edge instead of code and its test axis is waived, mirroring how
+    `check` treats the need layer. `--json` emits the same numbers as a
     parseable object for a CI badge. Read-only, always exit 0."""
     total = len(reqs)
     lock = load_lock(reqs_dir)
+    satisfied = set()  # need ids with >=1 `satisfies:` edge (REQ-TRACE-020)
+    for r in reqs.values():
+        satisfied.update(_as_list(r["meta"].get("satisfies")))
     confirmed = implemented = tested = orphans = untested = open_intent = drifted = drafts = healthy = 0
     for rid, r in reqs.items():
         m, body = r["meta"], r["body"]
         status = m.get("status", "draft")
         roles = _member_roles(members.get(rid, []))
         has_impl = "implements" in roles
+        # a need is covered by being satisfied, not implemented, and its test
+        # axis is waived — a need is fulfilled by requirements, not by code
+        is_need = m.get("layer") == "need"
+        covered = (rid in satisfied) if is_need else has_impl
         has_test_member = "tested-by" in roles
         has_test = has_test_member or bool(m.get("test_exempt"))
         is_confirmed = status == "confirmed"
@@ -2021,11 +2030,11 @@ def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALT
         implemented += has_impl
         tested += has_test_member
         drafts += status == "draft"
-        orphans += is_confirmed and not has_impl
+        orphans += is_confirmed and not covered
         untested += has_impl and not has_test_member and not m.get("test_exempt")
         open_intent += open_now
         drifted += is_drifted
-        if is_confirmed and has_impl and has_test and not open_now and not is_drifted:
+        if is_confirmed and covered and (has_test or is_need) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
     data = {"score": score, "total": total, "healthy": healthy,

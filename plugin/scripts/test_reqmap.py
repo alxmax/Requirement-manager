@@ -2057,6 +2057,28 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         self.assertEqual(code, 0)
         self.assertIn("0/100", out)
 
+    def _need(self):
+        return {"meta": {"status": "confirmed", "layer": "need"},
+                "body": "# N\n\n## WHAT — Verify intent\n- None — clear.\n"}
+
+    def test_satisfied_need_is_green(self):
+        # a need is covered by being satisfied, not implemented; test axis waived
+        reqs = {"NEED-X-001": self._need(),
+                "REQ-A-001": {"meta": {"status": "confirmed", "satisfies": ["NEED-X-001"]},
+                              "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"}}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 100)
+        self.assertEqual(obj["orphans"], 0)
+        self.assertEqual(obj["untested"], 0)
+
+    def test_unsatisfied_need_is_orphan_not_green(self):
+        _, out = self._health({"NEED-X-001": self._need()}, {}, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["orphans"], 1)
+        self.assertEqual(obj["healthy"], 0)
+
 
 class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
     def test_link_problem_missing_file(self):

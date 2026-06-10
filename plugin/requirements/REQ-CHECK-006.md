@@ -19,10 +19,12 @@ milestone: v1.02
 - It shall report an `ERROR` and exit non-zero for any of: a code tag referencing a
   non-existent capability (dangling tag); an invalid `status` or `layer`; a `depends_on`
   pointing at a missing id; an enforced (`in-progress`/`implemented`/`confirmed`)
-  requirement with no `implements:` member.
+  requirement with no `implements:` member (a `layer: need` requirement is exempt —
+  see [[REQ-TRACE-020]]).
 - It shall report drift as a `WARN` (never an error): a `confirmed` requirement whose
   binding hash differs from the lock, naming the member `file:line` locations to re-check.
-- A `confirmed` requirement with no `tested-by:` member shall be a `WARN`.
+- A `confirmed` requirement with no `tested-by:` member shall be a `WARN`, unless its
+  frontmatter carries a `test_exempt: <reason>` opt-out or it is a `layer: need` requirement.
 - A `confirmed` requirement missing a `## WHAT — Contract` section shall be a `WARN`
   (both `bus` and `feature` layers; does not affect the exit code).
 - A `confirmed` requirement missing a `## HOW — Acceptance` section shall be a `WARN`
@@ -31,6 +33,8 @@ milestone: v1.02
   `v<digits>[.<digits>…]` (e.g. `v1.14`); a malformed value is a `WARN` (it is roadmap-only
   metadata, never build-critical) and a `deprecated` requirement is exempt.
 - A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).
+- Requirements whose body lacks a `## WHAT — Verify intent` section shall be named in one
+  aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.
 - It shall print an advisory line with the open verify-intent finding count when > 0,
   without affecting the exit code, and print a summary (requirements, members, errors, warnings).
 - With `--update-lock` it shall write the current binding hashes to `requirements/_reqlock.json`.
@@ -41,6 +45,9 @@ milestone: v1.02
 ## WHAT — Notes & known limitations (informative)
 - Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`)
   is not automatable and surfaces at human review.
+- When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed
+  plugin's copy, `check` prints an advisory staleness notice (`warn_if_stale`); the
+  variable is unset in CI, so the notice is silent and exit-neutral there.
 
 ## HOW — Acceptance (= tests)
 - A tag referencing a non-existent capability produces an `ERROR` and exit 1.
@@ -52,6 +59,8 @@ milestone: v1.02
 - A `confirmed` requirement with no `## WHAT — Contract` section produces a `WARN` and does not affect the exit code.
 - A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.
 - A `confirmed` requirement with both sections present produces no section-lint warning.
+- A `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member produces no test warning.
+- A requirement without a `## WHAT — Verify intent` section is counted as legacy-schema in the summary.
 - `--update-lock` writes the current hashes to `requirements/_reqlock.json`.
 
 ## Example — in practice (optional, non-binding)
