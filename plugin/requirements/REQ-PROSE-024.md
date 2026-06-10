@@ -1,0 +1,69 @@
+---
+id: REQ-PROSE-024
+status: confirmed
+layer: feature
+owner: Alex
+depends_on: [CORE-SCAN-002, REQ-EXTRACT-008]
+superseded_by:
+milestone: v1.06
+---
+
+# Prose capability classification & drafting
+
+> Specs and prompts written as text documents can be capabilities too, not just code.
+> When `extract` runs, this part decides which text files deserve a draft requirement,
+> which are only kept in sync, and which are ignored as boilerplate — then writes the
+> drafts. Without it, prompt and spec files would stay invisible to the registry, or
+> every README would pollute it with junk drafts.
+
+## WHAT — Contract (normative)
+- `extract` shall also draft `draft`-status requirements from untagged **prose** files
+  (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.
+- Each prose file shall be classified into one of three buckets before drafting:
+  - **ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`,
+    `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`,
+    `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).
+  - **sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`.
+    These are never drafted as their own requirement, but become a member (and are
+    drift-checked) when a human tags them `generated-from: <ID>`.
+  - **capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These
+    are auto-drafted.
+- The buckets shall govern auto-drafting ONLY; an explicit tag on any file is always
+  honored by the scanner regardless of bucket (so a hand-tagged README is still a member).
+- A prose draft shall be scaffolded from the file's title (frontmatter `title:`, else the
+  first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings,
+  recorded as an authoring hint.
+- The source prose is never the contract: the drift hash anchors on the authored
+  Contract + Acceptance, so the prose may later drift freely from the authored requirement.
+
+## WHAT — Verify intent (open questions for the human)
+- None — split out of [[REQ-EXTRACT-008]] with intent carried over unchanged.
+
+## WHAT — Notes & known limitations (informative)
+- The bucket lists are fixed in the engine, not configurable; `.reqmapignore` remains the
+  per-repo escape hatch for anything the buckets misjudge.
+
+## HOW — Acceptance (= tests)
+- Given a `prompts/foo.md` with no member tag, when `extract` runs, then a `draft`-status
+  requirement is written for it.
+- Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`,
+  when `extract` runs, then no draft is written for it.
+- Given a capability-bucket prose file already tagged `# implements: <ID>`, when `extract`
+  runs, then it is skipped (no duplicate draft).
+- Given a file tagged `generated-from: <ID>` inside an HTML comment
+  (`<!-- generated-from: <ID> -->`), when the scanner runs, then that file is a member of `<ID>`.
+
+## Example — in practice (optional, non-binding)
+<!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
+- Ana runs extract on a repo with a `prompts/triage.md` nobody tagged. It gets its own
+  draft requirement built from its title and headings. Her `README.md` gets none — but
+  when she later tags the README `generated-from: REQ-DOCS-001`, the gate starts flagging
+  it whenever that requirement's contract changes.
+
+## WHERE — Current implementation
+- `classify_prose` (the three-bucket router) and `_prose_facts` (title + heading scaffold)
+  in `reqmap.py`; the prose walk lives inside `cmd_extract`.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)

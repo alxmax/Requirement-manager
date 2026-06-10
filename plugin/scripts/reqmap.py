@@ -830,7 +830,7 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
     return "DRAFT-" + (slug or "FILE")
 
 
-def classify_prose(rel):  # implements: REQ-EXTRACT-008
+def classify_prose(rel):  # implements: REQ-PROSE-024
     """Bucket a POSIX-relative .md/.html path for the auto-draft path. Returns
     'ignore' (meta/boilerplate, invisible), 'sync_only' (README/docs/*.html — never
     drafted, but a drift- and semantic-checked member when explicitly tagged), or
@@ -855,7 +855,7 @@ def classify_prose(rel):  # implements: REQ-EXTRACT-008
     return "capability"
 
 
-def _prose_facts(src):  # implements: REQ-EXTRACT-008
+def _prose_facts(src):  # implements: REQ-PROSE-024
     """(title, [headings]) from markdown/HTML prose, for a draft scaffold.
     Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
     Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
@@ -883,7 +883,7 @@ def _prose_facts(src):  # implements: REQ-EXTRACT-008
     return title, headings
 
 
-def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
+def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008  # implements: REQ-PROSE-024
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
@@ -1647,7 +1647,7 @@ def _lint_prose(body, name):  # implements: REQ-LINT-014
     return out
 
 
-def _sentences(text):  # implements: REQ-LINT-014
+def _sentences(text):  # implements: REQ-LINTCHECKS-025
     """Split a prose line into sentences on '.', '!', '?' boundaries. Crude but
     deterministic — enough to count words per sentence for the length check."""
     return [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
@@ -1676,7 +1676,7 @@ def _count_ac(body):
     return count
 
 
-def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014
+def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # implements: REQ-LINTCHECKS-025
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only.
     `member_list` (optional [(role, file, line), ...]) enables the member-based
@@ -1999,16 +1999,25 @@ def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALT
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
-    verify-intent, not drifted vs the lock). `--json` emits the same numbers as a
+    verify-intent, not drifted vs the lock). A `layer: need` is covered by ≥1
+    `satisfies:` edge instead of code and its test axis is waived, mirroring how
+    `check` treats the need layer. `--json` emits the same numbers as a
     parseable object for a CI badge. Read-only, always exit 0."""
     total = len(reqs)
     lock = load_lock(reqs_dir)
+    satisfied = set()  # need ids with >=1 `satisfies:` edge (REQ-TRACE-020)
+    for r in reqs.values():
+        satisfied.update(_as_list(r["meta"].get("satisfies")))
     confirmed = implemented = tested = orphans = untested = open_intent = drifted = drafts = healthy = 0
     for rid, r in reqs.items():
         m, body = r["meta"], r["body"]
         status = m.get("status", "draft")
         roles = _member_roles(members.get(rid, []))
         has_impl = "implements" in roles
+        # a need is covered by being satisfied, not implemented, and its test
+        # axis is waived — a need is fulfilled by requirements, not by code
+        is_need = m.get("layer") == "need"
+        covered = (rid in satisfied) if is_need else has_impl
         has_test_member = "tested-by" in roles
         has_test = has_test_member or bool(m.get("test_exempt"))
         is_confirmed = status == "confirmed"
@@ -2021,11 +2030,11 @@ def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALT
         implemented += has_impl
         tested += has_test_member
         drafts += status == "draft"
-        orphans += is_confirmed and not has_impl
+        orphans += is_confirmed and not covered
         untested += has_impl and not has_test_member and not m.get("test_exempt")
         open_intent += open_now
         drifted += is_drifted
-        if is_confirmed and has_impl and has_test and not open_now and not is_drifted:
+        if is_confirmed and covered and (has_test or is_need) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
     data = {"score": score, "total": total, "healthy": healthy,

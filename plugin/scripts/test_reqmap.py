@@ -280,7 +280,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertIn("FOO-BAR-001", R.scan_members(d, None))
 
 
-class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
                     "SKILL.md", "TODO.md", "CHANGELOG.md", "LICENSE", "LICENSE.md",
@@ -298,7 +298,7 @@ class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertEqual(R.classify_prose(rel), "capability", rel)
 
 
-class ProseFacts(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseFacts(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_markdown_frontmatter_title_and_headings(self):
         src = ("---\ntitle: Senator Aurelius\n---\n\n"
                "## Role\nrisk lens\n## Specialty\nreversibility\n### sub\n")
@@ -415,7 +415,7 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("promote to `confirmed`", md)    # unreviewed advice text
 
 
-class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseExtract(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def _extract(self, d):
         reqs = R.load_requirements(os.path.join(d, "requirements"))
         members = R.scan_members(d, os.path.join(d, "requirements"))
@@ -466,7 +466,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertFalse(any("FOO" in f for f in drafts), drafts)
 
 
-class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008  # tested-by: REQ-PROSE-024
     def test_tag_inside_html_comment_is_a_member(self):  # rider #1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"),
@@ -1718,7 +1718,7 @@ class ParseTodos(unittest.TestCase):
         self.assertEqual(payload["todos"][0]["name"], "X")
 
 
-class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
+class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINTCHECKS-025
     CONTRACT = "## WHAT — Contract (normative)"
     ACCEPT = "## HOW — Acceptance (= tests)"
 
@@ -2056,6 +2056,28 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         code, out = self._health({}, {})
         self.assertEqual(code, 0)
         self.assertIn("0/100", out)
+
+    def _need(self):
+        return {"meta": {"status": "confirmed", "layer": "need"},
+                "body": "# N\n\n## WHAT — Verify intent\n- None — clear.\n"}
+
+    def test_satisfied_need_is_green(self):
+        # a need is covered by being satisfied, not implemented; test axis waived
+        reqs = {"NEED-X-001": self._need(),
+                "REQ-A-001": {"meta": {"status": "confirmed", "satisfies": ["NEED-X-001"]},
+                              "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"}}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 100)
+        self.assertEqual(obj["orphans"], 0)
+        self.assertEqual(obj["untested"], 0)
+
+    def test_unsatisfied_need_is_orphan_not_green(self):
+        _, out = self._health({"NEED-X-001": self._need()}, {}, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["orphans"], 1)
+        self.assertEqual(obj["healthy"], 0)
 
 
 class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
