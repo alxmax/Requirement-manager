@@ -48,7 +48,7 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
 VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
-MILESTONE_RE = re.compile(r"^v\d[\d.]*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
+MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
 # depend on (a hub) — the bus is hidden regardless of count. Full graph stays in
@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-09.14"
+MAP_ENGINE_VERSION = "2026-06-10"
 
 
 # ---------- parsing ----------
@@ -617,7 +617,7 @@ REQUIREMENT_TEMPLATE = """\
 ---
 id: AREA-NAME-NNN
 status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
-layer: feature       # bus | feature
+layer: feature       # bus | feature | need
 owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: []       # ids of bus/other capabilities this builds on
@@ -670,7 +670,9 @@ AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
 ## WHERE — Current implementation
 - How the code does it today (the volatile narrative — may drift from the contract).
 
-## WHERE — Members in code (auto)
+## Links
+- Used by: (auto)
+## Members in code (auto)
 """
 
 
@@ -2690,7 +2692,7 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     try:
         git_root = subprocess.check_output(
             ["git", "-C", root, "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.DEVNULL, timeout=3
         ).decode().strip()
     except Exception:
         git_root = root
