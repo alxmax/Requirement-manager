@@ -44,16 +44,31 @@ milestone: v1.04
   `_map.html` that the map capability renders. It adds no new rendering — only publish + gate.
 
 ## HOW — Acceptance (= tests)
-- When `docs/` at the git root has `.nojekyll` or `index.html`, `map` also writes `docs/map.html`
-  (same content as `_map.html`); when the signal is absent, `docs/map.html` is not written.
-- When `docs/` has no Pages signal (or git is absent), `map` still succeeds and writes only the
-  standard outputs.
-- After `map`, `map --check` exits 0; if `docs/map.html` is then edited to differ from a fresh
-  render, `map --check` exits non-zero and names `map.html`.
-- When the Pages signal is present but `docs/map.html` does not exist (never generated, or
-  removed), `map --check` does not flag it stale.
-- A change to only the git-derived `repo` value inside `docs/map.html` leaves `map --check` fresh
-  (the field is excluded from the diff).
+AC-1
+  Given  a `docs/` at the git root carrying `.nojekyll` or `index.html`
+  When   `map` runs
+  Then   it also writes `docs/map.html` (same content as `_map.html`); absent the signal,
+         `docs/map.html` is not written
+
+AC-2
+  Given  no Pages signal in `docs/` (or git absent)
+  When   `map` runs
+  Then   it still succeeds and writes only the standard outputs
+
+AC-3
+  Given  a completed `map`
+  When   `docs/map.html` is edited to differ from a fresh render
+  Then   `map --check` exits non-zero and names `map.html` (it exits 0 before the edit)
+
+AC-4
+  Given  the Pages signal present but no `docs/map.html` (never generated, or removed)
+  When   `map --check` runs
+  Then   it does not flag the file stale
+
+AC-5
+  Given  a change to only the git-derived `repo` value inside `docs/map.html`
+  When   `map --check` runs
+  Then   it stays fresh (the field is excluded from the diff)
 
 ## WHERE — Current implementation
 - `_docs_publish_path` (Pages-signal resolution) and the `docs/map.html` branches of `cmd_map`

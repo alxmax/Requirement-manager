@@ -57,13 +57,27 @@ milestone: v1.14
   break that property.
 
 ## HOW — Acceptance (= tests)
-- Given the corpus, when `review` runs with no argument, then it emits JSON for every requirement;
-  `review <ID>` emits JSON for that one; neither writes a file nor invokes an LLM.
-- The plan carries a `coverage_summary` with `total_requirements` and `requirements_in_plan`, and
-  names the three categories with the suggested_rewrite-required finding contract.
-- Two `review` runs on the same corpus produce byte-identical output (deterministic).
-- `check`'s exit code and printed output are byte-identical whether or not `requirements/_ai_review.md`
-  exists — the gate never reads the AI sidecar.
+AC-1
+  Given  the corpus
+  When   `review` runs with no argument (or as `review <ID>`)
+  Then   it emits JSON for every requirement (or that one); neither form writes a file nor
+         invokes an LLM
+
+AC-2
+  Given  the emitted plan
+  When   it is inspected
+  Then   it carries a `coverage_summary` with `total_requirements` and `requirements_in_plan`,
+         and names the three categories with the suggested_rewrite-required finding contract
+
+AC-3
+  Given  the same corpus
+  When   `review` runs twice
+  Then   the two outputs are byte-identical (deterministic)
+
+AC-4
+  Given  a `requirements/_ai_review.md` present or absent
+  When   `check` runs
+  Then   its exit code and printed output are byte-identical — the gate never reads the AI sidecar
 
 ## WHERE — Current implementation
 - `cmd_review` in `reqmap.py` (the deterministic plan emitter), dispatched from `main()` for the

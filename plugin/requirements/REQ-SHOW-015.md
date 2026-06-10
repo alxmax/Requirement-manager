@@ -37,12 +37,36 @@ milestone: v1.14
 - The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached.
 
 ## HOW — Acceptance (= tests)
-- Given a known id, when `show` runs, then it prints the id, status, and layer on the header line and returns zero.
-- Given a requirement with a `priority` field, when `show` runs, then the priority value appears on the header line; given none, the header carries no empty priority segment.
-- Given an unknown id, when `show` runs, then it prints a "no requirement with id" message and returns a non-zero code.
-- Given a requirement that another requirement depends on, when `show` runs, then the depender's id appears under "Depended on by".
-- Given a requirement with a tagged member, when `show` runs, then the member's role and `file:line` appear under members.
-- Given a requirement with an open verify-intent bullet, when `show` runs, then that bullet appears and a "None" placeholder bullet does not.
+AC-1
+  Given  a known id
+  When   `show` runs
+  Then   it prints the id, status, and layer on the header line and returns zero
+
+AC-2
+  Given  a requirement with a `priority` field
+  When   `show` runs
+  Then   the priority value appears on the header line; given none, the header carries no
+         empty priority segment
+
+AC-3
+  Given  an unknown id
+  When   `show` runs
+  Then   it prints a "no requirement with id" message and returns a non-zero code
+
+AC-4
+  Given  a requirement that another requirement depends on
+  When   `show` runs
+  Then   the depender's id appears under "Depended on by"
+
+AC-5
+  Given  a requirement with a tagged member
+  When   `show` runs
+  Then   the member's role and `file:line` appear under members
+
+AC-6
+  Given  a requirement with an open verify-intent bullet
+  When   `show` runs
+  Then   that bullet appears and a "None" placeholder bullet does not
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

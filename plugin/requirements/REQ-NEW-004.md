@@ -30,10 +30,25 @@ milestone: v1.02
   directory is required for `new` to work.
 
 ## HOW — Acceptance (= tests)
-- `new FOO-NEW-099` on an empty registry creates `requirements/FOO-NEW-099.md` with that id.
-- Running `new` for an id that already exists exits non-zero and writes nothing.
-- The created file matches the template with `AREA-NAME-NNN` replaced by the given id.
-- With no on-disk template, the built-in scaffold (Contract + Acceptance sections) is used.
+AC-1
+  Given  an empty registry
+  When   `new FOO-NEW-099` runs
+  Then   `requirements/FOO-NEW-099.md` is created with that id
+
+AC-2
+  Given  an id that already exists
+  When   `new` runs for it
+  Then   it exits non-zero and writes nothing
+
+AC-3
+  Given  a file created by `new`
+  When   it is compared to the template
+  Then   it matches with `AREA-NAME-NNN` replaced by the given id
+
+AC-4
+  Given  no on-disk template
+  When   `new` runs
+  Then   the built-in scaffold (Contract + Acceptance sections) is used
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

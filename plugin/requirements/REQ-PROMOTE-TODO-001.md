@@ -40,14 +40,26 @@ milestone: v1.14
   confirmed): this one creates a *new draft* from a TODO line.
 
 ## HOW — Acceptance (= tests)
-- Given an unfinished TODO item, when `promote-todo "<name>" --id REQ-X-001` runs, then
-  `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title, milestone
-  and layer, and `TODO.md` is left unchanged.
-- Given a TODO `lane: ops`, when the requirement is scaffolded, then its `layer:` is `feature`.
-- Given `--mark-done`, when the command runs, then the matched `TODO.md` line becomes
-  `- [x] <name>` and no other line changes.
-- Given a missing `--id`, an already-taken id, a name with no open match, or an ambiguous name,
-  when the command runs, then it exits non-zero and writes no requirement file.
+AC-1
+  Given  an unfinished TODO item
+  When   `promote-todo "<name>" --id REQ-X-001` runs
+  Then   `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title,
+         milestone and layer, and `TODO.md` is left unchanged
+
+AC-2
+  Given  a TODO `lane: ops`
+  When   the requirement is scaffolded
+  Then   its `layer:` is `feature`
+
+AC-3
+  Given  `--mark-done`
+  When   the command runs
+  Then   the matched `TODO.md` line becomes `- [x] <name>` and no other line changes
+
+AC-4
+  Given  a missing `--id`, an already-taken id, a name with no open match, or an ambiguous name
+  When   the command runs
+  Then   it exits non-zero and writes no requirement file
 
 ## WHERE — Current implementation
 - `cmd_promote_todo`, `_mark_todo_done` in `reqmap.py`; reuses `_parse_todos` (TODO.md parsing)

@@ -36,14 +36,46 @@ milestone: v1.12
 - `risk:` ordering only discriminates extract-authored drafts (hand-authored requirements have no `risk:` field → score 0, ordered by id).
 
 ## HOW — Acceptance (= tests)
-- The output starts with a progress header carrying the confirmed/tested/draft counts.
-- Given a confirmed requirement with implementing code but no `tested-by`, `next` lists it under "Needs tests" with `requirements/<ID>.md`.
-- Given a draft requirement, `next` lists it under "Drafts to review" and NOT under "Needs intent review" even when it has an open verify bullet (source dedup).
-- Given a confirmed requirement with an open Verify-intent bullet, `next` lists it under "Needs intent review".
-- Given a bucket with more items than the top-N, the default view truncates and prints a `... N more` line; `--all` lists every item.
-- Within a bucket, a draft with `risk: 2` (REVIEW) is ordered before a `risk: 0` draft and tagged `[REVIEW]`.
-- Within a bucket, a `must-have` requirement is ordered before a `should-have` one, and a requirement with no `priority` ranks after both.
-- Given an empty registry, `next` prints the "no requirements yet" message; given requirements with no open signals, it prints the all-clear line. Either way it writes no files and returns 0.
+AC-1
+  Given  any corpus
+  When   `next` runs
+  Then   the output starts with a progress header carrying the confirmed/tested/draft counts
+
+AC-2
+  Given  a confirmed requirement with implementing code but no `tested-by`
+  When   `next` runs
+  Then   it is listed under "Needs tests" with `requirements/<ID>.md`
+
+AC-3
+  Given  a draft requirement with an open verify bullet
+  When   `next` runs
+  Then   it is listed under "Drafts to review" and NOT under "Needs intent review" (source dedup)
+
+AC-4
+  Given  a confirmed requirement with an open Verify-intent bullet
+  When   `next` runs
+  Then   it is listed under "Needs intent review"
+
+AC-5
+  Given  a bucket with more items than the top-N
+  When   `next` runs
+  Then   the default view truncates and prints a `... N more` line; `--all` lists every item
+
+AC-6
+  Given  a draft with `risk: 2` (REVIEW) and a `risk: 0` draft in one bucket
+  When   `next` runs
+  Then   the REVIEW draft is ordered first and tagged `[REVIEW]`
+
+AC-7
+  Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket
+  When   `next` runs
+  Then   they are ordered must-have, should-have, then no-priority
+
+AC-8
+  Given  an empty registry, or one with no open signals
+  When   `next` runs
+  Then   it prints the "no requirements yet" message or the all-clear line respectively,
+         writes no files, and returns 0
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

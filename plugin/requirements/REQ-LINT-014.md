@@ -39,12 +39,35 @@ milestone: v1.14
   as an opt-in check.
 
 ## HOW — Acceptance (= tests)
-- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.
-- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.
-- Given a requirement whose `## HOW — Acceptance` heading is present but has no criteria beneath it, when `lint` runs, then it reports an `empty-section` warning.
-- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.
-- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.
-- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.
+AC-1
+  Given  a confirmed requirement whose body has no `## HOW — Acceptance` heading
+  When   `lint` runs
+  Then   it reports a `missing-section` error for that requirement
+
+AC-2
+  Given  a draft requirement with a long sentence
+  When   `lint` runs
+  Then   it reports nothing for that requirement, because drafts are out of scope
+
+AC-3
+  Given  a requirement whose `## HOW — Acceptance` heading is present but has no criteria beneath it
+  When   `lint` runs
+  Then   it reports an `empty-section` warning
+
+AC-4
+  Given  a long sentence that sits inside a fenced code block in the Acceptance section
+  When   `lint` runs
+  Then   it reports no `long-sentence` finding for that line
+
+AC-5
+  Given  a corpus whose non-draft requirements all have both sections
+  When   `lint --strict` runs
+  Then   it returns zero even if warnings were printed
+
+AC-6
+  Given  one non-draft requirement missing a section
+  When   `lint --strict` runs
+  Then   it returns a non-zero exit code
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

@@ -39,13 +39,40 @@ milestone: v1.14
 - The `implemented` and `tested` counts stay code-member counts, so a corpus with a satisfied need shows `implemented < total` while still scoring 100.
 
 ## HOW — Acceptance (= tests)
-- Given a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted, when `health` runs, then the score is 100.
-- Given an all-draft corpus, when `health` runs, then the score is zero.
-- Given `--json`, when `health` runs, then the output parses as JSON and carries the `score` and `total` keys.
-- Given a confirmed requirement with no `implements` member, when `health` runs, then it is counted under orphans and not under green.
-- Given an empty corpus, when `health` runs, then the score is zero and the exit code is zero.
-- Given a confirmed `need` satisfied by at least one requirement in an otherwise green corpus, when `health` runs, then the score is 100 and the orphan count is zero.
-- Given a confirmed `need` that no requirement satisfies, when `health` runs, then it is counted under orphans and not under green.
+AC-1
+  Given  a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted
+  When   `health` runs
+  Then   the score is 100
+
+AC-2
+  Given  an all-draft corpus
+  When   `health` runs
+  Then   the score is zero
+
+AC-3
+  Given  `--json`
+  When   `health` runs
+  Then   the output parses as JSON and carries the `score` and `total` keys
+
+AC-4
+  Given  a confirmed requirement with no `implements` member
+  When   `health` runs
+  Then   it is counted under orphans and not under green
+
+AC-5
+  Given  an empty corpus
+  When   `health` runs
+  Then   the score is zero and the exit code is zero
+
+AC-6
+  Given  a confirmed `need` satisfied by at least one requirement in an otherwise green corpus
+  When   `health` runs
+  Then   the score is 100 and the orphan count is zero
+
+AC-7
+  Given  a confirmed `need` that no requirement satisfies
+  When   `health` runs
+  Then   it is counted under orphans and not under green
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

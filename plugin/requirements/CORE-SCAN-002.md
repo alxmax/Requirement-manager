@@ -36,11 +36,30 @@ milestone: v1.00
 - The member list is discovered, never hand-maintained — that is the first thing to rot.
 
 ## HOW — Acceptance (= tests)
-- A file containing `# implements: <ID>` produces a member `(implements, file, line)` under `<ID>`.
-- All four roles are recognized; an unknown role string produces no member.
-- Excluded directories (`.git`, `node_modules`, `__pycache__`, the SSOT `requirements/`) are not scanned.
-- A duplicate tag on a single line is deduplicated; member paths are POSIX-relative.
-- An unreadable file is skipped without aborting the scan.
+AC-1
+  Given  a file containing `# implements: <ID>`
+  When   the scan runs
+  Then   a member `(implements, file, line)` is recorded under `<ID>`
+
+AC-2
+  Given  tags using each of the four roles and one unknown role string
+  When   the scan runs
+  Then   all four roles are recognized and the unknown role produces no member
+
+AC-3
+  Given  files under `.git`, `node_modules`, `__pycache__` or the SSOT `requirements/`
+  When   the scan runs
+  Then   those directories are not scanned
+
+AC-4
+  Given  a duplicate tag on a single line
+  When   the scan runs
+  Then   it is deduplicated and member paths are POSIX-relative
+
+AC-5
+  Given  an unreadable file in the tree
+  When   the scan runs
+  Then   the file is skipped without aborting the scan
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

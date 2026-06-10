@@ -50,18 +50,66 @@ milestone: v1.02
   variable is unset in CI, so the notice is silent and exit-neutral there.
 
 ## HOW — Acceptance (= tests)
-- A tag referencing a non-existent capability produces an `ERROR` and exit 1.
-- A `confirmed` requirement with no `implements` member produces an `ERROR`.
-- An invalid status or layer, and a `depends_on` pointing at a missing id, each produce an `ERROR`.
-- A `confirmed` requirement whose binding hash differs from the lock produces a `WARN` (not an error) naming the member `file:line` locations.
-- A present-but-corrupt lock file produces a `WARN` and does not change the exit code.
-- A requirement with a malformed `milestone:` (e.g. `next` or `1.14`) produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated` requirement produces none.
-- A `confirmed` requirement with no `## WHAT — Contract` section produces a `WARN` and does not affect the exit code.
-- A `confirmed` requirement with no `## HOW — Acceptance` section produces a `WARN` and does not affect the exit code.
-- A `confirmed` requirement with both sections present produces no section-lint warning.
-- A `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member produces no test warning.
-- A requirement without a `## WHAT — Verify intent` section is counted as legacy-schema in the summary.
-- `--update-lock` writes the current hashes to `requirements/_reqlock.json`.
+AC-1
+  Given  a tag referencing a non-existent capability
+  When   `check` runs
+  Then   it produces an `ERROR` and exit 1
+
+AC-2
+  Given  a `confirmed` requirement with no `implements` member
+  When   `check` runs
+  Then   it produces an `ERROR`
+
+AC-3
+  Given  an invalid status or layer, or a `depends_on` pointing at a missing id
+  When   `check` runs
+  Then   each produces an `ERROR`
+
+AC-4
+  Given  a `confirmed` requirement whose binding hash differs from the lock
+  When   `check` runs
+  Then   it produces a `WARN` (not an error) naming the member `file:line` locations
+
+AC-5
+  Given  a present-but-corrupt lock file
+  When   `check` runs
+  Then   it produces a `WARN` and does not change the exit code
+
+AC-6
+  Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)
+  When   `check` runs
+  Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`
+         requirement produces none
+
+AC-7
+  Given  a `confirmed` requirement with no `## WHAT — Contract` section
+  When   `check` runs
+  Then   it produces a `WARN` and does not affect the exit code
+
+AC-8
+  Given  a `confirmed` requirement with no `## HOW — Acceptance` section
+  When   `check` runs
+  Then   it produces a `WARN` and does not affect the exit code
+
+AC-9
+  Given  a `confirmed` requirement with both sections present
+  When   `check` runs
+  Then   it produces no section-lint warning
+
+AC-10
+  Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member
+  When   `check` runs
+  Then   it produces no test warning
+
+AC-11
+  Given  a requirement without a `## WHAT — Verify intent` section
+  When   `check` runs
+  Then   it is counted as legacy-schema in the summary
+
+AC-12
+  Given  `--update-lock`
+  When   `check` runs
+  Then   the current hashes are written to `requirements/_reqlock.json`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
