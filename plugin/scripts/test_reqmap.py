@@ -280,7 +280,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertIn("FOO-BAR-001", R.scan_members(d, None))
 
 
-class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
                     "SKILL.md", "TODO.md", "CHANGELOG.md", "LICENSE", "LICENSE.md",
@@ -298,7 +298,7 @@ class ProseClassification(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertEqual(R.classify_prose(rel), "capability", rel)
 
 
-class ProseFacts(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseFacts(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_markdown_frontmatter_title_and_headings(self):
         src = ("---\ntitle: Senator Aurelius\n---\n\n"
                "## Role\nrisk lens\n## Specialty\nreversibility\n### sub\n")
@@ -415,7 +415,7 @@ class Rendering(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertIn("promote to `confirmed`", md)    # unreviewed advice text
 
 
-class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class ProseExtract(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def _extract(self, d):
         reqs = R.load_requirements(os.path.join(d, "requirements"))
         members = R.scan_members(d, os.path.join(d, "requirements"))
@@ -466,7 +466,7 @@ class ProseExtract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             self.assertFalse(any("FOO" in f for f in drafts), drafts)
 
 
-class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+class RiderGuards(unittest.TestCase):  # tested-by: REQ-EXTRACT-008  # tested-by: REQ-PROSE-024
     def test_tag_inside_html_comment_is_a_member(self):  # rider #1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "docs", "arch.html"),
@@ -1718,7 +1718,7 @@ class ParseTodos(unittest.TestCase):
         self.assertEqual(payload["todos"][0]["name"], "X")
 
 
-class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014
+class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINTCHECKS-025
     CONTRACT = "## WHAT — Contract (normative)"
     ACCEPT = "## HOW — Acceptance (= tests)"
 

@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-10 22:37
-nodes: 26
-edges: 33
+generated: 2026-06-10 22:46
+nodes: 28
+edges: 37
 ---
 
 # Requirement Map
@@ -26,12 +26,14 @@ graph LR
     REQ_HEALTH_017["Corpus health snapshot<br><small>REQ-HEALTH-017</small>"]
     REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
     REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
+    REQ_LINTCHECKS_025["Readability & scope checks<br><small>REQ-LINTCHECKS-025</small>"]
     REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
     REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
     REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
     REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
     REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
     REQ_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>REQ-PROMOTE-TODO-001</small>"]
+    REQ_PROSE_024["Prose capability classification & drafting<br><small>REQ-PROSE-024</small>"]
     REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
     REQ_SCANCACHE_023["Opt-in scan cache<br><small>REQ-SCANCACHE-023</small>"]
@@ -48,9 +50,11 @@ graph LR
   REQ_INIT_012 --> REQ_EXTRACT_008
   REQ_INIT_012 --> REQ_CHECK_006
   REQ_INIT_012 --> REQ_MAP_007
+  REQ_LINTCHECKS_025 --> REQ_LINT_014
   REQ_NEXT_013 --> REQ_MAP_007
   REQ_PAGES_021 --> REQ_MAP_007
   REQ_PROMOTE_TODO_001 --> REQ_NEW_004
+  REQ_PROSE_024 --> REQ_EXTRACT_008
   REQ_TESTLINK_018 --> REQ_CHECK_006
   REQ_TRACE_020 --> REQ_CHECK_006
   REQ_VIEWER_007 --> REQ_MAP_007
@@ -100,8 +104,8 @@ graph LR
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_825_971["scripts/reqmap.py:825-971"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_825_971
-  f_scripts_test_reqmap_py_283_484["scripts/test_reqmap.py:283-484"]
-  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_283_484
+  f_scripts_test_reqmap_py_469_484["scripts/test_reqmap.py:469-484"]
+  REQ_EXTRACT_008 -->|tested-by| f_scripts_test_reqmap_py_469_484
   REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
   f_scripts_reqmap_py_1241_1328["scripts/reqmap.py:1241-1328"]
   REQ_FINDINGS_010 -->|implements| f_scripts_reqmap_py_1241_1328
@@ -122,6 +126,11 @@ graph LR
   REQ_LINT_014 -->|implements| f_scripts_reqmap_py_1621_1787
   f_scripts_test_reqmap_py_1721["scripts/test_reqmap.py:1721"]
   REQ_LINT_014 -->|tested-by| f_scripts_test_reqmap_py_1721
+  REQ_LINTCHECKS_025["Readability & scope checks<br><small>REQ-LINTCHECKS-025</small>"]
+  f_scripts_reqmap_py_1650_1679["scripts/reqmap.py:1650-1679"]
+  REQ_LINTCHECKS_025 -->|implements| f_scripts_reqmap_py_1650_1679
+  f_scripts_test_reqmap_py_1721["scripts/test_reqmap.py:1721"]
+  REQ_LINTCHECKS_025 -->|tested-by| f_scripts_test_reqmap_py_1721
   REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
   f_scripts_reqmap_py_1363_2677["scripts/reqmap.py:1363-2677"]
   REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1363_2677
@@ -152,6 +161,11 @@ graph LR
   REQ_PROMOTE_TODO_001 -->|implements| f_scripts_reqmap_py_700_746
   f_scripts_test_reqmap_py_2340["scripts/test_reqmap.py:2340"]
   REQ_PROMOTE_TODO_001 -->|tested-by| f_scripts_test_reqmap_py_2340
+  REQ_PROSE_024["Prose capability classification & drafting<br><small>REQ-PROSE-024</small>"]
+  f_scripts_reqmap_py_833_886["scripts/reqmap.py:833-886"]
+  REQ_PROSE_024 -->|implements| f_scripts_reqmap_py_833_886
+  f_scripts_test_reqmap_py_283_469["scripts/test_reqmap.py:283-469"]
+  REQ_PROSE_024 -->|tested-by| f_scripts_test_reqmap_py_283_469
   REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
   f_scripts_reqmap_py_2746["scripts/reqmap.py:2746"]
   REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_2746
@@ -203,7 +217,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>22 caps</small>"]
+  a_REQ["REQ<br><small>24 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px

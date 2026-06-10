@@ -117,6 +117,7 @@
         "REQ-FINDINGS-010",
         "REQ-HEALTH-017",
         "REQ-LINT-014",
+        "REQ-LINTCHECKS-025",
         "REQ-MAP-007",
         "REQ-NEW-004",
         "REQ-PROMOTE-011",
@@ -202,6 +203,7 @@
         "REQ-EXTRACT-008",
         "REQ-HEALTH-017",
         "REQ-MAP-007",
+        "REQ-PROSE-024",
         "REQ-SCAN-005",
         "REQ-SCANCACHE-023",
         "REQ-SHOW-015"
@@ -571,41 +573,32 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Legacy extraction",
-      "intent": "When an existing project has lots of code but no requirements written down, this gives you a running start: it reads each untagged file and writes a rough draft requirement for it, clearly marked as a draft so no one mistakes a guess for a settled decision. It also looks at human-readable spec and prompt documents, not just code. Without it, someone would have to sit down and describe every existing capability from scratch before the tool was useful on an older project.",
+      "intent": "When an existing project has lots of code but no requirements written down, this gives you a running start: it reads each untagged file and writes a rough draft requirement for it, clearly marked as a draft so no one mistakes a guess for a settled decision. Without it, someone would have to sit down and describe every existing capability from scratch before the tool was useful on an older project. Spec and prompt documents get the same treatment from the companion capability [[REQ-PROSE-024]].",
       "contract": [
         "It shall walk untagged source files (`.py`/`.js`/`.ts`/`.c`/`.cpp`) and propose one `requirements/DRAFT-*.md` per file, skipping files that already carry a member tag.",
         "It shall honor `.reqmapignore` (the same fnmatch globs `scan` respects): a file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.",
         "Every proposal shall be `status: draft` with a TODO body — it captures observed behavior, never canonizing intent or correctness.",
         "It shall assign a cheap risk score (TODO/FIXME/HACK/XXX markers, suppressions, file size) and route a score ≥ 2 to `REVIEW`, else `auto-baseline`.",
-        "Re-running shall not overwrite an existing draft; the requirements directory shall be created if absent and draft ids shall be path-aware so same-basename files do not collide.",
-        "`extract` shall also draft `draft`-status requirements from untagged **prose** capability files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code. Each prose file is classified by `classify_prose(rel)` into one of three buckets:",
-        "**ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).",
-        "**sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`. These are never drafted as their own requirement, but become a member (and are drift-checked) when a human tags them `generated-from: <ID>`.",
-        "**capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These are auto-drafted.",
-        "The buckets shall govern auto-drafting ONLY; an explicit tag on any file is always honored by `scan_members` regardless of bucket (so a hand-tagged README is still a member).",
-        "A prose draft shall be scaffolded by `_prose_facts(src)` from the file's title (frontmatter `title:`, else first `#` heading, else HTML `<title>`/`<h1>`) plus its `##` section headings, which are recorded as an authoring hint. The source prose is never the contract — so the prose may later drift freely from the authored requirement (the drift hash anchors on the authored Contract+Acceptance)."
+        "Re-running shall not overwrite an existing draft; the requirements directory shall be created if absent and draft ids shall be path-aware so same-basename files do not collide."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "`extract` cannot recover intent; prefer `candidates` (read-only plan) before authoring. The draft body uses the same Contract/Acceptance section names as a real requirement so a promoted draft needs no reshaping."
+        "`extract` cannot recover intent; prefer `candidates` (read-only plan) before authoring. The draft body uses the same Contract/Acceptance section names as a real requirement so a promoted draft needs no reshaping.",
+        "Prose (`.md`/`.html`) classification and drafting is a separate capability — [[REQ-PROSE-024]] — running under the same `extract` command."
       ],
       "current_impl": [
-        "`cmd_extract`, `_draft_id`, `_risk`, `classify_prose`, `_prose_facts` in `reqmap.py`."
+        "`cmd_extract`, `_draft_id`, `_risk` in `reqmap.py`."
       ],
       "acc": [
         "An untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file yields one `DRAFT-*` draft.",
         "A file already carrying a member tag is skipped.",
         "A file matching a `.reqmapignore` pattern is skipped (no draft proposed for it).",
         "A file containing `TODO`/`FIXME` scores higher risk and is flagged `REVIEW`.",
-        "Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide.",
-        "Given a `prompts/foo.md` with no member tag, When `extract` runs, Then a `draft`-status requirement is written for it.",
-        "Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`, When `extract` runs, Then no draft is written for it.",
-        "Given a capability-bucket prose file already tagged `# implements: <ID>`, When `extract` runs, Then it is skipped (no duplicate draft).",
-        "Given a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`), When `scan_members` runs, Then that file is a member of `<ID>`."
+        "Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide."
       ],
-      "accept": "- An untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file yields one `DRAFT-*` draft.\n- A file already carrying a member tag is skipped.\n- A file matching a `.reqmapignore` pattern is skipped (no draft proposed for it).\n- A file containing `TODO`/`FIXME` scores higher risk and is flagged `REVIEW`.\n- Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide.\n- Given a `prompts/foo.md` with no member tag, When `extract` runs, Then a\n  `draft`-status requirement is written for it.\n- Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or\n  `CHANGELOG.md`, When `extract` runs, Then no draft is written for it.\n- Given a capability-bucket prose file already tagged `# implements: <ID>`, When\n  `extract` runs, Then it is skipped (no duplicate draft).\n- Given a file tagged `generated-from: <ID>` inside an HTML comment\n  (`<!-- generated-from: <ID> -->`), When `scan_members` runs, Then that file is a\n  member of `<ID>`.",
+      "accept": "- An untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file yields one `DRAFT-*` draft.\n- A file already carrying a member tag is skipped.\n- A file matching a `.reqmapignore` pattern is skipped (no draft proposed for it).\n- A file containing `TODO`/`FIXME` scores higher risk and is flagged `REVIEW`.\n- Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide.",
       "input": "",
       "output": "",
       "desc": "",
@@ -613,7 +606,8 @@
         "CORE-SCAN-002"
       ],
       "used_by": [
-        "REQ-INIT-012"
+        "REQ-INIT-012",
+        "REQ-PROSE-024"
       ],
       "satisfies": [],
       "satisfied_by": [],
@@ -624,31 +618,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:833"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:858"
-        },
-        {
-          "role": "implements",
           "loc": "scripts/reqmap.py:886"
         },
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:971"
-        },
-        {
-          "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:283"
-        },
-        {
-          "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:301"
-        },
-        {
-          "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:418"
         },
         {
           "role": "tested-by",
@@ -865,22 +839,13 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Requirement readability linter",
-      "intent": "Requirement documents are only useful if people can actually read them. This is an automatic proofreader: it flags writing that has drifted into hard-to-follow territory — missing key sections, sentences that run too long, lines that pile up too many conditions at once, or a list of acceptance tests that is suspiciously short or bloated. Without it, the clear-writing rules rely on someone re-reading every file by hand, and prose slowly degrades until the documents stop being worth opening.",
+      "intent": "Requirement documents are only useful if people can actually read them. This is the automatic proofreader's frame: it decides which files get checked, which sections count, how severe a finding is, and whether the build fails. Without it, the clear-writing rules rely on someone re-reading every file by hand, and prose slowly degrades until the documents stop being worth opening.",
       "contract": [
         "The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.",
         "It shall scope its checks to non-draft requirements only (status `baseline`, `in-progress`, `implemented`, or `confirmed`). Drafts are auto-extracted TODO stubs, so linting them would only add noise.",
-        "It shall run two kinds of check. A structural check is severity `error`. A prose-readability check is severity `warn`.",
+        "It shall run two severities: a structural check is an `error`; a prose or scope check is a `warn`.",
         "The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.",
-        "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
-        "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
-        "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
-        "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3).",
-        "The `ac-count-high` check (warn) shall flag an Acceptance section holding more than `LINT_AC_MAX` (default 7) criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
-        "The `over-scoped` check (warn) shall flag a requirement whose Contract exceeds `LINT_CONTRACT_MAX` (default 10) clauses AND whose Acceptance exceeds `LINT_AC_MAX` — a composite signal that several capabilities are bundled into one. Requiring both axes at once keeps false positives near zero.",
         "The `empty-section` check (warn) shall flag a Contract or Acceptance heading that is present but carries no clauses or criteria — it would otherwise pass `missing-section` while documenting nothing.",
-        "The `file-spread` check (warn) shall flag a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX` (default 3) distinct files — an architectural-diffuseness signal on a DIFFERENT axis from `over-scoped` (which measures contract/acceptance scope, not where the code lives). It is auto-off below the threshold, so it is silent in single-file repos, and it is skipped when no member data is supplied.",
-        "The `vague-term` check (warn) shall flag a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words like `appropriate`, `robust`, or `user-friendly`.",
-        "Before the `vague-term` scan, backticked code spans are stripped, and one finding is emitted per distinct term.",
         "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
         "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
         "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
@@ -889,47 +854,36 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "`statement-too-long` deliberately ignores a single over-long sentence (that is `long-sentence`'s job), so the two checks never flag the same line twice.",
-        "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check.",
-        "Sentence splitting is a deterministic split on `.`, `!`, and `?`. It is crude — an abbreviation can over-split — but it never reads code and only feeds a word count, so the worst case is a missed long sentence, not a false alarm on code.",
-        "The thresholds are module constants, not configurable from the command line. A single well-named constant is enough until a real project needs a different value."
+        "The individual warn checks (long-sentence, stacked-conditions, statement-too-long, ac-count, over-scoped, file-spread, vague-term) are a separate capability — [[REQ-LINTCHECKS-025]] — running under the same `lint` command.",
+        "Jargon-before-definition detection is intentionally out of scope for this version. Without a dictionary of project terms, any heuristic for \"undefined jargon\" produces too many false positives on prose that carries code references. It may arrive later as an opt-in check."
       ],
       "current_impl": [
-        "`cmd_lint`, `lint_requirement`, `_lint_prose`, `_sentences`, `_count_ac` and `_clip` in `reqmap.py` — `cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_sentences` splits a line for the word-count checks; `_count_ac` counts acceptance criteria. The `missing-section` and `ac-count` checks reuse `_has_section` (shared with the gate in `cmd_check`). The `over-scoped` check pairs the Contract clause count (`_bullets`) with `_count_ac` against `LINT_CONTRACT_MAX`/`LINT_AC_MAX`."
+        "`cmd_lint` selects non-draft requirements, runs `lint_requirement` on each, prints findings grouped per requirement, and decides the exit code. `_lint_prose` extracts the prose lines of one section; `_clip` truncates finding text for display. The `missing-section` check reuses `_has_section` (shared with the gate in `cmd_check`)."
       ],
       "acc": [
         "Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.",
         "Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.",
-        "Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.",
-        "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
-        "Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.",
-        "Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.",
-        "Given a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria), when `lint` runs, then it reports an `over-scoped` warning; given one over only a single ceiling, it reports no `over-scoped`.",
         "Given a requirement whose `## HOW — Acceptance` heading is present but has no criteria beneath it, when `lint` runs, then it reports an `empty-section` warning.",
-        "Given a requirement whose `implements` members span three or more distinct files, when `lint` runs with member data, then it reports a `file-spread` warning; members within a single file, or no member data, produce none.",
-        "Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.",
         "Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.",
         "Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.",
         "Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code."
       ],
-      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a confirmed requirement with a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports a `statement-too-long` warning; given a single 40-word sentence, it reports only `long-sentence` and no `statement-too-long`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; given one with eight criteria, it reports `ac-count-high`; given one with four, it reports neither.\n- Given a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria), when `lint` runs, then it reports an `over-scoped` warning; given one over only a single ceiling, it reports no `over-scoped`.\n- Given a requirement whose `## HOW — Acceptance` heading is present but has no criteria beneath it, when `lint` runs, then it reports an `empty-section` warning.\n- Given a requirement whose `implements` members span three or more distinct files, when `lint` runs with member data, then it reports a `file-spread` warning; members within a single file, or no member data, produce none.\n- Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
+      "accept": "- Given a confirmed requirement whose body has no `## HOW — Acceptance` heading, when `lint` runs, then it reports a `missing-section` error for that requirement.\n- Given a draft requirement with a long sentence, when `lint` runs, then it reports nothing for that requirement, because drafts are out of scope.\n- Given a requirement whose `## HOW — Acceptance` heading is present but has no criteria beneath it, when `lint` runs, then it reports an `empty-section` warning.\n- Given a long sentence that sits inside a fenced code block in the Acceptance section, when `lint` runs, then it reports no `long-sentence` finding for that line.\n- Given a corpus whose non-draft requirements all have both sections, when `lint --strict` runs, then it returns zero even if warnings were printed.\n- Given one non-draft requirement missing a section, when `lint --strict` runs, then it returns a non-zero exit code.",
       "input": "",
       "output": "",
       "desc": "",
       "deps": [
         "CORE-PARSE-001"
       ],
-      "used_by": [],
+      "used_by": [
+        "REQ-LINTCHECKS-025"
+      ],
       "satisfies": [],
       "satisfied_by": [],
       "members": [
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:1621"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:1650"
         },
         {
           "role": "implements",
@@ -942,6 +896,74 @@
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:1787"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:1721"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.14",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-LINTCHECKS-025",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Readability & scope checks",
+      "intent": "The linter's rulebook: the individual checks that catch hard-to-read or overloaded requirement prose — sentences that run long, lines that stack conditions, bloated or skimpy acceptance lists, contracts that bundle several capabilities, vague quality words, and code spread across too many files. The framework that runs them, scopes them and decides exit codes is [[REQ-LINT-014]]; this is what each check flags.",
+      "contract": [
+        "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
+        "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
+        "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
+        "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3); `ac-count-high` shall flag more than `LINT_AC_MAX` (default 7), counted as `- ` bullets or `AC-N` labelled blocks.",
+        "The `over-scoped` check (warn) shall flag a requirement whose Contract exceeds `LINT_CONTRACT_MAX` (default 10) clauses AND whose Acceptance exceeds `LINT_AC_MAX` — a composite signal that several capabilities are bundled into one.",
+        "The `file-spread` check (warn) shall flag a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX` (default 3) distinct files; it is an architectural-diffuseness signal and is skipped when no member data is supplied.",
+        "The `vague-term` check (warn) shall flag a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words like `appropriate` or `robust`.",
+        "Before the `vague-term` scan, backticked code spans are stripped, and one finding is emitted per distinct term."
+      ],
+      "verify": [
+        "None — split out of [[REQ-LINT-014]] with intent carried over unchanged."
+      ],
+      "notes": [
+        "`statement-too-long` deliberately ignores a single over-long sentence (that is `long-sentence`'s job), so the two checks never flag the same line twice.",
+        "`file-spread` measures where the code lives; `over-scoped` measures contract/acceptance scope — different axes, so one firing says nothing about the other.",
+        "Sentence splitting is a deterministic split on `.`, `!`, and `?` — crude, but it only feeds a word count, so the worst case is a missed long sentence, not a false alarm.",
+        "The thresholds are module constants, not configurable from the command line."
+      ],
+      "current_impl": [
+        "The check bodies live in `lint_requirement` (per-requirement checks) and `_lint_prose` (per-section prose walk) in `reqmap.py`; `_sentences` splits lines for the word counts."
+      ],
+      "acc": [
+        "Given a confirmed requirement with a 40-word sentence in its Contract section, when `lint` runs, then it reports a `long-sentence` warning naming the word count.",
+        "Given a confirmed requirement with a normative line that joins four clauses with \"and\", when `lint` runs, then it reports a `stacked-conditions` warning.",
+        "Given a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`.",
+        "Given an Acceptance section with one criterion, when `lint` runs, then it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither.",
+        "Given a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria), when `lint` runs, then it reports `over-scoped`; over only one ceiling, none.",
+        "Given a requirement whose `implements` members span three or more distinct files, when `lint` runs with member data, then it reports `file-spread`; a single file or no member data produce none.",
+        "Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs, then it reports two `vague-term` warnings; a backticked span and a precise bullet report none."
+      ],
+      "accept": "- Given a confirmed requirement with a 40-word sentence in its Contract section, when\n  `lint` runs, then it reports a `long-sentence` warning naming the word count.\n- Given a confirmed requirement with a normative line that joins four clauses with \"and\",\n  when `lint` runs, then it reports a `stacked-conditions` warning.\n- Given a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it\n  reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`.\n- Given an Acceptance section with one criterion, when `lint` runs, then it reports\n  `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither.\n- Given a requirement over both ceilings (more than ten contract clauses and more than\n  seven acceptance criteria), when `lint` runs, then it reports `over-scoped`; over only\n  one ceiling, none.\n- Given a requirement whose `implements` members span three or more distinct files, when\n  `lint` runs with member data, then it reports `file-spread`; a single file or no member\n  data produce none.\n- Given a Contract bullet containing \"appropriate\" and \"user-friendly\", when `lint` runs,\n  then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-PARSE-001",
+        "REQ-LINT-014"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1650"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:1679"
         },
         {
           "role": "tested-by",
@@ -1434,6 +1456,84 @@
       ],
       "test_exempt": null,
       "milestone": "v1.14",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-PROSE-024",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Prose capability classification & drafting",
+      "intent": "Specs and prompts written as text documents can be capabilities too, not just code. When `extract` runs, this part decides which text files deserve a draft requirement, which are only kept in sync, and which are ignored as boilerplate — then writes the drafts. Without it, prompt and spec files would stay invisible to the registry, or every README would pollute it with junk drafts.",
+      "contract": [
+        "`extract` shall also draft `draft`-status requirements from untagged **prose** files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.",
+        "Each prose file shall be classified into one of three buckets before drafting:",
+        "**ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).",
+        "**sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`. These are never drafted as their own requirement, but become a member (and are drift-checked) when a human tags them `generated-from: <ID>`.",
+        "**capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These are auto-drafted.",
+        "The buckets shall govern auto-drafting ONLY; an explicit tag on any file is always honored by the scanner regardless of bucket (so a hand-tagged README is still a member).",
+        "A prose draft shall be scaffolded from the file's title (frontmatter `title:`, else the first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings, recorded as an authoring hint.",
+        "The source prose is never the contract: the drift hash anchors on the authored Contract + Acceptance, so the prose may later drift freely from the authored requirement."
+      ],
+      "verify": [
+        "None — split out of [[REQ-EXTRACT-008]] with intent carried over unchanged."
+      ],
+      "notes": [
+        "The bucket lists are fixed in the engine, not configurable; `.reqmapignore` remains the per-repo escape hatch for anything the buckets misjudge."
+      ],
+      "current_impl": [
+        "`classify_prose` (the three-bucket router) and `_prose_facts` (title + heading scaffold) in `reqmap.py`; the prose walk lives inside `cmd_extract`."
+      ],
+      "acc": [
+        "Given a `prompts/foo.md` with no member tag, when `extract` runs, then a `draft`-status requirement is written for it.",
+        "Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`, when `extract` runs, then no draft is written for it.",
+        "Given a capability-bucket prose file already tagged `# implements: <ID>`, when `extract` runs, then it is skipped (no duplicate draft).",
+        "Given a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`), when the scanner runs, then that file is a member of `<ID>`."
+      ],
+      "accept": "- Given a `prompts/foo.md` with no member tag, when `extract` runs, then a `draft`-status\n  requirement is written for it.\n- Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`,\n  when `extract` runs, then no draft is written for it.\n- Given a capability-bucket prose file already tagged `# implements: <ID>`, when `extract`\n  runs, then it is skipped (no duplicate draft).\n- Given a file tagged `generated-from: <ID>` inside an HTML comment\n  (`<!-- generated-from: <ID> -->`), when the scanner runs, then that file is a member of `<ID>`.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-SCAN-002",
+        "REQ-EXTRACT-008"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:833"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:858"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:886"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:283"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:301"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:418"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:469"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.06",
       "priority": "",
       "risks": []
     },
@@ -2014,6 +2114,14 @@
       "CORE-PARSE-001"
     ],
     [
+      "REQ-LINTCHECKS-025",
+      "CORE-PARSE-001"
+    ],
+    [
+      "REQ-LINTCHECKS-025",
+      "REQ-LINT-014"
+    ],
+    [
       "REQ-MAP-007",
       "CORE-PARSE-001"
     ],
@@ -2040,6 +2148,14 @@
     [
       "REQ-PROMOTE-TODO-001",
       "REQ-NEW-004"
+    ],
+    [
+      "REQ-PROSE-024",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-PROSE-024",
+      "REQ-EXTRACT-008"
     ],
     [
       "REQ-REVIEW-022",

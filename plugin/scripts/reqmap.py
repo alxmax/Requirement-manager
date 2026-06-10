@@ -830,7 +830,7 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
     return "DRAFT-" + (slug or "FILE")
 
 
-def classify_prose(rel):  # implements: REQ-EXTRACT-008
+def classify_prose(rel):  # implements: REQ-PROSE-024
     """Bucket a POSIX-relative .md/.html path for the auto-draft path. Returns
     'ignore' (meta/boilerplate, invisible), 'sync_only' (README/docs/*.html — never
     drafted, but a drift- and semantic-checked member when explicitly tagged), or
@@ -855,7 +855,7 @@ def classify_prose(rel):  # implements: REQ-EXTRACT-008
     return "capability"
 
 
-def _prose_facts(src):  # implements: REQ-EXTRACT-008
+def _prose_facts(src):  # implements: REQ-PROSE-024
     """(title, [headings]) from markdown/HTML prose, for a draft scaffold.
     Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
     Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
@@ -883,7 +883,7 @@ def _prose_facts(src):  # implements: REQ-EXTRACT-008
     return title, headings
 
 
-def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008
+def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008  # implements: REQ-PROSE-024
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
@@ -1647,7 +1647,7 @@ def _lint_prose(body, name):  # implements: REQ-LINT-014
     return out
 
 
-def _sentences(text):  # implements: REQ-LINT-014
+def _sentences(text):  # implements: REQ-LINTCHECKS-025
     """Split a prose line into sentences on '.', '!', '?' boundaries. Crude but
     deterministic — enough to count words per sentence for the length check."""
     return [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
@@ -1676,7 +1676,7 @@ def _count_ac(body):
     return count
 
 
-def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014
+def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # implements: REQ-LINTCHECKS-025
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only.
     `member_list` (optional [(role, file, line), ...]) enables the member-based
