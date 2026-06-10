@@ -34,12 +34,37 @@ milestone: v1.10
 - `init` orchestrates existing capabilities (extract, check, map); it adds no new analysis of its own.
 
 ## HOW — Acceptance (= tests)
-- `init` on a repo with no `requirements/` creates the directory and a `.reqmapignore` containing `scripts/reqmap.py`.
-- `init` on a self-hosting repo (an existing requirement whose id is tagged inside `scripts/reqmap.py`) writes a `.reqmapignore` that does **not** ignore `scripts/reqmap.py`, so the engine stays scanned and its members are not orphaned.
-- `init` on a repo that already has a `.reqmapignore` leaves that file unchanged.
-- After `init`, `requirements/_map.html`, `requirements/_map.md` and the drift lock exist.
-- `init` over existing untagged code drafts at least one requirement, reports the tracked count, and its summary points at `reqmap.py next`.
-- `init` on a repo with no extractable code prints the distinct "no requirements were extracted" message (not a tracked-count summary).
+AC-1
+  Given  a repo with no `requirements/`
+  When   `init` runs
+  Then   it creates the directory and a `.reqmapignore` containing `scripts/reqmap.py`
+
+AC-2
+  Given  a self-hosting repo (an existing requirement whose id is tagged inside `scripts/reqmap.py`)
+  When   `init` runs
+  Then   the written `.reqmapignore` does **not** ignore `scripts/reqmap.py`, so the engine
+         stays scanned and its members are not orphaned
+
+AC-3
+  Given  a repo that already has a `.reqmapignore`
+  When   `init` runs
+  Then   that file is left unchanged
+
+AC-4
+  Given  a completed `init`
+  When   the requirements directory is inspected
+  Then   `requirements/_map.html`, `requirements/_map.md` and the drift lock exist
+
+AC-5
+  Given  existing untagged code
+  When   `init` runs
+  Then   it drafts at least one requirement, reports the tracked count, and its summary
+         points at `reqmap.py next`
+
+AC-6
+  Given  a repo with no extractable code
+  When   `init` runs
+  Then   it prints the distinct "no requirements were extracted" message (not a tracked-count summary)
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

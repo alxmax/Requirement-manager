@@ -33,10 +33,25 @@ milestone: v1.15
 - Only confirmed requirements are checked. A draft or baseline requirement is exempt, matching the rest of the gate's enforcement scope.
 
 ## HOW — Acceptance (= tests)
-- Given a confirmed requirement whose `tested-by` file is missing, when the gate runs, then it adds a warning that names the requirement and the file.
-- Given a confirmed requirement whose `tested-by` file exists and contains a `def test...(`, when the gate runs, then it adds no warning for that link.
-- Given a confirmed requirement whose `tested-by` file exists but contains no test function, when the gate runs, then it adds a warning.
-- Given any of the above, when the gate runs, then the error count is unchanged (the check is warn-only).
+AC-1
+  Given  a confirmed requirement whose `tested-by` file is missing
+  When   the gate runs
+  Then   it adds a warning that names the requirement and the file
+
+AC-2
+  Given  a confirmed requirement whose `tested-by` file exists and contains a `def test...(`
+  When   the gate runs
+  Then   it adds no warning for that link
+
+AC-3
+  Given  a confirmed requirement whose `tested-by` file exists but contains no test function
+  When   the gate runs
+  Then   it adds a warning
+
+AC-4
+  Given  any of the above
+  When   the gate runs
+  Then   the error count is unchanged (the check is warn-only)
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

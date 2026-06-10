@@ -50,22 +50,40 @@ milestone: v1.14
 - The thresholds are module constants, not configurable from the command line.
 
 ## HOW — Acceptance (= tests)
-- Given a confirmed requirement with a 40-word sentence in its Contract section, when
-  `lint` runs, then it reports a `long-sentence` warning naming the word count.
-- Given a confirmed requirement with a normative line that joins four clauses with "and",
-  when `lint` runs, then it reports a `stacked-conditions` warning.
-- Given a Contract bullet over 30 words spanning two sentences, when `lint` runs, then it
-  reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`.
-- Given an Acceptance section with one criterion, when `lint` runs, then it reports
-  `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither.
-- Given a requirement over both ceilings (more than ten contract clauses and more than
-  seven acceptance criteria), when `lint` runs, then it reports `over-scoped`; over only
-  one ceiling, none.
-- Given a requirement whose `implements` members span three or more distinct files, when
-  `lint` runs with member data, then it reports `file-spread`; a single file or no member
-  data produce none.
-- Given a Contract bullet containing "appropriate" and "user-friendly", when `lint` runs,
-  then it reports two `vague-term` warnings; a backticked span and a precise bullet report none.
+AC-1
+  Given  a confirmed requirement with a 40-word sentence in its Contract section
+  When   `lint` runs
+  Then   it reports a `long-sentence` warning naming the word count
+
+AC-2
+  Given  a confirmed requirement with a normative line that joins four clauses with "and"
+  When   `lint` runs
+  Then   it reports a `stacked-conditions` warning
+
+AC-3
+  Given  a Contract bullet over 30 words spanning two sentences
+  When   `lint` runs
+  Then   it reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`
+
+AC-4
+  Given  an Acceptance section with one criterion
+  When   `lint` runs
+  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither
+
+AC-5
+  Given  a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria)
+  When   `lint` runs
+  Then   it reports `over-scoped`; over only one ceiling, none
+
+AC-6
+  Given  a requirement whose `implements` members span three or more distinct files
+  When   `lint` runs with member data
+  Then   it reports `file-spread`; a single file or no member data produce none
+
+AC-7
+  Given  a Contract bullet containing "appropriate" and "user-friendly"
+  When   `lint` runs
+  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

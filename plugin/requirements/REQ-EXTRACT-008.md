@@ -40,11 +40,30 @@ milestone: v1.06
   [[REQ-PROSE-024]] — running under the same `extract` command.
 
 ## HOW — Acceptance (= tests)
-- An untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file yields one `DRAFT-*` draft.
-- A file already carrying a member tag is skipped.
-- A file matching a `.reqmapignore` pattern is skipped (no draft proposed for it).
-- A file containing `TODO`/`FIXME` scores higher risk and is flagged `REVIEW`.
-- Re-running does not overwrite an existing draft; same-basename files in different dirs do not collide.
+AC-1
+  Given  an untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file
+  When   `extract` runs
+  Then   it yields one `DRAFT-*` draft
+
+AC-2
+  Given  a file already carrying a member tag
+  When   `extract` runs
+  Then   the file is skipped
+
+AC-3
+  Given  a file matching a `.reqmapignore` pattern
+  When   `extract` runs
+  Then   the file is skipped (no draft proposed for it)
+
+AC-4
+  Given  a file containing `TODO`/`FIXME`
+  When   `extract` runs
+  Then   it scores higher risk and is flagged `REVIEW`
+
+AC-5
+  Given  an existing draft and same-basename files in different dirs
+  When   `extract` re-runs
+  Then   the draft is not overwritten and the basenames do not collide
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

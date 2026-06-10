@@ -35,11 +35,30 @@ milestone: v1.00
   and multi-line scalars are not supported.
 
 ## HOW — Acceptance (= tests)
-- A file with valid frontmatter yields its scalar and list fields in `meta`.
-- A trailing `# comment` on a frontmatter line is stripped from the value.
-- A file without a leading `---` block returns empty `meta` and the whole text as body.
-- Files starting with `_` are excluded from the result.
-- A block-style list and an unclosed inline list both parse to the intended list.
+AC-1
+  Given  a file with valid frontmatter
+  When   it is parsed
+  Then   its scalar and list fields appear in `meta`
+
+AC-2
+  Given  a frontmatter line carrying a trailing `# comment`
+  When   it is parsed
+  Then   the comment is stripped from the value
+
+AC-3
+  Given  a file without a leading `---` block
+  When   it is parsed
+  Then   `meta` is empty and the whole text is the body
+
+AC-4
+  Given  a requirements directory containing files starting with `_`
+  When   requirements are loaded
+  Then   those files are excluded from the result
+
+AC-5
+  Given  a block-style list and an unclosed inline list
+  When   they are parsed
+  Then   both yield the intended list
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

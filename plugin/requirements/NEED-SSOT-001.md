@@ -29,9 +29,20 @@ milestone: v1.00
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
 
 ## HOW — Acceptance (= tests)
-- Given a repo where a requirement and its code disagree, when the gate runs, then the build fails.
-- Given a confirmed capability, when the gate runs, then it has linked, existing code and tests.
-- Given any capability, when a reader runs `show`, then they see its code locations and what depends on it.
+AC-1
+  Given  a repo where a requirement and its code disagree
+  When   the gate runs
+  Then   the build fails
+
+AC-2
+  Given  a confirmed capability
+  When   the gate runs
+  Then   it has linked, existing code and tests
+
+AC-3
+  Given  any capability
+  When   a reader runs `show`
+  Then   they see its code locations and what depends on it
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

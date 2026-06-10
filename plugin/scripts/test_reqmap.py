@@ -77,6 +77,35 @@ class Parsing(unittest.TestCase):  # tested-by: CORE-PARSE-001
         self.assertEqual(R._as_list(["X-1"]), ["X-1"])
         self.assertEqual(R._as_list(""), [])
 
+    def test_scalar_and_list_fields_in_meta(self):  # verifies: CORE-PARSE-001#AC-1
+        meta, _ = R.parse_frontmatter(
+            "---\nid: REQ-A-001\nstatus: draft\ndepends_on: [X-Y-001, Z-W-002]\n---\nbody\n")
+        self.assertEqual(meta["id"], "REQ-A-001")
+        self.assertEqual(meta["status"], "draft")
+        self.assertEqual(meta["depends_on"], ["X-Y-001", "Z-W-002"])
+
+    def test_trailing_comment_stripped_from_value(self):  # verifies: CORE-PARSE-001#AC-2
+        meta, _ = R.parse_frontmatter("---\nstatus: draft  # not enforced\n---\n")
+        self.assertEqual(meta["status"], "draft")
+
+    def test_no_frontmatter_block_yields_empty_meta(self):  # verifies: CORE-PARSE-001#AC-3
+        meta, body = R.parse_frontmatter("# Title\njust text\n")
+        self.assertEqual(meta, {})
+        self.assertEqual(body, "# Title\njust text\n")
+
+    def test_underscore_files_excluded(self):  # verifies: CORE-PARSE-001#AC-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_draft.md"), "---\nid: X-A-001\n---\n# T\n")
+            _write(os.path.join(d, "REQ-A-001.md"), "---\nid: REQ-A-001\n---\n# T\n")
+            reqs = R.load_requirements(d)
+        self.assertEqual(list(reqs), ["REQ-A-001"])
+
+    def test_block_list_and_unclosed_inline_list(self):  # verifies: CORE-PARSE-001#AC-5
+        meta, _ = R.parse_frontmatter(
+            "---\ndepends_on:\n  - A-B-001\n  - C-D-002\ntags: [x, y\n---\n")
+        self.assertEqual(meta["depends_on"], ["A-B-001", "C-D-002"])
+        self.assertEqual(meta["tags"], ["x", "y"])
+
 
 class Gate(unittest.TestCase):
     def _check(self, files):
@@ -100,7 +129,7 @@ class Gate(unittest.TestCase):
         self.assertNotIn("depends_on missing", out)
         self.assertEqual(code, 0)
 
-    def test_corrupt_lock_does_not_crash(self):  # bug #6  tested-by: CORE-DRIFT-003
+    def test_corrupt_lock_does_not_crash(self):  # bug #6  tested-by: CORE-DRIFT-003  # verifies: CORE-DRIFT-003#AC-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "_reqlock.json"), "")        # empty
             self.assertEqual(R.load_lock(d), {})
@@ -116,7 +145,12 @@ class Gate(unittest.TestCase):
             R.save_lock(missing, {"A": "b"})  # must not raise
             self.assertTrue(os.path.exists(os.path.join(missing, "_reqlock.json")))
 
-    def test_binding_hash_tracks_contract_not_commentary(self):  # tested-by: CORE-DRIFT-003
+    def test_save_then_load_roundtrip(self):  # verifies: CORE-DRIFT-003#AC-4
+        with tempfile.TemporaryDirectory() as d:
+            R.save_lock(d, {"A-B-001": "abc123def456", "C-D-002": "0123456789ab"})
+            self.assertEqual(R.load_lock(d), {"A-B-001": "abc123def456", "C-D-002": "0123456789ab"})
+
+    def test_binding_hash_tracks_contract_not_commentary(self):  # tested-by: CORE-DRIFT-003  # verifies: CORE-DRIFT-003#AC-1  # verifies: CORE-DRIFT-003#AC-2
         base = ("# T\n\n## WHAT — Contract (normative)\n- shall do X\n\n"
                 "## HOW — Acceptance (= tests)\nAC-1\n  Then X holds\n")
         notes_a = base + "\n## WHAT — Notes & known limitations\n- footgun A\n"
@@ -152,7 +186,7 @@ class Gate(unittest.TestCase):
         for h in ("## WHAT — Contract (normative)", "## Contract", "## WHAT Contract"):
             self.assertTrue(R._has_section("# T\n\n" + h + "\n- x\n", "contract"), h)
 
-    def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006
+    def test_drift_warn_names_member_locations(self):  # tested-by: REQ-CHECK-006  # verifies: REQ-CHECK-006#AC-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-FOO-001.md"),
                    REQ.format(id="AREA-FOO-001", status="confirmed", layer="bus", extra="", title="Foo")
@@ -169,7 +203,7 @@ class Gate(unittest.TestCase):
             self.assertIn("re-check 1 member", out)   # actionable count
             self.assertIn("mod.py:1", out)            # names the member location
 
-    def test_confirmed_missing_contract_section_warns(self):  # tested-by: REQ-CHECK-006
+    def test_confirmed_missing_contract_section_warns(self):  # tested-by: REQ-CHECK-006  # verifies: REQ-CHECK-006#AC-7
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -182,7 +216,7 @@ class Gate(unittest.TestCase):
         self.assertIn("missing '## WHAT — Contract'", out)
         self.assertEqual(code, 0)  # WARN, not error
 
-    def test_confirmed_missing_acceptance_section_warns(self):  # tested-by: REQ-CHECK-006
+    def test_confirmed_missing_acceptance_section_warns(self):  # tested-by: REQ-CHECK-006  # verifies: REQ-CHECK-006#AC-8
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -195,7 +229,7 @@ class Gate(unittest.TestCase):
         self.assertIn("missing '## HOW — Acceptance'", out)
         self.assertEqual(code, 0)  # WARN, not error
 
-    def test_confirmed_with_both_sections_no_section_lint_warn(self):  # tested-by: REQ-CHECK-006
+    def test_confirmed_with_both_sections_no_section_lint_warn(self):  # tested-by: REQ-CHECK-006  # verifies: REQ-CHECK-006#AC-9
         files = {
             "AREA-FOO-001.md": (
                 "---\nid: AREA-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
@@ -238,7 +272,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         self.assertEqual(R.TAG_RE.findall("# re" + _ROLE + ": FOO-BAR-001"), [])
         self.assertEqual(R.TAG_RE.findall("auto-" + _ROLE + ": AB-CD-001"), [])
 
-    def test_only_ssot_requirements_dir_excluded(self):  # bug #4
+    def test_only_ssot_requirements_dir_excluded(self):  # bug #4  # verifies: CORE-SCAN-002#AC-3
         with tempfile.TemporaryDirectory() as d:
             ssot = os.path.join(d, "requirements")
             _write(os.path.join(d, "src", "requirements", "mod.py"), tag("SRC-REQ-001") + "\n")
@@ -247,13 +281,13 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertIn("SRC-REQ-001", members)       # non-SSOT requirements/ still scanned
             self.assertNotIn("SSOT-IGN-001", members)    # the real SSOT dir is skipped
 
-    def test_duplicate_tag_on_one_line_deduped(self):  # bug #18
+    def test_duplicate_tag_on_one_line_deduped(self):  # bug #18  # verifies: CORE-SCAN-002#AC-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "m.py"), tag("FOO-BAR-001") + " " + _ROLE + ": FOO-BAR-001\n")
             members = R.scan_members(d, None)
             self.assertEqual(len(members["FOO-BAR-001"]), 1)
 
-    def test_member_paths_are_posix(self):  # bug #17
+    def test_member_paths_are_posix(self):  # bug #17  # verifies: CORE-SCAN-002#AC-4
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "sub", "dir", "m.py"), tag("FOO-BAR-001") + "\n")
             members = R.scan_members(d, None)
@@ -278,6 +312,26 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "m.py"), tag("FOO-BAR-001") + "\n")
             self.assertIn("FOO-BAR-001", R.scan_members(d, None))
+
+    def test_implements_tag_yields_member(self):  # verifies: CORE-SCAN-002#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), tag("REQ-T-001") + "\n")
+            members = R.scan_members(d, None)
+        self.assertEqual(members["REQ-T-001"], [("implements", "a.py", 1)])
+
+    def test_all_roles_recognized_unknown_ignored(self):  # verifies: CORE-SCAN-002#AC-2
+        # roles built at runtime so THIS .py source registers no phantom member
+        roles = [_ROLE, _TB_ROLE, "generated" + "-from", "validated" + "-against", "refines"]
+        src = "".join("# {}: REQ-T-001\n".format(r) for r in roles)
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), src)
+            members = R.scan_members(d, None)
+        found = sorted(r for (r, _f, _l) in members["REQ-T-001"])
+        self.assertEqual(found, ["generated-from", "implements", "tested-by", "validated-against"])
+
+    def test_unreadable_file_skipped(self):  # verifies: CORE-SCAN-002#AC-5
+        # _scan_file_tags fails open (None) on a read error; scan_members skips the file
+        self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))
 
 
 class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
@@ -901,37 +955,55 @@ class GateErrors(unittest.TestCase):  # tested-by: REQ-CHECK-006
                 code = R.cmd_check(reqs, members, d, False, code_root=d)
             return code, buf.getvalue()
 
-    def test_invalid_status_errors_and_exits_nonzero(self):  # bug: gate-never-asserted-to-fail
+    def test_invalid_status_errors_and_exits_nonzero(self):  # bug: gate-never-asserted-to-fail  # verifies: REQ-CHECK-006#AC-3
         code, out = self._check({"A-FOO-001.md": REQ.format(
             id="A-FOO-001", status="bogus", layer="feature", extra="", title="T")})
         self.assertIn("invalid status", out)
         self.assertEqual(code, 1)
 
-    def test_invalid_layer_errors(self):
+    def test_invalid_layer_errors(self):  # verifies: REQ-CHECK-006#AC-3
         code, out = self._check({"A-FOO-001.md": REQ.format(
             id="A-FOO-001", status="baseline", layer="bogus", extra="", title="T")})
         self.assertIn("invalid layer", out)
         self.assertEqual(code, 1)
 
-    def test_depends_on_missing_errors(self):
+    def test_depends_on_missing_errors(self):  # verifies: REQ-CHECK-006#AC-3
         code, out = self._check({"A-FOO-001.md": REQ.format(
             id="A-FOO-001", status="baseline", layer="feature",
             extra="depends_on: [GHOST-X-999]\n", title="T")})
         self.assertIn("depends_on missing GHOST-X-999", out)
         self.assertEqual(code, 1)
 
-    def test_dangling_tag_errors(self):
+    def test_dangling_tag_errors(self):  # verifies: REQ-CHECK-006#AC-1
         code, out = self._check({"mod.py": tag("GHOST-CAP-001") + "\n"})
         self.assertIn("dangling tag", out)
         self.assertEqual(code, 1)
 
-    def test_confirmed_without_implements_errors(self):
+    def test_confirmed_without_implements_errors(self):  # verifies: REQ-CHECK-006#AC-2
         code, out = self._check({"A-FOO-001.md": REQ.format(
             id="A-FOO-001", status="confirmed", layer="bus", extra="", title="T")})
         self.assertIn("no implements", out)
         self.assertEqual(code, 1)
 
-    def test_corrupt_lock_warns_in_check(self):  # bug: corrupt-lock-disables-drift-silently
+    def test_test_exempt_suppresses_test_warn(self):  # verifies: REQ-CHECK-006#AC-10
+        code, out = self._check({
+            "A-FOO-001.md": REQ.format(id="A-FOO-001", status="confirmed", layer="bus",
+                                       extra="test_exempt: covered by manual QA\n", title="T"),
+            "mod.py": tag("A-FOO-001") + "\n"})
+        self.assertNotIn("tested-by", out)
+        self.assertEqual(code, 0)
+
+    def test_update_lock_writes_hashes(self):  # verifies: REQ-CHECK-006#AC-12
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   REQ.format(id="A-FOO-001", status="baseline", layer="bus", extra="", title="T"))
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, R.scan_members(d, d), d, True)
+            self.assertIn("A-FOO-001", R.load_lock(d))
+
+    def test_corrupt_lock_warns_in_check(self):  # bug: corrupt-lock-disables-drift-silently  # verifies: REQ-CHECK-006#AC-5
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
                    REQ.format(id="A-FOO-001", status="baseline", layer="bus", extra="", title="T"))
@@ -1143,7 +1215,7 @@ class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
         self.assertIn("0 legacy-schema", out)   # both reqs use the new schema
         self.assertEqual(code, 0)
 
-    def test_legacy_schema_is_flagged_nonblocking(self):
+    def test_legacy_schema_is_flagged_nonblocking(self):  # verifies: REQ-CHECK-006#AC-11
         # a legacy-schema requirement (no Verify-intent section) must warn but not error
         legacy = REQ.format(id="AREA-L-001", status="baseline", layer="feature",
                             extra="", title="Legacy") + "\n## Input\n- x\n## Output\n- y\n"
@@ -2325,15 +2397,15 @@ class MilestoneGate(unittest.TestCase):  # tested-by: REQ-CHECK-006
                 R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
             return buf.getvalue()
 
-    def test_malformed_milestone_warns(self):
+    def test_malformed_milestone_warns(self):  # verifies: REQ-CHECK-006#AC-6
         for bad in ("next", "1.14", "V1.0", "v1.14-beta"):
             self.assertIn("malformed", self._warns(bad), bad)
 
-    def test_valid_milestone_silent(self):
+    def test_valid_milestone_silent(self):  # verifies: REQ-CHECK-006#AC-6
         for ok in ("v1.14", "v1.04", "v2"):
             self.assertNotIn("malformed", self._warns(ok), ok)
 
-    def test_deprecated_milestone_exempt(self):
+    def test_deprecated_milestone_exempt(self):  # verifies: REQ-CHECK-006#AC-6
         self.assertNotIn("malformed", self._warns("next", status="deprecated"))
 
 

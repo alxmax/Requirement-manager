@@ -39,10 +39,25 @@ milestone: v1.00
   present-but-unreadable lock); `load_lock` itself fails open to `{}`.
 
 ## HOW — Acceptance (= tests)
-- Editing only the Description/Notes section does not change the hash.
-- Editing the Output (or Contract) section changes the hash.
-- `load_lock` on a missing or corrupt lock file returns an empty dict (no crash).
-- `save_lock` then `load_lock` round-trips the same mapping.
+AC-1
+  Given  a requirement body
+  When   only its Description/Notes section is edited
+  Then   the binding hash does not change
+
+AC-2
+  Given  a requirement body
+  When   its Output (or Contract) section is edited
+  Then   the binding hash changes
+
+AC-3
+  Given  a missing or corrupt lock file
+  When   `load_lock` runs
+  Then   it returns an empty dict (no crash)
+
+AC-4
+  Given  a hash mapping
+  When   `save_lock` then `load_lock` run
+  Then   the same mapping round-trips
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

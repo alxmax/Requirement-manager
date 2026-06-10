@@ -41,11 +41,26 @@ milestone: v1.15
   may be cached later if it ever becomes a measured bottleneck.
 
 ## HOW — Acceptance (= tests)
-- Given a tagged tree, `scan_members(cache=True)` equals `scan_members(cache=False)` (identical
-  members), and a `_scancache.json` sidecar is written.
-- Given a tagged file's content changes, a cached re-scan reflects the new tag and drops the old.
-- Given a tagged file is deleted, a cached re-scan omits it and prunes its cache entry.
-- Given no `--cache`, `scan_members` writes no cache file (off by default).
+AC-1
+  Given  a tagged tree
+  When   `scan_members(cache=True)` runs
+  Then   it equals `scan_members(cache=False)` (identical members) and a `_scancache.json`
+         sidecar is written
+
+AC-2
+  Given  a tagged file's content changes
+  When   a cached re-scan runs
+  Then   it reflects the new tag and drops the old
+
+AC-3
+  Given  a tagged file is deleted
+  When   a cached re-scan runs
+  Then   it omits the file and prunes its cache entry
+
+AC-4
+  Given  no `--cache`
+  When   `scan_members` runs
+  Then   it writes no cache file (off by default)
 
 ## WHERE — Current implementation
 - `_scancache_path`, `_load_scancache`, `_save_scancache` in `reqmap.py`; `scan_members` (CORE-SCAN-002)

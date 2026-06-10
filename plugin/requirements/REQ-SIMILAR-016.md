@@ -34,11 +34,30 @@ milestone: v1.14
 - Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `candidates`.
 
 ## HOW — Acceptance (= tests)
-- Given two requirements with near-identical Contract text, when `similar` runs, then the pair is reported with a high score.
-- Given two requirements about unrelated topics, when `similar` runs at the default threshold, then the pair is not reported.
-- Given a corpus with fewer than two requirements that have contract text, when `similar` runs, then it prints a "need at least two" message and returns zero.
-- Given a custom `--threshold` above a pair's score, when `similar` runs, then that pair is not reported.
-- Given any corpus, when `similar` runs, then it returns zero.
+AC-1
+  Given  two requirements with near-identical Contract text
+  When   `similar` runs
+  Then   the pair is reported with a high score
+
+AC-2
+  Given  two requirements about unrelated topics
+  When   `similar` runs at the default threshold
+  Then   the pair is not reported
+
+AC-3
+  Given  a corpus with fewer than two requirements that have contract text
+  When   `similar` runs
+  Then   it prints a "need at least two" message and returns zero
+
+AC-4
+  Given  a custom `--threshold` above a pair's score
+  When   `similar` runs
+  Then   that pair is not reported
+
+AC-5
+  Given  any corpus
+  When   `similar` runs
+  Then   it returns zero
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

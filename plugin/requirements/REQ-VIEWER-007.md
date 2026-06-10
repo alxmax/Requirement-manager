@@ -41,13 +41,21 @@ milestone: v1.04
   capability — see [[REQ-PAGES-021]].
 
 ## HOW — Acceptance (= tests)
-- Given the vendored `_map_viewer.html` template is present, when `map` runs, then it writes
-  `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a `window.__REQMAP_DATA__`
-  assignment carrying one node per requirement.
-- Given a requirement field containing `</script>`, when the viewer is rendered, then the
-  sequence is escaped (`<\/`) so it cannot close the inline-data script early.
-- Given no template is vendored, when `map` runs, then `render_html` returns None and only
-  `_map.md` + `_map.json` are written (no crash).
+AC-1
+  Given  the vendored `_map_viewer.html` template is present
+  When   `map` runs
+  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a
+         `window.__REQMAP_DATA__` assignment carrying one node per requirement
+
+AC-2
+  Given  a requirement field containing `</script>`
+  When   the viewer is rendered
+  Then   the sequence is escaped (`<\/`) so it cannot close the inline-data script early
+
+AC-3
+  Given  no template is vendored
+  When   `map` runs
+  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

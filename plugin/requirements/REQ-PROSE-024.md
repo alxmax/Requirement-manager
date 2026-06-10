@@ -44,14 +44,25 @@ milestone: v1.06
   per-repo escape hatch for anything the buckets misjudge.
 
 ## HOW — Acceptance (= tests)
-- Given a `prompts/foo.md` with no member tag, when `extract` runs, then a `draft`-status
-  requirement is written for it.
-- Given `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`,
-  when `extract` runs, then no draft is written for it.
-- Given a capability-bucket prose file already tagged `# implements: <ID>`, when `extract`
-  runs, then it is skipped (no duplicate draft).
-- Given a file tagged `generated-from: <ID>` inside an HTML comment
-  (`<!-- generated-from: <ID> -->`), when the scanner runs, then that file is a member of `<ID>`.
+AC-1
+  Given  a `prompts/foo.md` with no member tag
+  When   `extract` runs
+  Then   a `draft`-status requirement is written for it
+
+AC-2
+  Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`
+  When   `extract` runs
+  Then   no draft is written for it
+
+AC-3
+  Given  a capability-bucket prose file already tagged `# implements: <ID>`
+  When   `extract` runs
+  Then   it is skipped (no duplicate draft)
+
+AC-4
+  Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`)
+  When   the scanner runs
+  Then   that file is a member of `<ID>`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

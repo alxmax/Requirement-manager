@@ -41,12 +41,35 @@ milestone: v1.06
   import can produce a false `depends_on` edge for the author to prune.
 
 ## HOW — Acceptance (= tests)
-- Running `candidates` writes zero `.md` files and emits valid JSON.
-- A file listed in `.reqmapignore` (including one placed in `requirements/`) is absent from every candidate's `files`.
-- An import of a local module yields a `depends_on` edge to that module's candidate.
-- When `requirements/_capmap.json` groups two files under one id, they appear as a single candidate carrying both files with the declared layer.
-- A file already carrying an `implements:` tag is reported via `existing_req`.
-- A module imported by `BUS_FANIN_THRESHOLD` or more candidates is suggested as `bus`.
+AC-1
+  Given  any corpus
+  When   `candidates` runs
+  Then   it writes zero `.md` files and emits valid JSON
+
+AC-2
+  Given  a file listed in `.reqmapignore` (including one placed in `requirements/`)
+  When   `candidates` runs
+  Then   that file is absent from every candidate's `files`
+
+AC-3
+  Given  an import of a local module
+  When   `candidates` runs
+  Then   a `depends_on` edge points at that module's candidate
+
+AC-4
+  Given  a `requirements/_capmap.json` grouping two files under one id
+  When   `candidates` runs
+  Then   they appear as a single candidate carrying both files with the declared layer
+
+AC-5
+  Given  a file already carrying an `implements:` tag
+  When   `candidates` runs
+  Then   it is reported via `existing_req`
+
+AC-6
+  Given  a module imported by `BUS_FANIN_THRESHOLD` or more candidates
+  When   `candidates` runs
+  Then   it is suggested as `bus`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

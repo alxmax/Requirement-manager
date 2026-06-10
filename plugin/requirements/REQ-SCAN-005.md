@@ -31,9 +31,20 @@ milestone: v1.04
   "what is declared but never built?".
 
 ## HOW — Acceptance (= tests)
-- A capability with two tags prints both `role file:line` lines under its id.
-- A requirement with no members prints `(no members found)`.
-- A tag pointing at an id with no requirement still appears in the listing.
+AC-1
+  Given  a capability with two tags
+  When   `scan` runs
+  Then   both `role file:line` lines print under its id
+
+AC-2
+  Given  a requirement with no members
+  When   `scan` runs
+  Then   it prints `(no members found)`
+
+AC-3
+  Given  a tag pointing at an id with no requirement
+  When   `scan` runs
+  Then   the id still appears in the listing
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
