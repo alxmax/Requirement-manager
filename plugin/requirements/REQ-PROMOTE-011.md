@@ -4,6 +4,7 @@ status: confirmed
 layer: feature
 owner: Alex
 depends_on: [CORE-PARSE-001]
+superseded_by:
 milestone: v1.08
 ---
 
@@ -54,3 +55,7 @@ AC-4
 
 ## WHERE — Current implementation
 - plugin/scripts/reqmap.py (`cmd_promote`, `_set_frontmatter_status`)
+
+## Links
+- Used by: (auto)
+## Members in code (auto)

@@ -31,8 +31,10 @@ milestone: v1.00
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
-- A heading is matched by substring, so any `## …` whose title contains "contract",
-  "acceptan", "input" or "output" contributes to the hash.
+- A heading is matched by its label (anchored): only a `## …` heading whose label —
+  optionally after a `WHAT`/`HOW` prefix — starts with "Contract", "Acceptance",
+  "Input" or "Output" contributes to the hash; a commentary heading such as
+  `## Notes — contract caveats` does not.
 - The lock distinguishes "absent" from "corrupt" only at the gate (`check` warns on a
   present-but-unreadable lock); `load_lock` itself fails open to `{}`.
 
