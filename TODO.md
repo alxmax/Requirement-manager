@@ -30,4 +30,4 @@
 - [x] check --json (structured gate output, exit-code aligned) | lane: feature
 - [x] Frontmatter '#' scalar truncation fix | lane: bus
 - [x] Off-status drift blind spot fix | lane: bus
-- [ ] check --since <ref> (git-scoped gate, full-scan fallback + WARN) | lane: feature
+- [x] check --since <ref> (git-scoped gate, full-scan fallback + WARN) | lane: feature

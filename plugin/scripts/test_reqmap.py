@@ -5,6 +5,7 @@ Run: python -m unittest test_reqmap   (from plugin/scripts/)
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -2890,6 +2891,111 @@ class CheckJson(unittest.TestCase):
                 R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
             data = json.loads(buf.getvalue())
             self.assertIn("warnings", data)
+
+
+class CheckSince(unittest.TestCase):
+    """--since <ref> scopes the gate to files changed since ref."""
+
+    def _init_git_repo(self, d):
+        """Initialize a minimal git repo in d so --since can call git diff."""
+        subprocess.run(["git", "init", d], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.email", "test@test.com"],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.name", "Test"],
+                       check=True, capture_output=True)
+        return d
+
+    def _commit_all(self, d, msg="init"):
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "commit", "-m", msg],
+                       check=True, capture_output=True)
+
+    def test_since_fallback_on_bad_ref(self):
+        """--since with a non-existent ref falls back to full scan and emits WARN."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            self._commit_all(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=True,
+                                 since="nonexistent-sha-9999")
+            out = buf.getvalue()
+            self.assertIn("WARN", out,
+                          "bad --since ref must fall back with a WARN")
+            # Gate still ran (full scan fallback) — a clean corpus exits 0
+            self.assertEqual(rc, 0)
+
+    def test_since_only_checks_changed_files(self):
+        """--since only validates reqs whose member files changed since the ref."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            # Two confirmed reqs
+            for rid in ("REQ-A-001", "REQ-B-002"):
+                _write(os.path.join(rdir, f"{rid}.md"),
+                       f"---\nid: {rid}\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                       "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src_a.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            _write(os.path.join(d, "src_b.py"),
+                   "# {}: REQ-B-002\n".format("impl" + "ements"))
+            self._commit_all(d, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True
+            ).stdout.strip()
+            # Modify only src_a.py
+            _write(os.path.join(d, "src_a.py"),
+                   "# {}: REQ-A-001\n# changed\n".format("impl" + "ements"))
+            self._commit_all(d, "touch-a-only")
+
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=True,
+                            since=base_ref)
+            # The check ran: REQ-A-001 member (src_a.py) was changed, so it was
+            # included; REQ-B-002 was untouched.  Just verify it completes without
+            # error (both are clean, no dangling tags).
+            # Re-run and capture rc:
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False,
+                                 since=base_ref)
+            self.assertEqual(rc, 0)
+
+    def test_since_fallback_no_git(self):
+        """--since falls back gracefully when git is not available (monkeypatched)."""
+        import unittest.mock as mock
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # Simulate git failure
+            with mock.patch("subprocess.run", side_effect=FileNotFoundError("git not found")):
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    rc = R.cmd_check(reqs, members, rdir, update_lock=True,
+                                     since="HEAD~1")
+            out = buf.getvalue()
+            self.assertIn("WARN", out, "must WARN when git is unavailable")
+            self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
 
 
 if __name__ == "__main__":

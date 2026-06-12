@@ -82,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-12.3"
+MAP_ENGINE_VERSION = "2026-06-12.4"
 
 
 # ---------- parsing ----------
@@ -593,11 +593,26 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None):  # implements: REQ-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
     cap_ids = set(reqs)
+
+    # --since: scope checks to requirements whose member files changed since ref.
+    # Fail-open: fall back to full scan with WARN if git is unavailable or ref invalid.
+    if since:
+        changed = _since_changed_files(since, code_root)
+        if changed is None:
+            warns.append(f"--since {since!r}: git diff failed or ref not found; falling back to full scan")
+        else:
+            # Keep only members whose file appears in the changed set
+            members = {
+                cap: [(role, fp, ln) for role, fp, ln in entries
+                      if os.path.abspath(fp) in changed]
+                for cap, entries in members.items()
+            }
+
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
     satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
     for _rid, _r in reqs.items():
@@ -2800,6 +2815,28 @@ def _repo_name(root):  # implements: REQ-MAP-007
     return os.path.basename(os.path.abspath(root)) or None
 
 
+def _since_changed_files(ref, code_root):
+    """Return set of absolute paths changed since `ref`, or None on failure.
+
+    Returns None as the fail-open signal: caller must fall back to full scan.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-only", f"{ref}...HEAD"],
+            capture_output=True, text=True, cwd=code_root,
+        )
+        if result.returncode != 0:
+            return None
+        files = set()
+        for line in result.stdout.splitlines():
+            line = line.strip()
+            if line:
+                files.add(os.path.abspath(os.path.join(code_root, line)))
+        return files
+    except Exception:
+        return None
+
+
 def _build_json_text(data):  # implements: REQ-MAP-007
     """The registry graph as a JSON string: {engine_version, repo, nodes, edges}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
@@ -2967,6 +3004,9 @@ def main():
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--update-lock", action="store_true")
+    ap.add_argument("--since", metavar="REF",
+                    help="check: scope gate to requirements whose member files changed since REF "
+                         "(hypothesis: highest-frequency changes; falls back to full scan on git error)")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
                          "membership tags from source files before re-extracting")
@@ -3017,7 +3057,8 @@ def main():
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
+                       getattr(a, "since", None))
         if a.update_lock:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc
