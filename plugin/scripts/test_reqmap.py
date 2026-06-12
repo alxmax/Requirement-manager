@@ -2962,7 +2962,7 @@ class CheckSince(unittest.TestCase):
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_check(reqs, members, rdir, update_lock=True,
-                            since=base_ref)
+                            code_root=d, since=base_ref)
             # The check ran: REQ-A-001 member (src_a.py) was changed, so it was
             # included; REQ-B-002 was untouched.  Just verify it completes without
             # error (both are clean, no dangling tags).
@@ -2972,7 +2972,7 @@ class CheckSince(unittest.TestCase):
             buf2 = io.StringIO()
             with redirect_stdout(buf2):
                 rc = R.cmd_check(reqs, members, rdir, update_lock=False,
-                                 since=base_ref)
+                                 code_root=d, since=base_ref)
             self.assertEqual(rc, 0)
 
     def test_since_fallback_no_git(self):

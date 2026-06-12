@@ -607,11 +607,15 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             warns.append(f"--since {since!r}: git diff failed or ref not found; falling back to full scan")
         else:
             # Keep only members whose file appears in the changed set
-            members = {
-                cap: [(role, fp, ln) for role, fp, ln in entries
-                      if os.path.abspath(fp) in changed]
-                for cap, entries in members.items()
-            }
+            filtered = {}
+            for cap, entries in members.items():
+                kept = [
+                    (role, fp, ln) for role, fp, ln in entries
+                    if os.path.normcase(os.path.abspath(os.path.join(code_root, fp))) in changed
+                ]
+                if kept:
+                    filtered[cap] = kept
+            members = filtered
 
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
     satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
@@ -649,11 +653,19 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         # implemented or tested by code directly — so it is exempt from the code-coverage gates.
         is_need = m.get("layer") == "need"
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
+        # When --since filters members, skip code-coverage checks for reqs with no members in the diff
         if m.get("status") in ENFORCED and not impls and not is_need:
-            errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
+            if rid in members:
+                # Requirement is in the filtered scope but has no implements tag
+                errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
+            elif not since:
+                # Full scan and requirement is enforced but has no impl tag
+                errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not is_need:
-            warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+            # Similar logic for test checks: only enforce if the requirement is in scope
+            if rid in members or not since:
+                warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
         # behavior-sync (warn-only): a tested-by link must point at a file that
         # exists and actually holds tests, else it asserts coverage it lacks.
         if m.get("status") == "confirmed" and tests:
@@ -2823,7 +2835,7 @@ def _since_changed_files(ref, code_root):
     try:
         result = subprocess.run(
             ["git", "diff", "--name-only", f"{ref}...HEAD"],
-            capture_output=True, text=True, cwd=code_root,
+            capture_output=True, text=True, cwd=code_root, timeout=10,
         )
         if result.returncode != 0:
             return None
@@ -2831,7 +2843,7 @@ def _since_changed_files(ref, code_root):
         for line in result.stdout.splitlines():
             line = line.strip()
             if line:
-                files.add(os.path.abspath(os.path.join(code_root, line)))
+                files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, line))))
         return files
     except Exception:
         return None
