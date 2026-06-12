@@ -29,6 +29,11 @@ ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
 # `x-implements:` from being picked up as a real `implements:` tag
 TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
+# Phantom-member exclusion helpers used in _scan_file_tags
+_FENCE_RE = re.compile(r'^(`{3,}|~{3,})')   # CommonMark fence opener/closer
+# NOTE: only handles single-backtick spans; double/triple-backtick spans (CommonMark-valid)
+# are not filtered. No instances exist in this corpus, but this is a known gap.
+_BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip before tag search)
 # Per-acceptance-criterion coverage tag, placed in a test: `# verifies: REQ-X#AC-1`.
 # Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
@@ -77,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-12"
+MAP_ENGINE_VERSION = "2026-06-12.1"
 
 
 # ---------- parsing ----------
@@ -191,22 +196,133 @@ def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     return pats
 
 
+def _strip_py_strings(s):
+    """Mask Python string literal contents with spaces; detect an unclosed triple-quote.
+
+    Handles single-line '' / "" strings and triple-quoted forms (both ''' and \""").
+    Triple-quote detection takes precedence over single-quote detection.
+    A '#' after all string content is consumed is preserved as-is (it starts a comment).
+
+    Returns (masked_line, in_triple_or_None):
+      masked_line        — line with all string *content* replaced by spaces
+      in_triple_or_None  — the triple-quote delimiter ('\"\"\"' or \"'''\") if one opened
+                           and did not close on this line, else None.
+    """
+    out = []
+    i = 0
+    n = len(s)
+    while i < n:
+        c = s[i]
+        if i + 2 < n and s[i:i+3] in ('"""', "'''"):
+            q = s[i:i+3]
+            out.append('   ')    # mask the opening delimiter
+            i += 3
+            j = s.find(q, i)
+            if j == -1:
+                out.append(' ' * (n - i))
+                return ''.join(out), q
+            out.append(' ' * (j - i + 3))
+            i = j + 3
+        elif c in ('"', "'"):
+            out.append(' ')
+            i += 1
+            while i < n and s[i] != c and s[i] != '\n':
+                if s[i] == '\\' and i + 1 < n:
+                    out.append('  ')
+                    i += 2
+                else:
+                    out.append(' ')
+                    i += 1
+            if i < n and s[i] == c:
+                out.append(' ')
+                i += 1
+        elif c == '#':
+            out.append(s[i:])
+            break
+        else:
+            out.append(c)
+            i += 1
+    return ''.join(out), None
+
+
 def _scan_file_tags(fp):  # implements: CORE-SCAN-002
-    """Read one file; return its membership tags as [[role, cap, line], ...] in file
-    order, or None on read error (the caller skips the file)."""
+    """Read one file; return membership tags as [[role, cap, line], ...] or None on read error.
+
+    Context-aware per file class — admits a tag only when NOT in an excluded zone:
+
+    PROSE (.md, .html):  excluded if in a fenced code block (``` / ~~~, CommonMark
+      length-matched), a backtick span, or a >=4-space / tab indent block.
+      <!-- implements: X --> in prose (outside any exclusion zone) remains valid.
+
+    PY:  excluded if in a triple-quoted string (state carried across lines) or a
+      single-line string literal. Comment tags (code()  # implements: X) are kept.
+
+    Other extensions: no filtering — all positions valid (original behavior).
+
+    State is local — resets per file call (no cross-file leak).
+    """
+    ext = os.path.splitext(fp)[1].lower()
     out = []
     try:
         with open(fp, encoding="utf-8", errors="ignore") as f:
-            for i, line in enumerate(f, 1):
-                seen = set()
-                for role, cap in TAG_RE.findall(line):
-                    key = (role, cap)
-                    if key in seen:        # same tag twice on one line
-                        continue
-                    seen.add(key)
-                    out.append([role, cap, i])
+            lines = f.readlines()
     except OSError:
         return None
+
+    if ext in PROSE_EXTS:
+        fence = None   # None = not fenced; else the opening fence string e.g. "```"
+        for i, raw in enumerate(lines, 1):
+            s = raw.rstrip("\n\r")
+            stripped = s.lstrip()
+            fm = _FENCE_RE.match(stripped)
+            if fm:
+                marker = fm.group(1)
+                rest = stripped[len(marker):].strip()
+                if fence is None:
+                    fence = marker
+                    continue
+                elif marker[0] == fence[0] and len(marker) >= len(fence) and not rest:
+                    fence = None    # closer must be bare (no info string)
+                    continue
+            if fence is not None:
+                continue
+            if s.startswith("    ") or s.startswith("\t"):
+                continue
+            clean = _BACKTICK_RE.sub("", s)
+            seen = set()
+            for role, cap in TAG_RE.findall(clean):
+                key = (role, cap)
+                if key not in seen:
+                    seen.add(key)
+                    out.append([role, cap, i])
+
+    elif ext == ".py":
+        in_triple = None   # None or the opening triple-quote delimiter
+        for i, raw in enumerate(lines, 1):
+            s = raw.rstrip("\n\r")
+            if in_triple is not None:
+                idx = s.find(in_triple)
+                if idx == -1:
+                    continue
+                s = s[idx + len(in_triple):]
+                in_triple = None
+            s, in_triple = _strip_py_strings(s)
+            seen = set()
+            for role, cap in TAG_RE.findall(s):
+                key = (role, cap)
+                if key not in seen:
+                    seen.add(key)
+                    out.append([role, cap, i])
+
+    else:
+        for i, raw in enumerate(lines, 1):
+            seen = set()
+            for role, cap in TAG_RE.findall(raw):
+                key = (role, cap)
+                if key not in seen:
+                    seen.add(key)
+                    out.append([role, cap, i])
+
     return out
 
 

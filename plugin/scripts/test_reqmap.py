@@ -2627,5 +2627,86 @@ class LockUpdate(unittest.TestCase):
             self.assertIn("REQ-A-001", out)
 
 
+class PhantomMember(unittest.TestCase):
+    """Fixtures F1-F8 from the phantom-member Senate spec."""
+
+    # Split so this .py source does not register itself as a phantom member
+    _CAP = "CORE" + "-SCAN-002"
+    _ROLE = "impl" + "ements"
+    _TAG = "# {}: {}".format(_ROLE, _CAP)
+    _HTML_TAG = "<!-- {}: {} -->".format(_ROLE, _CAP)
+
+    def _scan(self, filename, content):
+        with tempfile.TemporaryDirectory() as d:
+            fp = os.path.join(d, filename)
+            _write(fp, content)
+            return R._scan_file_tags(fp)
+
+    def test_F1_md_html_comment_outside_fence_kept(self):
+        """F1: <!-- implements: X --> in .md outside any fence is a real member."""
+        content = "Prose.\n{}\nMore prose.\n".format(self._HTML_TAG)
+        tags = self._scan("req.md", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "HTML comment tag outside fence must be kept")
+
+    def test_F2_md_tag_inside_fence_dropped(self):
+        """F2: tag inside a ``` fence block in .md is dropped."""
+        content = "```\n{}\n```\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside fenced block must be dropped")
+
+    def test_F3_md_tag_in_backtick_span_dropped(self):
+        """F3: tag inside a backtick span is dropped."""
+        content = "See `{}` for details.\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside backtick span must be dropped")
+
+    def test_F4_md_tag_in_4space_indent_dropped(self):
+        """F4: tag in a 4-space-indented block is dropped."""
+        content = "    {}\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag in 4-space indent must be dropped")
+
+    def test_F5_py_tag_in_triple_quote_dropped(self):
+        """F5: tag inside a triple-quoted docstring in .py is dropped."""
+        content = 'def foo():\n    """\n    {}\n    """\n    pass\n'.format(self._TAG)
+        tags = self._scan("module.py", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag in triple-quoted docstring must be dropped")
+
+    def test_F6_state_resets_per_file(self):
+        """F6: fence/triple-quote state does not leak across files."""
+        contentA = "```\n{}\n".format(self._TAG)   # opens fence, never closes
+        contentB = "{}\n".format(self._TAG)          # plain prose tag
+        with tempfile.TemporaryDirectory() as d:
+            fpA = os.path.join(d, "a.md")
+            fpB = os.path.join(d, "b.md")
+            _write(fpA, contentA)
+            _write(fpB, contentB)
+            tagsA = R._scan_file_tags(fpA)
+            tagsB = R._scan_file_tags(fpB)
+        self.assertFalse(any(t[1] == self._CAP for t in tagsA),
+                         "tag inside unclosed fence in file A must be dropped")
+        self.assertTrue(any(t[1] == self._CAP for t in tagsB),
+                        "state must reset — file B tag must be kept")
+
+    def test_F7_py_inline_comment_tag_kept(self):
+        """F7: tag in an inline comment is kept."""
+        content = "code()  {}\n".format(self._TAG)
+        tags = self._scan("module.py", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "inline comment tag in .py must be kept")
+
+    def test_F8_longer_fence_contains_shorter(self):
+        """F8: a 4-backtick fence containing 3-backtick content closes on length match."""
+        content = "````\n```\n{}\n```\n````\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside outer 4-backtick fence must be dropped")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
