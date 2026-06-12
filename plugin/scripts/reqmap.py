@@ -714,13 +714,6 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         errors.extend(strict_warns)
     else:
         warns.extend(strict_warns)
-    if as_json:
-        print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
-        return 1 if errors else 0
-    for w in warns:
-        print("WARN ", w)
-    for e in errors:
-        print("ERROR", e)
 
     if update_lock:
         changed = [(rid, lock.get(rid), h)
@@ -733,6 +726,15 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print(f"  lock update: {rid} removed from lock")
         save_lock(reqs_dir, new_lock)
         print("lock updated.")
+
+    if as_json:
+        print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
+        return 1 if errors else 0
+
+    for w in warns:
+        print("WARN ", w)
+    for e in errors:
+        print("ERROR", e)
 
     n_find = sum(len(items) for _rid, _t, items in collect_findings(reqs))
     if n_find:
@@ -2963,7 +2965,7 @@ def main():
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="health: emit the snapshot as a JSON object (for a CI badge)")
+                    help="check|health: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
