@@ -599,6 +599,14 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
         print("ERROR", e)
 
     if update_lock:
+        changed = [(rid, lock.get(rid), h)
+                   for rid, h in sorted(new_lock.items()) if lock.get(rid) != h]
+        removed = [rid for rid in sorted(lock) if rid not in new_lock]
+        for rid, old_h, new_h in changed:
+            old_short = old_h[:8] if old_h else "new"
+            print(f"  lock update: {rid} hash changed ({old_short}->{new_h[:8]})")
+        for rid in removed:
+            print(f"  lock update: {rid} removed from lock")
         save_lock(reqs_dir, new_lock)
         print("lock updated.")
 

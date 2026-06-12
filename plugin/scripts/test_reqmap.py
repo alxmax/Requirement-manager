@@ -2573,5 +2573,59 @@ class ScanCache(unittest.TestCase):  # tested-by: REQ-SCANCACHE-023
                              R.scan_members(d, rq, cache=True))     # corrupt cache -> full re-scan, same result
 
 
+class LockUpdate(unittest.TestCase):
+    def test_update_lock_prints_changed_hashes(self):
+        """--update-lock must report which requirement hashes actually changed."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            # Write a requirement
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T") +
+                   "\n## WHAT — Contract\n- original contract\n")
+            # Build initial lock
+            reqs = R.load_requirements(rdir)
+            members = {}
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=True)
+            # Now change the body so the hash differs
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T") +
+                   "\n## WHAT — Contract\n- changed contract\n")
+            reqs2 = R.load_requirements(rdir)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                R.cmd_check(reqs2, members, rdir, update_lock=True)
+            out = buf2.getvalue()
+            self.assertIn("lock update:", out,
+                          "update-lock must report hash changes — got: " + out)
+            self.assertIn("REQ-A-001", out)
+
+    def test_update_lock_reports_removed_entry(self):
+        """--update-lock must report requirements removed from the lock."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            # Write a requirement and build initial lock
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T"))
+            reqs = R.load_requirements(rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, {}, rdir, update_lock=True)
+            # Now delete the requirement file (simulate removal)
+            os.remove(os.path.join(rdir, "REQ-A-001.md"))
+            reqs2 = R.load_requirements(rdir)  # empty
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                R.cmd_check(reqs2, {}, rdir, update_lock=True)
+            out = buf2.getvalue()
+            self.assertIn("removed from lock", out,
+                          "update-lock must report removed entries — got: " + out)
+            self.assertIn("REQ-A-001", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
