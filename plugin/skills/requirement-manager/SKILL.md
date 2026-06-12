@@ -265,6 +265,9 @@ expected and acceptable.
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
 
+Use `check --strict` to promote test-link integrity and drift to errors (useful in CI
+for a corpus where all requirements are confirmed and lock is current).
+
 - **link sync** — every code tag points to a real requirement; every `confirmed`
   requirement has ≥1 `implements:` member; no dangling refs; `depends_on` targets exist.
 - **behavior sync** — deterministic half is **test-link integrity** (warn-only): a

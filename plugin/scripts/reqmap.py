@@ -82,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-12.1"
+MAP_ENGINE_VERSION = "2026-06-12.2"
 
 
 # ---------- parsing ----------
@@ -593,8 +593,9 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False):  # implements: REQ-CHECK-006
     errors, warns = [], []
+    strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
     cap_ids = set(reqs)
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
@@ -644,7 +645,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
             for fp in sorted({t[1] for t in tests}):  # implements: REQ-TESTLINK-018
                 problem = _test_link_problem(os.path.join(code_root, fp))
                 if problem:
-                    warns.append(f"{rid}: tested-by {fp} {problem}")
+                    strict_warns.append(f"{rid}: tested-by {fp} {problem}")
         # per-AC coverage (warn-only): a confirmed requirement that LABELS its criteria
         # (AC-1, AC-2, ...) should have a `# verifies: <id>#AC-N` tag for each. Only
         # fires once at least one criterion is covered, so adopting per-AC tagging is
@@ -694,8 +695,8 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
             # name the member locations so the warning is actionable, not "its members"
             locs = [f"{fp}:{ln}" for (_role, fp, ln) in members.get(rid, [])]
             where = ", ".join(locs) if locs else "no members tagged — add an implements: tag"
-            warns.append(f"{rid}: DRIFT — contract changed since lock; "
-                         f"re-check {len(locs)} member(s): {where}")
+            strict_warns.append(f"{rid}: DRIFT — contract changed since lock; "
+                               f"re-check {len(locs)} member(s): {where}")
 
     # Health signals (non-blocking): how much of the corpus is human-validated, and
     # how much still uses the legacy body schema. Surfaced so an all-baseline corpus
@@ -711,6 +712,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root="."):  # implement
 
     for w in warns:
         print("WARN ", w)
+    if strict:
+        for sw in strict_warns:
+            print("ERROR", sw)
+        errors.extend(strict_warns)
+    else:
+        for sw in strict_warns:
+            print("WARN ", sw)
     for e in errors:
         print("ERROR", e)
 
@@ -2950,7 +2958,8 @@ def main():
     ap.add_argument("--all", dest="show_all", action="store_true",
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--strict", action="store_true",
-                    help="lint: exit non-zero on any error-severity finding (warnings stay advisory)")
+                    help="lint: exit non-zero on errors. check: promote drift and "
+                         "test-link integrity from warn to error.")
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--json", dest="as_json", action="store_true",
@@ -3006,7 +3015,7 @@ def main():
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict)
         if a.update_lock:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc

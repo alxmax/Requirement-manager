@@ -2708,5 +2708,90 @@ class PhantomMember(unittest.TestCase):
                          "tag inside outer 4-backtick fence must be dropped")
 
 
+class CheckStrict(unittest.TestCase):
+    """--strict promotes drift and test-link integrity to errors."""
+
+    def _setup_confirmed(self, d, contract="- shall do X"):
+        """Write a confirmed req with a member tag; build and save the lock."""
+        rdir = os.path.join(d, "requirements")
+        body = (
+            "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+            "## WHAT — Contract\n{}\n\n"
+            "## HOW — Acceptance\n- AC-1\n".format(contract)
+        )
+        _write(os.path.join(rdir, "REQ-A-001.md"), body)
+        src = os.path.join(d, "src.py")
+        _write(src, "# {}: REQ-A-001\n".format("impl" + "ements"))
+        reqs = R.load_requirements(rdir)
+        members = R.scan_members(d, rdir)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, members, rdir, update_lock=True)
+        return rdir
+
+    def test_strict_clean_exits_0(self):
+        """--strict: clean corpus exits 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._setup_confirmed(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
+            self.assertEqual(rc, 0)
+
+    def test_strict_drift_exits_1(self):
+        """--strict: a stale confirmed req (drift) exits 1; without --strict exits 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._setup_confirmed(d, contract="- shall do X")
+            # Mutate the body to create drift
+            body2 = (
+                "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                "## WHAT — Contract\n- shall do Y (changed)\n\n"
+                "## HOW — Acceptance\n- AC-1\n"
+            )
+            _write(os.path.join(rdir, "REQ-A-001.md"), body2)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc_normal = R.cmd_check(reqs, members, rdir, update_lock=False)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc_strict = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
+            self.assertEqual(rc_normal, 0, "without --strict, drift must exit 0")
+            self.assertEqual(rc_strict, 1, "with --strict, drift must exit 1")
+
+    def test_strict_bad_testlink_exits_1(self):
+        """--strict: confirmed req with missing tested-by file exits 1."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            body = (
+                "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                "## WHAT — Contract\n- shall do X\n\n"
+                "## HOW — Acceptance\n- AC-1\n"
+            )
+            _write(os.path.join(rdir, "REQ-A-001.md"), body)
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            # Inject a tested-by member pointing to a missing file
+            members = {
+                "REQ-A-001": [
+                    ("implements", "src.py", 1),
+                    ("tested-by", "missing_test.py", 1),
+                ]
+            }
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc_normal = R.cmd_check(R.load_requirements(rdir), members, rdir,
+                                        update_lock=False)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc_strict = R.cmd_check(R.load_requirements(rdir), members, rdir,
+                                        update_lock=False, strict=True)
+            self.assertEqual(rc_normal, 0, "without --strict, bad test-link is warn")
+            self.assertEqual(rc_strict, 1, "with --strict, bad test-link is error")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
