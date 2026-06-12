@@ -102,11 +102,15 @@ script, so there's nothing else to download.
 | Command | What it does |
 |---|---|
 | `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
-| `check` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit |
+| `check` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`) |
 | `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Also reads `TODO.md` from the repo root and inlines a `todos` array into `_map.json` so the Roadmap tab can show planned work alongside requirements |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
 | `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template |
 | `scan` | List which code belongs to which requirement |
+| `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors |
+| `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
+| `similar` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35 |
+| `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge |
 | `export` | Emit just the graph JSON (for an external front-end) |
 | `extract` | Draft requirements from untagged legacy code |
 | `candidates` | Read-only JSON plan for AI-assisted extraction (writes no files) |
