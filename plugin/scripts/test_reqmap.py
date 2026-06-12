@@ -2798,5 +2798,99 @@ class CheckStrict(unittest.TestCase):
             self.assertEqual(len(tl_lines), 1, "test-link line must appear exactly once under --strict")
 
 
+class CheckJson(unittest.TestCase):
+    """--json emits structured output, exit-code aligned with ok field."""
+
+    def _make_clean_corpus(self, d):
+        rdir = os.path.join(d, "requirements")
+        body = (
+            "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+            "## WHAT — Contract\n- shall do X\n\n"
+            "## HOW — Acceptance\n- AC-1\n"
+        )
+        _write(os.path.join(rdir, "REQ-A-001.md"), body)
+        _write(os.path.join(d, "src.py"),
+               "# {}: REQ-A-001\n".format("impl" + "ements"))
+        reqs = R.load_requirements(rdir)
+        members = R.scan_members(d, rdir)
+        # build initial lock
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, members, rdir, update_lock=True)
+        return rdir
+
+    def test_json_clean_ok_true(self):
+        """--json: clean corpus → ok=true, errors=[], exit 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(rc, 0)
+            self.assertTrue(data["ok"])
+            self.assertEqual(data["errors"], [])
+
+    def test_json_error_ok_false_exit_1(self):
+        """--json: a dangling tag → ok=false, errors non-empty, exit 1."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir, exist_ok=True)
+            # No requirements, but a member tag pointing to a nonexistent req
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-Z-999\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(rc, 1)
+            self.assertFalse(data["ok"])
+            self.assertTrue(len(data["errors"]) > 0)
+
+    def test_json_exit_code_aligned(self):
+        """ok field in JSON must be equivalent to exit 0 (both directions)."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # clean: ok=true ⟺ exit 0
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(data["ok"], (rc == 0),
+                             "ok must be True exactly when exit code is 0")
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir, exist_ok=True)
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-Z-999\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # error: ok=false ⟺ exit 1
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(data["ok"], (rc == 0),
+                             "ok must be False exactly when exit code is 1")
+
+    def test_json_has_warnings_key(self):
+        """--json output must include a warnings key."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertIn("warnings", data)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

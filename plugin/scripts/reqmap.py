@@ -82,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-12.2"
+MAP_ENGINE_VERSION = "2026-06-12.3"
 
 
 # ---------- parsing ----------
@@ -593,7 +593,7 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False):  # implements: REQ-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
@@ -714,6 +714,9 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False)
         errors.extend(strict_warns)
     else:
         warns.extend(strict_warns)
+    if as_json:
+        print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
+        return 1 if errors else 0
     for w in warns:
         print("WARN ", w)
     for e in errors:
@@ -3012,7 +3015,7 @@ def main():
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
     if a.cmd == "check":
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict)
+        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json)
         if a.update_lock:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc

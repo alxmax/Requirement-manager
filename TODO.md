@@ -27,7 +27,7 @@
 - [x] Phantom-member fix: context-aware tag scan (fence/backtick/indent + .py string state) | lane: bus
 - [x] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, NEED-SSOT-001 AC-1 split + severity table | lane: ops
 - [x] check --strict (promotes test-link integrity + confirmed-drift to error) | lane: feature
-- [ ] check --json (structured gate output, exit-code aligned) | lane: feature
+- [x] check --json (structured gate output, exit-code aligned) | lane: feature
 - [x] Frontmatter '#' scalar truncation fix | lane: bus
 - [x] Off-status drift blind spot fix | lane: bus
 - [ ] check --since <ref> (git-scoped gate, full-scan fallback + WARN) | lane: feature
