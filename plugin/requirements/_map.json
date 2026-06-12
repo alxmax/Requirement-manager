@@ -242,7 +242,7 @@
         "Not implemented by code — a stakeholder need is fulfilled by the requirements that declare `satisfies: NEED-SSOT-001` (the gate, the map, the dossier, and the traceability feature itself)."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a repo where a requirement and its code disagree\n  When   the gate runs\n  Then   the build fails\n\nAC-2\n  Given  a confirmed capability\n  When   the gate runs\n  Then   it has linked, existing code and tests\n\nAC-3\n  Given  any capability\n  When   a reader runs `show`\n  Then   they see its code locations and what depends on it",
+      "accept": "AC-1a\n  Given  a repo where a tag points to a non-existent requirement (dangling ref)\n         or an enforced requirement (in-progress, implemented, or confirmed) has\n         no implements: member (structural gap)\n  When   the gate runs\n  Then   the build fails (exit 1 — link-sync is an ERROR)\n\nAC-1b\n  Given  a repo where a confirmed requirement's contract was edited after the lock\n  When   the gate runs\n  Then   the drift is surfaced (WARN: \"DRIFT — contract changed since lock\") and\n         the gate exits 0 — drift is reported, not blocking, by design\n\nAC-2\n  Given  a confirmed capability\n  When   the gate runs\n  Then   it has linked, existing code and tests\n\nAC-3\n  Given  any capability\n  When   a reader runs `show`\n  Then   they see its code locations and what depends on it",
       "input": "",
       "output": "",
       "desc": "",
@@ -2128,7 +2128,7 @@
       "name": "Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, NEED-SSOT-001 AC-1 split + severity table",
       "lane": "ops",
       "milestone": "v1.16",
-      "done": false
+      "done": true
     },
     {
       "name": "check --strict (promotes test-link integrity + confirmed-drift to error)",

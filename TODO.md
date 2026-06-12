@@ -25,7 +25,7 @@
 <!-- Senate fix plan 2026-06-12 (runs/senate/2026-06-12_091906-requirement-manager-fix-plan.json, verdict MODIFY).
      Detail spec: docs/PLAN-senate-fix-2026-06-12.md -->
 - [x] Phantom-member fix: context-aware tag scan (fence/backtick/indent + .py string state) | lane: bus
-- [ ] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, NEED-SSOT-001 AC-1 split + severity table | lane: ops
+- [x] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, NEED-SSOT-001 AC-1 split + severity table | lane: ops
 - [ ] check --strict (promotes test-link integrity + confirmed-drift to error) | lane: feature
 - [ ] check --json (structured gate output, exit-code aligned) | lane: feature
 - [x] Frontmatter '#' scalar truncation fix | lane: bus

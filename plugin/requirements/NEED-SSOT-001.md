@@ -29,10 +29,18 @@ milestone: v1.00
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
 
 ## HOW — Acceptance (= tests)
-AC-1
-  Given  a repo where a requirement and its code disagree
+AC-1a
+  Given  a repo where a tag points to a non-existent requirement (dangling ref)
+         or an enforced requirement (in-progress, implemented, or confirmed) has
+         no implements: member (structural gap)
   When   the gate runs
-  Then   the build fails
+  Then   the build fails (exit 1 — link-sync is an ERROR)
+
+AC-1b
+  Given  a repo where a confirmed requirement's contract was edited after the lock
+  When   the gate runs
+  Then   the drift is surfaced (WARN: "DRIFT — contract changed since lock") and
+         the gate exits 0 — drift is reported, not blocking, by design
 
 AC-2
   Given  a confirmed capability
