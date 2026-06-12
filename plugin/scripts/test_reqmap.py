@@ -106,6 +106,24 @@ class Parsing(unittest.TestCase):  # tested-by: CORE-PARSE-001
         self.assertEqual(meta["depends_on"], ["A-B-001", "C-D-002"])
         self.assertEqual(meta["tags"], ["x", "y"])
 
+    def test_frontmatter_hash_in_word_not_truncated(self):
+        """'#' not preceded by whitespace must not be treated as a comment."""
+        text = "---\nid: REQ-A-001\ntitle: count#1 thing\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "count#1 thing")
+
+    def test_frontmatter_hash_preceded_by_space_is_comment(self):
+        """'#' preceded by space IS an inline comment — value stops there."""
+        text = "---\nid: REQ-A-001\ntitle: v1.0 # release note\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "v1.0")
+
+    def test_frontmatter_hash_at_start_is_comment(self):
+        """'#' at the very start of a value is a comment — value becomes empty."""
+        text = "---\nid: REQ-A-001\ntitle: #comment\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "")
+
 
 class Gate(unittest.TestCase):
     def _check(self, files):

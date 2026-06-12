@@ -77,7 +77,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-10"
+MAP_ENGINE_VERSION = "2026-06-12"
 
 
 # ---------- parsing ----------
@@ -129,7 +129,9 @@ def parse_frontmatter(text):  # implements: CORE-PARSE-001
                         i += 1
                     meta[k] = [x for x in items if x] if items else ""
                 else:
-                    v = v.split("#", 1)[0].rstrip()      # inline comment
+                    # Treat '#' as a comment only when preceded by whitespace or at
+                    # the start of the value — preserves embedded '#' like "issue#123".
+                    v = re.split(r'(?:^|\s)#', v, 1)[0].rstrip()
                     if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
                         v = v[1:-1]                       # strip matching quotes
                     meta[k] = v
