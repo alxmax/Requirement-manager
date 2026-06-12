@@ -710,15 +710,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False)
                      "intent' section) — `findings` is inactive for them: {}"
                      .format(len(legacy), len(reqs), ", ".join(legacy)))
 
-    for w in warns:
-        print("WARN ", w)
     if strict:
-        for sw in strict_warns:
-            print("ERROR", sw)
         errors.extend(strict_warns)
     else:
-        for sw in strict_warns:
-            print("WARN ", sw)
+        warns.extend(strict_warns)
+    for w in warns:
+        print("WARN ", w)
     for e in errors:
         print("ERROR", e)
 

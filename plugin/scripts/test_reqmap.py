@@ -2761,6 +2761,9 @@ class CheckStrict(unittest.TestCase):
                 rc_strict = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
             self.assertEqual(rc_normal, 0, "without --strict, drift must exit 0")
             self.assertEqual(rc_strict, 1, "with --strict, drift must exit 1")
+            # promoted warn must appear exactly once, not twice
+            drift_lines = [l for l in buf2.getvalue().splitlines() if "DRIFT" in l]
+            self.assertEqual(len(drift_lines), 1, "DRIFT line must appear exactly once under --strict")
 
     def test_strict_bad_testlink_exits_1(self):
         """--strict: confirmed req with missing tested-by file exits 1."""
@@ -2791,6 +2794,8 @@ class CheckStrict(unittest.TestCase):
                                         update_lock=False, strict=True)
             self.assertEqual(rc_normal, 0, "without --strict, bad test-link is warn")
             self.assertEqual(rc_strict, 1, "with --strict, bad test-link is error")
+            tl_lines = [l for l in buf2.getvalue().splitlines() if "tested-by" in l]
+            self.assertEqual(len(tl_lines), 1, "test-link line must appear exactly once under --strict")
 
 
 if __name__ == "__main__":
