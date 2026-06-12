@@ -255,18 +255,29 @@ expected and acceptable.
 
 ## The gate (run at commit/merge — keep it non-optional)
 
-`python scripts/reqmap.py check` verifies these syncs and exits non-zero on error:
-- **link sync**  — every code tag points to a real requirement; every confirmed
-  requirement has ≥1 member; no dangling refs; `depends_on` targets exist.
-- **behavior sync** — acceptance criteria run as tests (wire `tested-by` into CI).
-  The gate's deterministic half is **test-link integrity** (warn-only): a confirmed
-  requirement's `tested-by` file must exist and contain a test function (`def test…(`,
-  `function test…(`, `it(`/`test(`), else the link asserts coverage it lacks. It is
-  silent on a well-formed corpus. Per-criterion AC→test mapping is deferred (it needs
-  a per-AC tag convention — a shared, class-tagged test file makes per-AC counting
-  non-deterministic).
-- **drift** — content hash of each requirement compared to the lock; a changed
-  `confirmed` requirement whose members were not re-touched is flagged stale.
+`python scripts/reqmap.py check` verifies these syncs and exits non-zero on **link-sync errors only**:
+
+| Check | Level | Effect on exit code |
+|---|---|---|
+| link sync (dangling tag, enforced req with no member, bad `depends_on`) | **ERROR** | exit 1 |
+| test-link integrity (tested-by file missing or holds no test function) | **WARN** | exit 0 |
+| drift (confirmed contract changed vs lock, members not re-touched) | **WARN** | exit 0 |
+| missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
+| AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
+
+Use `check --strict` to promote test-link integrity and drift to errors (useful in CI
+for a corpus where all requirements are confirmed and lock is current).
+
+- **link sync** — every code tag points to a real requirement; every `confirmed`
+  requirement has ≥1 `implements:` member; no dangling refs; `depends_on` targets exist.
+- **behavior sync** — deterministic half is **test-link integrity** (warn-only): a
+  confirmed requirement's `tested-by` file must exist and contain a test function
+  (`def test…(`, `function test…(`, `it(`/`test(`), else the link asserts coverage it
+  lacks. Silent on a well-formed corpus.
+- **drift** — content hash of each `confirmed` requirement compared to `_reqlock.json`;
+  a changed requirement whose members were not re-touched is flagged WARN (never ERROR by
+  default — design decision from day 1; see REQ-CHECK-006). Use `check --update-lock`
+  after intentionally editing a requirement.
 
 Intent sync is *not* automatable — it surfaces at human review (promote
 `baseline → confirmed`).

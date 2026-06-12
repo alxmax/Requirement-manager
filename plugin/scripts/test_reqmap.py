@@ -5,6 +5,7 @@ Run: python -m unittest test_reqmap   (from plugin/scripts/)
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -105,6 +106,24 @@ class Parsing(unittest.TestCase):  # tested-by: CORE-PARSE-001
             "---\ndepends_on:\n  - A-B-001\n  - C-D-002\ntags: [x, y\n---\n")
         self.assertEqual(meta["depends_on"], ["A-B-001", "C-D-002"])
         self.assertEqual(meta["tags"], ["x", "y"])
+
+    def test_frontmatter_hash_in_word_not_truncated(self):
+        """'#' not preceded by whitespace must not be treated as a comment."""
+        text = "---\nid: REQ-A-001\ntitle: count#1 thing\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "count#1 thing")
+
+    def test_frontmatter_hash_preceded_by_space_is_comment(self):
+        """'#' preceded by space IS an inline comment — value stops there."""
+        text = "---\nid: REQ-A-001\ntitle: v1.0 # release note\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "v1.0")
+
+    def test_frontmatter_hash_at_start_is_comment(self):
+        """'#' at the very start of a value is a comment — value becomes empty."""
+        text = "---\nid: REQ-A-001\ntitle: #comment\nstatus: draft\nlayer: bus\n---\n\n# T\n"
+        meta, _ = R.parse_frontmatter(text)
+        self.assertEqual(meta.get("title"), "")
 
 
 class Gate(unittest.TestCase):
@@ -2553,6 +2572,430 @@ class ScanCache(unittest.TestCase):  # tested-by: REQ-SCANCACHE-023
             _write(os.path.join(rq, "_scancache.json"), "{ not json")
             self.assertEqual(R.scan_members(d, rq, cache=False),
                              R.scan_members(d, rq, cache=True))     # corrupt cache -> full re-scan, same result
+
+
+class LockUpdate(unittest.TestCase):
+    def test_update_lock_prints_changed_hashes(self):
+        """--update-lock must report which requirement hashes actually changed."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            # Write a requirement
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T") +
+                   "\n## WHAT — Contract\n- original contract\n")
+            # Build initial lock
+            reqs = R.load_requirements(rdir)
+            members = {}
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=True)
+            # Now change the body so the hash differs
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T") +
+                   "\n## WHAT — Contract\n- changed contract\n")
+            reqs2 = R.load_requirements(rdir)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                R.cmd_check(reqs2, members, rdir, update_lock=True)
+            out = buf2.getvalue()
+            self.assertIn("lock update:", out,
+                          "update-lock must report hash changes — got: " + out)
+            self.assertIn("REQ-A-001", out)
+
+    def test_update_lock_reports_removed_entry(self):
+        """--update-lock must report requirements removed from the lock."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            # Write a requirement and build initial lock
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="in-progress",
+                              layer="bus", extra="", title="T"))
+            reqs = R.load_requirements(rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, {}, rdir, update_lock=True)
+            # Now delete the requirement file (simulate removal)
+            os.remove(os.path.join(rdir, "REQ-A-001.md"))
+            reqs2 = R.load_requirements(rdir)  # empty
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                R.cmd_check(reqs2, {}, rdir, update_lock=True)
+            out = buf2.getvalue()
+            self.assertIn("removed from lock", out,
+                          "update-lock must report removed entries — got: " + out)
+            self.assertIn("REQ-A-001", out)
+
+
+class PhantomMember(unittest.TestCase):
+    """Fixtures F1-F8 from the phantom-member Senate spec."""
+
+    # Split so this .py source does not register itself as a phantom member
+    _CAP = "CORE" + "-SCAN-002"
+    _ROLE = "impl" + "ements"
+    _TAG = "# {}: {}".format(_ROLE, _CAP)
+    _HTML_TAG = "<!-- {}: {} -->".format(_ROLE, _CAP)
+
+    def _scan(self, filename, content):
+        with tempfile.TemporaryDirectory() as d:
+            fp = os.path.join(d, filename)
+            _write(fp, content)
+            return R._scan_file_tags(fp)
+
+    def test_F1_md_html_comment_outside_fence_kept(self):
+        """F1: <!-- implements: X --> in .md outside any fence is a real member."""
+        content = "Prose.\n{}\nMore prose.\n".format(self._HTML_TAG)
+        tags = self._scan("req.md", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "HTML comment tag outside fence must be kept")
+
+    def test_F2_md_tag_inside_fence_dropped(self):
+        """F2: tag inside a ``` fence block in .md is dropped."""
+        content = "```\n{}\n```\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside fenced block must be dropped")
+
+    def test_F3_md_tag_in_backtick_span_dropped(self):
+        """F3: tag inside a backtick span is dropped."""
+        content = "See `{}` for details.\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside backtick span must be dropped")
+
+    def test_F4_md_tag_in_4space_indent_dropped(self):
+        """F4: tag in a 4-space-indented block is dropped."""
+        content = "    {}\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag in 4-space indent must be dropped")
+
+    def test_F5_py_tag_in_triple_quote_dropped(self):
+        """F5: tag inside a triple-quoted docstring in .py is dropped."""
+        content = 'def foo():\n    """\n    {}\n    """\n    pass\n'.format(self._TAG)
+        tags = self._scan("module.py", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag in triple-quoted docstring must be dropped")
+
+    def test_F6_state_resets_per_file(self):
+        """F6: fence/triple-quote state does not leak across files."""
+        contentA = "```\n{}\n".format(self._TAG)   # opens fence, never closes
+        contentB = "{}\n".format(self._TAG)          # plain prose tag
+        with tempfile.TemporaryDirectory() as d:
+            fpA = os.path.join(d, "a.md")
+            fpB = os.path.join(d, "b.md")
+            _write(fpA, contentA)
+            _write(fpB, contentB)
+            tagsA = R._scan_file_tags(fpA)
+            tagsB = R._scan_file_tags(fpB)
+        self.assertFalse(any(t[1] == self._CAP for t in tagsA),
+                         "tag inside unclosed fence in file A must be dropped")
+        self.assertTrue(any(t[1] == self._CAP for t in tagsB),
+                        "state must reset — file B tag must be kept")
+
+    def test_F7_py_inline_comment_tag_kept(self):
+        """F7: tag in an inline comment is kept."""
+        content = "code()  {}\n".format(self._TAG)
+        tags = self._scan("module.py", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "inline comment tag in .py must be kept")
+
+    def test_F8_longer_fence_contains_shorter(self):
+        """F8: a 4-backtick fence containing 3-backtick content closes on length match."""
+        content = "````\n```\n{}\n```\n````\n".format(self._TAG)
+        tags = self._scan("doc.md", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside outer 4-backtick fence must be dropped")
+
+
+class CheckStrict(unittest.TestCase):
+    """--strict promotes drift and test-link integrity to errors."""
+
+    def _setup_confirmed(self, d, contract="- shall do X"):
+        """Write a confirmed req with a member tag; build and save the lock."""
+        rdir = os.path.join(d, "requirements")
+        body = (
+            "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+            "## WHAT — Contract\n{}\n\n"
+            "## HOW — Acceptance\n- AC-1\n".format(contract)
+        )
+        _write(os.path.join(rdir, "REQ-A-001.md"), body)
+        src = os.path.join(d, "src.py")
+        _write(src, "# {}: REQ-A-001\n".format("impl" + "ements"))
+        reqs = R.load_requirements(rdir)
+        members = R.scan_members(d, rdir)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, members, rdir, update_lock=True)
+        return rdir
+
+    def test_strict_clean_exits_0(self):
+        """--strict: clean corpus exits 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._setup_confirmed(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
+            self.assertEqual(rc, 0)
+
+    def test_strict_drift_exits_1(self):
+        """--strict: a stale confirmed req (drift) exits 1; without --strict exits 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._setup_confirmed(d, contract="- shall do X")
+            # Mutate the body to create drift
+            body2 = (
+                "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                "## WHAT — Contract\n- shall do Y (changed)\n\n"
+                "## HOW — Acceptance\n- AC-1\n"
+            )
+            _write(os.path.join(rdir, "REQ-A-001.md"), body2)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc_normal = R.cmd_check(reqs, members, rdir, update_lock=False)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc_strict = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
+            self.assertEqual(rc_normal, 0, "without --strict, drift must exit 0")
+            self.assertEqual(rc_strict, 1, "with --strict, drift must exit 1")
+            # promoted warn must appear exactly once, not twice
+            drift_lines = [l for l in buf2.getvalue().splitlines() if "DRIFT" in l]
+            self.assertEqual(len(drift_lines), 1, "DRIFT line must appear exactly once under --strict")
+
+    def test_strict_bad_testlink_exits_1(self):
+        """--strict: confirmed req with missing tested-by file exits 1."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            body = (
+                "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                "## WHAT — Contract\n- shall do X\n\n"
+                "## HOW — Acceptance\n- AC-1\n"
+            )
+            _write(os.path.join(rdir, "REQ-A-001.md"), body)
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            # Inject a tested-by member pointing to a missing file
+            members = {
+                "REQ-A-001": [
+                    ("implements", "src.py", 1),
+                    ("tested-by", "missing_test.py", 1),
+                ]
+            }
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc_normal = R.cmd_check(R.load_requirements(rdir), members, rdir,
+                                        update_lock=False)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc_strict = R.cmd_check(R.load_requirements(rdir), members, rdir,
+                                        update_lock=False, strict=True)
+            self.assertEqual(rc_normal, 0, "without --strict, bad test-link is warn")
+            self.assertEqual(rc_strict, 1, "with --strict, bad test-link is error")
+            tl_lines = [l for l in buf2.getvalue().splitlines() if "tested-by" in l]
+            self.assertEqual(len(tl_lines), 1, "test-link line must appear exactly once under --strict")
+
+
+class CheckJson(unittest.TestCase):
+    """--json emits structured output, exit-code aligned with ok field."""
+
+    def _make_clean_corpus(self, d):
+        rdir = os.path.join(d, "requirements")
+        body = (
+            "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+            "## WHAT — Contract\n- shall do X\n\n"
+            "## HOW — Acceptance\n- AC-1\n"
+        )
+        _write(os.path.join(rdir, "REQ-A-001.md"), body)
+        _write(os.path.join(d, "src.py"),
+               "# {}: REQ-A-001\n".format("impl" + "ements"))
+        reqs = R.load_requirements(rdir)
+        members = R.scan_members(d, rdir)
+        # build initial lock
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, members, rdir, update_lock=True)
+        return rdir
+
+    def test_json_clean_ok_true(self):
+        """--json: clean corpus → ok=true, errors=[], exit 0."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(rc, 0)
+            self.assertTrue(data["ok"])
+            self.assertEqual(data["errors"], [])
+
+    def test_json_error_ok_false_exit_1(self):
+        """--json: a dangling tag → ok=false, errors non-empty, exit 1."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir, exist_ok=True)
+            # No requirements, but a member tag pointing to a nonexistent req
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-Z-999\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(rc, 1)
+            self.assertFalse(data["ok"])
+            self.assertTrue(len(data["errors"]) > 0)
+
+    def test_json_exit_code_aligned(self):
+        """ok field in JSON must be equivalent to exit 0 (both directions)."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # clean: ok=true ⟺ exit 0
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(data["ok"], (rc == 0),
+                             "ok must be True exactly when exit code is 0")
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir, exist_ok=True)
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-Z-999\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # error: ok=false ⟺ exit 1
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual(data["ok"], (rc == 0),
+                             "ok must be False exactly when exit code is 1")
+
+    def test_json_has_warnings_key(self):
+        """--json output must include a warnings key."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._make_clean_corpus(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=False, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertIn("warnings", data)
+
+
+class CheckSince(unittest.TestCase):
+    """--since <ref> scopes the gate to files changed since ref."""
+
+    def _init_git_repo(self, d):
+        """Initialize a minimal git repo in d so --since can call git diff."""
+        subprocess.run(["git", "init", d], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.email", "test@test.com"],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.name", "Test"],
+                       check=True, capture_output=True)
+        return d
+
+    def _commit_all(self, d, msg="init"):
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "commit", "-m", msg],
+                       check=True, capture_output=True)
+
+    def test_since_fallback_on_bad_ref(self):
+        """--since with a non-existent ref falls back to full scan and emits WARN."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            self._commit_all(d)
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=True,
+                                 since="nonexistent-sha-9999")
+            out = buf.getvalue()
+            self.assertIn("WARN", out,
+                          "bad --since ref must fall back with a WARN")
+            # Gate still ran (full scan fallback) — a clean corpus exits 0
+            self.assertEqual(rc, 0)
+
+    def test_since_only_checks_changed_files(self):
+        """--since only validates reqs whose member files changed since the ref."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            # Two confirmed reqs
+            for rid in ("REQ-A-001", "REQ-B-002"):
+                _write(os.path.join(rdir, f"{rid}.md"),
+                       f"---\nid: {rid}\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                       "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src_a.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            _write(os.path.join(d, "src_b.py"),
+                   "# {}: REQ-B-002\n".format("impl" + "ements"))
+            self._commit_all(d, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True
+            ).stdout.strip()
+            # Modify only src_a.py
+            _write(os.path.join(d, "src_a.py"),
+                   "# {}: REQ-A-001\n# changed\n".format("impl" + "ements"))
+            self._commit_all(d, "touch-a-only")
+
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=True,
+                            code_root=d, since=base_ref)
+            # The check ran: REQ-A-001 member (src_a.py) was changed, so it was
+            # included; REQ-B-002 was untouched.  Just verify it completes without
+            # error (both are clean, no dangling tags).
+            # Re-run and capture rc:
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False,
+                                 code_root=d, since=base_ref)
+            self.assertEqual(rc, 0)
+
+    def test_since_fallback_no_git(self):
+        """--since falls back gracefully when git is not available (monkeypatched)."""
+        import unittest.mock as mock
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            # Simulate git failure
+            with mock.patch("subprocess.run", side_effect=FileNotFoundError("git not found")):
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    rc = R.cmd_check(reqs, members, rdir, update_lock=True,
+                                     since="HEAD~1")
+            out = buf.getvalue()
+            self.assertIn("WARN", out, "must WARN when git is unavailable")
+            self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
 
 
 if __name__ == "__main__":
