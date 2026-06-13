@@ -21,6 +21,9 @@ python scripts/reqmap.py health             # corpus coherence score + component
 python scripts/reqmap.py extract            # draft requirements from untagged legacy code
 python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
 python scripts/reqmap.py findings           # aggregate open verify-intent items
+python scripts/reqmap.py promote AREA-NAME-NNN  # promote a draft/baseline requirement to confirmed (requires an implements: member)
+python scripts/reqmap.py promote-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
+python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
 ```
 
 Run tests (stdlib unittest, no install needed):

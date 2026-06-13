@@ -247,8 +247,8 @@ expected and acceptable.
 ## Statuses
 
 - `draft`     — auto-extracted from code, unreviewed. Not enforced.
-- `baseline`  — descriptive: "this is what the code does now". The gate only
-  alerts on *change* (characterization), it does not claim correctness.
+- `baseline`  — descriptive: "this is what the code does now". Not enforced
+  by the gate — only `confirmed` requirements trigger drift alerts.
 - `in-progress` / `implemented` — being built / built.
 - `confirmed` — intent validated by a human. The gate enforces it as truth.
 - `deprecated` / `superseded-by: <ID>`
