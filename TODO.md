@@ -31,3 +31,14 @@
 - [x] Frontmatter '#' scalar truncation fix | lane: bus
 - [x] Off-status drift blind spot fix | lane: bus
 - [x] check --since <ref> (git-scoped gate, full-scan fallback + WARN) | lane: feature
+
+## v1.17
+<!-- Gap found 2026-06-13 while updating the Consilium architecture explainer.
+     A whole-system generated doc (docs/architecture.html, built from many .jsx
+     sources that each cover several requirements) has no single
+     `generated-from: <ID>`, so doc-sync skips it entirely. Its Conservator-first
+     voice order drifted for days after the requirements + code moved to
+     Generator-first, and reqmap never flagged it — Consilium had to work around
+     it with a bespoke check_doc_drift gate. reqmap should catch this class. -->
+- [ ] `generated-from:` accepting >1 requirement ID — drift a system/explainer doc when ANY referenced requirement changes | lane: feature
+- [ ] WARN when a large docs/ HTML/generated bundle carries no `generated-from:` tag at all (surface the doc-sync blind spot instead of silently ignoring it) | lane: ops
