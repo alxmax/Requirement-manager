@@ -79,32 +79,65 @@ be a reasonable initial straight line — the builder computes border-to-border
 points so it already looks right before any interaction.
 
 `focus` (−1..1) shifts where the arrow meets the shape; `gap` is the pixel gap.
-The builder uses `focus:0, gap:6`.
+The builder uses `focus:0` and an auto-clamped `gap` (≤14px, shrunk when the two
+shapes are close so the endpoints never cross).
 
 ## 4. Full builder API
 
 ```python
-Scene(hand_drawn=True, background="#ffffff")
+Scene(hand_drawn=True, background="#ffffff", seed=None)
 ```
+`seed=<int>` makes every id, seed, nonce and timestamp deterministic, so the same
+scene re-saves to a byte-identical file (use it when the diagram is committed).
 
 ### Shapes with a centered label — return a node id
 ```python
 s.box(text, x, y, w=160, h=70, *,
       fill=None, stroke=None, shape="rectangle",
-      font_size=16, font_color=None, group=None)
+      font_size=16, font_color=None, group=None, container=False)
 s.ellipse(text, x, y, w=170, h=110, **kw)   # shape="ellipse"
 s.diamond(text, x, y, w=160, h=90,  **kw)   # shape="diamond"
 ```
 - `fill` / `stroke` / `font_color`: hex (`"#a5d8ff"`) or palette name.
 - `text` may contain `\n`; the box does not auto-grow, so size `w/h` for it.
-- Returns the **container id** — pass it to `arrow()`.
+- `container=True` exempts the shape from the overlap check — use it for an
+  ellipse/box that wraps other shapes (e.g. an "agent" ellipse around inner
+  boxes).
+- Returns the **node id** — pass it to `arrow()`.
 
 ### Container frame — return a node id
 ```python
 s.frame(x, y, w, h, *, fill=None, stroke=None, dashed=False, group=None)
 ```
-Drawn behind everything added so far. Place child boxes on top at coordinates
-inside it.
+Drawn behind everything added so far; always exempt from the overlap check.
+Place child boxes on top at coordinates inside it.
+
+### Auto-layout — place groups without coordinate math
+```python
+s.row(items, x, y, *, w=160, h=70, gap=40, fill=None,
+      font_size=16, shape="rectangle", connect=False)   # -> [ids] left→right
+s.column(items, x, y, *, w=160, h=70, gap=30, ...)       # -> [ids] top→down
+s.grid(items, x, y, cols, *, w=160, h=70,
+       gap_x=40, gap_y=30, ...)                          # -> [ids] cols-wide grid
+s.enclose(ids, *, pad=24, dashed=True, fill=None,
+          stroke=None, label=None)                       # -> frame id around ids
+```
+- `items`: each entry is `"text"`, `(text, fill)`, or a dict of `box()` options
+  (`text`, `fill`, `stroke`, `shape`, `font_size`, `w`, `h`, `container`).
+- `connect=True` (row/column) chains consecutive nodes with arrows.
+- `grid` uses a uniform cell size so rows/columns align (per-item `w/h` ignored).
+- `enclose` measures the bounding box of `ids`, pads it, and draws a `frame()`
+  behind them; call it *after* placing the nodes. Optional centered caption.
+
+### Layout sanity
+```python
+s.check_overlaps(min_px=1.0)            # -> [(label_a, label_b), ...] overlapping nodes
+s.check_arrow_crossings(threshold=12)   # -> [(src, dst, crossed), ...] arrows over a box
+s.bounds()                              # -> (min_x, min_y, max_x, max_y) over all shapes
+```
+`check_overlaps` and `check_arrow_crossings` both ignore containers. `save()`
+calls both — overlaps raise, crossings print a warning. `bounds` is handy for
+stacking several diagrams in one scene (start the next region below `max_y`).
 
 ### Free-standing text
 ```python
@@ -124,8 +157,10 @@ bound arrow (useful for a loop-back). `p0/p1` are `(x, y)` tuples.
 
 ### Save
 ```python
-s.save(basename, out_dir=".")  # -> (path.excalidraw, path.html)
+s.save(basename, out_dir=".", allow_overlap=False)  # -> (path.excalidraw, path.html)
 ```
+Raises `ValueError` if two non-container nodes overlap (lists the labels). Fix
+the layout, mark a wrapper `container=True`, or pass `allow_overlap=True`.
 
 ### Palette
 `grey, red, orange, yellow, green, teal, blue, indigo, violet, pink`

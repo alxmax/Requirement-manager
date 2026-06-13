@@ -61,8 +61,10 @@ and emits both files in one `.save()` call.
    shapes and arrows, and calls `.save(basename, out_dir)`. See
    `examples/make_consilium.py` for a complete, non-trivial example
    (pipeline + grouped agent frames + feedback loop + a modes section).
-5. **Run it**, then **present both files** (`.excalidraw` first, then `.html`).
-5. If you want to sanity-check the layout before presenting, you can render a
+5. **Run it.** `save()` raises if any shapes overlap — if it does, fix the
+   coordinates and re-run until it passes. Then **present both files**
+   (`.excalidraw` first, then `.html`).
+6. If you want to sanity-check the layout before presenting, you can render a
    quick preview — but the `.excalidraw` itself is the source of truth.
 
 ### Layout rules (apply before writing code)
@@ -70,9 +72,15 @@ and emits both files in one `.save()` call.
 **Parallel groups — the most common source of spaghetti arrows**
 
 When N nodes run simultaneously (e.g. 9 senators, 3 agents, parallel workers):
-- Enclose them ALL in a single `frame()`.
-- Draw **one arrow in** to the frame, **one arrow out**. Never draw arrows
-  between individual nodes inside the group — that creates N×N crossing lines.
+- Place them with `grid()`/`row()` and wrap with `enclose()` — even spacing, an
+  auto-sized frame, zero coordinate math:
+  ```python
+  workers = s.grid([f"agent {i}" for i in range(9)], 900, 120, 3, fill="violet")
+  group   = s.enclose(workers, label="9 parallel sub-agents")
+  ```
+- Draw **one arrow in** to the frame (`s.arrow(dispatch, group)`), **one arrow
+  out** (`s.arrow(group, merge)`). Never draw arrows between individual nodes
+  inside the group — that creates N×N crossing lines.
 
 **Column gaps**
 
@@ -107,6 +115,50 @@ Size boxes to fit their text; do not let text overflow:
 
 Run the numbers before placing the box. A 2-line label at font_size 14 needs
 at least h=60; at font_size 13 with a 16-char line needs at least w=135.
+
+**One file, many diagrams**
+
+Always produce ONE `.excalidraw` + ONE `.html` per request — a single `.save()`
+call. If a system genuinely needs several views (e.g. architecture + data flow +
+modes), do NOT emit separate files. Stack the views as labelled regions in the
+*same* scene: open each with a `s.title(...)` and separate them vertically. Use
+`s.bounds()` (returns `(min_x, min_y, max_x, max_y)`) to find where the previous
+region ended, then start the next ~80px below `max_y`.
+
+**Expand, don't cram**
+
+The canvas is unlimited. When a diagram gets dense, spread it out — bigger gaps,
+larger boxes, a fresh region below. Never shrink fonts or overlap shapes to make
+things fit. A large, airy diagram always reads better than a small, tight one.
+
+**Overlap and crossings are caught for you**
+
+`save()` raises a `ValueError` if any two normal shapes overlap, naming the
+offending labels — fix the coordinates until it passes. A shape that is *meant*
+to wrap others (an ellipse drawn around inner boxes, a backing panel behind a
+group) must be created with `container=True` so it is exempt; `frame()` is always
+exempt. As a last resort `save(..., allow_overlap=True)` skips the check, but
+prefer fixing the layout.
+
+`save()` also **prints a warning** when a bound arrow's straight path runs
+through an unrelated box (the automated form of the crossing rule above). It's a
+warning, not an error — reroute with `route_under()` or move the box until it's
+gone.
+
+**Centered captions anchor at the point.** `label(text, x, y)` and
+`title(..., align="center")` treat `x` as the *center* of the text (and
+`align="right"` as the right edge). Pass the coordinate you want the caption
+centered on — e.g. a frame's mid-x — not its left edge.
+
+**Committing the diagram?** Pass `Scene(seed=<int>)` so re-running produces a
+byte-identical file (no git churn from random seeds/timestamps).
+
+**Frame & group captions**
+
+Put a group's caption ≥24px ABOVE the frame's top edge (`y = frame_y - 24`),
+never on the border line. Keep free-floating explanatory `label()` text ≥16px
+clear of every shape and arrowhead — text under an arrowhead or on a box edge is
+the other common overlap.
 
 ### Minimal example
 
@@ -143,25 +195,40 @@ essentials:
 
 | Call | Draws |
 | --- | --- |
-| `Scene(font="normal", sketch=False, background="#ffffff")` | the canvas |
-| `s.box(text, x, y, w=160, h=70, fill=…, shape=…, font_size=…)` | a labelled rectangle (→ node id) |
-| `s.ellipse(text, x, y, w, h, …)` | a labelled ellipse |
+| `Scene(font="normal", sketch=False, background="#ffffff", seed=None)` | the canvas (`seed=<int>` → byte-stable file for git) |
+| `s.box(text, x, y, w=160, h=70, fill=…, shape=…, font_size=…, container=…)` | a labelled rectangle (→ node id) |
+| `s.ellipse(text, x, y, w, h, …, container=…)` | a labelled ellipse |
 | `s.diamond(text, x, y, w, h, …)` | a labelled decision diamond |
-| `s.frame(x, y, w, h, dashed=False)` | a container drawn *behind* children |
+| `s.frame(x, y, w, h, dashed=False)` | a container drawn *behind* children (overlap-exempt) |
+| `s.row(items, x, y, gap=…, connect=…)` | place items left→right → list of ids (`connect=True` chains arrows) |
+| `s.column(items, x, y, gap=…, connect=…)` | place items top→down → list of ids |
+| `s.grid(items, x, y, cols, …)` | place items in a `cols`-wide grid → list of ids |
+| `s.enclose(ids, label=…, pad=…)` | auto-sized frame *behind* those nodes → frame id |
 | `s.title(text, x, y, size=28)` | a large free-standing heading |
 | `s.label(text, x, y, size=12)` | a small grey caption (e.g. "ONE AGENT") |
 | `s.arrow(src, dst, label=…, dashed=…, curve=…, start=…, end=…)` | a bound arrow node→node |
 | `s.free_arrow(p0, p1, …)` | an unbound arrow between two points |
-| `s.save(basename, out_dir=".")` | writes `<basename>.excalidraw` + `.html` |
+| `s.route_under(src, dst, drop=…, label=…)` | a connector routed below the row (feedback / backward) |
+| `s.bounds()` | `(min_x, min_y, max_x, max_y)` of all shapes — for stacking regions |
+| `s.check_arrow_crossings()` | `[(src, dst, crossed), …]` arrows running through an unrelated box |
+| `s.save(basename, out_dir=".")` | writes both files; **raises if shapes overlap**, warns on arrow crossings |
 
 **Colours** accept a hex string or a palette name: `grey, red, orange, yellow,
 green, teal, blue, indigo, violet, pink`. Each name maps to Excalidraw's own
 stroke + light-fill pair, so diagrams look native.
 
+**Auto-layout** — prefer `row`/`column`/`grid` over hand-computing coordinates;
+they space evenly (so shapes never overlap) and return the ids in order. Each
+`items` entry is a `"text"` string, a `(text, fill)` pair, or a full dict of
+`box()` options. `enclose(ids, label=…)` then draws a correctly-sized frame
+behind them — no manual frame math.
+
 **Grouping pattern** (an "agent" that holds several voices/boxes): draw a
-`frame()` or `ellipse()` first, place the inner `box()`es on top at coordinates
-inside it, and add a `label()` caption above. `examples/make_consilium.py`
-factors this into an `agent(...)` helper you can copy.
+`frame()` or `ellipse(..., container=True)` first, place the inner `box()`es on
+top at coordinates inside it, and add a `label()` caption above. Mark the wrapper
+`container=True` (frames are automatic) so the overlap check ignores
+wrapper-vs-child. `examples/make_consilium.py` factors this into an `agent(...)`
+helper you can copy.
 
 ## Tips for good diagrams
 

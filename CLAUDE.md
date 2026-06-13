@@ -43,9 +43,14 @@ The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any 
 
 ## Architecture
 
-This repo is a Claude Code plugin. The plugin exposes one skill (`requirement-manager`) that seeds `reqmap.py` into target repos. The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
+This repo is a Claude Code plugin that ships **three skills** under `plugin/skills/`:
+- `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` is the authoritative contract.
+- `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: REQ-REVIEW-022`).
+- `excalidraw-diagram` — generates Excalidraw scenes + a self-contained HTML viewer from a system description. Fully independent of `reqmap.py`: its own stdlib-only builder at `skills/excalidraw-diagram/scripts/excalidraw_builder.py` (smoke test + auto-layout/overlap self-checks via `python excalidraw_builder.py`).
 
-**Single engine file:** `plugin/scripts/reqmap.py` — ~1000 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
+
+**Single engine file:** `plugin/scripts/reqmap.py` — ~3100 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
@@ -81,7 +86,11 @@ cd app && npm run build:viewer   # rewrites plugin/scripts/_map_viewer.html
 
 ## Plugin packaging
 
-`plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root). Version is tracked in `plugin.json` and as `MAP_ENGINE_VERSION` (ISO date `YYYY-MM-DD`, with an optional `.N` same-day revision suffix, e.g. `2026-06-03.2`) inside `reqmap.py` — bump both on engine changes so seeded repos can detect they are behind.
+`plugin/.claude-plugin/plugin.json` is the manifest. The plugin is published to a marketplace manifest at `.claude-plugin/marketplace.json` (repo root).
+
+**Two independent version numbers — don't conflate them:**
+- **Plugin semver** lives in *three* places kept in lockstep by `check_versions.py`: `version` in `plugin.json`, plus the top-level `version` and `plugins[].version` in `marketplace.json`. **Any** shipped change — engine *or* a skill edit — must bump this semver, or installed copies won't pick it up via `/plugin update` (a skill edit with no bump is silently invisible to consumers).
+- **`MAP_ENGINE_VERSION`** inside `reqmap.py` (ISO date `YYYY-MM-DD`, optional `.N` same-day suffix, e.g. `2026-06-03.2`) is engine-only — it lets a seeded copy of `reqmap.py` detect it is behind. Bump it only on engine changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 

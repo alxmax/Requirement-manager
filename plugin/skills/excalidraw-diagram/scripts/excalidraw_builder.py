@@ -70,14 +70,6 @@ _FONT_HAND = 1
 _FONT_NORMAL = 2
 
 
-def _rand():
-    return random.randint(1, 2_000_000_000)
-
-
-def _now():
-    return int(time.time() * 1000)
-
-
 def _hex(color, table, default):
     if color is None:
         return default
@@ -92,12 +84,15 @@ class Scene:
     """A drawing surface that accumulates elements and serialises them."""
 
     def __init__(self, hand_drawn=None, font="normal", sketch=False,
-                 background="#ffffff"):
+                 background="#ffffff", seed=None):
         """A drawing surface.
 
         font  : "normal" (Helvetica), "hand" (Excalifont), or "code".
         sketch: True = rough/hand-drawn shape outlines, False = clean lines.
         hand_drawn: back-compat alias — True sets font="hand", sketch=True.
+        seed: pass an int for byte-stable output (the same scene re-saves to an
+              identical file — useful when the diagram is committed to git).
+              Default None uses time + randomness, so every run differs.
         """
         if hand_drawn is not None:
             font = "hand" if hand_drawn else "normal"
@@ -110,11 +105,25 @@ class Scene:
         self._n = 0
         # registry of geometry so arrows can compute endpoints
         self._geom = {}  # id -> (x, y, w, h, shape)
+        # overlap bookkeeping: normal nodes are collision-checked at save()
+        self._nodes = []          # [(id, x, y, w, h, label)] to check
+        self._containers = set()  # frames + container=True shapes (exempt)
+        # randomness source — fixed when a seed is given (reproducible files)
+        self._rng = random.Random(seed) if seed is not None else random
+        self._fixed_time = 1_700_000_000_000 if seed is not None else None
 
-    # -- id helpers --------------------------------------------------------
+    # -- id / randomness helpers -------------------------------------------
+    def _rand(self):
+        return self._rng.randint(1, 2_000_000_000)
+
+    def _now(self):
+        if self._fixed_time is not None:
+            return self._fixed_time
+        return int(time.time() * 1000)
+
     def _new_id(self, prefix):
         self._n += 1
-        return f"{prefix}-{self._n}-{_rand():08x}"
+        return f"{prefix}-{self._n}-{self._rand():08x}"
 
     # -- base element ------------------------------------------------------
     def _base(self, eid, etype, x, y, w, h, stroke, fill, *,
@@ -137,12 +146,12 @@ class Scene:
             "groupIds": groups,
             "frameId": None,
             "roundness": roundness,
-            "seed": _rand(),
+            "seed": self._rand(),
             "version": 1,
-            "versionNonce": _rand(),
+            "versionNonce": self._rand(),
             "isDeleted": False,
             "boundElements": [],
-            "updated": _now(),
+            "updated": self._now(),
             "link": None,
             "locked": False,
         }
@@ -179,10 +188,16 @@ class Scene:
     #  SHAPES WITH A CENTERED LABEL
     # ====================================================================
     def box(self, text, x, y, w=160, h=70, *, fill=None, stroke=None,
-            shape="rectangle", font_size=16, font_color=None, group=None):
+            shape="rectangle", font_size=16, font_color=None, group=None,
+            container=False):
         """A rectangle / ellipse / diamond carrying centered bound text.
 
-        Returns the container node id (use it in .arrow()).
+        Returns the node id (use it in .arrow()).
+
+        container=True marks this shape as a visual wrapper meant to hold other
+        shapes (e.g. an ellipse drawn around inner boxes, or a backing panel).
+        Containers are exempt from the save-time overlap check; frames always
+        are.
         """
         sc = _hex(stroke, _STROKE, _STROKE["black"])
         bg = _hex(fill, _FILL, "transparent")
@@ -205,6 +220,11 @@ class Scene:
             self.elements.append(cont)
 
         self._geom[cid] = (x, y, w, h, shape)
+        if container:
+            self._containers.add(cid)
+        else:
+            self._nodes.append((cid, x, y, w, h,
+                                (text or "").split("\n")[0] or shape))
         return cid
 
     def ellipse(self, text, x, y, w=170, h=110, **kw):
@@ -230,6 +250,94 @@ class Scene:
                         roundness={"type": 3}, group=group)
         self.elements.insert(0, el)          # behind everything so far
         self._geom[fid] = (x, y, w, h, "rectangle")
+        self._containers.add(fid)            # frames hold children — never flag
+        return fid
+
+    # ====================================================================
+    #  AUTO-LAYOUT  (place several nodes without hand-computing coordinates)
+    # ====================================================================
+    @staticmethod
+    def _norm(items):
+        """Normalise row/grid items to dicts. An item may be a plain string
+        (text), a (text, fill) pair, or a full dict of box() options."""
+        out = []
+        for it in items:
+            if isinstance(it, dict):
+                out.append(dict(it))
+            elif isinstance(it, (tuple, list)):
+                d = {"text": it[0]}
+                if len(it) > 1:
+                    d["fill"] = it[1]
+                out.append(d)
+            else:
+                out.append({"text": str(it)})
+        return out
+
+    def _place(self, it, x, y, w, h, fill, font_size, shape):
+        return self.box(it.get("text", ""), x, y,
+                        it.get("w", w), it.get("h", h),
+                        fill=it.get("fill", fill), stroke=it.get("stroke"),
+                        shape=it.get("shape", shape),
+                        font_size=it.get("font_size", font_size),
+                        container=it.get("container", False))
+
+    def row(self, items, x, y, *, w=160, h=70, gap=40, fill=None,
+            font_size=16, shape="rectangle", connect=False):
+        """Place items left→right starting at (x, y); return their ids.
+        connect=True chains them with arrows (a quick pipeline)."""
+        ids, cx = [], x
+        for it in self._norm(items):
+            ids.append(self._place(it, cx, y, w, h, fill, font_size, shape))
+            cx += it.get("w", w) + gap
+        if connect:
+            for a, b in zip(ids, ids[1:]):
+                self.arrow(a, b)
+        return ids
+
+    def column(self, items, x, y, *, w=160, h=70, gap=30, fill=None,
+               font_size=16, shape="rectangle", connect=False):
+        """Place items top→down starting at (x, y); return their ids."""
+        ids, cy = [], y
+        for it in self._norm(items):
+            ids.append(self._place(it, x, cy, w, h, fill, font_size, shape))
+            cy += it.get("h", h) + gap
+        if connect:
+            for a, b in zip(ids, ids[1:]):
+                self.arrow(a, b)
+        return ids
+
+    def grid(self, items, x, y, cols, *, w=160, h=70, gap_x=40, gap_y=30,
+             fill=None, font_size=16, shape="rectangle"):
+        """Place items in a `cols`-wide grid (row-major); return their ids.
+        Cell size is uniform so columns and rows stay aligned."""
+        ids = []
+        for i, it in enumerate(self._norm(items)):
+            r, c = divmod(i, cols)
+            ids.append(self.box(it.get("text", ""),
+                                x + c * (w + gap_x), y + r * (h + gap_y), w, h,
+                                fill=it.get("fill", fill),
+                                stroke=it.get("stroke"),
+                                shape=it.get("shape", shape),
+                                font_size=it.get("font_size", font_size)))
+        return ids
+
+    def enclose(self, ids, *, pad=24, dashed=True, fill=None, stroke=None,
+                label=None, label_size=13, label_color="grey"):
+        """Draw a frame auto-sized around the given node ids (call it AFTER
+        placing them, so it sits behind). Optional centered caption above.
+        Returns the frame id."""
+        if not ids:
+            raise ValueError("enclose() needs at least one node id")
+        x0 = min(self._geom[i][0] for i in ids)
+        y0 = min(self._geom[i][1] for i in ids)
+        x1 = max(self._geom[i][0] + self._geom[i][2] for i in ids)
+        y1 = max(self._geom[i][1] + self._geom[i][3] for i in ids)
+        fx, fy = x0 - pad, y0 - pad
+        fw, fh = (x1 - x0) + 2 * pad, (y1 - y0) + 2 * pad
+        fid = self.frame(fx, fy, fw, fh, fill=fill, stroke=stroke, dashed=dashed)
+        if label:
+            self.label(label, fx + fw / 2, fy - 22, size=label_size,
+                       color=label_color, align="center")
         return fid
 
     # ====================================================================
@@ -239,6 +347,13 @@ class Scene:
               group=None):
         c = _hex(color, _STROKE, _STROKE["black"])
         tw, th = self._text_wh(text, size)
+        # Anchor semantics: for centered/right text the caller passes the
+        # center/right point, so shift the element's left edge — Excalidraw only
+        # aligns text *within* the element's own (tight) width, not around x.
+        if align == "center":
+            x = x - tw / 2
+        elif align == "right":
+            x = x - tw
         el = self._text_el(text, x, y, tw, th, size=size, color=c,
                            align=align, valign="top", group=group)
         self.elements.append(el)
@@ -265,7 +380,11 @@ class Scene:
             # parametric: scale the direction onto the ellipse boundary
             ang = math.atan2(dy, dx)
             return cx + (w / 2) * math.cos(ang), cy + (h / 2) * math.sin(ang)
-        # rectangle / diamond -> clip to the box border
+        if shape == "diamond":
+            # rhombus boundary: |X|/(w/2) + |Y|/(h/2) = 1 — meet the slanted edge
+            t = 1.0 / (2 * abs(dx) / w + 2 * abs(dy) / h)
+            return cx + dx * t, cy + dy * t
+        # rectangle -> clip to the box border
         scale = 0.5 / max(abs(dx) / w, abs(dy) / h)
         return cx + dx * scale, cy + dy * scale
 
@@ -396,6 +515,108 @@ class Scene:
                          group=group)
 
     # ====================================================================
+    #  LAYOUT SANITY
+    # ====================================================================
+    def check_overlaps(self, min_px=1.0):
+        """Return [(label_a, label_b), ...] for every pair of non-container
+        nodes whose bounding boxes overlap by more than `min_px` in BOTH axes.
+
+        Containers (frames, and shapes created with container=True) are exempt,
+        because they are meant to sit behind their children."""
+        hits = []
+        nodes = self._nodes
+        for i in range(len(nodes)):
+            _, ax, ay, aw, ah, al = nodes[i]
+            for j in range(i + 1, len(nodes)):
+                _, bx, by, bw, bh, bl = nodes[j]
+                ox = min(ax + aw, bx + bw) - max(ax, bx)
+                oy = min(ay + ah, by + bh) - max(ay, by)
+                if ox > min_px and oy > min_px:
+                    hits.append((al, bl))
+        return hits
+
+    @staticmethod
+    def _seg_rect_overlap(p0, p1, rect):
+        """Length of the portion of segment p0->p1 that lies inside `rect`
+        (x, y, w, h); 0 if it never enters. Liang–Barsky slab clipping."""
+        x0, y0 = p0
+        x1, y1 = p1
+        rx, ry, rw, rh = rect
+        dx, dy = x1 - x0, y1 - y0
+        t0, t1 = 0.0, 1.0
+        for p, q in ((-dx, x0 - rx), (dx, rx + rw - x0),
+                     (-dy, y0 - ry), (dy, ry + rh - y0)):
+            if p == 0:
+                if q < 0:
+                    return 0.0          # parallel to a slab and outside it
+            else:
+                r = q / p
+                if p < 0:
+                    if r > t1:
+                        return 0.0
+                    if r > t0:
+                        t0 = r
+                else:
+                    if r < t0:
+                        return 0.0
+                    if r < t1:
+                        t1 = r
+        if t1 <= t0:
+            return 0.0
+        return (t1 - t0) * math.hypot(dx, dy)
+
+    def check_arrow_crossings(self, threshold=12.0, inset=4.0):
+        """Return [(src, dst, crossed), ...] where a bound arrow's straight
+        src→dst path runs through an unrelated node by more than `threshold`
+        pixels. Endpoints, containers and unbound arrows are ignored. This is a
+        heuristic readability check — a clean layout returns []."""
+        labels = {nid: lab for (nid, _x, _y, _w, _h, lab) in self._nodes}
+
+        def center(gid):
+            gx, gy, gw, gh, _s = self._geom[gid]
+            return (gx + gw / 2, gy + gh / 2)
+
+        hits = []
+        for el in self.elements:
+            if el.get("type") != "arrow":
+                continue
+            sb, eb = el.get("startBinding"), el.get("endBinding")
+            if not sb or not eb:
+                continue
+            src, dst = sb["elementId"], eb["elementId"]
+            if src not in self._geom or dst not in self._geom:
+                continue
+            p0, p1 = center(src), center(dst)
+            # if an endpoint is a container, stop at its border so the segment
+            # does not traverse the container's own children
+            if src in self._containers:
+                p0 = self._border_point(src, p1)
+            if dst in self._containers:
+                p1 = self._border_point(dst, p0)
+            for nid, (nx, ny, nw, nh, _s) in self._geom.items():
+                if nid in (src, dst) or nid in self._containers:
+                    continue
+                rw, rh = nw - 2 * inset, nh - 2 * inset
+                if rw <= 0 or rh <= 0:
+                    continue
+                if self._seg_rect_overlap(
+                        p0, p1, (nx + inset, ny + inset, rw, rh)) > threshold:
+                    hits.append((labels.get(src, "?"), labels.get(dst, "?"),
+                                 labels.get(nid, "?")))
+        return hits
+
+    def bounds(self):
+        """(min_x, min_y, max_x, max_y) over every shape. Use it to stack
+        several diagrams in one scene: start the next region below max_y."""
+        if not self._geom:
+            return (0, 0, 0, 0)
+        x0 = min(g[0] for g in self._geom.values())
+        y0 = min(g[1] for g in self._geom.values())
+        x1 = max(g[0] + g[2] for g in self._geom.values())
+        y1 = max(g[1] + g[3] for g in self._geom.values())
+        return (x0, y0, x1, y1)
+
+    # ====================================================================
     #  SERIALISATION
     # ====================================================================
     def to_dict(self):
@@ -411,7 +632,19 @@ class Scene:
             "files": {},
         }
 
-    def save(self, basename, out_dir="."):
+    def save(self, basename, out_dir=".", allow_overlap=False):
+        hits = self.check_overlaps()
+        if hits and not allow_overlap:
+            pairs = "; ".join(f"'{a}' overlaps '{b}'" for a, b in hits)
+            raise ValueError(
+                f"{len(hits)} overlapping shape(s): {pairs}. "
+                "Move the coordinates apart, wrap a grouping shape with "
+                "container=True, or pass allow_overlap=True if intentional.")
+        crossings = self.check_arrow_crossings()
+        if crossings:
+            seen = sorted({f"{a}->{b} crosses '{c}'" for a, b, c in crossings})
+            print("WARNING: arrow(s) may run through an unrelated box — "
+                  "reroute or move the box: " + "; ".join(seen))
         os.makedirs(out_dir, exist_ok=True)
         scene = self.to_dict()
         p_json = os.path.join(out_dir, basename + ".excalidraw")
@@ -517,11 +750,21 @@ window.addEventListener("load", function(){
 
 
 if __name__ == "__main__":
-    # tiny smoke test
-    s = Scene()
-    a = s.box("A", 80, 80, fill="blue")
-    b = s.box("B", 80, 240, fill="green")
-    s.arrow(a, b, label="next")
-    s.title("demo", 80, 20, size=24)
-    pj, ph = s.save("smoke", out_dir="/tmp/excd")
+    # smoke test — also exercises the auto-layout helpers and sanity checks
+    import tempfile
+    out = os.path.join(tempfile.gettempdir(), "excd")
+    s = Scene(seed=1)
+    s.title("demo", 0, -40, size=24)
+    stages = s.row(["ingest", "process", "store"], 0, 0, fill="blue",
+                   connect=True)
+    workers = s.grid([f"n{i}" for i in range(9)], 0, 150, 3,
+                     w=120, h=60, fill="violet")
+    s.enclose(workers, label="parallel workers")
+    done = s.box("done", 620, 0, fill="green")
+    s.arrow(stages[-1], done)
+    assert not s.check_overlaps(), s.check_overlaps()
+    assert not s.check_arrow_crossings(), s.check_arrow_crossings()
+    pj, ph = s.save("smoke", out_dir=out)
     print("wrote", pj, ph)
+    print("overlaps:", s.check_overlaps(),
+          "crossings:", s.check_arrow_crossings())
