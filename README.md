@@ -164,10 +164,13 @@ The action just runs `reqmap.py check`. Inputs `reqmap-path` and
 plugin/                                the plugin — self-contained
   .claude-plugin/plugin.json           plugin manifest
   skills/requirement-manager/SKILL.md  the full contract & authoring rules
-  scripts/reqmap.py                    the engine (Python stdlib only, ~1900 lines)
+  skills/requirement-quality-review/   on-demand AI review of requirement quality (advisory)
+  skills/excalidraw-diagram/           generate Excalidraw architecture / flow diagrams
+  scripts/reqmap.py                    the engine (Python stdlib only, ~3200 lines)
   requirements/*.md                    the source of truth (one file per capability)
   requirements/_reqlock.json           the drift baseline (committed)
 app/                                   the React viewer (built into the single-file _map.html)
+docs/                                  guides + Excalidraw diagrams (open plugin_architecture.html for a visual overview)
 TODO.md                                optional planning file — feeds the Roadmap tab in the viewer
 ```
 

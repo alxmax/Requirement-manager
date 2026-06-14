@@ -47,11 +47,11 @@ The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any 
 This repo is a Claude Code plugin that ships **three skills** under `plugin/skills/`:
 - `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` is the authoritative contract.
 - `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: REQ-REVIEW-022`).
-- `excalidraw-diagram` — generates Excalidraw scenes + a self-contained HTML viewer from a system description. Fully independent of `reqmap.py`: its own stdlib-only builder at `skills/excalidraw-diagram/scripts/excalidraw_builder.py` (smoke test + auto-layout/overlap self-checks via `python excalidraw_builder.py`).
+- `excalidraw-diagram` — generates Excalidraw scenes + a self-contained HTML viewer from a system description. Fully independent of `reqmap.py`: its own stdlib-only builder at `skills/excalidraw-diagram/scripts/excalidraw_builder.py` (smoke test + auto-layout/overlap self-checks via `python excalidraw_builder.py`). Example generators live in `skills/excalidraw-diagram/examples/` — e.g. `make_architecture.py` (the whole-plugin architecture poster) and `make_excalidraw_skill_flow.py`.
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — ~3100 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — ~3200 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
