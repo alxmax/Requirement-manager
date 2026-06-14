@@ -1,5 +1,29 @@
 # Changelog
 
+## plugin `v2.0.0` — 2026-06-15
+
+**Breaking — intent-verb CLI.** Commands renamed to match what the user wants:
+
+| Old | New |
+|---|---|
+| `check` | `gate` (report-only) — **kept as a deprecation alias**, removed next major |
+| `scan` + `check --update-lock` + `map` | `sync` (composite; `--accept-drift` to advance an edited confirmed baseline) |
+| `extract` | `draft` |
+| `promote` | `confirm` |
+| `candidates` | `plan` |
+| `similar` | `dupes` |
+| `promote-todo "x" --id ID` | `new --from-todo "x" --id ID` |
+
+- **No consumer breakage:** `check` still runs (prints a deprecation notice, forwards to the legacy path), so vendored pre-commit hooks, CI, and the `check@v1` Action keep working. Migrate at leisure: `check`→`gate`, the trio→`sync`.
+- **`sync` drift guard:** `sync` refuses to silently re-baseline an edited `confirmed`/`implemented` contract — it prints the changed hashes and exits non-zero unless you pass `--accept-drift`.
+- **`gate` is report-only:** it never touches `_reqlock.json`; use `sync` to advance the baseline.
+- Requirement IDs are unchanged (`REQ-PROMOTE-011`, `REQ-SIMILAR-016` keep their slugs — only the CLI verb + prose changed).
+
+### Migration
+`extract`/`promote`/`candidates`/`similar`/`promote-todo` are removed (no alias) — they do not appear in consumer CI. Update your own scripts: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`. `MAP_ENGINE_VERSION` is `2026-06-15`.
+
+---
+
 ## plugin `v1.35.0` — 2026-06-14
 
 The `site` command — keep a project presentation page in sync with the registry. Highlights:

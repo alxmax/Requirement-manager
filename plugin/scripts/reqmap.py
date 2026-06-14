@@ -82,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-14"
+MAP_ENGINE_VERSION = "2026-06-15"
 
 
 # ---------- parsing ----------
@@ -880,7 +880,7 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     engine runs headless (CI, pre-commit hook), so there is no interactive prompt. With
     mark_done it flips the matched TODO line to [x]; otherwise TODO.md is never touched."""
     if not cap_id:
-        print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+        print('usage: reqmap new --from-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
     key = name.strip().casefold()
     open_todos = [t for t in _parse_todos(root) if not t["done"]]
     matches = [t for t in open_todos if t["name"].strip().casefold() == key]
