@@ -3106,6 +3106,19 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
             self.assertFalse(os.path.isfile(os.path.join(d, "docs", "architecture.html")))
 
+    def test_map_check_flags_stale_stats_region(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d); os.makedirs(os.path.join(d, "docs"))
+            page = os.path.join(d, "docs", "architecture.html")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, reqs, d, attach=page, regions=["stats"])
+            data = R._build_map_data(r, m); data["repo"] = R._repo_name(d)
+            self.assertEqual(R._map_check(data, reqs, d), 0)        # fresh
+            cur = open(page, encoding="utf-8").read()
+            tampered = cur.replace(R._extract_region(cur, "stats"), "TAMPERED")
+            open(page, "w", encoding="utf-8").write(tampered)
+            self.assertEqual(R._map_check(data, reqs, d), 1)        # stale stats -> exit 1
+
     def test_cli_site_detect_runs(self):
         import contextlib
         with tempfile.TemporaryDirectory() as d:

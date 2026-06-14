@@ -2404,6 +2404,17 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
             fresh_html = _inject_viewer(f.read(), data)
         if _strip_generated(open(docs_out, encoding="utf-8").read()) != _strip_generated(fresh_html):
             stale.append(os.path.basename(docs_out))
+    # Site presentation page: gate the deterministic STATS region only. NAV embeds
+    # the git-derived repo URL (fork-specific) and is excluded, mirroring the
+    # `repo`-field exclusion in _strip_generated.  # implements: REQ-SITE-026
+    site_target = _site_default_target(root)
+    if site_target and os.path.exists(site_target):
+        on_disk = open(site_target, encoding="utf-8").read()
+        disk_stats = _extract_region(on_disk, "stats")
+        if disk_stats is not None:
+            ctx = _site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
+            if disk_stats != _render_region("stats", ctx):
+                stale.append(os.path.basename(site_target))
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py map` and commit the result."
               .format(", ".join(stale)))
