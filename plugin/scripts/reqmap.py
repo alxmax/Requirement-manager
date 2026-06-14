@@ -769,8 +769,8 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print("lock updated.")
 
     if as_json:
-        print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
-        return 1 if errors else 0
+        print(json.dumps({"ok": not (errors or lock_blocked), "errors": errors, "warnings": warns}))
+        return 1 if (errors or lock_blocked) else 0
 
     for w in warns:
         print("WARN ", w)
@@ -3658,7 +3658,7 @@ def main():
         return cmd_review(reqs, a.arg)
     if a.cmd == "confirm":
         if not a.arg:
-            print("usage: reqmap promote AREA-NAME-NNN"); return 2
+            print("usage: reqmap confirm AREA-NAME-NNN"); return 2
         return cmd_promote(reqs, members, a.arg)
 
 

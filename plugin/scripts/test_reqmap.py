@@ -3266,6 +3266,22 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertEqual(rc, 0)
             self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # advanced
 
+    def test_json_path_reflects_blocked_lock(self):  # guard the as_json early-return
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d,
+                                 as_json=True, accept_drift=False)
+            self.assertEqual(rc, 1)  # blocked lock surfaces as non-zero even on the json path
+            # the json line is printed last (after the 'lock update:' diff lines)
+            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
