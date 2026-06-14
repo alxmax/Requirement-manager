@@ -3287,6 +3287,74 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     return None
 
 
+def _site_diagram_ok(target_path, diagram_rel):  # implements: REQ-SITE-026
+    """True when `diagram_rel` (relative to the page's directory) names an existing
+    file — so the Diagram link is emitted only when the artifact is actually there."""
+    if not diagram_rel:
+        return False
+    return os.path.isfile(os.path.join(os.path.dirname(target_path) or ".", diagram_rel))
+
+
+def _site_default_target(root):  # implements: REQ-SITE-026
+    """docs/architecture.html at the git root (so running from plugin/ still finds
+    the project-root docs/), or None when there is no docs/. Mirrors
+    _docs_publish_path's git-root resolution."""
+    try:
+        git_root = subprocess.check_output(
+            ["git", "-C", root, "rev-parse", "--show-toplevel"],
+            stderr=subprocess.DEVNULL, timeout=3).decode().strip()
+    except Exception:
+        git_root = root
+    docs = os.path.join(git_root, "docs")
+    return os.path.join(docs, "architecture.html") if os.path.isdir(docs) else None
+
+
+def cmd_site(reqs, members, reqs_dir, root=".", attach=None,
+             regions=None, diagram=None, detect=False):  # implements: REQ-SITE-026
+    """Inject engine-owned regions into a presentation page (attach mode) or write
+    a default page when the target is absent (scaffold mode). Deterministic and
+    headless-safe: never prompts, never raises on missing git/files. `detect`
+    prints findings + the suggested command and writes nothing."""
+    regions = regions or ["nav"]
+    data = _build_map_data(reqs, members)
+    repo_url = _git_remote_web_url(root)
+
+    if detect:
+        cands = [p for p in (_site_default_target(root),) if p and os.path.isfile(p)]
+        print("repo: {}".format(repo_url or "(no remote)"))
+        print("presentation candidates: {}".format(", ".join(cands) or "(none)"))
+        tgt = _site_default_target(root) or os.path.join(root, "docs", "architecture.html")
+        print("suggested: reqmap site --attach {} --regions nav,stats".format(tgt))
+        return 0
+
+    if not attach:
+        print("usage: reqmap site --attach <page.html> [--regions nav,stats] [--diagram <rel>]")
+        print("   or: reqmap site --detect")
+        return 0
+
+    map_ok = os.path.isfile(os.path.join(os.path.dirname(attach) or ".", "map.html"))
+    diagram_rel = diagram if _site_diagram_ok(attach, diagram) else None
+    ctx = _site_context_from_data(data, repo_url=repo_url, map_ok=map_ok, diagram_rel=diagram_rel)
+
+    if os.path.isfile(attach):
+        html = open(attach, encoding="utf-8").read()
+        mode = "refreshed"
+    else:                                   # scaffold mode
+        os.makedirs(os.path.dirname(attach) or ".", exist_ok=True)
+        html = (SITE_TEMPLATE.replace("%%REPO_NAME%%", _repo_name(root) or "this project")
+                             .replace("%%REPO_URL%%", repo_url or "#"))
+        mode = "scaffolded"
+
+    for name in regions:
+        if name in SITE_REGIONS:
+            html = _inject_region(html, name, _render_region(name, ctx))
+
+    with open(attach, "w", encoding="utf-8") as f:
+        f.write(html)
+    print("{} {} (regions: {})".format(mode, attach, ",".join(regions)))
+    return 0
+
+
 def _viewer_template_path():  # implements: REQ-VIEWER-007
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), VIEWER_TEMPLATE)
 

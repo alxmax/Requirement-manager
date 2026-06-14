@@ -3049,6 +3049,47 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertIn(">2<", stats)   # 2 confirmed
         self.assertIn(R.MAP_ENGINE_VERSION, stats)
 
+    def _seed(self, d):
+        """Minimal reqs dir with one confirmed requirement so site can build map data."""
+        reqs = os.path.join(d, "requirements"); os.makedirs(reqs)
+        with open(os.path.join(reqs, "AREA-X-001.md"), "w", encoding="utf-8") as f:
+            f.write("---\nid: AREA-X-001\nstatus: confirmed\nlayer: feature\n---\n# X\n> why\n")
+        return reqs
+
+    def test_attach_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            open(page, "w", encoding="utf-8").write("<body>\n<h1>Mine</h1>\n</body>")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, reqs, d, attach=page, regions=["nav", "stats"])
+            first = open(page, encoding="utf-8").read()
+            R.cmd_site(r, m, reqs, d, attach=page, regions=["nav", "stats"])
+            second = open(page, encoding="utf-8").read()
+            self.assertEqual(first, second)
+            self.assertIn("<h1>Mine</h1>", second)
+
+    def test_no_remote_degrades(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            open(page, "w", encoding="utf-8").write("<body></body>")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            rc = R.cmd_site(r, m, reqs, d, attach=page, regions=["nav"])
+            self.assertEqual(rc, 0)
+            self.assertNotIn("GitHub", open(page, encoding="utf-8").read())
+
+    def test_scaffold_writes_full_page(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            target = os.path.join(d, "docs", "architecture.html")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, reqs, d, attach=target, regions=["nav", "stats"])
+            html = open(target, encoding="utf-8").read()
+            self.assertIn("<!--##REQMAP:NAV##-->", html)
+            self.assertIn("<!--##REQMAP:STATS##-->", html)
+            self.assertIn("<!-- author me -->", html)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
