@@ -3202,6 +3202,15 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
                 self.assertEqual(r.returncode, 2, f"{verb} should be unknown")
                 self.assertIn("invalid choice", r.stderr)
 
+    def test_help_groups_everyday_and_advanced(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run("--help", cwd=d)
+            self.assertEqual(r.returncode, 0)
+            self.assertIn("Everyday", r.stdout)
+            self.assertIn("Advanced", r.stdout)
+            self.assertIn("gate", r.stdout)
+            self.assertIn("sync", r.stdout)
+
     def test_new_from_todo_scaffolds_and_old_verb_gone(self):
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "requirements"), exist_ok=True)

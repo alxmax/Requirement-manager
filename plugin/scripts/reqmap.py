@@ -3504,7 +3504,27 @@ def main():
             _stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError, OSError):
             pass
-    ap = argparse.ArgumentParser(prog="reqmap")
+    ap = argparse.ArgumentParser(
+        prog="reqmap",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Everyday:\n"
+            "  init                 bootstrap a repo (scaffold + draft + lock + map)\n"
+            "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID: from a TODO.md item)\n"
+            "  draft                derive draft requirements from untagged CODE\n"
+            "  confirm ID           validate a reviewed requirement -> status confirmed\n"
+            "  sync                 rescan + regenerate map + advance drift baseline (use --accept-drift on confirmed edits)\n"
+            "  gate                 the commit/CI gate: link sync + drift + test-link (report-only)\n"
+            "  next                 what to do next (counted risk buckets)\n"
+            "  show ID              one-requirement dossier\n"
+            "\nAdvanced:\n"
+            "  plan                 read-only extraction plan (writes nothing)\n"
+            "  dupes                flag requirement pairs with overlapping contracts\n"
+            "  scan / map / export / site / findings / lint / review / health\n"
+            "\nDeprecated:\n"
+            "  check                alias for 'gate' (removed next major)\n"
+        ),
+    )
     ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
