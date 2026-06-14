@@ -14,7 +14,7 @@ if ! "$PY" scripts/check_versions.py; then
   echo "version drift — run 'python scripts/check_versions.py --fix' to sync, then re-stage." >&2
   exit 1
 fi
-if ! "$PY" -X utf8 plugin/scripts/reqmap.py check --root plugin; then
+if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin; then
   echo "" >&2
   echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
   exit 1

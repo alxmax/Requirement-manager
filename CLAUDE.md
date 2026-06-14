@@ -8,22 +8,23 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
-python scripts/reqmap.py check              # gate: link sync + drift + test-link integrity (warn) — run before every commit
+python scripts/reqmap.py gate               # gate: link sync + drift + test-link integrity (warn) — run before every commit; report-only, never touches the lock
+python scripts/reqmap.py sync               # rescan + advance drift baseline + regen map in one step; use --accept-drift when a confirmed/implemented contract changed
 python scripts/reqmap.py map                # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
 python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats   # inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. init runs this best-effort.
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
+python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
 python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
 python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
-python scripts/reqmap.py similar            # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
 python scripts/reqmap.py health             # corpus coherence score + component counts (--json for a CI badge)
-python scripts/reqmap.py extract            # draft requirements from untagged legacy code
-python scripts/reqmap.py candidates         # JSON capability-extraction plan (AI-assist)
+python scripts/reqmap.py draft              # draft requirements from untagged legacy code (input: existing code)
+python scripts/reqmap.py plan               # JSON capability-extraction plan, writes no files (AI-assist; use before draft)
 python scripts/reqmap.py findings           # aggregate open verify-intent items
-python scripts/reqmap.py promote AREA-NAME-NNN  # promote a draft/baseline requirement to confirmed (requires an implements: member)
-python scripts/reqmap.py promote-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
+python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
 python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
 ```
 
@@ -40,7 +41,7 @@ Version coherence gate (run from repo root, not `plugin/`):
 python scripts/check_versions.py       # asserts plugin.json semver == marketplace.json; validates MAP_ENGINE_VERSION shape
 ```
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all four checks: `check_versions.py` → `reqmap.py check` → `reqmap.py map --check` → `test_reqmap.py`.
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all four checks: `check_versions.py` → `reqmap.py gate` → `reqmap.py map --check` → `test_reqmap.py`. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 ## Architecture
 
@@ -51,11 +52,11 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — ~3200 lines, stdlib only, no external dependencies. All logic (parse, scan, check, map, extract, candidates, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — ~3200 lines, stdlib only, no external dependencies. All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
-- `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, check, map, extract, candidates, findings, init, next.
+- `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, gate, sync, map, draft, plan, findings, init, next, confirm.
 - `layer: need` — an upstream stakeholder need (`NEED-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `REQ-TRACE-020`).
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
@@ -67,7 +68,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 ```
 `TAG_RE` in the engine enforces a left-boundary guard so `reimplements:` or `x-implements:` are not picked up as real tags. The member list is discovered by scanning — never hand-maintained.
 
-**Gate logic** (`check`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member) and `depends_on` target existence are **error-level** (exit 1). Drift (content hash vs `_reqlock.json`) and **test-link integrity** are **warn-only** (exit 0). The test-link integrity check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync. Per-criterion coverage (`REQ-ACVERIFY-019`) is the finer-grained sibling: a `# verifies: <id>#AC-N` tag links one test to one labelled criterion, and the gate warns (warn-only, opt-in) for each labelled `AC-N` left untagged once a requirement carries at least one `verifies` tag.
+**Gate logic** (`gate`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member) and `depends_on` target existence are **error-level** (exit 1). Drift (content hash vs `_reqlock.json`) and **test-link integrity** are **warn-only** (exit 0). `gate` is report-only and never touches `_reqlock.json`; use `sync` (with `--accept-drift` for confirmed/implemented contracts) to advance the baseline. The test-link integrity check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync. Per-criterion coverage (`REQ-ACVERIFY-019`) is the finer-grained sibling: a `# verifies: <id>#AC-N` tag links one test to one labelled criterion, and the gate warns (warn-only, opt-in) for each labelled `AC-N` left untagged once a requirement carries at least one `verifies` tag.
 
 **Generated outputs** (under `plugin/requirements/`):
 - `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*

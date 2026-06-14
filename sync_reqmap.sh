@@ -8,9 +8,7 @@
 #   ./sync_reqmap.sh repo1 repo2 ...   # sync cache + multiple consumer repos
 #
 # After syncing a consumer repo, run inside it:
-#   python -X utf8 scripts/reqmap.py scan
-#   python -X utf8 scripts/reqmap.py check --update-lock
-#   python -X utf8 scripts/reqmap.py map
+#   python -X utf8 scripts/reqmap.py sync --accept-drift
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -61,9 +59,7 @@ for REPO in "$@"; do
   cp "$SRC" "$DEST"
   [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$REPO/scripts/_map_viewer.html"
   echo "  → $REPO synced"
-  (cd "$REPO" && python -X utf8 scripts/reqmap.py scan \
-    && python -X utf8 scripts/reqmap.py check --update-lock \
-    && python -X utf8 scripts/reqmap.py map 2>&1 | sed 's/^/     /')
+  (cd "$REPO" && python -X utf8 scripts/reqmap.py sync --accept-drift 2>&1 | sed 's/^/     /')
 done
 
 echo "done."

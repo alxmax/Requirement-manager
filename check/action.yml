@@ -56,7 +56,10 @@ runs:
     - uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
-    - name: reqmap check
+    - name: reqmap gate
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: python -X utf8 "${{ inputs.reqmap-path }}" check
+      # `gate` is the intent-verb name for the report-only check (v2.0.0+).
+      # `check` remains a deprecation alias in the engine, so `@v1` stays valid
+      # for existing consumer repos without any change on their side — no `@v2` needed.
+      run: python -X utf8 "${{ inputs.reqmap-path }}" gate
