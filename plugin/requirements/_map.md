@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-14 18:10
+generated: 2026-06-14 18:14
 nodes: 29
 edges: 40
 ---
@@ -198,8 +198,8 @@ graph LR
   f_scripts_test_reqmap_py_2036["scripts/test_reqmap.py:2036"]
   REQ_SIMILAR_016 -->|tested-by| f_scripts_test_reqmap_py_2036
   REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
-  f_scripts_reqmap_py_2830_3313["scripts/reqmap.py:2830-3313"]
-  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2830_3313
+  f_scripts_reqmap_py_2830_3545["scripts/reqmap.py:2830-3545"]
+  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2830_3545
   f_scripts_test_reqmap_py_3001["scripts/test_reqmap.py:3001"]
   REQ_SITE_026 -->|tested-by| f_scripts_test_reqmap_py_3001
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]

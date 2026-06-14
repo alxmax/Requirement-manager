@@ -3090,6 +3090,21 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             self.assertIn("<!--##REQMAP:STATS##-->", html)
             self.assertIn("<!-- author me -->", html)
 
+    def test_cli_site_detect_runs(self):
+        import contextlib
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            argv = ["reqmap", "site", "--detect", "--root", d]
+            buf = io.StringIO()
+            old = sys.argv; sys.argv = argv
+            try:
+                with contextlib.redirect_stdout(buf):
+                    rc = R.main()
+            finally:
+                sys.argv = old
+            self.assertEqual(rc, 0)
+            self.assertIn("suggested:", buf.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

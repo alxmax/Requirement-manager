@@ -3450,7 +3450,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3487,6 +3487,16 @@ def main():
     ap.add_argument("--cache", action="store_true",
                     help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
                          "files skip re-parsing. Off by default; results are identical with or without it.")
+    ap.add_argument("--attach", default=None,
+                    help="site: target HTML to inject engine-owned regions into (scaffolds it if absent)")
+    ap.add_argument("--regions", default="nav",
+                    help="site: comma list of regions to inject (nav,stats); default nav")
+    ap.add_argument("--diagram", default=None,
+                    help="site: relative path (from the page) to an excalidraw HTML; linked only if it exists")
+    ap.add_argument("--detect", action="store_true",
+                    help="site: print docs/ findings + the suggested command; writes nothing")
+    ap.add_argument("--no-site", dest="no_site", action="store_true",
+                    help="init: skip the final site step")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -3532,6 +3542,10 @@ def main():
         return rc
     if a.cmd == "map":
         return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh)
+    if a.cmd == "site":  # implements: REQ-SITE-026
+        regions = [x.strip() for x in (a.regions or "").split(",") if x.strip()]
+        return cmd_site(reqs, members, reqs_dir, code_root,
+                        attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
     if a.cmd == "export":
         return cmd_export(reqs, members, reqs_dir, code_root, a.out)
     if a.cmd == "extract":
