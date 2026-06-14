@@ -5,7 +5,8 @@ A non-trivial, real-world example for the excalidraw-diagram skill. It shows how
 the ENTIRE requirement-manager project works, as a modular poster, and doubles
 as a showcase of the role-colour + legend pattern: fills are declared by meaning
 (Scene(roles=…)) and a legend() renders the key, so a reader with no context can
-decode every colour. save(crossing_check="error") enforces a crossing-free scene.
+decode every colour. save(crossing_check="error", legend_check="error") enforces a
+crossing-free, fully-legended scene (every fill must appear in the legend key).
 
 Left -> right journey:  the plugin repo (modules)  ->  marketplace  ->
 Claude Code install  ->  a consumer repo where it runs.  Plus the dogfood loop
@@ -135,24 +136,37 @@ s.arrow(cmds, gate)
 # INTER-MODULE FLOW
 # ════════════════════════════════════════════════════════════════════════════
 s.arrow(z1, mkt, label="published")
-# install/seed — routed (right, up, in) so it clears the SSOT-loop box
+# install/seed — routed (right, up, in) so it clears the SSOT-loop box.
+# Short label so its panel fits the gap between ZONE 2 and ZONE 3.
 s.path([(1160, 500), (1220, 500), (1220, 265), (1290, 265)],
-       color="blue", end="arrow", label="skill seeds + init")
+       color="blue", end="arrow", label="seeds + init")
 
-# dogfood loop — engine runs on its own requirements (routed on the right edge)
+# dogfood loop — engine runs on its own requirements (routed on the right edge).
+# Short label so its white panel fits the narrow strip without hitting a box.
 s.path([(800, 265), (822, 265), (822, 805), (800, 805)],
-       color="green", dashed=True, end="arrow",
-       label="dogfoods: engine runs on its own requirements")
+       color="green", dashed=True, end="arrow", label="dogfoods own reqs")
 
 # the published action reaches the consumer's CI (routed below everything)
 s.path([(760, 940), (760, 1010), (1655, 1010), (1655, 752)],
        color="orange", dashed=True, end="arrow",
        label="consumer CI runs Action @v1")
 
+# ── Glossary — decode the jargon (a term→meaning key, below the diagram) ──────
+s.glossary(
+    [("SSOT", "single source of truth — one .md per capability"),
+     ("dogfood", "the engine runs on its own requirements"),
+     ("CI action", "GitHub Action running the gate on every push / PR"),
+     ("seed / init", "copy reqmap.py into a repo and scaffold it"),
+     ("drift gate", "fails if requirements no longer match the code"),
+     ("@v1", "the published action's pinned version tag")],
+    40, 1060, title="Glossary")
+
 # ════════════════════════════════════════════════════════════════════════════
 out_dir = sys.argv[1] if len(sys.argv) > 1 else "docs"
-pj, ph = s.save("reqmap_workflow", out_dir=out_dir, crossing_check="error")
+pj, ph = s.save("reqmap_workflow", out_dir=out_dir,
+                crossing_check="error", legend_check="error")
 print("elements:", len(s.elements))
 print("overlaps:", s.check_overlaps())
 print("crossings:", s.check_arrow_crossings())
+print("legend coverage gaps:", s.check_legend_coverage())
 print("wrote:", pj, ph)

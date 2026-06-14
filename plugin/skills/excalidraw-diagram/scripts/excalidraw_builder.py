@@ -400,6 +400,39 @@ class Scene:
             cy += row_h
         return fid
 
+    def glossary(self, entries, x, y, *, title="Glossary", font_size=13,
+                 pad=14, gap=8):
+        """A term→meaning key so a reader can decode jargon / acronyms on the
+        canvas — distinct from legend() (which maps colour→role). `entries` is a
+        list of (term, meaning); each renders as one left-aligned "TERM — meaning"
+        line (no colour, no wrapping — keep each meaning to one short line). The
+        box is overlap-checked like real content. Returns the frame id."""
+        if not entries:
+            raise ValueError("glossary() needs at least one (term, meaning)")
+        rows = [f"{t} — {m}" for t, m in entries]
+        row_h = font_size * 1.25 + gap
+        title_h = (font_size + 1) * 1.5 if title else 0
+        longest = max(len(r) for r in rows)
+        w = pad * 2 + int(longest * font_size * 0.58)
+        if title:
+            w = max(w, pad * 2 + int(len(title) * (font_size + 1) * 0.62))
+        h = pad * 2 + title_h + row_h * len(entries)
+        fid = self.frame(x, y, w, h, fill="#ffffff")
+        # overlap-checked content: frame() is container-exempt, so register the
+        # box in _nodes explicitly (mirrors path()'s knock-out panel). Left out
+        # of _geom so it is not treated as an arrow-crossing obstacle.
+        self._nodes.append((fid + "-box", x, y, w, h, f'glossary "{title}"'))
+        cy = y + pad
+        if title:
+            self.label(title, x + pad, cy, size=font_size + 1, color="black",
+                       align="left")
+            cy += title_h
+        for r in rows:
+            self.label(r, x + pad, cy, size=font_size, color="black",
+                       align="left")
+            cy += row_h
+        return fid
+
     def lane(self, ids, label, *, pad=24, fill=None, stroke=None,
              font_size=14, label_color="black"):
         """Swimlane: a solid frame around `ids` with a prominent top-left
@@ -672,12 +705,19 @@ class Scene:
             tw, th = self._text_wh(label, 13)
             lx, ly = mid[0] - tw / 2, mid[1] + 8
             # A10: white knock-out panel so the (unbound) label reads cleanly
-            # over the line / boxes underneath it. Container-exempt (decorative).
+            # over the LINE it sits on. The panel is overlap-CHECKED (added to
+            # _nodes, not _containers): a routed label that lands on a box is a
+            # real overlap — its white fill hides the box — so check_overlaps()
+            # must catch it. It is left out of _geom so it is NOT treated as an
+            # arrow-crossing obstacle (the path's own line legitimately runs
+            # under it, and bound arrows elsewhere must not false-positive on it).
+            lw, lh = tw + 8, th + 4
             bg = self._base(self._new_id("rectangle"), "rectangle",
-                            lx - 4, ly - 2, tw + 8, th + 4,
+                            lx - 4, ly - 2, lw, lh,
                             "transparent", "#ffffff", roundness={"type": 3})
             self.elements.append(bg)
-            self._containers.add(bg["id"])
+            self._nodes.append((bg["id"], lx - 4, ly - 2, lw, lh,
+                                f'label "{label.splitlines()[0][:24]}"'))
             self.elements.append(
                 self._text_el(label, lx, ly, tw, th,
                               size=13, color=_STROKE["grey"], group=group))
@@ -1001,7 +1041,7 @@ if __name__ == "__main__":
     s.enclose(workers, label="parallel workers")
     done = s.box("done", 620, 0, fill="green")
     s.arrow(stages[-1], done)
-    s.path([(0, 320), (620, 320)], label="feedback")   # A10 labelled path
+    s.path([(0, 460), (620, 460)], label="feedback")   # A10 labelled path (clear of the grid)
     s.legend([("source", "blue"), ("worker", "violet"), ("done", "green")],
              x=760, y=150)                  # A2 legend
     # A5 align/distribute must keep the overlap check honest
