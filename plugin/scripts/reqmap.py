@@ -3505,7 +3505,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "promote-todo", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3588,7 +3588,7 @@ def main():
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
         return cmd_show(reqs, members, a.arg)
-    if a.cmd == "similar":
+    if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
@@ -3624,9 +3624,9 @@ def main():
                         attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
     if a.cmd == "export":
         return cmd_export(reqs, members, reqs_dir, code_root, a.out)
-    if a.cmd == "extract":
+    if a.cmd == "draft":
         return cmd_extract(reqs, members, code_root, reqs_dir)
-    if a.cmd == "candidates":
+    if a.cmd == "plan":
         md_globs = []
         for g in (a.md_glob or []):
             md_globs += [x.strip() for x in g.split(",") if x.strip()]
@@ -3635,7 +3635,7 @@ def main():
         return cmd_findings(reqs, reqs_dir, a.raw)
     if a.cmd == "review":
         return cmd_review(reqs, a.arg)
-    if a.cmd == "promote":
+    if a.cmd == "confirm":
         if not a.arg:
             print("usage: reqmap promote AREA-NAME-NNN"); return 2
         return cmd_promote(reqs, members, a.arg)

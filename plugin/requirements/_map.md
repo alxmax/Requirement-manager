@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-15 00:09
+generated: 2026-06-15 00:10
 nodes: 29
 edges: 40
 ---
@@ -103,8 +103,8 @@ graph LR
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_457_757["scripts/reqmap.py:457-757"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_457_757
-  f_scripts_test_reqmap_py_141_3184["scripts/test_reqmap.py:141-3184"]
-  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_141_3184
+  f_scripts_test_reqmap_py_141_3206["scripts/test_reqmap.py:141-3206"]
+  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_141_3206
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_1002_1148["scripts/reqmap.py:1002-1148"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_1002_1148

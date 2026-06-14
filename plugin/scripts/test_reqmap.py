@@ -3181,6 +3181,28 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertIn("gate", r.stderr.lower())
 
 
+    def test_new_verbs_dispatch(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            for verb in ("draft", "dupes"):
+                r = self._run(verb, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 0, f"{verb}: {r.stderr}")
+            # plan (cmd_candidates) always prints its extraction plan to stdout — a
+            # non-empty stdout proves the branch is wired, not falling through the
+            # dispatch chain to a no-op return (which would print nothing).
+            r = self._run("plan", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue(r.stdout.strip(), "plan produced no output — branch not wired")
+
+    def test_old_verbs_are_unknown(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            for verb in ("extract", "candidates", "similar", "promote"):
+                r = self._run(verb, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 2, f"{verb} should be unknown")
+                self.assertIn("invalid choice", r.stderr)
+
+
 class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
     """sync must not silently re-baseline an edited confirmed contract."""
 
