@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-14 18:04
+generated: 2026-06-14 18:07
 nodes: 29
 edges: 40
 ---
@@ -136,8 +136,8 @@ graph LR
   f_scripts_test_reqmap_py_1812["scripts/test_reqmap.py:1812"]
   REQ_LINTCHECKS_025 -->|tested-by| f_scripts_test_reqmap_py_1812
   REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1526_3254["scripts/reqmap.py:1526-3254"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1526_3254
+  f_scripts_reqmap_py_1526_3250["scripts/reqmap.py:1526-3250"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1526_3250
   f_scripts_test_reqmap_py_399_1336["scripts/test_reqmap.py:399-1336"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_399_1336
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -151,8 +151,8 @@ graph LR
   f_scripts_test_reqmap_py_1500_1619["scripts/test_reqmap.py:1500-1619"]
   REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1500_1619
   REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
-  f_scripts_reqmap_py_1632_3270["scripts/reqmap.py:1632-3270"]
-  REQ_PAGES_021 -->|implements| f_scripts_reqmap_py_1632_3270
+  f_scripts_reqmap_py_1632_3266["scripts/reqmap.py:1632-3266"]
+  REQ_PAGES_021 -->|implements| f_scripts_reqmap_py_1632_3266
   f_scripts_test_reqmap_py_899_1337["scripts/test_reqmap.py:899-1337"]
   REQ_PAGES_021 -->|tested-by| f_scripts_test_reqmap_py_899_1337
   REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
@@ -171,8 +171,8 @@ graph LR
   f_scripts_test_reqmap_py_356_542["scripts/test_reqmap.py:356-542"]
   REQ_PROSE_024 -->|tested-by| f_scripts_test_reqmap_py_356_542
   REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
-  f_scripts_reqmap_py_3323["scripts/reqmap.py:3323"]
-  REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_3323
+  f_scripts_reqmap_py_3319["scripts/reqmap.py:3319"]
+  REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_3319
   f_scripts_test_reqmap_py_2473["scripts/test_reqmap.py:2473"]
   REQ_REVIEW_022 -->|tested-by| f_scripts_test_reqmap_py_2473
   f_skills_requirement_quality_review_SKILL_md_6["skills/requirement-quality-review/SKILL.md:6"]
@@ -198,8 +198,8 @@ graph LR
   f_scripts_test_reqmap_py_2036["scripts/test_reqmap.py:2036"]
   REQ_SIMILAR_016 -->|tested-by| f_scripts_test_reqmap_py_2036
   REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
-  f_scripts_reqmap_py_2830_3219["scripts/reqmap.py:2830-3219"]
-  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2830_3219
+  f_scripts_reqmap_py_2830_3215["scripts/reqmap.py:2830-3215"]
+  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2830_3215
   f_scripts_test_reqmap_py_3001["scripts/test_reqmap.py:3001"]
   REQ_SITE_026 -->|tested-by| f_scripts_test_reqmap_py_3001
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
@@ -213,8 +213,8 @@ graph LR
   f_scripts_test_reqmap_py_2308["scripts/test_reqmap.py:2308"]
   REQ_TRACE_020 -->|tested-by| f_scripts_test_reqmap_py_2308
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
-  f_scripts_reqmap_py_3294_3307["scripts/reqmap.py:3294-3307"]
-  REQ_VIEWER_007 -->|implements| f_scripts_reqmap_py_3294_3307
+  f_scripts_reqmap_py_3290_3303["scripts/reqmap.py:3290-3303"]
+  REQ_VIEWER_007 -->|implements| f_scripts_reqmap_py_3290_3303
   f_scripts_test_reqmap_py_872["scripts/test_reqmap.py:872"]
   REQ_VIEWER_007 -->|tested-by| f_scripts_test_reqmap_py_872
 ```

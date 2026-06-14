@@ -3088,14 +3088,12 @@ SITE_TEMPLATE = """\
 </head>
 <body>
 
-<!--##REQMAP:NAV## — engine regenerates this bar (links from git remote + known artifact paths) -->
 <div class="nav">
   <div class="nav-inner">
     <div class="brand"><span class="mark">R</span> %%REPO_NAME%%</div>
     <!--##REQMAP:NAV##--><!--##/REQMAP:NAV##-->
   </div>
 </div>
-<!--##/REQMAP:NAV##-->
 
 <div class="legend">
   <span><span class="dot eng"></span>engine-generated (refreshed every run)</span>
@@ -3119,7 +3117,6 @@ SITE_TEMPLATE = """\
   </div>
 </header>
 
-<!--##REQMAP:STATS## — engine fills these from _map.json + requirements/ on every run -->
 <section class="band">
   <div class="wrap">
     <div class="secthead"><span class="tag eng">engine-generated</span></div>
@@ -3131,7 +3128,6 @@ SITE_TEMPLATE = """\
     <p class="src">Auto-injected by <code>reqmap.py site</code> from <code>_map.json</code> (engine <code>2026-06-12.4</code>) — re-computed on every run, so it never drifts.</p>
   </div>
 </section>
-<!--##/REQMAP:STATS##-->
 
 <!-- PILLARS — authored -->
 <section>
