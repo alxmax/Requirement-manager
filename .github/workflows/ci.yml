@@ -30,3 +30,8 @@ jobs:
       - name: Engine regression tests
         working-directory: plugin/scripts
         run: python -X utf8 -m unittest test_reqmap -v
+      - name: Excalidraw builder + example diagrams
+        working-directory: plugin/skills/excalidraw-diagram/scripts
+        run: |
+          python -X utf8 excalidraw_builder.py
+          python -X utf8 -m unittest test_excalidraw -v
