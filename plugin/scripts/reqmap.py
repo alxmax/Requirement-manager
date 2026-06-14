@@ -2340,7 +2340,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ
         if target:
             try:
                 _site_pages_bootstrap(os.path.dirname(target))   # .nojekyll + index.html redirect
-                cmd_site(reqs, members, reqs_dir, code_root, attach=target, regions=["nav", "stats"])
+                cmd_site(reqs, members, code_root, attach=target, regions=["nav", "stats"])
             except Exception as e:   # site is decorative; a failure must not break bootstrap
                 print("note: site step skipped ({}).".format(e))
         else:
@@ -2864,7 +2864,7 @@ def _normalise_remote(url):  # implements: REQ-SITE-026
     m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)/(.+)$", url)
     if m:
         return "https://{}/{}".format(m.group(1), m.group(2))
-    return url or None
+    return url if "://" in url else None
 
 
 def _git_remote_web_url(root):  # implements: REQ-SITE-026
@@ -2887,7 +2887,7 @@ def _git_remote_web_url(root):  # implements: REQ-SITE-026
     return _normalise_remote(url)
 
 
-SITE_REGIONS = ("nav", "stats", "commands", "layers")  # implements: REQ-SITE-026
+SITE_REGIONS = ("nav", "stats")  # implements: REQ-SITE-026  (commands/layers deferred to a follow-up)
 
 
 def _region_markers(name):  # implements: REQ-SITE-026
@@ -3133,7 +3133,7 @@ SITE_TEMPLATE = """\
       between what you <em>meant</em> to build and what the code actually does — a drift gate you run before
       every commit, a live map of every capability, and an answer to "where is this implemented?".</p>
     <div class="cta">
-      <a class="btn primary" href="../plugin/requirements/_map.html" target="_blank" rel="noopener">Open the live map ↗</a>
+      <a class="btn primary" href="map.html" target="_blank" rel="noopener">Open the live map ↗</a>
       <a class="btn ghost" href="%%REPO_URL%%" target="_blank" rel="noopener">View on GitHub ↗</a>
     </div>
   </div>
@@ -3147,7 +3147,7 @@ SITE_TEMPLATE = """\
     <div class="stats">
       <!--##REQMAP:STATS##--><!--##/REQMAP:STATS##-->
     </div>
-    <p class="src">Auto-injected by <code>reqmap.py site</code> from <code>_map.json</code> (engine <code>2026-06-12.4</code>) — re-computed on every run, so it never drifts.</p>
+    <p class="src">Auto-injected by <code>reqmap.py site</code> from <code>_map.json</code> — re-computed on every run, so it never drifts.</p>
   </div>
 </section>
 
@@ -3349,7 +3349,7 @@ def _site_default_target(root):  # implements: REQ-SITE-026
     return os.path.join(docs, "architecture.html") if os.path.isdir(docs) else None
 
 
-def cmd_site(reqs, members, reqs_dir, root=".", attach=None,
+def cmd_site(reqs, members, root=".", attach=None,
              regions=None, diagram=None, detect=False):  # implements: REQ-SITE-026
     """Inject engine-owned regions into a presentation page (attach mode) or write
     a default page when the target is absent (scaffold mode). Deterministic and
@@ -3360,10 +3360,11 @@ def cmd_site(reqs, members, reqs_dir, root=".", attach=None,
     repo_url = _git_remote_web_url(root)
 
     if detect:
-        cands = [p for p in (_site_default_target(root),) if p and os.path.isfile(p)]
+        default = _site_default_target(root)
+        cands = [p for p in (default,) if p and os.path.isfile(p)]
         print("repo: {}".format(repo_url or "(no remote)"))
         print("presentation candidates: {}".format(", ".join(cands) or "(none)"))
-        tgt = _site_default_target(root) or os.path.join(root, "docs", "architecture.html")
+        tgt = default or os.path.join(root, "docs", "architecture.html")
         print("suggested: reqmap site --attach {} --regions nav,stats".format(tgt))
         return 0
 
@@ -3584,7 +3585,7 @@ def main():
         return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh)
     if a.cmd == "site":  # implements: REQ-SITE-026
         regions = [x.strip() for x in (a.regions or "").split(",") if x.strip()]
-        return cmd_site(reqs, members, reqs_dir, code_root,
+        return cmd_site(reqs, members, code_root,
                         attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
     if a.cmd == "export":
         return cmd_export(reqs, members, reqs_dir, code_root, a.out)

@@ -3062,9 +3062,9 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             page = os.path.join(d, "page.html")
             open(page, "w", encoding="utf-8").write("<body>\n<h1>Mine</h1>\n</body>")
             r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(r, m, reqs, d, attach=page, regions=["nav", "stats"])
+            R.cmd_site(r, m, d, attach=page, regions=["nav", "stats"])
             first = open(page, encoding="utf-8").read()
-            R.cmd_site(r, m, reqs, d, attach=page, regions=["nav", "stats"])
+            R.cmd_site(r, m, d, attach=page, regions=["nav", "stats"])
             second = open(page, encoding="utf-8").read()
             self.assertEqual(first, second)
             self.assertIn("<h1>Mine</h1>", second)
@@ -3075,7 +3075,7 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             page = os.path.join(d, "page.html")
             open(page, "w", encoding="utf-8").write("<body></body>")
             r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            rc = R.cmd_site(r, m, reqs, d, attach=page, regions=["nav"])
+            rc = R.cmd_site(r, m, d, attach=page, regions=["nav"])
             self.assertEqual(rc, 0)
             self.assertNotIn("GitHub", open(page, encoding="utf-8").read())
 
@@ -3084,7 +3084,7 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             reqs = self._seed(d)
             target = os.path.join(d, "docs", "architecture.html")
             r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(r, m, reqs, d, attach=target, regions=["nav", "stats"])
+            R.cmd_site(r, m, d, attach=target, regions=["nav", "stats"])
             html = open(target, encoding="utf-8").read()
             self.assertIn("<!--##REQMAP:NAV##-->", html)
             self.assertIn("<!--##REQMAP:STATS##-->", html)
@@ -3111,7 +3111,7 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             reqs = self._seed(d); os.makedirs(os.path.join(d, "docs"))
             page = os.path.join(d, "docs", "architecture.html")
             r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
-            R.cmd_site(r, m, reqs, d, attach=page, regions=["stats"])
+            R.cmd_site(r, m, d, attach=page, regions=["stats"])
             data = R._build_map_data(r, m); data["repo"] = R._repo_name(d)
             self.assertEqual(R._map_check(data, reqs, d), 0)        # fresh
             cur = open(page, encoding="utf-8").read()
@@ -3133,6 +3133,19 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
                 sys.argv = old
             self.assertEqual(rc, 0)
             self.assertIn("suggested:", buf.getvalue())
+
+    def test_render_nav_escapes_repo_url(self):
+        nav = R._render_region("nav", {"repo_url": "https://x/<script>", "map_ok": False, "diagram_rel": None})
+        self.assertNotIn("<script>", nav)
+        self.assertIn("&lt;script&gt;", nav)
+
+    def test_site_diagram_ok_checks_existence(self):
+        with tempfile.TemporaryDirectory() as d:
+            page = os.path.join(d, "p.html")
+            self.assertFalse(R._site_diagram_ok(page, "d.html"))
+            open(os.path.join(d, "d.html"), "w").close()
+            self.assertTrue(R._site_diagram_ok(page, "d.html"))
+            self.assertFalse(R._site_diagram_ok(page, None))
 
     def test_engine_never_touches_excalidraw_builder(self):
         src = open(R.__file__, encoding="utf-8").read()
