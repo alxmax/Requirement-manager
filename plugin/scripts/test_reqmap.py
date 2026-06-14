@@ -2998,5 +2998,16 @@ class CheckSince(unittest.TestCase):
             self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
 
 
+class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
+    def test_remote_url_normalises_scp_and_https(self):
+        self.assertEqual(R._normalise_remote("git@github.com:alxmax/Requirement-manager.git"),
+                         "https://github.com/alxmax/Requirement-manager")
+        self.assertEqual(R._normalise_remote("https://github.com/alxmax/Requirement-manager.git"),
+                         "https://github.com/alxmax/Requirement-manager")
+        self.assertEqual(R._normalise_remote("ssh://git@example.com/o/r.git"),
+                         "https://example.com/o/r")
+        self.assertIsNone(R._normalise_remote(""))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

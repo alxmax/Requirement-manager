@@ -2827,6 +2827,44 @@ def _repo_name(root):  # implements: REQ-MAP-007
     return os.path.basename(os.path.abspath(root)) or None
 
 
+def _normalise_remote(url):  # implements: REQ-SITE-026
+    """Normalise a git remote URL to a https web URL (https://host/owner/repo),
+    or None when empty/unparseable. Handles scp-style (git@host:owner/repo.git),
+    ssh:// and https:// forms; strips a trailing `.git`. Pure string work."""
+    url = (url or "").strip()
+    if not url:
+        return None
+    if url.endswith(".git"):
+        url = url[:-4]
+    m = re.match(r"^[\w.+-]+@([\w.-]+):(.+)$", url)          # scp-style
+    if m:
+        return "https://{}/{}".format(m.group(1), m.group(2))
+    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)/(.+)$", url)
+    if m:
+        return "https://{}/{}".format(m.group(1), m.group(2))
+    return url or None
+
+
+def _git_remote_web_url(root):  # implements: REQ-SITE-026
+    """The project's web URL from git `remote.origin.url`, or None when git is
+    absent / no remote / not a checkout. Honours the REQMAP_REPO override (a
+    bare slug becomes https://github.com/<slug>; empty disables). Never raises."""
+    override = os.environ.get("REQMAP_REPO")
+    if override is not None:
+        if not override:
+            return None
+        return override if "://" in override else "https://github.com/" + override
+    url = ""
+    try:
+        r = subprocess.run(["git", "-C", root, "config", "--get", "remote.origin.url"],
+                           capture_output=True, text=True, timeout=3)
+        if r.returncode == 0:
+            url = r.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        url = ""
+    return _normalise_remote(url)
+
+
 def _since_changed_files(ref, code_root):
     """Return set of absolute paths changed since `ref`, or None on failure.
 

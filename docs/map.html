@@ -265,6 +265,7 @@
         "REQ-CHECK-006",
         "REQ-MAP-007",
         "REQ-PAGES-021",
+        "REQ-SITE-026",
         "REQ-TRACE-020"
       ],
       "members": [],
@@ -952,6 +953,7 @@
         "REQ-INIT-012",
         "REQ-NEXT-013",
         "REQ-PAGES-021",
+        "REQ-SITE-026",
         "REQ-VIEWER-007"
       ],
       "satisfies": [
@@ -1037,11 +1039,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2852"
+          "loc": "scripts/reqmap.py:2890"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2862"
+          "loc": "scripts/reqmap.py:2900"
         },
         {
           "role": "tested-by",
@@ -1223,7 +1225,9 @@
       "deps": [
         "REQ-MAP-007"
       ],
-      "used_by": [],
+      "used_by": [
+        "REQ-SITE-026"
+      ],
       "satisfies": [
         "NEED-SSOT-001"
       ],
@@ -1239,7 +1243,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2878"
+          "loc": "scripts/reqmap.py:2916"
         },
         {
           "role": "tested-by",
@@ -1475,7 +1479,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2931"
+          "loc": "scripts/reqmap.py:2969"
         },
         {
           "role": "tested-by",
@@ -1729,6 +1733,65 @@
       "risks": []
     },
     {
+      "id": "REQ-SITE-026",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Generate & maintain a project presentation page",
+      "intent": "A project is easier to grasp from one presentation page than from a folder of files. This capability lets the engine keep that page's links and key numbers current — injecting engine-owned regions into a page the author still controls, and scaffolding one when none exists — so the page never drifts from the registry.",
+      "contract": [
+        "`site --attach <page.html>` shall inject the requested marker-delimited regions (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each region's paired markers and preserving all other (authored) content. A re-run with no underlying change shall produce a byte-identical file (idempotent).",
+        "When the `--attach` target does not exist, `site` shall scaffold a self-contained default page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.",
+        "The `nav` region shall emit a link only when its target resolves: Live Map when a sibling `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git remote resolves. A missing git remote, missing artifact, or non-checkout shall never raise.",
+        "The engine shall never import or execute the excalidraw skill's builder; the Diagram entry is a link only.",
+        "`init` shall, unless `--no-site` is given, run a best-effort `site` step after `map`: refresh `nav`+`stats` in `docs/architecture.html` if it exists, else scaffold it plus a Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step shall not abort `init`.",
+        "`map --check` shall flag the site page stale when its on-disk `stats` region differs from a fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page that was never generated, or that lacks a `stats` region, is not stale."
+      ],
+      "verify": [
+        "None — authored from known intent."
+      ],
+      "notes": [
+        "v1 engine-owns `nav` + `stats`; `commands`/`layers` render as authored content in the scaffold and may be promoted to engine-owned regions later.",
+        "The interactive \"scan docs/ and ask which target + regions\" flow lives in the requirement-manager skill, not the engine (the engine is headless-safe)."
+      ],
+      "current_impl": [
+        "`cmd_site`, `_render_region`, `_inject_region`/`_extract_region`, `_git_remote_web_url`, `_site_default_target`, `_site_pages_bootstrap`, the `cmd_init` hook, and the `_map_check` site branch in `reqmap.py`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a page with `nav`/`stats` markers\n  When   `site --attach` runs twice\n  Then   the second run leaves the file byte-identical and authored prose intact\n\nAC-2\n  Given  a repo with no git remote\n  When   `site --attach` injects `nav`\n  Then   it exits 0 and emits no GitHub link\n\nAC-3\n  Given  an absent `--attach` target\n  When   `site` runs\n  Then   it scaffolds a full page with the regions + the placeholder-hero marker\n\nAC-4\n  Given  a generated site page\n  When   its `stats` region is edited to differ from a fresh render\n  Then   `map --check` exits non-zero and names the page (it exits 0 before the edit)\n\nAC-5\n  Given  `docs/` present and no `--no-site`\n  When   `init` runs\n  Then   `docs/architecture.html` exists with engine regions; `--no-site` skips it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-MAP-007",
+        "REQ-VIEWER-007",
+        "REQ-PAGES-021"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2830"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:2848"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:3001"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.35",
+      "priority": "",
+      "risks": []
+    },
+    {
       "id": "REQ-TESTLINK-018",
       "layer": "feature",
       "status": "confirmed",
@@ -1886,21 +1949,23 @@
       "deps": [
         "REQ-MAP-007"
       ],
-      "used_by": [],
+      "used_by": [
+        "REQ-SITE-026"
+      ],
       "satisfies": [],
       "satisfied_by": [],
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2902"
+          "loc": "scripts/reqmap.py:2940"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2906"
+          "loc": "scripts/reqmap.py:2944"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2915"
+          "loc": "scripts/reqmap.py:2953"
         },
         {
           "role": "tested-by",
@@ -2045,6 +2110,18 @@
     [
       "REQ-SIMILAR-016",
       "CORE-PARSE-001"
+    ],
+    [
+      "REQ-SITE-026",
+      "REQ-MAP-007"
+    ],
+    [
+      "REQ-SITE-026",
+      "REQ-VIEWER-007"
+    ],
+    [
+      "REQ-SITE-026",
+      "REQ-PAGES-021"
     ],
     [
       "REQ-TESTLINK-018",

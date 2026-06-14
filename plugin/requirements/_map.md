@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-14 11:14
-nodes: 28
-edges: 37
+generated: 2026-06-14 17:55
+nodes: 29
+edges: 40
 ---
 
 # Requirement Map
@@ -39,6 +39,7 @@ graph LR
     REQ_SCANCACHE_023["Opt-in scan cache<br><small>REQ-SCANCACHE-023</small>"]
     REQ_SHOW_015["Single-requirement dossier<br><small>REQ-SHOW-015</small>"]
     REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
+    REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
     REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
     REQ_TRACE_020["Upstream traceability<br><small>REQ-TRACE-020</small>"]
     REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
@@ -55,6 +56,9 @@ graph LR
   REQ_PAGES_021 --> REQ_MAP_007
   REQ_PROMOTE_TODO_001 --> REQ_NEW_004
   REQ_PROSE_024 --> REQ_EXTRACT_008
+  REQ_SITE_026 --> REQ_MAP_007
+  REQ_SITE_026 --> REQ_VIEWER_007
+  REQ_SITE_026 --> REQ_PAGES_021
   REQ_TESTLINK_018 --> REQ_CHECK_006
   REQ_TRACE_020 --> REQ_CHECK_006
   REQ_VIEWER_007 --> REQ_MAP_007
@@ -132,8 +136,8 @@ graph LR
   f_scripts_test_reqmap_py_1812["scripts/test_reqmap.py:1812"]
   REQ_LINTCHECKS_025 -->|tested-by| f_scripts_test_reqmap_py_1812
   REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
-  f_scripts_reqmap_py_1526_2862["scripts/reqmap.py:1526-2862"]
-  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1526_2862
+  f_scripts_reqmap_py_1526_2900["scripts/reqmap.py:1526-2900"]
+  REQ_MAP_007 -->|implements| f_scripts_reqmap_py_1526_2900
   f_scripts_test_reqmap_py_399_1336["scripts/test_reqmap.py:399-1336"]
   REQ_MAP_007 -->|tested-by| f_scripts_test_reqmap_py_399_1336
   REQ_NEW_004["Scaffold a requirement<br><small>REQ-NEW-004</small>"]
@@ -147,8 +151,8 @@ graph LR
   f_scripts_test_reqmap_py_1500_1619["scripts/test_reqmap.py:1500-1619"]
   REQ_NEXT_013 -->|tested-by| f_scripts_test_reqmap_py_1500_1619
   REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
-  f_scripts_reqmap_py_1632_2878["scripts/reqmap.py:1632-2878"]
-  REQ_PAGES_021 -->|implements| f_scripts_reqmap_py_1632_2878
+  f_scripts_reqmap_py_1632_2916["scripts/reqmap.py:1632-2916"]
+  REQ_PAGES_021 -->|implements| f_scripts_reqmap_py_1632_2916
   f_scripts_test_reqmap_py_899_1337["scripts/test_reqmap.py:899-1337"]
   REQ_PAGES_021 -->|tested-by| f_scripts_test_reqmap_py_899_1337
   REQ_PROMOTE_011["promote<br><small>REQ-PROMOTE-011</small>"]
@@ -167,8 +171,8 @@ graph LR
   f_scripts_test_reqmap_py_356_542["scripts/test_reqmap.py:356-542"]
   REQ_PROSE_024 -->|tested-by| f_scripts_test_reqmap_py_356_542
   REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
-  f_scripts_reqmap_py_2931["scripts/reqmap.py:2931"]
-  REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_2931
+  f_scripts_reqmap_py_2969["scripts/reqmap.py:2969"]
+  REQ_REVIEW_022 -->|implements| f_scripts_reqmap_py_2969
   f_scripts_test_reqmap_py_2473["scripts/test_reqmap.py:2473"]
   REQ_REVIEW_022 -->|tested-by| f_scripts_test_reqmap_py_2473
   f_skills_requirement_quality_review_SKILL_md_6["skills/requirement-quality-review/SKILL.md:6"]
@@ -193,6 +197,11 @@ graph LR
   REQ_SIMILAR_016 -->|implements| f_scripts_reqmap_py_2063_2124
   f_scripts_test_reqmap_py_2036["scripts/test_reqmap.py:2036"]
   REQ_SIMILAR_016 -->|tested-by| f_scripts_test_reqmap_py_2036
+  REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
+  f_scripts_reqmap_py_2830_2848["scripts/reqmap.py:2830-2848"]
+  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2830_2848
+  f_scripts_test_reqmap_py_3001["scripts/test_reqmap.py:3001"]
+  REQ_SITE_026 -->|tested-by| f_scripts_test_reqmap_py_3001
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
   f_scripts_reqmap_py_576_672["scripts/reqmap.py:576-672"]
   REQ_TESTLINK_018 -->|implements| f_scripts_reqmap_py_576_672
@@ -204,8 +213,8 @@ graph LR
   f_scripts_test_reqmap_py_2308["scripts/test_reqmap.py:2308"]
   REQ_TRACE_020 -->|tested-by| f_scripts_test_reqmap_py_2308
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
-  f_scripts_reqmap_py_2902_2915["scripts/reqmap.py:2902-2915"]
-  REQ_VIEWER_007 -->|implements| f_scripts_reqmap_py_2902_2915
+  f_scripts_reqmap_py_2940_2953["scripts/reqmap.py:2940-2953"]
+  REQ_VIEWER_007 -->|implements| f_scripts_reqmap_py_2940_2953
   f_scripts_test_reqmap_py_872["scripts/test_reqmap.py:872"]
   REQ_VIEWER_007 -->|tested-by| f_scripts_test_reqmap_py_872
 ```
@@ -217,7 +226,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>24 caps</small>"]
+  a_REQ["REQ<br><small>25 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
