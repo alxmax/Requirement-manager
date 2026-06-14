@@ -78,6 +78,7 @@ nav{
   text-decoration:none;transition:color .15s;
 }
 .nav-links a:hover{color:var(--accent)}
+.nav-links .reqmap-nav{display:flex;gap:1.5rem;align-items:center}
 
 /* ── LAYOUT ── */
 .wrap{max-width:860px;margin:0 auto;padding:0 2rem}
@@ -411,8 +412,9 @@ footer a:hover{color:var(--accent)}
       <li><a href="#layers">Layers</a></li>
       <li><a href="#ci">CI/CD</a></li>
       <li><a href="#install">Install</a></li>
-      <li><a href="./map.html" target="_blank">Live Map ↗</a></li>
-      <li><a href="https://github.com/alxmax/requirement-manager" target="_blank">GitHub ↗</a></li>
+      <!--##REQMAP:NAV##-->
+<nav class="reqmap-nav"><a href="map.html" target="_blank" rel="noopener">Live Map ↗</a><a href="https://github.com/alxmax/Requirement-manager" target="_blank" rel="noopener">GitHub ↗</a></nav>
+<!--##/REQMAP:NAV##-->
     </ul>
   </div>
 </nav>
