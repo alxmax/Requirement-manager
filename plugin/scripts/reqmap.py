@@ -593,7 +593,7 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True):  # implements: REQ-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
@@ -742,6 +742,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     else:
         warns.extend(strict_warns)
 
+    lock_blocked = False
     if update_lock:
         changed = [(rid, lock.get(rid), h)
                    for rid, h in sorted(new_lock.items()) if lock.get(rid) != h]
@@ -751,8 +752,21 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print(f"  lock update: {rid} hash changed ({old_short}->{new_h[:8]})")
         for rid in removed:
             print(f"  lock update: {rid} removed from lock")
-        save_lock(reqs_dir, new_lock)
-        print("lock updated.")
+        # sync drift guard: refuse to silently re-baseline an EDITED confirmed/implemented
+        # contract unless the caller explicitly accepts it (accept_drift). A brand-new
+        # requirement (old hash None) is not drift.  # implements: REQ-CHECK-006
+        confirmed_drift = [rid for (rid, old_h, _h) in changed
+                           if old_h is not None
+                           and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
+        if confirmed_drift and not accept_drift:
+            lock_blocked = True
+            print("Contract drift on confirmed requirements; re-run with --accept-drift "
+                  "to advance the baseline:", file=sys.stderr)
+            for rid in confirmed_drift:
+                print(f"  drift: {rid}", file=sys.stderr)
+        else:
+            save_lock(reqs_dir, new_lock)
+            print("lock updated.")
 
     if as_json:
         print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
@@ -770,7 +784,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "
           f"{len(errors)} errors, {len(warns)} warnings.")
-    return 1 if errors else 0
+    return 1 if (errors or lock_blocked) else 0
 
 
 # Built-in scaffold so `new` needs no separate templates/ dir — the engine is
@@ -3491,7 +3505,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3513,6 +3527,9 @@ def main():
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--update-lock", action="store_true")
+    ap.add_argument("--accept-drift", dest="accept_drift", action="store_true",
+                    help="sync: advance the drift baseline even when a confirmed/implemented "
+                         "contract changed (otherwise sync refuses and exits non-zero)")
     ap.add_argument("--since", metavar="REF",
                     help="check: scope gate to requirements whose member files changed since REF "
                          "(hypothesis: highest-frequency changes; falls back to full scan on git error)")
@@ -3579,6 +3596,15 @@ def main():
         # report-only: link sync + drift + test-link; never touches the lock.
         return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
                          getattr(a, "since", None))
+    if a.cmd == "sync":
+        # rescan + regenerate map + advance the drift baseline (guarded). Members were
+        # already scanned above; cmd_check rewrites the lock unless confirmed drift is
+        # detected without --accept-drift, then map regenerates only on success.
+        rc = cmd_check(reqs, members, reqs_dir, True, code_root,
+                       accept_drift=getattr(a, "accept_drift", False))
+        if rc == 0:
+            cmd_map(reqs, members, reqs_dir, code_root)
+        return rc
     if a.cmd == "check":
         # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
         # legacy behavior verbatim so consumer hooks/CI/Action keep working.

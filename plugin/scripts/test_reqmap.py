@@ -3181,5 +3181,49 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertIn("gate", r.stderr.lower())
 
 
+class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """sync must not silently re-baseline an edited confirmed contract."""
+
+    def _confirmed_repo(self, d, body_tail=""):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="confirmed", layer="feature",
+                          extra="", title="T") +
+               "\n## WHAT — Contract\n- shall do the thing.\n## HOW — Acceptance\n- Given X When Y Then Z\n"
+               + body_tail)
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        _write(os.path.join(d, "test_impl.py"), "def test_a():\n    assert True  " + tb_tag("REQ-A-001"))
+        return rdir
+
+    def test_sync_blocks_confirmed_drift_without_flag(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)  # seed lock
+            lock_before = open(R.lock_path(rdir), encoding="utf-8").read()
+            # edit the contract -> drift
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            with redirect_stdout(io.StringIO()):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
+            self.assertEqual(rc, 1)  # blocked
+            self.assertEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # lock untouched
+
+    def test_sync_accept_drift_advances_baseline(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)
+            lock_before = open(R.lock_path(rdir), encoding="utf-8").read()
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            with redirect_stdout(io.StringIO()):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=True)
+            self.assertEqual(rc, 0)
+            self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # advanced
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
