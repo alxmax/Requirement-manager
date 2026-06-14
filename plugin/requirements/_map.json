@@ -520,6 +520,10 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_reqmap.py:2405"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:3155"
         }
       ],
       "test_exempt": null,
@@ -1827,7 +1831,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3586"
+          "loc": "scripts/reqmap.py:3595"
         },
         {
           "role": "tested-by",

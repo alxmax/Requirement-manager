@@ -3491,7 +3491,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3575,7 +3575,16 @@ def main():
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
+    if a.cmd == "gate":
+        # report-only: link sync + drift + test-link; never touches the lock.
+        return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
+                         getattr(a, "since", None))
     if a.cmd == "check":
+        # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
+        # legacy behavior verbatim so consumer hooks/CI/Action keep working.
+        print("reqmap: 'check' is deprecated — use 'gate' (report) or 'sync' (regenerate "
+              "lock+map). Forwarding to legacy behavior; the alias is removed in the next major.",
+              file=sys.stderr)
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
                        getattr(a, "since", None))
         if a.update_lock:

@@ -3152,5 +3152,34 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """The renamed CLI surface: gate (report-only) + check (deprecation alias)."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args],
+                              cwd=cwd, capture_output=True, text=True)
+
+    def _seed(self, d):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
+
+    def test_gate_runs_report_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            r = self._run("gate", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertNotIn("lock updated", r.stdout)  # gate never touches the lock
+
+    def test_check_alias_warns_and_forwards(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            r = self._run("check", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("deprecated", r.stderr.lower())
+            self.assertIn("gate", r.stderr.lower())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

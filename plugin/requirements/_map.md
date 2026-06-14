@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-14 18:39
+generated: 2026-06-15 00:08
 nodes: 29
 edges: 40
 ---
@@ -103,8 +103,8 @@ graph LR
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_scripts_reqmap_py_457_596["scripts/reqmap.py:457-596"]
   REQ_CHECK_006 -->|implements| f_scripts_reqmap_py_457_596
-  f_scripts_test_reqmap_py_141_2405["scripts/test_reqmap.py:141-2405"]
-  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_141_2405
+  f_scripts_test_reqmap_py_141_3155["scripts/test_reqmap.py:141-3155"]
+  REQ_CHECK_006 -->|tested-by| f_scripts_test_reqmap_py_141_3155
   REQ_EXTRACT_008["Legacy extraction<br><small>REQ-EXTRACT-008</small>"]
   f_scripts_reqmap_py_988_1134["scripts/reqmap.py:988-1134"]
   REQ_EXTRACT_008 -->|implements| f_scripts_reqmap_py_988_1134
@@ -198,8 +198,8 @@ graph LR
   f_scripts_test_reqmap_py_2036["scripts/test_reqmap.py:2036"]
   REQ_SIMILAR_016 -->|tested-by| f_scripts_test_reqmap_py_2036
   REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
-  f_scripts_reqmap_py_2337_3586["scripts/reqmap.py:2337-3586"]
-  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2337_3586
+  f_scripts_reqmap_py_2337_3595["scripts/reqmap.py:2337-3595"]
+  REQ_SITE_026 -->|implements| f_scripts_reqmap_py_2337_3595
   f_scripts_test_reqmap_py_3001["scripts/test_reqmap.py:3001"]
   REQ_SITE_026 -->|tested-by| f_scripts_test_reqmap_py_3001
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
