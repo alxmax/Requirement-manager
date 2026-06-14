@@ -10,6 +10,7 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
 python scripts/reqmap.py check              # gate: link sync + drift + test-link integrity (warn) — run before every commit
 python scripts/reqmap.py map                # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
+python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats   # inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. init runs this best-effort.
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
