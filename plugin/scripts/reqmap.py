@@ -2994,7 +2994,7 @@ SITE_TEMPLATE = """\
       run (nav links, stats band, commands grid, layer model) — never stale.
     • Everything else is AUTHORED prose, preserved across regenerations.
   Self-contained: no CDN, no network. Plain anchor links (no file:// iframes).
-  Diagram is link-only (no excalidraw_builder coupling). Applies the Senate
+  Diagram is link-only (no builder coupling). Applies the Senate
   (2026-06-14, MODIFY) blocking conditions.
   ============================================================================
 -->

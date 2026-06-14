@@ -3134,6 +3134,10 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             self.assertEqual(rc, 0)
             self.assertIn("suggested:", buf.getvalue())
 
+    def test_engine_never_touches_excalidraw_builder(self):
+        src = open(R.__file__, encoding="utf-8").read()
+        self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
