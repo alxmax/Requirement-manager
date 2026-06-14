@@ -995,7 +995,7 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
     if "tested-by" not in roles:
         print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
               f"or set `test_exempt: <reason>` to silence the untested signal.")
-    print("  next: reqmap.py check --update-lock  &&  reqmap.py map")
+    print("  next: reqmap.py sync")
     return 0
 
 
@@ -2371,7 +2371,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ
     if created:
         print("created: " + ", ".join(created))
     print("\nNext: run `reqmap.py next` — it shows what to do, most important first.")
-    print("Then wire the gate: add `python scripts/reqmap.py check` to your pre-commit hook.")
+    print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
     return 0
 
 
@@ -3559,12 +3559,12 @@ def main():
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
     ap.add_argument("--id", dest="new_id", default=None,
-                    help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+                    help="new --from-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
     ap.add_argument("--from-todo", dest="from_todo", default=None,
                     help="new: scaffold the requirement from a TODO.md item matched by this name "
                          "(use with --id; add --mark-done to flip the item to [x])")
     ap.add_argument("--mark-done", dest="mark_done", action="store_true",
-                    help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
+                    help="new --from-todo: also flip the matched TODO.md item to [x] (off by default)")
     ap.add_argument("--cache", action="store_true",
                     help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
                          "files skip re-parsing. Off by default; results are identical with or without it.")
