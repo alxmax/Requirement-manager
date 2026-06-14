@@ -2998,5 +2998,159 @@ class CheckSince(unittest.TestCase):
             self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
 
 
+class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
+    def test_remote_url_normalises_scp_and_https(self):
+        self.assertEqual(R._normalise_remote("git@github.com:alxmax/Requirement-manager.git"),
+                         "https://github.com/alxmax/Requirement-manager")
+        self.assertEqual(R._normalise_remote("https://github.com/alxmax/Requirement-manager.git"),
+                         "https://github.com/alxmax/Requirement-manager")
+        self.assertEqual(R._normalise_remote("ssh://git@example.com/o/r.git"),
+                         "https://example.com/o/r")
+        self.assertIsNone(R._normalise_remote(""))
+
+    def test_inject_region_refreshes_and_preserves_prose(self):
+        html = "<body>\n<h1>AUTHORED</h1>\n<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n<p>keep</p>\n</body>"
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
+        self.assertIn("<h1>AUTHORED</h1>", out)
+        self.assertIn("<p>keep</p>", out)
+        self.assertNotIn("old", out)
+
+    def test_inject_region_absent_inserts_after_body(self):
+        html = "<body>\n<h1>hi</h1>\n</body>"
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
+        self.assertLess(out.index("<body>"), out.index("REQMAP:NAV"))
+
+    def test_extract_region_roundtrip(self):
+        html = R._inject_region("<body></body>", "stats", "DATA")
+        self.assertEqual(R._extract_region(html, "stats"), "DATA")
+        self.assertIsNone(R._extract_region("<body></body>", "stats"))
+
+    def test_render_nav_omits_absent_targets(self):
+        ctx = {"repo_url": None, "map_ok": False, "diagram_rel": None}
+        nav = R._render_region("nav", ctx)
+        self.assertNotIn("<a", nav)
+        ctx = {"repo_url": "https://github.com/o/r", "map_ok": True, "diagram_rel": "d.html"}
+        nav = R._render_region("nav", ctx)
+        self.assertIn('href="https://github.com/o/r"', nav)
+        self.assertIn('href="map.html"', nav)
+        self.assertIn('href="d.html"', nav)
+        self.assertIn('target="_blank"', nav)
+
+    def test_render_stats_counts_from_graph(self):
+        data = {"nodes": [{"id": "A-1", "layer": "bus", "status": "confirmed"},
+                          {"id": "B-2", "layer": "feature", "status": "confirmed"},
+                          {"id": "C-3", "layer": "feature", "status": "draft"}],
+                "edges": [["B-2", "A-1"]]}
+        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
+        stats = R._render_region("stats", ctx)
+        self.assertIn(">3<", stats)   # 3 requirements
+        self.assertIn(">2<", stats)   # 2 confirmed
+        self.assertIn(R.MAP_ENGINE_VERSION, stats)
+
+    def _seed(self, d):
+        """Minimal reqs dir with one confirmed requirement so site can build map data."""
+        reqs = os.path.join(d, "requirements"); os.makedirs(reqs)
+        with open(os.path.join(reqs, "AREA-X-001.md"), "w", encoding="utf-8") as f:
+            f.write("---\nid: AREA-X-001\nstatus: confirmed\nlayer: feature\n---\n# X\n> why\n")
+        return reqs
+
+    def test_attach_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            open(page, "w", encoding="utf-8").write("<body>\n<h1>Mine</h1>\n</body>")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, d, attach=page, regions=["nav", "stats"])
+            first = open(page, encoding="utf-8").read()
+            R.cmd_site(r, m, d, attach=page, regions=["nav", "stats"])
+            second = open(page, encoding="utf-8").read()
+            self.assertEqual(first, second)
+            self.assertIn("<h1>Mine</h1>", second)
+
+    def test_no_remote_degrades(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            page = os.path.join(d, "page.html")
+            open(page, "w", encoding="utf-8").write("<body></body>")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            rc = R.cmd_site(r, m, d, attach=page, regions=["nav"])
+            self.assertEqual(rc, 0)
+            self.assertNotIn("GitHub", open(page, encoding="utf-8").read())
+
+    def test_scaffold_writes_full_page(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d)
+            target = os.path.join(d, "docs", "architecture.html")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, d, attach=target, regions=["nav", "stats"])
+            html = open(target, encoding="utf-8").read()
+            self.assertIn("<!--##REQMAP:NAV##-->", html)
+            self.assertIn("<!--##REQMAP:STATS##-->", html)
+            self.assertIn("<!-- author me -->", html)
+
+    def test_init_scaffolds_site_when_absent(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            open(os.path.join(d, "a.py"), "w").write("# implements: AREA-X-001\nx = 1\n")
+            R.cmd_init(os.path.join(d, "requirements"), d, no_site=False)
+            page = os.path.join(d, "docs", "architecture.html")
+            self.assertTrue(os.path.isfile(page))
+            self.assertIn("<!--##REQMAP:NAV##-->", open(page, encoding="utf-8").read())
+
+    def test_init_no_site_flag_skips(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            open(os.path.join(d, "a.py"), "w").write("x = 1\n")
+            R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+            self.assertFalse(os.path.isfile(os.path.join(d, "docs", "architecture.html")))
+
+    def test_map_check_flags_stale_stats_region(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._seed(d); os.makedirs(os.path.join(d, "docs"))
+            page = os.path.join(d, "docs", "architecture.html")
+            r = R.load_requirements(reqs); m = R.scan_members(d, reqs)
+            R.cmd_site(r, m, d, attach=page, regions=["stats"])
+            data = R._build_map_data(r, m); data["repo"] = R._repo_name(d)
+            self.assertEqual(R._map_check(data, reqs, d), 0)        # fresh
+            cur = open(page, encoding="utf-8").read()
+            tampered = cur.replace(R._extract_region(cur, "stats"), "TAMPERED")
+            open(page, "w", encoding="utf-8").write(tampered)
+            self.assertEqual(R._map_check(data, reqs, d), 1)        # stale stats -> exit 1
+
+    def test_cli_site_detect_runs(self):
+        import contextlib
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            argv = ["reqmap", "site", "--detect", "--root", d]
+            buf = io.StringIO()
+            old = sys.argv; sys.argv = argv
+            try:
+                with contextlib.redirect_stdout(buf):
+                    rc = R.main()
+            finally:
+                sys.argv = old
+            self.assertEqual(rc, 0)
+            self.assertIn("suggested:", buf.getvalue())
+
+    def test_render_nav_escapes_repo_url(self):
+        nav = R._render_region("nav", {"repo_url": "https://x/<script>", "map_ok": False, "diagram_rel": None})
+        self.assertNotIn("<script>", nav)
+        self.assertIn("&lt;script&gt;", nav)
+
+    def test_site_diagram_ok_checks_existence(self):
+        with tempfile.TemporaryDirectory() as d:
+            page = os.path.join(d, "p.html")
+            self.assertFalse(R._site_diagram_ok(page, "d.html"))
+            open(os.path.join(d, "d.html"), "w").close()
+            self.assertTrue(R._site_diagram_ok(page, "d.html"))
+            self.assertFalse(R._site_diagram_ok(page, None))
+
+    def test_engine_never_touches_excalidraw_builder(self):
+        src = open(R.__file__, encoding="utf-8").read()
+        self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

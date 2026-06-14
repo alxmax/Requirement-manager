@@ -335,6 +335,7 @@ before push *and* on the remote for PRs.
 - `python scripts/reqmap.py health`            — print a corpus coherence snapshot: a headline score (the percentage of requirements green on EVERY axis — `confirmed` + an `implements` member + tested-or-`test_exempt` + no open verify-intent + not drifted) plus the component counts (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift). `--json` emits the same numbers as a parseable object for a CI badge. Read-only, always exit 0 (a report, not a gate). The score is strict by design: one open question or one drifted contract drops a requirement out of the green count.
 - `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
+- `python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats` — inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. `init` runs this best-effort.
 - `python scripts/reqmap.py export`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
 - `python scripts/reqmap.py extract`           — draft one requirement per untagged file. Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
 - `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
@@ -353,6 +354,36 @@ python scripts/reqmap.py map
 memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
 edit shifted it). Wire it next to `check` in your pre-commit hook / CI so a stale
 map can't be committed. A repo that doesn't track a map passes silently.
+
+## Project site (`reqmap.py site`)
+
+`site` keeps a project presentation page (e.g. `docs/architecture.html`) current by
+injecting **engine-owned, marker-delimited regions** and preserving the authored prose
+between them. It is deterministic and never prompts — the *interactive* part is your job
+as the skill.
+
+**When the user wants a project/landing/architecture page, or to refresh one:**
+1. Run `python scripts/reqmap.py site --detect` (from the dir where `requirements/` lives)
+   to see what `docs/` already has and the suggested command.
+2. Ask the user **which target** — an existing `docs/architecture.html`, an
+   `index.html`, a bring-your-own HTML path, or scaffold a new page — and **which regions**
+   (`nav` for the top links only, or `nav,stats`).
+3. Run `python scripts/reqmap.py site --attach <path> --regions <nav|nav,stats> [--diagram <rel>]`.
+   - Attach mode refreshes only the marked regions (`<!--##REQMAP:NAV##-->…<!--##/REQMAP:NAV##-->`,
+     `…:STATS…`); your prose is untouched.
+   - If `<path>` does not exist, `site` **scaffolds** a full default page (theme + regions +
+     a placeholder hero marked `<!-- author me -->`).
+4. If you scaffolded, offer to rewrite the placeholder hero into real prose for the repo.
+
+Regions and their sources: `nav` = Live Map / Diagram / GitHub links (from `git remote` +
+artifact paths, each emitted only if its target resolves); `stats` = requirement/confirmed/
+layer/edge counts + engine version (from `_map.json`). The engine **only links** an
+excalidraw diagram — it never generates one (the excalidraw-diagram skill stays independent).
+
+`init` already runs a best-effort `site` pass (`nav,stats` into `docs/architecture.html`,
+scaffolding it if absent); `reqmap.py init --no-site` opts out. `map --check` flags the
+page stale if its `stats` region drifts (the `nav` region is exempt — it embeds the
+fork-specific repo URL).
 
 ## Releasing a new version (plugin semver checklist)
 
