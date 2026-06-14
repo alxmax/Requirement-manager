@@ -3008,6 +3008,47 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
                          "https://example.com/o/r")
         self.assertIsNone(R._normalise_remote(""))
 
+    def test_inject_region_refreshes_and_preserves_prose(self):
+        html = "<body>\n<h1>AUTHORED</h1>\n<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n<p>keep</p>\n</body>"
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
+        self.assertIn("<h1>AUTHORED</h1>", out)
+        self.assertIn("<p>keep</p>", out)
+        self.assertNotIn("old", out)
+
+    def test_inject_region_absent_inserts_after_body(self):
+        html = "<body>\n<h1>hi</h1>\n</body>"
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertIn("<!--##REQMAP:NAV##-->\nNEW\n<!--##/REQMAP:NAV##-->", out)
+        self.assertLess(out.index("<body>"), out.index("REQMAP:NAV"))
+
+    def test_extract_region_roundtrip(self):
+        html = R._inject_region("<body></body>", "stats", "DATA")
+        self.assertEqual(R._extract_region(html, "stats"), "DATA")
+        self.assertIsNone(R._extract_region("<body></body>", "stats"))
+
+    def test_render_nav_omits_absent_targets(self):
+        ctx = {"repo_url": None, "map_ok": False, "diagram_rel": None}
+        nav = R._render_region("nav", ctx)
+        self.assertNotIn("<a", nav)
+        ctx = {"repo_url": "https://github.com/o/r", "map_ok": True, "diagram_rel": "d.html"}
+        nav = R._render_region("nav", ctx)
+        self.assertIn('href="https://github.com/o/r"', nav)
+        self.assertIn('href="map.html"', nav)
+        self.assertIn('href="d.html"', nav)
+        self.assertIn('target="_blank"', nav)
+
+    def test_render_stats_counts_from_graph(self):
+        data = {"nodes": [{"id": "A-1", "layer": "bus", "status": "confirmed"},
+                          {"id": "B-2", "layer": "feature", "status": "confirmed"},
+                          {"id": "C-3", "layer": "feature", "status": "draft"}],
+                "edges": [["B-2", "A-1"]]}
+        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
+        stats = R._render_region("stats", ctx)
+        self.assertIn(">3<", stats)   # 3 requirements
+        self.assertIn(">2<", stats)   # 2 confirmed
+        self.assertIn(R.MAP_ENGINE_VERSION, stats)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

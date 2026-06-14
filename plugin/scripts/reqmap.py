@@ -2865,6 +2865,93 @@ def _git_remote_web_url(root):  # implements: REQ-SITE-026
     return _normalise_remote(url)
 
 
+SITE_REGIONS = ("nav", "stats", "commands", "layers")  # implements: REQ-SITE-026
+
+
+def _region_markers(name):  # implements: REQ-SITE-026
+    key = name.upper()
+    return "<!--##REQMAP:{}##-->".format(key), "<!--##/REQMAP:{}##-->".format(key)
+
+
+def _inject_region(html, name, inner, anchor="<body>"):  # implements: REQ-SITE-026
+    """Replace the content between the paired markers for `name` with `inner`
+    (idempotent). Markers absent -> insert a fresh marked block right after the
+    first `anchor`; anchor absent too -> append. Only the marked block is
+    written; surrounding (authored) bytes are untouched."""
+    open_m, close_m = _region_markers(name)
+    block = open_m + "\n" + inner + "\n" + close_m
+    i, j = html.find(open_m), html.find(close_m)
+    if i != -1 and j != -1 and j > i:
+        return html[:i] + block + html[j + len(close_m):]
+    a = html.find(anchor)
+    if a != -1:
+        a += len(anchor)
+        return html[:a] + "\n" + block + html[a:]
+    return html + "\n" + block
+
+
+def _extract_region(html, name):  # implements: REQ-SITE-026
+    """Inner text between the paired markers for `name`, or None when absent.
+    Lets the freshness gate diff only engine-owned regions (prose is exempt)."""
+    open_m, close_m = _region_markers(name)
+    i = html.find(open_m)
+    if i == -1:
+        return None
+    i += len(open_m)
+    j = html.find(close_m, i)
+    return html[i:j].strip("\n") if j != -1 else None
+
+
+def _html_escape(s):  # implements: REQ-SITE-026
+    return (str(s).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
+def _site_context_from_data(data, repo_url, map_ok, diagram_rel):  # implements: REQ-SITE-026
+    """Deterministic region inputs derived from the map graph + already-resolved
+    link facts. No wall-clock, no filesystem here — callers resolve repo_url /
+    map_ok / diagram_rel, so a re-run with no change reproduces byte-identically."""
+    nodes = data.get("nodes", [])
+    layers = {n.get("layer", "feature") for n in nodes}
+    return {
+        "repo_url": repo_url,
+        "map_ok": map_ok,
+        "diagram_rel": diagram_rel,
+        "counts": {
+            "requirements": len(nodes),
+            "confirmed": sum(1 for n in nodes if n.get("status") == "confirmed"),
+            "layers": len(layers),
+            "edges": len(data.get("edges", [])),
+        },
+    }
+
+
+def _render_region(name, ctx):  # implements: REQ-SITE-026
+    """Inner HTML for an engine-owned region. NAV: plain target=_blank anchors,
+    each emitted only when its target resolves (graceful degradation). STATS:
+    deterministic stat cards from the graph counts + engine version."""
+    if name == "nav":
+        links = []
+        if ctx.get("map_ok"):
+            links.append('<a href="map.html" target="_blank" rel="noopener">Live Map ↗</a>')
+        if ctx.get("diagram_rel"):
+            links.append('<a href="{}" target="_blank" rel="noopener">Diagram ↗</a>'
+                         .format(_html_escape(ctx["diagram_rel"])))
+        if ctx.get("repo_url"):
+            links.append('<a href="{}" target="_blank" rel="noopener">GitHub ↗</a>'
+                         .format(_html_escape(ctx["repo_url"])))
+        return '<nav class="reqmap-nav">' + "".join(links) + '</nav>'
+    if name == "stats":
+        c = ctx["counts"]
+        cells = [("requirements", c["requirements"]), ("confirmed", c["confirmed"]),
+                 ("layers", c["layers"]), ("edges", c["edges"]),
+                 ("engine", MAP_ENGINE_VERSION)]
+        items = "".join('<div class="stat"><b>{}</b><span>{}</span></div>'.format(v, k)
+                        for k, v in cells)
+        return '<div class="reqmap-stats">' + items + '</div>'
+    return ""
+
+
 def _since_changed_files(ref, code_root):
     """Return set of absolute paths changed since `ref`, or None on failure.
 
