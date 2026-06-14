@@ -3202,6 +3202,17 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
                 self.assertEqual(r.returncode, 2, f"{verb} should be unknown")
                 self.assertIn("invalid choice", r.stderr)
 
+    def test_new_from_todo_scaffolds_and_old_verb_gone(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"), exist_ok=True)
+            _write(os.path.join(d, "TODO.md"), "# TODO\n\n## v1.0\n- [ ] Make widget\n")
+            r = self._run("new", "--from-todo", "Make widget", "--id", "REQ-W-001",
+                          "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
+            r2 = self._run("promote-todo", "Make widget", "--id", "REQ-W-002", "--root", d, cwd=d)
+            self.assertEqual(r2.returncode, 2)  # old verb removed
+
 
 class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
     """sync must not silently re-baseline an edited confirmed contract."""

@@ -3505,7 +3505,7 @@ def main():
         except (AttributeError, ValueError, OSError):
             pass
     ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "promote-todo", "review", "site"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3540,6 +3540,9 @@ def main():
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
     ap.add_argument("--id", dest="new_id", default=None,
                     help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+    ap.add_argument("--from-todo", dest="from_todo", default=None,
+                    help="new: scaffold the requirement from a TODO.md item matched by this name "
+                         "(use with --id; add --mark-done to flip the item to [x])")
     ap.add_argument("--mark-done", dest="mark_done", action="store_true",
                     help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
     ap.add_argument("--cache", action="store_true",
@@ -3566,13 +3569,11 @@ def main():
         tmpl = None
 
     if a.cmd == "new":
+        if getattr(a, "from_todo", None):
+            return cmd_promote_todo(reqs_dir, tmpl, a.from_todo, a.new_id, a.mark_done, code_root)
         if not a.arg:
-            print("usage: reqmap new AREA-NAME-NNN"); return 2
+            print("usage: reqmap new AREA-NAME-NNN   |   reqmap new --from-todo \"<todo name>\" --id AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
-    if a.cmd == "promote-todo":
-        if not a.arg:
-            print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
-        return cmd_promote_todo(reqs_dir, tmpl, a.arg, a.new_id, a.mark_done, code_root)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
