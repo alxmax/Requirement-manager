@@ -3090,6 +3090,22 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
             self.assertIn("<!--##REQMAP:STATS##-->", html)
             self.assertIn("<!-- author me -->", html)
 
+    def test_init_scaffolds_site_when_absent(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            open(os.path.join(d, "a.py"), "w").write("# implements: AREA-X-001\nx = 1\n")
+            R.cmd_init(os.path.join(d, "requirements"), d, no_site=False)
+            page = os.path.join(d, "docs", "architecture.html")
+            self.assertTrue(os.path.isfile(page))
+            self.assertIn("<!--##REQMAP:NAV##-->", open(page, encoding="utf-8").read())
+
+    def test_init_no_site_flag_skips(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "docs"))
+            open(os.path.join(d, "a.py"), "w").write("x = 1\n")
+            R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+            self.assertFalse(os.path.isfile(os.path.join(d, "docs", "architecture.html")))
+
     def test_cli_site_detect_runs(self):
         import contextlib
         with tempfile.TemporaryDirectory() as d:

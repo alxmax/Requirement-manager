@@ -2308,7 +2308,7 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
             "scripts/reqmap.py\n")
 
 
-def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
+def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ-INIT-012
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
     .reqmapignore (idempotent — never clobbers an existing one), draft requirements
     from existing code, build the lock + map, then print guided next steps.
@@ -2334,6 +2334,17 @@ def cmd_init(reqs_dir, code_root, wipe=False):  # implements: REQ-INIT-012
     members = scan_members(code_root, reqs_dir)
     cmd_check(reqs, members, reqs_dir, update_lock=True, code_root=code_root)
     cmd_map(reqs, members, reqs_dir, code_root)
+    # implements: REQ-SITE-026 — best-effort project site. Never aborts init.
+    if not no_site:
+        target = _site_default_target(code_root)
+        if target:
+            try:
+                _site_pages_bootstrap(os.path.dirname(target))   # .nojekyll + index.html redirect
+                cmd_site(reqs, members, reqs_dir, code_root, attach=target, regions=["nav", "stats"])
+            except Exception as e:   # site is decorative; a failure must not break bootstrap
+                print("note: site step skipped ({}).".format(e))
+        else:
+            print("note: no docs/ folder — run the requirement-manager skill to set up a project site.")
     print("\n" + "=" * 60)
     if not reqs:   # nothing to extract — don't masquerade as "all clean"
         print("reqmap initialized, but no requirements were extracted")
@@ -3287,6 +3298,24 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     return None
 
 
+def _site_pages_bootstrap(docs_dir):  # implements: REQ-SITE-026
+    """Ensure docs/ carries a GitHub Pages signal so REQ-PAGES-021 publishes and
+    the page is servable: write .nojekyll and an index.html redirect when absent.
+    Idempotent — never clobbers an existing index.html."""
+    os.makedirs(docs_dir, exist_ok=True)
+    nojekyll = os.path.join(docs_dir, ".nojekyll")
+    if not os.path.exists(nojekyll):
+        open(nojekyll, "w").close()
+    index = os.path.join(docs_dir, "index.html")
+    if not os.path.exists(index):
+        with open(index, "w", encoding="utf-8") as f:
+            f.write('<!doctype html><meta charset="utf-8">'
+                    '<meta http-equiv="refresh" content="0; url=./architecture.html">'
+                    '<link rel="canonical" href="./architecture.html">'
+                    '<title>Project site</title>'
+                    '<p>Redirecting to <a href="./architecture.html">the project site</a>…</p>\n')
+
+
 def _site_diagram_ok(target_path, diagram_rel):  # implements: REQ-SITE-026
     """True when `diagram_rel` (relative to the page's directory) names an existing
     file — so the Diagram link is emitted only when the artifact is actually there."""
@@ -3516,7 +3545,7 @@ def main():
             print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
         return cmd_promote_todo(reqs_dir, tmpl, a.arg, a.new_id, a.mark_done, code_root)
     if a.cmd == "init":
-        return cmd_init(reqs_dir, code_root, wipe=a.wipe)
+        return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir, cache=a.cache)
