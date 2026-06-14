@@ -42,3 +42,12 @@
      it with a bespoke check_doc_drift gate. reqmap should catch this class. -->
 - [ ] `generated-from:` accepting >1 requirement ID — drift a system/explainer doc when ANY referenced requirement changes | lane: feature
 - [ ] WARN when a large docs/ HTML/generated bundle carries no `generated-from:` tag at all (surface the doc-sync blind spot instead of silently ignoring it) | lane: ops
+
+## v1.18
+<!-- Bug found 2026-06-14 while generating the Consilium full architecture diagram via the
+     excalidraw-diagram skill. route_under() label text overlapped with the next diagram
+     region's title. Root cause: two independent bugs in excalidraw_builder.py.
+     Consilium deliberation: .consilium/runs/2026-06-14_1200_excalidraw-builder-label-overlap.json
+     Chosen approach: combined_midpoint_and_bounds (conf=0.695, 5 cand, 0 vetoed, sequential). -->
+- [x] excalidraw_builder: fix path() label placement to arc-length midpoint (not points_abs[len//2] corner) | lane: bus
+- [x] excalidraw_builder: extend bounds() to include _path_extents so route_under gap calculations via bounds()+N are correct | lane: bus

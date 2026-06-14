@@ -2171,6 +2171,18 @@
       "lane": "ops",
       "milestone": "v1.17",
       "done": false
+    },
+    {
+      "name": "excalidraw_builder: fix path() label placement to arc-length midpoint (not points_abs[len//2] corner)",
+      "lane": "bus",
+      "milestone": "v1.18",
+      "done": true
+    },
+    {
+      "name": "excalidraw_builder: extend bounds() to include _path_extents so route_under gap calculations via bounds()+N are correct",
+      "lane": "bus",
+      "milestone": "v1.18",
+      "done": true
     }
   ]
 }
