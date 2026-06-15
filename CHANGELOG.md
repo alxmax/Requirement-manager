@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v2.1.0` — 2026-06-15
+
+**excalidraw-diagram CLI.** Two helper verbs on `excalidraw_builder.py` — the authoring path stays Python (no declarative `build <spec>` verb, which would fork a second, divergent format):
+
+- **`render <scene.excalidraw> [out_dir]`** — rebuild the self-contained `.html` viewer from an existing scene file (e.g. one edited on excalidraw.com, where there is no generator script to re-run).
+- **`discover <repo> [out.py]`** — scan a repo and emit a runnable Python generator stub (`make_diagram.py`): one box per top-level component on a no-overlap grid, with `TODO`s for the arrows/grouping you fill in, then run it to produce the scene + viewer.
+- No-arg `python excalidraw_builder.py` still runs the builder self-test (unchanged — CI relies on it).
+
+reqmap engine unchanged; `MAP_ENGINE_VERSION` stays `2026-06-15`.
+
+---
+
 ## plugin `v2.0.0` — 2026-06-15
 
 **Breaking — intent-verb CLI.** Commands renamed to match what the user wants:
