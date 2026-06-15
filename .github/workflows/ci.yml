@@ -23,7 +23,7 @@ jobs:
       # depending on its own unpublished action.
       - name: Requirement drift gate
         working-directory: plugin
-        run: python -X utf8 scripts/reqmap.py check
+        run: python -X utf8 scripts/reqmap.py gate
       - name: Map freshness
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py map --check

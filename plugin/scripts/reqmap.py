@@ -82,7 +82,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-14"
+MAP_ENGINE_VERSION = "2026-06-15"
 
 
 # ---------- parsing ----------
@@ -593,7 +593,7 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     return "contains no test function (def test.../func TestX.../#[test]/it()"
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True):  # implements: REQ-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
@@ -742,6 +742,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     else:
         warns.extend(strict_warns)
 
+    lock_blocked = False
     if update_lock:
         changed = [(rid, lock.get(rid), h)
                    for rid, h in sorted(new_lock.items()) if lock.get(rid) != h]
@@ -751,12 +752,25 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print(f"  lock update: {rid} hash changed ({old_short}->{new_h[:8]})")
         for rid in removed:
             print(f"  lock update: {rid} removed from lock")
-        save_lock(reqs_dir, new_lock)
-        print("lock updated.")
+        # sync drift guard: refuse to silently re-baseline an EDITED confirmed/implemented
+        # contract unless the caller explicitly accepts it (accept_drift). A brand-new
+        # requirement (old hash None) is not drift.  # implements: REQ-CHECK-006
+        confirmed_drift = [rid for (rid, old_h, _h) in changed
+                           if old_h is not None
+                           and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
+        if confirmed_drift and not accept_drift:
+            lock_blocked = True
+            print("Contract drift on confirmed requirements; re-run with --accept-drift "
+                  "to advance the baseline:", file=sys.stderr)
+            for rid in confirmed_drift:
+                print(f"  drift: {rid}", file=sys.stderr)
+        else:
+            save_lock(reqs_dir, new_lock)
+            print("lock updated.")
 
     if as_json:
-        print(json.dumps({"ok": not errors, "errors": errors, "warnings": warns}))
-        return 1 if errors else 0
+        print(json.dumps({"ok": not (errors or lock_blocked), "errors": errors, "warnings": warns}))
+        return 1 if (errors or lock_blocked) else 0
 
     for w in warns:
         print("WARN ", w)
@@ -770,7 +784,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "
           f"{len(errors)} errors, {len(warns)} warnings.")
-    return 1 if errors else 0
+    return 1 if (errors or lock_blocked) else 0
 
 
 # Built-in scaffold so `new` needs no separate templates/ dir — the engine is
@@ -866,7 +880,7 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     engine runs headless (CI, pre-commit hook), so there is no interactive prompt. With
     mark_done it flips the matched TODO line to [x]; otherwise TODO.md is never touched."""
     if not cap_id:
-        print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+        print('usage: reqmap new --from-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
     key = name.strip().casefold()
     open_todos = [t for t in _parse_todos(root) if not t["done"]]
     matches = [t for t in open_todos if t["name"].strip().casefold() == key]
@@ -981,7 +995,7 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
     if "tested-by" not in roles:
         print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
               f"or set `test_exempt: <reason>` to silence the untested signal.")
-    print("  next: reqmap.py check --update-lock  &&  reqmap.py map")
+    print("  next: reqmap.py sync")
     return 0
 
 
@@ -2357,7 +2371,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ
     if created:
         print("created: " + ", ".join(created))
     print("\nNext: run `reqmap.py next` — it shows what to do, most important first.")
-    print("Then wire the gate: add `python scripts/reqmap.py check` to your pre-commit hook.")
+    print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
     return 0
 
 
@@ -3490,8 +3504,28 @@ def main():
             _stream.reconfigure(encoding="utf-8")
         except (AttributeError, ValueError, OSError):
             pass
-    ap = argparse.ArgumentParser(prog="reqmap")
-    ap.add_argument("cmd", choices=["init", "new", "scan", "check", "map", "export", "next", "lint", "show", "similar", "health", "extract", "candidates", "findings", "promote", "promote-todo", "review", "site"])
+    ap = argparse.ArgumentParser(
+        prog="reqmap",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Everyday:\n"
+            "  init                 bootstrap a repo (scaffold + draft + lock + map)\n"
+            "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID: from a TODO.md item)\n"
+            "  draft                derive draft requirements from untagged CODE\n"
+            "  confirm ID           validate a reviewed requirement -> status confirmed\n"
+            "  sync                 rescan + regenerate map + advance drift baseline (use --accept-drift on confirmed edits)\n"
+            "  gate                 the commit/CI gate: link sync + drift + test-link (report-only)\n"
+            "  next                 what to do next (counted risk buckets)\n"
+            "  show ID              one-requirement dossier\n"
+            "\nAdvanced:\n"
+            "  plan                 read-only extraction plan (writes nothing)\n"
+            "  dupes                flag requirement pairs with overlapping contracts\n"
+            "  scan / map / export / site / findings / lint / review / health\n"
+            "\nDeprecated:\n"
+            "  check                alias for 'gate' (removed next major)\n"
+        ),
+    )
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3513,6 +3547,9 @@ def main():
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--update-lock", action="store_true")
+    ap.add_argument("--accept-drift", dest="accept_drift", action="store_true",
+                    help="sync: advance the drift baseline even when a confirmed/implemented "
+                         "contract changed (otherwise sync refuses and exits non-zero)")
     ap.add_argument("--since", metavar="REF",
                     help="check: scope gate to requirements whose member files changed since REF "
                          "(hypothesis: highest-frequency changes; falls back to full scan on git error)")
@@ -3522,9 +3559,12 @@ def main():
     ap.add_argument("--check", dest="check_fresh", action="store_true",
                     help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
     ap.add_argument("--id", dest="new_id", default=None,
-                    help="promote-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+                    help="new --from-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
+    ap.add_argument("--from-todo", dest="from_todo", default=None,
+                    help="new: scaffold the requirement from a TODO.md item matched by this name "
+                         "(use with --id; add --mark-done to flip the item to [x])")
     ap.add_argument("--mark-done", dest="mark_done", action="store_true",
-                    help="promote-todo: also flip the matched TODO.md item to [x] (off by default)")
+                    help="new --from-todo: also flip the matched TODO.md item to [x] (off by default)")
     ap.add_argument("--cache", action="store_true",
                     help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
                          "files skip re-parsing. Off by default; results are identical with or without it.")
@@ -3549,13 +3589,11 @@ def main():
         tmpl = None
 
     if a.cmd == "new":
+        if getattr(a, "from_todo", None):
+            return cmd_promote_todo(reqs_dir, tmpl, a.from_todo, a.new_id, a.mark_done, code_root)
         if not a.arg:
-            print("usage: reqmap new AREA-NAME-NNN"); return 2
+            print("usage: reqmap new AREA-NAME-NNN   |   reqmap new --from-todo \"<todo name>\" --id AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
-    if a.cmd == "promote-todo":
-        if not a.arg:
-            print('usage: reqmap promote-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
-        return cmd_promote_todo(reqs_dir, tmpl, a.arg, a.new_id, a.mark_done, code_root)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
@@ -3571,11 +3609,29 @@ def main():
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
         return cmd_show(reqs, members, a.arg)
-    if a.cmd == "similar":
+    if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json)
+    if a.cmd == "gate":
+        # report-only: link sync + drift + test-link; never touches the lock.
+        return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
+                         getattr(a, "since", None))
+    if a.cmd == "sync":
+        # rescan + regenerate map + advance the drift baseline (guarded). Members were
+        # already scanned above; cmd_check rewrites the lock unless confirmed drift is
+        # detected without --accept-drift, then map regenerates only on success.
+        rc = cmd_check(reqs, members, reqs_dir, True, code_root,
+                       accept_drift=getattr(a, "accept_drift", False))
+        if rc == 0:
+            cmd_map(reqs, members, reqs_dir, code_root)
+        return rc
     if a.cmd == "check":
+        # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
+        # legacy behavior verbatim so consumer hooks/CI/Action keep working.
+        print("reqmap: 'check' is deprecated — use 'gate' (report) or 'sync' (regenerate "
+              "lock+map). Forwarding to legacy behavior; the alias is removed in the next major.",
+              file=sys.stderr)
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
                        getattr(a, "since", None))
         if a.update_lock:
@@ -3589,9 +3645,9 @@ def main():
                         attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
     if a.cmd == "export":
         return cmd_export(reqs, members, reqs_dir, code_root, a.out)
-    if a.cmd == "extract":
+    if a.cmd == "draft":
         return cmd_extract(reqs, members, code_root, reqs_dir)
-    if a.cmd == "candidates":
+    if a.cmd == "plan":
         md_globs = []
         for g in (a.md_glob or []):
             md_globs += [x.strip() for x in g.split(",") if x.strip()]
@@ -3600,9 +3656,9 @@ def main():
         return cmd_findings(reqs, reqs_dir, a.raw)
     if a.cmd == "review":
         return cmd_review(reqs, a.arg)
-    if a.cmd == "promote":
+    if a.cmd == "confirm":
         if not a.arg:
-            print("usage: reqmap promote AREA-NAME-NNN"); return 2
+            print("usage: reqmap confirm AREA-NAME-NNN"); return 2
         return cmd_promote(reqs, members, a.arg)
 
 

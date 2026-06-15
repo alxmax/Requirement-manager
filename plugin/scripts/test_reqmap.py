@@ -3152,5 +3152,136 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """The renamed CLI surface: gate (report-only) + check (deprecation alias)."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args],
+                              cwd=cwd, capture_output=True, text=True)
+
+    def _seed(self, d):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
+
+    def test_gate_runs_report_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            r = self._run("gate", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertNotIn("lock updated", r.stdout)  # gate never touches the lock
+
+    def test_check_alias_warns_and_forwards(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            r = self._run("check", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("deprecated", r.stderr.lower())
+            self.assertIn("gate", r.stderr.lower())
+
+
+    def test_new_verbs_dispatch(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            for verb in ("draft", "dupes"):
+                r = self._run(verb, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 0, f"{verb}: {r.stderr}")
+            # plan (cmd_candidates) always prints its extraction plan to stdout — a
+            # non-empty stdout proves the branch is wired, not falling through the
+            # dispatch chain to a no-op return (which would print nothing).
+            r = self._run("plan", "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue(r.stdout.strip(), "plan produced no output — branch not wired")
+
+    def test_old_verbs_are_unknown(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            for verb in ("extract", "candidates", "similar", "promote"):
+                r = self._run(verb, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 2, f"{verb} should be unknown")
+                self.assertIn("invalid choice", r.stderr)
+
+    def test_help_groups_everyday_and_advanced(self):
+        with tempfile.TemporaryDirectory() as d:
+            r = self._run("--help", cwd=d)
+            self.assertEqual(r.returncode, 0)
+            self.assertIn("Everyday", r.stdout)
+            self.assertIn("Advanced", r.stdout)
+            self.assertIn("gate", r.stdout)
+            self.assertIn("sync", r.stdout)
+
+    def test_new_from_todo_scaffolds_and_old_verb_gone(self):
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "requirements"), exist_ok=True)
+            _write(os.path.join(d, "TODO.md"), "# TODO\n\n## v1.0\n- [ ] Make widget\n")
+            r = self._run("new", "--from-todo", "Make widget", "--id", "REQ-W-001",
+                          "--root", d, cwd=d)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertTrue(os.path.exists(os.path.join(d, "requirements", "REQ-W-001.md")))
+            r2 = self._run("promote-todo", "Make widget", "--id", "REQ-W-002", "--root", d, cwd=d)
+            self.assertEqual(r2.returncode, 2)  # old verb removed
+
+
+class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """sync must not silently re-baseline an edited confirmed contract."""
+
+    def _confirmed_repo(self, d, body_tail=""):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="confirmed", layer="feature",
+                          extra="", title="T") +
+               "\n## WHAT — Contract\n- shall do the thing.\n## HOW — Acceptance\n- Given X When Y Then Z\n"
+               + body_tail)
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        _write(os.path.join(d, "test_impl.py"), "def test_a():\n    assert True  " + tb_tag("REQ-A-001"))
+        return rdir
+
+    def test_sync_blocks_confirmed_drift_without_flag(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)  # seed lock
+            lock_before = open(R.lock_path(rdir), encoding="utf-8").read()
+            # edit the contract -> drift
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            with redirect_stdout(io.StringIO()):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
+            self.assertEqual(rc, 1)  # blocked
+            self.assertEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # lock untouched
+
+    def test_sync_accept_drift_advances_baseline(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)
+            lock_before = open(R.lock_path(rdir), encoding="utf-8").read()
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            with redirect_stdout(io.StringIO()):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=True)
+            self.assertEqual(rc, 0)
+            self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # advanced
+
+    def test_json_path_reflects_blocked_lock(self):  # guard the as_json early-return
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d)
+            reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)
+            self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
+            reqs2 = R.load_requirements(rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d,
+                                 as_json=True, accept_drift=False)
+            self.assertEqual(rc, 1)  # blocked lock surfaces as non-zero even on the json path
+            # the json line is printed last (after the 'lock update:' diff lines)
+            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

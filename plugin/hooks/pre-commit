@@ -16,7 +16,7 @@
 if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
 # -X utf8 belt-and-suspenders: the engine self-reconfigures stdout to UTF-8, but the
 # flag guarantees the WARN/info lines (em-dashes) print on legacy Windows codepages.
-if ! "$PY" -X utf8 scripts/reqmap.py check; then
+if ! "$PY" -X utf8 scripts/reqmap.py gate; then
   echo "" >&2
   echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
   exit 1

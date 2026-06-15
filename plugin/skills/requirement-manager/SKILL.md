@@ -20,9 +20,9 @@ A script reconciles the two and generates a navigable map.
 
 When this skill is invoked, choose one of two paths:
 
-- **With an action argument** (e.g. `requirement-manager regenerate-map`) — skip the
-  menu and run that action directly. Accepted arguments: `init`,
-  `regenerate-requirements`, `update-engine`, `regenerate-map`, `intent-triage` (hyphen or space,
+- **With an action argument** (e.g. `requirement-manager sync`) — skip the
+  menu and run that action directly. Accepted arguments: `setup`,
+  `draft`, `sync`, `update-engine`, `triage` (hyphen or space,
   case-insensitive).
 - **Bare** (no argument) — present the five actions below with `AskUserQuestion` and
   run the one the user picks.
@@ -31,13 +31,13 @@ All actions run from the repo root where `scripts/reqmap.py` is vendored (see Se
 After any action, summarize what changed and, when useful, point to
 `python scripts/reqmap.py next` for the best follow-up.
 
-| Action | What it does | Commands to run (in order) |
+| Action | What it does and when to pick it | Commands to run (in order) |
 |---|---|---|
-| **init / reinit everything** | Idempotent bootstrap: scaffold `requirements/` and `.reqmapignore` if missing, draft new requirements for any untagged code/prose, then rebuild the lock + map. Existing requirement files and membership tags are **preserved**. Never clobbers `.reqmapignore`. | `python scripts/reqmap.py init` |
-| **regenerate requirements** | Discovery pass: draft new requirements for any untagged code/prose files. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After extraction run `check` and report the draft count + gate result (`N errors`). Remind the user to review + `promote` the real ones. | `python scripts/reqmap.py extract` → `check` → report draft count + result |
-| **update engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py check` → `map` |
-| **regenerate map** | Refresh the generated artifacts (lock + Mermaid map + JSON graph) without drafting anything. | `python scripts/reqmap.py scan` → `check --update-lock` → `map` → advisory doc-sync |
-| **intent triage** | Classify all auto-extracted requirements as Core / Emergent / Accidental. Run when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py next` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → promote path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py scan` → `check --update-lock` → `map`. |
+| **setup** (first use in a repo) | Idempotent bootstrap: scaffold `requirements/` and `.reqmapignore` if missing, draft new requirements for any untagged code/prose, then rebuild the lock + map. Pick this when the repo has never had a requirement registry. Existing requirement files and membership tags are **preserved**. Never clobbers `.reqmapignore`. | `python scripts/reqmap.py init` |
+| **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py draft` → `gate` → report draft count + result |
+| **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
+| **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after `/plugin update` to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py gate` → `map` |
+| **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py next` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
 
 **Advisory doc-sync (assistant step, not the engine).** After `map`, for each
 sync-only doc (bucket 2) tagged `generated-from: <ID>`, the assistant reads the doc,
@@ -72,13 +72,13 @@ intent triage before any other action.
 1. Read each requirement's `## WHAT — Contract` to the user in one sentence.
 2. User says C, E, or A.
 3. After classifying all: apply decisions in bulk.
-   - Core → leave for human review + promote path (`reqmap.py promote <ID>`).
+   - Core → leave for human review + confirm path (`reqmap.py confirm <ID>`).
    - Emergent → keep as `baseline`; no action needed.
    - Accidental → set `status: deprecated` in frontmatter; delete implementing
      code (check for load-bearing callers first with `grep` before deleting).
 4. For Accidental code that IS still referenced: keep the code, strip the
    `implements:` tag, delete only the requirement file.
-5. Run `reqmap.py scan` → `check --update-lock` → `map` to verify.
+5. Run `reqmap.py sync` to verify.
 
 ## Setup (first use in a repo)
 
@@ -199,7 +199,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
 
 ### Prose & doc capabilities (the three buckets)
 
-`extract`/`init` scan `.md`/`.html` by default and classify each prose file
+`draft`/`init` scan `.md`/`.html` by default and classify each prose file
 (prose = human-readable spec/prompt text, not source code):
 
 1. **Ignore** — meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`,
@@ -255,7 +255,7 @@ expected and acceptable.
 
 ## The gate (run at commit/merge — keep it non-optional)
 
-`python scripts/reqmap.py check` verifies these syncs and exits non-zero on **link-sync errors only**:
+`python scripts/reqmap.py gate` is report-only: it verifies these syncs and exits non-zero on **link-sync errors only**. It **never** touches `_reqlock.json`. To advance the drift baseline after intentionally editing a requirement, use `sync` (with `--accept-drift` when a confirmed/implemented contract changed).
 
 | Check | Level | Effect on exit code |
 |---|---|---|
@@ -265,7 +265,7 @@ expected and acceptable.
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
 
-Use `check --strict` to promote test-link integrity and drift to errors (useful in CI
+Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI
 for a corpus where all requirements are confirmed and lock is current).
 
 - **link sync** — every code tag points to a real requirement; every `confirmed`
@@ -276,8 +276,8 @@ for a corpus where all requirements are confirmed and lock is current).
   lacks. Silent on a well-formed corpus.
 - **drift** — content hash of each `confirmed` requirement compared to `_reqlock.json`;
   a changed requirement whose members were not re-touched is flagged WARN (never ERROR by
-  default — design decision from day 1; see REQ-CHECK-006). Use `check --update-lock`
-  after intentionally editing a requirement.
+  default — design decision from day 1; see REQ-CHECK-006). Advance the lock with `sync`
+  (use `--accept-drift` when the edited requirement is `confirmed` or `implemented`).
 
 Intent sync is *not* automatable — it surfaces at human review (promote
 `baseline → confirmed`).
@@ -289,7 +289,7 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 ```bash
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
-python -X utf8 scripts/reqmap.py check
+python -X utf8 scripts/reqmap.py gate
 EOF
 chmod +x .git/hooks/pre-commit
 ```
@@ -317,42 +317,50 @@ jobs:
 `warn_if_stale` (the vendored-copy staleness notice) is gated on `CLAUDE_PLUGIN_ROOT`,
 unset in CI — so it is silent and exit-neutral there by design; the action enforces
 only the gate proper. If you prefer not to depend on the action, run the engine
-directly instead of the `uses:` line: `- run: python -X utf8 scripts/reqmap.py check`.
+directly instead of the `uses:` line: `- run: python -X utf8 scripts/reqmap.py gate`.
 
 The hook and the CI job are independent — wire both so the gate runs locally
 before push *and* on the remote for PRs.
 
 ## Commands
 
+Creation verbs (pick by input, not by outcome):
+- `draft` — input is **existing untagged CODE** (or prose); auto-extracts draft requirements from it.
+- `new AREA-NAME-NNN` — input is **nothing yet**; scaffolds one blank requirement from the built-in template.
+- `new --from-todo "TODO name" --id AREA-NAME-NNN` — input is a **TODO.md item**; scaffolds a requirement draft pre-filled from that item. Replaces the old `promote-todo` verb. Add `--mark-done` to flip the TODO item to `[x]` at the same time.
+
 - `python scripts/reqmap.py init`              — first-use bootstrap: scaffold `requirements/` + `.reqmapignore`, draft requirements from existing code, build the lock + map, and print guided next steps. Idempotent; never clobbers an existing `.reqmapignore`.
-- `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
-- `python scripts/reqmap.py promote <ID>`        — the human-validation step: flip a reviewed requirement's `status` to `confirmed` (one frontmatter edit). Refuses if it has no `implements:` member (a confirmed requirement must point to code); warns if it has no `tested-by:`. Re-run `check --update-lock` + `map` after.
+- `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the built-in template. Use `--from-todo "name" --id AREA-NAME-NNN` to pre-fill from a TODO.md item instead.
+- `python scripts/reqmap.py confirm <ID>`        — the human-validation step: flip a reviewed requirement's `status` to `confirmed` (one frontmatter edit). Refuses if it has no `implements:` member (a confirmed requirement must point to code); warns if it has no `tested-by:`. Re-run `sync` after.
 - `python scripts/reqmap.py scan`              — list code members per capability
-- `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (extract `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
+- `python scripts/reqmap.py sync`              — rescan + advance the drift baseline + regenerate the map in one step. Use after editing requirement files or tagging new code members. **Drift guard:** if a `confirmed` or `implemented` contract changed, `sync` refuses and exits non-zero unless you pass `--accept-drift` (which explicitly advances the baseline for that contract).
+- `python scripts/reqmap.py gate`              — run the commit/CI gate (report-only): link sync + drift + test-link integrity. **Never** touches `_reqlock.json`. Use `gate --strict` to promote drift + test-link warnings to errors.
+- `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (draft `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
 - `python scripts/reqmap.py lint`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks: `missing-section` (error — a non-draft lacking `## WHAT — Contract` or `## HOW — Acceptance`), `long-sentence` (warn — a sentence over 35 words), `stacked-conditions` (warn — a `shall`/`must` line with ≥3 `and`/`or` joins). Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings only (warnings stay advisory, so heuristic prose checks never flake CI). Jargon-before-definition is intentionally out of scope in v1 (no term dictionary → too many false positives).
 - `python scripts/reqmap.py show <ID>`         — print a consolidated, human-readable dossier for one requirement: header (id · status · layer · milestone), intent, Contract bullets, dependencies both directions (`depends_on` + reverse `Depended on by`), code members grouped by role with `file:line`, open `## WHAT — Verify intent` questions (the `findings` "None" filter applied), and risk signals with advice (same `_risk_signals` source as `next`). Answers "what does this do / where is X" in one command. Read-only; returns non-zero on an unknown id so a typo is visible to CI.
-- `python scripts/reqmap.py similar`           — flag requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. Stdlib TF-IDF (smoothed idf) + cosine over each requirement's title + intent + Contract bullets (Notes excluded as noise); prints pairs most-similar-first with their score and top shared terms. `--threshold T` overrides the default `0.35`. Read-only, always exit 0 (advisory — a human decides if a flagged pair is a real duplicate). Lexical, not semantic: it surfaces likely duplicates, it does not prove duplication. Requirement-to-requirement only; untagged-code-to-requirement matching stays with `candidates`.
+- `python scripts/reqmap.py dupes`             — flag requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. Stdlib TF-IDF (smoothed idf) + cosine over each requirement's title + intent + Contract bullets (Notes excluded as noise); prints pairs most-similar-first with their score and top shared terms. `--threshold T` overrides the default `0.35`. Read-only, always exit 0 (advisory — a human decides if a flagged pair is a real duplicate). Lexical, not semantic: it surfaces likely duplicates, it does not prove duplication. Requirement-to-requirement only; untagged-code-to-requirement matching stays with `plan`.
 - `python scripts/reqmap.py health`            — print a corpus coherence snapshot: a headline score (the percentage of requirements green on EVERY axis — `confirmed` + an `implements` member + tested-or-`test_exempt` + no open verify-intent + not drifted) plus the component counts (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift). `--json` emits the same numbers as a parseable object for a CI badge. Read-only, always exit 0 (a report, not a gate). The score is strict by design: one open question or one drifted contract drops a requirement out of the green count.
-- `python scripts/reqmap.py check`             — run the gate (use as pre-commit/CI hook)
 - `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
 - `python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats` — inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. `init` runs this best-effort.
 - `python scripts/reqmap.py export`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
-- `python scripts/reqmap.py extract`           — draft one requirement per untagged file. Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
-- `python scripts/reqmap.py candidates`        — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `extract`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
+- `python scripts/reqmap.py draft`             — draft one requirement per untagged file. Input: **existing untagged code** (and prose). Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
+- `python scripts/reqmap.py plan`              — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `draft`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
 - `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view
 
-**Workflow order** — after modifying requirement files, run these three as a unit
+**`check` is a deprecated alias for `gate`** (removed in the next major version). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
+
+**Workflow order** — after modifying requirement files, run `sync` as a unit
 so the lock and map stay in sync:
 
 ```bash
-python scripts/reqmap.py scan
-python scripts/reqmap.py check --update-lock
-python scripts/reqmap.py map
+python scripts/reqmap.py sync
+# or, if you edited a confirmed/implemented contract:
+python scripts/reqmap.py sync --accept-drift
 ```
 
 `reqmap.py map --check` is the freshness gate (no write): it rebuilds the map in
 memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
-edit shifted it). Wire it next to `check` in your pre-commit hook / CI so a stale
+edit shifted it). Wire it next to `gate` in your pre-commit hook / CI so a stale
 map can't be committed. A repo that doesn't track a map passes silently.
 
 ## Project site (`reqmap.py site`)
@@ -401,9 +409,9 @@ Before merging a feature branch, bump the semver **on that branch** so the versi
 - **minor** (X.**Y**.0) — new commands, new viewer tabs, new frontmatter fields, new generated outputs
 - **major** (**X**.0.0) — breaking changes to the requirement schema, gate behavior, or CLI interface
 
-## Legacy / brownfield (extract mode)
+## Legacy / brownfield (draft mode)
 
-`extract` walks the code and proposes `draft` requirements (structure, input/output
+`draft` walks the code and proposes `draft` requirements (structure, input/output
 from signatures, `depends_on` from imports). It **cannot** recover intent — it only
 captures observed behavior, so:
 - Everything it emits is `draft`/`baseline`, never `confirmed`. It never canonizes a

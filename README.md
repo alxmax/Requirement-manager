@@ -31,7 +31,7 @@ tool turns the spec into a real file that lives **next to the code** and is
    # implements: AUTH-LOGIN-001
    def login(email, password): ...
    ```
-3. **The gate keeps them honest.** `reqmap.py check` verifies that every tag
+3. **The gate keeps them honest.** `reqmap.py gate` verifies that every tag
    points to a real requirement, every requirement has code, and nothing has
    silently changed. Run it before every commit (and in CI).
 4. **The map shows the big picture.** `reqmap.py map` generates diagrams and a
@@ -43,7 +43,7 @@ tool turns the spec into a real file that lives **next to the code** and is
 # from inside any project of yours
 python scripts/reqmap.py init     # creates the folders, drafts requirements from your
                                   # existing code, and prints what to do next
-python scripts/reqmap.py check    # the gate: are code and specs in sync?
+python scripts/reqmap.py gate     # the gate: are code and specs in sync? (report-only)
 python scripts/reqmap.py map      # build the visual map → open requirements/_map.html
 ```
 
@@ -102,20 +102,21 @@ script, so there's nothing else to download.
 | Command | What it does |
 |---|---|
 | `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
-| `check` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`) |
+| `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias, kept for backward compat.) |
+| `sync` | Rescan + advance the drift baseline + regenerate the map in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
 | `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Also reads `TODO.md` from the repo root and inlines a `todos` array into `_map.json` so the Roadmap tab can show planned work alongside requirements |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
-| `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template |
+| `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template. Use `--from-todo "name" --id ID` to pre-fill from a TODO.md item. |
 | `scan` | List which code belongs to which requirement |
 | `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors |
 | `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
-| `similar` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35 |
+| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35 |
 | `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge |
 | `export` | Emit just the graph JSON (for an external front-end) |
-| `extract` | Draft requirements from untagged legacy code |
-| `candidates` | Read-only JSON plan for AI-assisted extraction (writes no files) |
+| `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |
+| `plan` | Read-only JSON plan for AI-assisted extraction (writes no files; use before `draft`) |
 | `findings` | Collect open "needs human review" notes into `_findings.md` |
-| `promote <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step) |
+| `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
 
 ## Run the gate in CI
 
@@ -135,9 +136,9 @@ jobs:
       - uses: alxmax/requirement-manager/check@v1
 ```
 
-The action just runs `reqmap.py check`. Inputs `reqmap-path` and
+The action runs `reqmap.py gate`. Inputs `reqmap-path` and
 `working-directory` adapt it to wherever you vendored the engine — see
-[`check/action.yml`](check/action.yml).
+[`check/action.yml`](check/action.yml). (`check` is kept as a deprecation alias so existing `@v1` usages need no change.)
 
 ## Glossary (the jargon, in plain words)
 
@@ -147,7 +148,7 @@ The action just runs `reqmap.py check`. Inputs `reqmap-path` and
 - **Tag / membership** — the comment that links code to a requirement. Four
   roles exist: `implements`, `generated-from`, `validated-against`, `tested-by`.
   The list of members is discovered by scanning the code — never hand-maintained.
-- **The gate** — the `check` command; it fails when code and specs disagree.
+- **The gate** — the `gate` command; it fails when code and specs disagree. (`check` is a deprecated alias.)
 - **Drift** — a requirement's contract changed but the code wasn't re-checked.
   The tool spots this by hashing the spec and comparing it to a saved baseline
   (`_reqlock.json`).
