@@ -21,3 +21,10 @@ docs/before_after_ieee29148.*
 
 # Superpowers session artifacts (top-level)
 .superpowers/
+
+# Excalidraw diagrams: regenerable outputs (see diagrams/README.md for the canonical
+# regeneration command). The dir + README are tracked; the generated scenes/viewers are not.
+diagrams/*.excalidraw
+diagrams/*.html
+# Guard: raw excalidraw scenes must never land in the published docs/ Pages site
+docs/*.excalidraw
