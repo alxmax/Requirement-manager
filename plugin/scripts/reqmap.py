@@ -2991,7 +2991,8 @@ def _render_region(name, ctx):  # implements: REQ-SITE-026
 # A self-contained default presentation page written by `site` scaffold mode.
 # Inline (not a vendored file) so the engine stays hermetic. NAV and STATS are
 # marker-delimited engine-owned regions; everything else is authored prose the
-# user/skill rewrites. Source markup: docs/reqmap_site_prototype.html.
+# user/skill rewrites. This template is the canonical source (the prototype that
+# seeded it has been removed).
 # Callers fill %%REPO_NAME%% / %%REPO_URL%% via str.replace (NOT str.format —
 # the CSS contains literal braces).
 SITE_TEMPLATE = """\
