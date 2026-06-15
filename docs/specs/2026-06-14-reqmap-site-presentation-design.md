@@ -4,7 +4,7 @@
 - **Status:** Approved (brainstorm), pending spec review
 - **Requirement:** `REQ-SITE-026` (new; `depends_on: REQ-PAGES-021, REQ-MAP-007, REQ-VIEWER-007`)
 - **Audit:** Senate `2026-06-14_152646-reqmap-site-landing-page` — verdict **MODIFY**; all blocking conditions folded into this design.
-- **Demo:** `docs/reqmap_site_prototype.html` (hybrid layout, applied conditions).
+- **Demo:** the page prototype (removed after implementation; markup now in `SITE_TEMPLATE`, `plugin/scripts/reqmap.py`).
 
 ## 1. Problem
 
