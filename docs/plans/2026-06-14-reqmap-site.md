@@ -6,7 +6,7 @@
 
 **Architecture:** Two layers — the stdlib engine (`reqmap.py`, flag-driven, headless-safe) does the injection/scaffold; the AI skill (separate, not in this plan) does the interactive asking. v1 engine-owns two regions: `NAV` (links: Live Map / Diagram / GitHub — refreshed but excluded from the freshness gate because it embeds the fork-specific repo URL) and `STATS` (deterministic counts — gated). Reuses `REQ-PAGES-021`'s git-root + Pages-signal machinery. `COMMANDS`/`LAYERS` are authored in the scaffold for v1 and become engine-owned in a follow-up plan.
 
-**Tech Stack:** Python 3 stdlib only (`subprocess`, `re`, `os`), `unittest`. Source spec: `docs/specs/2026-06-14-reqmap-site-presentation-design.md`. Visual reference: `docs/reqmap_site_prototype.html`.
+**Tech Stack:** Python 3 stdlib only (`subprocess`, `re`, `os`), `unittest`. Source spec: `docs/specs/2026-06-14-reqmap-site-presentation-design.md`. Visual reference: `SITE_TEMPLATE` in `plugin/scripts/reqmap.py` (the implemented page template; the prototype it was lifted from has been removed).
 
 **Conventions to match:** every new function/code path carries `# implements: REQ-SITE-026`; tests carry `# tested-by: REQ-SITE-026`; engine functions never raise on missing git/files (mirror `_repo_name`, `_docs_publish_path`). Run all commands from `plugin/`.
 
@@ -313,11 +313,11 @@ git commit -m "feat(site): NAV + STATS region renderers (REQ-SITE-026)"
 
 **Files:**
 - Modify: `plugin/scripts/reqmap.py`
-- Reference: `docs/reqmap_site_prototype.html` (the committed visual)
+- Reference: `SITE_TEMPLATE` in `plugin/scripts/reqmap.py` (the implemented template; source prototype removed)
 
 - [ ] **Step 1: Add `SITE_TEMPLATE` as an inline constant** (no test step — exercised by Task 6's scaffold test)
 
-Create `SITE_TEMPLATE` by lifting the markup of `docs/reqmap_site_prototype.html` with these exact transformations (the prototype is the source of truth for the CSS/layout; do NOT invent new markup):
+Create `SITE_TEMPLATE` by lifting the markup of the page prototype (now removed) with these exact transformations (the prototype was the source of truth for the CSS/layout; do NOT invent new markup):
 
 1. Keep the entire `<style>` block verbatim.
 2. Replace the hardcoded nav `<nav class="nav-links">…</nav>` block with the marker pair only:
@@ -333,7 +333,7 @@ Header comment above the constant:
 # A self-contained default presentation page written by `site` scaffold mode.
 # Inline (not a vendored file) so the engine stays hermetic. The NAV and STATS
 # regions are marker-delimited and engine-owned; everything else is authored
-# prose the user/skill rewrites. Source markup: docs/reqmap_site_prototype.html.
+# prose the user/skill rewrites. Source markup: the page prototype (since removed).
 SITE_TEMPLATE = """..."""   # implements: REQ-SITE-026
 ```
 
