@@ -86,7 +86,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-16.1"
+MAP_ENGINE_VERSION = "2026-06-16.2"
 
 
 # ---------- parsing ----------
@@ -691,6 +691,10 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
                 warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        # owner accountability (warn): a confirmed requirement with owner: auto was never
+        # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
+        if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
+            warns.append(f"{rid}: confirmed requirement has owner: auto — assign a named owner")
         # behavior-sync (warn-only): a tested-by link must point at a file that
         # exists and actually holds tests, else it asserts coverage it lacks.
         if m.get("status") == "confirmed" and tests:
@@ -1894,7 +1898,10 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only.
     `member_list` (optional [(role, file, line), ...]) enables the member-based
-    file-spread check; when omitted, that check is skipped."""
+    file-spread check; when omitted, that check is skipped.
+    Checks named in the requirement's `lint_exempt:` frontmatter list are silently
+    skipped and not counted against the requirement."""
+    exempt = set(r["meta"].get("lint_exempt") or [])
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
@@ -1995,6 +2002,8 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                 "severity": "warn", "check": "file-spread",
                 "detail": "implements span {} files (>= {}): capability may be diffuse — "
                           "confirm cohesion or split".format(len(impl_files), LINT_FILE_SPREAD_MAX)})
+    if exempt:
+        findings = [f for f in findings if f["check"] not in exempt]
     return findings
 
 
@@ -2004,17 +2013,28 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     mechanical. Checks: missing-section (error), long-sentence (warn),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
     ac-count-high (warn), vague-term (warn). Read-only. Exit-neutral by default; with
-    --strict it exits non-zero on any error-severity finding (warnings never change exit)."""
+    --strict it exits non-zero on any error-severity finding AND promotes structural
+    checks (ac-count-high) to error severity.
+    Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
+    active exemptions are printed after the requirement header."""
+    # Checks promoted from warn→error in --strict mode (structural, not style).
+    STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
     errors = warns = 0
     for rid, r in targets:
         fs = lint_requirement(rid, r, (members or {}).get(rid))
-        if not fs:
+        exempt = set(r["meta"].get("lint_exempt") or [])
+        if not fs and not exempt:
             continue
         print("{}   requirements/{}.md".format(rid, rid))
+        if exempt:
+            print("  (exempt: {})".format(", ".join(sorted(exempt))))
         for f in fs:
-            if f["severity"] == "error":
+            effective = f["severity"]
+            if strict and f["check"] in STRICT_PROMOTE:
+                effective = "error"
+            if effective == "error":
                 errors += 1; mark = "ERROR"
             else:
                 warns += 1; mark = "warn "
@@ -2024,7 +2044,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     if errors == 0 and warns == 0:
         print("All clean — every linted requirement is well-formed and readable.")
     if strict and errors:
-        print("FAIL (--strict): {} structural error(s).".format(errors))
+        print("FAIL (--strict): {} structural error(s) (includes promoted structural warns).".format(errors))
         return 1
     return 0
 
@@ -2209,7 +2229,66 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
 
 
 # ---------- health (corpus coherence snapshot) ----------
-def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALTH-017
+def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
+    """Per-directory coverage report: how many scannable files in each top-level
+    directory carry at least one membership tag vs. total scannable files.
+    Helps identify which parts of the codebase have no requirement coverage."""
+    ignore = load_ignore(code_root, reqs_dir)
+    # requirements dir contains spec files, not implementation files — exclude from coverage
+    reqs_abs = os.path.normcase(os.path.abspath(reqs_dir)) if reqs_dir else None
+    tagged_files = set()
+    for mlist in members.values():
+        for _role, fp, _ln in mlist:
+            tagged_files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, fp))))
+
+    buckets = {}  # dir_label -> [total, tagged]
+    for dirpath, dirs, files in os.walk(code_root):
+        dirs[:] = [d for d in sorted(dirs) if d not in (".git", "__pycache__", "node_modules")]
+        for fn in sorted(files):
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            if reqs_abs and os.path.normcase(os.path.abspath(fp)).startswith(reqs_abs + os.sep):
+                continue
+            rel = os.path.relpath(fp, code_root).replace("\\", "/")
+            if any(fnmatch.fnmatch(rel, p) for p in ignore):
+                continue
+            # Group by first path component (top-level directory or "." for root files)
+            parts = rel.split("/")
+            label = parts[0] if len(parts) > 1 else "."
+            if label not in buckets:
+                buckets[label] = [0, 0]
+            buckets[label][0] += 1
+            if os.path.normcase(os.path.abspath(fp)) in tagged_files:
+                buckets[label][1] += 1
+
+    rows = []
+    for label in sorted(buckets):
+        total, tagged = buckets[label]
+        pct = round(100 * tagged / total) if total else 0
+        rows.append({"dir": label, "total": total, "tagged": tagged, "pct": pct})
+
+    if as_json:
+        print(json.dumps(rows, indent=2))
+        return 0
+
+    if not rows:
+        print("No scannable files found.")
+        return 0
+
+    w = max(len(r["dir"]) for r in rows)
+    for r in rows:
+        bar = "#" * (r["pct"] // 5) + "." * (20 - r["pct"] // 5)
+        print("{:<{w}}  {:>3}/{:<3}  ({:>3}%)  [{}]".format(
+            r["dir"], r["tagged"], r["total"], r["pct"], bar, w=w))
+    total_all = sum(r["total"] for r in rows)
+    tagged_all = sum(r["tagged"] for r in rows)
+    pct_all = round(100 * tagged_all / total_all) if total_all else 0
+    print("\nTotal: {}/{} files tagged ({:>3}%)".format(tagged_all, total_all, pct_all))
+    return 0
+
+
+def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False):  # implements: REQ-HEALTH-017
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
@@ -2255,6 +2334,12 @@ def cmd_health(reqs, members, reqs_dir, as_json=False):  # implements: REQ-HEALT
             "confirmed": confirmed, "implemented": implemented, "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
             "open_intent": open_intent, "drift": drifted}
+    if as_badge:
+        color = "brightgreen" if score == 100 else "green" if score >= 80 else "yellow" if score >= 60 else "red"
+        badge = {"schemaVersion": 1, "label": "requirements",
+                 "message": "{}/{} | {}%".format(confirmed, total, score), "color": color}
+        print(json.dumps(badge))
+        return 0
     if as_json:
         print(json.dumps(data, indent=2))
         return 0
@@ -3566,7 +3651,7 @@ def main():
             "  check                alias for 'gate' (removed next major)\n"
         ),
     )
-    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site"])
+    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site", "coverage"])
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
@@ -3586,7 +3671,9 @@ def main():
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="check|health: emit structured JSON output (for CI/badge consumption)")
+                    help="check|health|coverage: emit structured JSON output (for CI/badge consumption)")
+    ap.add_argument("--badge", dest="as_badge", action="store_true",
+                    help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, color)")
     ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--accept-drift", dest="accept_drift", action="store_true",
                     help="sync: advance the drift baseline even when a confirmed/implemented "
@@ -3653,7 +3740,9 @@ def main():
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "health":
-        return cmd_health(reqs, members, reqs_dir, a.as_json)
+        return cmd_health(reqs, members, reqs_dir, a.as_json, getattr(a, "as_badge", False))
+    if a.cmd == "coverage":
+        return cmd_coverage(reqs, members, code_root, reqs_dir, a.as_json)
     if a.cmd == "gate":
         # report-only: link sync + drift + test-link; never touches the lock.
         return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,

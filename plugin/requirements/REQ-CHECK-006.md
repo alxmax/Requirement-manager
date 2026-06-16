@@ -7,6 +7,7 @@ depends_on: [CORE-PARSE-001, CORE-SCAN-002, CORE-DRIFT-003]
 satisfies: [NEED-SSOT-001]
 superseded_by:
 milestone: v1.02
+lint_exempt: [ac-count-high]
 ---
 
 # The gate
@@ -48,6 +49,11 @@ milestone: v1.02
 - When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed
   plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the
   variable is unset in CI, so the notice is silent and exit-neutral there.
+- The dev-CI version-coherence script `scripts/check_versions.py` (repo root, never seeded
+  into consumer repos) enforces plugin manifest alignment as the first step in this repo's
+  own CI pipeline (`check_versions.py → gate → map --check → test_reqmap.py`). It is
+  outside the plugin scan root and has no requirement of its own; its invariant (semver
+  consistency across `plugin.json` + `marketplace.json`) is documented in `CLAUDE.md`.
 
 ## HOW — Acceptance (= tests)
 AC-1

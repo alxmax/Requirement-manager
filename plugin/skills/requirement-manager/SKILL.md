@@ -22,9 +22,9 @@ When this skill is invoked, choose one of two paths:
 
 - **With an action argument** (e.g. `requirement-manager sync`) — skip the
   menu and run that action directly. Accepted arguments: `setup`,
-  `draft`, `sync`, `update-engine`, `triage` (hyphen or space,
+  `draft`, `sync`, `confirm`, `update-engine`, `triage` (hyphen or space,
   case-insensitive).
-- **Bare** (no argument) — present the five actions below with `AskUserQuestion` and
+- **Bare** (no argument) — present the six actions below with `AskUserQuestion` and
   run the one the user picks.
 
 All actions run from the repo root where `scripts/reqmap.py` is vendored (see Setup).
@@ -35,6 +35,7 @@ After any action, summarize what changed and, when useful, point to
 |---|---|---|
 | **setup** (first use in a repo) | Idempotent bootstrap: scaffold `requirements/` and `.reqmapignore` if missing, draft new requirements for any untagged code/prose, then rebuild the lock + map. Pick this when the repo has never had a requirement registry. Existing requirement files and membership tags are **preserved**. Never clobbers `.reqmapignore`. | `python scripts/reqmap.py init` |
 | **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py draft` → `gate` → report draft count + result |
+| **confirm** (validate a reviewed requirement) | Human-validation step: flip a reviewed requirement's `status` to `confirmed`. Pick this when you have reviewed a `draft` or `baseline` requirement and verified its contract matches the code's actual behaviour. The engine refuses if the requirement has no `implements:` member (a confirmed requirement must point to code). After confirming, run `sync`. | 1. Tag the implementing file: add `# implements: <ID>` (and `# tested-by: <ID>` if there's a test). 2. `python scripts/reqmap.py confirm <ID>`. 3. `python scripts/reqmap.py sync`. |
 | **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
 | **update-engine** (after a plugin update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after `/plugin update` to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | copy `${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py` → `scripts/reqmap.py` and `${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html` → `scripts/_map_viewer.html` (Windows PowerShell: `Copy-Item`; POSIX: `cp`), then `python scripts/reqmap.py gate` → `map` |
 | **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py next` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
