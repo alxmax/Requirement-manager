@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased
+
+**License correction.** `plugin/.claude-plugin/plugin.json` declared `"MIT"` while
+the `LICENSE` file and README are Business Source License 1.1 — corrected to the
+SPDX id `"BUSL-1.1"`.
+
+**excalidraw-diagram — C4 removed + docs overhaul.**
+- **Removed the C4 helpers** (`Scene.c4()` and `Scene.person()`). They were
+  undocumented and pulled the skill toward formal C4 notation; the canonical
+  poster (`examples/make_full_architecture.py`) now uses plain role-coloured
+  `box()`es. ISO 5807 flowchart shapes are unaffected.
+- **SKILL.md restructured for its purpose** — a "The goal" statement up front, a
+  "Diagramming a repo's architecture" recipe pointing at
+  `make_full_architecture.py`, a "Worked examples — ❌ → ✅ variants" section
+  (repo poster, pipeline, parallel agents, decision flow, feedback loop), and the
+  box-sizing guidance softened to lean on the `overflow_check` gate.
+- **Doc↔code drift closed.** The cheat-sheet and `references/excalidraw_format.md`
+  now document the previously-undocumented public API the examples rely on
+  (`section()`, `pipeline()`, the ISO shapes, `path()`, `glossary()`), the full
+  `Scene()` signature, all four `save()` gates (`crossing_check`, `legend_check`,
+  `overflow_check`, `text_overlap_check`), and `check_text_overflow()` /
+  `check_text_overlaps()`.
+
+> Note: CHANGELOG entries for plugin `v2.2.0` and `v2.3.0` are missing (the
+> manifests are at `2.3.0`); backfill or supersede on the next tagged release.
+
 ## plugin `v2.1.1` — 2026-06-15
 
 **Audit follow-up (Consilium Trias).** Fixes from a multi-lens audit of the v2.1.0 excalidraw CLI branch:
