@@ -35,8 +35,9 @@ milestone: v1.00
   optionally after a `WHAT`/`HOW` prefix — starts with "Contract", "Acceptance",
   "Input" or "Output" contributes to the hash; a commentary heading such as
   `## Notes — contract caveats` does not.
-- The lock distinguishes "absent" from "corrupt" only at the gate (`check` warns on a
+- The lock distinguishes "absent" from "corrupt" only at the gate (the gate warns on a
   present-but-unreadable lock); `load_lock` itself fails open to `{}`.
+  (The `gate` command surfaces this warning; `check` is its deprecated alias.)
 
 ## HOW — Acceptance (= tests)
 AC-1

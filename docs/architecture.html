@@ -413,7 +413,7 @@ footer a:hover{color:var(--accent)}
       <li><a href="#ci">CI/CD</a></li>
       <li><a href="#install">Install</a></li>
       <!--##REQMAP:NAV##-->
-<nav class="reqmap-nav"><a href="map.html" target="_blank" rel="noopener">Live Map ↗</a><a href="https://github.com/alxmax/Requirement-manager" target="_blank" rel="noopener">GitHub ↗</a></nav>
+<nav class="reqmap-nav"><a href="map.html" target="_blank" rel="noopener">Live Map ↗</a><a href="full_architecture.html" target="_blank" rel="noopener">Diagram ↗</a><a href="https://github.com/alxmax/Requirement-manager" target="_blank" rel="noopener">GitHub ↗</a></nav>
 <!--##/REQMAP:NAV##-->
     </ul>
   </div>
@@ -422,7 +422,7 @@ footer a:hover{color:var(--accent)}
 <!-- HERO -->
 <div class="hero">
   <div class="wrap">
-    <div class="badge"><div class="badge-dot"></div>v1.16 · Claude Code Plugin · stdlib-only</div>
+    <div class="badge"><div class="badge-dot"></div>v2.3.1 · Claude Code Plugin · stdlib-only</div>
     <h1>Keep your specs and<br>your code <em>honest.</em></h1>
     <p class="hero-lead">
       A capability registry that sits between intent and code. One Markdown file per capability as
@@ -476,7 +476,7 @@ footer a:hover{color:var(--accent)}
         <!-- Arrow 2→3 -->
         <line x1="389" y1="73" x2="432" y2="73" stroke="#cec8bc" stroke-width="1.5" stroke-dasharray="4,3"/>
         <polygon points="432,69 440,73 432,77" fill="#cec8bc"/>
-        <text x="412" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#a0988e">check</text>
+        <text x="412" y="65" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8.5" fill="#a0988e">gate</text>
 
         <!-- Box 3: Gate -->
         <rect x="442" y="30" width="162" height="86" rx="10" fill="#ede9df" stroke="#cec8bc" stroke-width="1.5"/>
@@ -604,7 +604,7 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">All 15 commands</h2>
+      <h2 class="reveal">All 18 commands</h2>
       <p class="lead reveal">
         One stdlib-only Python script. No installation, no dependencies.
         Seed it with <code>cp</code>; run it from the directory where <code>requirements/</code> lives.
@@ -613,7 +613,7 @@ has not been re-touched.</pre></div>
 
     <div class="cmds reveal">
       <div class="cmd gate">
-        <div class="cmd-n"><code>check</code></div>
+        <div class="cmd-n"><code>gate</code></div>
         <div class="cmd-d">
           <strong>The gate.</strong> Every tag resolves, every confirmed requirement has code, nothing drifted.
           Run before every commit and in CI.<br>
@@ -623,12 +623,20 @@ has not been re-touched.</pre></div>
         </div>
       </div>
       <div class="cmd">
+        <div class="cmd-n"><code>sync</code></div>
+        <div class="cmd-d">Rescan + advance the drift baseline + regenerate the map in one step. <span class="fl">--accept-drift</span> re-baselines an edited confirmed/implemented contract; without it, <code>sync</code> refuses to silently re-baseline confirmed drift.</div>
+      </div>
+      <div class="cmd">
         <div class="cmd-n"><code>init</code></div>
         <div class="cmd-d">First-time bootstrap: scaffold <code>requirements/</code> + <code>.reqmapignore</code>, draft requirements from existing code, build lock + map. Idempotent; never clobbers existing files.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>map</code></div>
         <div class="cmd-d">Generate <code>_map.md</code> (4 Mermaid diagrams) + <code>_map.json</code> (graph) + <code>_map.html</code> (self-contained viewer). Reads <code>TODO.md</code> for the Roadmap tab. <span class="fl">--check</span> freshness gate — exits non-zero if committed map is stale.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>site</code></div>
+        <div class="cmd-d">Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. <span class="fl">--attach &lt;page&gt;</span> · <span class="fl">--regions nav,stats</span> · <span class="fl">--diagram &lt;rel&gt;</span> links an Excalidraw HTML.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>next</code></div>
@@ -643,7 +651,7 @@ has not been re-touched.</pre></div>
         <div class="cmd-d">Consolidated dossier for one requirement: contract, dependencies both directions, code members by role with file:line, open verify-intent questions, risk signals. Answers "where is X implemented?" in one command.</div>
       </div>
       <div class="cmd">
-        <div class="cmd-n"><code>similar</code></div>
+        <div class="cmd-n"><code>dupes</code></div>
         <div class="cmd-d">Flag requirement pairs with overlapping contracts (TF-IDF cosine, stdlib). Catches divergent re-implementations before they land. <span class="fl">--threshold T</span> overrides default 0.35.</div>
       </div>
       <div class="cmd">
@@ -651,7 +659,7 @@ has not been re-touched.</pre></div>
         <div class="cmd-d">Corpus coherence snapshot: % of requirements fully green (confirmed + member + tested + no open questions + not drifted). <span class="fl">--json</span> for CI badges.</div>
       </div>
       <div class="cmd">
-        <div class="cmd-n"><code>promote &lt;ID&gt;</code></div>
+        <div class="cmd-n"><code>confirm &lt;ID&gt;</code></div>
         <div class="cmd-d">Human validation step: flip a reviewed requirement to <code>confirmed</code>. Refuses if no <code>implements:</code> member exists; warns if no <code>tested-by:</code> is linked.</div>
       </div>
       <div class="cmd">
@@ -663,16 +671,20 @@ has not been re-touched.</pre></div>
         <div class="cmd-d">List which code belongs to which requirement. Shows member counts per capability with file paths.</div>
       </div>
       <div class="cmd">
-        <div class="cmd-n"><code>extract</code></div>
+        <div class="cmd-n"><code>draft</code></div>
         <div class="cmd-d">Draft requirements for untagged code and prose files (<code>.py .js .ts .md .html</code> and more). Existing files and membership tags are preserved.</div>
       </div>
       <div class="cmd">
-        <div class="cmd-n"><code>candidates</code></div>
-        <div class="cmd-d">Read-only extraction plan: JSON capability map from legacy code without writing any <code>.md</code> files. Safe first pass before <code>extract</code>. Add <span class="fl">--md-glob</span> for prose discovery.</div>
+        <div class="cmd-n"><code>plan</code></div>
+        <div class="cmd-d">Read-only extraction plan: JSON capability map from legacy code without writing any <code>.md</code> files. Safe first pass before <code>draft</code>. Add <span class="fl">--md-glob</span> for prose discovery.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>findings</code></div>
         <div class="cmd-d">Aggregate open "Verify intent" questions across all requirements into <code>_findings.md</code>. Accepts an AI-triage sidecar for a classified view.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>review &lt;ID?&gt;</code></div>
+        <div class="cmd-d">Emit a JSON review plan (intent, contract, acceptance, anchors) for all requirements or one — an AI-feed for advisory quality review. Read-only, writes nothing.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>export</code></div>
@@ -773,9 +785,9 @@ has not been re-touched.</pre></div>
     </div>
 
     <div class="callout reveal">
-      Use <strong><code>check --strict</code></strong> to promote drift and test-link warnings to errors —
+      Use <strong><code>gate --strict</code></strong> to promote drift and test-link warnings to errors —
       useful in CI when the corpus is fully confirmed and the lock is current.
-      Use <strong><code>check --since &lt;ref&gt;</code></strong> to scope the gate to only requirements
+      Use <strong><code>gate --since &lt;ref&gt;</code></strong> to scope the gate to only requirements
       touched since a git ref (fail-open: falls back to full scan on git errors).
     </div>
   </div>
@@ -788,7 +800,7 @@ has not been re-touched.</pre></div>
     <h2 class="reveal">Wire the gate everywhere</h2>
     <p class="lead reveal">
       Pre-commit hook for local enforcement. Published GitHub Action for the whole team.
-      Both run the same <code>reqmap.py check</code> under the hood.
+      Both run the same <code>reqmap.py gate</code> under the hood.
     </p>
 
     <div class="ci-grid reveal">
@@ -800,7 +812,7 @@ has not been re-touched.</pre></div>
             <span class="cb-filename">.git/hooks/pre-commit</span>
           </div>
           <div class="cb-body"><pre><span class="cm">#!/bin/sh</span>
-python -X utf8 scripts/reqmap.py check</pre></div>
+python -X utf8 scripts/reqmap.py gate</pre></div>
         </div>
         <p style="font-size:.82rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.55">
           One-time setup per developer clone. Blocks a commit on gate failure.
@@ -904,7 +916,7 @@ python scripts/reqmap.py map
         <div class="icmd"><span class="pr">/</span> plugin marketplace add alxmax/requirement-manager</div>
         <div class="icmd"><span class="pr">/</span> plugin install requirement-manager@requirement-manager</div>
         <div class="icmd" style="color:var(--code-text);margin-top:.25rem"><span class="pr">$</span> python scripts/reqmap.py init</div>
-        <div class="icmd" style="color:var(--code-text)"><span class="pr">$</span> python scripts/reqmap.py check</div>
+        <div class="icmd" style="color:var(--code-text)"><span class="pr">$</span> python scripts/reqmap.py gate</div>
       </div>
     </div>
   </div>
@@ -914,7 +926,7 @@ python scripts/reqmap.py map
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <span class="foot-copy">requirement-manager v1.16 · Business Source License 1.1</span>
+      <span class="foot-copy">requirement-manager v2.3.1 · Business Source License 1.1</span>
       <div class="foot-links">
         <a href="https://github.com/alxmax/requirement-manager">GitHub</a>
         <a href="https://github.com/alxmax/requirement-manager/blob/main/plugin/skills/requirement-manager/SKILL.md">SKILL.md</a>

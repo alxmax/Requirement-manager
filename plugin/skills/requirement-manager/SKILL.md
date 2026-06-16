@@ -213,7 +213,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
    verifies its claims still match the code.
 3. **Capability source** — prompt/spec prose (`prompts/**`, `specs/**`, …).
    Auto-drafted as a `draft` stub from its title + `##` headings; review, edit and
-   `promote`. `draft` is never enforced by the gate, so unreviewed prose is never
+   `confirm`. `draft` is never enforced by the gate, so unreviewed prose is never
    canonized as truth.
 
 The buckets govern auto-drafting only — an explicit tag on any file is always

@@ -96,8 +96,8 @@ script, so there's nothing else to download.
 
 ## All commands
 
-> Run these from inside `plugin/` in this repo (the engine resolves paths
-> relative to where it runs).
+> In **this** repo, run them from inside `plugin/`. In **your** repo, run from
+> wherever `requirements/` lives — the engine resolves paths relative to where it runs.
 
 | Command | What it does |
 |---|---|
@@ -105,6 +105,7 @@ script, so there's nothing else to download.
 | `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias, kept for backward compat.) |
 | `sync` | Rescan + advance the drift baseline + regenerate the map in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
 | `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Also reads `TODO.md` from the repo root and inlines a `todos` array into `_map.json` so the Roadmap tab can show planned work alongside requirements |
+| `site --attach <page>` | Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. `--regions nav,stats`, `--diagram <rel>` links an Excalidraw HTML |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
 | `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template. Use `--from-todo "name" --id ID` to pre-fill from a TODO.md item. |
 | `scan` | List which code belongs to which requirement |
@@ -116,6 +117,7 @@ script, so there's nothing else to download.
 | `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |
 | `plan` | Read-only JSON plan for AI-assisted extraction (writes no files; use before `draft`) |
 | `findings` | Collect open "needs human review" notes into `_findings.md` |
+| `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) for all requirements or one — an AI-feed for advisory quality review. Read-only |
 | `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
 
 ## Run the gate in CI
@@ -167,7 +169,7 @@ plugin/                                the plugin — self-contained
   skills/requirement-manager/SKILL.md  the full contract & authoring rules
   skills/requirement-quality-review/   on-demand AI review of requirement quality (advisory)
   skills/excalidraw-diagram/           generate Excalidraw architecture / flow diagrams
-  scripts/reqmap.py                    the engine (Python stdlib only, ~3200 lines)
+  scripts/reqmap.py                    the engine (Python stdlib only, ~3700 lines)
   requirements/*.md                    the source of truth (one file per capability)
   requirements/_reqlock.json           the drift baseline (committed)
 app/                                   the React viewer (built into the single-file _map.html)

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## plugin `v2.3.1` — 2026-06-16
 
 **License correction.** `plugin/.claude-plugin/plugin.json` declared `"MIT"` while
 the `LICENSE` file and README are Business Source License 1.1 — corrected to the
@@ -42,8 +42,64 @@ SPDX id `"BUSL-1.1"`.
   `overflow_check`, `text_overlap_check`), and `check_text_overflow()` /
   `check_text_overlaps()`.
 
-> Note: CHANGELOG entries for plugin `v2.2.0` and `v2.3.0` are missing (the
-> manifests are at `2.3.0`); backfill or supersede on the next tagged release.
+**Audit follow-up (4-lens Consilium audit) — intent-verb propagation + diagram publish.**
+- **Stale CLI names swept.** The intent-verb rename (`check→gate`, `promote→confirm`,
+  `extract→draft`, `candidates→plan`, `similar→dupes`, `promote-todo→new --from-todo`)
+  is now propagated everywhere it had been missed: the published site
+  (`docs/architecture.html`), the engine's own module docstring and scaffold
+  `SITE_TEMPLATE`, and six requirement files (`REQ-PROMOTE-011`, `REQ-EXTRACT-008`,
+  `REQ-CANDIDATES-009`, `REQ-SIMILAR-016`, `REQ-PROMOTE-TODO-001`, plus stale `check`
+  references in `REQ-CHECK-006` / `REQ-ACVERIFY-019` / `CORE-DRIFT-003`).
+- **Site truth-up.** `docs/architecture.html` showed `v1.16` (now `v2.3.1`) and
+  "All 15 commands" (now 18, with the missing `sync` / `site` / `review` cards added).
+  README gains the `site` and `review` rows; the `~3200 lines` engine figure is now `~3700`.
+- **Diagram published.** The complete-architecture poster is committed at
+  `docs/full_architecture.html` and linked from the site nav (`Diagram ↗`), so it
+  resolves on GitHub Pages instead of 404-ing (it had pointed at gitignored `diagrams/`).
+- **Engine fixes.** `sync --strict` now forwards the flag to the gate (it was silently
+  dropped); `REQ-MAP-007`'s contract documents the `todos` key emitted in `_map.json`;
+  the narrower file-type scope of `draft` (vs the gate's full scan set) is documented.
+
+reqmap engine touched (the `sync --strict` fix + docstring/template) → `MAP_ENGINE_VERSION`
+advances to `2026-06-16`.
+
+---
+
+## plugin `v2.3.0` — 2026-06-15
+
+**excalidraw-diagram — text-overflow gates.** Two silent failure classes the
+shape-only overlap check missed — bound text wider than its box (label spills
+out) and two free captions/headers colliding — now have `check_text_overflow()`
+and `check_text_overlaps()` checks plus a `fit_text()` wrap-and-size helper.
+`save()` gains `overflow_check` / `text_overlap_check` (warn by default, error
+opt-in); `box()` defaults are unchanged so existing layouts don't re-flow. The
+new per-example assertions caught real bugs (widened a box in
+`make_full_architecture.py`, fixed caption pitch in `make_explainer.py`, retired
+the superseded `make_repo_map.py`). reqmap engine unchanged; `MAP_ENGINE_VERSION`
+stays `2026-06-15`.
+
+---
+
+## plugin `v2.2.0` — 2026-06-15
+
+**excalidraw-diagram — ISO 5807 shapes, C4 helpers, poster helpers.** Additive
+builder expansion:
+- **ISO 5807 flowchart shapes** — `process`, `terminator`, `decision`, `data`
+  (parallelogram), `predefined_process`, `preparation` (hexagon), `connector`
+  via `box(shape=…)` + convenience methods (polygons drawn as closed lines with
+  bbox geometry).
+- **C4 model helpers** — `person()` + `c4()` (name / [kind: tech] / description);
+  later removed in v2.3.1.
+- **Poster helpers** — `section()` (auto-stacked labelled regions) and `pipeline()`
+  (auto-spaced, mid-aligned, auto-chained horizontal flowchart).
+- **Examples consolidated** to four maintained, test-covered generators
+  (`make_full_architecture.py`, `make_explainer.py`, `make_repo_map.py`,
+  `make_iso5807_flowchart.py`); retired the overlapping `make_architecture.py`
+  and `gen_reqmap_workflow.py`. `diagrams/` output convention documented
+  (gitignored, regenerable). reqmap engine unchanged; `MAP_ENGINE_VERSION` stays
+  `2026-06-15`.
+
+---
 
 ## plugin `v2.1.1` — 2026-06-15
 

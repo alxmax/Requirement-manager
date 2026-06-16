@@ -18,13 +18,15 @@ milestone: v1.04
 
 ## WHAT — Contract (normative)
 - It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for
-  static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges}`
+  static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges, todos}`
   graph for an external front-end). Both are derived views, regenerated, never edited.
 - `_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the
   repo directory name, else null) identifying the project the map describes, for display in
   the viewer header. It is derived from the git remote and so differs across forks/clones;
   it is therefore excluded from the `map --check` freshness diff and resolving it shall never
   raise or block map generation (git may be absent or the tree may not be a checkout).
+- `_map.json` shall also carry a top-level `todos` array, derived from `TODO.md` (via
+  `_parse_todos`), so the viewer's Roadmap tab can show planned work alongside requirements.
 - There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall
   contain exactly 4 Mermaid code blocks — System Map, Req→Code, Dependencies, Risk — and
   each shall carry a legend.
@@ -71,7 +73,7 @@ AC-2
 AC-3
   Given  the generated `_map.json`
   When   it is parsed
-  Then   it yields `{engine_version, repo, nodes, edges}` with one node per requirement carrying
+  Then   it yields `{engine_version, repo, nodes, edges, todos}` with one node per requirement carrying
          its members and risk signals. The `repo` field is the project's `owner/repo` (or
          directory name, or null) and is omitted from the freshness comparison.
 

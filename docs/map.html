@@ -11,7 +11,7 @@
      <script>window.__REQMAP_DATA__ = { ...this repo's _map.json... }</script>
      It must run before the app module, so loadData() finds the inlined data. -->
 <script>window.__REQMAP_DATA__={
-  "engine_version": "2026-06-15",
+  "engine_version": "2026-06-16",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -32,7 +32,7 @@
       ],
       "notes": [
         "A heading is matched by its label (anchored): only a `## …` heading whose label — optionally after a `WHAT`/`HOW` prefix — starts with \"Contract\", \"Acceptance\", \"Input\" or \"Output\" contributes to the hash; a commentary heading such as `## Notes — contract caveats` does not.",
-        "The lock distinguishes \"absent\" from \"corrupt\" only at the gate (`check` warns on a present-but-unreadable lock); `load_lock` itself fails open to `{}`."
+        "The lock distinguishes \"absent\" from \"corrupt\" only at the gate (the gate warns on a present-but-unreadable lock); `load_lock` itself fails open to `{}`. (The `gate` command surfaces this warning; `check` is its deprecated alias.)"
       ],
       "current_impl": [
         "`binding_hash`, `lock_path`, `load_lock`, `save_lock` in `reqmap.py`."
@@ -52,11 +52,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:470"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:486"
+          "loc": "scripts/reqmap.py:474"
         },
         {
           "role": "implements",
@@ -64,7 +60,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:504"
+          "loc": "scripts/reqmap.py:494"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:508"
         },
         {
           "role": "tested-by",
@@ -133,19 +133,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:89"
+          "loc": "scripts/reqmap.py:93"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:99"
+          "loc": "scripts/reqmap.py:103"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:104"
+          "loc": "scripts/reqmap.py:108"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:146"
+          "loc": "scripts/reqmap.py:150"
         },
         {
           "role": "tested-by",
@@ -208,19 +208,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:162"
+          "loc": "scripts/reqmap.py:166"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:179"
+          "loc": "scripts/reqmap.py:183"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:248"
+          "loc": "scripts/reqmap.py:252"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:352"
+          "loc": "scripts/reqmap.py:356"
         },
         {
           "role": "tested-by",
@@ -314,15 +314,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:399"
+          "loc": "scripts/reqmap.py:403"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:426"
+          "loc": "scripts/reqmap.py:430"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:680"
+          "loc": "scripts/reqmap.py:684"
         },
         {
           "role": "tested-by",
@@ -342,7 +342,7 @@
       "title": "Capability candidates (extraction plan)",
       "intent": "When you point this tool at an old codebase that has no requirements written down yet, this is the first, look-but-don't-touch step. It reads the code and produces a tidy machine-readable plan that guesses what each capability is — which files belong together, what they depend on, how central each one is — without writing or changing a single requirement file. An author (or an AI assistant) then uses that plan to decide what to actually write up. Without it, you would face a wall of untagged code with no starting map.",
       "contract": [
-        "It shall emit a single JSON object (stdout or `--out PATH`) `{engine_version, bus[], candidates[]}` and write NO `.md` files — it cannot repeat `extract`'s empty-stub failure.",
+        "It shall emit a single JSON object (stdout or `--out PATH`) `{engine_version, bus[], candidates[]}` and write NO `.md` files — it cannot repeat `draft`'s empty-stub failure.",
         "It shall walk the code with the same exclusions as scanning (noise dirs, the SSOT dir, and `.reqmapignore` resolved in `requirements/` first), gathering per-file facts: module and symbol docstrings, top-level signatures (Python via `ast`, JS/TS via best-effort parsing), import targets, and line count.",
         "Each candidate shall carry `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate}`. `depends_on` shall be derived from imports resolved to other candidates; `suggested_layer` shall be `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.",
         "Grouping shall use `requirements/_capmap.json` when present (authoritative) and otherwise fall back to one candidate per file. A file already carrying an `implements:` tag shall be reported via `existing_req`. An unparseable file shall yield empty facts, not abort the plan."
@@ -358,7 +358,7 @@
         "`cmd_candidates` and the `_py_facts`/`_js_facts`/`_file_facts`/`_load_capmap`/`_collect_files` helpers in `reqmap.py`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  any corpus\n  When   `candidates` runs\n  Then   it writes zero `.md` files and emits valid JSON\n\nAC-2\n  Given  a file listed in `.reqmapignore` (including one placed in `requirements/`)\n  When   `candidates` runs\n  Then   that file is absent from every candidate's `files`\n\nAC-3\n  Given  an import of a local module\n  When   `candidates` runs\n  Then   a `depends_on` edge points at that module's candidate\n\nAC-4\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `candidates` runs\n  Then   they appear as a single candidate carrying both files with the declared layer\n\nAC-5\n  Given  a file already carrying an `implements:` tag\n  When   `candidates` runs\n  Then   it is reported via `existing_req`\n\nAC-6\n  Given  a module imported by `BUS_FANIN_THRESHOLD` or more candidates\n  When   `candidates` runs\n  Then   it is suggested as `bus`",
+      "accept": "AC-1\n  Given  any corpus\n  When   `plan` runs\n  Then   it writes zero `.md` files and emits valid JSON\n\nAC-2\n  Given  a file listed in `.reqmapignore` (including one placed in `requirements/`)\n  When   `plan` runs\n  Then   that file is absent from every candidate's `files`\n\nAC-3\n  Given  an import of a local module\n  When   `plan` runs\n  Then   a `depends_on` edge points at that module's candidate\n\nAC-4\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `plan` runs\n  Then   they appear as a single candidate carrying both files with the declared layer\n\nAC-5\n  Given  a file already carrying an `implements:` tag\n  When   `plan` runs\n  Then   it is reported via `existing_req`\n\nAC-6\n  Given  a module imported by `BUS_FANIN_THRESHOLD` or more candidates\n  When   `plan` runs\n  Then   it is suggested as `bus`",
       "input": "",
       "output": "",
       "desc": "",
@@ -371,35 +371,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1165"
+          "loc": "scripts/reqmap.py:1169"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1199"
+          "loc": "scripts/reqmap.py:1203"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1222"
+          "loc": "scripts/reqmap.py:1226"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1245"
+          "loc": "scripts/reqmap.py:1249"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1262"
+          "loc": "scripts/reqmap.py:1266"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1281"
+          "loc": "scripts/reqmap.py:1285"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1287"
+          "loc": "scripts/reqmap.py:1291"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1312"
+          "loc": "scripts/reqmap.py:1316"
         },
         {
           "role": "tested-by",
@@ -444,20 +444,20 @@
         "A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).",
         "Requirements whose body lacks a `## WHAT — Verify intent` section shall be named in one aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.",
         "It shall print an advisory line with the open verify-intent finding count when > 0, without affecting the exit code, and print a summary (requirements, members, errors, warnings).",
-        "With `--update-lock` it shall write the current binding hashes to `requirements/_reqlock.json`."
+        "With `--update-lock` (exercised by `sync` and the deprecated `check` alias; the `gate` verb is report-only) it shall write the current binding hashes to `requirements/_reqlock.json`."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
         "Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`) is not automatable and surfaces at human review.",
-        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `check` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there."
+        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there."
       ],
       "current_impl": [
         "`cmd_check`, `warn_if_stale` in `reqmap.py`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a tag referencing a non-existent capability\n  When   `check` runs\n  Then   it produces an `ERROR` and exit 1\n\nAC-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `check` runs\n  Then   it produces an `ERROR`\n\nAC-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `check` runs\n  Then   each produces an `ERROR`\n\nAC-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `check` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nAC-5\n  Given  a present-but-corrupt lock file\n  When   `check` runs\n  Then   it produces a `WARN` and does not change the exit code\n\nAC-6\n  Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)\n  When   `check` runs\n  Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`\n         requirement produces none\n\nAC-7\n  Given  a `confirmed` requirement with no `## WHAT — Contract` section\n  When   `check` runs\n  Then   it produces a `WARN` and does not affect the exit code\n\nAC-8\n  Given  a `confirmed` requirement with no `## HOW — Acceptance` section\n  When   `check` runs\n  Then   it produces a `WARN` and does not affect the exit code\n\nAC-9\n  Given  a `confirmed` requirement with both sections present\n  When   `check` runs\n  Then   it produces no section-lint warning\n\nAC-10\n  Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member\n  When   `check` runs\n  Then   it produces no test warning\n\nAC-11\n  Given  a requirement without a `## WHAT — Verify intent` section\n  When   `check` runs\n  Then   it is counted as legacy-schema in the summary\n\nAC-12\n  Given  `--update-lock`\n  When   `check` runs\n  Then   the current hashes are written to `requirements/_reqlock.json`",
+      "accept": "AC-1\n  Given  a tag referencing a non-existent capability\n  When   `gate` runs\n  Then   it produces an `ERROR` and exit 1\n\nAC-2\n  Given  a `confirmed` requirement with no `implements` member\n  When   `gate` runs\n  Then   it produces an `ERROR`\n\nAC-3\n  Given  an invalid status or layer, or a `depends_on` pointing at a missing id\n  When   `gate` runs\n  Then   each produces an `ERROR`\n\nAC-4\n  Given  a `confirmed` requirement whose binding hash differs from the lock\n  When   `gate` runs\n  Then   it produces a `WARN` (not an error) naming the member `file:line` locations\n\nAC-5\n  Given  a present-but-corrupt lock file\n  When   `gate` runs\n  Then   it produces a `WARN` and does not change the exit code\n\nAC-6\n  Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)\n  When   `gate` runs\n  Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`\n         requirement produces none\n\nAC-7\n  Given  a `confirmed` requirement with no `## WHAT — Contract` section\n  When   `gate` runs\n  Then   it produces a `WARN` and does not affect the exit code\n\nAC-8\n  Given  a `confirmed` requirement with no `## HOW — Acceptance` section\n  When   `gate` runs\n  Then   it produces a `WARN` and does not affect the exit code\n\nAC-9\n  Given  a `confirmed` requirement with both sections present\n  When   `gate` runs\n  Then   it produces no section-lint warning\n\nAC-10\n  Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member\n  When   `gate` runs\n  Then   it produces no test warning\n\nAC-11\n  Given  a requirement without a `## WHAT — Verify intent` section\n  When   `gate` runs\n  Then   it is counted as legacy-schema in the summary\n\nAC-12\n  Given  an advancing run (`sync`, or the deprecated `check --update-lock`)\n  When   it runs\n  Then   the current hashes are written to `requirements/_reqlock.json`",
       "input": "",
       "output": "",
       "desc": "",
@@ -479,23 +479,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:457"
+          "loc": "scripts/reqmap.py:461"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:511"
+          "loc": "scripts/reqmap.py:515"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:545"
+          "loc": "scripts/reqmap.py:549"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:596"
+          "loc": "scripts/reqmap.py:600"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:757"
+          "loc": "scripts/reqmap.py:761"
         },
         {
           "role": "tested-by",
@@ -569,14 +569,15 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "`extract` cannot recover intent; prefer `candidates` (read-only plan) before authoring. The draft body uses the same Contract/Acceptance section names as a real requirement so a promoted draft needs no reshaping.",
-        "Prose (`.md`/`.html`) classification and drafting is a separate capability — [[REQ-PROSE-024]] — running under the same `extract` command."
+        "`draft` cannot recover intent; prefer `plan` (read-only plan) before authoring. The draft body uses the same Contract/Acceptance section names as a real requirement so a promoted draft needs no reshaping.",
+        "Prose (`.md`/`.html`) classification and drafting is a separate capability — [[REQ-PROSE-024]] — running under the same `draft` command.",
+        "The drafted file types (`.py`/`.js`/`.ts`/`.c`/`.cpp`) are deliberately narrower than the gate's full scan set (which also enforces tags in `.go`/`.rs`/`.tsx` and more): drafting targets mainstream source, while the gate enforces tags wherever they appear."
       ],
       "current_impl": [
         "`cmd_extract`, `_draft_id`, `_risk` in `reqmap.py`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  an untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file\n  When   `extract` runs\n  Then   it yields one `DRAFT-*` draft\n\nAC-2\n  Given  a file already carrying a member tag\n  When   `extract` runs\n  Then   the file is skipped\n\nAC-3\n  Given  a file matching a `.reqmapignore` pattern\n  When   `extract` runs\n  Then   the file is skipped (no draft proposed for it)\n\nAC-4\n  Given  a file containing `TODO`/`FIXME`\n  When   `extract` runs\n  Then   it scores higher risk and is flagged `REVIEW`\n\nAC-5\n  Given  an existing draft and same-basename files in different dirs\n  When   `extract` re-runs\n  Then   the draft is not overwritten and the basenames do not collide",
+      "accept": "AC-1\n  Given  an untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file\n  When   `draft` runs\n  Then   it yields one `DRAFT-*` draft\n\nAC-2\n  Given  a file already carrying a member tag\n  When   `draft` runs\n  Then   the file is skipped\n\nAC-3\n  Given  a file matching a `.reqmapignore` pattern\n  When   `draft` runs\n  Then   the file is skipped (no draft proposed for it)\n\nAC-4\n  Given  a file containing `TODO`/`FIXME`\n  When   `draft` runs\n  Then   it scores higher risk and is flagged `REVIEW`\n\nAC-5\n  Given  an existing draft and same-basename files in different dirs\n  When   `draft` re-runs\n  Then   the draft is not overwritten and the basenames do not collide",
       "input": "",
       "output": "",
       "desc": "",
@@ -592,15 +593,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1002"
+          "loc": "scripts/reqmap.py:1006"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1063"
+          "loc": "scripts/reqmap.py:1067"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1148"
+          "loc": "scripts/reqmap.py:1152"
         },
         {
           "role": "tested-by",
@@ -631,7 +632,7 @@
         "It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.",
         "With the raw flag set it shall ignore any sidecar and emit the raw grouped list.",
         "It shall be deterministic and stdlib-only: it shall not classify findings itself (classification is produced out-of-band by the AI triage pass and supplied through the sidecar) and shall write no file other than `_findings.md`.",
-        "The drift gate (`check`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings."
+        "The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings."
       ],
       "verify": [
         "None — this capability is authored from known intent, not reconstructed from code."
@@ -644,7 +645,7 @@
         "`collect_findings(reqs)` pulls each requirement's `## WHAT — Verify intent` bullets via `_bullets`, dropping the \"None\" placeholder, and returns `(id, title, items)` groups. `cmd_findings` reads an optional `_findings_triage.json`; with valid items it calls `_render_findings_triaged` (buckets by classification, sorts REAL_BUG by `_SEV_RANK`, emits a staleness note when raw≠triaged), otherwise `_render_findings_raw`. `cmd_check` calls `collect_findings` to print the advisory count before its summary."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  two requirements, one with two Verify-intent bullets and one with only the \"None —\" placeholder\n  When   `findings` runs in raw mode\n  Then   `_findings.md` lists the two bullets under the first requirement and the summary reports \"2 open finding(s) across 1 requirement(s)\"\n\nAC-2\n  Given  a `_findings_triage.json` sidecar classifying one item REAL_BUG (high) and one USER_DECISION\n  When   `findings` runs without `--raw`\n  Then   the \"Confirmed bugs\" section precedes \"Your call\", the bug shows a HIGH badge with its location, and the summary reports \"1 confirmed bug(s)\"\n\nAC-3\n  Given  a sidecar is present\n  When   `findings` runs with `--raw`\n  Then   the sidecar is ignored and the raw grouped list is written\n\nAC-4\n  Given  three raw verify-intent items but only one triaged item in the sidecar\n  When   `findings` runs\n  Then   `_findings.md` carries a staleness warning advising a re-run of the triage pass\n\nAC-5\n  Given  at least one requirement with an open verify-intent item\n  When   `check` runs\n  Then   it prints an advisory line naming the open-findings count without affecting the error count",
+      "accept": "AC-1\n  Given  two requirements, one with two Verify-intent bullets and one with only the \"None —\" placeholder\n  When   `findings` runs in raw mode\n  Then   `_findings.md` lists the two bullets under the first requirement and the summary reports \"2 open finding(s) across 1 requirement(s)\"\n\nAC-2\n  Given  a `_findings_triage.json` sidecar classifying one item REAL_BUG (high) and one USER_DECISION\n  When   `findings` runs without `--raw`\n  Then   the \"Confirmed bugs\" section precedes \"Your call\", the bug shows a HIGH badge with its location, and the summary reports \"1 confirmed bug(s)\"\n\nAC-3\n  Given  a sidecar is present\n  When   `findings` runs with `--raw`\n  Then   the sidecar is ignored and the raw grouped list is written\n\nAC-4\n  Given  three raw verify-intent items but only one triaged item in the sidecar\n  When   `findings` runs\n  Then   `_findings.md` carries a staleness warning advising a re-run of the triage pass\n\nAC-5\n  Given  at least one requirement with an open verify-intent item\n  When   `gate` runs\n  Then   it prints an advisory line naming the open-findings count without affecting the error count",
       "input": "",
       "output": "",
       "desc": "",
@@ -657,11 +658,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1418"
+          "loc": "scripts/reqmap.py:1422"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1505"
+          "loc": "scripts/reqmap.py:1509"
         },
         {
           "role": "tested-by",
@@ -703,7 +704,7 @@
       "notes": [
         "The score is deliberately strict: one open question or one drifted contract drops a requirement out of the green count. This makes the number move when real work remains.",
         "The \"tested\" line counts actual `tested-by` members, while the green test counts a `test_exempt` reason as covered. The two can differ by the number of exempted requirements.",
-        "Drift reuses the lock that `check` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses.",
+        "Drift reuses the lock that `sync` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses.",
         "The `implemented` and `tested` counts stay code-member counts, so a corpus with a satisfied need shows `implemented < total` while still scoring 100."
       ],
       "current_impl": [
@@ -725,7 +726,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2175"
+          "loc": "scripts/reqmap.py:2179"
         },
         {
           "role": "tested-by",
@@ -780,11 +781,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2296"
+          "loc": "scripts/reqmap.py:2300"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2325"
+          "loc": "scripts/reqmap.py:2329"
         },
         {
           "role": "tested-by",
@@ -839,19 +840,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1798"
+          "loc": "scripts/reqmap.py:1802"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1833"
+          "loc": "scripts/reqmap.py:1837"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1856"
+          "loc": "scripts/reqmap.py:1860"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1964"
+          "loc": "scripts/reqmap.py:1968"
         },
         {
           "role": "tested-by",
@@ -907,11 +908,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1827"
+          "loc": "scripts/reqmap.py:1831"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1856"
+          "loc": "scripts/reqmap.py:1860"
         },
         {
           "role": "tested-by",
@@ -931,8 +932,9 @@
       "title": "Requirement map (Mermaid MD + JSON)",
       "intent": "A list of requirement files tells you what exists but not how it all connects. This draws the picture: which capability depends on which, what has code, what is at risk — as Mermaid diagrams you can read on GitHub and a JSON graph any front-end can consume. It turns the registry into something a person can take in at a glance.",
       "contract": [
-        "It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges}` graph for an external front-end). Both are derived views, regenerated, never edited.",
+        "It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges, todos}` graph for an external front-end). Both are derived views, regenerated, never edited.",
         "`_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the repo directory name, else null) identifying the project the map describes, for display in the viewer header. It is derived from the git remote and so differs across forks/clones; it is therefore excluded from the `map --check` freshness diff and resolving it shall never raise or block map generation (git may be absent or the tree may not be a checkout).",
+        "`_map.json` shall also carry a top-level `todos` array, derived from `TODO.md` (via `_parse_todos`), so the viewer's Roadmap tab can show planned work alongside requirements.",
         "There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall contain exactly 4 Mermaid code blocks — System Map, Req→Code, Dependencies, Risk — and each shall carry a legend.",
         "`_map.json` shall carry, per node, the requirement's id, layer, status, area, title, intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`, `used_by`, and risk signals — the same `{nodes, edges}` shape the diagrams are built from.",
         "The System Map shall group nodes into per-area subgraphs (a node's `area:` field, else its id prefix), collapse single-node areas into a `misc` box, and omit `depends_on` edges whose target is a bus node OR a high-fan-in hub.",
@@ -953,7 +955,7 @@
         "`cmd_map`, `cmd_export`, `render_md`, `render_json`, `_build_map_data`, `_build_json_text`, `_repo_name`, the `_mermaid_*` generators in `reqmap.py`. (HTML viewer moved to [[REQ-VIEWER-007]]; Pages publish/gate to [[REQ-PAGES-021]].)"
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  the corpus\n  When   `map` runs\n  Then   the generated files contain one node per requirement and one edge per `depends_on`\n\nAC-2\n  Given  the generated `_map.md`\n  When   it is inspected\n  Then   it contains exactly 4 Mermaid code blocks, each with a legend\n\nAC-3\n  Given  the generated `_map.json`\n  When   it is parsed\n  Then   it yields `{engine_version, repo, nodes, edges}` with one node per requirement carrying\n         its members and risk signals. The `repo` field is the project's `owner/repo` (or\n         directory name, or null) and is omitted from the freshness comparison.\n\nAC-4\n  Given  the System Map diagram\n  When   it is rendered\n  Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges\n         whose target is a bus node are omitted\n\nAC-5\n  Given  the Dependency Map diagram\n  When   it is rendered\n  Then   it is area-level: one node per area (with a count), an edge A→B when some capability\n         in A depends on one in B; per-capability hub edges are not drawn\n\nAC-6\n  Given  the Risk diagram\n  When   it is rendered\n  Then   it shows only requirements with at least one risk signal, each with a scripted recommendation\n\nAC-7\n  Given  a requirement id/title containing a quote or `<\/script>`\n  When   `map` runs\n  Then   it round-trips through `_map.json` as data (no injection) and a node with no members\n         reports an empty member list",
+      "accept": "AC-1\n  Given  the corpus\n  When   `map` runs\n  Then   the generated files contain one node per requirement and one edge per `depends_on`\n\nAC-2\n  Given  the generated `_map.md`\n  When   it is inspected\n  Then   it contains exactly 4 Mermaid code blocks, each with a legend\n\nAC-3\n  Given  the generated `_map.json`\n  When   it is parsed\n  Then   it yields `{engine_version, repo, nodes, edges, todos}` with one node per requirement carrying\n         its members and risk signals. The `repo` field is the project's `owner/repo` (or\n         directory name, or null) and is omitted from the freshness comparison.\n\nAC-4\n  Given  the System Map diagram\n  When   it is rendered\n  Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges\n         whose target is a bus node are omitted\n\nAC-5\n  Given  the Dependency Map diagram\n  When   it is rendered\n  Then   it is area-level: one node per area (with a count), an edge A→B when some capability\n         in A depends on one in B; per-capability hub edges are not drawn\n\nAC-6\n  Given  the Risk diagram\n  When   it is rendered\n  Then   it shows only requirements with at least one risk signal, each with a scripted recommendation\n\nAC-7\n  Given  a requirement id/title containing a quote or `<\/script>`\n  When   `map` runs\n  Then   it round-trips through `_map.json` as data (no injection) and a node with no members\n         reports an empty member list",
       "input": "",
       "output": "",
       "desc": "",
@@ -975,87 +977,87 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1540"
+          "loc": "scripts/reqmap.py:1544"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1631"
+          "loc": "scripts/reqmap.py:1635"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1655"
+          "loc": "scripts/reqmap.py:1659"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2388"
+          "loc": "scripts/reqmap.py:2392"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2440"
+          "loc": "scripts/reqmap.py:2444"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2448"
+          "loc": "scripts/reqmap.py:2452"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2471"
+          "loc": "scripts/reqmap.py:2475"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2485"
+          "loc": "scripts/reqmap.py:2489"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2501"
+          "loc": "scripts/reqmap.py:2505"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2554"
+          "loc": "scripts/reqmap.py:2558"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2560"
+          "loc": "scripts/reqmap.py:2564"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2567"
+          "loc": "scripts/reqmap.py:2571"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2604"
+          "loc": "scripts/reqmap.py:2608"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2619"
+          "loc": "scripts/reqmap.py:2623"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2650"
+          "loc": "scripts/reqmap.py:2654"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2728"
+          "loc": "scripts/reqmap.py:2732"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2776"
+          "loc": "scripts/reqmap.py:2780"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2827"
+          "loc": "scripts/reqmap.py:2831"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2835"
+          "loc": "scripts/reqmap.py:2839"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3277"
+          "loc": "scripts/reqmap.py:3284"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3287"
+          "loc": "scripts/reqmap.py:3294"
         },
         {
           "role": "tested-by",
@@ -1124,7 +1126,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:856"
+          "loc": "scripts/reqmap.py:860"
         },
         {
           "role": "tested-by",
@@ -1179,11 +1181,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1673"
+          "loc": "scripts/reqmap.py:1677"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1686"
+          "loc": "scripts/reqmap.py:1690"
         },
         {
           "role": "tested-by",
@@ -1247,15 +1249,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1646"
+          "loc": "scripts/reqmap.py:1650"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2414"
+          "loc": "scripts/reqmap.py:2418"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3303"
+          "loc": "scripts/reqmap.py:3310"
         },
         {
           "role": "tested-by",
@@ -1276,10 +1278,10 @@
       "layer": "feature",
       "status": "confirmed",
       "area": "REQ",
-      "title": "promote",
+      "title": "confirm",
       "intent": "A requirement starts life as a draft and only becomes official once a human has reviewed it. This command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks that it actually points at real code and warns if no test is linked. Doing this by hand means editing the file's header directly, which is easy to get subtly wrong; this command does it safely every time.",
       "contract": [
-        "`promote <ID>` shall set the requirement's `status` to `confirmed` by editing only the value of the first `status:` line in its leading frontmatter block, preserving indentation and any trailing inline comment, and leaving the body untouched.",
+        "`confirm <ID>` shall set the requirement's `status` to `confirmed` by editing only the value of the first `status:` line in its leading frontmatter block, preserving indentation and any trailing inline comment, and leaving the body untouched.",
         "It shall refuse (non-zero exit, no write) when the requirement has no `implements:` member, because a `confirmed` requirement with no code is a gate error; it shall print the tag to add.",
         "It shall be idempotent: a requirement already `confirmed` is reported and left unchanged (exit 0).",
         "It shall warn (without failing) when no `tested-by:` member is linked, pointing at the test tag or the `test_exempt:` opt-out, and shall remind the caller to re-lock + regenerate the map.",
@@ -1289,13 +1291,13 @@
         "None — behavior is fully specified by the acceptance criteria below."
       ],
       "notes": [
-        "`promote` does not itself run `check --update-lock`; the drift lock must be refreshed afterward so the newly-enforced contract is baselined (the command prints this reminder)."
+        "`confirm` does not itself run `sync`; the drift lock must be refreshed afterward so the newly-enforced contract is baselined (the command prints this reminder)."
       ],
       "current_impl": [
         "plugin/scripts/reqmap.py (`cmd_promote`, `_set_frontmatter_status`)"
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a baseline requirement with an `implements:` member\n  When   `promote <ID>` runs\n  Then   its frontmatter `status` becomes `confirmed`, the body is byte-identical, and exit is 0\n\nAC-2\n  Given  a requirement with no `implements:` member\n  When   `promote <ID>` runs\n  Then   the file is unchanged, a \"must point to code\" message is printed, and exit is non-zero\n\nAC-3\n  Given  an already-`confirmed` requirement\n  When   `promote <ID>` runs\n  Then   the file is unchanged and exit is 0\n\nAC-4\n  Given  a status line carrying a trailing `# comment`\n  When   `promote <ID>` runs\n  Then   the comment is preserved and only the status value changed",
+      "accept": "AC-1\n  Given  a baseline requirement with an `implements:` member\n  When   `confirm <ID>` runs\n  Then   its frontmatter `status` becomes `confirmed`, the body is byte-identical, and exit is 0\n\nAC-2\n  Given  a requirement with no `implements:` member\n  When   `confirm <ID>` runs\n  Then   the file is unchanged, a \"must point to code\" message is printed, and exit is non-zero\n\nAC-3\n  Given  an already-`confirmed` requirement\n  When   `confirm <ID>` runs\n  Then   the file is unchanged and exit is 0\n\nAC-4\n  Given  a status line carrying a trailing `# comment`\n  When   `confirm <ID>` runs\n  Then   the comment is preserved and only the status value changed",
       "input": "",
       "output": "",
       "desc": "",
@@ -1308,11 +1310,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:953"
+          "loc": "scripts/reqmap.py:957"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:968"
+          "loc": "scripts/reqmap.py:972"
         },
         {
           "role": "tested-by",
@@ -1332,7 +1334,7 @@
       "title": "Promote a TODO item into a requirement draft",
       "intent": "You plan features as checkbox items in `TODO.md`, grouped by milestone. When you decide to build one, you have to turn that line into a real requirement file with a contract and acceptance criteria. This command does the scaffolding step: it finds the TODO item, creates a requirement seeded with its name, milestone and lane, and (optionally) checks the item off — so the roadmap item and its requirement stay connected instead of being retyped by hand.",
       "contract": [
-        "The `promote-todo` command shall scaffold a new requirement file from an unfinished `TODO.md` item selected by exact name (trimmed, case-insensitive). It shall require an explicit `--id AREA-NAME-NNN`; there is no interactive prompt (the engine runs headless — CI, hooks).",
+        "The `new --from-todo` command shall scaffold a new requirement file from an unfinished `TODO.md` item selected by exact name (trimmed, case-insensitive). It shall require an explicit `--id AREA-NAME-NNN`; there is no interactive prompt (the engine runs headless — CI, hooks).",
         "It shall seed the new requirement from the matched item: the title from the TODO name, `milestone:` from the item's `## vX.Y` section, and `layer:` from the item's `lane:` — where `lane: ops` maps to `feature` (ops is a TODO lane, not a requirement layer). The new requirement's status shall be `draft` (the author reviews, then promotes).",
         "It shall refuse (non-zero exit, no file written) when the `--id` is absent, the target id already exists, no open TODO matches the name, or the name is ambiguous (more than one open match) — printing a clear message (and, for no match, the list of open items).",
         "It shall not modify `TODO.md` by default. With `--mark-done` it shall flip the matched item's checkbox `[ ]` → `[x]` (best-effort: a write failure warns and does not fail the command)."
@@ -1342,13 +1344,13 @@
       ],
       "notes": [
         "Selection is by exact name within the unfinished items; rename a TODO to disambiguate rather than adding index syntax. Batch promotion and an undo command are intentionally out of scope.",
-        "This is orthogonal to [[REQ-PROMOTE-011]] (`promote`, which lifts a baseline requirement to confirmed): this one creates a *new draft* from a TODO line."
+        "This is orthogonal to [[REQ-PROMOTE-011]] (`confirm`, which lifts a baseline requirement to confirmed): this one creates a *new draft* from a TODO line."
       ],
       "current_impl": [
-        "`cmd_promote_todo`, `_mark_todo_done` in `reqmap.py`; reuses `_parse_todos` (TODO.md parsing) and the `REQUIREMENT_TEMPLATE` scaffold ([[REQ-NEW-004]]), dispatched from `main()` for the `promote-todo` subcommand."
+        "`cmd_promote_todo`, `_mark_todo_done` in `reqmap.py`; reuses `_parse_todos` (TODO.md parsing) and the `REQUIREMENT_TEMPLATE` scaffold ([[REQ-NEW-004]]), dispatched from `main()` under `new --from-todo`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  an unfinished TODO item\n  When   `promote-todo \"<name>\" --id REQ-X-001` runs\n  Then   `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title,\n         milestone and layer, and `TODO.md` is left unchanged\n\nAC-2\n  Given  a TODO `lane: ops`\n  When   the requirement is scaffolded\n  Then   its `layer:` is `feature`\n\nAC-3\n  Given  `--mark-done`\n  When   the command runs\n  Then   the matched `TODO.md` line becomes `- [x] <name>` and no other line changes\n\nAC-4\n  Given  a missing `--id`, an already-taken id, a name with no open match, or an ambiguous name\n  When   the command runs\n  Then   it exits non-zero and writes no requirement file",
+      "accept": "AC-1\n  Given  an unfinished TODO item\n  When   `new --from-todo \"<name>\" --id REQ-X-001` runs\n  Then   `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title,\n         milestone and layer, and `TODO.md` is left unchanged\n\nAC-2\n  Given  a TODO `lane: ops`\n  When   the requirement is scaffolded\n  Then   its `layer:` is `feature`\n\nAC-3\n  Given  `--mark-done`\n  When   the command runs\n  Then   the matched `TODO.md` line becomes `- [x] <name>` and no other line changes\n\nAC-4\n  Given  a missing `--id`, an already-taken id, a name with no open match, or an ambiguous name\n  When   the command runs\n  Then   it exits non-zero and writes no requirement file",
       "input": "",
       "output": "",
       "desc": "",
@@ -1361,11 +1363,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:877"
+          "loc": "scripts/reqmap.py:881"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:923"
+          "loc": "scripts/reqmap.py:927"
         },
         {
           "role": "tested-by",
@@ -1383,9 +1385,9 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Prose capability classification & drafting",
-      "intent": "Specs and prompts written as text documents can be capabilities too, not just code. When `extract` runs, this part decides which text files deserve a draft requirement, which are only kept in sync, and which are ignored as boilerplate — then writes the drafts. Without it, prompt and spec files would stay invisible to the registry, or every README would pollute it with junk drafts.",
+      "intent": "Specs and prompts written as text documents can be capabilities too, not just code. When `draft` runs, this part decides which text files deserve a draft requirement, which are only kept in sync, and which are ignored as boilerplate — then writes the drafts. Without it, prompt and spec files would stay invisible to the registry, or every README would pollute it with junk drafts.",
       "contract": [
-        "`extract` shall also draft `draft`-status requirements from untagged **prose** files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.",
+        "`draft` shall also produce `draft`-status requirements from untagged **prose** files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.",
         "Each prose file shall be classified into one of three buckets before drafting:",
         "**ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).",
         "**sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`. These are never drafted as their own requirement, but become a member (and are drift-checked) when a human tags them `generated-from: <ID>`.",
@@ -1404,7 +1406,7 @@
         "`classify_prose` (the three-bucket router) and `_prose_facts` (title + heading scaffold) in `reqmap.py`; the prose walk lives inside `cmd_extract`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a `prompts/foo.md` with no member tag\n  When   `extract` runs\n  Then   a `draft`-status requirement is written for it\n\nAC-2\n  Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`\n  When   `extract` runs\n  Then   no draft is written for it\n\nAC-3\n  Given  a capability-bucket prose file already tagged `# implements: <ID>`\n  When   `extract` runs\n  Then   it is skipped (no duplicate draft)\n\nAC-4\n  Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`)\n  When   the scanner runs\n  Then   that file is a member of `<ID>`",
+      "accept": "AC-1\n  Given  a `prompts/foo.md` with no member tag\n  When   `draft` runs\n  Then   a `draft`-status requirement is written for it\n\nAC-2\n  Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`\n  When   `draft` runs\n  Then   no draft is written for it\n\nAC-3\n  Given  a capability-bucket prose file already tagged `# implements: <ID>`\n  When   `draft` runs\n  Then   it is skipped (no duplicate draft)\n\nAC-4\n  Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`)\n  When   the scanner runs\n  Then   that file is a member of `<ID>`",
       "input": "",
       "output": "",
       "desc": "",
@@ -1418,15 +1420,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1010"
+          "loc": "scripts/reqmap.py:1014"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1035"
+          "loc": "scripts/reqmap.py:1039"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1063"
+          "loc": "scripts/reqmap.py:1067"
         },
         {
           "role": "tested-by",
@@ -1461,7 +1463,7 @@
         "The `review` command shall emit a DETERMINISTIC, read-only JSON plan to stdout and write no file; it shall never invoke an LLM. `review` (no arg) covers the whole corpus; `review <ID>` covers one requirement.",
         "The plan shall carry, per requirement, its prose (title, intent/WHY, contract, acceptance, verify-intent) plus cheap STRUCTURAL anchors that are deterministic facts, not judgements (contract-clause count, acceptance count, intent word count, intent-terse, more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`, `requirements_in_plan`).",
         "The plan shall name exactly three AI categories — `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding MUST carry a concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).",
-        "DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`check`, `map --check`, the pre-commit hook, the CI action) shall read, write, or regenerate the plan or any AI sidecar; `check` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
+        "DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write, or regenerate the plan or any AI sidecar; `gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
         "The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive rate. The near-zero-false-positive property comes from MANDATORY human review of each `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).",
         "The AI consumer (the `requirement-quality-review` skill) shall write findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and shall never auto-edit a requirement.",
         "`review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a machine corpus plan with structural anchors, a coverage summary and category guidance for an out-of-band AI consumer — a different audience and shape, so they are not merged."
@@ -1478,7 +1480,7 @@
         "`cmd_review` in `reqmap.py` (the deterministic plan emitter), dispatched from `main()` for the `review` subcommand; the out-of-band consumer is the `requirement-quality-review` skill."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  the corpus\n  When   `review` runs with no argument (or as `review <ID>`)\n  Then   it emits JSON for every requirement (or that one); neither form writes a file nor\n         invokes an LLM\n\nAC-2\n  Given  the emitted plan\n  When   it is inspected\n  Then   it carries a `coverage_summary` with `total_requirements` and `requirements_in_plan`,\n         and names the three categories with the suggested_rewrite-required finding contract\n\nAC-3\n  Given  the same corpus\n  When   `review` runs twice\n  Then   the two outputs are byte-identical (deterministic)\n\nAC-4\n  Given  a `requirements/_ai_review.md` present or absent\n  When   `check` runs\n  Then   its exit code and printed output are byte-identical — the gate never reads the AI sidecar",
+      "accept": "AC-1\n  Given  the corpus\n  When   `review` runs with no argument (or as `review <ID>`)\n  Then   it emits JSON for every requirement (or that one); neither form writes a file nor\n         invokes an LLM\n\nAC-2\n  Given  the emitted plan\n  When   it is inspected\n  Then   it carries a `coverage_summary` with `total_requirements` and `requirements_in_plan`,\n         and names the three categories with the suggested_rewrite-required finding contract\n\nAC-3\n  Given  the same corpus\n  When   `review` runs twice\n  Then   the two outputs are byte-identical (deterministic)\n\nAC-4\n  Given  a `requirements/_ai_review.md` present or absent\n  When   `gate` runs\n  Then   its exit code and printed output are byte-identical — the gate never reads the AI sidecar",
       "input": "",
       "output": "",
       "desc": "",
@@ -1491,7 +1493,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3443"
+          "loc": "scripts/reqmap.py:3450"
         },
         {
           "role": "tested-by",
@@ -1543,7 +1545,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:526"
+          "loc": "scripts/reqmap.py:530"
         },
         {
           "role": "tested-by",
@@ -1593,15 +1595,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:329"
-        },
-        {
-          "role": "implements",
           "loc": "scripts/reqmap.py:333"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:343"
+          "loc": "scripts/reqmap.py:337"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:347"
         },
         {
           "role": "tested-by",
@@ -1637,7 +1639,7 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "The view is read-only and never edits the requirement. To change a status, use `promote`; to change the contract, edit the file.",
+        "The view is read-only and never edits the requirement. To change a status, use `confirm`; to change the contract, edit the file.",
         "The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached."
       ],
       "current_impl": [
@@ -1658,7 +1660,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1995"
+          "loc": "scripts/reqmap.py:1999"
         },
         {
           "role": "tested-by",
@@ -1678,7 +1680,7 @@
       "title": "Duplicate-capability detector",
       "intent": "When two requirements quietly describe the same capability, you do not notice until each has grown its own divergent implementation — and now there is a mess to untangle. This compares requirement pairs by their wording and flags the ones that overlap, so a reviewer can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.",
       "contract": [
-        "The `similar` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
+        "The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
         "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
         "It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.",
         "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
@@ -1693,13 +1695,13 @@
       "notes": [
         "The default threshold is a starting point, not a proven value. A reviewer tunes it with `--threshold` for the corpus at hand.",
         "Detection is lexical, not semantic. Two contracts that mean the same thing in different words may score low. The command surfaces likely duplicates; it does not prove duplication.",
-        "Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `candidates`."
+        "Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `plan`."
       ],
       "current_impl": [
         "`cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf` and `_cosine` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, and `_cosine` scores each pair. `cmd_similar` sorts the pairs and prints them with their shared terms."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  two requirements with near-identical Contract text\n  When   `similar` runs\n  Then   the pair is reported with a high score\n\nAC-2\n  Given  two requirements about unrelated topics\n  When   `similar` runs at the default threshold\n  Then   the pair is not reported\n\nAC-3\n  Given  a corpus with fewer than two requirements that have contract text\n  When   `similar` runs\n  Then   it prints a \"need at least two\" message and returns zero\n\nAC-4\n  Given  a custom `--threshold` above a pair's score\n  When   `similar` runs\n  Then   that pair is not reported\n\nAC-5\n  Given  any corpus\n  When   `similar` runs\n  Then   it returns zero",
+      "accept": "AC-1\n  Given  two requirements with near-identical Contract text\n  When   `dupes` runs\n  Then   the pair is reported with a high score\n\nAC-2\n  Given  two requirements about unrelated topics\n  When   `dupes` runs at the default threshold\n  Then   the pair is not reported\n\nAC-3\n  Given  a corpus with fewer than two requirements that have contract text\n  When   `dupes` runs\n  Then   it prints a \"need at least two\" message and returns zero\n\nAC-4\n  Given  a custom `--threshold` above a pair's score\n  When   `dupes` runs\n  Then   that pair is not reported\n\nAC-5\n  Given  any corpus\n  When   `dupes` runs\n  Then   it returns zero",
       "input": "",
       "output": "",
       "desc": "",
@@ -1712,27 +1714,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2077"
+          "loc": "scripts/reqmap.py:2081"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2084"
+          "loc": "scripts/reqmap.py:2088"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2096"
+          "loc": "scripts/reqmap.py:2100"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2114"
+          "loc": "scripts/reqmap.py:2118"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2126"
+          "loc": "scripts/reqmap.py:2130"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2138"
+          "loc": "scripts/reqmap.py:2142"
         },
         {
           "role": "tested-by",
@@ -1787,71 +1789,71 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2351"
+          "loc": "scripts/reqmap.py:2355"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2423"
+          "loc": "scripts/reqmap.py:2427"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2866"
+          "loc": "scripts/reqmap.py:2870"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2884"
+          "loc": "scripts/reqmap.py:2888"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2904"
+          "loc": "scripts/reqmap.py:2908"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2907"
+          "loc": "scripts/reqmap.py:2911"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2912"
+          "loc": "scripts/reqmap.py:2916"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2929"
+          "loc": "scripts/reqmap.py:2933"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2941"
+          "loc": "scripts/reqmap.py:2945"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2946"
+          "loc": "scripts/reqmap.py:2950"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2965"
+          "loc": "scripts/reqmap.py:2969"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3252"
+          "loc": "scripts/reqmap.py:3259"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3327"
+          "loc": "scripts/reqmap.py:3334"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3345"
+          "loc": "scripts/reqmap.py:3352"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3353"
+          "loc": "scripts/reqmap.py:3360"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3368"
+          "loc": "scripts/reqmap.py:3375"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3643"
+          "loc": "scripts/reqmap.py:3650"
         },
         {
           "role": "tested-by",
@@ -1903,11 +1905,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:576"
+          "loc": "scripts/reqmap.py:580"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:672"
+          "loc": "scripts/reqmap.py:676"
         },
         {
           "role": "tested-by",
@@ -1961,23 +1963,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:648"
+          "loc": "scripts/reqmap.py:652"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:700"
+          "loc": "scripts/reqmap.py:704"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1548"
+          "loc": "scripts/reqmap.py:1552"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1589"
+          "loc": "scripts/reqmap.py:1593"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2030"
+          "loc": "scripts/reqmap.py:2034"
         },
         {
           "role": "tested-by",
@@ -2029,15 +2031,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3414"
+          "loc": "scripts/reqmap.py:3421"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3418"
+          "loc": "scripts/reqmap.py:3425"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3427"
+          "loc": "scripts/reqmap.py:3434"
         },
         {
           "role": "tested-by",

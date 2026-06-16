@@ -17,7 +17,7 @@ milestone: v1.14
 > so the roadmap item and its requirement stay connected instead of being retyped by hand.
 
 ## WHAT — Contract (normative)
-- The `promote-todo` command shall scaffold a new requirement file from an unfinished `TODO.md`
+- The `new --from-todo` command shall scaffold a new requirement file from an unfinished `TODO.md`
   item selected by exact name (trimmed, case-insensitive). It shall require an explicit
   `--id AREA-NAME-NNN`; there is no interactive prompt (the engine runs headless — CI, hooks).
 - It shall seed the new requirement from the matched item: the title from the TODO name,
@@ -36,13 +36,13 @@ milestone: v1.14
 ## WHAT — Notes & known limitations (informative)
 - Selection is by exact name within the unfinished items; rename a TODO to disambiguate rather
   than adding index syntax. Batch promotion and an undo command are intentionally out of scope.
-- This is orthogonal to [[REQ-PROMOTE-011]] (`promote`, which lifts a baseline requirement to
+- This is orthogonal to [[REQ-PROMOTE-011]] (`confirm`, which lifts a baseline requirement to
   confirmed): this one creates a *new draft* from a TODO line.
 
 ## HOW — Acceptance (= tests)
 AC-1
   Given  an unfinished TODO item
-  When   `promote-todo "<name>" --id REQ-X-001` runs
+  When   `new --from-todo "<name>" --id REQ-X-001` runs
   Then   `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title,
          milestone and layer, and `TODO.md` is left unchanged
 
@@ -63,8 +63,8 @@ AC-4
 
 ## WHERE — Current implementation
 - `cmd_promote_todo`, `_mark_todo_done` in `reqmap.py`; reuses `_parse_todos` (TODO.md parsing)
-  and the `REQUIREMENT_TEMPLATE` scaffold ([[REQ-NEW-004]]), dispatched from `main()` for the
-  `promote-todo` subcommand.
+  and the `REQUIREMENT_TEMPLATE` scaffold ([[REQ-NEW-004]]), dispatched from `main()` under
+  `new --from-todo`.
 
 ## Links
 - Used by: (auto)

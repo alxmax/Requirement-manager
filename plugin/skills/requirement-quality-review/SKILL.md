@@ -53,5 +53,5 @@ requirement file.** A human decides what to act on.
 
 ## Hard rules
 - Never edit a requirement `.md` file. Propose rewrites; the human applies them.
-- Never run as part of `check` / `map --check` / a pre-commit hook / CI — this is on-demand only.
+- Never run as part of `gate` / `map --check` / a pre-commit hook / CI — this is on-demand only.
 - If the plan is empty or unreadable, say so and stop; do not fabricate findings.

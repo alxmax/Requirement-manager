@@ -33,7 +33,7 @@ milestone: v1.14
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
-- The view is read-only and never edits the requirement. To change a status, use `promote`; to change the contract, edit the file.
+- The view is read-only and never edits the requirement. To change a status, use `confirm`; to change the contract, edit the file.
 - The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached.
 
 ## HOW — Acceptance (= tests)
