@@ -7,6 +7,7 @@ priority: must-have
 depends_on: []
 superseded_by:
 milestone: v1.00
+lint_exempt: [ac-count-low]
 ---
 
 # Stakeholder need — specs and code stay in sync

@@ -4,3 +4,33 @@
 # the engine must stay scanned. Add other vendored/generated paths below.
 # The bundled single-file viewer is a generated artifact, never a member.
 scripts/_map_viewer.html
+
+# --- excalidraw-diagram skill ---
+# SKILL.md: classified as 'ignore' bucket by REQ-PROSE-024 (user contract, not
+# a capability implementation).
+skills/excalidraw-diagram/SKILL.md
+# examples/: transient generators — correctness proved by test_excalidraw.py.
+# A new example should not require a new requirement.
+skills/excalidraw-diagram/examples/*.py
+# references/: Excalidraw JSON format reference doc — not a capability.
+skills/excalidraw-diagram/references/excalidraw_format.md
+
+# --- requirement-manager skill ---
+# SKILL.md: same 'ignore' bucket classification. The engine's own skill
+# contract is described by requirements in plugin/requirements/, not by
+# tagging SKILL.md itself.
+skills/requirement-manager/SKILL.md
+
+# --- working docs / specs ---
+# Design specs and superpowers working notes under docs/ are sync_only prose
+# (REQ-PROSE-024 bucket), not capability implementations.
+docs/superpowers/specs/*.md
+
+# --- app/ and repo-root scripts/ ---
+# app/ (Vite+React viewer source) and scripts/check_versions.py live at the
+# repo root — OUTSIDE plugin/'s scan root. They carry no implements: tags by
+# design: the viewer UX is tested via npm build; the version-gate script is
+# dev-CI tooling described in CLAUDE.md and cross-referenced in REQ-CHECK-006.
+# No ignore entry needed here (structural scope already excludes them) — this
+# comment exists solely to document the intent so future contributors don't
+# wonder why these files have no tags.

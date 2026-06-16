@@ -12,6 +12,15 @@ This skill is the **out-of-band AI consumer** of the deterministic plan emitted 
 here. **This is advisory only — it is NEVER part of the gate, and you NEVER edit a
 requirement file.** A human decides what to act on.
 
+## Deterministic complement
+
+Before invoking this skill, run `python scripts/reqmap.py lint` — it catches mechanical
+structural issues (missing Contract/Acceptance sections, over-long sentences, stacked
+conditions) that do not require AI judgement. Fix lint findings first; this skill covers
+the semantic layer lint cannot reach. Add `lint_exempt: [<check>]` to a requirement's
+frontmatter to silence a lint check that is intentionally violated (e.g.
+`lint_exempt: [ac-count-high]` for a requirement whose many ACs are by design).
+
 ## Procedure
 
 1. **Get the plan** (deterministic, read-only — safe to run anywhere):

@@ -65,6 +65,16 @@ AC-3
 ## WHERE — Current implementation
 - `render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is
   called by `cmd_map` after `_map.json`/`_map.md` are written.
+- The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):
+  - `MapView.jsx` — force-graph rendering of the requirement graph
+  - `ProblemsView.jsx` — gate errors, drift items, and open risk inbox
+  - `RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields
+  - `SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)
+  - `app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views
+  These files carry no `implements:` tags because they are outside the plugin scan root —
+  the requirement covers the engine-side injection contract, not the compiled UX layer.
+  The viewer UX is tested by `npm run build:viewer` (Vite build success) and manual
+  inspection, not by reqmap's gate.
 
 ## Links
 - Used by: (auto)

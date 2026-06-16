@@ -6,6 +6,7 @@ owner: Alex
 depends_on: [REQ-MAP-007]
 superseded_by:
 milestone: v1.12
+lint_exempt: [ac-count-high]
 ---
 
 # What-should-I-do-next report

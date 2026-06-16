@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-16.1",
+  "engine_version": "2026-06-16.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -251,6 +251,9 @@
       "satisfies": [],
       "satisfied_by": [
         "REQ-CHECK-006",
+        "REQ-EXCALIDRAW-030",
+        "REQ-EXCALIDRAW-031",
+        "REQ-EXCALIDRAW-032",
         "REQ-MAP-007",
         "REQ-PAGES-021",
         "REQ-SITE-026",
@@ -310,7 +313,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:705"
+          "loc": "scripts/reqmap.py:709"
         },
         {
           "role": "tested-by",
@@ -359,35 +362,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1190"
+          "loc": "scripts/reqmap.py:1194"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1224"
+          "loc": "scripts/reqmap.py:1228"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1247"
+          "loc": "scripts/reqmap.py:1251"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1270"
+          "loc": "scripts/reqmap.py:1274"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1287"
+          "loc": "scripts/reqmap.py:1291"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1306"
+          "loc": "scripts/reqmap.py:1310"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1312"
+          "loc": "scripts/reqmap.py:1316"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1337"
+          "loc": "scripts/reqmap.py:1341"
         },
         {
           "role": "tested-by",
@@ -439,7 +442,8 @@
       ],
       "notes": [
         "Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`) is not automatable and surfaces at human review.",
-        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there."
+        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there.",
+        "The dev-CI version-coherence script `scripts/check_versions.py` (repo root, never seeded into consumer repos) enforces plugin manifest alignment as the first step in this repo's own CI pipeline (`check_versions.py → gate → map --check → test_reqmap.py`). It is outside the plugin scan root and has no requirement of its own; its invariant (semver consistency across `plugin.json` + `marketplace.json`) is documented in `CLAUDE.md`."
       ],
       "current_impl": [
         "`cmd_check`, `warn_if_stale` in `reqmap.py`."
@@ -483,7 +487,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:782"
+          "loc": "scripts/reqmap.py:786"
         },
         {
           "role": "tested-by",
@@ -540,6 +544,169 @@
       "risks": []
     },
     {
+      "id": "REQ-EXCALIDRAW-030",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Excalidraw scene builder — core API",
+      "intent": "The excalidraw-diagram skill needs a stdlib-only Python library that turns declarative shape and arrow declarations into a valid Excalidraw scene file and a self-contained HTML viewer, with no external dependencies, so the skill can be vendored into any environment without install friction.",
+      "contract": [
+        "`Scene()` shall produce a valid Excalidraw JSON scene (schema version 2) with a `type: \"excalidraw\"` root and a `elements` list compatible with excalidraw.com import.",
+        "`Scene` shall expose shape primitives: `box`, `ellipse`, `diamond`, `frame`.",
+        "`Scene` shall expose ISO 5807 flowchart aliases: `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation`, `connector`.",
+        "`Scene` shall expose layout helpers: `row`, `column`, `grid`, `enclose`, `lane`, `pipeline`, `section`, `align`, `distribute`.",
+        "`Scene` shall expose annotation helpers: `title`, `label`, `legend`, `glossary`, `role`.",
+        "`Scene` shall expose connector helpers: `arrow`, `free_arrow`, `path`, `route_under`.",
+        "`.save(basename, out_dir)` shall write both `<basename>.excalidraw` (the scene JSON) and `<basename>.html` (a self-contained viewer) in one call and raise `RuntimeError` if called more than once on the same `Scene`.",
+        "`Scene(seed=<int>)` shall produce byte-identical output across re-runs.",
+        "The builder shall have no external dependencies — stdlib only."
+      ],
+      "verify": [
+        "None — authored from known intent."
+      ],
+      "notes": [
+        "The authoritative usage reference is `skills/excalidraw-diagram/SKILL.md`.",
+        "`save()` overlap detection raises on any two non-container shapes that overlap (co-ordinates checked after all shapes are added)."
+      ],
+      "current_impl": [
+        "`class Scene` and all shape/layout/arrow methods in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a `Scene` with at least one `box` and one `arrow`\n  When   `.save()` is called\n  Then   both `<basename>.excalidraw` and `<basename>.html` are written and the\n         `.excalidraw` file parses as valid JSON with `type: \"excalidraw\"`\n\nAC-2\n  Given  two `box` shapes placed at overlapping coordinates\n  When   `.save()` is called without `allow_overlap=True`\n  Then   a `ValueError` is raised naming the overlapping shapes\n\nAC-3\n  Given  `Scene(seed=42)` with identical shape declarations run twice\n  When   both outputs are compared byte-for-byte\n  Then   they are identical\n\nAC-4\n  Given  `.save()` has already been called once on a `Scene`\n  When   `.save()` is called again\n  Then   a `RuntimeError` is raised\n\nAC-5\n  Given  a `pipeline([...])` call with step dicts\n  When   `.save()` is called\n  Then   the resulting scene contains connected flowchart nodes with no\n         overlapping shapes",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [
+        "REQ-EXCALIDRAW-031",
+        "REQ-EXCALIDRAW-032"
+      ],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "skills/excalidraw-diagram/scripts/excalidraw_builder.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v2.4",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-EXCALIDRAW-031",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Excalidraw quality gates",
+      "intent": "A diagram that ships with overlapping shapes, uncrossing arrows, unlegended colours, or text that spills outside its box is unreadable to an outsider. Hard-fail gates at `.save()` time make these defects impossible to ship silently.",
+      "contract": [
+        "`.save()` shall support four named gates, each accepting `\"warn\"` (default, prints) or `\"error\"` (raises `ValueError`): `crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`.",
+        "`crossing_check`: a bound arrow whose straight centre-to-centre path passes through an unrelated box shall trigger the gate.",
+        "`legend_check`: a fill colour used on any shape but absent from the `legend()` key shall trigger the gate (fires only after `legend()` is rendered; a scene with no legend is exempt).",
+        "`overflow_check`: a shape whose bound text is larger than the shape bounds (text spills outside) shall trigger the gate.",
+        "`text_overlap_check`: two free captions or label elements that geometrically overlap each other shall trigger the gate.",
+        "The inspection methods `check_arrow_crossings()`, `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()` shall each return a list of offending items (empty list = clean) and be callable before `.save()`.",
+        "`test_excalidraw.py` shall exercise all four gates in both `\"warn\"` and `\"error\"` modes for each maintained example generator."
+      ],
+      "verify": [
+        "None — authored from known intent."
+      ],
+      "notes": [
+        "The canonical pattern for a ship-quality diagram is all four gates set to `\"error\"`: `save(..., crossing_check=\"error\", legend_check=\"error\", overflow_check=\"error\", text_overlap_check=\"error\")`."
+      ],
+      "current_impl": [
+        "`_check_crossings`, `_check_legend`, `_check_overflow`, `_check_text_overlaps` and the `save()` gate dispatch in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`.",
+        "`skills/excalidraw-diagram/scripts/test_excalidraw.py` (gate regression suite)."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a scene where a bound arrow's path passes through an unrelated box\n  When   `save(crossing_check=\"error\")` is called\n  Then   a `ValueError` is raised; `save(crossing_check=\"warn\")` emits a\n         warning and exits normally\n\nAC-2\n  Given  a scene with `fill=\"blue\"` on a box and no `legend()` rendered\n  When   `save(legend_check=\"error\")` is called\n  Then   a `ValueError` is raised naming the unlegended colour\n\nAC-3\n  Given  a box whose bound text is wider than the box width\n  When   `save(overflow_check=\"error\")` is called\n  Then   a `ValueError` is raised; `check_text_overflow()` returns the\n         offending shape id\n\nAC-4\n  Given  two `label()` elements placed at overlapping coordinates\n  When   `save(text_overlap_check=\"error\")` is called\n  Then   a `ValueError` is raised naming the overlapping pair\n\nAC-5\n  Given  each maintained example generator in `examples/`\n  When   `test_excalidraw.py` runs it with all four gates at `\"error\"`\n  Then   the generator produces zero gate violations",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-EXCALIDRAW-030"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "skills/excalidraw-diagram/scripts/excalidraw_builder.py:3"
+        },
+        {
+          "role": "tested-by",
+          "loc": "skills/excalidraw-diagram/scripts/test_excalidraw.py:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v2.4",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-EXCALIDRAW-032",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Excalidraw builder CLI verbs",
+      "intent": "Diagrams need to be rebuilt when source changes: either from a generator script (the main authoring path), from a hand-edited `.excalidraw` file (viewer rebuild only), or from an existing repo that needs a scaffolded starting point (discover). The CLI exposes these as three distinct verbs so each use-case has a single, unambiguous entry point.",
+      "contract": [
+        "Invoking `python excalidraw_builder.py` with **no arguments** shall run the builder smoke test, print a human-readable summary, and exit 0 on success. This is the CI health-check entry point and must not be shadowed by a new default verb.",
+        "`python excalidraw_builder.py render <scene.excalidraw> [out_dir]` shall read an existing `.excalidraw` file and write a fresh self-contained `<basename>.html` viewer beside it (or into `out_dir` when given). The source `.excalidraw` file shall not be modified.",
+        "`python excalidraw_builder.py discover <repo> [out.py]` shall scan `<repo>` for source files and emit a runnable multi-layer poster stub (STRUCTURE layer pre-populated, WORKFLOW / INTEGRATION / MODES / MODEL / DATA layers commented as scaffolds) to `out.py` (default: `make_diagram.py`).",
+        "Any unrecognised verb shall exit with code 2 and print a usage message."
+      ],
+      "verify": [
+        "None — authored from known intent."
+      ],
+      "notes": [
+        "`discover` only scaffolds the *components* it can see; inferring real data flow and grouping remains the author's responsibility.",
+        "The smoke test (no-arg invocation) is what CI depends on — do not change the no-arg behaviour."
+      ],
+      "current_impl": [
+        "`_main(argv)` and the `render_html`, `discover_stub` functions in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`.",
+        "`skills/excalidraw-diagram/scripts/test_excalidraw.py` (CLI test class)."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  no arguments\n  When   `python excalidraw_builder.py` is run\n  Then   it exits 0 and stdout contains a success/summary line (not an error)\n\nAC-2\n  Given  a valid `.excalidraw` file at `<path>`\n  When   `render <path>` is run\n  Then   a `<basename>.html` is written; the source `.excalidraw` is unchanged\n\nAC-3\n  Given  a directory containing at least one `.py` source file\n  When   `discover <dir>` is run\n  Then   a runnable Python stub is emitted that imports `excalidraw_builder`\n         and calls `.save()`\n\nAC-4\n  Given  an unknown verb such as `frobnicate`\n  When   `python excalidraw_builder.py frobnicate`\n  Then   the process exits with code 2 and prints usage",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-EXCALIDRAW-030"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "NEED-SSOT-001"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "skills/excalidraw-diagram/scripts/excalidraw_builder.py:4"
+        },
+        {
+          "role": "tested-by",
+          "loc": "skills/excalidraw-diagram/scripts/test_excalidraw.py:4"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v2.4",
+      "priority": "",
+      "risks": []
+    },
+    {
       "id": "REQ-EXTRACT-008",
       "layer": "feature",
       "status": "confirmed",
@@ -581,15 +748,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1027"
+          "loc": "scripts/reqmap.py:1031"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1088"
+          "loc": "scripts/reqmap.py:1092"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1173"
+          "loc": "scripts/reqmap.py:1177"
         },
         {
           "role": "tested-by",
@@ -646,11 +813,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1443"
+          "loc": "scripts/reqmap.py:1447"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1530"
+          "loc": "scripts/reqmap.py:1534"
         },
         {
           "role": "tested-by",
@@ -714,7 +881,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2212"
+          "loc": "scripts/reqmap.py:2291"
         },
         {
           "role": "tested-by",
@@ -769,11 +936,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2333"
+          "loc": "scripts/reqmap.py:2418"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2362"
+          "loc": "scripts/reqmap.py:2447"
         },
         {
           "role": "tested-by",
@@ -828,19 +995,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1835"
+          "loc": "scripts/reqmap.py:1839"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1870"
+          "loc": "scripts/reqmap.py:1874"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1893"
+          "loc": "scripts/reqmap.py:1897"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2001"
+          "loc": "scripts/reqmap.py:2010"
         },
         {
           "role": "tested-by",
@@ -896,11 +1063,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1864"
+          "loc": "scripts/reqmap.py:1868"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1893"
+          "loc": "scripts/reqmap.py:1897"
         },
         {
           "role": "tested-by",
@@ -965,87 +1132,87 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1565"
+          "loc": "scripts/reqmap.py:1569"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1656"
+          "loc": "scripts/reqmap.py:1660"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1680"
+          "loc": "scripts/reqmap.py:1684"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2425"
+          "loc": "scripts/reqmap.py:2510"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2477"
+          "loc": "scripts/reqmap.py:2562"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2485"
+          "loc": "scripts/reqmap.py:2570"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2508"
+          "loc": "scripts/reqmap.py:2593"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2522"
+          "loc": "scripts/reqmap.py:2607"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2538"
+          "loc": "scripts/reqmap.py:2623"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2591"
+          "loc": "scripts/reqmap.py:2676"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2597"
+          "loc": "scripts/reqmap.py:2682"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2604"
+          "loc": "scripts/reqmap.py:2689"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2641"
+          "loc": "scripts/reqmap.py:2726"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2656"
+          "loc": "scripts/reqmap.py:2741"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2687"
+          "loc": "scripts/reqmap.py:2772"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2765"
+          "loc": "scripts/reqmap.py:2850"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2813"
+          "loc": "scripts/reqmap.py:2898"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2864"
+          "loc": "scripts/reqmap.py:2949"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2872"
+          "loc": "scripts/reqmap.py:2957"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3317"
+          "loc": "scripts/reqmap.py:3402"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3327"
+          "loc": "scripts/reqmap.py:3412"
         },
         {
           "role": "tested-by",
@@ -1114,7 +1281,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:881"
+          "loc": "scripts/reqmap.py:885"
         },
         {
           "role": "tested-by",
@@ -1174,11 +1341,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1698"
+          "loc": "scripts/reqmap.py:1702"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1711"
+          "loc": "scripts/reqmap.py:1715"
         },
         {
           "role": "tested-by",
@@ -1242,15 +1409,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1671"
+          "loc": "scripts/reqmap.py:1675"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2451"
+          "loc": "scripts/reqmap.py:2536"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3343"
+          "loc": "scripts/reqmap.py:3428"
         },
         {
           "role": "tested-by",
@@ -1303,11 +1470,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:978"
+          "loc": "scripts/reqmap.py:982"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:993"
+          "loc": "scripts/reqmap.py:997"
         },
         {
           "role": "tested-by",
@@ -1356,11 +1523,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:902"
+          "loc": "scripts/reqmap.py:906"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:948"
+          "loc": "scripts/reqmap.py:952"
         },
         {
           "role": "tested-by",
@@ -1413,15 +1580,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1035"
+          "loc": "scripts/reqmap.py:1039"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1060"
+          "loc": "scripts/reqmap.py:1064"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1088"
+          "loc": "scripts/reqmap.py:1092"
         },
         {
           "role": "tested-by",
@@ -1486,7 +1653,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3483"
+          "loc": "scripts/reqmap.py:3568"
         },
         {
           "role": "tested-by",
@@ -1653,7 +1820,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2032"
+          "loc": "scripts/reqmap.py:2052"
         },
         {
           "role": "tested-by",
@@ -1707,27 +1874,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2114"
+          "loc": "scripts/reqmap.py:2134"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2121"
+          "loc": "scripts/reqmap.py:2141"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2133"
+          "loc": "scripts/reqmap.py:2153"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2151"
+          "loc": "scripts/reqmap.py:2171"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2163"
+          "loc": "scripts/reqmap.py:2183"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2175"
+          "loc": "scripts/reqmap.py:2195"
         },
         {
           "role": "tested-by",
@@ -1782,71 +1949,71 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2388"
+          "loc": "scripts/reqmap.py:2473"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2460"
+          "loc": "scripts/reqmap.py:2545"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2903"
+          "loc": "scripts/reqmap.py:2988"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2921"
+          "loc": "scripts/reqmap.py:3006"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2941"
+          "loc": "scripts/reqmap.py:3026"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2944"
+          "loc": "scripts/reqmap.py:3029"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2949"
+          "loc": "scripts/reqmap.py:3034"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2966"
+          "loc": "scripts/reqmap.py:3051"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2978"
+          "loc": "scripts/reqmap.py:3063"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2983"
+          "loc": "scripts/reqmap.py:3068"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3002"
+          "loc": "scripts/reqmap.py:3087"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3292"
+          "loc": "scripts/reqmap.py:3377"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3367"
+          "loc": "scripts/reqmap.py:3452"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3385"
+          "loc": "scripts/reqmap.py:3470"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3393"
+          "loc": "scripts/reqmap.py:3478"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3408"
+          "loc": "scripts/reqmap.py:3493"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3683"
+          "loc": "scripts/reqmap.py:3772"
         },
         {
           "role": "tested-by",
@@ -1902,7 +2069,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:697"
+          "loc": "scripts/reqmap.py:701"
         },
         {
           "role": "tested-by",
@@ -1960,19 +2127,19 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:725"
+          "loc": "scripts/reqmap.py:729"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1573"
+          "loc": "scripts/reqmap.py:1577"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1614"
+          "loc": "scripts/reqmap.py:1618"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2067"
+          "loc": "scripts/reqmap.py:2087"
         },
         {
           "role": "tested-by",
@@ -2006,7 +2173,13 @@
         "Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate capability — see [[REQ-PAGES-021]]."
       ],
       "current_impl": [
-        "`render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is called by `cmd_map` after `_map.json`/`_map.md` are written."
+        "`render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is called by `cmd_map` after `_map.json`/`_map.md` are written.",
+        "The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):",
+        "`MapView.jsx` — force-graph rendering of the requirement graph",
+        "`ProblemsView.jsx` — gate errors, drift items, and open risk inbox",
+        "`RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields",
+        "`SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)",
+        "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags because they are outside the plugin scan root — the requirement covers the engine-side injection contract, not the compiled UX layer. The viewer UX is tested by `npm run build:viewer` (Vite build success) and manual inspection, not by reqmap's gate."
       ],
       "acc": [],
       "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)",
@@ -2024,15 +2197,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3454"
+          "loc": "scripts/reqmap.py:3539"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3458"
+          "loc": "scripts/reqmap.py:3543"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3467"
+          "loc": "scripts/reqmap.py:3552"
         },
         {
           "role": "tested-by",
@@ -2069,6 +2242,14 @@
     [
       "REQ-CHECK-006",
       "CORE-DRIFT-003"
+    ],
+    [
+      "REQ-EXCALIDRAW-031",
+      "REQ-EXCALIDRAW-030"
+    ],
+    [
+      "REQ-EXCALIDRAW-032",
+      "REQ-EXCALIDRAW-030"
     ],
     [
       "REQ-EXTRACT-008",
