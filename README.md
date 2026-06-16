@@ -9,11 +9,10 @@ Markdown file that says *what it should do*. Your code links back to that file
 with a one-line comment. A small Python script then checks that the two never
 fall out of sync — and draws you a map of how everything connects.
 
-It runs as a plain command-line script (a single file, no installation needed),
-as a [Claude Code plugin](plugin/.claude-plugin/plugin.json), and with any other
-AI assistant that can call shell commands (Copilot, Gemini CLI, and others). It's
-especially handy when several people — or several AI agents — touch the same
-codebase and the specs slowly rot.
+The engine is a single stdlib-only Python script. It runs in any repo, with any
+AI assistant (Claude Code, Copilot, Gemini CLI, or none), and needs no
+installation — just copy one file. It's especially handy when several people or
+several AI agents touch the same codebase and the specs slowly rot.
 
 ## Why would I want this?
 
@@ -40,11 +39,11 @@ tool turns the spec into a real file that lives **next to the code** and is
 
 ## Try it in 2 minutes
 
+Copy the engine into any project, then:
+
 ```bash
-# from inside any project of yours
-python scripts/reqmap.py init     # creates the folders, drafts requirements from your
-                                  # existing code, and prints what to do next
-python scripts/reqmap.py gate     # the gate: are code and specs in sync? (report-only)
+python scripts/reqmap.py init     # scaffold + draft requirements from your existing code
+python scripts/reqmap.py gate     # are code and specs in sync? (report-only)
 python scripts/reqmap.py map      # build the visual map → open requirements/_map.html
 ```
 
@@ -53,8 +52,7 @@ next step. You never edit the generated files (`_map.*`, `_reqlock.json`) by han
 
 ## What a requirement file looks like
 
-A requirement is just Markdown: a small header (YAML "frontmatter") plus prose.
-Trimmed example:
+A requirement is just Markdown: a small YAML header plus prose. Trimmed example:
 
 ```markdown
 ---
@@ -82,89 +80,93 @@ The header carries the machine-readable bits (`id`, `status`, what it
 `depends_on`); the prose explains intent and lists the acceptance criteria that
 become your tests.
 
-## Using with other AI assistants
+## AI assistant integrations
 
-`reqmap.py` is a plain Python CLI — no AI SDK, no cloud dependency, stdlib only.
-Any AI assistant that can run shell commands can drive the full workflow.
+### Plain CLI (any tool, or no tool)
 
-**GitHub Copilot, Gemini CLI, and other function-calling tools**
-
-The plugin ships a machine-readable manifest — `plugin/tool_definition.json` — that
-exposes every reqmap.py command in [OpenAI function-calling schema](https://platform.openai.com/docs/guides/function-calling).
-Any tool that supports function calling can read this file to discover the available
-commands, their parameters, and their descriptions.
-
-**SKILL.universal.md — AI-agnostic instruction files**
-
-Each of the three skills ships a `SKILL.universal.md` alongside the Claude
-Code-specific `SKILL.md`. The universal variant has all Claude Code-specific
-directives removed (no `Skill` tool invocations, no `${CLAUDE_PLUGIN_ROOT}` paths)
-so it works as a plain system-prompt or instruction file with any AI assistant:
-
-| File | For |
-|---|---|
-| `plugin/skills/requirement-manager/SKILL.universal.md` | Core SSOT + drift workflow |
-| `plugin/skills/excalidraw-diagram/SKILL.universal.md` | Excalidraw diagram generation |
-| `plugin/skills/requirement-quality-review/SKILL.universal.md` | Advisory quality review |
-
-**Manual setup (any AI, any repo)**
-
-The engine is a single file with no dependencies. Copy it into your repo once:
+Copy `reqmap.py` from `plugin/scripts/` into your repo's `scripts/` directory and
+run it directly. No AI assistant needed:
 
 ```bash
-# copy reqmap.py from the plugin's scripts/ directory, then:
-python scripts/reqmap.py init   # bootstrap: scaffold + draft + lock + map
-python scripts/reqmap.py gate   # run the gate — works identically under any AI
-python scripts/reqmap.py map    # generate the viewer
+# one-time copy
+cp /path/to/plugin/scripts/reqmap.py scripts/reqmap.py
+
+# then from your repo root:
+python scripts/reqmap.py init
+python scripts/reqmap.py gate
+python scripts/reqmap.py map
 ```
 
-**Verifying AI-agnostic compatibility**
+### Claude Code plugin (most integrated)
 
-```bash
-python scripts/test_cross_tool.py
-```
-
-Runs a headless integration test (stdlib only, no AI tooling required): seeds
-reqmap.py in a tempdir, runs `sync → gate → map`, and asserts a valid `_map.json`
-is produced. This is the falsification criterion for multi-AI compatibility.
-
-## Install as a Claude Code plugin
-
-This repo is also a plugin marketplace. Inside Claude Code:
+Install from the plugin marketplace — Claude Code will auto-trigger the skills,
+surface commands via the menu, and update the engine when a new version ships:
 
 ```
 /plugin marketplace add alxmax/requirement-manager
 /plugin install requirement-manager@requirement-manager
 ```
 
-Then ask for the `requirement-manager` skill in any repo. On first use it copies
-`scripts/reqmap.py` into that repo — the requirement template is built into the
-script, so there's nothing else to download.
+On first use in any repo the skill copies `scripts/reqmap.py` into that repo and
+runs `init`. The requirement template is built into the script — nothing else to
+download.
+
+### GitHub Copilot, Gemini CLI, and others
+
+The engine is a plain Python CLI with no AI SDK dependency. Any assistant that
+can run shell commands can drive the full workflow. The plugin ships two
+interoperability artifacts:
+
+**`plugin/tool_definition.json`** — every `reqmap.py` command in
+[OpenAI function-calling schema](https://platform.openai.com/docs/guides/function-calling).
+Load this file so your assistant can discover all available commands, their
+parameters, and their descriptions without reading source code.
+
+**`SKILL.universal.md` files** — AI-agnostic variants of each skill's instruction
+file, with all Claude Code-specific directives removed (`Skill` tool invocations,
+`${CLAUDE_PLUGIN_ROOT}` paths). Drop any of these as a plain system prompt or
+`AGENTS.md` / `GEMINI.md` instruction:
+
+| File | Skill |
+|---|---|
+| `plugin/skills/requirement-manager/SKILL.universal.md` | Core SSOT + drift workflow |
+| `plugin/skills/excalidraw-diagram/SKILL.universal.md` | Excalidraw diagram generation |
+| `plugin/skills/requirement-quality-review/SKILL.universal.md` | Advisory quality review |
+
+**Verify AI-agnostic compatibility:**
+
+```bash
+python scripts/test_cross_tool.py
+```
+
+Stdlib-only headless test: seeds `reqmap.py` in a tempdir, runs `sync → gate → map`,
+and asserts a valid `_map.json` is produced. If this passes, the engine works under
+any assistant — or with no assistant at all.
 
 ## All commands
 
-> In **this** repo, run them from inside `plugin/`. In **your** repo, run from
-> wherever `requirements/` lives — the engine resolves paths relative to where it runs.
+> In **this** repo, run commands from inside `plugin/`. In **your** repo, run
+> from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
 | Command | What it does |
 |---|---|
 | `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
-| `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias, kept for backward compat.) |
+| `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias.) |
 | `sync` | Rescan + advance the drift baseline + regenerate the map in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
-| `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Also reads `TODO.md` from the repo root and inlines a `todos` array into `_map.json` so the Roadmap tab can show planned work alongside requirements |
-| `site --attach <page>` | Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. `--regions nav,stats`, `--diagram <rel>` links an Excalidraw HTML |
+| `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Reads `TODO.md` from the repo root and inlines a `todos` array for the Roadmap tab. |
+| `site --attach <page>` | Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. `--regions nav,stats`, `--diagram <rel>` links an Excalidraw HTML. |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
 | `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template. Use `--from-todo "name" --id ID` to pre-fill from a TODO.md item. |
 | `scan` | List which code belongs to which requirement |
-| `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors |
+| `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors. |
 | `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
-| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35 |
-| `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge |
+| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35. |
+| `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge. |
 | `export` | Emit just the graph JSON (for an external front-end) |
 | `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |
 | `plan` | Read-only JSON plan for AI-assisted extraction (writes no files; use before `draft`) |
 | `findings` | Collect open "needs human review" notes into `_findings.md` |
-| `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) for all requirements or one — an AI-feed for advisory quality review. Read-only |
+| `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) — AI feed for advisory quality review. Read-only. |
 | `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
 
 ## The Excalidraw diagram skill
@@ -179,10 +181,12 @@ hand-drawn-look and fully editable, not a screenshot.
 - Flowcharts, pipelines, multi-agent layouts, state flows, module maps
 - Any time you want a whiteboard-style schematic you can open in excalidraw.com
 
-**How to invoke it (Claude Code):**
-Ask for the `excalidraw-diagram` skill in any conversation — it reads the code,
-plans the layout, writes a Python generator script against the built-in `Scene` API,
-runs it, and delivers both files. No external dependencies needed.
+**How to invoke it:**
+- *Claude Code* — ask for the `excalidraw-diagram` skill; it explores the repo,
+  writes a generator script against the built-in `Scene` API, runs it, and delivers
+  both files.
+- *Other assistants* — load `SKILL.universal.md` as a system prompt and call the
+  builder CLI directly (see CLI helper commands below).
 
 **CLI helper commands** (run from `plugin/skills/excalidraw-diagram/scripts/`):
 
@@ -222,9 +226,10 @@ jobs:
       - uses: alxmax/requirement-manager/check@v1
 ```
 
-The action runs `reqmap.py gate`. Inputs `reqmap-path` and
-`working-directory` adapt it to wherever you vendored the engine — see
-[`check/action.yml`](check/action.yml). (`check` is kept as a deprecation alias so existing `@v1` usages need no change.)
+The action runs `reqmap.py gate`. Inputs `reqmap-path` and `working-directory`
+adapt it to wherever you vendored the engine — see
+[`check/action.yml`](check/action.yml). Or skip the action entirely:
+`- run: python -X utf8 scripts/reqmap.py gate`.
 
 ## Glossary (the jargon, in plain words)
 
@@ -234,34 +239,48 @@ The action runs `reqmap.py gate`. Inputs `reqmap-path` and
 - **Tag / membership** — the comment that links code to a requirement. Four
   roles exist: `implements`, `generated-from`, `validated-against`, `tested-by`.
   The list of members is discovered by scanning the code — never hand-maintained.
-- **The gate** — the `gate` command; it fails when code and specs disagree. (`check` is a deprecated alias.)
+- **The gate** — the `gate` command; it fails when code and specs disagree.
 - **Drift** — a requirement's contract changed but the code wasn't re-checked.
   The tool spots this by hashing the spec and comparing it to a saved baseline
   (`_reqlock.json`).
 - **Layer (`bus` vs `feature`)** — `bus` is shared foundation that many things
   rely on; `feature` is built on top of the bus.
 - **Dogfooding** — this repo uses the tool on itself: `plugin/requirements/`
-  describes `reqmap.py`'s own capabilities, and its own gate passes with zero
-  errors.
+  describes `reqmap.py`'s own capabilities, and its own gate passes with zero errors.
 
 ## How this repo is laid out
 
 ```
-.claude-plugin/marketplace.json        marketplace manifest (this repo is a marketplace)
-plugin/                                the plugin — self-contained
-  .claude-plugin/plugin.json           plugin manifest
-  skills/requirement-manager/SKILL.md  the full contract & authoring rules
-  skills/requirement-quality-review/   on-demand AI review of requirement quality (advisory)
-  skills/excalidraw-diagram/           generate Excalidraw architecture / flow diagrams
-  scripts/reqmap.py                    the engine (Python stdlib only, ~3700 lines)
-  requirements/*.md                    the source of truth (one file per capability)
-  requirements/_reqlock.json           the drift baseline (committed)
-app/                                   the React viewer (built into the single-file _map.html)
-docs/                                  guides, plans + specs (architecture diagrams regenerate via the excalidraw-diagram skill)
-TODO.md                                optional planning file — feeds the Roadmap tab in the viewer
+.claude-plugin/marketplace.json             marketplace manifest (this repo is a marketplace)
+plugin/                                     the plugin — self-contained
+  .claude-plugin/plugin.json                plugin manifest
+  tool_definition.json                      OpenAI function-calling schema for all reqmap commands
+  skills/requirement-manager/
+    SKILL.md                                full contract & authoring rules (Claude Code)
+    SKILL.universal.md                      AI-agnostic variant (any assistant)
+  skills/excalidraw-diagram/
+    SKILL.md                                diagram skill contract (Claude Code)
+    SKILL.universal.md                      AI-agnostic variant (any assistant)
+  skills/requirement-quality-review/
+    SKILL.md                                advisory quality review (Claude Code)
+    SKILL.universal.md                      AI-agnostic variant (any assistant)
+  scripts/reqmap.py                         the engine (Python stdlib only, ~3700 lines)
+  requirements/*.md                         the source of truth (one file per capability)
+  requirements/_reqlock.json                the drift baseline (committed)
+scripts/
+  check_versions.py                         version-coherence gate (plugin.json vs marketplace.json)
+  test_cross_tool.py                        headless integration test — sync->gate->map, no AI needed
+app/                                        the React viewer (built into the single-file _map.html)
+docs/                                       guides, plans + specs
+TODO.md                                     optional planning file — feeds the Roadmap tab in the viewer
 ```
 
-**`TODO.md` format** — group items under `## vX.Y` milestone headings; each item is a checkbox with an optional `| lane: bus|feature|ops` suffix. Completed items (`[x]`) are hidden in the chart.
+`SKILL.md` (authoritative for authoring rules, statuses, and the gate):
+[`plugin/skills/requirement-manager/SKILL.md`](plugin/skills/requirement-manager/SKILL.md).
+
+**`TODO.md` format** — group items under `## vX.Y` milestone headings; each item is
+a checkbox with an optional `| lane: bus|feature|ops` suffix. Completed items (`[x]`)
+are hidden in the chart.
 
 ```markdown
 ## v1.14
@@ -269,13 +288,8 @@ TODO.md                                optional planning file — feeds the Road
 - [ ] Gate validation for milestone IDs | lane: ops
 ```
 
-Items appear as amber dashed bars in the Roadmap tab until you replace them with a real requirement file.
-
-## Want the full details?
-
-[`SKILL.md`](plugin/skills/requirement-manager/SKILL.md) is the authoritative
-reference: statuses, the layer model, authoring rules, and exactly how the gate
-decides pass or fail.
+Items appear as amber dashed bars in the Roadmap tab until you replace them with a
+real requirement file.
 
 ## License
 
