@@ -33,41 +33,44 @@ milestone: v1.06
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
-- `extract` cannot recover intent; prefer `candidates` (read-only plan) before authoring.
+- `draft` cannot recover intent; prefer `plan` (read-only plan) before authoring.
   The draft body uses the same Contract/Acceptance section names as a real requirement so a
   promoted draft needs no reshaping.
 - Prose (`.md`/`.html`) classification and drafting is a separate capability —
-  [[REQ-PROSE-024]] — running under the same `extract` command.
+  [[REQ-PROSE-024]] — running under the same `draft` command.
+- The drafted file types (`.py`/`.js`/`.ts`/`.c`/`.cpp`) are deliberately narrower than the
+  gate's full scan set (which also enforces tags in `.go`/`.rs`/`.tsx` and more): drafting
+  targets mainstream source, while the gate enforces tags wherever they appear.
 
 ## HOW — Acceptance (= tests)
 AC-1
   Given  an untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file
-  When   `extract` runs
+  When   `draft` runs
   Then   it yields one `DRAFT-*` draft
 
 AC-2
   Given  a file already carrying a member tag
-  When   `extract` runs
+  When   `draft` runs
   Then   the file is skipped
 
 AC-3
   Given  a file matching a `.reqmapignore` pattern
-  When   `extract` runs
+  When   `draft` runs
   Then   the file is skipped (no draft proposed for it)
 
 AC-4
   Given  a file containing `TODO`/`FIXME`
-  When   `extract` runs
+  When   `draft` runs
   Then   it scores higher risk and is flagged `REVIEW`
 
 AC-5
   Given  an existing draft and same-basename files in different dirs
-  When   `extract` re-runs
+  When   `draft` re-runs
   Then   the draft is not overwritten and the basenames do not collide
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana runs extract on a brownfield repo. For each untagged source file it drops a
+- Ana runs `draft` on a brownfield repo. For each untagged source file it drops a
   `DRAFT-*.md` capturing what the file appears to do; one file full of `TODO` and `FIXME`
   markers scores higher risk and is flagged `REVIEW`. The engine's own `reqmap.py` is in
   `.reqmapignore`, so it is skipped — leaving Ana a pile of starting points to promote

@@ -11,13 +11,13 @@ milestone: v1.06
 # Prose capability classification & drafting
 
 > Specs and prompts written as text documents can be capabilities too, not just code.
-> When `extract` runs, this part decides which text files deserve a draft requirement,
+> When `draft` runs, this part decides which text files deserve a draft requirement,
 > which are only kept in sync, and which are ignored as boilerplate — then writes the
 > drafts. Without it, prompt and spec files would stay invisible to the registry, or
 > every README would pollute it with junk drafts.
 
 ## WHAT — Contract (normative)
-- `extract` shall also draft `draft`-status requirements from untagged **prose** files
+- `draft` shall also produce `draft`-status requirements from untagged **prose** files
   (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.
 - Each prose file shall be classified into one of three buckets before drafting:
   - **ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`,
@@ -46,17 +46,17 @@ milestone: v1.06
 ## HOW — Acceptance (= tests)
 AC-1
   Given  a `prompts/foo.md` with no member tag
-  When   `extract` runs
+  When   `draft` runs
   Then   a `draft`-status requirement is written for it
 
 AC-2
   Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`
-  When   `extract` runs
+  When   `draft` runs
   Then   no draft is written for it
 
 AC-3
   Given  a capability-bucket prose file already tagged `# implements: <ID>`
-  When   `extract` runs
+  When   `draft` runs
   Then   it is skipped (no duplicate draft)
 
 AC-4

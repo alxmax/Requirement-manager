@@ -4,20 +4,24 @@
 Subcommands:
   init              first-use bootstrap: scaffold requirements/ + .reqmapignore, draft
                     requirements from existing code, build the lock + map, print next steps
-  new AREA-NAME-NNN   scaffold a requirement from the built-in template
+  new AREA-NAME-NNN   scaffold a requirement from the built-in template (--from-todo seeds from TODO.md)
   scan              list code members (implements/generated-from/... tags) per capability
-  check             the gate: link sync + drift; exit non-zero on error (use in pre-commit/CI)
-  map               generate requirements/_map.md (Mermaid) + _map.json (graph)
+  gate              the gate: link sync + drift + test-link integrity; exit non-zero on error (pre-commit/CI)
+  sync              rescan + advance the drift baseline + regen the map (--accept-drift for an edited contract)
+  map               generate requirements/_map.md (Mermaid) + _map.json (graph) [+ _map.html viewer]
+  site              inject/refresh engine-owned regions into a presentation page (--attach/--regions/--diagram)
   export            emit the registry graph as requirements/_map.json (for a front-end)
   next              terminal 'what should I do next': counted, actionable risk buckets
   lint [--strict]   readability/structure check on non-draft requirements (warn; --strict fails on errors)
   show <ID>         consolidated dossier for one requirement (contract, deps, members, risk)
-  similar [--threshold T]  flag requirement pairs with overlapping contracts (TF-IDF cosine)
+  dupes [--threshold T]  flag requirement pairs with overlapping contracts (TF-IDF cosine)
   health [--json]   corpus coherence score + component counts (--json for a CI badge)
-  extract           draft requirements from legacy code (status: draft, risk-scored)
-  candidates        read-only JSON capability-extraction plan (writes no .md)
+  draft             draft requirements from legacy code (status: draft, risk-scored)
+  plan              read-only JSON capability-extraction plan (writes no .md)
   findings          aggregate open verify-intent items into requirements/_findings.md
-  promote <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
+  confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
+  review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted quality review
+  check             DEPRECATED alias for `gate` (report) / `sync` (with --update-lock); removed next major
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
@@ -82,7 +86,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-15"
+MAP_ENGINE_VERSION = "2026-06-16"
 
 
 # ---------- parsing ----------
@@ -3173,9 +3177,9 @@ SITE_TEMPLATE = """\
     <p class="eyebrow">Why it exists</p>
     <h2>Three jobs, one engine</h2>
     <div class="pillars">
-      <div class="pill"><h3>Catch drift early</h3><p>Every code tag resolves to a real requirement; every confirmed requirement has code behind it. <code>check</code> fails the build the moment intent and implementation diverge.</p></div>
+      <div class="pill"><h3>Catch drift early</h3><p>Every code tag resolves to a real requirement; every confirmed requirement has code behind it. <code>gate</code> fails the build the moment intent and implementation diverge.</p></div>
       <div class="pill"><h3>Map the system</h3><p>One command renders the whole capability graph — system map, req→code, dependencies, risk — into a self-contained viewer you open by double-click.</p></div>
-      <div class="pill"><h3>Prevent duplicates</h3><p>Before a second team re-implements an existing capability, <code>similar</code> flags the overlapping contracts. The SSOT is the place you look first.</p></div>
+      <div class="pill"><h3>Prevent duplicates</h3><p>Before a second team re-implements an existing capability, <code>dupes</code> flags the overlapping contracts. The SSOT is the place you look first.</p></div>
     </div>
   </div>
 </section>
@@ -3185,21 +3189,24 @@ SITE_TEMPLATE = """\
   <div class="wrap">
     <div class="secthead"><span class="tag eng">engine-generated</span></div>
     <p class="eyebrow">Surface</p>
-    <h2>All 15 commands</h2>
+    <h2>All 18 commands</h2>
     <div class="cmds">
-      <div class="cmd gate"><code>check</code><p>The gate. Links resolve, drift detected, test-links verified. Run before every commit + in CI.</p></div>
+      <div class="cmd gate"><code>gate</code><p>The gate. Links resolve, drift detected, test-links verified. Run before every commit + in CI.</p></div>
+      <div class="cmd"><code>sync</code><p>Rescan + advance the drift baseline + regen the map. --accept-drift for an edited confirmed contract.</p></div>
       <div class="cmd"><code>init</code><p>First-time bootstrap: scaffold, draft from code, lock, map, next-steps. Idempotent.</p></div>
       <div class="cmd"><code>map</code><p>Generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer).</p></div>
+      <div class="cmd"><code>site</code><p>Inject engine-owned regions (nav links + counts) into a presentation page. --attach/--diagram.</p></div>
       <div class="cmd"><code>next</code><p>"What should I work on?" — prioritised, actionable risk buckets.</p></div>
       <div class="cmd"><code>show &lt;ID&gt;</code><p>Consolidated dossier: contract, deps, members by role, risk.</p></div>
       <div class="cmd"><code>lint</code><p>Readability/structure check on non-draft requirements.</p></div>
-      <div class="cmd"><code>similar</code><p>Flag requirement pairs with overlapping contracts (TF-IDF).</p></div>
+      <div class="cmd"><code>dupes</code><p>Flag requirement pairs with overlapping contracts (TF-IDF).</p></div>
       <div class="cmd"><code>health</code><p>Corpus coherence score + component counts. --json for a badge.</p></div>
-      <div class="cmd"><code>promote &lt;ID&gt;</code><p>Flip a reviewed requirement to confirmed (needs a member).</p></div>
+      <div class="cmd"><code>confirm &lt;ID&gt;</code><p>Flip a reviewed requirement to confirmed (needs a member).</p></div>
+      <div class="cmd"><code>review</code><p>Emit a JSON review plan (intent/contract/acceptance) for AI-assisted quality review.</p></div>
       <div class="cmd"><code>new</code><p>Scaffold a new requirement from the built-in template.</p></div>
       <div class="cmd"><code>scan</code><p>List which code members belong to which capability.</p></div>
-      <div class="cmd"><code>extract</code><p>Draft requirements from untagged legacy code + prose.</p></div>
-      <div class="cmd"><code>candidates</code><p>Read-only JSON extraction plan (AI-assist), writes nothing.</p></div>
+      <div class="cmd"><code>draft</code><p>Draft requirements from untagged legacy code + prose.</p></div>
+      <div class="cmd"><code>plan</code><p>Read-only JSON extraction plan (AI-assist), writes nothing.</p></div>
       <div class="cmd"><code>findings</code><p>Aggregate open verify-intent questions into _findings.md.</p></div>
       <div class="cmd"><code>export</code><p>Emit _map.json for an external front-end. --out PATH or -.</p></div>
     </div>
@@ -3622,7 +3629,7 @@ def main():
         # rescan + regenerate map + advance the drift baseline (guarded). Members were
         # already scanned above; cmd_check rewrites the lock unless confirmed drift is
         # detected without --accept-drift, then map regenerates only on success.
-        rc = cmd_check(reqs, members, reqs_dir, True, code_root,
+        rc = cmd_check(reqs, members, reqs_dir, True, code_root, strict=a.strict,
                        accept_drift=getattr(a, "accept_drift", False))
         if rc == 0:
             cmd_map(reqs, members, reqs_dir, code_root)

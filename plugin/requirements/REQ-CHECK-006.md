@@ -37,7 +37,7 @@ milestone: v1.02
   aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.
 - It shall print an advisory line with the open verify-intent finding count when > 0,
   without affecting the exit code, and print a summary (requirements, members, errors, warnings).
-- With `--update-lock` it shall write the current binding hashes to `requirements/_reqlock.json`.
+- With `--update-lock` (exercised by `sync` and the deprecated `check` alias; the `gate` verb is report-only) it shall write the current binding hashes to `requirements/_reqlock.json`.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -46,69 +46,69 @@ milestone: v1.02
 - Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`)
   is not automatable and surfaces at human review.
 - When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed
-  plugin's copy, `check` prints an advisory staleness notice (`warn_if_stale`); the
+  plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the
   variable is unset in CI, so the notice is silent and exit-neutral there.
 
 ## HOW — Acceptance (= tests)
 AC-1
   Given  a tag referencing a non-existent capability
-  When   `check` runs
+  When   `gate` runs
   Then   it produces an `ERROR` and exit 1
 
 AC-2
   Given  a `confirmed` requirement with no `implements` member
-  When   `check` runs
+  When   `gate` runs
   Then   it produces an `ERROR`
 
 AC-3
   Given  an invalid status or layer, or a `depends_on` pointing at a missing id
-  When   `check` runs
+  When   `gate` runs
   Then   each produces an `ERROR`
 
 AC-4
   Given  a `confirmed` requirement whose binding hash differs from the lock
-  When   `check` runs
+  When   `gate` runs
   Then   it produces a `WARN` (not an error) naming the member `file:line` locations
 
 AC-5
   Given  a present-but-corrupt lock file
-  When   `check` runs
+  When   `gate` runs
   Then   it produces a `WARN` and does not change the exit code
 
 AC-6
   Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)
-  When   `check` runs
+  When   `gate` runs
   Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`
          requirement produces none
 
 AC-7
   Given  a `confirmed` requirement with no `## WHAT — Contract` section
-  When   `check` runs
+  When   `gate` runs
   Then   it produces a `WARN` and does not affect the exit code
 
 AC-8
   Given  a `confirmed` requirement with no `## HOW — Acceptance` section
-  When   `check` runs
+  When   `gate` runs
   Then   it produces a `WARN` and does not affect the exit code
 
 AC-9
   Given  a `confirmed` requirement with both sections present
-  When   `check` runs
+  When   `gate` runs
   Then   it produces no section-lint warning
 
 AC-10
   Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member
-  When   `check` runs
+  When   `gate` runs
   Then   it produces no test warning
 
 AC-11
   Given  a requirement without a `## WHAT — Verify intent` section
-  When   `check` runs
+  When   `gate` runs
   Then   it is counted as legacy-schema in the summary
 
 AC-12
-  Given  `--update-lock`
-  When   `check` runs
+  Given  an advancing run (`sync`, or the deprecated `check --update-lock`)
+  When   it runs
   Then   the current hashes are written to `requirements/_reqlock.json`
 
 ## Example — in practice (optional, non-binding)

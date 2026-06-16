@@ -23,7 +23,7 @@ milestone: v1.08
 - It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.
 - With the raw flag set it shall ignore any sidecar and emit the raw grouped list.
 - It shall be deterministic and stdlib-only: it shall not classify findings itself (classification is produced out-of-band by the AI triage pass and supplied through the sidecar) and shall write no file other than `_findings.md`.
-- The drift gate (`check`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings.
+- The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — this capability is authored from known intent, not reconstructed from code.
@@ -55,7 +55,7 @@ AC-4
 
 AC-5
   Given  at least one requirement with an open verify-intent item
-  When   `check` runs
+  When   `gate` runs
   Then   it prints an advisory line naming the open-findings count without affecting the error count
 
 ## Example — in practice (optional, non-binding)

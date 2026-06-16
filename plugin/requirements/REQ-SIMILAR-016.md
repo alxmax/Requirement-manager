@@ -16,7 +16,7 @@ milestone: v1.14
 > can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.
 
 ## WHAT — Contract (normative)
-- The `similar` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.
+- The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.
 - It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The "Notes & limitations" section is excluded, because it is dense and would add noise.
 - It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.
 - It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.
@@ -31,32 +31,32 @@ milestone: v1.14
 ## WHAT — Notes & known limitations (informative)
 - The default threshold is a starting point, not a proven value. A reviewer tunes it with `--threshold` for the corpus at hand.
 - Detection is lexical, not semantic. Two contracts that mean the same thing in different words may score low. The command surfaces likely duplicates; it does not prove duplication.
-- Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `candidates`.
+- Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `plan`.
 
 ## HOW — Acceptance (= tests)
 AC-1
   Given  two requirements with near-identical Contract text
-  When   `similar` runs
+  When   `dupes` runs
   Then   the pair is reported with a high score
 
 AC-2
   Given  two requirements about unrelated topics
-  When   `similar` runs at the default threshold
+  When   `dupes` runs at the default threshold
   Then   the pair is not reported
 
 AC-3
   Given  a corpus with fewer than two requirements that have contract text
-  When   `similar` runs
+  When   `dupes` runs
   Then   it prints a "need at least two" message and returns zero
 
 AC-4
   Given  a custom `--threshold` above a pair's score
-  When   `similar` runs
+  When   `dupes` runs
   Then   that pair is not reported
 
 AC-5
   Given  any corpus
-  When   `similar` runs
+  When   `dupes` runs
   Then   it returns zero
 
 ## Example — in practice (optional, non-binding)

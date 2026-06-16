@@ -54,7 +54,7 @@ AC-4
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana's login requirement lists AC-1, AC-2, AC-3 but only AC-1 has a test. She tags that
-  test `# verifies: AUTH-LOGIN-001#AC-1` and runs `reqmap.py check`. The gate warns
+  test `# verifies: AUTH-LOGIN-001#AC-1` and runs `reqmap.py gate`. The gate warns
   "AC-2 has no `# verifies` tag — criterion unverified" and the same for AC-3, so she sees
   exactly which two criteria still need a test instead of a vague "needs tests".
 
