@@ -9,8 +9,9 @@ Markdown file that says *what it should do*. Your code links back to that file
 with a one-line comment. A small Python script then checks that the two never
 fall out of sync — and draws you a map of how everything connects.
 
-It runs as a plain command-line script (a single file, no installation needed)
-**and** as a [Claude Code plugin](plugin/.claude-plugin/plugin.json). It's
+It runs as a plain command-line script (a single file, no installation needed),
+as a [Claude Code plugin](plugin/.claude-plugin/plugin.json), and with any other
+AI assistant that can call shell commands (Copilot, Gemini CLI, and others). It's
 especially handy when several people — or several AI agents — touch the same
 codebase and the specs slowly rot.
 
@@ -80,6 +81,52 @@ milestone: v1.4          # optional — shows this requirement in the Roadmap ta
 The header carries the machine-readable bits (`id`, `status`, what it
 `depends_on`); the prose explains intent and lists the acceptance criteria that
 become your tests.
+
+## Using with other AI assistants
+
+`reqmap.py` is a plain Python CLI — no AI SDK, no cloud dependency, stdlib only.
+Any AI assistant that can run shell commands can drive the full workflow.
+
+**GitHub Copilot, Gemini CLI, and other function-calling tools**
+
+The plugin ships a machine-readable manifest — `plugin/tool_definition.json` — that
+exposes every reqmap.py command in [OpenAI function-calling schema](https://platform.openai.com/docs/guides/function-calling).
+Any tool that supports function calling can read this file to discover the available
+commands, their parameters, and their descriptions.
+
+**SKILL.universal.md — AI-agnostic instruction files**
+
+Each of the three skills ships a `SKILL.universal.md` alongside the Claude
+Code-specific `SKILL.md`. The universal variant has all Claude Code-specific
+directives removed (no `Skill` tool invocations, no `${CLAUDE_PLUGIN_ROOT}` paths)
+so it works as a plain system-prompt or instruction file with any AI assistant:
+
+| File | For |
+|---|---|
+| `plugin/skills/requirement-manager/SKILL.universal.md` | Core SSOT + drift workflow |
+| `plugin/skills/excalidraw-diagram/SKILL.universal.md` | Excalidraw diagram generation |
+| `plugin/skills/requirement-quality-review/SKILL.universal.md` | Advisory quality review |
+
+**Manual setup (any AI, any repo)**
+
+The engine is a single file with no dependencies. Copy it into your repo once:
+
+```bash
+# copy reqmap.py from the plugin's scripts/ directory, then:
+python scripts/reqmap.py init   # bootstrap: scaffold + draft + lock + map
+python scripts/reqmap.py gate   # run the gate — works identically under any AI
+python scripts/reqmap.py map    # generate the viewer
+```
+
+**Verifying AI-agnostic compatibility**
+
+```bash
+python scripts/test_cross_tool.py
+```
+
+Runs a headless integration test (stdlib only, no AI tooling required): seeds
+reqmap.py in a tempdir, runs `sync → gate → map`, and asserts a valid `_map.json`
+is produced. This is the falsification criterion for multi-AI compatibility.
 
 ## Install as a Claude Code plugin
 

@@ -1,0 +1,397 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_init",
+      "description": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code/prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. Run once per repo to get started.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ should live. Defaults to cwd."
+          },
+          "no_site": {
+            "type": "boolean",
+            "description": "Skip scaffolding docs/architecture.html (pass --no-site)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_gate",
+      "description": "Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Promote drift and test-link integrity warnings to errors (--strict). Useful in CI when all requirements are confirmed."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit structured JSON output instead of human-readable text."
+          },
+          "since": {
+            "type": "string",
+            "description": "Limit gate to requirements touched since this git ref (e.g. 'main', 'HEAD~1')."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_sync",
+      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step. Run after editing requirement files or tagging new code members. Use accept_drift when a confirmed or implemented contract changed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "accept_drift": {
+            "type": "boolean",
+            "description": "Explicitly advance the baseline when a confirmed or implemented contract changed (--accept-drift). Required by sync when those contracts differ from the lock; sync exits non-zero without it."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_map",
+      "description": "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained double-click-openable React viewer with 4 tabs: Map, Problems, Spec, Roadmap). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "check": {
+            "type": "boolean",
+            "description": "Freshness gate: rebuild the map in memory and exit non-zero if the committed _map.* is stale (--check). Use in CI alongside gate."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_new",
+      "description": "Scaffold a new blank requirement from the built-in template. Use from_todo and id together to pre-fill from a TODO.md item instead.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "id": {
+            "type": "string",
+            "description": "Requirement ID in AREA-NAME-NNN format (e.g. AUTH-LOGIN-001). Required unless using from_todo."
+          },
+          "from_todo": {
+            "type": "string",
+            "description": "Name of a TODO.md item to pre-fill the requirement from (--from-todo). Requires id."
+          },
+          "mark_done": {
+            "type": "boolean",
+            "description": "Flip the TODO.md item to [x] at the same time (--mark-done). Only used with from_todo."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_confirm",
+      "description": "Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "id": {
+            "type": "string",
+            "description": "Requirement ID to confirm (e.g. AUTH-LOGIN-001)."
+          }
+        },
+        "required": ["id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_draft",
+      "description": "Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_plan",
+      "description": "Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "md_glob": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Additional glob patterns for non-code Markdown to include in the plan (e.g. ['prompts/**', 'modes/**'])."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_next",
+      "description": "Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "all": {
+            "type": "boolean",
+            "description": "Expand all buckets to show every item instead of just the top few (--all)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_lint",
+      "description": "Readability and structure check on non-draft requirements: long sentences (>35 words), stacked conditions (3+ and/or joins on a shall/must line), missing Contract or Acceptance sections. Read-only; exit-neutral by default.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Exit non-zero on error-severity findings only (warnings remain advisory)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_show",
+      "description": "Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "id": {
+            "type": "string",
+            "description": "Requirement ID to show (e.g. AUTH-LOGIN-001)."
+          }
+        },
+        "required": ["id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_scan",
+      "description": "List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_dupes",
+      "description": "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Similarity threshold (0–1). Default 0.35. Lower = more pairs flagged."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_health",
+      "description": "Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with json=true.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit parseable JSON for a CI badge (--json)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_export",
+      "description": "Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "out": {
+            "type": "string",
+            "description": "Output path override. Use '-' for stdout (--out -)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_findings",
+      "description": "Aggregate open 'Verify intent' items across all requirements into requirements/_findings.md. Surfaces every open human-review question in one place.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_review",
+      "description": "Emit a JSON review plan (intent, contract, acceptance criteria, structural anchors) for all requirements or one. Used as an AI feed for semantic quality review. Read-only.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "id": {
+            "type": "string",
+            "description": "Optional requirement ID to review just one (e.g. AUTH-LOGIN-001). Omit for the whole corpus."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_site",
+      "description": "Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "working_directory": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives."
+          },
+          "attach": {
+            "type": "string",
+            "description": "Path to the HTML page to inject regions into (--attach path/to/page.html)."
+          },
+          "regions": {
+            "type": "string",
+            "description": "Comma-separated list of regions to inject: 'nav' (top links) or 'nav,stats' (links + counts). Default: nav,stats."
+          },
+          "diagram": {
+            "type": "string",
+            "description": "Relative path to an Excalidraw .html viewer to link from the nav region."
+          },
+          "detect": {
+            "type": "boolean",
+            "description": "Scan docs/ and suggest the command to run — does not modify any files."
+          }
+        },
+        "required": []
+      }
+    }
+  }
+]
