@@ -120,6 +120,43 @@ script, so there's nothing else to download.
 | `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) for all requirements or one — an AI-feed for advisory quality review. Read-only |
 | `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
 
+## The Excalidraw diagram skill
+
+Bundled alongside `requirement-manager` is a second skill — **`excalidraw-diagram`**
+— that turns a system description into a genuine [Excalidraw](https://excalidraw.com)
+scene (`.excalidraw`) and a self-contained HTML viewer (`.html`). The output is
+hand-drawn-look and fully editable, not a screenshot.
+
+**When to reach for it:**
+- "Diagram this repo's architecture" / "draw the flow"
+- Flowcharts, pipelines, multi-agent layouts, state flows, module maps
+- Any time you want a whiteboard-style schematic you can open in excalidraw.com
+
+**How to invoke it (Claude Code):**
+Ask for the `excalidraw-diagram` skill in any conversation — it reads the code,
+plans the layout, writes a Python generator script against the built-in `Scene` API,
+runs it, and delivers both files. No external dependencies needed.
+
+**CLI helper commands** (run from `plugin/skills/excalidraw-diagram/scripts/`):
+
+| Command | What it does |
+|---|---|
+| `python excalidraw_builder.py` | Self-test / smoke test — verifies the builder is healthy |
+| `python excalidraw_builder.py discover <repo> [out.py]` | Scan a repo and emit a runnable multi-layer poster scaffold (`make_diagram.py`) — fill in the real content, then run it |
+| `python excalidraw_builder.py render <scene.excalidraw> [out_dir]` | Rebuild just the `.html` viewer from an existing scene (e.g. after hand-editing on excalidraw.com) |
+
+**Output:** one `.excalidraw` + one `.html` per call.
+- `.excalidraw` — drag onto excalidraw.com to edit; works fully offline.
+- `.html` — double-click to open; has a built-in "Download .excalidraw" button.
+  Loads Excalidraw from a CDN, so the first open needs a network connection.
+
+**Linking a diagram to your project page:** `reqmap.py site --attach docs/architecture.html --diagram <rel-path-to.html>` adds a live link to the diagram in the engine-owned nav region of your project page.
+
+The full builder API (shapes, auto-layout helpers, quality gates) is documented in
+[`plugin/skills/excalidraw-diagram/SKILL.md`](plugin/skills/excalidraw-diagram/SKILL.md).
+
+---
+
 ## Run the gate in CI
 
 Fail the build on drift, on every push and pull request:
