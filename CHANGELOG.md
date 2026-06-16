@@ -6,6 +6,18 @@
 the `LICENSE` file and README are Business Source License 1.1 — corrected to the
 SPDX id `"BUSL-1.1"`.
 
+**excalidraw-diagram — adaptive multi-layer posters (one file).**
+- The "Diagramming a repo's architecture" recipe is now **adaptive**: a table of
+  six layer-types (STRUCTURE / WORKFLOW / INTEGRATION / MODES / MODEL / DATA) each
+  with an "include when…" condition. The author picks which layers the repo needs
+  and emits them ALL as stacked sections in ONE file, with one legend that decodes
+  every layer (colour-per-distinct-role discipline documented).
+- **`discover` now scaffolds that poster**: a live STRUCTURE layer (`section()` +
+  sized `grid()`, all four `save()` gates at `"error"`) plus commented scaffolds
+  for the five optional layers. The generated stub also carries a **portable
+  import** (builder next to the stub / on PYTHONPATH, else newest plugin-cache
+  build) so it runs from any repo. New regression test locks the stub shape.
+
 **excalidraw-diagram — C4 removed + docs overhaul.**
 - **Removed the C4 helpers** (`Scene.c4()` and `Scene.person()`). They were
   undocumented and pulled the skill toward formal C4 notation; the canonical
