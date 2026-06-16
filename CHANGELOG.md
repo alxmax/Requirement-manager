@@ -1,5 +1,50 @@
 # Changelog
 
+## Unreleased
+
+**License correction.** `plugin/.claude-plugin/plugin.json` declared `"MIT"` while
+the `LICENSE` file and README are Business Source License 1.1 — corrected to the
+SPDX id `"BUSL-1.1"`.
+
+**excalidraw-diagram — adaptive multi-layer posters (one file).**
+- The "Diagramming a repo's architecture" recipe is now **adaptive**: a table of
+  six layer-types (STRUCTURE / WORKFLOW / INTEGRATION / MODES / MODEL / DATA) each
+  with an "include when…" condition. The author picks which layers the repo needs
+  and emits them ALL as stacked sections in ONE file, with one legend that decodes
+  every layer (colour-per-distinct-role discipline documented).
+- **`discover` now scaffolds that poster**: a live STRUCTURE layer (`section()` +
+  sized `grid()`, all four `save()` gates at `"error"`) plus commented scaffolds
+  for the five optional layers. The generated stub also carries a **portable
+  import** (builder next to the stub / on PYTHONPATH, else newest plugin-cache
+  build) so it runs from any repo. New regression test locks the stub shape.
+- **Richer-by-default, with guardrails.** Multi-tool repos (2+ skills/services
+  with distinct flows) now get one labelled `s.lane()` per tool in the WORKFLOW
+  layer instead of a single pipeline that hides the others; single-tool repos
+  keep one pipeline. A "depth comes from structure, never from cramming" rule
+  subordinates elaboration to the existing readability gates (≤20 nodes/region,
+  short labels, simplicity-first always win). The `discover` scaffold shows the
+  per-tool lane pattern; a ❌→✅ worked example contrasts it with the thin one.
+
+**excalidraw-diagram — C4 removed + docs overhaul.**
+- **Removed the C4 helpers** (`Scene.c4()` and `Scene.person()`). They were
+  undocumented and pulled the skill toward formal C4 notation; the canonical
+  poster (`examples/make_full_architecture.py`) now uses plain role-coloured
+  `box()`es. ISO 5807 flowchart shapes are unaffected.
+- **SKILL.md restructured for its purpose** — a "The goal" statement up front, a
+  "Diagramming a repo's architecture" recipe pointing at
+  `make_full_architecture.py`, a "Worked examples — ❌ → ✅ variants" section
+  (repo poster, pipeline, parallel agents, decision flow, feedback loop), and the
+  box-sizing guidance softened to lean on the `overflow_check` gate.
+- **Doc↔code drift closed.** The cheat-sheet and `references/excalidraw_format.md`
+  now document the previously-undocumented public API the examples rely on
+  (`section()`, `pipeline()`, the ISO shapes, `path()`, `glossary()`), the full
+  `Scene()` signature, all four `save()` gates (`crossing_check`, `legend_check`,
+  `overflow_check`, `text_overlap_check`), and `check_text_overflow()` /
+  `check_text_overlaps()`.
+
+> Note: CHANGELOG entries for plugin `v2.2.0` and `v2.3.0` are missing (the
+> manifests are at `2.3.0`); backfill or supersede on the next tagged release.
+
 ## plugin `v2.1.1` — 2026-06-15
 
 **Audit follow-up (Consilium Trias).** Fixes from a multi-lens audit of the v2.1.0 excalidraw CLI branch:

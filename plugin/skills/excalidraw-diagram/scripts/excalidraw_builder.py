@@ -13,7 +13,7 @@ describe:
 
     from excalidraw_builder import Scene
 
-    s = Scene(hand_drawn=True)
+    s = Scene()
     a = s.box("User prompt",     120,  40, fill="blue")
     b = s.box("Consilium skill", 120, 180, fill="indigo")
     s.arrow(a, b, label="activates")
@@ -25,20 +25,34 @@ The .excalidraw file imports cleanly into excalidraw.com (drag & drop) and the
 component, read-only, with edit/export still available.
 
 Public API (see method docstrings for detail)
-    Scene(hand_drawn=True, background="#ffffff")
+    Scene(font="normal", sketch=False, hand_drawn=None, background="#ffffff",
+          seed=None, roles=None)
     .box(text, x, y, w=160, h=70, *, fill=None, stroke=None, shape="rectangle",
-         font_size=16, group=None)        -> node id
+         font_size=16, group=None, container=False)   -> node id
     .ellipse(text, x, y, w, h, ...)        -> node id   (shape="ellipse")
     .diamond(text, x, y, w, h, ...)        -> node id   (shape="diamond")
     .frame(x, y, w, h, *, fill=None, dashed=False, group=None) -> node id
-    .label(text, x, y, *, size=12, color=None, align="center", italic-ish caps)
-    .title(text, x, y, *, size=28, color=None)
+    # ISO 5807 flowchart shapes (thin box() aliases):
+    .process / .terminator / .decision / .data / .predefined_process
+    / .preparation / .connector (text, x, y, ...)      -> node id
+    .row / .column / .grid(items, x, y, ...)           -> [node id, ...]
+    .enclose(ids, *, label=None) / .lane(ids, label)   -> frame id
+    .section(title) -> y          # stack a labelled region below all content
+    .pipeline(steps, x, y, *, gap=44, connect=True)    -> [node id, ...]
+    .align(ids, axis) / .distribute(ids, axis, gap=40)
+    .label(text, x, y, *, size=12, color=None, align="center")
+    .title(text, x, y, *, size=28, color=None, align="left")
     .arrow(src, dst, *, label=None, dashed=False, color=None,
-           start="dot"/None, end="arrow")  -> arrow id
+           start=None, end="arrow", curve=False, gap=14) -> arrow id
     .free_arrow((x1,y1),(x2,y2), ...)       -> arrow id  (unbound)
-    .legend(entries, x, y)                  -> frame id  (the colour-SSOT key)
-    .check_legend_coverage()                -> [unlegended fill, ...]
-    .save(basename, out_dir=".", crossing_check="warn", legend_check="warn")
+    .path(points, *, label=None, ...)       -> arrow id  (multi-point connector)
+    .route_under(src, dst, *, drop=70, label=None)      -> arrow id  (feedback)
+    .role(name, colour) / .legend(entries, x, y) / .glossary(entries, x, y)
+    .check_overlaps() / .check_arrow_crossings()
+    .check_legend_coverage() / .check_text_overflow() / .check_text_overlaps()
+    .bounds() -> (min_x, min_y, max_x, max_y)
+    .save(basename, out_dir=".", *, allow_overlap=False, crossing_check="warn",
+          legend_check="warn", overflow_check="warn", text_overlap_check="warn")
                                             -> (path_excalidraw, path_html)
 
 Colours accept either a hex string ("#a5d8ff") or a palette name:
@@ -379,59 +393,6 @@ class Scene:
 
     def connector(self, text, x, y, w=46, h=46, **kw):
         return self.box(text, x, y, w, h, shape="connector", **kw)
-
-    # ====================================================================
-    #  C4 MODEL (person shape + standard element labelling)
-    # ====================================================================
-    def person(self, text, x, y, w=200, h=92, *, fill=None, stroke=None,
-               font_size=13, font_color=None, group=None, container=False):
-        """A C4 'person' element: a labelled rounded body with a circular head
-        on top. The whole (x, y, w, h) box is the node; the head is decoration."""
-        sc = _hex(stroke, _STROKE, _STROKE["black"])
-        bg = _hex(self.roles.get(fill, fill), _FILL, "transparent")
-        d = min(34.0, h * 0.36, w * 0.4)            # head diameter
-        body_y = y + d * 0.55
-        body_h = h - d * 0.55
-        head = self._base(self._new_id("ellipse"), "ellipse",
-                          x + w / 2 - d / 2, y, d, d, sc, bg,
-                          roundness=None, group=group)
-        bid = self._new_id("rectangle")
-        body = self._base(bid, "rectangle", x, body_y, w, body_h, sc, bg,
-                          roundness={"type": 3}, group=group)
-        self.elements.append(head)
-        if text:
-            tcolor = _hex(font_color, _STROKE, _STROKE["black"])
-            tw, th = self._text_wh(text, font_size)
-            tel = self._text_el(text, x + (w - tw) / 2,
-                                body_y + (body_h - th) / 2, tw, th,
-                                size=font_size, color=tcolor, container=bid,
-                                group=group)
-            body["boundElements"].append({"type": "text", "id": tel["id"]})
-            self.elements.append(body)
-            self.elements.append(tel)
-        else:
-            self.elements.append(body)
-        self._geom[bid] = (x, y, w, h, "rectangle")   # full bbox incl. head
-        if container:
-            self._containers.add(bid)
-        else:
-            self._nodes.append((bid, x, y, w, h,
-                                (text or "").split("\n")[0] or "person"))
-        return bid
-
-    def c4(self, name, x, y, *, kind="System", tech=None, desc=None,
-           person=False, w=220, h=104, font_size=13, **kw):
-        """A C4 element with the standard three-line label:
-            <name>
-            [<kind>] or [<kind>: <tech>]
-            <description>
-        Pass person=True for a person element, fill=<role> for the C4 colour
-        (in-scope vs external). Routes to person()/box()."""
-        stereo = f"[{kind}: {tech}]" if tech else f"[{kind}]"
-        label = name + "\n" + stereo + (("\n" + desc) if desc else "")
-        if person:
-            return self.person(label, x, y, w=w, h=h, font_size=font_size, **kw)
-        return self.box(label, x, y, w, h, font_size=font_size, **kw)
 
     # ====================================================================
     #  POSTER HELPERS (stacked sections + a horizontal workflow pipeline)
@@ -1427,11 +1388,46 @@ def discover_components(repo):
     return comps
 
 
+# Import preamble baked into every generated stub: try the builder next to the
+# stub (or on PYTHONPATH — how CI runs it), else fall back to the newest builder
+# in the plugin cache, so a stub generated into ANY repo still runs. Plain raw
+# string (not an f-string) so the regex backslashes survive verbatim.
+_STUB_IMPORT = r'''import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from excalidraw_builder import Scene
+except ModuleNotFoundError:                      # not alongside the stub — find the plugin
+    # Falls back to the newest INSTALLED plugin build; if you run this stub outside
+    # the plugin, that cached build may lag an unreleased local edit to the builder.
+    import glob, re
+    _cache = os.path.join(os.path.expanduser("~"), ".claude", "plugins",
+                          "cache", "requirement-manager", "requirement-manager")
+    _hits = glob.glob(os.path.join(_cache, "*", "skills",
+                                   "excalidraw-diagram", "scripts"))
+    if not _hits:
+        raise
+    def _ver(p):
+        m = re.search(r"(\d+)\.(\d+)\.(\d+)", p)
+        return tuple(int(x) for x in m.groups()) if m else (0, 0, 0)
+    sys.path.insert(0, max(_hits, key=_ver))     # newest installed version
+    from excalidraw_builder import Scene'''
+
+
 def _render_stub(repo_name, comps, truncated):
-    """Render the text of a runnable Python generator stub from the components."""
+    """Render the text of a runnable, multi-LAYER poster stub from the components.
+
+    The stub is a single-file architecture poster: layer 1 (STRUCTURE) is live and
+    runs as-is; layers 2-6 are commented scaffolds the author keeps/deletes per what
+    the repo actually needs. This encodes the skill's adaptive recipe — pick the
+    layers that explain THIS repo, emit them all in one file."""
     items = comps or ["component-a", "component-b"]
     items_repr = ", ".join(repr(c) for c in items)
     cols = min(4, max(1, len(items)))
+    # Size the grid cells to the longest component name so the live STRUCTURE layer
+    # never trips overflow_check (the stub ships with all four gates at "error").
+    longest = max((len(c) for c in items), default=12)
+    gw = max(160, int(longest * 13 * 0.62) + 26)
     # Sanitize the repo name before it lands in the generated stub: a name with a
     # quote (or `"""`) would otherwise break the stub's docstring / string literals
     # on filesystems that allow such characters. Also keeps the saved filename sane.
@@ -1445,26 +1441,70 @@ def _render_stub(repo_name, comps, truncated):
     return f'''#!/usr/bin/env python3
 """Diagram generator for {safe} — scaffolded by `excalidraw_builder.py discover`.
 
-This places one box per discovered top-level component on a non-overlapping grid.
-FILL IT IN: add the real arrows (data flow / calls), group related boxes with
-enclose(), and add a legend() if colour encodes a role. Then run this file to
+A multi-LAYER architecture poster in ONE file. Layer 1 (STRUCTURE) is live and
+runnable now; layers 2-6 are commented scaffolds. DECIDE PER REPO which layers
+explain it, KEEP those, delete the rest, and fill in the real content:
+
+  1. STRUCTURE       (always)   the components and how they group
+  2. WORKFLOW        if it has a pipeline / run-order / algorithm
+  3. INTEGRATION     if it is invoked by / connects to external systems, CI, a loop
+  4. MODES/VARIANTS  if it has modes / strategies / variants of the same flow
+  5. MODEL/RUNNERS   if parts run on different models / workers / runtimes
+  6. DATA/SCHEMA     if it produces a core record / output shape
+
+Colour = role: give each distinct meaning its own colour and add ONE legend()
+when colour is used. Keep all four save() gates at "error". Then run this file to
 emit {safe}.excalidraw + {safe}.html.
 """
-import os
-import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # ensure excalidraw_builder is importable
-from excalidraw_builder import Scene
+{_STUB_IMPORT}
 
-s = Scene()
-s.title({safe!r}, 0, -50, size=28)
-{note_block}# Components discovered in the repo (auto-placed, no overlaps):
-nodes = s.grid([{items_repr}], 0, 0, {cols})
+s = Scene(seed=7)
+s.title({safe!r}, 40, -70, size=30)
+s.label("What it is, how it runs, how it integrates. Left -> right within a layer.",
+        40, -34, size=14, align="left")
 
-# TODO: connect real relationships, e.g.  s.arrow(nodes[0], nodes[1], label="calls")
-# TODO: group related nodes, e.g.         s.enclose([nodes[0], nodes[1]], label="subsystem")
-# TODO: if colour encodes a role, declare roles + a legend().
+# ---- 1 - STRUCTURE (live: one box per discovered component) ----------------
+y = s.section("1 - STRUCTURE   the components")
+{note_block}nodes = s.grid([{items_repr}], 40, y, {cols}, w={gw}, h=64, font_size=13)
+# TODO: group related nodes -> s.enclose([nodes[0], nodes[1]], label="subsystem")
 
-s.save({safe!r})
+# ---- 2 - WORKFLOW (optional: uncomment if the repo has a pipeline) ----------
+# y = s.section("2 - WORKFLOW   run order (left -> right)")
+# s.pipeline([("Start", "terminator"), ("step", "process"),
+#             ("ok?", "decision"), ("Done", "terminator")], 40, y)
+# Multi-tool repo (bundles 2+ skills/services with distinct flows)? Do NOT hide
+# them in one pipeline — give each its own labelled lane (single-tool: skip this):
+# t1 = s.pipeline([("step1", "process"), ("step2", "process")], 120, y + 40)
+# s.lane(t1, "tool-one - one-line role")
+# t2 = s.pipeline([("step1", "process"), ("step2", "process")], 120, y + 210)
+# s.lane(t2, "tool-two - one-line role")
+
+# ---- 3 - INTEGRATION (optional: entry points, external systems, loops) ------
+# y = s.section("3 - INTEGRATION   how it is invoked and what it touches")
+# entry = s.box("entry point", 40, y, fill="blue")
+# ext   = s.box("external system", 320, y, fill="grey")
+# s.arrow(entry, ext, label="calls")
+
+# ---- 4 - MODES / VARIANTS (optional: one column per mode, enclosed) ---------
+# y = s.section("4 - MODES   variants of the same flow")
+# m1 = s.column(["step A", "step B"], 40, y + 40, fill="violet", connect=True)
+# s.enclose(m1, label="mode one")
+
+# ---- 5 - MODEL / RUNNERS (optional: group -> arrow -> runtime) --------------
+# y = s.section("5 - MODEL ASSIGNMENT   what runs where")
+# grp = s.enclose(s.column(["part a", "part b"], 40, y + 40), label="components")
+# s.arrow(grp, s.box("runtime / model", 420, y + 60, fill="yellow"), label="runs on")
+
+# ---- 6 - DATA / SCHEMA (optional: the record it produces) -------------------
+# y = s.section("6 - DATA SCHEMA   the record it produces")
+# s.box("record / field_a / field_b / field_c", 40, y, w=300, h=140, fill="green")
+
+# When colour encodes a role, add ONE legend() that decodes the whole poster:
+# s.legend([("component", "blue"), ("external system", "grey")],
+#          40, s.bounds()[3] + 50, title="Legend - colour = role")
+
+s.save({safe!r}, crossing_check="error", legend_check="error",
+       overflow_check="error", text_overlap_check="error")
 print("wrote {safe}.excalidraw + .html")
 '''
 
