@@ -25,6 +25,7 @@ milestone: v1.12
 - It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).
 - By default it shall show at most the top few items per bucket and, when a bucket has more, print a `... N more — run \`reqmap.py next --all\`` line; with `--all` it shall list every item. Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
 - With a registry that has no requirements it shall print a distinct "no requirements yet" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.
+- It shall scan all scannable files for membership tags and surface any file that carries none as an "Untagged files" bucket (lowest priority), with the same top-N/`--all` truncation as other buckets. It shall skip this scan when no `code_root` is provided (e.g. unit-test callers).
 - It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate).
 
 ## WHAT — Verify intent (open questions for the human)
@@ -77,12 +78,17 @@ AC-8
   Then   it prints the "no requirements yet" message or the all-clear line respectively,
          writes no files, and returns 0
 
+AC-9
+  Given  scannable files in the repo with no membership tag
+  When   `next` runs with a code_root
+  Then   they are listed under "Untagged files" with a `reqmap.py draft` suggestion
+
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana starts her day unsure what's most important. She runs `reqmap.py next` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 draft(s)" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
 
 ## WHERE — Current implementation
-- `cmd_next` and `_risk_score` in `reqmap.py` — prints the header, builds a minimal node per requirement, collects `_risk_signals`, orders each bucket by `risk:` score then id, truncates to the top-N unless `--all`, and prints `RISK_ADVICE` text. The draft intent-dedup is in `_risk_signals` (shared with the Risk tab).
+- `cmd_next`, `_risk_score`, and `_scan_untagged` in `reqmap.py` — prints the header, builds a minimal node per requirement, collects `_risk_signals`, orders each bucket by `risk:` score then id, truncates to the top-N unless `--all`, and prints `RISK_ADVICE` text. The draft intent-dedup is in `_risk_signals` (shared with the Risk tab). `_scan_untagged` adds the untagged-files bucket using the same walk as `scan_members`.
 
 ## Links
 - Used by: (auto)

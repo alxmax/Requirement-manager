@@ -86,7 +86,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-16"
+MAP_ENGINE_VERSION = "2026-06-16.1"
 
 
 # ---------- parsing ----------
@@ -398,6 +398,27 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     if use_cache:
         _save_scancache(reqs_dir, new)   # `new` omits vanished files → prune
     return members
+
+
+def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
+    """Return sorted relative paths of scannable files that carry no membership tags.
+    Same walk discipline as scan_members: honors .reqmapignore, prunes .git/node_modules."""
+    ignore = load_ignore(code_root, reqs_dir)
+    untagged = []
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        dirs.sort()
+        for fn in sorted(files):
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            tags = _scan_file_tags(fp)
+            if tags is not None and not tags:
+                untagged.append(rel)
+    return sorted(untagged)
 
 
 def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
@@ -1687,12 +1708,13 @@ def _risk_score(meta):  # implements: REQ-NEXT-013
 _PRIORITY_ORDER = {"must-have": 0, "should-have": 1, "could-have": 2, "wont-have": 3}
 
 
-def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-013
+def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: REQ-NEXT-013
     """Terminal 'what should I do next': a focused, counted worklist over the same
     `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
     header, leads with the most-urgent bucket, shows the top few per bucket (the
     extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
-    item names the requirement file to open. Read-only, always exit 0."""
+    item names the requirement file to open. Also surfaces scannable files that
+    carry no membership tag (untagged bucket). Read-only, always exit 0."""
     total = len(reqs)
     if total == 0:   # distinguish "nothing set up yet" from "all clean"
         print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
@@ -1732,12 +1754,14 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
 
     pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
-    if not pending:
+    untagged = _scan_untagged(code_root, reqs_dir) if code_root else []
+    if not pending and not untagged:
         print("Nothing pending — every confirmed requirement is implemented, tested and intent-checked.")
         return 0
-    total_actions = sum(len(ids) for _, _, ids in pending)
-    print("{} item(s) need attention across {} {}:\n".format(
-        total_actions, len(pending), "category" if len(pending) == 1 else "categories"))
+    if pending:
+        total_actions = sum(len(ids) for _, _, ids in pending)
+        print("{} item(s) need attention across {} {}:\n".format(
+            total_actions, len(pending), "category" if len(pending) == 1 else "categories"))
     for sig, label, ids in pending:
         print("{} ({})".format(label, len(ids)))
         shown = ids if show_all else ids[:top_n]
@@ -1747,6 +1771,15 @@ def cmd_next(reqs, members, show_all=False, top_n=3):  # implements: REQ-NEXT-01
         if not show_all and len(ids) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
+    if untagged:
+        shown_u = untagged if show_all else untagged[:top_n]
+        print("Untagged files ({})".format(len(untagged)))
+        for fp in shown_u:
+            print("  {}".format(fp))
+        if not show_all and len(untagged) > top_n:
+            print("  ... {} more — run `reqmap.py next --all`".format(len(untagged) - top_n))
+        print("  -> Run `reqmap.py draft` to auto-extract requirements, "
+              "or add to .reqmapignore to silence.\n")
     # Granularity advisory: requirements with many ACs covering disjoint behaviors
     AC_SPLIT_THRESHOLD = 5
     oversize = sorted(
@@ -3610,7 +3643,7 @@ def main():
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
-        return cmd_next(reqs, members, a.show_all)
+        return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
     if a.cmd == "lint":
         return cmd_lint(reqs, a.strict, members)
     if a.cmd == "show":
