@@ -1,5 +1,5 @@
 ---
-generated: 2026-06-16 23:46
+generated: 2026-06-17 00:24
 nodes: 32
 edges: 42
 ---
@@ -197,6 +197,8 @@ graph LR
   REQ_REVIEW_022 -->|tested-by| f_scripts_test_reqmap_py_2473
   f_skills_requirement_quality_review_SKILL_md_6["skills/requirement-quality-review/SKILL.md:6"]
   REQ_REVIEW_022 -->|implements| f_skills_requirement_quality_review_SKILL_md_6
+  f_skills_requirement_quality_review_SKILL_universal_md_9["skills/requirement-quality-review/SKILL.universal.md:9"]
+  REQ_REVIEW_022 -->|implements| f_skills_requirement_quality_review_SKILL_universal_md_9
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_scripts_reqmap_py_551["scripts/reqmap.py:551"]
   REQ_SCAN_005 -->|implements| f_scripts_reqmap_py_551
