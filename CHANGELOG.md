@@ -17,6 +17,13 @@ SPDX id `"BUSL-1.1"`.
   for the five optional layers. The generated stub also carries a **portable
   import** (builder next to the stub / on PYTHONPATH, else newest plugin-cache
   build) so it runs from any repo. New regression test locks the stub shape.
+- **Richer-by-default, with guardrails.** Multi-tool repos (2+ skills/services
+  with distinct flows) now get one labelled `s.lane()` per tool in the WORKFLOW
+  layer instead of a single pipeline that hides the others; single-tool repos
+  keep one pipeline. A "depth comes from structure, never from cramming" rule
+  subordinates elaboration to the existing readability gates (≤20 nodes/region,
+  short labels, simplicity-first always win). The `discover` scaffold shows the
+  per-tool lane pattern; a ❌→✅ worked example contrasts it with the thin one.
 
 **excalidraw-diagram — C4 removed + docs overhaul.**
 - **Removed the C4 helpers** (`Scene.c4()` and `Scene.person()`). They were
