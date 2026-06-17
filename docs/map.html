@@ -11,7 +11,7 @@
      <script>window.__REQMAP_DATA__ = { ...this repo's _map.json... }</script>
      It must run before the app module, so loadData() finds the inlined data. -->
 <script>window.__REQMAP_DATA__={
-  "engine_version": "2026-06-16.2",
+  "engine_version": "2026-06-17",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -1578,7 +1578,7 @@
         "`classify_prose` (the three-bucket router) and `_prose_facts` (title + heading scaffold) in `reqmap.py`; the prose walk lives inside `cmd_extract`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a `prompts/foo.md` with no member tag\n  When   `draft` runs\n  Then   a `draft`-status requirement is written for it\n\nAC-2\n  Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`\n  When   `draft` runs\n  Then   no draft is written for it\n\nAC-3\n  Given  a capability-bucket prose file already tagged `# implements: <ID>`\n  When   `draft` runs\n  Then   it is skipped (no duplicate draft)\n\nAC-4\n  Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`)\n  When   the scanner runs\n  Then   that file is a member of `<ID>`",
+      "accept": "AC-1\n  Given  a `prompts/foo.md` with no member tag\n  When   `draft` runs\n  Then   a `draft`-status requirement is written for it\n\nAC-2\n  Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`\n  When   `draft` runs\n  Then   no draft is written for it\n\nAC-3\n  Given  a capability-bucket prose file already tagged `# implements: <ID>`\n  When   `draft` runs\n  Then   it is skipped (no duplicate draft)\n\nAC-4\n  Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<\!-- generated-from: <ID> -\->`)\n  When   the scanner runs\n  Then   that file is a member of `<ID>`",
       "input": "",
       "output": "",
       "desc": "",
@@ -1665,7 +1665,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3568"
+          "loc": "scripts/reqmap.py:3577"
         },
         {
           "role": "tested-by",
@@ -2029,7 +2029,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3772"
+          "loc": "scripts/reqmap.py:3781"
         },
         {
           "role": "tested-by",
@@ -2177,14 +2177,17 @@
       "contract": [
         "It shall generate `_map.html` — a self-contained, single-file copy of the React viewer (the Vite + React app under `app/`) with this repo's graph inlined as `window.__REQMAP_DATA__`, openable by double-click with no server — WHEN the viewer template `_map_viewer.html` is vendored beside the engine.",
         "Absent the template it shall emit nothing (return None) without failing, so `map` still writes `_map.md` + `_map.json` and the stdlib engine works with no extra files.",
-        "It shall inject the graph by replacing the template's `<!--REQMAP_DATA-->` marker with a single inline `<script>window.__REQMAP_DATA__=…<\/script>` assignment carrying the same `{nodes, edges}` graph [[REQ-MAP-007]] builds.",
-        "The injected graph shall be escaped (`<\/` → `<\\/`) so a `<\/script>` sequence in any requirement field cannot break out of the inline-data `<script>` (HTML-injection guard)."
+        "It shall inject the graph by replacing the template's `<\!--REQMAP_DATA-\->` marker with a single inline `<script>window.__REQMAP_DATA__=…<\/script>` assignment carrying the same `{nodes, edges}` graph [[REQ-MAP-007]] builds.",
+        "The injected graph shall be HTML-safe for embedding inside `<script>` via three escapes applied in order (all are V8 no-ops — backslash is silently ignored before `/`, `!`, `-`):",
+        "`<\/`   → `<\\/`   — prevents `<\/script>` from closing the element early",
+        "`<\!--` → `<\\!--` — prevents the HTML5 parser entering \"script data escaped\" state",
+        "`-\->`  → `-\\->`  — prevents prematurely closing that state if somehow entered The first guard alone was the original contract; the `<\!--`/`-\->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<\!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
+        "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<\!--REQMAP_DATA-\->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
         "`_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with `map`. `_map.json` (owned by [[REQ-MAP-007]]) is the committed source of its data.",
         "Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate capability — see [[REQ-PAGES-021]]."
       ],
@@ -2198,7 +2201,7 @@
         "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags because they are outside the plugin scan root — the requirement covers the engine-side injection contract, not the compiled UX layer. The viewer UX is tested by `npm run build:viewer` (Vite build success) and manual inspection, not by reqmap's gate."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `<\/script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)",
+      "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<\!--REQMAP_DATA-\->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `<\/script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-4\n  Given  a requirement field containing `<\!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<\!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)",
       "input": "",
       "output": "",
       "desc": "",
@@ -2221,7 +2224,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3552"
+          "loc": "scripts/reqmap.py:3561"
         },
         {
           "role": "tested-by",

@@ -25,8 +25,14 @@ milestone: v1.04
 - It shall inject the graph by replacing the template's `<!--REQMAP_DATA-->` marker with a
   single inline `<script>window.__REQMAP_DATA__=…</script>` assignment carrying the same
   `{nodes, edges}` graph [[REQ-MAP-007]] builds.
-- The injected graph shall be escaped (`</` → `<\/`) so a `</script>` sequence in any
-  requirement field cannot break out of the inline-data `<script>` (HTML-injection guard).
+- The injected graph shall be HTML-safe for embedding inside `<script>` via three escapes
+  applied in order (all are V8 no-ops — backslash is silently ignored before `/`, `!`, `-`):
+  - `</`   → `<\/`   — prevents `</script>` from closing the element early
+  - `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
+  - `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
+  The first guard alone was the original contract; the `<!--`/`-->` guards were added in
+  v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore
+  contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -51,6 +57,13 @@ AC-2
   Given  a requirement field containing `</script>`
   When   the viewer is rendered
   Then   the sequence is escaped (`<\/`) so it cannot close the inline-data script early
+
+AC-4
+  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)
+  When   the viewer is rendered
+  Then   `<!--` is escaped to `<\!--` in the inlined blob so the HTML5 parser never
+         enters "script data escaped" state, and `window.__REQMAP_DATA__` is always
+         accessible from the deferred bundle (verified: file:// opens without error)
 
 AC-3
   Given  no template is vendored

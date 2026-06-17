@@ -86,7 +86,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-16.2"
+MAP_ENGINE_VERSION = "2026-06-17"
 
 
 # ---------- parsing ----------
@@ -3542,9 +3542,18 @@ def _viewer_template_path():  # implements: REQ-VIEWER-007
 
 def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
     """Replace the data marker with an inline <script> assigning the graph to
-    window.__REQMAP_DATA__. `</` is escaped to `<\\/` so a requirement that
-    contains `</script>` cannot break out of the script element."""
-    blob = _build_json_text(data).replace("</", "<\\/")
+    window.__REQMAP_DATA__. Three sequences are escaped so the HTML5 parser
+    never changes state mid-blob:
+      `</`   → `<\\/`  prevents `</script>` from closing the element early
+      `<!--` → `<\\!--` prevents entering "script data escaped" state
+      `-->`  → `-\\->`  closes "script data escaped" state prematurely if unclosed
+    All three are valid JS string escapes (backslash ignored for `/`, `!`, `-`)."""
+    blob = (
+        _build_json_text(data)
+        .replace("</", "<\\/")
+        .replace("<!--", "<\\!--")
+        .replace("-->", "-\\->")
+    )
     script = "<script>window.__REQMAP_DATA__=" + blob + ";</script>"
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
 
