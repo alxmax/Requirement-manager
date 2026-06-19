@@ -429,6 +429,93 @@ class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
             self.assertIn("generated-from", buf.getvalue())
 
 
+class MemberDrift(unittest.TestCase):  # tested-by: REQ-MEMBERDRIFT-027
+    """Reverse-direction drift: a dedicated member (code/doc) changed while the
+    confirmed requirement's own contract stayed put — behaviour shipped, spec stale.
+    Scoped to mono-requirement files so a shared engine file is not blamed for all."""
+    def _req(self, d, rid="REQ-MD-001", status="confirmed"):
+        _write(os.path.join(d, rid + ".md"),
+               "---\nid: {}\nstatus: {}\nlayer: feature\nowner: Alex\n---\n\n"
+               "# T\n## WHAT — Contract (normative)\n- it shall foo\n".format(rid, status))
+
+    def _member(self, d, body, rid="REQ-MD-001", rel="src/foo.py"):
+        _write(os.path.join(d, *rel.split("/")), tag(rid) + "\n" + body + "\n")
+
+    def _state(self, d):
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        lock = {rid: R.binding_hash(r["body"]) for rid, r in reqs.items()}
+        return reqs, members, lock
+
+    def test_only_mono_requirement_files_recorded(self):  # verifies: REQ-MEMBERDRIFT-027#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "solo.py"), tag("REQ-AA-001") + "\n")
+            _write(os.path.join(d, "shared.py"), tag("REQ-BB-001") + "\n" + tag("REQ-CC-001") + "\n")
+            mh = R.compute_member_hashes(d, R.scan_members(d, d))
+            self.assertIn("solo.py", mh.get("REQ-AA-001", {}))
+            self.assertNotIn("REQ-BB-001", mh)   # shared.py belongs to two requirements
+            self.assertNotIn("REQ-CC-001", mh)
+
+    def test_memberlock_roundtrip_and_failopen(self):  # verifies: REQ-MEMBERDRIFT-027#AC-2
+        with tempfile.TemporaryDirectory() as d:
+            R.save_memberlock(d, {"REQ-AA-001": {"solo.py": "abc"}})
+            self.assertEqual(R.load_memberlock(d), {"REQ-AA-001": {"solo.py": "abc"}})
+            _write(os.path.join(d, "_memberlock.json"),
+                   json.dumps({"_schema": 999, "members": {"X": {}}}))   # newer schema → degrade
+            self.assertEqual(R.load_memberlock(d), {})
+            _write(os.path.join(d, "_memberlock.json"), "{ broken")
+            self.assertEqual(R.load_memberlock(d), {})
+
+    def test_changed_member_unchanged_contract_is_flagged(self):  # verifies: REQ-MEMBERDRIFT-027#AC-3
+        with tempfile.TemporaryDirectory() as d:
+            self._req(d); self._member(d, "ORIGINAL = 1")
+            reqs, members, lock = self._state(d)
+            memberlock = R.compute_member_hashes(d, members)
+            self._member(d, "CHANGED = 2")     # edit the member, leave the requirement alone
+            self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d),
+                             [("REQ-MD-001", "src/foo.py")])
+
+    def test_contract_also_changed_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-027#AC-4
+        with tempfile.TemporaryDirectory() as d:
+            self._req(d); self._member(d, "ORIGINAL = 1")
+            reqs, members, lock = self._state(d)
+            memberlock = R.compute_member_hashes(d, members)
+            self._member(d, "CHANGED = 2")
+            lock = {"REQ-MD-001": "stale-hash"}   # contract drifted too → forward drift owns it
+            self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d), [])
+
+    def test_non_confirmed_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-027#AC-5
+        with tempfile.TemporaryDirectory() as d:
+            self._req(d, status="baseline"); self._member(d, "ORIGINAL = 1")
+            reqs, members, lock = self._state(d)
+            memberlock = R.compute_member_hashes(d, members)
+            self._member(d, "CHANGED = 2")
+            self.assertEqual(R.member_drift(reqs, members, lock, memberlock, d), [])
+
+    def test_new_member_without_baseline_not_flagged(self):  # verifies: REQ-MEMBERDRIFT-027#AC-6
+        with tempfile.TemporaryDirectory() as d:
+            self._req(d); self._member(d, "ORIGINAL = 1")
+            reqs, members, lock = self._state(d)
+            self._member(d, "CHANGED = 2")
+            self.assertEqual(R.member_drift(reqs, members, lock, {}, d), [])   # no baseline yet
+
+    def test_gate_warns_and_strict_promotes(self):  # verifies: REQ-MEMBERDRIFT-027#AC-7
+        with tempfile.TemporaryDirectory() as d:
+            self._req(d); self._member(d, "ORIGINAL = 1")
+            reqs = R.load_requirements(d); members = R.scan_members(d, d)
+            R.cmd_check(reqs, members, d, True, code_root=d)   # baseline both locks
+            self._member(d, "CHANGED = 2")
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
+            self.assertIn("MEMBER DRIFT", buf.getvalue())
+            self.assertEqual(code, 0)                          # warn-only by default
+            with redirect_stdout(io.StringIO()):
+                strict_code = R.cmd_check(reqs, members, d, False, code_root=d, strict=True)
+            self.assertEqual(strict_code, 1)                   # --strict-promotable
+
+
 class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",

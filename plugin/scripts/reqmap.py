@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-19"
+MAP_ENGINE_VERSION = "2026-06-19.1"
 
 
 # ---------- parsing ----------
@@ -587,6 +587,90 @@ def save_lock(reqs_dir, lock):  # implements: CORE-DRIFT-003
         json.dump(lock, f, indent=2, sort_keys=True)
 
 
+# ---------- member-hash drift (reverse direction) ----------
+# _reqlock.json keeps ONE hash per requirement = the contract; drift in that file only
+# fires prose-ahead-of-code. The reverse — a MEMBER's content changed while the contract
+# stayed put (behaviour shipped, spec not updated) — is invisible there. Member hashes
+# live in a SEPARATE, versioned sidecar so _reqlock.json stays a byte-stable cross-repo
+# contract: an older seeded engine never reads _memberlock.json and is wholly unaffected.
+MEMBERLOCK_SCHEMA = 1
+MEMBER_ROLES = ("implements", "generated-from")   # roles that bind code/doc content to a contract
+
+
+def _memberlock_path(reqs_dir):  # implements: REQ-MEMBERDRIFT-027
+    return os.path.join(reqs_dir, "_memberlock.json")
+
+
+def load_memberlock(reqs_dir):  # implements: REQ-MEMBERDRIFT-027
+    """Return {rid: {relfile: sha}} from the sidecar, or {} when absent/corrupt or
+    written by a NEWER schema than this engine knows — fail open (no false drift) the
+    same way load_lock and the scan cache do, so a forward-incompatible sidecar degrades
+    to 'reverse-drift off this run' rather than crashing or mis-comparing."""
+    try:
+        with open(_memberlock_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict) or data.get("_schema") != MEMBERLOCK_SCHEMA:
+        return {}
+    members = data.get("members")
+    return members if isinstance(members, dict) else {}
+
+
+def save_memberlock(reqs_dir, member_hashes):  # implements: REQ-MEMBERDRIFT-027
+    os.makedirs(reqs_dir, exist_ok=True)
+    payload = {"_schema": MEMBERLOCK_SCHEMA, "members": member_hashes}
+    with open(_memberlock_path(reqs_dir), "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+
+def _file_sha(path):  # implements: REQ-MEMBERDRIFT-027
+    try:
+        with open(path, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except OSError:
+        return None
+
+
+def compute_member_hashes(code_root, members):  # implements: REQ-MEMBERDRIFT-027
+    """{rid: {relfile: sha}} for member files dedicated to ONE requirement. A file that
+    is an implements/generated-from member of several requirements (e.g. a single engine
+    file) is excluded: a change there cannot be attributed to one contract without noise."""
+    owners = {}   # relfile -> set(rid)
+    for rid, hits in members.items():
+        for role, fp, _ln in hits:
+            if role in MEMBER_ROLES:
+                owners.setdefault(fp, set()).add(rid)
+    out = {}
+    for fp, rids in owners.items():
+        if len(rids) == 1:
+            sha = _file_sha(os.path.join(code_root, fp))
+            if sha is not None:
+                out.setdefault(next(iter(rids)), {})[fp] = sha
+    return out
+
+
+def member_drift(reqs, members, lock, memberlock, code_root):  # implements: REQ-MEMBERDRIFT-027
+    """Sorted (rid, relfile) where a confirmed requirement's dedicated member changed
+    since the member-lock while the requirement's OWN contract did not. A requirement
+    whose contract also drifted is skipped — that is forward drift (the spec WAS
+    re-touched) and the contract-drift warning already owns it. A member with no recorded
+    baseline is skipped, so a freshly-tagged file is baselined on the next sync, not nagged."""
+    current = compute_member_hashes(code_root, members)
+    out = []
+    for rid, r in reqs.items():
+        if r["meta"].get("status") != "confirmed":
+            continue
+        if lock.get(rid) and lock[rid] != binding_hash(r["body"]):
+            continue   # forward drift owns this requirement
+        recorded = memberlock.get(rid, {})
+        for rel, sha in current.get(rid, {}).items():
+            old = recorded.get(rel)
+            if old and old != sha:
+                out.append((rid, rel))
+    return sorted(out)
+
+
 # ---------- commands ----------
 def _has_section(body, name):  # implements: REQ-CHECK-006
     """True if the body has a normative `## ` heading whose LABEL is `name`
@@ -809,6 +893,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             strict_warns.append(f"{rid}: DRIFT — contract changed since lock; "
                                f"re-check {len(locs)} member(s): {where}")
 
+    # Reverse-direction drift: a dedicated member changed while the contract stayed put
+    # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (REQ-MEMBERDRIFT-027).
+    memberlock = load_memberlock(reqs_dir)
+    for rid, rel in member_drift(reqs, members, lock, memberlock, code_root):
+        strict_warns.append(f"{rid}: MEMBER DRIFT — {rel} changed since lock but the contract "
+                            "was not re-touched; re-check the requirement, or run sync to re-baseline")
+
     # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
     # no generated-from: lineage drifts from them unnoticed (warn-only — see REQ-DOCBUNDLE-026).
     for rel in untagged_doc_bundles(code_root, members, reqs_dir):
@@ -857,6 +948,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 print(f"  drift: {rid}", file=sys.stderr)
         else:
             save_lock(reqs_dir, new_lock)
+            save_memberlock(reqs_dir, compute_member_hashes(code_root, members))  # re-baseline reverse drift
             print("lock updated.")
 
     if as_json:

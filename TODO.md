@@ -58,5 +58,7 @@
      Extra tell that was present but unused: the requirement's depends_on/graph had
      already been updated to the new model (TRIAS -> skeptic_on_chosen edge) while the
      prose contract still described the old one — an internal contradiction. -->
-- [ ] Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches "behavior shipped, spec not updated". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement. | lane: feature
+- [x] Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches "behavior shipped, spec not updated". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement. | lane: feature
+      <!-- Done as REQ-MEMBERDRIFT-027: stored in a versioned sidecar `_memberlock.json` (not _reqlock.json) so the cross-repo contract stays byte-stable; scoped to mono-requirement files to avoid alarm fatigue. Both Senate blocking conditions addressed. -->
+
 - [ ] Internal-consistency lint: flag a requirement whose structured fields moved to a new model (e.g. `depends_on` edge added, cost/number changed) while its prose Contract/AC still assert the superseded model — the contradiction is detectable without semantics. | lane: feature
