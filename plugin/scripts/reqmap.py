@@ -421,6 +421,40 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     return members
 
 
+DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
+
+
+def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-DOCBUNDLE-026
+    """Sorted rel-paths of large `docs/` HTML docs that carry no `generated-from:`
+    tag — the doc-sync blind spot: a whole-system doc (built from many requirements)
+    that drifts from them with nothing linking the two. A bare `generated-from:` only
+    pins ONE id, but the multi-id list (CORE-SCAN-002) lets one doc name all its
+    sources. Walk discipline matches scan_members: honors `.reqmapignore`, prunes
+    noise. Skips engine-generated outputs (`_`-prefixed, the published `map.html`
+    viewer). Threshold-only + warn-only by design, so it nudges without false alarms."""
+    tagged = {fp for hits in members.values()
+              for (role, fp, _ln) in hits if role == "generated-from"}
+    ignore = load_ignore(code_root, reqs_dir)
+    out = []
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        for fn in sorted(files):
+            if not fn.endswith(".html") or fn.startswith("_") or fn == "map.html":
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if not (rel == "docs" or rel.startswith("docs/")):
+                continue
+            if rel in tagged or any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                if os.path.getsize(fp) >= DOC_BUNDLE_MIN_BYTES:
+                    out.append(rel)
+            except OSError:
+                continue
+    return sorted(out)
+
+
 def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
     """Return sorted relative paths of scannable files that carry no membership tags.
     Same walk discipline as scan_members: honors .reqmapignore, prunes .git/node_modules."""
@@ -774,6 +808,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             where = ", ".join(locs) if locs else "no members tagged — add an implements: tag"
             strict_warns.append(f"{rid}: DRIFT — contract changed since lock; "
                                f"re-check {len(locs)} member(s): {where}")
+
+    # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
+    # no generated-from: lineage drifts from them unnoticed (warn-only — see REQ-DOCBUNDLE-026).
+    for rel in untagged_doc_bundles(code_root, members, reqs_dir):
+        warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
+                     "generated-from: tag — link it to the requirement(s) it derives from "
+                     "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
 
     # Health signals (non-blocking): how much of the corpus is human-validated, and
     # how much still uses the legacy body schema. Surfaced so an all-baseline corpus
