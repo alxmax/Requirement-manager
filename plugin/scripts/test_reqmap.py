@@ -348,6 +348,27 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         found = sorted(r for (r, _f, _l) in members["REQ-T-001"])
         self.assertEqual(found, ["generated-from", "implements", "tested-by", "validated-against"])
 
+    def test_generated_from_accepts_multiple_ids(self):  # verifies: CORE-SCAN-002#AC-6
+        # one whole-system doc generated from several requirements → a member of
+        # each, so a contract drift on ANY of them lists the doc as needing re-sync.
+        # List built at runtime so THIS .py source registers no phantom member.
+        line = "<!-- {}-from: {}, {} -->\n".format("generated", "REQ-MA-001", "REQ-MB-002")
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"), line)
+            members = R.scan_members(d, None)
+        self.assertEqual(members.get("REQ-MA-001"), [("generated-from", "docs/arch.html", 1)])
+        self.assertEqual(members.get("REQ-MB-002"), [("generated-from", "docs/arch.html", 1)])
+
+    def test_multi_id_dedup_and_single_id_unchanged(self):  # verifies: CORE-SCAN-002#AC-6
+        # a repeated id in one list is recorded once; a plain single-id tag is unaffected.
+        multi = "# {}: {}, {}\n".format(_ROLE, "REQ-MC-001", "REQ-MC-001")
+        single = tag("REQ-MD-001") + "\n"
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), multi + single)
+            members = R.scan_members(d, None)
+        self.assertEqual(members.get("REQ-MC-001"), [("implements", "a.py", 1)])
+        self.assertEqual(members.get("REQ-MD-001"), [("implements", "a.py", 2)])
+
     def test_unreadable_file_skipped(self):  # verifies: CORE-SCAN-002#AC-5
         # _scan_file_tags fails open (None) on a read error; scan_members skips the file
         self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))

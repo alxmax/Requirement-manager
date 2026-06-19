@@ -40,5 +40,23 @@
      voice order drifted for days after the requirements + code moved to
      Generator-first, and reqmap never flagged it — Consilium had to work around
      it with a bespoke check_doc_drift gate. reqmap should catch this class. -->
-- [ ] `generated-from:` accepting >1 requirement ID — drift a system/explainer doc when ANY referenced requirement changes | lane: feature
+- [x] `generated-from:` accepting >1 requirement ID — drift a system/explainer doc when ANY referenced requirement changes | lane: feature
 - [ ] WARN when a large docs/ HTML/generated bundle carries no `generated-from:` tag at all (surface the doc-sync blind spot instead of silently ignoring it) | lane: ops
+
+## v1.18
+<!-- Gap found 2026-06-19 while reconciling Consilium's requirements after the
+     Trias 6->4 skeptic-lever redesign. CONSILIUM-MODE-TRIAS-001 (status: confirmed)
+     described the OLD model (3 pre-vote Skeptics, revise-before-vote) while the
+     shipped code/member (modes/trias.md) had moved to the NEW model (vote, then 1
+     post-vote skeptic_on_chosen). reqmap never flagged it. Root cause: _reqlock.json
+     stores ONE hash per requirement = hash(requirement contract), with no member-
+     content hash. So drift only fires in the prose-ahead-of-code direction (the
+     requirement .md was edited); the reverse — a MEMBER (code/doc) changed while the
+     requirement prose stayed put — leaves the requirement hash unchanged and is
+     structurally invisible. The skill documents intent-sync as non-automatable and
+     surfaces it at human review; this is the mechanical half that could move it left.
+     Extra tell that was present but unused: the requirement's depends_on/graph had
+     already been updated to the new model (TRIAS -> skeptic_on_chosen edge) while the
+     prose contract still described the old one — an internal contradiction. -->
+- [ ] Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches "behavior shipped, spec not updated". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement. | lane: feature
+- [ ] Internal-consistency lint: flag a requirement whose structured fields moved to a new model (e.g. `depends_on` edge added, cost/number changed) while its prose Contract/AC still assert the superseded model — the contradiction is detectable without semantics. | lane: feature

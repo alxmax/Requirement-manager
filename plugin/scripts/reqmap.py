@@ -32,7 +32,28 @@ import argparse, ast, fnmatch, hashlib, json, math, os, re, subprocess, sys
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
 # `x-implements:` from being picked up as a real `implements:` tag
-TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)")
+_ID_PAT = r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+"
+TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*(" + _ID_PAT + r")")
+# A single tag may bind several requirements via a comma-separated id list (one
+# `<!-- generated-from: ... -->` listing several ids) — used for a whole-system doc
+# generated from many requirements, so a contract drift on ANY of them lists the doc
+# to re-sync. TAG_RE (single id) stays for callers that only need the tag's start
+# position; TAG_LIST_RE captures the whole id list, which _findall_tags expands.
+TAG_LIST_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*("
+                         + _ID_PAT + r"(?:\s*,\s*" + _ID_PAT + r")*)")
+_ID_RE = re.compile(_ID_PAT)
+
+
+def _findall_tags(text):
+    """Like ``TAG_RE.findall`` but expands a comma-separated id list into one
+    ``(role, id)`` pair per id, so ``generated-from: A-1, B-2`` yields two members."""
+    out = []
+    for role, idlist in TAG_LIST_RE.findall(text):
+        for cap in _ID_RE.findall(idlist):
+            out.append((role, cap))
+    return out
+
+
 # Phantom-member exclusion helpers used in _scan_file_tags
 _FENCE_RE = re.compile(r'^(`{3,}|~{3,})')   # CommonMark fence opener/closer
 # NOTE: only handles single-backtick spans; double/triple-backtick spans (CommonMark-valid)
@@ -86,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-17"
+MAP_ENGINE_VERSION = "2026-06-19"
 
 
 # ---------- parsing ----------
@@ -294,7 +315,7 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
                 continue
             clean = _BACKTICK_RE.sub("", s)
             seen = set()
-            for role, cap in TAG_RE.findall(clean):
+            for role, cap in _findall_tags(clean):
                 key = (role, cap)
                 if key not in seen:
                     seen.add(key)
@@ -312,7 +333,7 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
                 in_triple = None
             s, in_triple = _strip_py_strings(s)
             seen = set()
-            for role, cap in TAG_RE.findall(s):
+            for role, cap in _findall_tags(s):
                 key = (role, cap)
                 if key not in seen:
                     seen.add(key)
@@ -321,7 +342,7 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
     else:
         for i, raw in enumerate(lines, 1):
             seen = set()
-            for role, cap in TAG_RE.findall(raw):
+            for role, cap in _findall_tags(raw):
                 key = (role, cap)
                 if key not in seen:
                     seen.add(key)
