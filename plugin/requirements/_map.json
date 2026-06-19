@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-06-19",
+  "engine_version": "2026-06-19.1",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -33,7 +33,8 @@
       "deps": [],
       "used_by": [
         "REQ-CHECK-006",
-        "REQ-HEALTH-017"
+        "REQ-HEALTH-017",
+        "REQ-MEMBERDRIFT-027"
       ],
       "satisfies": [],
       "satisfied_by": [],
@@ -141,7 +142,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1114"
+          "loc": "scripts/test_reqmap.py:1201"
         }
       ],
       "test_exempt": null,
@@ -188,6 +189,7 @@
         "REQ-EXTRACT-008",
         "REQ-HEALTH-017",
         "REQ-MAP-007",
+        "REQ-MEMBERDRIFT-027",
         "REQ-PROSE-024",
         "REQ-SCAN-005",
         "REQ-SCANCACHE-023",
@@ -315,11 +317,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:764"
+          "loc": "scripts/reqmap.py:848"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2314"
+          "loc": "scripts/test_reqmap.py:2401"
         }
       ],
       "test_exempt": null,
@@ -364,55 +366,55 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1256"
+          "loc": "scripts/reqmap.py:1348"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1290"
+          "loc": "scripts/reqmap.py:1382"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1313"
+          "loc": "scripts/reqmap.py:1405"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1336"
+          "loc": "scripts/reqmap.py:1428"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1353"
+          "loc": "scripts/reqmap.py:1445"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1372"
+          "loc": "scripts/reqmap.py:1464"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1378"
+          "loc": "scripts/reqmap.py:1470"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1403"
+          "loc": "scripts/reqmap.py:1495"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:725"
+          "loc": "scripts/test_reqmap.py:812"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:996"
+          "loc": "scripts/test_reqmap.py:1083"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1169"
+          "loc": "scripts/test_reqmap.py:1256"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1191"
+          "loc": "scripts/test_reqmap.py:1278"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1239"
+          "loc": "scripts/test_reqmap.py:1326"
         }
       ],
       "test_exempt": null,
@@ -464,6 +466,7 @@
         "REQ-ACVERIFY-019",
         "REQ-DOCBUNDLE-026",
         "REQ-INIT-012",
+        "REQ-MEMBERDRIFT-027",
         "REQ-TESTLINK-018",
         "REQ-TRACE-020"
       ],
@@ -478,19 +481,19 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:591"
+          "loc": "scripts/reqmap.py:675"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:625"
+          "loc": "scripts/reqmap.py:709"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:676"
+          "loc": "scripts/reqmap.py:760"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:848"
+          "loc": "scripts/reqmap.py:939"
         },
         {
           "role": "tested-by",
@@ -518,27 +521,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1010"
+          "loc": "scripts/test_reqmap.py:1097"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1041"
+          "loc": "scripts/test_reqmap.py:1128"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1289"
+          "loc": "scripts/test_reqmap.py:1376"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2481"
+          "loc": "scripts/test_reqmap.py:2568"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3231"
+          "loc": "scripts/test_reqmap.py:3318"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3302"
+          "loc": "scripts/test_reqmap.py:3389"
         }
       ],
       "test_exempt": null,
@@ -802,23 +805,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1093"
+          "loc": "scripts/reqmap.py:1185"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1154"
+          "loc": "scripts/reqmap.py:1246"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1239"
+          "loc": "scripts/reqmap.py:1331"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:618"
+          "loc": "scripts/test_reqmap.py:705"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:633"
+          "loc": "scripts/test_reqmap.py:720"
         }
       ],
       "test_exempt": null,
@@ -867,19 +870,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1509"
+          "loc": "scripts/reqmap.py:1601"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1596"
+          "loc": "scripts/reqmap.py:1688"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:798"
+          "loc": "scripts/test_reqmap.py:885"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1222"
+          "loc": "scripts/test_reqmap.py:1309"
         }
       ],
       "test_exempt": null,
@@ -935,11 +938,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2353"
+          "loc": "scripts/reqmap.py:2445"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2174"
+          "loc": "scripts/test_reqmap.py:2261"
         }
       ],
       "test_exempt": null,
@@ -990,21 +993,67 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2480"
+          "loc": "scripts/reqmap.py:2572"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2509"
+          "loc": "scripts/reqmap.py:2601"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1702"
+          "loc": "scripts/test_reqmap.py:1789"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.10",
       "priority": "",
       "risks": []
+    },
+    {
+      "id": "REQ-INTCONSISTLINT-028",
+      "layer": "feature",
+      "status": "draft",
+      "area": "REQ",
+      "title": "Internal-consistency lint (deferred — redesign required)",
+      "intent": "When a requirement's structured frontmatter moves to a new model (a `depends_on` edge added, a number changed) but its prose Contract/AC still describe the old one, the requirement contradicts itself. The contract hash misses this (it hashes the prose body only, not the frontmatter), and reverse member drift (REQ-MEMBERDRIFT-027) misses it too (it compares member files, not a requirement's own frontmatter-vs-prose). So the gap is real — but the obvious detector is not. This requirement parks the intent with a design brief, deliberately unimplemented, until a detector that actually works exists.",
+      "contract": [],
+      "verify": [
+        "A viable detector is **baseline-aware**, not static: flag when a `depends_on` edge is present now but absent from a recorded baseline AND the requirement's contract body hash did not change in the same revision (the TRIAS shape: structure moved, prose did not).",
+        "Does a per-requirement `depends_on` baseline exist? `_reqlock.json` stores only the contract body hash today, so this likely needs a new persisted field/sidecar — i.e. a schema change, not a lint addition. Decide the storage (extend `_memberlock.json`?).",
+        "Acceptance bar before promotion out of draft: a test fixture that reproduces the TRIAS incident must fire, AND the measured false-positive rate on the existing corpus must be below the existing warn-check baseline (target < 10%).",
+        "Confirm the base rate is worth it: the motivating evidence is n=1; a second real occurrence would justify the persisted-baseline cost."
+      ],
+      "notes": [
+        "Intentionally has no `implements:`/`tested-by:` members while `draft` — it ships no code.",
+        "Distinct from REQ-MEMBERDRIFT-027 (member-file content) and from contract drift (prose body hash): this targets a requirement's own frontmatter-vs-prose coherence."
+      ],
+      "current_impl": [
+        "None (deferred). Future home: a baseline-aware check in `lint`/`cmd_check`."
+      ],
+      "acc": [
+        "None yet — draft. Acceptance is gated on the open questions above being resolved into a detector whose corpus false-positive rate is measured below threshold."
+      ],
+      "accept": "- None yet — draft. Acceptance is gated on the open questions above being resolved into a\n  detector whose corpus false-positive rate is measured below threshold.",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-LINT-014",
+        "REQ-MEMBERDRIFT-027"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [],
+      "test_exempt": null,
+      "milestone": "v1.19",
+      "priority": "could-have",
+      "risks": [
+        {
+          "signal": "unreviewed",
+          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
+        }
+      ]
     },
     {
       "id": "REQ-LINT-014",
@@ -1042,6 +1091,7 @@
         "CORE-PARSE-001"
       ],
       "used_by": [
+        "REQ-INTCONSISTLINT-028",
         "REQ-LINTCHECKS-025"
       ],
       "satisfies": [],
@@ -1049,23 +1099,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1901"
+          "loc": "scripts/reqmap.py:1993"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1936"
+          "loc": "scripts/reqmap.py:2028"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1959"
+          "loc": "scripts/reqmap.py:2051"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2072"
+          "loc": "scripts/reqmap.py:2164"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1888"
+          "loc": "scripts/test_reqmap.py:1975"
         }
       ],
       "test_exempt": null,
@@ -1117,15 +1167,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1930"
+          "loc": "scripts/reqmap.py:2022"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1959"
+          "loc": "scripts/reqmap.py:2051"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1888"
+          "loc": "scripts/test_reqmap.py:1975"
         }
       ],
       "test_exempt": null,
@@ -1186,116 +1236,192 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1631"
+          "loc": "scripts/reqmap.py:1723"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1722"
+          "loc": "scripts/reqmap.py:1814"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1746"
+          "loc": "scripts/reqmap.py:1838"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2572"
+          "loc": "scripts/reqmap.py:2664"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2624"
+          "loc": "scripts/reqmap.py:2716"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2632"
+          "loc": "scripts/reqmap.py:2724"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2655"
+          "loc": "scripts/reqmap.py:2747"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2669"
+          "loc": "scripts/reqmap.py:2761"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2685"
+          "loc": "scripts/reqmap.py:2777"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2738"
+          "loc": "scripts/reqmap.py:2830"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2744"
+          "loc": "scripts/reqmap.py:2836"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2751"
+          "loc": "scripts/reqmap.py:2843"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2788"
+          "loc": "scripts/reqmap.py:2880"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2803"
+          "loc": "scripts/reqmap.py:2895"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2834"
+          "loc": "scripts/reqmap.py:2926"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2912"
+          "loc": "scripts/reqmap.py:3004"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2960"
+          "loc": "scripts/reqmap.py:3052"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3011"
+          "loc": "scripts/reqmap.py:3103"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3019"
+          "loc": "scripts/reqmap.py:3111"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3464"
+          "loc": "scripts/reqmap.py:3556"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3474"
+          "loc": "scripts/reqmap.py:3566"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:475"
+          "loc": "scripts/test_reqmap.py:562"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:883"
+          "loc": "scripts/test_reqmap.py:970"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:917"
+          "loc": "scripts/test_reqmap.py:1004"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1129"
+          "loc": "scripts/test_reqmap.py:1216"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1324"
+          "loc": "scripts/test_reqmap.py:1411"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1412"
+          "loc": "scripts/test_reqmap.py:1499"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.04",
       "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-MEMBERDRIFT-027",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Reverse-direction member drift",
+      "intent": "Drift detection has one eye open. `_reqlock.json` stores one hash per requirement — the contract — so it fires when the *prose* moves ahead of the code. The reverse is invisible: a member (the code or doc that realises a requirement) can change while the contract sits untouched, so behaviour ships and the spec quietly goes stale. This is the mechanical half of intent-sync: hash the dedicated members too, and warn when one moves while its requirement does not. Without it, \"confirmed\" can silently mean \"confirmed six versions ago\", and only a human re-reading both sides would ever notice.",
+      "contract": [
+        "Member content hashes shall live in a separate, versioned sidecar `_memberlock.json` (`{\"_schema\": N, \"members\": {id: {relfile: sha}}}`), so `_reqlock.json` stays a byte-stable cross-repo contract that an older seeded engine reads unchanged.",
+        "The sidecar shall fail open (treated as empty) when absent, corrupt, or written by a newer `_schema` than the engine knows — degrading to \"reverse-drift off this run\" rather than crashing or mis-comparing.",
+        "Member hashes shall be recorded only for files dedicated to ONE requirement (an `implements:`/`generated-from:` member of exactly one id); a file shared by several requirements is excluded, because a change there cannot be attributed without noise.",
+        "The gate shall warn for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not. A requirement whose contract also drifted is skipped (forward drift already owns it).",
+        "A member with no recorded baseline shall not warn, so a freshly-tagged file is baselined on the next sync rather than nagged on first sight.",
+        "The check shall be warn-only by default and shall be promoted to an error under `--strict` (it joins the same strict set as contract drift).",
+        "`--update-lock` shall re-baseline the sidecar in lockstep with `_reqlock.json`."
+      ],
+      "verify": [
+        "None — authored from known intent, not reconstructed from code."
+      ],
+      "notes": [
+        "File-level granularity with a mono-requirement filter trades reach for silence: drift in a file shared by many requirements (e.g. a single engine file) is not attributed, by design. Repos with one file per capability get the most value.",
+        "It asserts a member's bytes changed, not that the change is behaviourally meaningful — a reformat re-baselines like any edit. Re-running sync acknowledges and clears it."
+      ],
+      "current_impl": [
+        "`compute_member_hashes`, `member_drift`, `load_memberlock`, `save_memberlock`, `_memberlock_path`, `MEMBERLOCK_SCHEMA` in `reqmap.py`, consumed by `cmd_check` — `compute_member_hashes` hashes mono-requirement member files, `member_drift` compares them to the sidecar while skipping forward-drifted requirements, and `cmd_check` emits a strict-promotable warn per result and re-baselines the sidecar on `--update-lock`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a file that is a member of one requirement and a file shared by two\n  When   member hashes are computed\n  Then   only the dedicated file is recorded\nAC-2\n  Given  a sidecar that is absent, corrupt, or of a newer schema\n  When   it is loaded\n  Then   it reads as empty (fail open)\nAC-3\n  Given  a confirmed requirement whose dedicated member changed but whose contract did not\n  When   member drift is computed\n  Then   that (requirement, file) pair is reported\nAC-4\n  Given  a requirement whose contract also drifted since the lock\n  When   member drift is computed\n  Then   it is not reported (forward drift owns it)\nAC-5\n  Given  a non-confirmed requirement whose member changed\n  When   member drift is computed\n  Then   it is not reported\nAC-6\n  Given  a member file with no recorded baseline in the sidecar\n  When   member drift is computed\n  Then   it is not reported\nAC-7\n  Given  a baselined dedicated member that is then edited\n  When   the gate runs\n  Then   it warns (exit 0) and, under `--strict`, exits non-zero",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "CORE-DRIFT-003",
+        "CORE-SCAN-002",
+        "REQ-CHECK-006"
+      ],
+      "used_by": [
+        "REQ-INTCONSISTLINT-028"
+      ],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:600"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:604"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:620"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:627"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:635"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:653"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:432"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v1.18",
+      "priority": "should-have",
       "risks": []
     },
     {
@@ -1335,11 +1461,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:947"
+          "loc": "scripts/reqmap.py:1039"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:667"
+          "loc": "scripts/test_reqmap.py:754"
         }
       ],
       "test_exempt": null,
@@ -1395,27 +1521,27 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1764"
+          "loc": "scripts/reqmap.py:1856"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1777"
+          "loc": "scripts/reqmap.py:1869"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1576"
+          "loc": "scripts/test_reqmap.py:1663"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1684"
+          "loc": "scripts/test_reqmap.py:1771"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1690"
+          "loc": "scripts/test_reqmap.py:1777"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1695"
+          "loc": "scripts/test_reqmap.py:1782"
         }
       ],
       "test_exempt": null,
@@ -1463,23 +1589,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1737"
+          "loc": "scripts/reqmap.py:1829"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2598"
+          "loc": "scripts/reqmap.py:2690"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3490"
+          "loc": "scripts/reqmap.py:3582"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:975"
+          "loc": "scripts/test_reqmap.py:1062"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1413"
+          "loc": "scripts/test_reqmap.py:1500"
         }
       ],
       "test_exempt": null,
@@ -1524,15 +1650,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1044"
+          "loc": "scripts/reqmap.py:1136"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1059"
+          "loc": "scripts/reqmap.py:1151"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1516"
+          "loc": "scripts/test_reqmap.py:1603"
         }
       ],
       "test_exempt": null,
@@ -1577,15 +1703,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:968"
+          "loc": "scripts/reqmap.py:1060"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1014"
+          "loc": "scripts/reqmap.py:1106"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2507"
+          "loc": "scripts/test_reqmap.py:2594"
         }
       ],
       "test_exempt": null,
@@ -1634,31 +1760,31 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1101"
+          "loc": "scripts/reqmap.py:1193"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1126"
+          "loc": "scripts/reqmap.py:1218"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1154"
+          "loc": "scripts/reqmap.py:1246"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:432"
+          "loc": "scripts/test_reqmap.py:519"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:450"
+          "loc": "scripts/test_reqmap.py:537"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:567"
+          "loc": "scripts/test_reqmap.py:654"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:618"
+          "loc": "scripts/test_reqmap.py:705"
         }
       ],
       "test_exempt": null,
@@ -1707,11 +1833,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3639"
+          "loc": "scripts/reqmap.py:3731"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2549"
+          "loc": "scripts/test_reqmap.py:2636"
         },
         {
           "role": "implements",
@@ -1763,11 +1889,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:606"
+          "loc": "scripts/reqmap.py:690"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:711"
+          "loc": "scripts/test_reqmap.py:798"
         }
       ],
       "test_exempt": null,
@@ -1825,7 +1951,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2601"
+          "loc": "scripts/test_reqmap.py:2688"
         }
       ],
       "test_exempt": null,
@@ -1878,11 +2004,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2114"
+          "loc": "scripts/reqmap.py:2206"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2048"
+          "loc": "scripts/test_reqmap.py:2135"
         }
       ],
       "test_exempt": null,
@@ -1932,31 +2058,31 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2196"
+          "loc": "scripts/reqmap.py:2288"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2203"
+          "loc": "scripts/reqmap.py:2295"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2215"
+          "loc": "scripts/reqmap.py:2307"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2233"
+          "loc": "scripts/reqmap.py:2325"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2245"
+          "loc": "scripts/reqmap.py:2337"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2257"
+          "loc": "scripts/reqmap.py:2349"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2112"
+          "loc": "scripts/test_reqmap.py:2199"
         }
       ],
       "test_exempt": null,
@@ -2007,75 +2133,75 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2535"
+          "loc": "scripts/reqmap.py:2627"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2607"
+          "loc": "scripts/reqmap.py:2699"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3050"
+          "loc": "scripts/reqmap.py:3142"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3068"
+          "loc": "scripts/reqmap.py:3160"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3088"
+          "loc": "scripts/reqmap.py:3180"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3091"
+          "loc": "scripts/reqmap.py:3183"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3096"
+          "loc": "scripts/reqmap.py:3188"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3113"
+          "loc": "scripts/reqmap.py:3205"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3125"
+          "loc": "scripts/reqmap.py:3217"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3130"
+          "loc": "scripts/reqmap.py:3222"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3149"
+          "loc": "scripts/reqmap.py:3241"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3439"
+          "loc": "scripts/reqmap.py:3531"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3514"
+          "loc": "scripts/reqmap.py:3606"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3532"
+          "loc": "scripts/reqmap.py:3624"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3540"
+          "loc": "scripts/reqmap.py:3632"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3555"
+          "loc": "scripts/reqmap.py:3647"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3843"
+          "loc": "scripts/reqmap.py:3935"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3077"
+          "loc": "scripts/test_reqmap.py:3164"
         }
       ],
       "test_exempt": null,
@@ -2123,15 +2249,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:656"
+          "loc": "scripts/reqmap.py:740"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:756"
+          "loc": "scripts/reqmap.py:840"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2250"
+          "loc": "scripts/test_reqmap.py:2337"
         }
       ],
       "test_exempt": null,
@@ -2181,27 +2307,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:728"
+          "loc": "scripts/reqmap.py:812"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:784"
+          "loc": "scripts/reqmap.py:868"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1639"
+          "loc": "scripts/reqmap.py:1731"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:1680"
+          "loc": "scripts/reqmap.py:1772"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2149"
+          "loc": "scripts/reqmap.py:2241"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2384"
+          "loc": "scripts/test_reqmap.py:2471"
         }
       ],
       "test_exempt": null,
@@ -2258,19 +2384,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3601"
+          "loc": "scripts/reqmap.py:3693"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3605"
+          "loc": "scripts/reqmap.py:3697"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3623"
+          "loc": "scripts/reqmap.py:3715"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:948"
+          "loc": "scripts/test_reqmap.py:1035"
         }
       ],
       "test_exempt": null,
@@ -2353,6 +2479,14 @@
       "REQ-MAP-007"
     ],
     [
+      "REQ-INTCONSISTLINT-028",
+      "REQ-LINT-014"
+    ],
+    [
+      "REQ-INTCONSISTLINT-028",
+      "REQ-MEMBERDRIFT-027"
+    ],
+    [
       "REQ-LINT-014",
       "CORE-PARSE-001"
     ],
@@ -2371,6 +2505,18 @@
     [
       "REQ-MAP-007",
       "CORE-SCAN-002"
+    ],
+    [
+      "REQ-MEMBERDRIFT-027",
+      "CORE-DRIFT-003"
+    ],
+    [
+      "REQ-MEMBERDRIFT-027",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-MEMBERDRIFT-027",
+      "REQ-CHECK-006"
     ],
     [
       "REQ-NEW-004",
@@ -2582,13 +2728,7 @@
       "name": "Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches \"behavior shipped, spec not updated\". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement.",
       "lane": "feature",
       "milestone": "v1.18",
-      "done": false
-    },
-    {
-      "name": "Internal-consistency lint: flag a requirement whose structured fields moved to a new model (e.g. `depends_on` edge added, cost/number changed) while its prose Contract/AC still assert the superseded model — the contradiction is detectable without semantics.",
-      "lane": "feature",
-      "milestone": "v1.18",
-      "done": false
+      "done": true
     }
   ]
 }

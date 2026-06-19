@@ -1,0 +1,9 @@
+{
+  "_schema": 1,
+  "members": {
+    "REQ-REVIEW-022": {
+      "skills/requirement-quality-review/SKILL.md": "10cdf069da6cfdb072d4868197254ac1bd4c1c989cd46e283e82456b55de5c5c",
+      "skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+    }
+  }
+}
