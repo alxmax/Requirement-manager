@@ -23,6 +23,10 @@ milestone: v1.00
 - Tag IDs shall match `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`; a left-boundary guard shall prevent
   substring matches such as `reimplements:` or `x-implements:` being read as real tags.
 - The same `(role, ID)` appearing twice on one line shall be recorded once.
+- A single tag may bind several requirements via a comma-separated id list
+  (`role: <ID>, <ID>, ...`); each id is recorded as a member of the same
+  `(role, file, line)`, so a whole-system doc generated from many requirements
+  (`generated-from: A, B, C`) is a member of each and drifts when ANY changes.
 - File paths shall be reported repo-root-relative with POSIX separators.
 - `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory shall be
   skipped, the latter matched by realpath so a source package merely named `requirements/`
@@ -61,6 +65,11 @@ AC-5
   When   the scan runs
   Then   the file is skipped without aborting the scan
 
+AC-6
+  Given  a tag `generated-from: <ID-A>, <ID-B>` listing several ids
+  When   the scan runs
+  Then   the file is recorded as a member of both <ID-A> and <ID-B>
+
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana adds a comment `# implements: CORE-SCAN-002` at the top of a new file and saves it.
@@ -69,7 +78,7 @@ AC-5
   reading `reimplements:` nearby is correctly ignored and never mistaken for a real tag.
 
 ## WHERE — Current implementation
-- `scan_members`, `_prune_dirs`, `load_ignore`, `TAG_RE` in `reqmap.py`.
+- `scan_members`, `_prune_dirs`, `load_ignore`, `TAG_RE`, `TAG_LIST_RE`, `_findall_tags` in `reqmap.py`.
 
 ## Links
 - Used by: (auto)
