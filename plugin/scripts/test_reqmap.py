@@ -374,6 +374,61 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))
 
 
+class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
+    """A large docs/ HTML doc with no generated-from lineage is the doc-sync blind
+    spot — it drifts from the requirements it derives from with nothing linking them."""
+    def _big(self, n=None):
+        return "<html>" + "x" * (R.DOC_BUNDLE_MIN_BYTES + 10 if n is None else n) + "</html>"
+
+    # generated-from comment built at runtime so THIS .py source registers no phantom member
+    def _gtag(self, cap):
+        return "<!-- {}-from: {} -->\n".format("generated", cap)
+
+    def test_large_untagged_docs_html_is_flagged(self):  # verifies: REQ-DOCBUNDLE-026#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"), self._big())
+            members = R.scan_members(d, None)
+            self.assertEqual(R.untagged_doc_bundles(d, members), ["docs/arch.html"])
+
+    def test_small_docs_html_not_flagged(self):  # verifies: REQ-DOCBUNDLE-026#AC-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "small.html"), "<html>tiny</html>")
+            members = R.scan_members(d, None)
+            self.assertEqual(R.untagged_doc_bundles(d, members), [])
+
+    def test_tagged_large_docs_html_not_flagged(self):  # verifies: REQ-DOCBUNDLE-026#AC-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"), self._gtag("REQ-DOC-001") + self._big())
+            members = R.scan_members(d, None)
+            self.assertEqual(R.untagged_doc_bundles(d, members), [])
+
+    def test_engine_outputs_and_nondocs_excluded(self):  # verifies: REQ-DOCBUNDLE-026#AC-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "map.html"), self._big())   # engine's published viewer
+            _write(os.path.join(d, "docs", "_x.html"), self._big())    # _-prefixed generated output
+            _write(os.path.join(d, "top.html"), self._big())           # not under docs/
+            members = R.scan_members(d, None)
+            self.assertEqual(R.untagged_doc_bundles(d, members), [])
+
+    def test_reqmapignore_suppresses(self):  # verifies: REQ-DOCBUNDLE-026#AC-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "poster.html"), self._big())
+            _write(os.path.join(d, ".reqmapignore"), "docs/poster.html\n")
+            members = R.scan_members(d, None)
+            self.assertEqual(R.untagged_doc_bundles(d, members), [])
+
+    def test_gate_surfaces_the_warn(self):  # verifies: REQ-DOCBUNDLE-026#AC-6
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "arch.html"), self._big())
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, d, False, code_root=d)
+            self.assertIn("docs/arch.html", buf.getvalue())
+            self.assertIn("generated-from", buf.getvalue())
+
+
 class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",

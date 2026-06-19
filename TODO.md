@@ -41,7 +41,7 @@
      Generator-first, and reqmap never flagged it — Consilium had to work around
      it with a bespoke check_doc_drift gate. reqmap should catch this class. -->
 - [x] `generated-from:` accepting >1 requirement ID — drift a system/explainer doc when ANY referenced requirement changes | lane: feature
-- [ ] WARN when a large docs/ HTML/generated bundle carries no `generated-from:` tag at all (surface the doc-sync blind spot instead of silently ignoring it) | lane: ops
+- [x] WARN when a large docs/ HTML/generated bundle carries no `generated-from:` tag at all (surface the doc-sync blind spot instead of silently ignoring it) | lane: ops
 
 ## v1.18
 <!-- Gap found 2026-06-19 while reconciling Consilium's requirements after the
