@@ -1,7 +1,7 @@
 ---
-generated: 2026-06-19 22:26
-nodes: 34
-edges: 47
+generated: 2026-06-19 22:49
+nodes: 35
+edges: 49
 ---
 
 # Requirement Map
@@ -29,6 +29,7 @@ graph LR
     REQ_FINDINGS_010["Open-findings report<br><small>REQ-FINDINGS-010</small>"]
     REQ_HEALTH_017["Corpus health snapshot<br><small>REQ-HEALTH-017</small>"]
     REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
+    REQ_INTCONSISTLINT_028["Internal-consistency lint (deferred — redesign required)<br><small>REQ-INTCONSISTLINT-028</small>"]
     REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
     REQ_LINTCHECKS_025["Readability & scope checks<br><small>REQ-LINTCHECKS-025</small>"]
     REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
@@ -59,6 +60,8 @@ graph LR
   REQ_INIT_012 --> REQ_EXTRACT_008
   REQ_INIT_012 --> REQ_CHECK_006
   REQ_INIT_012 --> REQ_MAP_007
+  REQ_INTCONSISTLINT_028 --> REQ_LINT_014
+  REQ_INTCONSISTLINT_028 --> REQ_MEMBERDRIFT_027
   REQ_LINTCHECKS_025 --> REQ_LINT_014
   REQ_MEMBERDRIFT_027 --> REQ_CHECK_006
   REQ_NEXT_013 --> REQ_MAP_007
@@ -154,6 +157,8 @@ graph LR
   REQ_INIT_012 -->|implements| f_scripts_reqmap_py_2572_2601
   f_scripts_test_reqmap_py_1789["scripts/test_reqmap.py:1789"]
   REQ_INIT_012 -->|tested-by| f_scripts_test_reqmap_py_1789
+  REQ_INTCONSISTLINT_028["Internal-consistency lint (deferred — redesign required)<br><small>REQ-INTCONSISTLINT-028</small>"]
+  style REQ_INTCONSISTLINT_028 fill:#eee,stroke:#bbb,color:#888
   REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
   f_scripts_reqmap_py_1993_2164["scripts/reqmap.py:1993-2164"]
   REQ_LINT_014 -->|implements| f_scripts_reqmap_py_1993_2164
@@ -262,7 +267,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>30 caps</small>"]
+  a_REQ["REQ<br><small>31 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px
@@ -274,5 +279,14 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  ok["No risk signals detected"]
+  subgraph sg_misc["misc"]
+    REQ_INTCONSISTLINT_028["Internal-consistency lint (deferred — redesign required)<br><small>REQ-INTCONSISTLINT-028</small><br>unreviewed"]
+  end
+  style REQ_INTCONSISTLINT_028 fill:#fff3cd,stroke:#a66,color:#630
 ```
+
+### Risk Table
+
+| ID | status | members | dependents | risks | recommendation |
+| --- | --- | --- | --- | --- | --- |
+| REQ-INTCONSISTLINT-028 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
