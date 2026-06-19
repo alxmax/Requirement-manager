@@ -1010,52 +1010,6 @@
       "risks": []
     },
     {
-      "id": "REQ-INTCONSISTLINT-028",
-      "layer": "feature",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Internal-consistency lint (deferred — redesign required)",
-      "intent": "When a requirement's structured frontmatter moves to a new model (a `depends_on` edge added, a number changed) but its prose Contract/AC still describe the old one, the requirement contradicts itself. The contract hash misses this (it hashes the prose body only, not the frontmatter), and reverse member drift (REQ-MEMBERDRIFT-027) misses it too (it compares member files, not a requirement's own frontmatter-vs-prose). So the gap is real — but the obvious detector is not. This requirement parks the intent with a design brief, deliberately unimplemented, until a detector that actually works exists.",
-      "contract": [],
-      "verify": [
-        "A viable detector is **baseline-aware**, not static: flag when a `depends_on` edge is present now but absent from a recorded baseline AND the requirement's contract body hash did not change in the same revision (the TRIAS shape: structure moved, prose did not).",
-        "Does a per-requirement `depends_on` baseline exist? `_reqlock.json` stores only the contract body hash today, so this likely needs a new persisted field/sidecar — i.e. a schema change, not a lint addition. Decide the storage (extend `_memberlock.json`?).",
-        "Acceptance bar before promotion out of draft: a test fixture that reproduces the TRIAS incident must fire, AND the measured false-positive rate on the existing corpus must be below the existing warn-check baseline (target < 10%).",
-        "Confirm the base rate is worth it: the motivating evidence is n=1; a second real occurrence would justify the persisted-baseline cost."
-      ],
-      "notes": [
-        "Intentionally has no `implements:`/`tested-by:` members while `draft` — it ships no code.",
-        "Distinct from REQ-MEMBERDRIFT-027 (member-file content) and from contract drift (prose body hash): this targets a requirement's own frontmatter-vs-prose coherence."
-      ],
-      "current_impl": [
-        "None (deferred). Future home: a baseline-aware check in `lint`/`cmd_check`."
-      ],
-      "acc": [
-        "None yet — draft. Acceptance is gated on the open questions above being resolved into a detector whose corpus false-positive rate is measured below threshold."
-      ],
-      "accept": "- None yet — draft. Acceptance is gated on the open questions above being resolved into a\n  detector whose corpus false-positive rate is measured below threshold.",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [
-        "REQ-LINT-014",
-        "REQ-MEMBERDRIFT-027"
-      ],
-      "used_by": [],
-      "satisfies": [],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": "v1.19",
-      "priority": "could-have",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-LINT-014",
       "layer": "feature",
       "status": "confirmed",
@@ -1091,7 +1045,6 @@
         "CORE-PARSE-001"
       ],
       "used_by": [
-        "REQ-INTCONSISTLINT-028",
         "REQ-LINTCHECKS-025"
       ],
       "satisfies": [],
@@ -1384,9 +1337,7 @@
         "CORE-SCAN-002",
         "REQ-CHECK-006"
       ],
-      "used_by": [
-        "REQ-INTCONSISTLINT-028"
-      ],
+      "used_by": [],
       "satisfies": [],
       "satisfied_by": [],
       "members": [
@@ -2479,14 +2430,6 @@
       "REQ-MAP-007"
     ],
     [
-      "REQ-INTCONSISTLINT-028",
-      "REQ-LINT-014"
-    ],
-    [
-      "REQ-INTCONSISTLINT-028",
-      "REQ-MEMBERDRIFT-027"
-    ],
-    [
       "REQ-LINT-014",
       "CORE-PARSE-001"
     ],
@@ -2726,6 +2669,12 @@
     },
     {
       "name": "Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches \"behavior shipped, spec not updated\". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement.",
+      "lane": "feature",
+      "milestone": "v1.18",
+      "done": true
+    },
+    {
+      "name": "~~Internal-consistency lint: flag a requirement whose structured fields moved to a new model while its prose Contract/AC still assert the superseded model.~~ **DROPPED**",
       "lane": "feature",
       "milestone": "v1.18",
       "done": true
