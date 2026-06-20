@@ -2300,6 +2300,31 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         self.assertEqual(obj["healthy"], 0)
         self.assertLess(obj["score"], 100)
 
+    # tested-by: REQ-COVERAGE-029
+    def test_untagged_count_with_code_root(self):
+        # REQ-COVERAGE-029 AC-1 — the read-only coverage signal: count scannable
+        # code files with no membership tag. Informational: it must NOT lower
+        # the score.
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "src"))
+            _write(os.path.join(d, "src", "tagged.py"), "# implements: REQ-A-001\nx = 1\n")
+            _write(os.path.join(d, "src", "untagged.py"), "x = 2\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health({"REQ-A-001": self._green()}, members, d,
+                             as_json=True, code_root=d)
+            obj = json.loads(buf.getvalue())
+        self.assertEqual(obj["untagged"], 1)   # only untagged.py; tagged.py is covered
+        self.assertEqual(obj["score"], 100)    # informational — never lowers the score
+
+    def test_untagged_absent_without_code_root(self):
+        # no code root (e.g. a unit-test caller) -> the key is absent, not zero,
+        # so existing --json consumers keep their exact schema.
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        self.assertNotIn("untagged", json.loads(out))
+
     def test_orphan_not_green(self):
         # confirmed but no implements member -> orphan, drops out of green
         _, out = self._health({"REQ-A-001": self._green()}, {})
