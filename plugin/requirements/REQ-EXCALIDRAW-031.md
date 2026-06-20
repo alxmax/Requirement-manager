@@ -10,15 +10,16 @@ milestone: v2.4
 
 # Excalidraw quality gates
 
-> A diagram that ships with overlapping shapes, uncrossing arrows, unlegended
-> colours, or text that spills outside its box is unreadable to an outsider.
-> Hard-fail gates at `.save()` time make these defects impossible to ship
-> silently.
+> A diagram that ships with overlapping shapes, arrows that cut through
+> unrelated boxes, unlegended colours, text that spills outside its box, an
+> arrow too short to draw a visible line, or a label wider than the arrow it
+> sits on is unreadable to an outsider. Hard-fail gates at `.save()` time make
+> these defects impossible to ship silently.
 
 ## WHAT — Contract (normative)
-- `.save()` shall support four named gates, each accepting `"warn"` (default,
-  prints) or `"error"` (raises `ValueError`): `crossing_check`,
-  `legend_check`, `overflow_check`, `text_overlap_check`.
+- `.save()` shall support five named gates, each accepting `"warn"` (default,
+  prints) or `"error"` (raises `ValueError`): `crossing_check`, `legend_check`,
+  `overflow_check`, `text_overlap_check`, `label_fit_check`.
 - `crossing_check`: a bound arrow whose straight centre-to-centre path passes
   through an unrelated box shall trigger the gate.
 - `legend_check`: a fill colour used on any shape but absent from the
@@ -28,19 +29,31 @@ milestone: v2.4
   (text spills outside) shall trigger the gate.
 - `text_overlap_check`: two free captions or label elements that geometrically
   overlap each other shall trigger the gate.
-- The inspection methods `check_arrow_crossings()`, `check_legend_coverage()`,
-  `check_text_overflow()`, `check_text_overlaps()` shall each return a list of
+- `label_fit_check`: a bound arrow whose text label is wider than the connector
+  it sits on — leaving less than ~24px of visible line on each side, measuring
+  the label box projected onto the arrow direction — shall trigger the gate
+  (the label crowds the arrowheads or spills onto the joined boxes).
+- `.save()` shall additionally enforce two hard gates that raise `ValueError`
+  by default (no `"warn"`/`"error"` mode), each with an opt-out flag for a
+  deliberate exception: overlapping non-container shapes (`allow_overlap=True`)
+  and a bound arrow clamped too short to render a visible line — only its label
+  would show — (`allow_short_arrows=True`).
+- The inspection methods `check_overlaps()`, `check_arrow_crossings()`,
+  `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`,
+  `check_short_arrows()`, `check_arrow_label_fit()` shall each return a list of
   offending items (empty list = clean) and be callable before `.save()`.
-- `test_excalidraw.py` shall exercise all four gates in both `"warn"` and
-  `"error"` modes for each maintained example generator.
+- `test_excalidraw.py` shall exercise the five named gates in both `"warn"` and
+  `"error"` modes, and the two hard gates, for each maintained example
+  generator.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent.
 
 ## WHAT — Notes (informative)
-- The canonical pattern for a ship-quality diagram is all four gates set to
-  `"error"`: `save(..., crossing_check="error", legend_check="error",
-  overflow_check="error", text_overlap_check="error")`.
+- The canonical pattern for a ship-quality diagram is all five named gates set
+  to `"error"` (the two hard gates already raise by default): `save(...,
+  crossing_check="error", legend_check="error", overflow_check="error",
+  text_overlap_check="error", label_fit_check="error")`.
 
 ## HOW — Acceptance (= tests)
 
@@ -68,12 +81,27 @@ AC-4
 
 AC-5
   Given  each maintained example generator in `examples/`
-  When   `test_excalidraw.py` runs it with all four gates at `"error"`
-  Then   the generator produces zero gate violations
+  When   `test_excalidraw.py` runs it
+  Then   the generator produces zero violations on every gate (the five named
+         gates and both hard gates)
+
+AC-6
+  Given  two boxes placed close but not overlapping, joined by a bound arrow
+  When   `save()` is called with defaults
+  Then   a `ValueError` is raised (the connector is too short to render);
+         `save(allow_short_arrows=True)` writes the files, and
+         `check_short_arrows()` returns the offending pair
+
+AC-7
+  Given  a bound arrow whose label is wider than the arrow's visible line
+  When   `save(label_fit_check="error")` is called
+  Then   a `ValueError` is raised; `check_arrow_label_fit()` returns the
+         offending label
 
 ## WHERE — Current implementation
-- `_check_crossings`, `_check_legend`, `_check_overflow`, `_check_text_overlaps`
-  and the `save()` gate dispatch in
+- `check_overlaps`, `check_arrow_crossings`, `check_legend_coverage`,
+  `check_text_overflow`, `check_text_overlaps`, `check_short_arrows`,
+  `check_arrow_label_fit` and the `save()` gate dispatch in
   `skills/excalidraw-diagram/scripts/excalidraw_builder.py`.
 - `skills/excalidraw-diagram/scripts/test_excalidraw.py` (gate regression suite).
 
