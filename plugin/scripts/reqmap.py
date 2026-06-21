@@ -243,6 +243,12 @@ COMMANDS = {
                     "lock; sync exits non-zero without it."
                 ),
             },
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": "Promote drift and test-link integrity from warn to error.",
+            },
         ],
     },
     "check": {
@@ -369,7 +375,7 @@ COMMANDS = {
             {
                 "name": "threshold",
                 "flag": "--threshold",
-                "type": "str",
+                "type": "float",
                 "help": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged.",
             },
         ],
