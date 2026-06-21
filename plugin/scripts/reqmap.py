@@ -525,12 +525,53 @@ COMMANDS = {
             },
         ],
     },
+    "gen-integration": {
+        "summary": (
+            "Regenerate the multi-AI integration artifacts (tool_definition.json) from "
+            "the command registry."
+        ),
+        "arg": None,
+        "params": [],
+        "internal": True,
+    },
 }
 
 
 def _cli_choices():
     """The CLI command names, derived from the registry (single source of truth)."""
     return list(COMMANDS)
+
+
+def _generate_schema():
+    """Function-calling schema (OpenAI tool format) generated from COMMANDS.
+    Returns a JSON string (indent=2, trailing newline) — byte-stable for the gate
+    drift-compare. Internal commands are excluded from the AI-facing schema."""
+    _TYPE = {"bool": "boolean", "str": "string", "float": "number", "int": "integer"}
+    tools = []
+    for name, spec in COMMANDS.items():
+        if spec.get("internal"):
+            continue
+        props = {"root": {"type": "string",
+                          "description": "Repo root where requirements/ lives; defaults to the current directory."}}
+        if spec.get("arg"):
+            props["arg"] = {"type": "string", "description": spec["arg"]}
+        for p in spec["params"]:
+            props[p["name"]] = {"type": _TYPE[p["type"]], "description": p["help"]}
+        tools.append({"type": "function", "function": {
+            "name": "reqmap_" + name.replace("-", "_"),
+            "description": spec["summary"],
+            "parameters": {"type": "object", "properties": props, "required": []},
+        }})
+    return json.dumps(tools, indent=2, ensure_ascii=False) + "\n"
+
+
+def cmd_gen_integration(reqs_dir, code_root):
+    """Write tool_definition.json (OpenAI function-calling schema) generated from COMMANDS."""
+    plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    with open(os.path.join(plugin_root, "tool_definition.json"), "w", encoding="utf-8") as f:
+        f.write(_generate_schema())
+    print("wrote tool_definition.json")
+    return 0
 
 
 # ---------- parsing ----------
@@ -4320,6 +4361,8 @@ def main():
         return cmd_new(reqs_dir, tmpl, a.arg)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
+    if a.cmd == "gen-integration":
+        return cmd_gen_integration(reqs_dir, code_root)
 
     reqs = load_requirements(reqs_dir)
     members = scan_members(code_root, reqs_dir, cache=a.cache)

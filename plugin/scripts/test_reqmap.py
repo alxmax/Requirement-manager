@@ -3486,6 +3486,20 @@ class CommandRegistry(unittest.TestCase):  # links to REQ-CMDREGISTRY-033 (scaff
         self.assertTrue(handled.issubset(set(R.COMMANDS)),
                         f"dispatch handles commands absent from COMMANDS: {handled - set(R.COMMANDS)}")
 
+    def test_generated_schema_matches_committed(self):
+        generated = R._generate_schema()                 # JSON string, trailing newline
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        committed = open(os.path.join(HERE, "..", "tool_definition.json"), encoding="utf-8").read()
+        self.assertEqual(generated, committed)
+
+    def test_schema_has_one_entry_per_user_command(self):
+        import json as _j
+        tools = _j.loads(R._generate_schema())
+        names = {t["function"]["name"] for t in tools}
+        expected = {"reqmap_" + c.replace("-", "_")
+                    for c, s in R.COMMANDS.items() if not s.get("internal")}
+        self.assertEqual(names, expected)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
