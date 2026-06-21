@@ -64,15 +64,36 @@
 - [x] ~~Internal-consistency lint: flag a requirement whose structured fields moved to a new model while its prose Contract/AC still assert the superseded model.~~ **DROPPED** | lane: feature
       <!-- DROPPED (not implemented). Senate 2026-06-19 (runs/senate/2026-06-19_224727-reqmap-item4-internal-consistency-lint.json) + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by REQ-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
 
+## v1.35
+<!-- Backfilled 2026-06-21 (TODO/roadmap hygiene): shipped capabilities whose milestone
+     sections were never recorded here. Senate 2026-06-21 (runs/senate/*roadmap-coherence)
+     chose manual TODO hygiene over building a TODO<->requirement coherence-check feature
+     (demand n=1; the only stale TODO observed was this repo's own). -->
+- [x] Project presentation page (`site`): inject/refresh engine-owned nav + stats regions into docs/architecture.html (scaffold if absent) | lane: feature
+      <!-- REQ-SITE-026 -->
+
+## v2.4
+- [x] Excalidraw scene builder — core stdlib API (.excalidraw scene + self-contained HTML viewer) | lane: feature
+      <!-- REQ-EXCALIDRAW-030 -->
+- [x] Excalidraw quality gates at save() (overlap, crossing, legend, text-overflow, text-overlap; later: short-arrow, label-fit) | lane: feature
+      <!-- REQ-EXCALIDRAW-031 -->
+- [x] Excalidraw builder CLI verbs (`render` a scene → viewer; `discover` a repo → generator stub) | lane: feature
+      <!-- REQ-EXCALIDRAW-032 -->
+
+## v2.6
+- [x] Untagged-code coverage signal: read-only `untagged` count in `health` (code traced to no requirement) | lane: feature
+      <!-- REQ-COVERAGE-029. Senate 2026-06-21 (enforce-all-code DEEPLY_SPLIT): a hard coverage gate was rejected; only this read-only signal shipped. -->
+
 ## v2.7
-<!-- Multi-platform Phase 1. Senate 2026-06-21 (runs/senate/2026-06-21_110220-reqmap-multiplatform-mcp.json, verdict MODIFY).
+<!-- Multi-platform Phase 1 — SHIPPED (PR #127). Senate 2026-06-21 (runs/senate/2026-06-21_110220-reqmap-multiplatform-mcp.json, verdict MODIFY).
      Detail spec: docs/superpowers/specs/2026-06-21-reqmap-multiplatform-command-registry-design.md
-     Problem: the prior multi-AI artifacts (tool_definition.json + 3 SKILL.universal.md) are hand-maintained
+     Problem: the prior multi-AI artifacts (tool_definition.json + 3 SKILL.universal.md) were hand-maintained
      mirrors of the CLI with no sync mechanism — already drifting. Fix: one declarative command registry as
      the single source of truth, generate the artifacts from it, drift-guard them in the gate. -->
-- [ ] Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices + per-command flags + dispatch derived from it (hand-written `choices=[...]` literal removed). Existing CLI behaviour byte-identical (TestCli unchanged). | lane: bus
-- [ ] Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside each SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry. | lane: feature
-- [ ] Drift-guard: `gate` regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`. | lane: ops
+- [x] Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices derived from it (hand-written `choices=[...]` literal removed). Dispatch ladder left intact (de-risked); CLI behaviour byte-identical (TestCli unchanged). | lane: bus
+      <!-- REQ-CMDREGISTRY-033 -->
+- [x] Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry. | lane: feature
+- [x] Drift-guard: `gate` (incl. `--json`) regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`. | lane: ops
 
 ## v2.8 (deferred — demand-gated)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
