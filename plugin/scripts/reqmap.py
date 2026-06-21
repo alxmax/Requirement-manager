@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.1"
+MAP_ENGINE_VERSION = "2026-06-21.2"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -3050,8 +3050,15 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
 
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
-    Finds the comment marker (#, //, <!--) closest to the tag and cuts from
-    there to end-of-line, preserving the code before it.
+
+    Strips only when a comment marker (#, //, <!--) *directly opens* the tag —
+    i.e. nothing but whitespace sits between the marker and the tag id. A line
+    that merely mentions a tag in prose or a heading (e.g. a doc line
+    `# How implements: AREA-NAME-001 tags work`, or
+    `<!-- note --> ... implements: AREA-NAME-001 is required <!-- end -->`) is
+    left unchanged, so `init --wipe` never truncates documentation that
+    documents the tagging convention. A multi-char heading/banner marker
+    (`## `, `//// `) is removed whole rather than leaving a dangling bare `#`.
     Lines with no tag are returned unchanged."""
     m = TAG_RE.search(line)
     if m is None:
@@ -3061,11 +3068,18 @@ def _strip_line_tag(line):
     cut = -1
     for marker in ("#", "//", "<!--"):
         idx = pre.rfind(marker)
-        if idx > cut:
+        # the marker opens the tag's comment only when the gap between the
+        # marker token and the tag id is whitespace-only; otherwise it is an
+        # unrelated heading / inline comment and must not anchor the cut
+        if idx > cut and pre[idx + len(marker):].strip() == "":
             cut = idx
-    if cut >= 0:
-        return line[:cut].rstrip() + nl
-    return line  # no recognisable comment marker — leave unchanged
+    if cut < 0:
+        return line  # no comment marker directly opens the tag — leave unchanged
+    # walk back over a contiguous run of the same marker char (`## `, `//// `)
+    # so the whole heading/banner marker is removed, not just its last char
+    while cut > 0 and pre[cut - 1] == pre[cut]:
+        cut -= 1
+    return line[:cut].rstrip() + nl
 
 
 def _wipe(reqs_dir, code_root):
@@ -4080,11 +4094,27 @@ def _since_changed_files(ref, code_root):
         )
         if result.returncode != 0:
             return None
+        # `git diff` emits paths relative to the repo ROOT, not to cwd. Resolve
+        # the toplevel so these abspaths line up with member abspaths (which are
+        # relative to code_root) even when code_root is a subdirectory of the
+        # git root — otherwise the since-set and member-set never intersect and
+        # the gate silently checks zero requirements. Fall back to code_root on
+        # failure (mirrors _docs_publish_path).
+        root = code_root
+        try:
+            top = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                capture_output=True, text=True, cwd=code_root, timeout=10,
+            )
+            if top.returncode == 0 and top.stdout.strip():
+                root = top.stdout.strip()
+        except Exception:
+            pass
         files = set()
         for line in result.stdout.splitlines():
             line = line.strip()
             if line:
-                files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, line))))
+                files.add(os.path.normcase(os.path.abspath(os.path.join(root, line))))
         return files
     except Exception:
         return None

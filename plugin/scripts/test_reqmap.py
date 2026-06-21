@@ -1919,6 +1919,50 @@ class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
             self.assertTrue(os.path.exists(req_path))       # untouched without --wipe
 
 
+class StripLineTag(unittest.TestCase):  # tested-by: REQ-INIT-012
+    """_strip_line_tag strips only a genuine tag comment, never prose/headings
+    that merely mention the tagging convention (regression for the init --wipe
+    data-loss bugs: prose/heading truncation and dangling bare markers)."""
+
+    _CID = "AREA-NAME-001"
+
+    def _line(self, prefix):
+        return "{}{}: {}".format(prefix, _ROLE, self._CID)
+
+    def test_strips_trailing_code_comment(self):
+        self.assertEqual(R._strip_line_tag(self._line("def f():  # ") + "\n"),
+                         "def f():\n")
+
+    def test_strips_pure_comment_line(self):
+        self.assertEqual(R._strip_line_tag(self._line("# ") + "\n"), "\n")
+
+    def test_strips_html_comment_line(self):
+        self.assertEqual(R._strip_line_tag("<!-- {}: {} -->\n".format(_ROLE, self._CID)),
+                         "\n")
+
+    def test_preserves_prose_heading_mention(self):
+        # a heading that documents the convention must survive --wipe intact
+        line = "# How {}: {} tags work\n".format(_ROLE, self._CID)
+        self.assertEqual(R._strip_line_tag(line), line)
+
+    def test_preserves_prose_html_mention(self):
+        line = "<!-- note --> tag {}: {} is required <!-- end -->\n".format(_ROLE, self._CID)
+        self.assertEqual(R._strip_line_tag(line), line)
+
+    def test_markdown_heading_tag_leaves_no_dangling_marker(self):
+        # `## implements: X` is a pure tag heading — removed whole, never left as '#'
+        out = R._strip_line_tag("## {}: {}\n".format(_ROLE, self._CID))
+        self.assertEqual(out, "\n")
+        self.assertNotIn("#", out)
+
+    def test_banner_comment_removed_whole(self):
+        self.assertEqual(R._strip_line_tag("//// {}: {}\n".format(_ROLE, self._CID)),
+                         "\n")
+
+    def test_no_tag_unchanged(self):
+        self.assertEqual(R._strip_line_tag("def f(): pass\n"), "def f(): pass\n")
+
+
 def _kv(extra):
     """Parse the 'key: value' frontmatter lines a test passes as `extra` into meta,
     so Next can build requirement dicts the same way the REQ template does."""
@@ -3184,6 +3228,42 @@ class CheckSince(unittest.TestCase):
             out = buf.getvalue()
             self.assertIn("WARN", out, "must WARN when git is unavailable")
             self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
+
+    def test_since_from_subdir_of_git_root(self):
+        """--since must work when code_root is a subdirectory of the git root.
+
+        `git diff` emits root-relative paths; the engine resolves the toplevel so
+        the since-set lines up with member abspaths. Regression for the bug where
+        running `gate --since` from a subdir silently checked zero requirements
+        and passed even with a dangling tag in a changed file.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            sub = os.path.join(d, "proj")          # code_root is a subdir of git root
+            rdir = os.path.join(sub, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(sub, "src_a.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            self._commit_all(d, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True).stdout.strip()
+            # A dangling tag (no such requirement) in a NEW file under the subdir.
+            _write(os.path.join(sub, "ghost.py"),
+                   "# {}: REQ-GHOST-999\n".format("impl" + "ements"))
+            self._commit_all(d, "add-ghost")
+
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(sub, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False,
+                                 code_root=sub, since=base_ref)
+            self.assertEqual(
+                rc, 1,
+                "a dangling tag in a changed file under a subdir code_root must be caught")
 
 
 class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
