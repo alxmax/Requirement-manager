@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-19.1"
+MAP_ENGINE_VERSION = "2026-06-21"
 
 
 # ---------- parsing ----------
@@ -2442,7 +2442,7 @@ def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     return 0
 
 
-def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False):  # implements: REQ-HEALTH-017
+def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: REQ-HEALTH-017
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
@@ -2488,6 +2488,15 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False):  # imple
             "confirmed": confirmed, "implemented": implemented, "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
             "open_intent": open_intent, "drift": drifted}
+    # Untagged-code coverage signal (read-only): count of scannable code files
+    # carrying no membership tag — code traced to no requirement. Reuses
+    # _scan_untagged (REQ-NEXT-013). Informational only: it counts FILES, not
+    # requirements, so it never enters the per-requirement score, and it is
+    # absent (not zero) when no code root is available, e.g. a unit-test caller.
+    # implements: REQ-COVERAGE-029
+    untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
+    if untagged is not None:
+        data["untagged"] = len(untagged)
     if as_badge:
         color = "brightgreen" if score == 100 else "green" if score >= 80 else "yellow" if score >= 60 else "red"
         badge = {"schemaVersion": 1, "label": "requirements",
@@ -2506,6 +2515,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False):  # imple
     if untested:    print("  untested (code, no tests):        {}".format(untested))
     if open_intent: print("  open verify-intent:               {}".format(open_intent))
     if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
+    if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
     return 0
@@ -3903,7 +3913,8 @@ def main():
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "health":
-        return cmd_health(reqs, members, reqs_dir, a.as_json, getattr(a, "as_badge", False))
+        return cmd_health(reqs, members, reqs_dir, a.as_json,
+                          getattr(a, "as_badge", False), code_root=code_root)
     if a.cmd == "coverage":
         return cmd_coverage(reqs, members, code_root, reqs_dir, a.as_json)
     if a.cmd == "gate":
