@@ -6,9 +6,12 @@
 scripts/_map_viewer.html
 
 # --- excalidraw-diagram skill ---
-# SKILL.md: classified as 'ignore' bucket by REQ-PROSE-024 (user contract, not
-# a capability implementation).
+# SKILL.md and its cross-platform SKILL.universal.md variant: classified as the
+# 'ignore' bucket by REQ-PROSE-024 (user contract, not a capability
+# implementation). The .universal.md is the same contract adapted for other
+# platforms — same class, not its own capability.
 skills/excalidraw-diagram/SKILL.md
+skills/excalidraw-diagram/SKILL.universal.md
 # examples/: transient generators — correctness proved by test_excalidraw.py.
 # A new example should not require a new requirement.
 skills/excalidraw-diagram/examples/*.py
@@ -16,10 +19,11 @@ skills/excalidraw-diagram/examples/*.py
 skills/excalidraw-diagram/references/excalidraw_format.md
 
 # --- requirement-manager skill ---
-# SKILL.md: same 'ignore' bucket classification. The engine's own skill
-# contract is described by requirements in plugin/requirements/, not by
-# tagging SKILL.md itself.
+# SKILL.md and its cross-platform SKILL.universal.md variant: same 'ignore'
+# bucket classification. The engine's own skill contract is described by
+# requirements in plugin/requirements/, not by tagging the SKILL files.
 skills/requirement-manager/SKILL.md
+skills/requirement-manager/SKILL.universal.md
 
 # --- working docs / specs ---
 # Design specs and superpowers working notes under docs/ are sync_only prose
