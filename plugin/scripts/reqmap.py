@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.2"
+MAP_ENGINE_VERSION = "2026-06-21.3"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -812,6 +812,13 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
         fence = None   # None = not fenced; else the opening fence string e.g. "```"
         for i, raw in enumerate(lines, 1):
             s = raw.rstrip("\n\r")
+            # Markdown indented code block (>=4 spaces / tab): treat as code so an
+            # indented ```-prefixed line never opens a phantom fence that would
+            # swallow every later tag, and an indented tag is excluded. Checked
+            # BEFORE fence detection. HTML has no indented-code concept, so the
+            # guard is Markdown-only — an indented tag comment in HTML stays valid.
+            if ext == ".md" and (s.startswith("    ") or s.startswith("\t")):
+                continue
             stripped = s.lstrip()
             fm = _FENCE_RE.match(stripped)
             if fm:
@@ -824,8 +831,6 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
                     fence = None    # closer must be bare (no info string)
                     continue
             if fence is not None:
-                continue
-            if s.startswith("    ") or s.startswith("\t"):
                 continue
             clean = _BACKTICK_RE.sub("", s)
             seen = set()
@@ -1277,6 +1282,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     warn_if_stale()
     cap_ids = set(reqs)
 
+    # The reverse-drift baseline (_memberlock) must always cover the FULL member
+    # set; --since narrows `members` only to scope the gate's checks, so keep an
+    # unfiltered copy for the memberlock re-baseline below.
+    full_members = members
+
     # --since: scope checks to requirements whose member files changed since ref.
     # Fail-open: fall back to full scan with WARN if git is unavailable or ref invalid.
     if since:
@@ -1462,7 +1472,10 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 print(f"  drift: {rid}", file=sys.stderr)
         else:
             save_lock(reqs_dir, new_lock)
-            save_memberlock(reqs_dir, compute_member_hashes(code_root, members))  # re-baseline reverse drift
+            # re-baseline reverse drift over the FULL member set — using the
+            # --since-filtered `members` here would drop every unchanged member's
+            # baseline and silently disable reverse-drift detection for them.
+            save_memberlock(reqs_dir, compute_member_hashes(code_root, full_members))
             print("lock updated.")
 
     # Integration-artifact freshness: stale tool_definition.json or command-table region
@@ -1646,7 +1659,9 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
         changed = 0
         for i, line in enumerate(lines):
             m = re.match(r"^(\s*-\s+\[)[ ](\]\s+)(.+?)(\r?\n?)$", line)
-            if m and m.group(3).split("|", 1)[0].strip().casefold() == key:
+            # rsplit on the LAST '|' to mirror _parse_todos_from_text's name
+            # derivation — else a TODO whose name contains a '|' never matches
+            if m and m.group(3).rsplit("|", 1)[0].strip().casefold() == key:
                 lines[i] = m.group(1) + "x" + m.group(2) + m.group(3) + m.group(4)
                 changed = 1
                 break
@@ -1874,12 +1889,13 @@ SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not aut
 
 def _py_facts(src):  # implements: REQ-CANDIDATES-009
     """Module/symbol docstrings, top-level signatures and import targets via the
-    stdlib `ast`. A SyntaxError yields empty facts so one unparseable file never
-    aborts the whole plan."""
+    stdlib `ast`. A SyntaxError/ValueError yields empty facts so one unparseable
+    file (incl. a source with an embedded NUL byte, which ast.parse rejects with
+    ValueError, not SyntaxError) never aborts the whole plan."""
     facts = {"signatures": [], "docstrings": {}, "imports": []}
     try:
         tree = ast.parse(src)
-    except SyntaxError:
+    except (SyntaxError, ValueError):
         return facts
     mod_doc = ast.get_docstring(tree)
     if mod_doc:
@@ -2047,9 +2063,24 @@ def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # i
         if present:
             groups.append({"id": entry["id"], "layer": entry.get("layer"), "files": present})
             claimed.update(present)
+    # de-duplicate minted ids: two files sharing a slug (foo.py + foo.js, or
+    # foo-bar + foo_bar) would otherwise mint the same id and conflate two
+    # distinct candidates downstream — bump the numeric suffix on collision.
+    # Seed from capmap groups AND existing requirement ids so a minted id never
+    # duplicates a real requirement either.
+    used_ids = {g["id"] for g in groups} | set(reqs)
     for rel in files:
-        if rel not in claimed:
-            groups.append({"id": _mint_cap_id(rel), "layer": None, "files": [rel]})
+        if rel in claimed:
+            continue
+        cid = _mint_cap_id(rel)
+        if cid in used_ids:
+            stem = cid[:-3]                 # _mint_cap_id always ends in "-001"
+            n = 2
+            while "{}{:03d}".format(stem, n) in used_ids:
+                n += 1
+            cid = "{}{:03d}".format(stem, n)
+        used_ids.add(cid)
+        groups.append({"id": cid, "layer": None, "files": [rel]})
 
     group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
 
@@ -2306,7 +2337,10 @@ def _parse_todos_from_text(text):
     Items before the first ## vX.Y heading are silently ignored (milestone is required)."""
     todos, current_ms = [], None
     for line in text.splitlines():
-        ms_m = re.match(r"^##\s+(v\d[\d.]*)\s*$", line.strip())
+        # match the version token at the heading start; a trailing annotation
+        # like `## v2.8 (deferred — demand-gated)` is harmless (the capture group
+        # isolates the version) and must not drop the milestone's items.
+        ms_m = re.match(r"^##\s+(v\d[\d.]*)\b", line.strip())
         if ms_m:
             current_ms = ms_m.group(1)
             continue
@@ -2559,12 +2593,21 @@ def _clip(s, n=60):  # implements: REQ-LINT-014
 
 def _count_ac(body):
     """Count acceptance criteria in the HOW — Acceptance section.
-    Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...)."""
-    grab, seen, count = False, False, 0
+    Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...).
+    Skips fenced code blocks (so a ``` example with bullet lines doesn't inflate
+    the count) and detects the section with the anchored heading predicate (so a
+    `## Notes — acceptance …` commentary heading isn't mistaken for it) — keeping
+    this count in agreement with _has_section/_bullets and the gate."""
+    grab, seen, count, fenced = False, False, 0, False
     for line in body.splitlines():
         s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
         if s.lower().startswith("## "):
-            grab = (not seen) and ("acceptan" in s.lower())
+            grab = (not seen) and _heading_label_is(s, "acceptan")
             if grab:
                 seen = True
             continue
@@ -3702,7 +3745,9 @@ def _normalise_remote(url):  # implements: REQ-SITE-026
     m = re.match(r"^[\w.+-]+@([\w.-]+):(.+)$", url)          # scp-style
     if m:
         return "https://{}/{}".format(m.group(1), m.group(2))
-    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)/(.+)$", url)
+    # optional :port (corporate / self-hosted ssh remotes) is dropped, keeping
+    # group(1)=host and group(2)=path so the web URL stays clickable
+    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)(?::\d+)?/(.+)$", url)
     if m:
         return "https://{}/{}".format(m.group(1), m.group(2))
     return url if "://" in url else None

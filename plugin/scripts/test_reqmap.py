@@ -1305,6 +1305,31 @@ class CandidatesGrouping(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
             self.assertIn("keep.py", files)
             self.assertNotIn("skip.py", files)   # candidates now matches scan/check
 
+    def test_same_stem_files_mint_distinct_ids(self):  # bug: mint-cap-id-collision
+        """Two files sharing a slug (foo.py + foo.js) must mint distinct suggested
+        ids, not collapse into one conflated candidate (#9)."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "parser.py"), "x = 1\n")
+            _write(os.path.join(d, "parser.js"), "var y = 2;\n")
+            cands = [c for c in self._plan(d)["candidates"]
+                     if c["files"] in (["parser.py"], ["parser.js"])]
+            self.assertEqual(len(cands), 2, "both same-stem files must be candidates")
+            ids = [c["suggested_id"] for c in cands]
+            self.assertEqual(len(set(ids)), 2,
+                             "same-stem files must mint distinct ids; got " + str(ids))
+
+    def test_minted_id_avoids_existing_requirement_id(self):  # bug: mint-cap-id-vs-reqs-collision
+        """A minted candidate id must not duplicate an EXISTING requirement id
+        (seed used_ids from reqs, not just the capmap groups)."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "PARSER-001.md"),
+                   "---\nid: PARSER-001\nstatus: confirmed\n---\n\n# Cap\n")
+            _write(os.path.join(d, "parser.py"), "x = 1\n")  # untagged -> slug PARSER-001
+            parser = next(c for c in self._plan(d)["candidates"]
+                          if c["files"] == ["parser.py"])
+            self.assertNotEqual(parser["suggested_id"], "PARSER-001",
+                                "minted id must not collide with an existing requirement id")
+
 
 class TriageFolding(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
     def test_unknown_classification_folds_into_user_decision(self):  # bug: triage-unknown-classification-dropped
@@ -2015,6 +2040,44 @@ class ParseTodos(unittest.TestCase):
         payload = json.loads(R._build_json_text(data))
         self.assertEqual(payload["todos"][0]["name"], "X")
 
+    def test_milestone_heading_with_annotation(self):
+        """A milestone heading carrying a trailing annotation still registers and
+        keeps its items (#10) — e.g. `## v2.8 (deferred — demand-gated)`."""
+        text = ("## v2.8 (deferred — demand-gated)\n"
+                "- [ ] MCP server | lane: feature\n")
+        todos = R._parse_todos_from_text(text)
+        self.assertEqual(len(todos), 1)
+        self.assertEqual(todos[0]["milestone"], "v2.8")
+        self.assertEqual(todos[0]["name"], "MCP server")
+
+
+class PyFacts(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def test_nul_byte_source_yields_empty_facts(self):
+        """A source with an embedded NUL byte makes ast.parse raise ValueError (not
+        SyntaxError); _py_facts must swallow it and yield empty facts (#8)."""
+        facts = R._py_facts("x = 1\x00\ny = 2\n")
+        self.assertEqual(facts, {"signatures": [], "docstrings": {}, "imports": []})
+
+    def test_syntax_error_yields_empty_facts(self):
+        self.assertEqual(R._py_facts("def ("),
+                         {"signatures": [], "docstrings": {}, "imports": []})
+
+
+class CountAc(unittest.TestCase):  # tested-by: REQ-LINTCHECKS-025
+    def test_ignores_fenced_bullets(self):
+        """Bullet lines inside a ``` fence in the Acceptance section don't inflate
+        the AC count (#11)."""
+        body = ("## HOW — Acceptance\n- AC one\n- AC two\n"
+                "```\n- not an AC\n- also not an AC\n```\n")
+        self.assertEqual(R._count_ac(body), 2)
+
+    def test_anchored_heading_not_commentary(self):
+        """A `## Notes — acceptance …` commentary heading before the real section
+        must not capture the count (#12)."""
+        body = ("## Notes — acceptance caveats\n- note one\n- note two\n"
+                "## HOW — Acceptance\n- AC one\n- AC two\n- AC three\n")
+        self.assertEqual(R._count_ac(body), 3)
+
 
 class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINTCHECKS-025
     CONTRACT = "## WHAT — Contract (normative)"
@@ -2692,6 +2755,18 @@ class PromoteTodo(unittest.TestCase):  # tested-by: REQ-PROMOTE-TODO-001
             self.assertIn("- [x] Build the thing", todo)
             self.assertIn("- [x] Done already", todo)        # other lines untouched
 
+    def test_mark_done_flips_todo_with_pipe_in_name(self):
+        """A TODO whose displayed name contains a literal '|' is still flipped — the
+        marker must rsplit like the parser, not split on the first '|' (#7)."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "TODO.md"),
+                   "## v1.14\n- [ ] Support a|b pipe syntax | lane: bus\n")
+            rq = os.path.join(d, "requirements")
+            os.makedirs(rq, exist_ok=True)
+            self._run(rq, "Support a|b pipe syntax", "REQ-P-001", mark_done=True, root=d)
+            todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
+            self.assertIn("- [x] Support a|b pipe syntax", todo)
+
     def test_errors_write_nothing(self):
         with tempfile.TemporaryDirectory() as d:
             rq = self._setup(d)
@@ -2909,6 +2984,30 @@ class PhantomMember(unittest.TestCase):
         tags = self._scan("module.py", content)
         self.assertFalse(any(t[1] == self._CAP for t in tags),
                          "tag in triple-quoted docstring must be dropped")
+
+    def test_indented_fence_marker_does_not_swallow_later_tags(self):
+        """An indented ```-prefixed line in .md is an indented code block, not a
+        fence opener; it must not swallow tags that follow it (#3)."""
+        content = "Example:\n\n    ```python\n\n{}\n".format(self._HTML_TAG)
+        tags = self._scan("doc.md", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "indented ``` must not open a phantom fence")
+
+    def test_html_indented_tag_comment_kept(self):
+        """HTML has no indented-code-block concept; an indented tag comment in
+        .html must still be scanned (#4)."""
+        content = "<div>\n        {}\n</div>\n".format(self._HTML_TAG)
+        tags = self._scan("page.html", content)
+        self.assertTrue(any(t[1] == self._CAP for t in tags),
+                        "indented HTML tag comment must be kept")
+
+    def test_html_tag_inside_fence_dropped(self):
+        """The ``` fence exclusion applies to .html too — a tag inside a fenced
+        block in .html is dropped (complements the .md fence case)."""
+        content = "```\n{}\n```\n".format(self._HTML_TAG)
+        tags = self._scan("page.html", content)
+        self.assertFalse(any(t[1] == self._CAP for t in tags),
+                         "tag inside a fenced block in .html must be dropped")
 
     def test_F6_state_resets_per_file(self):
         """F6: fence/triple-quote state does not leak across files."""
@@ -3265,6 +3364,44 @@ class CheckSince(unittest.TestCase):
                 rc, 1,
                 "a dangling tag in a changed file under a subdir code_root must be caught")
 
+    def test_since_update_lock_preserves_full_memberlock(self):
+        """`--since --update-lock` must NOT wipe reverse-drift baselines for members
+        whose files were unchanged since the ref. Regression: the memberlock was
+        rebuilt from the --since-filtered member set, dropping the rest (#6)."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            for rid in ("REQ-A-001", "REQ-B-002"):
+                _write(os.path.join(rdir, f"{rid}.md"),
+                       f"---\nid: {rid}\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                       "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src_a.py"), "# {}: REQ-A-001\n".format("impl" + "ements"))
+            _write(os.path.join(d, "src_b.py"), "# {}: REQ-B-002\n".format("impl" + "ements"))
+            self._commit_all(d, "baseline")
+            # Full baseline of the memberlock (both members recorded).
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d)
+            full_keys = set(R.load_memberlock(rdir))
+            self.assertEqual(full_keys, {"REQ-A-001", "REQ-B-002"})
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True).stdout.strip()
+            # Change only src_a.py, then re-baseline scoped with --since.
+            _write(os.path.join(d, "src_a.py"),
+                   "# {}: REQ-A-001\n# changed\n".format("impl" + "ements"))
+            self._commit_all(d, "touch-a")
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(reqs, members, rdir, update_lock=True, code_root=d, since=base_ref)
+            after_keys = set(R.load_memberlock(rdir))
+            self.assertTrue(
+                full_keys <= after_keys,
+                "since+update-lock dropped unchanged members' baselines: {}".format(
+                    full_keys - after_keys))
+
 
 class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
     def test_remote_url_normalises_scp_and_https(self):
@@ -3275,6 +3412,13 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertEqual(R._normalise_remote("ssh://git@example.com/o/r.git"),
                          "https://example.com/o/r")
         self.assertIsNone(R._normalise_remote(""))
+
+    def test_remote_url_with_port(self):
+        """An ssh remote carrying an explicit port still yields a clickable https
+        web URL with the port dropped (#14)."""
+        self.assertEqual(
+            R._normalise_remote("ssh://git@github.com:2222/owner/repo.git"),
+            "https://github.com/owner/repo")
 
     def test_inject_region_refreshes_and_preserves_prose(self):
         html = "<body>\n<h1>AUTHORED</h1>\n<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n<p>keep</p>\n</body>"
