@@ -1,5 +1,5 @@
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
-import { useState, useEffect } from "react";
+import { useState, useEffect, Component } from "react";
 import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
@@ -104,6 +104,24 @@ function Rail({ view, setView }) {
   );
 }
 
+/* Keeps a render throw in one view from blanking the whole self-contained
+ * viewer; keyed by `view` so switching tabs resets it. */
+class ErrorBoundary extends Component {
+  constructor(props){ super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error){ return { error }; }
+  render(){
+    if (this.state.error) {
+      return (
+        <div className="view" style={{padding:24}}>
+          <h2>Something went wrong rendering this view.</h2>
+          <pre style={{whiteSpace:"pre-wrap",color:"var(--fg-faint)",fontSize:12}}>{String(this.state.error)}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const [view, setView] = useState("map");
   const [selId, setSelId] = useState("REQ-CHECK-006");
@@ -122,11 +140,13 @@ export default function App() {
         onSearchPick={searchPick} />
       <div className="body">
         <Rail view={view} setView={setView} />
-        {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
-          highlightId={highlightId} setHighlightId={setHighlightId} />}
-        {view==="problems" && <ProblemsView openSpec={openSpec} />}
-        {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
-        {view==="roadmap" && <RoadmapView openSpec={openSpec} />}
+        <ErrorBoundary key={view}>
+          {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
+            highlightId={highlightId} setHighlightId={setHighlightId} />}
+          {view==="problems" && <ProblemsView openSpec={openSpec} />}
+          {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
+          {view==="roadmap" && <RoadmapView openSpec={openSpec} />}
+        </ErrorBoundary>
       </div>
     </div>
   );

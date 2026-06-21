@@ -11,10 +11,13 @@ import { setRegistry, setRepo, setTodos } from "./data.js";
 /** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
 export function adaptNode(n) {
   const acc = Array.isArray(n.acc) ? n.acc : [];
+  // the engine always emits a string id, but adaptNode is the trust boundary for
+  // any external _map.json — guard it so a malformed node can't throw here
+  const id = typeof n.id === "string" ? n.id : String(n.id ?? "");
   return {
-    id: n.id,
-    area: n.area || (n.id.includes("-") ? n.id.split("-")[0] : n.id),
-    title: n.title || n.id,
+    id,
+    area: n.area || (id.includes("-") ? id.split("-")[0] : id),
+    title: n.title || id,
     layer: n.layer || "feature",
     status: n.status || "draft",
     intent: n.intent || "",

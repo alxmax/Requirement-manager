@@ -157,6 +157,10 @@ class Gate(unittest.TestCase):
             with open(os.path.join(d, "_reqlock.json"), "wb") as f:
                 f.write(b'{"A": "\xff\xfe\x80"}')               # non-UTF-8 / binary
             self.assertEqual(R.load_lock(d), {})                # must fail open, not crash
+            _write(os.path.join(d, "_reqlock.json"), "[]")      # valid JSON, wrong type
+            self.assertEqual(R.load_lock(d), {})                # non-dict must fail open too
+            _write(os.path.join(d, "_reqlock.json"), "null")
+            self.assertEqual(R.load_lock(d), {})
 
     def test_update_lock_missing_dir_no_crash(self):  # bug #13
         with tempfile.TemporaryDirectory() as d:
@@ -738,6 +742,19 @@ class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             made = sorted(n for n in os.listdir(out) if n.startswith("DRAFT-"))
             self.assertEqual(made, ["DRAFT-LIB-UTILS.md", "DRAFT-SRC-UTILS.md"])
 
+    def test_extract_drafts_go_and_rust(self):  # bug: draft-narrow-extension-set
+        # draft/init must cover the same code extensions the scanner does, not just 5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "server.go"), "package main\n")
+            _write(os.path.join(d, "lib.rs"), "fn main() {}\n")
+            reqs_dir = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_extract({}, {}, d, reqs_dir)
+            made = sorted(n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-"))
+            self.assertIn("DRAFT-SERVER.md", made)
+            self.assertIn("DRAFT-LIB.md", made)
+
     def test_extract_honors_reqmapignore(self):  # init surfaced: extract ignored .reqmapignore
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "keep.py"), "x = 1\n")
@@ -980,6 +997,18 @@ class JsonExport(unittest.TestCase):  # tested-by: REQ-MAP-007
             self.assertEqual(doc["engine_version"], R.MAP_ENGINE_VERSION)
             self.assertEqual(len(doc["nodes"]), 1)
             self.assertIn("edges", doc)
+
+    def test_export_includes_parsed_todos(self):  # bug: export-drops-todos
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Ship it | lane: feature\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_export(R.load_requirements(rd), {}, rd, root=d)
+            doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+            self.assertEqual([t["name"] for t in doc["todos"]], ["Ship it"])
 
     def test_hostile_title_roundtrips_as_data_not_injection(self):  # bug: id-js-string-breakout-xss
         doc = _export_doc_for({"id": "a</script><img src=x>", "title": "x\");alert(1)//"})
@@ -2872,6 +2901,15 @@ class Review(unittest.TestCase):  # tested-by: REQ-REVIEW-022
             R.cmd_review(reqs, one)
         return buf.getvalue()
 
+    def test_unknown_id_fails_closed(self):  # bug: review-unknown-id-silent-empty-plan
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_review(R.load_requirements(d), "TYPO-X-999")
+            self.assertEqual(rc, 1, "an unknown single id must exit 1, not emit an empty plan")
+            self.assertIn("no requirement with id", buf.getvalue())
+
     def test_plan_structure_and_coverage(self):
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
@@ -3480,6 +3518,73 @@ class CheckSince(unittest.TestCase):
                 full_keys <= after_keys,
                 "since+update-lock dropped unchanged members' baselines: {}".format(
                     full_keys - after_keys))
+
+    def test_since_keeps_tagged_doc_bundle_unwarned(self):  # bug: since-docbundle-false-flag
+        """A tagged, unchanged docs/ bundle must not be flagged 'untagged' under
+        --since just because its file fell out of the --since-filtered member set."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src.py"), "# {}: REQ-A-001\n".format("impl" + "ements"))
+            # a >=50KB docs bundle, correctly tagged with generated-from
+            _write(os.path.join(d, "docs", "big.html"),
+                   "<!-- {}-from: REQ-A-001 -->\n".format("generated") + ("x" * 50001))
+            self._commit_all(d, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True).stdout.strip()
+            # change only src.py; the docs bundle is untouched since base_ref
+            _write(os.path.join(d, "src.py"), "# {}: REQ-A-001\n# changed\n".format("impl" + "ements"))
+            self._commit_all(d, "touch-src")
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, rdir, update_lock=False, code_root=d, since=base_ref)
+            self.assertNotIn("large docs/ HTML bundle", buf.getvalue(),
+                             "an unchanged, tagged docs bundle must not be warned under --since")
+
+
+class Round2Polish(unittest.TestCase):  # tested-by: REQ-MAP-007  # tested-by: REQ-PROMOTE-011
+    """Round-2 LOW fixes: anchored heading detection in the last substring holdouts
+    + a frontmatter status-line guard."""
+
+    def test_labeled_acs_anchored_skips_commentary(self):  # _labeled_acs anchored (REQ-ACVERIFY-019)
+        body = ("## Notes — acceptance caveats\nAC-9 not a real criterion\n"
+                "## HOW — Acceptance\nAC-1 real\nAC-2 real\n")
+        self.assertEqual(R._labeled_acs(body), ["AC-1", "AC-2"])
+
+    def test_section_raw_anchored_skips_commentary(self):  # _section_raw anchored (REQ-MAP-007)
+        body = ("## Notes — output format\n- not the real output\n"
+                "## WHAT — Output\n- the real output line\n")
+        raw = R._section_raw(body, "output")
+        self.assertIn("the real output line", raw)
+        self.assertNotIn("not the real output", raw)
+
+    def test_set_status_blank_line_does_not_corrupt(self):  # _set_frontmatter_status (REQ-PROMOTE-011)
+        text = "---\nid: X-1\nstatus:\nlayer: feature\n---\n\n# T\n"
+        out, n = R._set_frontmatter_status(text, "confirmed")
+        self.assertEqual(n, 1)
+        self.assertIn("status: confirmed", out)
+        self.assertIn("layer: feature", out)   # the next frontmatter key must survive intact
+
+    def test_set_status_normal_line_unchanged_shape(self):
+        out, n = R._set_frontmatter_status("---\nstatus: draft\n---\n", "confirmed")
+        self.assertEqual(out, "---\nstatus: confirmed\n---\n")
+        self.assertEqual(n, 1)
+
+    def test_lint_exempt_scalar_string_is_honored(self):  # bug: lint-exempt-char-split (REQ-LINTCHECKS-025)
+        # a bracketless `lint_exempt: ac-count-high` must exempt that check, not be
+        # walked character-by-character (which silently exempts nothing)
+        body = ("## WHAT — Contract\n- shall do x\n## HOW — Acceptance\n"
+                + "".join("- AC {}\n".format(i) for i in range(1, 9)))   # 8 ACs > LINT_AC_MAX
+        r = {"meta": {"status": "confirmed", "layer": "feature", "lint_exempt": "ac-count-high"},
+             "body": body}
+        checks = [f["check"] for f in R.lint_requirement("A-B-001", r)]
+        self.assertNotIn("ac-count-high", checks)
 
 
 class Site(unittest.TestCase):  # tested-by: REQ-SITE-026

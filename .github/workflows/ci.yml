@@ -19,6 +19,8 @@ jobs:
       # The engine is stdlib-only — no dependencies to install.
       - name: Manifest version coherence
         run: python scripts/check_versions.py
+      - name: Version-gate tests
+        run: python -X utf8 scripts/test_check_versions.py
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
       - name: Requirement drift gate

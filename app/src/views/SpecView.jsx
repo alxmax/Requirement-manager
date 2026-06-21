@@ -3,7 +3,9 @@ import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, datesOf } from "../lib/data.js";
 import { Pill, statusKind } from "../lib/ui.jsx";
 
-function mdInlineSpec(s){ return String(s).replace(/`([^`]+)`/g,'<code>$1</code>'); }
+// HTML-escape before the backtick→<code> transform: the output feeds
+// dangerouslySetInnerHTML with untrusted requirement text from _map.json.
+function mdInlineSpec(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`([^`]+)`/g,'<code>$1</code>'); }
 
 function CovStrip({ r }) {
   const { state, clauses, covered, gap } = coverageDetail(r);

@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.4"
+MAP_ENGINE_VERSION = "2026-06-21.6"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1033,7 +1033,7 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
     for line in body.splitlines():
         s = line.strip()
         if s.lower().startswith("## "):
-            grab = (not seen) and ("acceptan" in s.lower())
+            grab = (not seen) and _heading_label_is(s, "acceptan")   # anchored, like _count_ac
             if grab:
                 seen = True
             continue
@@ -1095,7 +1095,10 @@ def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
     if os.path.exists(p):
         try:
             with open(p, encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+            # a valid-JSON-but-non-object lock ([], null, 42) must also fail open —
+            # consumers call lock.get(rid); fail open like load_memberlock/_load_scancache
+            return data if isinstance(data, dict) else {}
         except (ValueError, OSError):
             # empty / corrupt / merge-conflicted / non-UTF-8 lock: treat as no lock.
             # ValueError covers both json.JSONDecodeError and UnicodeDecodeError, so
@@ -1430,7 +1433,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
 
     # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
     # no generated-from: lineage drifts from them unnoticed (warn-only — see REQ-DOCBUNDLE-026).
-    for rel in untagged_doc_bundles(code_root, members, reqs_dir):
+    for rel in untagged_doc_bundles(code_root, full_members, reqs_dir):  # full set: a doc's generated-from membership is independent of the --since diff
         warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
                      "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
@@ -1700,7 +1703,9 @@ def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
     if end == -1:
         return text, 0
     head, rest = body[:end], body[end:]     # only the frontmatter block, never the body
-    new_head, n = re.subn(r"(?m)^(\s*status\s*:\s*)(\S+)", r"\g<1>" + value, head, count=1)
+    # match the colon gap with [ \t]* (never newlines) so a blank `status:` line
+    # fills in place instead of swallowing the next frontmatter key; value optional
+    new_head, n = re.subn(r"(?m)^([ \t]*status[ \t]*:)[ \t]*(\S+)?", r"\g<1> " + value, head, count=1)
     return new_head + rest, n
 
 
@@ -1809,7 +1814,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
         dirs.sort()                            # deterministic id/suffix assignment
         for fn in sorted(files):
-            is_code = fn.endswith((".py", ".js", ".ts", ".cpp", ".c"))
+            is_code = fn.endswith(tuple(e for e in CODE_EXTS if e not in PROSE_EXTS))
             is_prose = fn.endswith(PROSE_EXTS)
             if not (is_code or is_prose):
                 continue
@@ -2423,6 +2428,7 @@ def cmd_export(reqs, members, reqs_dir, root=".", out=None):  # implements: REQ-
     requirements/_map.json by default."""
     data = _build_map_data(reqs, members)
     data["repo"] = _repo_name(root)
+    data["todos"] = _parse_todos(root)   # mirror cmd_map so export is byte-equivalent
     text = _build_json_text(data)
     target = out if out else os.path.join(reqs_dir, "_map.json")
     if target == "-":
@@ -2588,7 +2594,7 @@ def _lint_prose(body, name):  # implements: REQ-LINT-014
         if fenced:
             continue
         if s.startswith("## "):
-            grab = (not seen) and (name in s.lower())   # first matching section only
+            grab = (not seen) and _heading_label_is(s, name)   # anchored, agrees with _has_section
             if grab:
                 seen = True
             continue
@@ -2646,7 +2652,7 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
     file-spread check; when omitted, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are silently
     skipped and not counted against the requirement."""
-    exempt = set(r["meta"].get("lint_exempt") or [])
+    exempt = set(_as_list(r["meta"].get("lint_exempt")))
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
@@ -2769,7 +2775,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     errors = warns = 0
     for rid, r in targets:
         fs = lint_requirement(rid, r, (members or {}).get(rid))
-        exempt = set(r["meta"].get("lint_exempt") or [])
+        exempt = set(_as_list(r["meta"].get("lint_exempt")))
         if not fs and not exempt:
             continue
         print("{}   requirements/{}.md".format(rid, rid))
@@ -3199,7 +3205,7 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
     if req_ids and os.path.isfile(engine):
         try:
             with open(engine, encoding="utf-8") as f:
-                tagged = {m.group(2) for m in TAG_RE.finditer(f.read())}
+                tagged = {cap for (_role, cap) in _findall_tags(f.read())}   # expand comma-lists like scan_members
         except OSError:
             tagged = set()
         if tagged & req_ids:   # self-hosting: the engine's tags point at local reqs
@@ -3364,7 +3370,7 @@ def _section(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue
@@ -3380,7 +3386,7 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue
@@ -4384,6 +4390,9 @@ def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
     consumer should focus on, a corpus coverage_summary, and the finding contract. The plan
     is byte-reproducible across runs; the AI findings DERIVED from it are advisory and NOT
     reproducible, and no gate path reads this output or any AI sidecar."""
+    if one_id and one_id not in reqs:
+        print("no requirement with id {} (expected requirements/{}.md)".format(one_id, one_id))
+        return 1
     ids = [one_id] if one_id else sorted(reqs)
     items = []
     for rid in ids:

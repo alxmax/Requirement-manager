@@ -111,7 +111,7 @@ function clearY(tops, wantY, lo, hi) {
   for (const [a, b] of occ) { if (a > prev) gaps.push([prev, a]); prev = Math.max(prev, b); }
   if (prev < hi) gaps.push([prev, hi]);
   let best = wantY, bd = Infinity;
-  for (const [a, b] of gaps) { const c = Math.max(a + 10, Math.min(b - 10, wantY)); const dd = Math.abs(c - wantY); if (dd < bd) { bd = dd; best = c; } }
+  for (const [a, b] of gaps) { const c = b - a >= 20 ? Math.max(a + 10, Math.min(b - 10, wantY)) : (a + b) / 2; const dd = Math.abs(c - wantY); if (dd < bd) { bd = dd; best = c; } }
   return best;
 }
 
