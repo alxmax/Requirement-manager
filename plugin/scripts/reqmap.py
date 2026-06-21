@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.5"
+MAP_ENGINE_VERSION = "2026-06-21.6"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1033,7 +1033,7 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
     for line in body.splitlines():
         s = line.strip()
         if s.lower().startswith("## "):
-            grab = (not seen) and ("acceptan" in s.lower())
+            grab = (not seen) and _heading_label_is(s, "acceptan")   # anchored, like _count_ac
             if grab:
                 seen = True
             continue
@@ -1703,7 +1703,9 @@ def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
     if end == -1:
         return text, 0
     head, rest = body[:end], body[end:]     # only the frontmatter block, never the body
-    new_head, n = re.subn(r"(?m)^(\s*status\s*:\s*)(\S+)", r"\g<1>" + value, head, count=1)
+    # match the colon gap with [ \t]* (never newlines) so a blank `status:` line
+    # fills in place instead of swallowing the next frontmatter key; value optional
+    new_head, n = re.subn(r"(?m)^([ \t]*status[ \t]*:)[ \t]*(\S+)?", r"\g<1> " + value, head, count=1)
     return new_head + rest, n
 
 
@@ -2592,7 +2594,7 @@ def _lint_prose(body, name):  # implements: REQ-LINT-014
         if fenced:
             continue
         if s.startswith("## "):
-            grab = (not seen) and (name in s.lower())   # first matching section only
+            grab = (not seen) and _heading_label_is(s, name)   # anchored, agrees with _has_section
             if grab:
                 seen = True
             continue
@@ -2650,7 +2652,7 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
     file-spread check; when omitted, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are silently
     skipped and not counted against the requirement."""
-    exempt = set(r["meta"].get("lint_exempt") or [])
+    exempt = set(_as_list(r["meta"].get("lint_exempt")))
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
@@ -2773,7 +2775,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     errors = warns = 0
     for rid, r in targets:
         fs = lint_requirement(rid, r, (members or {}).get(rid))
-        exempt = set(r["meta"].get("lint_exempt") or [])
+        exempt = set(_as_list(r["meta"].get("lint_exempt")))
         if not fs and not exempt:
             continue
         print("{}   requirements/{}.md".format(rid, rid))
@@ -3203,7 +3205,7 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
     if req_ids and os.path.isfile(engine):
         try:
             with open(engine, encoding="utf-8") as f:
-                tagged = {m.group(2) for m in TAG_RE.finditer(f.read())}
+                tagged = {cap for (_role, cap) in _findall_tags(f.read())}   # expand comma-lists like scan_members
         except OSError:
             tagged = set()
         if tagged & req_ids:   # self-hosting: the engine's tags point at local reqs
@@ -3368,7 +3370,7 @@ def _section(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue
@@ -3384,7 +3386,7 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue

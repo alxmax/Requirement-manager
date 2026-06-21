@@ -3548,6 +3548,45 @@ class CheckSince(unittest.TestCase):
                              "an unchanged, tagged docs bundle must not be warned under --since")
 
 
+class Round2Polish(unittest.TestCase):  # tested-by: REQ-MAP-007  # tested-by: REQ-PROMOTE-011
+    """Round-2 LOW fixes: anchored heading detection in the last substring holdouts
+    + a frontmatter status-line guard."""
+
+    def test_labeled_acs_anchored_skips_commentary(self):  # _labeled_acs anchored (REQ-ACVERIFY-019)
+        body = ("## Notes — acceptance caveats\nAC-9 not a real criterion\n"
+                "## HOW — Acceptance\nAC-1 real\nAC-2 real\n")
+        self.assertEqual(R._labeled_acs(body), ["AC-1", "AC-2"])
+
+    def test_section_raw_anchored_skips_commentary(self):  # _section_raw anchored (REQ-MAP-007)
+        body = ("## Notes — output format\n- not the real output\n"
+                "## WHAT — Output\n- the real output line\n")
+        raw = R._section_raw(body, "output")
+        self.assertIn("the real output line", raw)
+        self.assertNotIn("not the real output", raw)
+
+    def test_set_status_blank_line_does_not_corrupt(self):  # _set_frontmatter_status (REQ-PROMOTE-011)
+        text = "---\nid: X-1\nstatus:\nlayer: feature\n---\n\n# T\n"
+        out, n = R._set_frontmatter_status(text, "confirmed")
+        self.assertEqual(n, 1)
+        self.assertIn("status: confirmed", out)
+        self.assertIn("layer: feature", out)   # the next frontmatter key must survive intact
+
+    def test_set_status_normal_line_unchanged_shape(self):
+        out, n = R._set_frontmatter_status("---\nstatus: draft\n---\n", "confirmed")
+        self.assertEqual(out, "---\nstatus: confirmed\n---\n")
+        self.assertEqual(n, 1)
+
+    def test_lint_exempt_scalar_string_is_honored(self):  # bug: lint-exempt-char-split (REQ-LINTCHECKS-025)
+        # a bracketless `lint_exempt: ac-count-high` must exempt that check, not be
+        # walked character-by-character (which silently exempts nothing)
+        body = ("## WHAT — Contract\n- shall do x\n## HOW — Acceptance\n"
+                + "".join("- AC {}\n".format(i) for i in range(1, 9)))   # 8 ACs > LINT_AC_MAX
+        r = {"meta": {"status": "confirmed", "layer": "feature", "lint_exempt": "ac-count-high"},
+             "body": body}
+        checks = [f["check"] for f in R.lint_requirement("A-B-001", r)]
+        self.assertNotIn("ac-count-high", checks)
+
+
 class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
     def test_remote_url_normalises_scp_and_https(self):
         self.assertEqual(R._normalise_remote("git@github.com:alxmax/Requirement-manager.git"),
