@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.1"
+MAP_ENGINE_VERSION = "2026-06-21.4"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -636,8 +636,10 @@ def _as_list(v):  # implements: CORE-PARSE-001
 
 
 def _clean_item(s):  # implements: CORE-PARSE-001
-    """One list element: drop a trailing `# comment`, trim, strip matching quotes."""
-    return s.split("#", 1)[0].strip().strip("\"'")
+    """One list element: drop a trailing `# comment`, trim, strip matching quotes.
+    A '#' is a comment only at the token start or after whitespace, so an embedded
+    '#' (e.g. issue#123) is preserved — matching the scalar parse path."""
+    return re.split(r'(?:^|\s)#', s, 1)[0].strip().strip("\"'")
 
 
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
@@ -812,6 +814,13 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
         fence = None   # None = not fenced; else the opening fence string e.g. "```"
         for i, raw in enumerate(lines, 1):
             s = raw.rstrip("\n\r")
+            # Markdown indented code block (>=4 spaces / tab): treat as code so an
+            # indented ```-prefixed line never opens a phantom fence that would
+            # swallow every later tag, and an indented tag is excluded. Checked
+            # BEFORE fence detection. HTML has no indented-code concept, so the
+            # guard is Markdown-only — an indented tag comment in HTML stays valid.
+            if ext == ".md" and (s.startswith("    ") or s.startswith("\t")):
+                continue
             stripped = s.lstrip()
             fm = _FENCE_RE.match(stripped)
             if fm:
@@ -824,8 +833,6 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
                     fence = None    # closer must be bare (no info string)
                     continue
             if fence is not None:
-                continue
-            if s.startswith("    ") or s.startswith("\t"):
                 continue
             clean = _BACKTICK_RE.sub("", s)
             seen = set()
@@ -1044,8 +1051,10 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
 # Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
 # prefix), NOT anywhere in the heading — otherwise a commentary heading like
 # `## Notes — contract caveats` would leak into the drift hash.
+# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
+# section detection agree on which heading is a normative section (see its docstring)
 _NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
+    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
 
 
 def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
@@ -1057,7 +1066,7 @@ def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
     in agreement with the drift hash (_NORMATIVE_HEADING_RE) — see the silent-drift
     inconsistency this guards against."""
     return bool(re.match(
-        r"##\s+(?:(?:what|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
+        r"##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
         heading.strip().lower()))
 
 
@@ -1277,6 +1286,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     warn_if_stale()
     cap_ids = set(reqs)
 
+    # The reverse-drift baseline (_memberlock) must always cover the FULL member
+    # set; --since narrows `members` only to scope the gate's checks, so keep an
+    # unfiltered copy for the memberlock re-baseline below.
+    full_members = members
+
     # --since: scope checks to requirements whose member files changed since ref.
     # Fail-open: fall back to full scan with WARN if git is unavailable or ref invalid.
     if since:
@@ -1462,7 +1476,10 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 print(f"  drift: {rid}", file=sys.stderr)
         else:
             save_lock(reqs_dir, new_lock)
-            save_memberlock(reqs_dir, compute_member_hashes(code_root, members))  # re-baseline reverse drift
+            # re-baseline reverse drift over the FULL member set — using the
+            # --since-filtered `members` here would drop every unchanged member's
+            # baseline and silently disable reverse-drift detection for them.
+            save_memberlock(reqs_dir, compute_member_hashes(code_root, full_members))
             print("lock updated.")
 
     # Integration-artifact freshness: stale tool_definition.json or command-table region
@@ -1617,8 +1634,18 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
     t = t.replace("AREA-NAME-NNN", cap_id)
     t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
-    t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
-    t = t.replace("# Short name", "# " + todo["name"], 1)
+    # inject milestone at the template's anchor; if a custom template lacks it,
+    # fall back to the frontmatter fence, else warn rather than silently drop it
+    if "superseded_by:" in t:
+        t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
+    elif t.startswith("---\n"):
+        t = t.replace("---\n", f"---\nmilestone: {todo['milestone']}\n", 1)
+    else:
+        print(f"warning: template has no frontmatter anchor; milestone {todo['milestone']} not recorded")
+    if "# Short name" in t:
+        t = t.replace("# Short name", "# " + todo["name"], 1)
+    else:
+        print(f"warning: template has no '# Short name' title anchor; TODO title {todo['name']!r} not inserted")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
@@ -1646,7 +1673,9 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
         changed = 0
         for i, line in enumerate(lines):
             m = re.match(r"^(\s*-\s+\[)[ ](\]\s+)(.+?)(\r?\n?)$", line)
-            if m and m.group(3).split("|", 1)[0].strip().casefold() == key:
+            # rsplit on the LAST '|' to mirror _parse_todos_from_text's name
+            # derivation — else a TODO whose name contains a '|' never matches
+            if m and m.group(3).rsplit("|", 1)[0].strip().casefold() == key:
                 lines[i] = m.group(1) + "x" + m.group(2) + m.group(3) + m.group(4)
                 changed = 1
                 break
@@ -1874,12 +1903,13 @@ SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not aut
 
 def _py_facts(src):  # implements: REQ-CANDIDATES-009
     """Module/symbol docstrings, top-level signatures and import targets via the
-    stdlib `ast`. A SyntaxError yields empty facts so one unparseable file never
-    aborts the whole plan."""
+    stdlib `ast`. A SyntaxError/ValueError yields empty facts so one unparseable
+    file (incl. a source with an embedded NUL byte, which ast.parse rejects with
+    ValueError, not SyntaxError) never aborts the whole plan."""
     facts = {"signatures": [], "docstrings": {}, "imports": []}
     try:
         tree = ast.parse(src)
-    except SyntaxError:
+    except (SyntaxError, ValueError):
         return facts
     mod_doc = ast.get_docstring(tree)
     if mod_doc:
@@ -2047,9 +2077,24 @@ def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # i
         if present:
             groups.append({"id": entry["id"], "layer": entry.get("layer"), "files": present})
             claimed.update(present)
+    # de-duplicate minted ids: two files sharing a slug (foo.py + foo.js, or
+    # foo-bar + foo_bar) would otherwise mint the same id and conflate two
+    # distinct candidates downstream — bump the numeric suffix on collision.
+    # Seed from capmap groups AND existing requirement ids so a minted id never
+    # duplicates a real requirement either.
+    used_ids = {g["id"] for g in groups} | set(reqs)
     for rel in files:
-        if rel not in claimed:
-            groups.append({"id": _mint_cap_id(rel), "layer": None, "files": [rel]})
+        if rel in claimed:
+            continue
+        cid = _mint_cap_id(rel)
+        if cid in used_ids:
+            stem = cid[:-3]                 # _mint_cap_id always ends in "-001"
+            n = 2
+            while "{}{:03d}".format(stem, n) in used_ids:
+                n += 1
+            cid = "{}{:03d}".format(stem, n)
+        used_ids.add(cid)
+        groups.append({"id": cid, "layer": None, "files": [rel]})
 
     group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
 
@@ -2233,14 +2278,19 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
 
     if triage and isinstance(triage.get("items"), list):
         md, n_tri, n_bugs = _render_findings_triaged(triage, total)
+        used_triage = True
     else:
         md, n_tri, n_bugs = _render_findings_raw(groups, total)
+        used_triage = False
 
     os.makedirs(reqs_dir, exist_ok=True)
     out = os.path.join(reqs_dir, "_findings.md")
     with open(out, "w", encoding="utf-8") as f:
         f.write(md)
-    extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if triage else ""
+    # gate the suffix on the renderer actually used — a malformed sidecar that is
+    # truthy but whose `items` is not a list falls back to raw, so don't claim a
+    # triage view was rendered
+    extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if used_triage else ""
     print("{} open finding(s) across {} requirement(s){} -> {}"
           .format(total, len(groups), extra, out))
     return 0
@@ -2295,9 +2345,11 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
-            data["edges"].append([rid, dep])
+            if dep in reqs:                    # skip dangling targets — no phantom node
+                data["edges"].append([rid, dep])
         for up in _as_list(r["meta"].get("satisfies")):  # implements: REQ-TRACE-020
-            data["upstream_edges"].append([rid, up])
+            if up in reqs:
+                data["upstream_edges"].append([rid, up])
     return data
 
 
@@ -2306,7 +2358,10 @@ def _parse_todos_from_text(text):
     Items before the first ## vX.Y heading are silently ignored (milestone is required)."""
     todos, current_ms = [], None
     for line in text.splitlines():
-        ms_m = re.match(r"^##\s+(v\d[\d.]*)\s*$", line.strip())
+        # match the version token at the heading start; a trailing annotation
+        # like `## v2.8 (deferred — demand-gated)` is harmless (the capture group
+        # isolates the version) and must not drop the milestone's items.
+        ms_m = re.match(r"^##\s+(v\d[\d.]*)\b", line.strip())
         if ms_m:
             current_ms = ms_m.group(1)
             continue
@@ -2559,12 +2614,21 @@ def _clip(s, n=60):  # implements: REQ-LINT-014
 
 def _count_ac(body):
     """Count acceptance criteria in the HOW — Acceptance section.
-    Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...)."""
-    grab, seen, count = False, False, 0
+    Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...).
+    Skips fenced code blocks (so a ``` example with bullet lines doesn't inflate
+    the count) and detects the section with the anchored heading predicate (so a
+    `## Notes — acceptance …` commentary heading isn't mistaken for it) — keeping
+    this count in agreement with _has_section/_bullets and the gate."""
+    grab, seen, count, fenced = False, False, 0, False
     for line in body.splitlines():
         s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
         if s.lower().startswith("## "):
-            grab = (not seen) and ("acceptan" in s.lower())
+            grab = (not seen) and _heading_label_is(s, "acceptan")
             if grab:
                 seen = True
             continue
@@ -3050,8 +3114,15 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
 
 def _strip_line_tag(line):
     """Remove a reqmap membership-tag comment from a source line.
-    Finds the comment marker (#, //, <!--) closest to the tag and cuts from
-    there to end-of-line, preserving the code before it.
+
+    Strips only when a comment marker (#, //, <!--) *directly opens* the tag —
+    i.e. nothing but whitespace sits between the marker and the tag id. A line
+    that merely mentions a tag in prose or a heading (e.g. a doc line
+    `# How implements: AREA-NAME-001 tags work`, or
+    `<!-- note --> ... implements: AREA-NAME-001 is required <!-- end -->`) is
+    left unchanged, so `init --wipe` never truncates documentation that
+    documents the tagging convention. A multi-char heading/banner marker
+    (`## `, `//// `) is removed whole rather than leaving a dangling bare `#`.
     Lines with no tag are returned unchanged."""
     m = TAG_RE.search(line)
     if m is None:
@@ -3061,11 +3132,18 @@ def _strip_line_tag(line):
     cut = -1
     for marker in ("#", "//", "<!--"):
         idx = pre.rfind(marker)
-        if idx > cut:
+        # the marker opens the tag's comment only when the gap between the
+        # marker token and the tag id is whitespace-only; otherwise it is an
+        # unrelated heading / inline comment and must not anchor the cut
+        if idx > cut and pre[idx + len(marker):].strip() == "":
             cut = idx
-    if cut >= 0:
-        return line[:cut].rstrip() + nl
-    return line  # no recognisable comment marker — leave unchanged
+    if cut < 0:
+        return line  # no comment marker directly opens the tag — leave unchanged
+    # walk back over a contiguous run of the same marker char (`## `, `//// `)
+    # so the whole heading/banner marker is removed, not just its last char
+    while cut > 0 and pre[cut - 1] == pre[cut]:
+        cut -= 1
+    return line[:cut].rstrip() + nl
 
 
 def _wipe(reqs_dir, code_root):
@@ -3316,7 +3394,9 @@ def _bullets(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            # anchored heading match (not substring) so a commentary heading like
+            # `## Notes — contract caveats` doesn't capture the Contract section
+            grab = (not seen) and _heading_label_is(line.strip(), name)
             if grab:
                 seen = True
             continue
@@ -3388,7 +3468,15 @@ def _grouped_areas(nodes):  # implements: REQ-MAP-007
     groups = [(a, areas[a]) for a in sorted(areas) if len(areas[a]) > 1]
     singles = [n for a in sorted(areas) if len(areas[a]) == 1 for n in areas[a]]
     if singles:
-        groups.append(("misc", sorted(singles, key=lambda n: n["id"])))
+        # fold the singletons into any pre-existing real "misc" multi-node group
+        # rather than appending a second ("misc", …) tuple — two subgraphs with
+        # the same _safe_id would break the Mermaid render
+        existing = next((i for i, (a, _) in enumerate(groups) if a == "misc"), None)
+        merged = sorted(singles, key=lambda n: n["id"])
+        if existing is not None:
+            groups[existing] = ("misc", groups[existing][1] + merged)
+        else:
+            groups.append(("misc", merged))
     return groups
 
 
@@ -3688,7 +3776,9 @@ def _normalise_remote(url):  # implements: REQ-SITE-026
     m = re.match(r"^[\w.+-]+@([\w.-]+):(.+)$", url)          # scp-style
     if m:
         return "https://{}/{}".format(m.group(1), m.group(2))
-    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)/(.+)$", url)
+    # optional :port (corporate / self-hosted ssh remotes) is dropped, keeping
+    # group(1)=host and group(2)=path so the web URL stays clickable
+    m = re.match(r"^(?:ssh|git|https?)://(?:[^@/]+@)?([\w.-]+)(?::\d+)?/(.+)$", url)
     if m:
         return "https://{}/{}".format(m.group(1), m.group(2))
     return url if "://" in url else None
@@ -3729,8 +3819,12 @@ def _inject_region(html, name, inner, anchor="<body>"):  # implements: REQ-SITE-
     written; surrounding (authored) bytes are untouched."""
     open_m, close_m = _region_markers(name)
     block = open_m + "\n" + inner + "\n" + close_m
-    i, j = html.find(open_m), html.find(close_m)
-    if i != -1 and j != -1 and j > i:
+    # find the close that belongs to THIS open (search after it) so a stray close
+    # before the open isn't mistaken for the region end, which would append a
+    # duplicate block on re-run instead of rewriting in place
+    i = html.find(open_m)
+    j = html.find(close_m, i + len(open_m)) if i != -1 else -1
+    if i != -1 and j != -1:
         return html[:i] + block + html[j + len(close_m):]
     a = html.find(anchor)
     if a != -1:
@@ -4080,11 +4174,27 @@ def _since_changed_files(ref, code_root):
         )
         if result.returncode != 0:
             return None
+        # `git diff` emits paths relative to the repo ROOT, not to cwd. Resolve
+        # the toplevel so these abspaths line up with member abspaths (which are
+        # relative to code_root) even when code_root is a subdirectory of the
+        # git root — otherwise the since-set and member-set never intersect and
+        # the gate silently checks zero requirements. Fall back to code_root on
+        # failure (mirrors _docs_publish_path).
+        root = code_root
+        try:
+            top = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                capture_output=True, text=True, cwd=code_root, timeout=10,
+            )
+            if top.returncode == 0 and top.stdout.strip():
+                root = top.stdout.strip()
+        except Exception:
+            pass
         files = set()
         for line in result.stdout.splitlines():
             line = line.strip()
             if line:
-                files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, line))))
+                files.add(os.path.normcase(os.path.abspath(os.path.join(root, line))))
         return files
     except Exception:
         return None
@@ -4213,8 +4323,10 @@ def cmd_site(reqs, members, root=".", attach=None,
         mode = "refreshed"
     else:                                   # scaffold mode
         os.makedirs(os.path.dirname(attach) or ".", exist_ok=True)
-        html = (SITE_TEMPLATE.replace("%%REPO_NAME%%", _repo_name(root) or "this project")
-                             .replace("%%REPO_URL%%", repo_url or "#"))
+        # escape before substituting — a repo dir name or remote URL with < > " &
+        # would otherwise break out of the title/href sinks in the scaffold template
+        html = (SITE_TEMPLATE.replace("%%REPO_NAME%%", _html_escape(_repo_name(root) or "this project"))
+                             .replace("%%REPO_URL%%", _html_escape(repo_url or "#")))
         mode = "scaffolded"
 
     for name in regions:

@@ -453,6 +453,8 @@ class Scene:
             d.setdefault("w", dw)
             d.setdefault("h", dh)
             norm.append(d)
+        if not norm:
+            return []          # empty steps -> no nodes (consistent with row/column/grid)
         if connect and gap < 80 and any(d.get("label") for d in norm):
             print(
                 f"excalidraw_builder: pipeline gap={gap}px with labeled arrows —"
@@ -839,7 +841,11 @@ class Scene:
             midx = (pts[0][0] + pts[1][0]) / 2
             midy = (pts[0][1] + pts[1][1]) / 2
             pts = [pts[0], [midx, midy - 30], pts[1]]
-        w = abs(pts[-1][0]); h = abs(pts[-1][1])
+        # bounding box must span ALL points (incl. a curve's control point), not
+        # just the endpoint — otherwise the curved connector's selection/export
+        # bounds understate its extent (matches path()'s bbox computation)
+        xs = [p[0] for p in pts]; ys = [p[1] for p in pts]
+        w = max(xs) - min(xs); h = max(ys) - min(ys)
 
         el = self._base(aid, "arrow", ax, ay, w, h, sc, "transparent",
                         roundness={"type": 2} if curve else None, group=group)
@@ -1078,7 +1084,12 @@ class Scene:
         shapes = {"rectangle", "ellipse", "diamond"}
         used = set()
         for el in self.elements:
-            if el["id"] in self._containers or el.get("type") not in shapes:
+            if el["id"] in self._containers:
+                continue
+            # native fillable shapes + ISO polygons (data/preparation): the latter
+            # are serialized as type "line" with polygon:True but carry a real fill,
+            # so their colour must also be explained by the legend
+            if el.get("type") not in shapes and not el.get("polygon"):
                 continue
             bg = el.get("backgroundColor")
             if bg and bg not in neutral:
@@ -1690,6 +1701,12 @@ def _selftest():
     assert not s.check_arrow_crossings(), s.check_arrow_crossings()
     # colour-SSOT: every fill used (blue/violet/green) is in the legend above
     assert not s.check_legend_coverage(), s.check_legend_coverage()
+    # ISO polygons (data/preparation) are serialized as type "line" + polygon but
+    # carry a real fill — an unexplained one must still be flagged by the gate
+    iso = Scene(seed=7)
+    iso.data("input", 0, 0, fill="blue")
+    iso.legend([("worker", "violet")], 0, 200)
+    assert iso.check_legend_coverage(), "unexplained ISO polygon fill must be flagged"
     # short-arrow gate: this clean scene has none; a close pair must be caught
     # and save() must raise on it by default (the 'text without arrow' defect)
     assert not s.check_short_arrows(), s.check_short_arrows()
@@ -1717,6 +1734,15 @@ def _selftest():
         raise SystemExit("FAIL: crossing_check='error' did not raise")
     except ValueError:
         pass
+    # pipeline([]) returns [] instead of crashing on max() of an empty sequence
+    assert Scene(seed=8).pipeline([], 0, 0) == [], "empty pipeline must return []"
+    # a curved arrow's bbox spans its control-point dip, not just the endpoint
+    sc = Scene(seed=9)
+    cca = sc.box("A", 0, 0, w=80, h=40)
+    ccb = sc.box("B", 300, 0, w=80, h=40)   # horizontally aligned -> flat endpoints
+    caid = sc.arrow(cca, ccb, curve=True)
+    cael = next(e for e in sc.elements if e["id"] == caid)
+    assert cael["height"] >= 29, ("curved arrow bbox must span the control point", cael["height"])
     # routed-path label sits at the arc-length midpoint, not a corner waypoint
     mid = Scene._polyline_midpoint([(0, 0), (0, 100), (200, 100), (200, 0)])
     assert abs(mid[0] - 100) < 1 and abs(mid[1] - 100) < 1, mid
