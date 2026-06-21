@@ -602,6 +602,27 @@ def cmd_gen_integration(reqs_dir, code_root):
     return 0
 
 
+def _check_integration_fresh(plugin_root):
+    """Return a list of stale generated artifacts (empty = fresh). Compares the
+    committed tool_definition.json + the SKILL.universal.md command-table region
+    against a fresh generation from the registry. Mirrors map --check. Artifacts
+    that don't exist (e.g. a consumer repo that doesn't ship them) are skipped, so
+    this never breaks a vendored-engine gate."""
+    stale = []
+    tj = os.path.join(plugin_root, "tool_definition.json")
+    if os.path.exists(tj):
+        with open(tj, encoding="utf-8") as _f:
+            if _f.read() != _generate_schema():
+                stale.append("tool_definition.json")
+    skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
+    if os.path.exists(skill):
+        with open(skill, encoding="utf-8") as _f:
+            m = _REGION_RE.search(_f.read())
+        if m and m.group(2).strip() != _generate_command_table().strip():
+            stale.append("skills/requirement-manager/SKILL.universal.md")
+    return stale
+
+
 # ---------- parsing ----------
 def _as_list(v):  # implements: CORE-PARSE-001
     """Coerce a frontmatter value to a list: lists pass through, a bare scalar
@@ -1455,6 +1476,16 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     n_find = sum(len(items) for _rid, _t, items in collect_findings(reqs))
     if n_find:
         print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py findings`")
+
+    # Integration-artifact freshness: stale tool_definition.json or command-table region
+    # in SKILL.universal.md means someone edited COMMANDS without running gen-integration.
+    # Skipped silently when the artifacts don't exist (consumer/vendored repos).
+    plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _stale = _check_integration_fresh(plugin_root)
+    if _stale:
+        print("ERROR: stale generated integration artifact(s): " + ", ".join(_stale)
+              + " — run `python scripts/reqmap.py gen-integration` and commit.", file=sys.stderr)
+        errors = list(errors) + ["stale integration artifact(s): " + ", ".join(_stale)]
 
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "

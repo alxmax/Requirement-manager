@@ -3509,6 +3509,22 @@ class CommandRegistry(unittest.TestCase):  # links to REQ-CMDREGISTRY-033 (scaff
         end = text.index("<!--##/REQMAP:COMMANDS##-->")
         self.assertEqual(text[start:end].strip(), table.strip())
 
+    def test_integration_fresh_when_committed(self):
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        plugin_root = os.path.join(HERE, "..")          # plugin/
+        self.assertEqual(R._check_integration_fresh(plugin_root), [])
+
+    def test_check_integration_fresh_detects_stale_schema(self):
+        import tempfile, shutil
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        with tempfile.TemporaryDirectory() as d:
+            dst = os.path.join(d, "plugin")
+            shutil.copytree(os.path.join(HERE, ".."), dst)
+            with open(os.path.join(dst, "tool_definition.json"), "w", encoding="utf-8") as f:
+                f.write("[]\n")                          # deliberately stale
+            stale = R._check_integration_fresh(dst)
+            self.assertIn("tool_definition.json", stale)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
