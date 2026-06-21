@@ -2760,6 +2760,30 @@
       "lane": "feature",
       "milestone": "v1.18",
       "done": true
+    },
+    {
+      "name": "Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices + per-command flags + dispatch derived from it (hand-written `choices=[...]` literal removed). Existing CLI behaviour byte-identical (TestCli unchanged).",
+      "lane": "bus",
+      "milestone": "v2.7",
+      "done": false
+    },
+    {
+      "name": "Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside each SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry.",
+      "lane": "feature",
+      "milestone": "v2.7",
+      "done": false
+    },
+    {
+      "name": "Drift-guard: `gate` regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`.",
+      "lane": "ops",
+      "milestone": "v2.7",
+      "done": false
+    },
+    {
+      "name": "MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above.",
+      "lane": "feature",
+      "milestone": "v2.7",
+      "done": false
     }
   ]
 };</script>
