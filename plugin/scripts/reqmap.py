@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.3"
+MAP_ENGINE_VERSION = "2026-06-21.4"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -636,8 +636,10 @@ def _as_list(v):  # implements: CORE-PARSE-001
 
 
 def _clean_item(s):  # implements: CORE-PARSE-001
-    """One list element: drop a trailing `# comment`, trim, strip matching quotes."""
-    return s.split("#", 1)[0].strip().strip("\"'")
+    """One list element: drop a trailing `# comment`, trim, strip matching quotes.
+    A '#' is a comment only at the token start or after whitespace, so an embedded
+    '#' (e.g. issue#123) is preserved — matching the scalar parse path."""
+    return re.split(r'(?:^|\s)#', s, 1)[0].strip().strip("\"'")
 
 
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
@@ -1049,8 +1051,10 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
 # Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
 # prefix), NOT anywhere in the heading — otherwise a commentary heading like
 # `## Notes — contract caveats` would leak into the drift hash.
+# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
+# section detection agree on which heading is a normative section (see its docstring)
 _NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
+    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
 
 
 def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
@@ -1062,7 +1066,7 @@ def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
     in agreement with the drift hash (_NORMATIVE_HEADING_RE) — see the silent-drift
     inconsistency this guards against."""
     return bool(re.match(
-        r"##\s+(?:(?:what|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
+        r"##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?" + re.escape(name.lower()),
         heading.strip().lower()))
 
 
@@ -1630,8 +1634,18 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
     t = t.replace("AREA-NAME-NNN", cap_id)
     t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
-    t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
-    t = t.replace("# Short name", "# " + todo["name"], 1)
+    # inject milestone at the template's anchor; if a custom template lacks it,
+    # fall back to the frontmatter fence, else warn rather than silently drop it
+    if "superseded_by:" in t:
+        t = t.replace("superseded_by:", f"milestone: {todo['milestone']}\nsuperseded_by:", 1)
+    elif t.startswith("---\n"):
+        t = t.replace("---\n", f"---\nmilestone: {todo['milestone']}\n", 1)
+    else:
+        print(f"warning: template has no frontmatter anchor; milestone {todo['milestone']} not recorded")
+    if "# Short name" in t:
+        t = t.replace("# Short name", "# " + todo["name"], 1)
+    else:
+        print(f"warning: template has no '# Short name' title anchor; TODO title {todo['name']!r} not inserted")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
@@ -2264,14 +2278,19 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
 
     if triage and isinstance(triage.get("items"), list):
         md, n_tri, n_bugs = _render_findings_triaged(triage, total)
+        used_triage = True
     else:
         md, n_tri, n_bugs = _render_findings_raw(groups, total)
+        used_triage = False
 
     os.makedirs(reqs_dir, exist_ok=True)
     out = os.path.join(reqs_dir, "_findings.md")
     with open(out, "w", encoding="utf-8") as f:
         f.write(md)
-    extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if triage else ""
+    # gate the suffix on the renderer actually used — a malformed sidecar that is
+    # truthy but whose `items` is not a list falls back to raw, so don't claim a
+    # triage view was rendered
+    extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if used_triage else ""
     print("{} open finding(s) across {} requirement(s){} -> {}"
           .format(total, len(groups), extra, out))
     return 0
@@ -2326,9 +2345,11 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
-            data["edges"].append([rid, dep])
+            if dep in reqs:                    # skip dangling targets — no phantom node
+                data["edges"].append([rid, dep])
         for up in _as_list(r["meta"].get("satisfies")):  # implements: REQ-TRACE-020
-            data["upstream_edges"].append([rid, up])
+            if up in reqs:
+                data["upstream_edges"].append([rid, up])
     return data
 
 
@@ -3373,7 +3394,9 @@ def _bullets(body, name):  # implements: REQ-MAP-007
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = (not seen) and (name in h)   # first matching section only
+            # anchored heading match (not substring) so a commentary heading like
+            # `## Notes — contract caveats` doesn't capture the Contract section
+            grab = (not seen) and _heading_label_is(line.strip(), name)
             if grab:
                 seen = True
             continue
@@ -3445,7 +3468,15 @@ def _grouped_areas(nodes):  # implements: REQ-MAP-007
     groups = [(a, areas[a]) for a in sorted(areas) if len(areas[a]) > 1]
     singles = [n for a in sorted(areas) if len(areas[a]) == 1 for n in areas[a]]
     if singles:
-        groups.append(("misc", sorted(singles, key=lambda n: n["id"])))
+        # fold the singletons into any pre-existing real "misc" multi-node group
+        # rather than appending a second ("misc", …) tuple — two subgraphs with
+        # the same _safe_id would break the Mermaid render
+        existing = next((i for i, (a, _) in enumerate(groups) if a == "misc"), None)
+        merged = sorted(singles, key=lambda n: n["id"])
+        if existing is not None:
+            groups[existing] = ("misc", groups[existing][1] + merged)
+        else:
+            groups.append(("misc", merged))
     return groups
 
 
@@ -3788,8 +3819,12 @@ def _inject_region(html, name, inner, anchor="<body>"):  # implements: REQ-SITE-
     written; surrounding (authored) bytes are untouched."""
     open_m, close_m = _region_markers(name)
     block = open_m + "\n" + inner + "\n" + close_m
-    i, j = html.find(open_m), html.find(close_m)
-    if i != -1 and j != -1 and j > i:
+    # find the close that belongs to THIS open (search after it) so a stray close
+    # before the open isn't mistaken for the region end, which would append a
+    # duplicate block on re-run instead of rewriting in place
+    i = html.find(open_m)
+    j = html.find(close_m, i + len(open_m)) if i != -1 else -1
+    if i != -1 and j != -1:
         return html[:i] + block + html[j + len(close_m):]
     a = html.find(anchor)
     if a != -1:
@@ -4288,8 +4323,10 @@ def cmd_site(reqs, members, root=".", attach=None,
         mode = "refreshed"
     else:                                   # scaffold mode
         os.makedirs(os.path.dirname(attach) or ".", exist_ok=True)
-        html = (SITE_TEMPLATE.replace("%%REPO_NAME%%", _repo_name(root) or "this project")
-                             .replace("%%REPO_URL%%", repo_url or "#"))
+        # escape before substituting — a repo dir name or remote URL with < > " &
+        # would otherwise break out of the title/href sinks in the scaffold template
+        html = (SITE_TEMPLATE.replace("%%REPO_NAME%%", _html_escape(_repo_name(root) or "this project"))
+                             .replace("%%REPO_URL%%", _html_escape(repo_url or "#")))
         mode = "scaffolded"
 
     for name in regions:

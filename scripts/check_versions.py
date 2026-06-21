@@ -88,7 +88,10 @@ def main(argv=None) -> int:
     market = _load_json(MARKETPLACE_JSON)
     occurrences = [("marketplace.version", market.get("version"))]
     for i, plug in enumerate(market.get("plugins", [])):
-        occurrences.append((f"marketplace.plugins[{i}].version", plug.get("version")))
+        if isinstance(plug, dict):
+            occurrences.append((f"marketplace.plugins[{i}].version", plug.get("version")))
+        else:
+            errors.append(f"  marketplace.plugins[{i}] is not an object: {plug!r}")
     for label, value in occurrences:
         if value != canonical:
             errors.append(f"  {label}: {value!r} != plugin.json version {canonical!r}")

@@ -1212,6 +1212,18 @@ class ParserBlockLists(unittest.TestCase):  # tested-by: CORE-PARSE-001
         self.assertEqual(meta["superseded_by"], "")
         self.assertEqual(meta["id"], "X-1")
 
+    def test_inline_list_preserves_embedded_hash(self):  # bug: clean-item-eats-embedded-hash
+        meta, _ = R.parse_frontmatter("---\ntags: [issue#1, fix]\n---\nbody")
+        self.assertEqual(meta["tags"], ["issue#1", "fix"])
+
+    def test_inline_list_still_strips_trailing_comment(self):
+        meta, _ = R.parse_frontmatter("---\ntags: [a, b]  # trailing\n---\nbody")
+        self.assertEqual(meta["tags"], ["a", "b"])
+
+    def test_block_list_preserves_embedded_hash(self):
+        meta, _ = R.parse_frontmatter("---\ntags:\n  - issue#123\n  - clean\n---\nbody")
+        self.assertEqual(meta["tags"], ["issue#123", "clean"])
+
 
 class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
     def _node(self, members):
@@ -1251,6 +1263,46 @@ class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
     def test_first_quote_skips_fenced(self):
         self.assertEqual(R._first_quote("# T\n```\n> not a quote\n```\n> real why.\n"),
                          "real why.")
+
+    def test_dangling_depends_on_emits_no_edge(self):  # bug: build-map-data-phantom-edge
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-B-001.md"),
+                   "---\nid: A-B-001\nstatus: confirmed\nlayer: feature\n"
+                   "depends_on: [NOPE-X-999]\n---\n\n# T\n")
+            data = R._build_map_data(R.load_requirements(rd), {})
+            self.assertEqual(data["edges"], [],
+                             "a dangling depends_on target must not emit a phantom edge")
+
+    def test_bullets_anchored_skips_commentary_heading(self):  # bug: bullets-substring-heading
+        body = ("## Notes — contract caveats\n- a mere note\n"
+                "## WHAT — Contract\n- real clause one\n- real clause two\n")
+        self.assertEqual(R._bullets(body, "contract"),
+                         ["real clause one", "real clause two"])
+
+    def test_bullets_matches_where_prefixed_section(self):  # regression: WHERE prefix
+        # _heading_label_is must accept WHERE/WHY prefixes so _bullets still finds
+        # the Current-implementation section after switching off substring matching
+        body = "## WHERE — Current implementation\n- impl detail\n"
+        self.assertEqual(R._bullets(body, "current implementation"), ["impl detail"])
+
+    def test_section_detection_and_drift_hash_agree_on_prefixes(self):  # bug: heading-re-out-of-sync
+        # _has_section (gate, via _heading_label_is) and binding_hash (drift, via
+        # _NORMATIVE_HEADING_RE) must use the same prefix set, else a WHY/WHERE-
+        # prefixed normative heading passes the gate but is left out of the hash
+        body = "## WHY — Contract\n- shall do X\n"
+        self.assertTrue(R._has_section(body, "contract"))
+        self.assertNotEqual(R.binding_hash(body), R.binding_hash("# empty\n"),
+                            "a gate-accepted contract heading must be covered by the drift hash")
+
+    def test_grouped_areas_no_duplicate_misc(self):  # bug: grouped-areas-misc-collision
+        nodes = [{"id": "M1", "area": "misc"}, {"id": "M2", "area": "misc"},
+                 {"id": "S1", "area": "solo"}]   # solo is a singleton -> misc bucket
+        groups = R._grouped_areas(nodes)
+        labels = [a for a, _ in groups]
+        self.assertEqual(labels.count("misc"), 1, "must not emit two 'misc' groups")
+        misc_nodes = next(ns for a, ns in groups if a == "misc")
+        self.assertEqual({n["id"] for n in misc_nodes}, {"M1", "M2", "S1"})
 
 
 class CapmapMalformed(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
@@ -1346,6 +1398,20 @@ class TriageFolding(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
             md = open(os.path.join(rd, "_findings.md"), encoding="utf-8").read()
             self.assertIn("mystery finding", md)            # NOT silently dropped
             self.assertIn("1 product/config decision", md)  # counted in a real bucket
+
+    def test_malformed_sidecar_summary_not_misleading(self):  # bug: findings-misleading-triaged-count
+        """A sidecar that is valid JSON but whose `items` is not a list falls back
+        to raw rendering; the summary must NOT claim a triage view was rendered."""
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-X-001.md"),
+                   _req_with_verify("AREA-X-001", ["a finding"]))
+            _write(os.path.join(rd, R.FINDINGS_SIDECAR), json.dumps({"items": {}}))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_findings(R.load_requirements(rd), rd, raw=False)
+            self.assertNotIn("triaged", buf.getvalue(),
+                             "raw fallback must not claim a triage view was rendered")
 
 
 class MdDiscovery(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
@@ -2767,6 +2833,19 @@ class PromoteTodo(unittest.TestCase):  # tested-by: REQ-PROMOTE-TODO-001
             todo = open(os.path.join(d, "TODO.md"), encoding="utf-8").read()
             self.assertIn("- [x] Support a|b pipe syntax", todo)
 
+    def test_custom_template_without_anchor_still_records_milestone(self):  # bug: promote-todo-silent-drop
+        """A custom template lacking the `superseded_by:` anchor must still get the
+        milestone (frontmatter-fence fallback), not silently drop it (#18)."""
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._setup(d)
+            tmpl = os.path.join(d, "tmpl.md")
+            _write(tmpl, "---\nid: AREA-NAME-NNN\nstatus: draft\nlayer: feature\n---\n\n# Short name\n")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_promote_todo(rq, tmpl, "Build the thing", "REQ-T-001", root=d)
+            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
+            self.assertIn("milestone: v1.14", text)   # injected via the fence fallback
+            self.assertIn("# Build the thing", text)   # title anchor present -> filled
+
     def test_errors_write_nothing(self):
         with tempfile.TemporaryDirectory() as d:
             rq = self._setup(d)
@@ -3438,6 +3517,32 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         html = R._inject_region("<body></body>", "stats", "DATA")
         self.assertEqual(R._extract_region(html, "stats"), "DATA")
         self.assertIsNone(R._extract_region("<body></body>", "stats"))
+
+    def test_inject_region_close_before_open_no_duplicate(self):  # bug: inject-region-malformed-marker
+        """A stray close marker before the open must not trigger a duplicate block
+        on injection (the close is now searched after the open)."""
+        html = ("<body>\n<!--##/REQMAP:NAV##-->stray\n"
+                "<!--##REQMAP:NAV##-->old<!--##/REQMAP:NAV##-->\n</body>")
+        out = R._inject_region(html, "nav", "NEW")
+        self.assertEqual(out.count("<!--##REQMAP:NAV##-->"), 1,
+                         "must rewrite in place, not append a second region block")
+        self.assertIn("NEW", out)
+        self.assertNotIn("old", out)
+
+    def test_scaffold_escapes_repo_name(self):  # bug: cmd-site-scaffold-unescaped
+        """Scaffold mode must HTML-escape the repo name / URL it injects into the
+        template's title and href sinks."""
+        import unittest.mock as mock
+        with tempfile.TemporaryDirectory() as d:
+            target = os.path.join(d, "docs", "architecture.html")
+            with mock.patch.object(R, "_repo_name", return_value='x"><script>bad</script>'), \
+                 mock.patch.object(R, "_git_remote_web_url", return_value=None):
+                with redirect_stdout(io.StringIO()):
+                    R.cmd_site(R.load_requirements(os.path.join(d, "requirements")),
+                               {}, root=d, attach=target, regions=["nav"])
+            html = open(target, encoding="utf-8").read()
+            self.assertNotIn("<script>bad</script>", html)
+            self.assertIn("&lt;script&gt;", html)
 
     def test_render_nav_omits_absent_targets(self):
         ctx = {"repo_url": None, "map_ok": False, "diagram_rel": None}
