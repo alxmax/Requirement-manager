@@ -3471,7 +3471,7 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
 
 
-class CommandRegistry(unittest.TestCase):  # links to REQ-CMDREGISTRY-033 (scaffolded in a later task)
+class CommandRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-033
     def test_registry_matches_argparse_choices(self):
         # the registry is the single source: argparse choices must equal its keys.
         self.assertEqual(sorted(R._cli_choices()), sorted(R.COMMANDS.keys()))

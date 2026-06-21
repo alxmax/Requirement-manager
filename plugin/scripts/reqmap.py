@@ -117,6 +117,7 @@ MAP_ENGINE_VERSION = "2026-06-21"
 # Later tasks will derive argparse choices, tool_definition.json, and a
 # markdown command table from this registry — do NOT add behaviour here.
 # ---------------------------------------------------------------------------
+# implements: REQ-CMDREGISTRY-033
 COMMANDS = {
     "init": {
         "summary": (
@@ -542,7 +543,7 @@ def _cli_choices():
     return list(COMMANDS)
 
 
-def _generate_schema():
+def _generate_schema():  # implements: REQ-CMDREGISTRY-033
     """Function-calling schema (OpenAI tool format) generated from COMMANDS.
     Returns a JSON string (indent=2, trailing newline) — byte-stable for the gate
     drift-compare. Internal commands are excluded from the AI-facing schema."""
