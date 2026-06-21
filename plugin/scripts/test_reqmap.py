@@ -3473,8 +3473,8 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
 
 class CommandRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-033
     def test_registry_matches_argparse_choices(self):
-        # the registry is the single source: argparse choices must equal its keys.
-        self.assertEqual(sorted(R._cli_choices()), sorted(R.COMMANDS.keys()))
+        # the registry is the single source: argparse choices must equal its keys in insertion order.
+        self.assertEqual(R._cli_choices(), list(R.COMMANDS))
 
     def test_every_dispatch_branch_has_a_registry_entry(self):
         # guard: every command the dispatch ladder handles is described in the registry.
@@ -3524,6 +3524,19 @@ class CommandRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-033
                 f.write("[]\n")                          # deliberately stale
             stale = R._check_integration_fresh(dst)
             self.assertIn("tool_definition.json", stale)
+
+    def test_gate_json_also_fails_on_stale_artifact(self):
+        # the --json CI path must not bypass the drift-guard
+        import tempfile, shutil, subprocess, sys
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        with tempfile.TemporaryDirectory() as d:
+            dst = os.path.join(d, "plugin")
+            shutil.copytree(os.path.join(HERE, ".."), dst)
+            with open(os.path.join(dst, "tool_definition.json"), "w", encoding="utf-8") as f:
+                f.write("[]\n")                                   # stale
+            r = subprocess.run([sys.executable, "-X", "utf8", os.path.join(dst, "scripts", "reqmap.py"),
+                                "gate", "--json"], cwd=dst, capture_output=True, text=True)
+            self.assertNotEqual(r.returncode, 0, "gate --json must fail on a stale artifact")
 
 
 if __name__ == "__main__":
