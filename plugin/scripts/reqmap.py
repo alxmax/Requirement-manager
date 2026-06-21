@@ -109,6 +109,418 @@ RISK_ADVICE = {
 # chronological order, so a plain string compare is enough.
 MAP_ENGINE_VERSION = "2026-06-21"
 
+# ---------------------------------------------------------------------------
+# COMMANDS registry — single source of truth for the CLI command set.
+# Each entry describes one user-facing command: its summary, the positional
+# argument it accepts (or None), and the flags it owns (subset of the shared
+# argparse flag pool; global flags --root/--reqs/--code/--cache are omitted).
+# Later tasks will derive argparse choices, tool_definition.json, and a
+# markdown command table from this registry — do NOT add behaviour here.
+# ---------------------------------------------------------------------------
+COMMANDS = {
+    "init": {
+        "summary": (
+            "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, "
+            "draft requirements from existing code/prose, build the lock and map, and "
+            "print guided next steps. Idempotent — safe to re-run; never clobbers an "
+            "existing .reqmapignore. Run once per repo to get started."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "wipe",
+                "flag": "--wipe",
+                "type": "bool",
+                "help": (
+                    "Hard-reset: delete all non-generated requirements and strip "
+                    "membership tags from source files before re-extracting."
+                ),
+            },
+            {
+                "name": "no_site",
+                "flag": "--no-site",
+                "type": "bool",
+                "help": "Skip the final site step (scaffolding docs/architecture.html).",
+            },
+        ],
+    },
+    "new": {
+        "summary": (
+            "Scaffold a new blank requirement from the built-in template. "
+            "Use --from-todo and --id together to pre-fill from a TODO.md item instead."
+        ),
+        "arg": "AREA-NAME-NNN",
+        "params": [
+            {
+                "name": "id",
+                "flag": "--id",
+                "type": "str",
+                "help": (
+                    "Requirement ID in AREA-NAME-NNN format (e.g. AUTH-LOGIN-001). "
+                    "Required when using --from-todo."
+                ),
+            },
+            {
+                "name": "from_todo",
+                "flag": "--from-todo",
+                "type": "str",
+                "help": (
+                    "Scaffold the requirement from a TODO.md item matched by this name "
+                    "(use with --id; add --mark-done to flip the item to [x])."
+                ),
+            },
+            {
+                "name": "mark_done",
+                "flag": "--mark-done",
+                "type": "bool",
+                "help": (
+                    "Also flip the matched TODO.md item to [x] (off by default). "
+                    "Only used with --from-todo."
+                ),
+            },
+        ],
+    },
+    "scan": {
+        "summary": (
+            "List which code files belong to which requirement, grouped by capability. "
+            "Shows all code members (implements:, generated-from:, validated-against:, "
+            "tested-by:) discovered by scanning the repo."
+        ),
+        "arg": None,
+        "params": [],
+    },
+    "gate": {
+        "summary": (
+            "Run the commit/CI gate (report-only): verify every code tag resolves to a "
+            "real requirement, every confirmed requirement has at least one implements: "
+            "member, and drift has not been introduced since the last sync. Exits "
+            "non-zero on link-sync errors only (drift and test-link integrity are "
+            "warnings). Never touches _reqlock.json. Run before every commit and in CI."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": (
+                    "Promote drift and test-link integrity warnings to errors. "
+                    "Useful in CI when all requirements are confirmed."
+                ),
+            },
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit structured JSON output instead of human-readable text.",
+            },
+            {
+                "name": "since",
+                "flag": "--since",
+                "type": "str",
+                "help": (
+                    "Scope the gate to requirements whose member files changed since "
+                    "this git ref (e.g. 'main', 'HEAD~1')."
+                ),
+            },
+        ],
+    },
+    "sync": {
+        "summary": (
+            "Rescan code members, advance the drift baseline, and regenerate the map in "
+            "one step. Run after editing requirement files or tagging new code members. "
+            "Use --accept-drift when a confirmed or implemented contract changed."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "accept_drift",
+                "flag": "--accept-drift",
+                "type": "bool",
+                "help": (
+                    "Explicitly advance the baseline when a confirmed or implemented "
+                    "contract changed. Required when those contracts differ from the "
+                    "lock; sync exits non-zero without it."
+                ),
+            },
+        ],
+    },
+    "check": {
+        "summary": (
+            "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). "
+            "Preserved for backward compatibility with consumer hooks, CI, and the "
+            "GitHub Action. Will be removed in the next major version — use 'gate' or "
+            "'sync' instead."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": "Promote drift and test-link integrity warnings to errors.",
+            },
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit structured JSON output (for CI/badge consumption).",
+            },
+            {
+                "name": "since",
+                "flag": "--since",
+                "type": "str",
+                "help": "Scope the gate to requirements whose member files changed since this git ref.",
+            },
+            {
+                "name": "update_lock",
+                "flag": "--update-lock",
+                "type": "bool",
+                "help": "Also regenerate the lock and map (mirrors legacy 'sync' behavior).",
+            },
+        ],
+    },
+    "map": {
+        "summary": (
+            "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json "
+            "(graph with nodes, edges, todos), and requirements/_map.html (a "
+            "self-contained React viewer). The viewer is only emitted when "
+            "scripts/_map_viewer.html is vendored beside the engine."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "check_fresh",
+                "flag": "--check",
+                "type": "bool",
+                "help": (
+                    "Freshness gate: rebuild the map in memory and exit non-zero if the "
+                    "committed _map.* is stale. Use in CI alongside gate."
+                ),
+            },
+        ],
+    },
+    "export": {
+        "summary": (
+            "Write requirements/_map.json (the graph with engine_version, nodes, edges) "
+            "for feeding an external front-end. Same output as map, without rebuilding "
+            "_map.md and _map.html."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "out",
+                "flag": "--out",
+                "type": "str",
+                "help": "Output path override. Use '-' for stdout (--out -); omit for requirements/_map.json.",
+            },
+        ],
+    },
+    "next": {
+        "summary": (
+            "Show what to do next: a prioritized, actionable list of risk buckets "
+            "(Orphans, Needs tests, Needs intent review, Drafts to review). "
+            "Read-only, always exits 0. The best follow-up command to run after any action."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "show_all",
+                "flag": "--all",
+                "type": "bool",
+                "help": "Expand all buckets to show every item instead of just the top few.",
+            },
+        ],
+    },
+    "lint": {
+        "summary": (
+            "Readability and structure check on non-draft requirements: long sentences "
+            "(>35 words), stacked conditions (3+ and/or joins on a shall/must line), "
+            "missing Contract or Acceptance sections. Read-only; exit-neutral by default."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": "Exit non-zero on error-severity findings (warnings remain advisory).",
+            },
+        ],
+    },
+    "show": {
+        "summary": (
+            "Print a consolidated dossier for one requirement: header, intent, Contract "
+            "bullets, dependencies in both directions, code members grouped by role with "
+            "file:line, open Verify intent questions, and risk signals. Answers 'what "
+            "does this do / where is X' in one command. Read-only."
+        ),
+        "arg": "ID",
+        "params": [],
+    },
+    "dupes": {
+        "summary": (
+            "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), "
+            "so a divergent re-implementation is caught before it lands. Read-only, "
+            "advisory — a human decides if a flagged pair is a real duplicate."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "threshold",
+                "flag": "--threshold",
+                "type": "str",
+                "help": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged.",
+            },
+        ],
+    },
+    "health": {
+        "summary": (
+            "Print a corpus coherence snapshot: a headline score (percentage of "
+            "requirements fully green on every axis: confirmed + member + tested + no "
+            "open questions + not drifted) plus component counts. Use for a CI badge "
+            "with --json."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit parseable JSON for a CI badge (--json).",
+            },
+            {
+                "name": "badge",
+                "flag": "--badge",
+                "type": "bool",
+                "help": "Emit Shields.io endpoint JSON (schemaVersion, label, message, color).",
+            },
+        ],
+    },
+    "draft": {
+        "summary": (
+            "Draft one requirement per untagged file (code and prose). Input is existing "
+            "untagged source code and Markdown. Emits draft requirements — never "
+            "confirmed. After drafting, run gate and report the result. Remind the user "
+            "to review and confirm the real ones."
+        ),
+        "arg": None,
+        "params": [],
+    },
+    "plan": {
+        "summary": (
+            "Read-only JSON capability-extraction plan: emit a capability map from "
+            "legacy code without writing any .md files. Safer than draft — a human "
+            "authors and confirms each candidate. Use before draft to preview what would "
+            "be extracted."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "out",
+                "flag": "--out",
+                "type": "str",
+                "help": "Write plan JSON here ('-' or omit = stdout).",
+            },
+            {
+                "name": "md_glob",
+                "flag": "--md-glob",
+                "type": "str",
+                "help": (
+                    "Also discover .md files matching this glob (repeatable; "
+                    "comma-separated ok). Off unless given. "
+                    "e.g. --md-glob 'prompts/**' --md-glob 'modes/**'."
+                ),
+            },
+        ],
+    },
+    "findings": {
+        "summary": (
+            "Aggregate open 'Verify intent' items across all requirements into "
+            "requirements/_findings.md. Surfaces every open human-review question in "
+            "one place."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "raw",
+                "flag": "--raw",
+                "type": "bool",
+                "help": "Ignore the triage sidecar and emit the raw grouped list.",
+            },
+        ],
+    },
+    "confirm": {
+        "summary": (
+            "Mark a reviewed requirement as confirmed — the human sign-off step. Flips "
+            "status to confirmed in the frontmatter. The engine refuses if the "
+            "requirement has no implements: member (a confirmed requirement must point "
+            "to code). Run sync after confirming."
+        ),
+        "arg": "ID",
+        "params": [],
+    },
+    "review": {
+        "summary": (
+            "Emit a JSON review plan (intent, contract, acceptance criteria, structural "
+            "anchors) for all requirements or one. Used as an AI feed for semantic "
+            "quality review. Read-only."
+        ),
+        "arg": "ID",
+        "params": [],
+    },
+    "site": {
+        "summary": (
+            "Inject or refresh engine-owned regions (nav links + stats counts) into a "
+            "project presentation page. Scaffolds a full page if the target does not "
+            "exist. Run after map to keep the page current."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "attach",
+                "flag": "--attach",
+                "type": "str",
+                "help": "Target HTML page to inject engine-owned regions into (scaffolds it if absent).",
+            },
+            {
+                "name": "regions",
+                "flag": "--regions",
+                "type": "str",
+                "help": "Comma-separated list of regions to inject (nav,stats). Default: nav.",
+            },
+            {
+                "name": "diagram",
+                "flag": "--diagram",
+                "type": "str",
+                "help": "Relative path (from the page) to an Excalidraw HTML viewer; linked only if it exists.",
+            },
+            {
+                "name": "detect",
+                "flag": "--detect",
+                "type": "bool",
+                "help": "Scan docs/ and print the suggested command — writes nothing.",
+            },
+        ],
+    },
+    "coverage": {
+        "summary": (
+            "Read-only report of untagged-code coverage signal: lists source files that "
+            "carry no implements: tag, grouped by directory. Use to identify gaps in "
+            "requirement traceability."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit structured JSON output (for CI consumption).",
+            },
+        ],
+    },
+}
+
 
 # ---------- parsing ----------
 def _as_list(v):  # implements: CORE-PARSE-001
