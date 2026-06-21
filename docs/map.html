@@ -2833,22 +2833,52 @@
       "done": true
     },
     {
-      "name": "Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices + per-command flags + dispatch derived from it (hand-written `choices=[...]` literal removed). Existing CLI behaviour byte-identical (TestCli unchanged).",
+      "name": "Project presentation page (`site`): inject/refresh engine-owned nav + stats regions into docs/architecture.html (scaffold if absent)",
+      "lane": "feature",
+      "milestone": "v1.35",
+      "done": true
+    },
+    {
+      "name": "Excalidraw scene builder — core stdlib API (.excalidraw scene + self-contained HTML viewer)",
+      "lane": "feature",
+      "milestone": "v2.4",
+      "done": true
+    },
+    {
+      "name": "Excalidraw quality gates at save() (overlap, crossing, legend, text-overflow, text-overlap; later: short-arrow, label-fit)",
+      "lane": "feature",
+      "milestone": "v2.4",
+      "done": true
+    },
+    {
+      "name": "Excalidraw builder CLI verbs (`render` a scene → viewer; `discover` a repo → generator stub)",
+      "lane": "feature",
+      "milestone": "v2.4",
+      "done": true
+    },
+    {
+      "name": "Untagged-code coverage signal: read-only `untagged` count in `health` (code traced to no requirement)",
+      "lane": "feature",
+      "milestone": "v2.6",
+      "done": true
+    },
+    {
+      "name": "Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices derived from it (hand-written `choices=[...]` literal removed). Dispatch ladder left intact (de-risked); CLI behaviour byte-identical (TestCli unchanged).",
       "lane": "bus",
       "milestone": "v2.7",
-      "done": false
+      "done": true
     },
     {
-      "name": "Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside each SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry.",
+      "name": "Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry.",
       "lane": "feature",
       "milestone": "v2.7",
-      "done": false
+      "done": true
     },
     {
-      "name": "Drift-guard: `gate` regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`.",
+      "name": "Drift-guard: `gate` (incl. `--json`) regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`.",
       "lane": "ops",
       "milestone": "v2.7",
-      "done": false
+      "done": true
     },
     {
       "name": "MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above.",
