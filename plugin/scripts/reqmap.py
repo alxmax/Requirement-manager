@@ -1465,6 +1465,16 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             save_memberlock(reqs_dir, compute_member_hashes(code_root, members))  # re-baseline reverse drift
             print("lock updated.")
 
+    # Integration-artifact freshness: stale tool_definition.json or command-table region
+    # in SKILL.universal.md means someone edited COMMANDS without running gen-integration.
+    # Skipped silently when the artifacts don't exist (consumer/vendored repos).
+    # Must run BEFORE the as_json early-return so --json (the CI/badge path) also
+    # exits non-zero on a stale artifact.  # implements: REQ-CMDREGISTRY-033
+    plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _stale = _check_integration_fresh(plugin_root)
+    if _stale:
+        errors = list(errors) + ["stale integration artifact(s): " + ", ".join(_stale)]
+
     if as_json:
         print(json.dumps({"ok": not (errors or lock_blocked), "errors": errors, "warnings": warns}))
         return 1 if (errors or lock_blocked) else 0
@@ -1473,20 +1483,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         print("WARN ", w)
     for e in errors:
         print("ERROR", e)
+    if _stale:
+        print("ERROR: stale generated integration artifact(s): " + ", ".join(_stale)
+              + " — run `python scripts/reqmap.py gen-integration` and commit.", file=sys.stderr)
 
     n_find = sum(len(items) for _rid, _t, items in collect_findings(reqs))
     if n_find:
         print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py findings`")
-
-    # Integration-artifact freshness: stale tool_definition.json or command-table region
-    # in SKILL.universal.md means someone edited COMMANDS without running gen-integration.
-    # Skipped silently when the artifacts don't exist (consumer/vendored repos).
-    plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    _stale = _check_integration_fresh(plugin_root)
-    if _stale:
-        print("ERROR: stale generated integration artifact(s): " + ", ".join(_stale)
-              + " — run `python scripts/reqmap.py gen-integration` and commit.", file=sys.stderr)
-        errors = list(errors) + ["stale integration artifact(s): " + ", ".join(_stale)]
 
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "

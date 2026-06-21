@@ -30,14 +30,14 @@ milestone: v2.7
 
 ## WHAT — Notes & known limitations (informative)
 - `gen-integration` is the only command that writes generated artifacts; running it is required after any `COMMANDS` change before committing.
-- The gate check (`_check_integration_fresh`) re-generates in a temp dir and compares byte-for-byte; it is deterministic because `_generate_schema` sorts keys and `_generate_command_table` iterates `COMMANDS` insertion order.
+- The gate check (`_check_integration_fresh`) re-generates in a temp dir and compares byte-for-byte; it is deterministic because `_generate_schema` sorts JSON object keys and `_generate_command_table` iterates `COMMANDS` in insertion order (which is also the order exposed by `_cli_choices()` and `--help`).
 
 ## HOW — Acceptance (= tests)
 
 AC-1
   Given  the `COMMANDS` registry and the live argparse parser
   When   `_cli_choices()` is called
-  Then   its return value equals `sorted(COMMANDS.keys())` — no literal choices exist
+  Then   its return value equals `list(COMMANDS)` (insertion order) — no literal choices exist
 
 AC-2
   Given  a committed `tool_definition.json` whose content differs from a fresh generation
