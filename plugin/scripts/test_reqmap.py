@@ -3471,5 +3471,21 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
 
 
+class CommandRegistry(unittest.TestCase):  # links to REQ-CMDREGISTRY-033 (scaffolded in a later task)
+    def test_registry_matches_argparse_choices(self):
+        # the registry is the single source: argparse choices must equal its keys.
+        self.assertEqual(sorted(R._cli_choices()), sorted(R.COMMANDS.keys()))
+
+    def test_every_dispatch_branch_has_a_registry_entry(self):
+        # guard: every command the dispatch ladder handles is described in the registry.
+        import re
+        _scripts = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(_scripts, "reqmap.py"), encoding="utf-8") as _f:
+            src = _f.read()
+        handled = set(re.findall(r'a\.cmd == "([a-z-]+)"', src))
+        self.assertTrue(handled.issubset(set(R.COMMANDS)),
+                        f"dispatch handles commands absent from COMMANDS: {handled - set(R.COMMANDS)}")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

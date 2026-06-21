@@ -528,6 +528,11 @@ COMMANDS = {
 }
 
 
+def _cli_choices():
+    """The CLI command names, derived from the registry (single source of truth)."""
+    return list(COMMANDS)
+
+
 # ---------- parsing ----------
 def _as_list(v):  # implements: CORE-PARSE-001
     """Coerce a frontmatter value to a list: lists pass through, a bare scalar
@@ -4242,7 +4247,7 @@ def main():
             "  check                alias for 'gate' (removed next major)\n"
         ),
     )
-    ap.add_argument("cmd", choices=["init", "new", "scan", "gate", "sync", "check", "map", "export", "next", "lint", "show", "dupes", "health", "draft", "plan", "findings", "confirm", "review", "site", "coverage"])
+    ap.add_argument("cmd", choices=_cli_choices())
     ap.add_argument("arg", nargs="?")
     ap.add_argument("--root", default=".")
     ap.add_argument("--reqs", default=None)
