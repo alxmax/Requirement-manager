@@ -99,8 +99,14 @@ function Canvas({ width, height, minHeight, onClear, children }) {
   );
 }
 
-/* tiny inline-markdown: `code` → <code> */
-function mdInline(s) { return String(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+/* tiny inline-markdown: HTML-escape first, then `code` → <code>. Escaping is
+ * mandatory: the output feeds dangerouslySetInnerHTML and the text is untrusted
+ * requirement markdown carried verbatim from _map.json. */
+function mdInline(s) {
+  return String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
 
 function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
   if (!r) return null;

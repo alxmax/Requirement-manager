@@ -10,7 +10,7 @@ import { setRegistry, REQUIREMENTS } from "../src/lib/data.js";
 import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView } from "../src/views/ProblemsView.jsx";
-import { ConsoleView } from "../src/views/ConsoleView.jsx";
+import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
 
 // feed the real engine export through the adapter, exactly as the browser would
@@ -23,7 +23,7 @@ const cases = {
   App: <App />,
   MapView: <MapView selId="CORE-PARSE-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />,
   ProblemsView: <ProblemsView openSpec={noop} />,
-  ConsoleView: <ConsoleView />,
+  RoadmapView: <RoadmapView openSpec={noop} />,
   SpecView: <SpecView selId="REQ-MAP-007" setSelId={noop} />,
 };
 
@@ -47,6 +47,25 @@ const checks = [
   ["renders Problems nav", appHtml.includes("Problems")],
 ];
 for (const [label, ok] of checks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
+
+// XSS regression: untrusted requirement HTML must render ESCAPED in both
+// dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecView), never live.
+setRegistry([adaptNode({
+  id: "XSS-TEST-001", title: "xss", area: "XSS", layer: "feature", status: "confirmed",
+  intent: "i", contract: ['danger <img src=x onerror="boom()">'],
+  acc: ['<script>boom()</script>'], members: [], deps: [], used_by: [],
+})]);
+const xssMap = renderToString(
+  <MapView selId="XSS-TEST-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />);
+const xssSpec = renderToString(<SpecView selId="XSS-TEST-001" setSelId={noop} />);
+const xssChecks = [
+  ["MapView escapes injected contract HTML", xssMap.includes("&lt;img") && !xssMap.includes("<img src=x onerror")],
+  ["SpecView escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
+];
+for (const [label, ok] of xssChecks) {
   console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
   if (!ok) failures++;
 }
