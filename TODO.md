@@ -64,3 +64,24 @@
 - [x] ~~Internal-consistency lint: flag a requirement whose structured fields moved to a new model while its prose Contract/AC still assert the superseded model.~~ **DROPPED** | lane: feature
       <!-- DROPPED (not implemented). Senate 2026-06-19 (runs/senate/2026-06-19_224727-reqmap-item4-internal-consistency-lint.json) + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by REQ-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
 
+## v2.7
+<!-- Multi-platform Phase 1. Senate 2026-06-21 (runs/senate/2026-06-21_110220-reqmap-multiplatform-mcp.json, verdict MODIFY).
+     Detail spec: docs/superpowers/specs/2026-06-21-reqmap-multiplatform-command-registry-design.md
+     Problem: the prior multi-AI artifacts (tool_definition.json + 3 SKILL.universal.md) are hand-maintained
+     mirrors of the CLI with no sync mechanism — already drifting. Fix: one declarative command registry as
+     the single source of truth, generate the artifacts from it, drift-guard them in the gate. -->
+- [ ] Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices + per-command flags + dispatch derived from it (hand-written `choices=[...]` literal removed). Existing CLI behaviour byte-identical (TestCli unchanged). | lane: bus
+- [ ] Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside each SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry. | lane: feature
+- [ ] Drift-guard: `gate` regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`. | lane: ops
+
+## v2.8 (deferred — demand-gated)
+<!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
+     direct-CLI already covers every current shell-capable assistant (Claude Code, Copilot CLI, Gemini CLI,
+     Codex), so an MCP server unlocks zero platforms today, and demand is unproven (Deming n=0). BUILD ONLY
+     when ALL hold: (1) a named consumer that genuinely cannot use direct-CLI; (2) a conformance test
+     (initialize -> tools/list -> tools/call over stdio); (3) read-only-by-default mutation guard
+     (--allow-writes to expose sync/confirm/map); (4) init seeds the artifacts + gate warns when absent;
+     (5) stdlib-only stdio JSON-RPC against a pinned MCP protocol version, OR adopt the SDK and drop the
+     zero-dependency claim for that module only. -->
+- [ ] MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above. | lane: feature
+

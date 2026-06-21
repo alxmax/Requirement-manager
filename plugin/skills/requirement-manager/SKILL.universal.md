@@ -301,23 +301,30 @@ Creation verbs (pick by input, not by outcome):
 - `new AREA-NAME-NNN` — input is **nothing yet**; scaffolds one blank requirement from the built-in template.
 - `new --from-todo "TODO name" --id AREA-NAME-NNN` — input is a **TODO.md item**; scaffolds a requirement draft pre-filled from that item. Add `--mark-done` to flip the TODO item to `[x]` at the same time.
 
-- `python scripts/reqmap.py init`              — first-use bootstrap
-- `python scripts/reqmap.py new AREA-NAME-NNN`   — scaffold a requirement from the template
-- `python scripts/reqmap.py confirm <ID>`        — human-validation step: flip status to `confirmed`
-- `python scripts/reqmap.py scan`              — list code members per capability
-- `python scripts/reqmap.py sync`              — rescan + advance the drift baseline + regenerate the map
-- `python scripts/reqmap.py gate`              — run the commit/CI gate (report-only)
-- `python scripts/reqmap.py next`              — "what should I do next"
-- `python scripts/reqmap.py lint`             — readability/structure check
-- `python scripts/reqmap.py show <ID>`         — consolidated dossier for one requirement
-- `python scripts/reqmap.py dupes`             — flag overlapping contracts
-- `python scripts/reqmap.py health`            — corpus coherence snapshot
-- `python scripts/reqmap.py map`               — generate `_map.md` + `_map.json` + `_map.html`
-- `python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats`
-- `python scripts/reqmap.py export`            — write just `requirements/_map.json`
-- `python scripts/reqmap.py draft`             — draft requirements from untagged code
-- `python scripts/reqmap.py plan`              — read-only extraction plan (JSON)
-- `python scripts/reqmap.py findings`          — aggregate open verify-intent items
+<!--##REQMAP:COMMANDS##-->
+| Command | What it does | Flags |
+|---|---|---|
+| `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code/prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. Run once per repo to get started. | `--wipe`, `--no-site` |
+| `new` | Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
+| `scan` | List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo. | — |
+| `gate` | Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI. | `--strict`, `--json`, `--since` |
+| `sync` | Rescan code members, advance the drift baseline, and regenerate the map in one step. Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed. | `--accept-drift`, `--strict` |
+| `check` | Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in the next major version — use 'gate' or 'sync' instead. | `--strict`, `--json`, `--since`, `--update-lock` |
+| `map` | Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine. | `--check` |
+| `export` | Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html. | `--out` |
+| `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
+| `lint` | Readability and structure check on non-draft requirements: long sentences (>35 words), stacked conditions (3+ and/or joins on a shall/must line), missing Contract or Acceptance sections. Read-only; exit-neutral by default. | `--strict` |
+| `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
+| `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
+| `health` | Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with --json. | `--json`, `--badge` |
+| `draft` | Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones. | — |
+| `plan` | Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted. | `--out`, `--md-glob` |
+| `findings` | Aggregate open 'Verify intent' items across all requirements into requirements/_findings.md. Surfaces every open human-review question in one place. | `--raw` |
+| `confirm` | Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming. | — |
+| `review` | Emit a JSON review plan (intent, contract, acceptance criteria, structural anchors) for all requirements or one. Used as an AI feed for semantic quality review. Read-only. | — |
+| `site` | Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current. | `--attach`, `--regions`, `--diagram`, `--detect` |
+| `coverage` | Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability. | `--json` |
+<!--##/REQMAP:COMMANDS##-->
 
 **`check` is a deprecated alias for `gate`** — kept for backward compat.
 

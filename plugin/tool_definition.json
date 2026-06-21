@@ -7,13 +7,67 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ should live. Defaults to cwd."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "wipe": {
+            "type": "boolean",
+            "description": "Hard-reset: delete all non-generated requirements and strip membership tags from source files before re-extracting."
           },
           "no_site": {
             "type": "boolean",
-            "description": "Skip scaffolding docs/architecture.html (pass --no-site)."
+            "description": "Skip the final site step (scaffolding docs/architecture.html)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_new",
+      "description": "Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "AREA-NAME-NNN"
+          },
+          "id": {
+            "type": "string",
+            "description": "Requirement ID in AREA-NAME-NNN format (e.g. AUTH-LOGIN-001). Required when using --from-todo."
+          },
+          "from_todo": {
+            "type": "string",
+            "description": "Scaffold the requirement from a TODO.md item matched by this name (use with --id; add --mark-done to flip the item to [x])."
+          },
+          "mark_done": {
+            "type": "boolean",
+            "description": "Also flip the matched TODO.md item to [x] (off by default). Only used with --from-todo."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_scan",
+      "description": "List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           }
         },
         "required": []
@@ -28,13 +82,13 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
           "strict": {
             "type": "boolean",
-            "description": "Promote drift and test-link integrity warnings to errors (--strict). Useful in CI when all requirements are confirmed."
+            "description": "Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed."
           },
           "json": {
             "type": "boolean",
@@ -42,7 +96,7 @@
           },
           "since": {
             "type": "string",
-            "description": "Limit gate to requirements touched since this git ref (e.g. 'main', 'HEAD~1')."
+            "description": "Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')."
           }
         },
         "required": []
@@ -53,17 +107,54 @@
     "type": "function",
     "function": {
       "name": "reqmap_sync",
-      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step. Run after editing requirement files or tagging new code members. Use accept_drift when a confirmed or implemented contract changed.",
+      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step. Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed.",
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
           "accept_drift": {
             "type": "boolean",
-            "description": "Explicitly advance the baseline when a confirmed or implemented contract changed (--accept-drift). Required by sync when those contracts differ from the lock; sync exits non-zero without it."
+            "description": "Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Promote drift and test-link integrity from warn to error."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_check",
+      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in the next major version — use 'gate' or 'sync' instead.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Promote drift and test-link integrity warnings to errors."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit structured JSON output (for CI/badge consumption)."
+          },
+          "since": {
+            "type": "string",
+            "description": "Scope the gate to requirements whose member files changed since this git ref."
+          },
+          "update_lock": {
+            "type": "boolean",
+            "description": "Also regenerate the lock and map (mirrors legacy 'sync' behavior)."
           }
         },
         "required": []
@@ -74,228 +165,17 @@
     "type": "function",
     "function": {
       "name": "reqmap_map",
-      "description": "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained double-click-openable React viewer with 4 tabs: Map, Problems, Spec, Roadmap). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine.",
+      "description": "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine.",
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
-          "check": {
+          "check_fresh": {
             "type": "boolean",
-            "description": "Freshness gate: rebuild the map in memory and exit non-zero if the committed _map.* is stale (--check). Use in CI alongside gate."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_new",
-      "description": "Scaffold a new blank requirement from the built-in template. Use from_todo and id together to pre-fill from a TODO.md item instead.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "id": {
-            "type": "string",
-            "description": "Requirement ID in AREA-NAME-NNN format (e.g. AUTH-LOGIN-001). Required unless using from_todo."
-          },
-          "from_todo": {
-            "type": "string",
-            "description": "Name of a TODO.md item to pre-fill the requirement from (--from-todo). Requires id."
-          },
-          "mark_done": {
-            "type": "boolean",
-            "description": "Flip the TODO.md item to [x] at the same time (--mark-done). Only used with from_todo."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_confirm",
-      "description": "Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "id": {
-            "type": "string",
-            "description": "Requirement ID to confirm (e.g. AUTH-LOGIN-001)."
-          }
-        },
-        "required": ["id"]
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_draft",
-      "description": "Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_plan",
-      "description": "Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "md_glob": {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": "Additional glob patterns for non-code Markdown to include in the plan (e.g. ['prompts/**', 'modes/**'])."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_next",
-      "description": "Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "all": {
-            "type": "boolean",
-            "description": "Expand all buckets to show every item instead of just the top few (--all)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_lint",
-      "description": "Readability and structure check on non-draft requirements: long sentences (>35 words), stacked conditions (3+ and/or joins on a shall/must line), missing Contract or Acceptance sections. Read-only; exit-neutral by default.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "strict": {
-            "type": "boolean",
-            "description": "Exit non-zero on error-severity findings only (warnings remain advisory)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_show",
-      "description": "Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "id": {
-            "type": "string",
-            "description": "Requirement ID to show (e.g. AUTH-LOGIN-001)."
-          }
-        },
-        "required": ["id"]
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_scan",
-      "description": "List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_dupes",
-      "description": "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "threshold": {
-            "type": "number",
-            "description": "Similarity threshold (0–1). Default 0.35. Lower = more pairs flagged."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_health",
-      "description": "Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with json=true.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "working_directory": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives."
-          },
-          "json": {
-            "type": "boolean",
-            "description": "Emit parseable JSON for a CI badge (--json)."
+            "description": "Freshness gate: rebuild the map in memory and exit non-zero if the committed _map.* is stale. Use in CI alongside gate."
           }
         },
         "required": []
@@ -310,13 +190,164 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
           "out": {
             "type": "string",
-            "description": "Output path override. Use '-' for stdout (--out -)."
+            "description": "Output path override. Use '-' for stdout (--out -); omit for requirements/_map.json."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_next",
+      "description": "Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "show_all": {
+            "type": "boolean",
+            "description": "Expand all buckets to show every item instead of just the top few."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_lint",
+      "description": "Readability and structure check on non-draft requirements: long sentences (>35 words), stacked conditions (3+ and/or joins on a shall/must line), missing Contract or Acceptance sections. Read-only; exit-neutral by default.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Exit non-zero on error-severity findings (warnings remain advisory)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_show",
+      "description": "Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "ID"
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_dupes",
+      "description": "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "threshold": {
+            "type": "number",
+            "description": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_health",
+      "description": "Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with --json.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit parseable JSON for a CI badge (--json)."
+          },
+          "badge": {
+            "type": "boolean",
+            "description": "Emit Shields.io endpoint JSON (schemaVersion, label, message, color)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_draft",
+      "description": "Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_plan",
+      "description": "Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "out": {
+            "type": "string",
+            "description": "Write plan JSON here ('-' or omit = stdout)."
+          },
+          "md_glob": {
+            "type": "string",
+            "description": "Also discover .md files matching this glob (repeatable; comma-separated ok). Off unless given. e.g. --md-glob 'prompts/**' --md-glob 'modes/**'."
           }
         },
         "required": []
@@ -331,9 +362,34 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "raw": {
+            "type": "boolean",
+            "description": "Ignore the triage sidecar and emit the raw grouped list."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_confirm",
+      "description": "Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "ID"
           }
         },
         "required": []
@@ -348,13 +404,13 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
-          "id": {
+          "arg": {
             "type": "string",
-            "description": "Optional requirement ID to review just one (e.g. AUTH-LOGIN-001). Omit for the whole corpus."
+            "description": "ID"
           }
         },
         "required": []
@@ -369,25 +425,46 @@
       "parameters": {
         "type": "object",
         "properties": {
-          "working_directory": {
+          "root": {
             "type": "string",
-            "description": "Repo root where requirements/ lives."
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
           "attach": {
             "type": "string",
-            "description": "Path to the HTML page to inject regions into (--attach path/to/page.html)."
+            "description": "Target HTML page to inject engine-owned regions into (scaffolds it if absent)."
           },
           "regions": {
             "type": "string",
-            "description": "Comma-separated list of regions to inject: 'nav' (top links) or 'nav,stats' (links + counts). Default: nav,stats."
+            "description": "Comma-separated list of regions to inject (nav,stats). Default: nav."
           },
           "diagram": {
             "type": "string",
-            "description": "Relative path to an Excalidraw .html viewer to link from the nav region."
+            "description": "Relative path (from the page) to an Excalidraw HTML viewer; linked only if it exists."
           },
           "detect": {
             "type": "boolean",
-            "description": "Scan docs/ and suggest the command to run — does not modify any files."
+            "description": "Scan docs/ and print the suggested command — writes nothing."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_coverage",
+      "description": "Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit structured JSON output (for CI consumption)."
           }
         },
         "required": []

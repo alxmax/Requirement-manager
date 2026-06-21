@@ -3471,5 +3471,60 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
             self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
 
 
+class CommandRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-033
+    def test_registry_matches_argparse_choices(self):
+        # the registry is the single source: argparse choices must equal its keys.
+        self.assertEqual(sorted(R._cli_choices()), sorted(R.COMMANDS.keys()))
+
+    def test_every_dispatch_branch_has_a_registry_entry(self):
+        # guard: every command the dispatch ladder handles is described in the registry.
+        import re
+        _scripts = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(_scripts, "reqmap.py"), encoding="utf-8") as _f:
+            src = _f.read()
+        handled = set(re.findall(r'a\.cmd == "([a-z-]+)"', src))
+        self.assertTrue(handled.issubset(set(R.COMMANDS)),
+                        f"dispatch handles commands absent from COMMANDS: {handled - set(R.COMMANDS)}")
+
+    def test_generated_schema_matches_committed(self):
+        generated = R._generate_schema()                 # JSON string, trailing newline
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        committed = open(os.path.join(HERE, "..", "tool_definition.json"), encoding="utf-8").read()
+        self.assertEqual(generated, committed)
+
+    def test_schema_has_one_entry_per_user_command(self):
+        import json as _j
+        tools = _j.loads(R._generate_schema())
+        names = {t["function"]["name"] for t in tools}
+        expected = {"reqmap_" + c.replace("-", "_")
+                    for c, s in R.COMMANDS.items() if not s.get("internal")}
+        self.assertEqual(names, expected)
+
+    def test_command_table_region_is_generated(self):
+        table = R._generate_command_table()              # markdown table string
+        _here = os.path.dirname(os.path.abspath(__file__))
+        skill_path = os.path.join(_here, "..", "skills", "requirement-manager", "SKILL.universal.md")
+        text = open(skill_path, encoding="utf-8").read()
+        start = text.index("<!--##REQMAP:COMMANDS##-->") + len("<!--##REQMAP:COMMANDS##-->")
+        end = text.index("<!--##/REQMAP:COMMANDS##-->")
+        self.assertEqual(text[start:end].strip(), table.strip())
+
+    def test_integration_fresh_when_committed(self):
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        plugin_root = os.path.join(HERE, "..")          # plugin/
+        self.assertEqual(R._check_integration_fresh(plugin_root), [])
+
+    def test_check_integration_fresh_detects_stale_schema(self):
+        import tempfile, shutil
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        with tempfile.TemporaryDirectory() as d:
+            dst = os.path.join(d, "plugin")
+            shutil.copytree(os.path.join(HERE, ".."), dst)
+            with open(os.path.join(dst, "tool_definition.json"), "w", encoding="utf-8") as f:
+                f.write("[]\n")                          # deliberately stale
+            stale = R._check_integration_fresh(dst)
+            self.assertIn("tool_definition.json", stale)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
