@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-21.4"
+MAP_ENGINE_VERSION = "2026-06-21.5"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1095,7 +1095,10 @@ def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
     if os.path.exists(p):
         try:
             with open(p, encoding="utf-8") as f:
-                return json.load(f)
+                data = json.load(f)
+            # a valid-JSON-but-non-object lock ([], null, 42) must also fail open —
+            # consumers call lock.get(rid); fail open like load_memberlock/_load_scancache
+            return data if isinstance(data, dict) else {}
         except (ValueError, OSError):
             # empty / corrupt / merge-conflicted / non-UTF-8 lock: treat as no lock.
             # ValueError covers both json.JSONDecodeError and UnicodeDecodeError, so
@@ -1430,7 +1433,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
 
     # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
     # no generated-from: lineage drifts from them unnoticed (warn-only — see REQ-DOCBUNDLE-026).
-    for rel in untagged_doc_bundles(code_root, members, reqs_dir):
+    for rel in untagged_doc_bundles(code_root, full_members, reqs_dir):  # full set: a doc's generated-from membership is independent of the --since diff
         warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
                      "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
@@ -1809,7 +1812,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
         dirs.sort()                            # deterministic id/suffix assignment
         for fn in sorted(files):
-            is_code = fn.endswith((".py", ".js", ".ts", ".cpp", ".c"))
+            is_code = fn.endswith(tuple(e for e in CODE_EXTS if e not in PROSE_EXTS))
             is_prose = fn.endswith(PROSE_EXTS)
             if not (is_code or is_prose):
                 continue
@@ -2423,6 +2426,7 @@ def cmd_export(reqs, members, reqs_dir, root=".", out=None):  # implements: REQ-
     requirements/_map.json by default."""
     data = _build_map_data(reqs, members)
     data["repo"] = _repo_name(root)
+    data["todos"] = _parse_todos(root)   # mirror cmd_map so export is byte-equivalent
     text = _build_json_text(data)
     target = out if out else os.path.join(reqs_dir, "_map.json")
     if target == "-":
@@ -4384,6 +4388,9 @@ def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
     consumer should focus on, a corpus coverage_summary, and the finding contract. The plan
     is byte-reproducible across runs; the AI findings DERIVED from it are advisory and NOT
     reproducible, and no gate path reads this output or any AI sidecar."""
+    if one_id and one_id not in reqs:
+        print("no requirement with id {} (expected requirements/{}.md)".format(one_id, one_id))
+        return 1
     ids = [one_id] if one_id else sorted(reqs)
     items = []
     for rid in ids:
