@@ -3500,6 +3500,15 @@ class CommandRegistry(unittest.TestCase):  # links to REQ-CMDREGISTRY-033 (scaff
                     for c, s in R.COMMANDS.items() if not s.get("internal")}
         self.assertEqual(names, expected)
 
+    def test_command_table_region_is_generated(self):
+        table = R._generate_command_table()              # markdown table string
+        _here = os.path.dirname(os.path.abspath(__file__))
+        skill_path = os.path.join(_here, "..", "skills", "requirement-manager", "SKILL.universal.md")
+        text = open(skill_path, encoding="utf-8").read()
+        start = text.index("<!--##REQMAP:COMMANDS##-->") + len("<!--##REQMAP:COMMANDS##-->")
+        end = text.index("<!--##/REQMAP:COMMANDS##-->")
+        self.assertEqual(text[start:end].strip(), table.strip())
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -565,12 +565,40 @@ def _generate_schema():
     return json.dumps(tools, indent=2, ensure_ascii=False) + "\n"
 
 
+def _generate_command_table():
+    """A markdown table of the user CLI commands from COMMANDS, for the generated
+    region inside SKILL.universal.md. Internal commands are excluded."""
+    rows = ["| Command | What it does | Flags |", "|---|---|---|"]
+    for name, spec in COMMANDS.items():
+        if spec.get("internal"):
+            continue
+        flags = ", ".join("`" + p["flag"] + "`" for p in spec["params"]) or "—"
+        rows.append("| `{}` | {} | {} |".format(name, spec["summary"], flags))
+    return "\n".join(rows)
+
+
+_REGION_RE = re.compile(r"(<!--##REQMAP:COMMANDS##-->)(.*?)(<!--##/REQMAP:COMMANDS##-->)", re.DOTALL)
+
+
+def _write_region(path, body):
+    """Replace the delimited region body in `path`; prose outside is untouched."""
+    text = open(path, encoding="utf-8").read()
+    new = _REGION_RE.sub(lambda m: m.group(1) + "\n" + body + "\n" + m.group(3), text)
+    if new != text:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(new)
+
+
 def cmd_gen_integration(reqs_dir, code_root):
     """Write tool_definition.json (OpenAI function-calling schema) generated from COMMANDS."""
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     with open(os.path.join(plugin_root, "tool_definition.json"), "w", encoding="utf-8") as f:
         f.write(_generate_schema())
     print("wrote tool_definition.json")
+    skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
+    if os.path.exists(skill):
+        _write_region(skill, _generate_command_table())
+        print("wrote SKILL.universal.md command table")
     return 0
 
 
