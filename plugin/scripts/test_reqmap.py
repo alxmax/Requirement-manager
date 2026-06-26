@@ -1204,6 +1204,22 @@ class GateErrors(unittest.TestCase):  # tested-by: REQ-CHECK-006
         self.assertNotIn("tested-by", out)
         self.assertEqual(code, 0)
 
+    def test_untracked_lock_flagged_then_cleared(self):  # uncommitted-lock gap  # verifies: REQ-CHECK-006#AC-13
+        import subprocess as _sp
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "requirements")
+            os.makedirs(reqs_dir)
+            R.save_lock(reqs_dir, {"REQ-A-001": "abc"})
+            # not a git work tree yet -> fail open, no false positive
+            self.assertEqual([], R.untracked_locks(reqs_dir))
+            for args in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"]):
+                _sp.run(["git", "-C", d, *args], check=True, capture_output=True)
+            # lock on disk but untracked -> flagged
+            self.assertTrue(any("_reqlock.json" in p for p in R.untracked_locks(reqs_dir)))
+            # once tracked -> cleared
+            _sp.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+            self.assertEqual([], R.untracked_locks(reqs_dir))
+
     def test_update_lock_writes_hashes(self):  # verifies: REQ-CHECK-006#AC-12
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "A-FOO-001.md"),
@@ -2597,6 +2613,18 @@ class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
             p = os.path.join(d, "lib.rs")
             _write(p, "#[cfg(test)]\nmod t {\n  #[test]\n  fn checks() {}\n}\n")
             self.assertEqual("", R._test_link_problem(p))
+
+    def test_py_runner_entry_recognized(self):  # stdlib suites drive checks from run()/main()
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "test_thing.py")
+            _write(p, 'def run():\n    return 0\nif __name__ == "__main__":\n    raise SystemExit(run())\n')
+            self.assertEqual("", R._test_link_problem(p))
+
+    def test_py_runner_entry_needs_main_guard(self):  # a bare main()/run() without __main__ is not a test
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "helper.py")
+            _write(p, "def main():\n    return 0\n")
+            self.assertIn("no test function", R._test_link_problem(p))
 
     def test_check_warns_warn_only_on_broken_link(self):
         with tempfile.TemporaryDirectory() as d:

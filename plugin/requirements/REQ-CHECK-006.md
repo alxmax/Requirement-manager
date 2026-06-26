@@ -34,6 +34,10 @@ lint_exempt: [ac-count-high]
   `v<digits>[.<digits>…]` (e.g. `v1.14`); a malformed value is a `WARN` (it is roadmap-only
   metadata, never build-critical) and a `deprecated` requirement is exempt.
 - A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).
+- A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not
+  git-tracked** shall be a `WARN` naming the file, because an uncommitted lock silently
+  disables drift detection on a fresh CI checkout (no baseline to compare against). The
+  check is fail-open: silent when git is unavailable or the tree is not a work tree.
 - Requirements whose body lacks a `## WHAT — Verify intent` section shall be named in one
   aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.
 - It shall print an advisory line with the open verify-intent finding count when > 0,
@@ -116,6 +120,11 @@ AC-12
   Given  an advancing run (`sync`, or the deprecated `check --update-lock`)
   When   it runs
   Then   the current hashes are written to `requirements/_reqlock.json`
+
+AC-13
+  Given  a `_reqlock.json` (or `_memberlock.json`) present on disk but not git-tracked, inside a git work tree
+  When   `gate` runs
+  Then   it produces a `WARN` naming the file; once the file is tracked, or when run outside a git work tree, it produces none
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

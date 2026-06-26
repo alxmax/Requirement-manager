@@ -1,5 +1,28 @@
 # Changelog
 
+## plugin `v2.8.0` — 2026-06-26
+
+**Gate hardening — close the stale-map / uncommitted-lock blind spot.** A consumer repo
+hit a recurring member-drift that the gate never caught: CI ran only the link-sync `gate`
+(stale map / drift exit 0) and the `_memberlock.json` baseline was generated but never
+committed. Three fixes so this can't recur for any consumer:
+- The published action (`check/action.yml`) now runs **`map --check`** after the gate by
+  default (new `freshness` input, default `true`) — a stale or never-committed map/lock
+  fails CI instead of merging unseen. A repo that tracks no map passes silently. New
+  `reqmap-repo` input pins `REQMAP_REPO` for a repo whose committed map targets a different
+  slug (e.g. a private repo publishing to a public mirror); it is exported only when
+  non-empty, since an empty value means "emit no repo" to the engine. The default hook/CI
+  examples in `SKILL.md` gain the `map --check` line too.
+- **Untracked-lock warning** (`gate`): a `_reqlock.json` / `_memberlock.json` present on disk
+  but not git-tracked is now a `WARN` naming the file — the exact gap that silently disables
+  drift detection on a fresh checkout. Fail-open (silent when git is unavailable).
+- **Test-link detector** now recognizes a Python suite that drives its checks from a
+  `run` / `run_tests` / `main` entry point under an `if __name__ == "__main__"` guard, not
+  only `def test…`. A stdlib-only harness no longer false-negatives the test-link integrity
+  check — that false error was what blocked `gate --strict` on such corpora.
+
+`MAP_ENGINE_VERSION` → `2026-06-26`.
+
 ## plugin `v2.3.1` — 2026-06-16
 
 **License correction.** `plugin/.claude-plugin/plugin.json` declared `"MIT"` while

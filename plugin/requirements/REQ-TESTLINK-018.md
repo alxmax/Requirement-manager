@@ -19,7 +19,7 @@ milestone: v1.15
 ## WHAT — Contract (normative)
 - The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.
 - For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.
-- A test function is recognized lexically: a Python `def test...(`, a JavaScript `function test...(`, or a `it(` or `test(` call.
+- A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or a `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`. A `.py` file that exposes no `def test...` but drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard also counts — stdlib-only suites commonly take that form rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.
 - When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.
 - The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.
 - The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run.
@@ -52,6 +52,11 @@ AC-4
   Given  any of the above
   When   the gate runs
   Then   the error count is unchanged (the check is warn-only)
+
+AC-5
+  Given  a confirmed requirement whose `tested-by` is a `.py` file that has no `def test...` but defines a `run()`/`main()` entry point under an `if __name__ == "__main__"` guard
+  When   the gate runs
+  Then   it adds no warning for that link
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
