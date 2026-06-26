@@ -25,13 +25,14 @@
 #
 # Scope note: reqmap's vendored-copy staleness warning (warn_if_stale) is gated on the
 # CLAUDE_PLUGIN_ROOT env var, which is unset in CI — so it is silent and exit-neutral
-# here by design. This action enforces only the gate proper: link sync + drift + depends_on.
+# here by design. This action enforces the gate proper (link sync + drift + depends_on)
+# and, by default, map freshness (`map --check`) so a stale/uncommitted map can't merge.
 #
 # Fork-PR safety: keep `permissions: contents: read` in the caller workflow. The gate
 # needs no secrets and no write scope; do not grant them.
 
 name: 'Requirement drift gate'
-description: 'Run the requirement-manager reqmap check gate (link sync + drift + depends_on) on every push / PR.'
+description: 'Run the requirement-manager reqmap gate (link sync + drift + depends_on) plus map freshness on every push / PR.'
 branding:
   icon: 'check-circle'
   color: 'green'
@@ -49,6 +50,14 @@ inputs:
     description: 'Python to set up for the gate (stdlib-only; any 3.x works).'
     required: false
     default: '3.x'
+  freshness:
+    description: 'Also run `reqmap.py map --check` so a stale or never-committed map/lock fails the build. Silent in a repo that does not track a map. Set to "false" to disable.'
+    required: false
+    default: 'true'
+  reqmap-repo:
+    description: 'owner/name to pin the map regeneration to (sets REQMAP_REPO) — needed ONLY when the committed map is generated for a different slug than this repo (e.g. a private repo that publishes to a public mirror). Leave empty to use the repo''s own git remote.'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -66,3 +75,17 @@ runs:
       # expected to have re-seeded reqmap.py (>=2.0.0). An older vendored engine does
       # not know `gate` and would exit 2.
       run: python -X utf8 "${{ inputs.reqmap-path }}" gate
+    - name: reqmap map freshness
+      if: ${{ inputs.freshness == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # Catches a stale or never-committed map/lock — the failure mode that lets member
+      # drift accumulate unseen on a fresh checkout. A repo that does not track a map
+      # passes silently. REQMAP_REPO is exported ONLY when provided, because an empty
+      # value means "emit no repo" to the engine and would falsely report staleness
+      # against a committed map that carries a repo slug.
+      run: |
+        if [ -n "${{ inputs.reqmap-repo }}" ]; then
+          export REQMAP_REPO="${{ inputs.reqmap-repo }}"
+        fi
+        python -X utf8 "${{ inputs.reqmap-path }}" map --check
