@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-26"
+MAP_ENGINE_VERSION = "2026-06-26.1"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1178,11 +1178,18 @@ def untracked_locks(reqs_dir):  # implements: REQ-CHECK-006
 
 
 def _file_sha(path):  # implements: REQ-MEMBERDRIFT-027
+    """SHA-256 of a member file with line endings normalized to LF, so the hash is identical
+    whether the tree was checked out LF (Linux/CI) or CRLF (Windows core.autocrlf=true).
+    Without this, a lock generated on one platform shows spurious whole-repo member drift on
+    the other — under `gate --strict` that turns every member into a false error. Mirrors the
+    contract hash, which is already LF-normalized via the text-mode body parse."""
     try:
         with open(path, "rb") as f:
-            return hashlib.sha256(f.read()).hexdigest()
+            data = f.read()
     except OSError:
         return None
+    data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return hashlib.sha256(data).hexdigest()
 
 
 def compute_member_hashes(code_root, members):  # implements: REQ-MEMBERDRIFT-027

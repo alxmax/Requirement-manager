@@ -460,6 +460,16 @@ class MemberDrift(unittest.TestCase):  # tested-by: REQ-MEMBERDRIFT-027
             self.assertNotIn("REQ-BB-001", mh)   # shared.py belongs to two requirements
             self.assertNotIn("REQ-CC-001", mh)
 
+    def test_file_sha_normalizes_line_endings(self):  # CRLF (Windows) == LF (CI)  # verifies: REQ-MEMBERDRIFT-027#AC-8
+        with tempfile.TemporaryDirectory() as d:
+            lf = os.path.join(d, "lf.py")
+            crlf = os.path.join(d, "crlf.py")
+            with open(lf, "wb") as f:
+                f.write(b"def run():\n    return 0\n")
+            with open(crlf, "wb") as f:
+                f.write(b"def run():\r\n    return 0\r\n")
+            self.assertEqual(R._file_sha(lf), R._file_sha(crlf))
+
     def test_memberlock_roundtrip_and_failopen(self):  # verifies: REQ-MEMBERDRIFT-027#AC-2
         with tempfile.TemporaryDirectory() as d:
             R.save_memberlock(d, {"REQ-AA-001": {"solo.py": "abc"}})
