@@ -29,6 +29,11 @@ milestone: v1.18
 - Member hashes shall be recorded only for files dedicated to ONE requirement (an
   `implements:`/`generated-from:` member of exactly one id); a file shared by several
   requirements is excluded, because a change there cannot be attributed without noise.
+- Member hashes shall be computed on line-ending-normalized bytes (CRLF and lone CR folded
+  to LF), so a lock generated on a CRLF working tree (Windows `core.autocrlf=true`) matches
+  one verified on LF (Linux/CI). Without this every member shows spurious cross-platform
+  drift, which `--strict` escalates to errors — mirrors the contract hash, already
+  LF-normalized via the text-mode body parse.
 - The gate shall warn for each confirmed requirement whose dedicated member changed since
   the sidecar while the requirement's own contract hash did not. A requirement whose
   contract also drifted is skipped (forward drift already owns it).
@@ -77,6 +82,10 @@ AC-7
   Given  a baselined dedicated member that is then edited
   When   the gate runs
   Then   it warns (exit 0) and, under `--strict`, exits non-zero
+AC-8
+  Given  the same member content saved once with LF and once with CRLF line endings
+  When   the member hash is computed for each
+  Then   the two hashes are identical (line endings are normalized before hashing)
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

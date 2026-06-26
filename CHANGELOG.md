@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v2.8.1` — 2026-06-26
+
+**Fix: member-hash line-ending normalization (CRLF/Windows).** `_file_sha` hashed member
+files as raw bytes, so a `_memberlock.json` generated on a CRLF working tree (Windows,
+`core.autocrlf=true`) did not match one verified on LF (Linux/CI) — every member showed
+spurious drift. Harmless as a warning, but `gate --strict` (added in 2.8.0) escalated it to
+a wall of false errors. Now line endings are folded to LF before hashing, matching the
+contract hash (already LF-normalized via the text-mode body parse). LF-only repos are
+unaffected (their hashes don't change); `REQ-MEMBERDRIFT-027` +AC-8. `MAP_ENGINE_VERSION`
+→ `2026-06-26.1`.
+
 ## plugin `v2.8.0` — 2026-06-26
 
 **Gate hardening — close the stale-map / uncommitted-lock blind spot.** A consumer repo
