@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-26.1"
+MAP_ENGINE_VERSION = "2026-06-28"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -635,11 +635,25 @@ def _as_list(v):  # implements: CORE-PARSE-001
     return [v] if v else []
 
 
+def _scalar_value(v):  # implements: CORE-PARSE-001
+    """One frontmatter scalar value. If it opens with a matching quote, take the
+    quoted span verbatim — a '#' inside is DATA, and any text after the closing
+    quote (e.g. an inline comment) is dropped. Otherwise drop a ' #' / leading '#'
+    comment, preserving an embedded '#' with no leading space (issue#123)."""
+    v = v.strip()
+    if len(v) >= 2 and v[0] in "\"'":
+        end = v.find(v[0], 1)
+        if end != -1:
+            return v[1:end]                       # quoted: inner '#' is data
+    return re.split(r'(?:^|\s)#', v, 1)[0].strip()
+
+
 def _clean_item(s):  # implements: CORE-PARSE-001
-    """One list element: drop a trailing `# comment`, trim, strip matching quotes.
-    A '#' is a comment only at the token start or after whitespace, so an embedded
-    '#' (e.g. issue#123) is preserved — matching the scalar parse path."""
-    return re.split(r'(?:^|\s)#', s, 1)[0].strip().strip("\"'")
+    """One list element: unquote a quoted item verbatim, else drop a trailing
+    `# comment` and trim. A '#' is a comment only at the token start or after
+    whitespace, so an embedded '#' (e.g. issue#123) is preserved — matching the
+    scalar parse path."""
+    return _scalar_value(s)
 
 
 def parse_frontmatter(text):  # implements: CORE-PARSE-001
@@ -651,7 +665,7 @@ def parse_frontmatter(text):  # implements: CORE-PARSE-001
         end = body.find("\n---", 3)
         if end != -1:
             block = body[3:end]
-            body = body[end + 4:].lstrip("\n")
+            body = body[end + 4:].lstrip("\r\n")   # tolerate a CRLF close (\r\n--- )
             lines = block.splitlines()
             i = 0
             while i < len(lines):
@@ -675,12 +689,10 @@ def parse_frontmatter(text):  # implements: CORE-PARSE-001
                         i += 1
                     meta[k] = [x for x in items if x] if items else ""
                 else:
-                    # Treat '#' as a comment only when preceded by whitespace or at
-                    # the start of the value — preserves embedded '#' like "issue#123".
-                    v = re.split(r'(?:^|\s)#', v, 1)[0].rstrip()
-                    if len(v) >= 2 and v[0] == v[-1] and v[0] in "\"'":
-                        v = v[1:-1]                       # strip matching quotes
-                    meta[k] = v
+                    # A quoted value keeps an inner '#' verbatim; a bare value treats
+                    # '#' as a comment only at the start or after whitespace (so
+                    # "issue#123" is preserved). See _scalar_value.
+                    meta[k] = _scalar_value(v)
     return meta, body
 
 
@@ -696,6 +708,13 @@ def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
             text = f.read()
         meta, body = parse_frontmatter(text)
         rid = meta.get("id") or os.path.splitext(name)[0]
+        if rid in reqs:
+            # two files claim the same id: keep the first (sorted) and warn, rather
+            # than let the later file silently shadow it (the gate can't catch this —
+            # the id still resolves, just to the wrong file).
+            print("WARNING: duplicate requirement id {!r} in {!r} — keeping {!r}".format(
+                rid, name, os.path.basename(reqs[rid]["path"])), file=sys.stderr)
+            continue
         reqs[rid] = {"meta": meta, "body": body, "path": path}
     return reqs
 
@@ -1016,11 +1035,27 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
                 continue
             try:
                 with open(fp, encoding="utf-8", errors="ignore") as f:
-                    for i, line in enumerate(f, 1):
-                        for cap, ac in AC_VERIFY_RE.findall(line):
-                            cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+                    lines = f.readlines()
             except OSError:
                 continue
+            # For .py, mask string-literal content (mirrors _scan_file_tags) so a
+            # `verifies:` inside a docstring/string is not counted as real coverage;
+            # other file types keep the raw scan.
+            is_py = fp.endswith(".py")
+            in_triple = None
+            for i, line in enumerate(lines, 1):
+                s = line
+                if is_py:
+                    s = s.rstrip("\n\r")
+                    if in_triple is not None:
+                        idx = s.find(in_triple)
+                        if idx == -1:
+                            continue
+                        s = s[idx + len(in_triple):]
+                        in_triple = None
+                    s, in_triple = _strip_py_strings(s)
+                for cap, ac in AC_VERIFY_RE.findall(s):
+                    cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
     return cover
 
 
@@ -1029,9 +1064,14 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
     Empty when the requirement writes bullet ACs without labels — per-AC coverage
     only applies to requirements that label their criteria, so unlabelled ones are
     silently exempt (no false 'unverified' warning)."""
-    out, grab, seen = [], False, False
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced                  # skip fenced examples, like _count_ac
+            continue
+        if fenced:
+            continue
         if s.lower().startswith("## "):
             grab = (not seen) and _heading_label_is(s, "acceptan")   # anchored, like _count_ac
             if grab:
@@ -1079,10 +1119,17 @@ def binding_hash(body):  # implements: CORE-DRIFT-003
     for line in body.splitlines():
         h = line.strip().lower()
         if h.startswith("## "):
-            grab = bool(_NORMATIVE_HEADING_RE.match(h))
+            new_grab = bool(_NORMATIVE_HEADING_RE.match(h))
+            if new_grab:
+                # section boundary sentinel: keeps Contract and Acceptance distinct so
+                # relocating a clause between them is not invisible to the drift hash.
+                keep.append("\x1e")
+            grab = new_grab
             continue
         if grab and line.strip():
-            keep.append(line.strip())
+            # rstrip (not strip): leading indent is structure — unnesting a sub-clause
+            # is a real change and must drift.
+            keep.append(line.rstrip())
     return hashlib.sha256("\n".join(keep).encode()).hexdigest()[:12]
 
 
@@ -1266,6 +1313,14 @@ def _engine_version_at(path):
         return None
 
 
+def _ver_key(v):  # implements: REQ-CHECK-006
+    """Sortable key for a MAP_ENGINE_VERSION (`YYYY-MM-DD` + optional `.N` suffix).
+    Compares the numeric suffix as an int so `.10` sorts after `.9` (lexicographic
+    string compare gets that wrong)."""
+    date, _, n = (v or "").partition(".")
+    return (date, int(n) if n.isdigit() else 0)
+
+
 def warn_if_stale():  # implements: REQ-CHECK-006
     """Print a non-fatal notice when this vendored copy is older than the installed
     plugin's. Silent in CI: only runs when CLAUDE_PLUGIN_ROOT is set. Never raises,
@@ -1275,7 +1330,7 @@ def warn_if_stale():  # implements: REQ-CHECK-006
         if not root:
             return
         plugin_ver = _engine_version_at(os.path.join(root, "scripts", "reqmap.py"))
-        if plugin_ver and plugin_ver > MAP_ENGINE_VERSION:
+        if plugin_ver and _ver_key(plugin_ver) > _ver_key(MAP_ENGINE_VERSION):
             print(f"WARN  vendored reqmap.py is stale ({MAP_ENGINE_VERSION} < plugin "
                   f"{plugin_ver}) - re-seed: cp \"$CLAUDE_PLUGIN_ROOT/scripts/reqmap.py\" "
                   f"scripts/reqmap.py")
@@ -1286,10 +1341,13 @@ def warn_if_stale():  # implements: REQ-CHECK-006
 # Unambiguous test markers, trusted in ANY file: Python `def test…(`, JS/TS
 # `function test…(`, Go `func TestX/Benchmark/Example/Fuzz(`, Rust `#[test]` /
 # `#[tokio::test]`. Used only to confirm a tested-by file holds tests — not to count.
+# Case-insensitive for Python/JS/Rust idioms, but the Go branch stays
+# case-sensitive: `go test` only runs exported TestXxx/BenchmarkXxx/ExampleXxx/
+# FuzzXxx — a private `func testHelper(` is NOT a test and must not satisfy a link.
 _DEF_TEST_RE = re.compile(
-    r"def\s+test\w*\s*\(|function\s+test\w*\s*\(|"
+    r"(?i:def\s+test\w*\s*\()|(?i:function\s+test\w*\s*\()|"
     r"func\s+(?:Test|Benchmark|Example|Fuzz)\w*\s*\(|"
-    r"#\[\s*(?:[\w:]+::)?test\b", re.IGNORECASE)
+    r"(?i:#\[\s*(?:[\w:]+::)?test\b)")
 # The bare Jest/Mocha `it(` / `test(` call is too common a word to trust in prose or
 # config (e.g. "it (the parser) returns None" in a .md), so it is honored ONLY in a
 # JS/TS source file, where it is a genuine test idiom.
@@ -1725,7 +1783,7 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
             with open(path, encoding="utf-8") as f:
                 lines = f.readlines()
         except OSError:
-            return 0
+            continue          # unreadable here -> try the next candidate (parent), like _parse_todos
         changed = 0
         for i, line in enumerate(lines):
             m = re.match(r"^(\s*-\s+\[)[ ](\]\s+)(.+?)(\r?\n?)$", line)
@@ -1756,9 +1814,18 @@ def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
     if end == -1:
         return text, 0
     head, rest = body[:end], body[end:]     # only the frontmatter block, never the body
-    # match the colon gap with [ \t]* (never newlines) so a blank `status:` line
-    # fills in place instead of swallowing the next frontmatter key; value optional
-    new_head, n = re.subn(r"(?m)^([ \t]*status[ \t]*:)[ \t]*(\S+)?", r"\g<1> " + value, head, count=1)
+    # Replace only the VALUE, keeping any trailing inline comment (and its spacing).
+    # The value group excludes '#' so a blank `status:  # hint` line is filled in
+    # place instead of swallowing the '#' as the value (which glued the leftover
+    # comment text onto the status, corrupting the YAML).
+    def _repl(m):
+        comment = m.group(3)
+        if comment:
+            return m.group(1) + " " + value + (m.group(2) or "  ") + comment
+        return m.group(1) + " " + value
+    new_head, n = re.subn(
+        r"(?m)^([ \t]*status[ \t]*:)[ \t]*[^#\r\n]*?([ \t]*)(#[^\r\n]*)?$",
+        _repl, head, count=1)
     return new_head + rest, n
 
 
@@ -2379,7 +2446,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "intent": _first_quote(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _bullets(r["body"], "contract"),
-            "verify": _bullets(r["body"], "verify"),
+            "verify": _bullets(r["body"], "verify intent"),
             "notes": _bullets(r["body"], "notes"),
             "current_impl": _bullets(r["body"], "current implementation"),
             "acc": _bullets(r["body"], "acceptan"),          # AC bullets if any
@@ -2399,7 +2466,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
                  "members": members.get(rid, []),
-                 "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")})],
+                 "verify": _bullets(r["body"], "verify intent"), "test_exempt": m.get("test_exempt")})],
         })
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -2535,7 +2602,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         m = r["meta"]
         node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
                 "members": members.get(rid, []),
-                "verify": _bullets(r["body"], "verify"), "test_exempt": m.get("test_exempt")}
+                "verify": _bullets(r["body"], "verify intent"), "test_exempt": m.get("test_exempt")}
         for sig in _risk_signals(node):
             buckets.setdefault(sig, []).append((rid, _risk_score(m)))
     # Action buckets, MOST-URGENT FIRST: an unimplemented contract outranks an
@@ -2582,9 +2649,9 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     # Granularity advisory: requirements with many ACs covering disjoint behaviors
     AC_SPLIT_THRESHOLD = 5
     oversize = sorted(
-        [(rid, len(_bullets(r["body"], "acceptan")))
+        [(rid, _count_ac(r["body"]))
          for rid, r in reqs.items()
-         if len(_bullets(r["body"], "acceptan")) >= AC_SPLIT_THRESHOLD],
+         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
         key=lambda x: (-x[1], x[0])
     )
     if oversize:
@@ -3230,11 +3297,14 @@ def _wipe(reqs_dir, code_root):
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
             try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
+                # surrogateescape (read AND write) round-trips any non-UTF-8 bytes
+                # verbatim, so stripping a tag never silently corrupts e.g. a
+                # Latin-1 comment elsewhere in the file (errors="ignore" dropped them).
+                with open(fp, encoding="utf-8", errors="surrogateescape") as f:
                     lines = f.readlines()
                 new_lines = [_strip_line_tag(l) for l in lines]
                 if new_lines != lines:
-                    with open(fp, "w", encoding="utf-8") as f:
+                    with open(fp, "w", encoding="utf-8", errors="surrogateescape") as f:
                         f.writelines(new_lines)
                     stripped_files += 1
             except OSError:
@@ -3419,49 +3489,63 @@ def _first_quote(body):  # implements: REQ-MAP-007
 
 
 def _section(body, name):  # implements: REQ-MAP-007
-    out, grab, seen = [], False, False
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
-        h = line.strip().lower()
-        if h.startswith("## "):
-            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
+        s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
+            continue
+        if fenced:
+            continue
+        if s.lower().startswith("## "):
+            grab = (not seen) and _heading_label_is(s, name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue
-        if grab and line.strip() and not line.strip().startswith("<!--"):
-            out.append(line.strip().lstrip("- "))
+        if grab and s and not s.startswith("<!--"):
+            out.append(s.lstrip("- "))
     return " ".join(out)
 
 
 def _section_raw(body, name):  # implements: REQ-MAP-007
     """Like _section but preserves line breaks + indentation — used for the
     multi-line Given/When/Then acceptance blocks so they read as written."""
-    out, grab, seen = [], False, False
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
-        h = line.strip().lower()
-        if h.startswith("## "):
-            grab = (not seen) and _heading_label_is(line.strip(), name)   # anchored, like _bullets
+        s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
+            continue
+        if fenced:
+            continue
+        if s.lower().startswith("## "):
+            grab = (not seen) and _heading_label_is(s, name)   # anchored, like _bullets
             if grab:
                 seen = True
             continue
-        if grab and not line.strip().startswith("<!--"):
+        if grab and not s.startswith("<!--"):
             out.append(line.rstrip())
     return "\n".join(out).strip()
 
 
 def _bullets(body, name):  # implements: REQ-MAP-007
-    out, grab, seen = [], False, False
+    out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
-        h = line.strip().lower()
-        if h.startswith("## "):
+        s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
+            continue
+        if fenced:
+            continue
+        if s.lower().startswith("## "):
             # anchored heading match (not substring) so a commentary heading like
             # `## Notes — contract caveats` doesn't capture the Contract section
-            grab = (not seen) and _heading_label_is(line.strip(), name)
+            grab = (not seen) and _heading_label_is(s, name)
             if grab:
                 seen = True
             continue
         if not grab:
             continue
-        s = line.strip()
         if s.startswith("-"):
             out.append(s[1:].strip())
         elif s and not s.startswith("<!--") and out:
@@ -3542,8 +3626,15 @@ def _grouped_areas(nodes):  # implements: REQ-MAP-007
 def _emit_area_subgraphs(lines, nodes, label_fn=None):
     """Append per-area `subgraph` blocks (singletons collapse into 'misc')."""
     label_fn = label_fn or _node_label
+    sg_used = {}
     for area, ns in _grouped_areas(nodes):
-        lines.append('  subgraph sg_{}["{}"]'.format(_safe_id(area), area))
+        base = _safe_id(area)
+        k = sg_used.get(base, 0) + 1
+        sg_used[base] = k
+        # suffix on collision so two areas that sanitize to the same id (my-area /
+        # my_area) don't emit duplicate `subgraph` ids and break the Mermaid render
+        sg = base if k == 1 else "{}_{}".format(base, k)
+        lines.append('  subgraph sg_{}["{}"]'.format(sg, area))
         for n in ns:
             lines.append('    {}["{}"]'.format(_safe_id(n["id"]), label_fn(n)))
         lines.append("  end")
@@ -3609,6 +3700,7 @@ def _mermaid_deps(data):  # implements: REQ-MAP-007
 
 def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
     lines = ["graph LR"]
+    loc_sid, sid_used = {}, {}        # distinct file:line locs must get distinct node ids
     for n in data["nodes"]:
         rid = n["id"]
         sid = _safe_id(rid)
@@ -3635,7 +3727,16 @@ def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
         for g in groups.values():
             loc = "{}:{}".format(g["f"], g["min"]) if g["min"] == g["max"] \
                   else "{}:{}-{}".format(g["f"], g["min"], g["max"])
-            file_sid = "f_" + re.sub(r"[^A-Za-z0-9]", "_", loc)
+            if loc in loc_sid:
+                file_sid = loc_sid[loc]
+            else:
+                base = "f_" + re.sub(r"[^A-Za-z0-9]", "_", loc)
+                k = sid_used.get(base, 0) + 1
+                sid_used[base] = k
+                # suffix on collision so two different locs that sanitize to the same
+                # id (e.g. a-b.py vs a_b.py) don't merge into one mislabeled node
+                file_sid = base if k == 1 else "{}_{}".format(base, k)
+                loc_sid[loc] = file_sid
             lines.append('  {}["{}"]'.format(file_sid, _mlabel(loc)))
             lines.append("  {} -->|{}| {}".format(sid, g["role"], file_sid))
     return "\n".join(lines)
@@ -4228,8 +4329,11 @@ def _since_changed_files(ref, code_root):
     """
     try:
         result = subprocess.run(
-            ["git", "diff", "--name-only", f"{ref}...HEAD"],
-            capture_output=True, text=True, cwd=code_root, timeout=10,
+            # core.quotepath=off: emit non-ASCII paths verbatim, not octal-escaped &
+            # double-quoted — otherwise those files silently drop out of the since-set
+            # and the gate falsely reports clean.
+            ["git", "-c", "core.quotepath=off", "diff", "--name-only", f"{ref}...HEAD"],
+            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=10,
         )
         if result.returncode != 0:
             return None
@@ -4243,7 +4347,7 @@ def _since_changed_files(ref, code_root):
         try:
             top = subprocess.run(
                 ["git", "rev-parse", "--show-toplevel"],
-                capture_output=True, text=True, cwd=code_root, timeout=10,
+                capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=10,
             )
             if top.returncode == 0 and top.stdout.strip():
                 root = top.stdout.strip()
@@ -4640,8 +4744,8 @@ def main():
               "lock+map). Forwarding to legacy behavior; the alias is removed in the next major.",
               file=sys.stderr)
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
-                       getattr(a, "since", None))
-        if a.update_lock:
+                       getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False))
+        if a.update_lock and rc == 0:        # mirror sync: don't regen the map on a failing gate
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc
     if a.cmd == "map":
