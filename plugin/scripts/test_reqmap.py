@@ -9,7 +9,8 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stdout, redirect_stderr
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import reqmap as R
@@ -4009,6 +4010,240 @@ class CommandRegistry(unittest.TestCase):  # tested-by: REQ-CMDREGISTRY-033
             r = subprocess.run([sys.executable, "-X", "utf8", os.path.join(dst, "scripts", "reqmap.py"),
                                 "gate", "--json"], cwd=dst, capture_output=True, text=True)
             self.assertNotEqual(r.returncode, 0, "gate --json must fail on a stale artifact")
+
+
+# ---------------------------------------------------------------------------
+# Regression tests for the 2026-06-28 multi-agent (consilium) bug hunt — 15 fixes.
+# ---------------------------------------------------------------------------
+class BugHuntParsing(unittest.TestCase):  # tested-by: CORE-PARSE-001
+    def test_quoted_scalar_keeps_inner_hash(self):
+        """A '#' inside a quoted scalar is DATA, not a comment (was truncated)."""
+        meta, _ = R.parse_frontmatter('---\nsummary: "Parses a # fragment"\n---\n')
+        self.assertEqual(meta["summary"], "Parses a # fragment")
+
+    def test_quoted_scalar_with_trailing_comment_still_unquoted(self):
+        meta, _ = R.parse_frontmatter('---\nsummary: "foo" # a comment\n---\n')
+        self.assertEqual(meta["summary"], "foo")
+
+    def test_quoted_inline_list_item_keeps_inner_hash(self):
+        meta, _ = R.parse_frontmatter('---\ndepends_on: ["A-1 # note"]\n---\n')
+        self.assertEqual(meta["depends_on"], ["A-1 # note"])
+
+    def test_body_strips_leading_cr_after_crlf_close(self):
+        _, body = R.parse_frontmatter("---\nid: REQ-A-001\n---\r\nBODY\r\n")
+        self.assertFalse(body.startswith("\r"))
+        self.assertTrue(body.startswith("BODY"))
+
+    def test_duplicate_id_keeps_first_and_warns(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "aaa.md"), "---\nid: REQ-DUP-001\nstatus: draft\n---\n# A\n")
+            _write(os.path.join(d, "bbb.md"), "---\nid: REQ-DUP-001\nstatus: draft\n---\n# B\n")
+            err = io.StringIO()
+            with redirect_stderr(err):
+                reqs = R.load_requirements(d)
+            self.assertEqual(len(reqs), 1)
+            self.assertTrue(reqs["REQ-DUP-001"]["path"].endswith("aaa.md"))
+            self.assertIn("REQ-DUP-001", err.getvalue())
+
+
+class BugHuntScanning(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019
+    def test_verifies_inside_python_string_ignored(self):
+        V = "verif" + "ies"
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "t.py"),
+                   "# %s: REQ-AC-001#AC-1\n" % V
+                   + 'def f():\n    """note %s: REQ-AC-001#AC-2 end"""\n    return 1\n' % V)
+            cover = R.scan_ac_verifies(d, os.path.join(d, "requirements"))
+            self.assertIn("AC-1", cover.get("REQ-AC-001", {}))
+            self.assertNotIn("AC-2", cover.get("REQ-AC-001", {}))
+
+    def test_labeled_acs_skips_fenced_block(self):
+        body = "## HOW — Acceptance\nAC-1 real\n\n```\nAC-2 example\n```\nAC-3 real\n"
+        self.assertEqual(R._labeled_acs(body), ["AC-1", "AC-3"])
+
+
+class BugHuntGateDrift(unittest.TestCase):  # tested-by: REQ-CHECK-006  # tested-by: CORE-DRIFT-003
+    def test_version_key_orders_double_digit_suffix(self):
+        self.assertGreater(R._ver_key("2026-06-03.10"), R._ver_key("2026-06-03.9"))
+        self.assertGreater(R._ver_key("2026-06-04"), R._ver_key("2026-06-03.9"))
+        self.assertGreater(R._ver_key("2026-06-03.2"), R._ver_key("2026-06-03"))
+
+    def test_go_lowercase_func_is_not_a_test(self):
+        self.assertIsNone(R._DEF_TEST_RE.search("func testHelper() {"))
+        self.assertIsNotNone(R._DEF_TEST_RE.search("func TestThing(t *testing.T) {"))
+        self.assertIsNotNone(R._DEF_TEST_RE.search("def test_x():"))
+        self.assertIsNotNone(R._DEF_TEST_RE.search("    function testFoo() {"))
+
+    def test_binding_hash_detects_cross_section_move(self):
+        a = "## WHAT — Contract\n- A\n## HOW — Acceptance\n- B\n- C\n"
+        b = "## WHAT — Contract\n- A\n- B\n## HOW — Acceptance\n- C\n"
+        self.assertNotEqual(R.binding_hash(a), R.binding_hash(b))
+
+    def test_binding_hash_detects_indent_change(self):
+        a = "## WHAT — Contract\n- A\n  nested\n"
+        b = "## WHAT — Contract\n- A\nnested\n"
+        self.assertNotEqual(R.binding_hash(a), R.binding_hash(b))
+
+
+class CheckAliasDriftGuard(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """The deprecated `check --update-lock` must enforce the same confirmed-drift
+    guard as `sync`, and must not regenerate the map when the gate fails."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args],
+                              cwd=cwd, capture_output=True, text=True)
+
+    def _confirmed_repo(self, d, clause):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               REQ.format(id="REQ-A-001", status="confirmed", layer="feature", extra="", title="T")
+               + "\n## WHAT — Contract\n- %s\n## HOW — Acceptance\n- Given X When Y Then Z\n" % clause)
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        _write(os.path.join(d, "test_impl.py"),
+               "def test_a():\n    assert True  " + tb_tag("REQ-A-001"))
+        return rdir
+
+    def test_check_update_lock_blocks_confirmed_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._confirmed_repo(d, "shall do the thing")
+            self._run("sync", "--root", d, cwd=d)                      # seed the baseline
+            lock_before = open(R.lock_path(rdir), encoding="utf-8").read()
+            self._confirmed_repo(d, "shall do the thing DIFFERENTLY")  # drift the contract
+            r = self._run("check", "--update-lock", "--root", d, cwd=d)
+            self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)
+
+    def test_check_update_lock_skips_map_on_gate_error(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="draft", layer="feature", extra="", title="T"))
+            _write(os.path.join(d, "impl.py"), "x = 1  " + tag("NOPE-X-001"))  # dangling -> gate error
+            r = self._run("check", "--update-lock", "--root", d, cwd=d)
+            self.assertNotEqual(r.returncode, 0)
+            self.assertFalse(os.path.exists(os.path.join(rdir, "_map.json")),
+                             "map must not be regenerated when the gate errors")
+
+
+class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: REQ-PROMOTE-011  # tested-by: REQ-PROMOTE-TODO-001  # tested-by: REQ-NEXT-013
+    def test_set_status_empty_value_with_comment_not_corrupted(self):
+        out, n = R._set_frontmatter_status(
+            "---\nid: X\nstatus:  # deprecated hint\nlayer: bus\n---\nbody\n", "confirmed")
+        self.assertEqual(n, 1)
+        self.assertIn("status: confirmed", out)
+        self.assertNotIn("confirmed deprecated", out)   # value+leaked text must not glue
+        self.assertNotIn("confirmed#", out)
+        self.assertIn("\nbody\n", out)
+
+    def test_mark_todo_done_unreadable_root_falls_through_to_parent(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = os.path.join(d, "plugin"); os.makedirs(root)
+            root_todo = os.path.join(root, "TODO.md")
+            _write(root_todo, "# TODO\n- [ ] Widget\n")
+            parent_todo = os.path.join(d, "TODO.md")
+            _write(parent_todo, "# TODO\n- [ ] Widget\n")
+            real_open = open
+            def fake_open(file, *a, **k):
+                if os.path.abspath(file) == os.path.abspath(root_todo):
+                    raise OSError("simulated unreadable")
+                return real_open(file, *a, **k)
+            with mock.patch("builtins.open", side_effect=fake_open):
+                changed = R._mark_todo_done(root, "Widget")
+            self.assertEqual(changed, 1)
+            self.assertIn("[x] Widget", open(parent_todo, encoding="utf-8").read())
+
+    def test_next_granularity_counts_labeled_acs(self):
+        # 5 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
+        # the advisory; _count_ac sees 5. Members are implements-only so the req has a
+        # pending ('untested') signal and execution reaches the granularity block.
+        body = "# T\n\n## HOW — Acceptance\n" + "".join(
+            "AC-%d: criterion %d\n" % (i, i) for i in range(1, 6))
+        reqs = {"CORE-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"}, "body": body}}
+        members = {"CORE-FOO-001": [("implements", "x.py", 1)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_next(reqs, members)
+        self.assertIn("Granularity", buf.getvalue())
+
+    def test_map_data_verify_intent_heading_consistency(self):
+        body = "# T\n\n## WHAT — Contract\n- c\n\n## WHAT — Verify roadmap\n- someday item\n"
+        reqs = {"CORE-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"},
+                                 "body": body, "path": "x"}}
+        members = {"CORE-FOO-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        data = R._build_map_data(reqs, members)
+        node = next(n for n in data["nodes"] if n["id"] == "CORE-FOO-001")
+        self.assertNotIn("unverified-intent", [r["signal"] for r in node["risks"]])
+
+
+class BugHuntRender(unittest.TestCase):  # tested-by: REQ-MAP-007  # tested-by: REQ-INIT-012
+    def test_req_to_code_distinct_ids_for_safeid_collision(self):
+        data = {"nodes": [
+            {"id": "REQ-A-001", "title": "A", "status": "draft",
+             "members": [{"role": "implements", "loc": "src/a-b.py:1"}]},
+            {"id": "REQ-B-001", "title": "B", "status": "draft",
+             "members": [{"role": "implements", "loc": "src/a_b.py:1"}]},
+        ]}
+        out = R._mermaid_req_to_code(data)
+        import re
+        ids = re.findall(r"(f_\w+)\[", out)
+        self.assertEqual(len(ids), len(set(ids)), "colliding file node ids:\n" + out)
+
+    def test_area_subgraphs_distinct_ids_for_safeid_collision(self):
+        nodes = [
+            {"id": "X-1", "title": "x1", "area": "my-area"},
+            {"id": "X-2", "title": "x2", "area": "my-area"},
+            {"id": "Y-1", "title": "y1", "area": "my_area"},
+            {"id": "Y-2", "title": "y2", "area": "my_area"},
+        ]
+        lines = []
+        R._emit_area_subgraphs(lines, nodes)
+        import re
+        sgids = re.findall(r"subgraph (sg_\w+)\[", "\n".join(lines))
+        self.assertEqual(len(sgids), len(set(sgids)), "\n".join(lines))
+
+    def test_wipe_preserves_non_utf8_bytes(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements"); os.makedirs(rdir)
+            fp = os.path.join(d, "mod.py")
+            with open(fp, "wb") as f:
+                f.write(b"# caf\xe9 note\n# " + b"impl" + b"ements: WIPE-001\n")
+            with redirect_stdout(io.StringIO()):
+                R._wipe(rdir, d)
+            with open(fp, "rb") as f:
+                data = f.read()
+            self.assertIn(b"\xe9", data, "non-UTF-8 byte dropped by wipe")
+            self.assertNotIn(b"WIPE-001", data, "tag not stripped")
+
+    def test_section_includes_content_after_fenced_heading(self):
+        body = "## WHAT — Contract\nfirst clause\n```yaml\n## not a heading\nk: v\n```\nlast clause\n"
+        self.assertIn("last clause", R._section(body, "contract"))
+
+    def test_bullets_include_after_fenced_heading(self):
+        body = "## WHAT — Contract\n- one\n```\n## nope\n```\n- two\n"
+        self.assertIn("two", R._bullets(body, "contract"))
+
+
+class BugHuntSince(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    def test_since_decodes_non_ascii_paths(self):
+        with tempfile.TemporaryDirectory() as d:
+            for cfg in (["init", d],
+                        ["-C", d, "config", "user.email", "t@t.com"],
+                        ["-C", d, "config", "user.name", "T"],
+                        ["-C", d, "config", "core.quotepath", "true"]):
+                subprocess.run(["git", *cfg], check=True, capture_output=True)
+            fp = os.path.join(d, "café.py")
+            _write(fp, "x=1\n")
+            subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", d, "commit", "-m", "init"], check=True, capture_output=True)
+            base = subprocess.run(["git", "-C", d, "rev-parse", "HEAD"],
+                                  capture_output=True, text=True).stdout.strip()
+            _write(fp, "x=2\n")
+            subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", d, "commit", "-m", "change"], check=True, capture_output=True)
+            files = R._since_changed_files(base, d)
+            self.assertIsNotNone(files)
+            self.assertIn(os.path.normcase(os.path.abspath(fp)), files)
 
 
 if __name__ == "__main__":
