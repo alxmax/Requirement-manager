@@ -2,10 +2,10 @@
 
 [![ci](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml)
 
-**▶ [Live requirement map](https://alxmax.github.io/requirement-manager/map.html)** — this
-repo's own requirement graph, regenerated and published to GitHub Pages by CI via
-OIDC (short-lived token, no stored secrets). *Goes live once Pages is enabled
-(Settings → Pages → Source: GitHub Actions) and the first `deploy-map` run succeeds.*
+**▶ [Live requirement map](https://alxmax.github.io/Requirement-manager/map.html)** — this
+repo's own requirement graph, published to GitHub Pages. Once the Pages source is set to
+"GitHub Actions", the `deploy-map` job republishes it on every push to `main` via OIDC —
+a short-lived token, no stored secrets.
 
 **Keep your code and your specs from drifting apart.**
 
