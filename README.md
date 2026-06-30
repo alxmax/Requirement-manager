@@ -2,6 +2,11 @@
 
 [![ci](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/alxmax/requirement-manager/actions/workflows/ci.yml)
 
+**▶ [Live requirement map](https://alxmax.github.io/requirement-manager/map.html)** — this
+repo's own requirement graph, regenerated and published to GitHub Pages by CI via
+OIDC (short-lived token, no stored secrets). *Goes live once Pages is enabled
+(Settings → Pages → Source: GitHub Actions) and the first `deploy-map` run succeeds.*
+
 **Keep your code and your specs from drifting apart.**
 
 `requirement-manager` gives every feature of your project a single home: one
