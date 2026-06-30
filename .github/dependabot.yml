@@ -1,0 +1,16 @@
+# Keep the SHA-pinned GitHub Actions current. Without this, pinning to a commit
+# SHA freezes us on a version that never receives upstream security patches —
+# Dependabot opens a weekly PR (with the new SHA + version note) so the pins stay
+# fresh and reviewed instead of silently rotting.
+version: 2
+updates:
+  # Workflows under .github/workflows/
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  # The published composite action (check/action.yml) pins setup-python itself.
+  - package-ecosystem: "github-actions"
+    directory: "/check"
+    schedule:
+      interval: "weekly"
