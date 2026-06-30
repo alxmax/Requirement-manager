@@ -58,6 +58,13 @@ jobs:
     needs: gate-and-tests
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # GitHub Pages allows only one in-flight deployment; serialize so that two
+    # close-together pushes to main queue instead of one failing with
+    # "due to in progress deployment". cancel-in-progress: false lets an
+    # already-running deploy finish rather than abort mid-publish.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     permissions:
       contents: read   # read the tree
       pages: write     # publish to Pages
