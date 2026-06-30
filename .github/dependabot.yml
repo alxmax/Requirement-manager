@@ -1,7 +1,14 @@
 # Keep the SHA-pinned GitHub Actions current. Without this, pinning to a commit
-# SHA freezes us on a version that never receives upstream security patches —
-# Dependabot opens a weekly PR (with the new SHA + version note) so the pins stay
-# fresh and reviewed instead of silently rotting.
+# SHA freezes us on a version that never receives upstream patches — Dependabot
+# opens a weekly PR (with the new SHA + version note) so the pins stay fresh and
+# reviewed instead of silently rotting.
+#
+# Updates are GROUPED (one PR per directory instead of one per action) so that:
+#   - the Pages action set (configure-pages / upload-pages-artifact / deploy-pages)
+#     is bumped together and stays a compatible quartet, and
+#   - weekly review is a single PR, not six.
+# Majors are included (not ignored) so the repo never drifts onto a stale major;
+# they land in the same grouped PR for review.
 version: 2
 updates:
   # Workflows under .github/workflows/
@@ -9,8 +16,14 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns: ["*"]
   # The published composite action (check/action.yml) pins setup-python itself.
   - package-ecosystem: "github-actions"
     directory: "/check"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions:
+        patterns: ["*"]

@@ -846,6 +846,38 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
         </p>
       </div>
     </div>
+
+    <!-- This repo dogfoods a secure Pages deploy: OIDC, least-privilege, SHA pins -->
+    <div class="reveal" style="margin-top:2rem">
+      <h3 style="margin-bottom:1rem">Secure deploy — OIDC, no stored secrets</h3>
+      <div class="cb">
+        <div class="cb-head">
+          <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+          <span class="cb-filename">.github/workflows/ci.yml — deploy-map job</span>
+        </div>
+        <div class="cb-body"><pre><span class="kw">deploy-map</span><span class="pu">:</span>
+  <span class="kw">needs</span><span class="pu">:</span> <span class="vl">gate-and-tests</span>
+  <span class="kw">if</span><span class="pu">:</span> <span class="vl">github.event_name == 'push' &amp;&amp; github.ref == 'refs/heads/main'</span>
+  <span class="kw">permissions</span><span class="pu">:</span>            <span class="cm"># least privilege, per job</span>
+    <span class="kw">contents</span><span class="pu">:</span> <span class="vl">read</span>
+    <span class="kw">pages</span><span class="pu">:</span> <span class="vl">write</span>
+    <span class="kw">id-token</span><span class="pu">:</span> <span class="vl">write</span>       <span class="cm"># mint the short-lived OIDC token</span>
+  <span class="kw">environment</span><span class="pu">:</span> <span class="pu">{</span> <span class="kw">name</span><span class="pu">:</span> <span class="vl">github-pages</span> <span class="pu">}</span>
+  <span class="kw">steps</span><span class="pu">:</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/checkout@34e1148…</span>        <span class="cm"># pinned to commit SHA</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/configure-pages@983d773…</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/upload-pages-artifact@56afc60…</span>
+    <span class="pu">-</span> <span class="kw">uses</span><span class="pu">:</span> <span class="vl">actions/deploy-pages@d6db901…</span>     <span class="cm"># consumes the OIDC token</span></pre></div>
+      </div>
+      <p style="font-size:.82rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.55">
+        This repo dogfoods its own map: the published <code style="font-size:.8em">docs/</code> site deploys to
+        GitHub Pages on every push to <code style="font-size:.8em">main</code>, authenticated by a short-lived
+        <strong>OIDC</strong> token — no long-lived secret or PAT. Permissions are scoped <strong>per job</strong>
+        (the gate job gets only <code style="font-size:.8em">contents: read</code>); every action is pinned to a
+        40-hex <strong>commit SHA</strong>, and <code style="font-size:.8em">.github/dependabot.yml</code> keeps
+        those pins fresh weekly.
+      </p>
+    </div>
   </div>
 </section>
 
