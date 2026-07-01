@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-06-28"
+MAP_ENGINE_VERSION = "2026-07-01"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1016,6 +1016,41 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
     return sorted(untagged)
 
 
+ORPHAN_CODE_MIN_LOC = 150   # a program file this big with no tag is a coverage hole, not a stub
+# program-logic extensions only: prose/config/styling coverage is REQ-DOCBUNDLE-026's concern
+ORPHAN_CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cc", ".cpp",
+                    ".h", ".hpp", ".java", ".go", ".rs")
+
+
+def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: REQ-ORPHANCODE-034
+    """Sorted rel-paths of program-logic files >= ORPHAN_CODE_MIN_LOC lines that
+    carry no requirement link — code implementing behavior no requirement describes.
+    `covered` is the rel-path set already linked (membership tags + `verifies:`
+    coverage), derived from the caller's existing scans so this adds no second tag
+    scan. Walk discipline matches scan_members: honors `.reqmapignore`, prunes noise.
+    Warn-only at ANY flag combination (the REQ-COVERAGE-029 Senate audit capped
+    coverage signals at advisory — a hard gate makes hollow tags the way to pass CI)."""
+    ignore = load_ignore(code_root, reqs_dir)
+    out = []
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        for fn in sorted(files):
+            if not fn.endswith(ORPHAN_CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if rel in covered or any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    loc = sum(1 for _ in f)
+            except OSError:
+                continue
+            if loc >= ORPHAN_CODE_MIN_LOC:
+                out.append(rel)
+    return sorted(out)
+
+
 def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     """Walk the code for `# verifies: REQ-X#AC-N` tags and return
     `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
@@ -1307,7 +1342,10 @@ def _engine_version_at(path):
     """Best-effort MAP_ENGINE_VERSION parsed from a reqmap.py at `path`; None on any failure."""
     try:
         with open(path, encoding="utf-8") as f:
-            m = re.search(r'MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', f.read(4000))
+            # whole file + line-anchored: a bounded read() silently returned None
+            # once the header outgrew the bound, and an unanchored search could
+            # match a docstring mention before the real assignment.
+            m = re.search(r'(?m)^MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', f.read())
         return m.group(1) if m else None
     except Exception:  # fail open — never let the staleness probe break the gate
         return None
@@ -1516,6 +1554,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
             warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
+    # Reverse depends_on index: a contract drift's blast radius is its direct
+    # dependents (one edge, not the transitive closure — a reviewer follows the
+    # chain one hop at a time).  # implements: REQ-DRIFTIMPACT-035
+    dependents = {}
+    for _rid, _r in reqs.items():
+        for _dep in _as_list(_r["meta"].get("depends_on")):
+            dependents.setdefault(_dep, set()).add(_rid)
     new_lock = {}
     for rid, r in reqs.items():
         h = binding_hash(r["body"])
@@ -1525,8 +1570,10 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # name the member locations so the warning is actionable, not "its members"
             locs = [f"{fp}:{ln}" for (_role, fp, ln) in members.get(rid, [])]
             where = ", ".join(locs) if locs else "no members tagged — add an implements: tag"
+            deps_of = sorted(dependents.get(rid, ()))
+            fanout = "; review dependent(s): " + ", ".join(deps_of) if deps_of else ""
             strict_warns.append(f"{rid}: DRIFT — contract changed since lock; "
-                               f"re-check {len(locs)} member(s): {where}")
+                               f"re-check {len(locs)} member(s): {where}{fanout}")
 
     # Reverse-direction drift: a dedicated member changed while the contract stayed put
     # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (REQ-MEMBERDRIFT-027).
@@ -1548,6 +1595,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
                      "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
+
+    # Coverage erosion: a sizeable program file with no requirement link implements
+    # behavior no requirement describes. Plain warn — NEVER strict-promoted (the
+    # REQ-COVERAGE-029 Senate audit capped coverage at advisory).  # implements: REQ-ORPHANCODE-034
+    covered = {fp for hits in full_members.values() for (_role, fp, _ln) in hits}
+    covered.update(fp for acs in ac_cover.values()
+                   for locs in acs.values() for (fp, _ln) in locs)
+    for rel in orphan_code_files(code_root, covered, reqs_dir):
+        warns.append(f"{rel}: {ORPHAN_CODE_MIN_LOC}+-line code file has no membership tag — "
+                     "link it (`# implements: <ID>`), draft a requirement for it "
+                     "(`reqmap.py draft`), or add it to .reqmapignore")
 
     # Health signals (non-blocking): how much of the corpus is human-validated, and
     # how much still uses the legacy body schema. Surfaced so an all-baseline corpus

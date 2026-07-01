@@ -181,10 +181,10 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
     REQUIREMENTS.forEach(r => { const a = r.area || "?"; idArea[r.id] = a; (byArea[a] = byArea[a] || []).push(r.id); });
     const ae = new Set();
     REQUIREMENTS.forEach(r => (r.deps || []).forEach(d => {
-      const x = idArea[r.id], y = idArea[d]; if (x && y && x !== y && idArea[d]) ae.add(x + "" + y);
+      const x = idArea[r.id], y = idArea[d]; if (x && y && x !== y && idArea[d]) ae.add(x + "\u0001" + y);
     }));
     const pseudo = Object.keys(byArea).map(a => ({
-      id: a, deps: [...ae].filter(e => e.startsWith(a + "")).map(e => e.split("")[1]),
+      id: a, deps: [...ae].filter(e => e.startsWith(a + "\u0001")).map(e => e.split("\u0001")[1]),
     }));
     return { layout: computeLayout(pseudo, { colW: 320, rowH: 150 }), count: byArea };
   }, [REQUIREMENTS]);

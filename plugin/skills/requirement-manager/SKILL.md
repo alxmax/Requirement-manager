@@ -265,6 +265,9 @@ expected and acceptable.
 | drift (confirmed contract changed vs lock, members not re-touched) | **WARN** | exit 0 |
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
+| member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
+| untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
+| orphan code (150+-line program file with no membership tag) | **WARN** (never strict-promoted) | exit 0 |
 
 Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI
 for a corpus where all requirements are confirmed and lock is current).
@@ -277,7 +280,9 @@ for a corpus where all requirements are confirmed and lock is current).
   lacks. Silent on a well-formed corpus.
 - **drift** — content hash of each `confirmed` requirement compared to `_reqlock.json`;
   a changed requirement whose members were not re-touched is flagged WARN (never ERROR by
-  default — design decision from day 1; see REQ-CHECK-006). Advance the lock with `sync`
+  default — design decision from day 1; see REQ-CHECK-006). The warning also names the
+  drifted requirement's direct `depends_on` dependents — its review blast radius
+  (REQ-DRIFTIMPACT-035). Advance the lock with `sync`
   (use `--accept-drift` when the edited requirement is `confirmed` or `implemented`).
 
 Intent sync is *not* automatable — it surfaces at human review (promote
