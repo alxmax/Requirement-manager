@@ -74,6 +74,14 @@ class CheckVersions(unittest.TestCase):
             _setup(d, plugins=["requirement-manager"])   # a bare string, not an object
             self.assertEqual(self._run(d), 1)            # readable diagnostic, not AttributeError
 
+    def test_docstring_mention_before_assignment_is_ignored(self):  # regex anchor regression
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d)
+            (Path(d) / "plugin" / "scripts" / "reqmap.py").write_text(
+                '"""example: MAP_ENGINE_VERSION = "not-a-date" """\n'
+                'MAP_ENGINE_VERSION = "2026-06-21.4"\n', encoding="utf-8")
+            self.assertEqual(self._run(d), 0)   # unanchored regex matched the docstring -> 1
+
     def test_engine_version_revision_suffix(self):
         for engine, expected in [("2026-06-03.2", 0),   # valid same-day revision
                                  ("2026-06-03.0", 1),   # .0 invalid (>= 1 required)

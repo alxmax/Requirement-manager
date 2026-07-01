@@ -531,6 +531,107 @@ class MemberDrift(unittest.TestCase):  # tested-by: REQ-MEMBERDRIFT-027
             self.assertEqual(strict_code, 1)                   # --strict-promotable
 
 
+_BIG_PY = "".join("x{0} = {0}\n".format(i) for i in range(200))   # >= ORPHAN_CODE_MIN_LOC lines
+
+
+class OrphanCode(unittest.TestCase):  # tested-by: REQ-ORPHANCODE-034
+    def test_large_untagged_program_file_reported(self):  # verifies: REQ-ORPHANCODE-034#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "mod.py"), _BIG_PY)
+            self.assertEqual(R.orphan_code_files(d, set()), ["mod.py"])
+
+    def test_small_untagged_not_reported(self):  # verifies: REQ-ORPHANCODE-034#AC-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "mod.py"), "x = 1\ny = 2\n")
+            self.assertEqual(R.orphan_code_files(d, set()), [])
+
+    def test_covered_file_not_reported(self):  # verifies: REQ-ORPHANCODE-034#AC-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "mod.py"), _BIG_PY)
+            self.assertEqual(R.orphan_code_files(d, {"mod.py"}), [])
+
+    def test_non_program_ext_not_reported(self):  # verifies: REQ-ORPHANCODE-034#AC-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "big.txt.md"), _BIG_PY)
+            _write(os.path.join(d, "big.html"), _BIG_PY)
+            self.assertEqual(R.orphan_code_files(d, set()), [])
+
+    def test_reqmapignore_suppresses(self):  # verifies: REQ-ORPHANCODE-034#AC-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "vendor", "big.py"), _BIG_PY)
+            _write(os.path.join(d, ".reqmapignore"), "vendor/*\n")
+            self.assertEqual(R.orphan_code_files(d, set()), [])
+
+    def test_gate_warns_and_exit_unchanged_even_strict(self):  # verifies: REQ-ORPHANCODE-034#AC-6
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"), REQ.format(
+                id="A-FOO-001", status="baseline", layer="feature", extra="", title="T"))
+            _write(os.path.join(d, "orphan.py"), _BIG_PY)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, False, code_root=d)
+            self.assertIn("orphan.py", buf.getvalue())
+            self.assertIn("no membership tag", buf.getvalue())
+            self.assertEqual(code, 0)
+            with redirect_stdout(io.StringIO()):   # never strict-promoted (advisory ceiling)
+                strict_code = R.cmd_check(reqs, members, d, False, code_root=d, strict=True)
+            self.assertEqual(strict_code, 0)
+
+    def test_verifies_tag_counts_as_covered_at_gate(self):  # verifies: REQ-ORPHANCODE-034#AC-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"), REQ.format(
+                id="A-FOO-001", status="baseline", layer="feature", extra="", title="T"))
+            # runtime-built so THIS test file registers no phantom AC coverage
+            vtag = "# {}: A-FOO-001#AC-1\n".format("veri" + "fies")
+            _write(os.path.join(d, "test_mod.py"), vtag + _BIG_PY)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, members, d, False, code_root=d)
+            self.assertNotIn("test_mod.py", buf.getvalue())
+
+
+class DriftDependents(unittest.TestCase):  # tested-by: REQ-DRIFTIMPACT-035
+    _CONTRACT = "\n## Contract\n- x\n## Acceptance\n- y\n"
+
+    def _gate(self, d, dep_ids):
+        _write(os.path.join(d, "AREA-FOO-001.md"),
+               REQ.format(id="AREA-FOO-001", status="confirmed", layer="bus",
+                          extra="", title="Foo") + self._CONTRACT)
+        for dep in dep_ids:
+            _write(os.path.join(d, dep + ".md"),
+                   REQ.format(id=dep, status="baseline", layer="feature",
+                              extra="depends_on: [AREA-FOO-001]\n", title=dep))
+        _write(os.path.join(d, "mod.py"), tag("AREA-FOO-001") + "\n")
+        _write(os.path.join(d, "_reqlock.json"), '{"AREA-FOO-001": "stalehash0000"}')
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, members, d, False, code_root=d)
+        return buf.getvalue()
+
+    def test_dependent_named_on_drift(self):  # verifies: REQ-DRIFTIMPACT-035#AC-1
+        with tempfile.TemporaryDirectory() as d:
+            out = self._gate(d, ["AREA-BAR-002"])
+            self.assertIn("DRIFT", out)
+            self.assertIn("review dependent(s): AREA-BAR-002", out)
+
+    def test_no_dependents_no_clause(self):  # verifies: REQ-DRIFTIMPACT-035#AC-2
+        with tempfile.TemporaryDirectory() as d:
+            out = self._gate(d, [])
+            self.assertIn("DRIFT", out)
+            self.assertNotIn("review dependent", out)
+
+    def test_two_dependents_sorted(self):  # verifies: REQ-DRIFTIMPACT-035#AC-3
+        with tempfile.TemporaryDirectory() as d:
+            out = self._gate(d, ["AREA-BAZ-003", "AREA-BAR-002"])   # written unsorted
+            self.assertIn("review dependent(s): AREA-BAR-002, AREA-BAZ-003", out)
+
+
 class ProseClassification(unittest.TestCase):  # tested-by: REQ-PROSE-024
     def test_meta_files_are_ignored(self):
         for rel in ("CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
@@ -1141,6 +1242,19 @@ class Staleness(unittest.TestCase):  # tested-by: REQ-CHECK-006
             _write(p, 'X = 1\nMAP_ENGINE_VERSION = "2099-12-31"\n')
             self.assertEqual(R._engine_version_at(p), "2099-12-31")
             self.assertIsNone(R._engine_version_at(os.path.join(d, "nope.py")))
+
+    def test_engine_version_at_finds_real_engine(self):  # bug: staleness-probe-4k-truncation
+        # The probe must parse the REAL engine file, not just synthetic fixtures:
+        # a bounded read() went stale the day the file header outgrew the bound.
+        p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        self.assertEqual(R._engine_version_at(p), R.MAP_ENGINE_VERSION)
+
+    def test_engine_version_at_ignores_docstring_mention(self):  # bug: staleness-probe-4k-truncation
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "reqmap.py")
+            _write(p, '"""doc says MAP_ENGINE_VERSION = "1999-01-01" as an example"""\n'
+                      'MAP_ENGINE_VERSION = "2099-12-31"\n')
+            self.assertEqual(R._engine_version_at(p), "2099-12-31")
 
     def test_warn_if_stale_fires_only_when_plugin_newer(self):  # bug: warn-if-stale-untested
         with tempfile.TemporaryDirectory() as d:

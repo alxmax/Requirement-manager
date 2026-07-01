@@ -36,7 +36,8 @@ PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap.py"
 
-MAP_ENGINE_RE = re.compile(r'MAP_ENGINE_VERSION\s*=\s*"([^"]+)"')
+# line-anchored so a docstring/comment mention before the real assignment can't win
+MAP_ENGINE_RE = re.compile(r'^MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)
 
 
 def _load_json(path: Path) -> dict:
