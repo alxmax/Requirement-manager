@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v2.11.1` — 2026-07-03
+
+**MQL4 source is now scanned (`.mq4` / `.mqh` added to `CODE_EXTS`).** MQL4 files carry
+`// implements:` / `// tested-by:` capability tags like any other source, but the scanner
+never looked at them — so an MQL4 file's tags were invisible (its tree read as 0% coverage)
+and a confirmed MQL4-only requirement failed the gate with "no `implements:` member" even when
+correctly tagged. Adding `.mq4`/`.mqh` makes those tags count. Additive; no behaviour change
+for repos without MQL4 sources.
+
 ## plugin `v2.11.0` — 2026-07-03
 
 **`health` can no longer read 100/clean while `gate` has link-sync errors (RM-6).** A
