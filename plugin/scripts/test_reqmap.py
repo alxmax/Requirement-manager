@@ -2628,7 +2628,8 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertEqual(json.loads(out), {
             "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
-            "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0})
+            "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0,
+            "gate_errors": 0, "gate_link_sync_clean": True})
 
     def test_drift_drops_out_of_green(self):  # bug-hunt #18: exercise the drift axis
         reqs = {"REQ-A-001": self._green()}
@@ -2700,6 +2701,79 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         obj = json.loads(out)
         self.assertEqual(obj["orphans"], 1)
         self.assertEqual(obj["healthy"], 0)
+
+    # tested-by: REQ-HEALTH-017 (RM-6 / Senate reqmap-health-gate-cleanliness)
+    def test_gate_errors_reflect_dangling_tag(self):
+        # a code tag pointing at a nonexistent requirement is one of gate's two
+        # ERROR-level link-sync predicates — health must surface it, informational
+        # only (score stays 100, mirroring the `untagged` idiom).
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)],
+                   "REQ-GHOST-999": [("implements", "y.py", 3)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["gate_errors"], 1)
+        self.assertFalse(obj["gate_link_sync_clean"])
+        self.assertEqual(obj["score"], 100)   # informational — never lowers the score
+
+    def test_gate_errors_reflect_missing_implements(self):
+        # a confirmed requirement with no implements: member is gate's other
+        # ERROR-level predicate.
+        _, out = self._health({"REQ-A-001": self._green()}, {}, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["gate_errors"], 1)
+        self.assertFalse(obj["gate_link_sync_clean"])
+
+    def test_gate_clean_is_default(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["gate_errors"], 0)
+        self.assertTrue(obj["gate_link_sync_clean"])
+
+    def test_gate_errors_dirty_badge_is_red_with_count(self):
+        members = {"REQ-GHOST-999": [("implements", "y.py", 3)]}
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            R.cmd_health({}, members, d, as_badge=True)
+        badge = json.loads(buf.getvalue())
+        self.assertEqual(badge["color"], "red")
+        self.assertIn("gate:1", badge["message"])
+
+    def test_clean_badge_unaffected(self):
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            R.cmd_health({"REQ-A-001": self._green()}, members, d, as_badge=True)
+        badge = json.loads(buf.getvalue())
+        self.assertEqual(badge["color"], "brightgreen")
+        self.assertNotIn("gate:", badge["message"])
+
+    def test_does_NOT_catch_untagged_value_edit(self):
+        # RM-6's documented limitation (Senate reqmap-health-gate-cleanliness,
+        # Round 2 — Socrate/Dimon): a value changed in a file that carries no
+        # membership tag at all produces no dangling reference and no missing-
+        # implements error, so it is invisible to this signal. This test pins
+        # that gap so it is never silently "closed" by a future refactor without
+        # a deliberate, separate decision (see .consilium/TODO.md history).
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            os.makedirs(os.path.join(d, "config"))
+            _write(os.path.join(d, "config", "risk_limits.yaml"), "daily_loss_limit: 500\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health({"REQ-A-001": self._green()}, members, d,
+                             as_json=True, code_root=d)
+            obj = json.loads(buf.getvalue())
+            # simulate the incident: the untagged file's value changes with no
+            # supporting tag anywhere — re-running health sees no difference.
+            _write(os.path.join(d, "config", "risk_limits.yaml"), "daily_loss_limit: 150\n")
+            buf2 = io.StringIO()
+            with redirect_stdout(buf2):
+                R.cmd_health({"REQ-A-001": self._green()}, members, d,
+                             as_json=True, code_root=d)
+            obj2 = json.loads(buf2.getvalue())
+        self.assertTrue(obj["gate_link_sync_clean"])
+        self.assertTrue(obj2["gate_link_sync_clean"])   # unchanged — the gap is real
 
 
 class TestLink(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
