@@ -1,5 +1,28 @@
 # Changelog
 
+## plugin `v2.11.0` — 2026-07-03
+
+**`health` can no longer read 100/clean while `gate` has link-sync errors (RM-6).** A
+downstream consumer repo's `health` reported 100/100 for 18 days while `gate` sat on 14
+unwired link-sync errors — `gate` was never wired into that repo's CI, so nobody saw it, and
+`health`'s own score never reflected `gate`'s state at all. `health --json`/`--badge`/print now
+carry `gate_errors` (count) and `gate_link_sync_clean` (bool), computed by a new shared
+`_link_sync_errors()` helper mirroring `gate`'s own two ERROR-level checks (dangling tags,
+enforced-status requirements with no `implements:` member). Purely additive — the `score`
+formula is untouched, same idiom as the existing `untagged` signal. The badge can no longer
+show `brightgreen` while `gate` would fail; it turns `red` with a `gate:N` suffix instead.
+
+**What this deliberately does NOT fix:** a value changed in a file carrying no membership tag
+at all (the actual shape of the incident that motivated this — an unsourced monetary-constant
+edit) produces neither a dangling reference nor a missing-`implements` error, so it stays
+invisible to this signal; pinned by a dedicated test. Closing that gap needs a sourced /
+`validated-against:`-staleness convention, deliberately out of scope here — Senate run
+`reqmap-health-gate-cleanliness` (verdict `GO_WITH_CONDITIONS`) rejected folding it into this
+change, citing a 2026-06-21 precedent (`reqmap-enforce-all-code-has-requirements`,
+`DEEPLY_SPLIT`) against granting `gate` new blocking authority without its own deliberation.
+
+`MAP_ENGINE_VERSION` → `2026-07-03`.
+
 ## plugin `v2.8.1` — 2026-06-26
 
 **Fix: member-hash line-ending normalization (CRLF/Windows).** `_file_sha` hashed member

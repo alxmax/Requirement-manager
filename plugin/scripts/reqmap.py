@@ -107,7 +107,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-07-01"
+MAP_ENGINE_VERSION = "2026-07-03"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -3217,6 +3217,31 @@ def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     return 0
 
 
+def _link_sync_errors(reqs, members):
+    """The two ERROR-level link-sync predicates `gate` enforces on a full scan:
+    a code tag pointing at a requirement id that does not exist, and an
+    ENFORCED-status requirement with no `implements:` member (`need`-layer
+    requirements are exempt — covered by `satisfies:` edges, not code).
+    Mirrors cmd_check's own checks so `health` can reflect gate's error state
+    without a second, independently-maintained walk of `members`. Deliberately
+    narrow: this does NOT catch a value changed with no supporting tag at all
+    (nothing points at it, so there is no dangling reference and no missing-
+    implements) — see RM-6 / Senate run reqmap-health-gate-cleanliness."""
+    errs = []
+    cap_ids = set(reqs)
+    for cap in members:
+        if cap not in cap_ids:
+            errs.append(f"dangling tag: code references {cap} but no requirement exists")
+    for rid, r in reqs.items():
+        m = r["meta"]
+        if m.get("layer") == "need":
+            continue
+        impls = [x for x in members.get(rid, []) if x[0] == "implements"]
+        if m.get("status") in ENFORCED and not impls:
+            errs.append(f"{rid}: status {m['status']} but no implements: tag found in code")
+    return errs
+
+
 def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: REQ-HEALTH-017
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
@@ -3224,7 +3249,16 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     verify-intent, not drifted vs the lock). A `layer: need` is covered by ≥1
     `satisfies:` edge instead of code and its test axis is waived, mirroring how
     `check` treats the need layer. `--json` emits the same numbers as a
-    parseable object for a CI badge. Read-only, always exit 0."""
+    parseable object for a CI badge. Read-only, always exit 0.
+
+    `gate_errors`/`gate_link_sync_clean` (informational, never enters `score`):
+    the count of `gate`'s own ERROR-level link-sync problems (dangling tags,
+    enforced-status requirements with no `implements:` member), so a 100/100
+    reading here can no longer coexist with an unseen `gate` failure — see
+    RM-6 (Senate run reqmap-health-gate-cleanliness). This does NOT detect a
+    value changed with no tag at all; that class of drift needs a sourced/
+    `validated-against:` convention on the changed file, which is out of
+    scope for this signal."""
     total = len(reqs)
     lock = load_lock(reqs_dir)
     satisfied = set()  # need ids with >=1 `satisfies:` edge (REQ-TRACE-020)
@@ -3259,10 +3293,12 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         if is_confirmed and covered and (has_test or is_need) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
+    gate_errors = _link_sync_errors(reqs, members)
     data = {"score": score, "total": total, "healthy": healthy,
             "confirmed": confirmed, "implemented": implemented, "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
-            "open_intent": open_intent, "drift": drifted}
+            "open_intent": open_intent, "drift": drifted,
+            "gate_errors": len(gate_errors), "gate_link_sync_clean": not gate_errors}
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
     # _scan_untagged (REQ-NEXT-013). Informational only: it counts FILES, not
@@ -3274,8 +3310,14 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         data["untagged"] = len(untagged)
     if as_badge:
         color = "brightgreen" if score == 100 else "green" if score >= 80 else "yellow" if score >= 60 else "red"
+        message = "{}/{} | {}%".format(confirmed, total, score)
+        # a badge cannot read "clean" while gate has link-sync errors gate itself
+        # would fail on — this is the exact false-positive RM-6 closes.
+        if gate_errors:
+            color = "red"
+            message += " | gate:{}".format(len(gate_errors))
         badge = {"schemaVersion": 1, "label": "requirements",
-                 "message": "{}/{} | {}%".format(confirmed, total, score), "color": color}
+                 "message": message, "color": color}
         print(json.dumps(badge))
         return 0
     if as_json:
@@ -3290,6 +3332,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if untested:    print("  untested (code, no tests):        {}".format(untested))
     if open_intent: print("  open verify-intent:               {}".format(open_intent))
     if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
+    if gate_errors: print("  gate link-sync errors (not clean):{}".format(len(gate_errors)))
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
