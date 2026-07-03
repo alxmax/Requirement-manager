@@ -2,12 +2,14 @@
 
 ## plugin `v2.11.1` — 2026-07-03
 
-**MQL4 source is now scanned (`.mq4` / `.mqh` added to `CODE_EXTS`).** MQL4 files carry
-`// implements:` / `// tested-by:` capability tags like any other source, but the scanner
-never looked at them — so an MQL4 file's tags were invisible (its tree read as 0% coverage)
-and a confirmed MQL4-only requirement failed the gate with "no `implements:` member" even when
-correctly tagged. Adding `.mq4`/`.mqh` makes those tags count. Additive; no behaviour change
-for repos without MQL4 sources.
+**Repos can declare extra scannable extensions (`REQMAP_EXTRA_CODE_EXTS`).** The scanner
+looks at a fixed set of source extensions (`CODE_EXTS`). A repo whose source language isn't in
+that set had its capability tags go invisible — the file read as un-covered, and a confirmed
+requirement whose only implementation lived in such a file failed the gate with "no
+`implements:` member" even when correctly tagged. The new `REQMAP_EXTRA_CODE_EXTS` env var
+(comma-separated, leading dot optional, e.g. `.foo,bar`) merges extra extensions into
+`CODE_EXTS` at load, so any repo can extend the scan set without forking the engine. Additive;
+unset = unchanged behaviour.
 
 ## plugin `v2.11.0` — 2026-07-03
 
