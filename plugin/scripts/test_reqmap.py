@@ -1633,6 +1633,20 @@ class MdDiscovery(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
             roles = [m[0] for m in members["CONSILIUM-VOICE-001"]]
             self.assertIn("implements", roles)
 
+    def test_tag_in_mq4_is_scanned_as_member(self):  # .mq4/.mqh now in CODE_EXTS
+        # MQL4 (MetaTrader EAs/indicators) is a real source language whose capability
+        # tags were previously invisible — a MetaTrader repo's mt4/ read as 0% coverage.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "mt4", "PreCheck.mq4"),
+                   "// {}: BUS-PRECHECK-006\nint OnInit(){{return 0;}}\n".format(_ROLE))
+            _write(os.path.join(d, "mt4", "lib.mqh"),
+                   "// {}: BUS-PRECHECK-006\n".format(_ROLE))
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            self.assertIn("BUS-PRECHECK-006", members)
+            files = {os.path.basename(m[1]) for m in members["BUS-PRECHECK-006"]}
+            self.assertIn("PreCheck.mq4", files)
+            self.assertIn("lib.mqh", files)
+
 
 class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
     def _check(self, files):

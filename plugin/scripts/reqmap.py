@@ -66,6 +66,7 @@ _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip befo
 AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
+             ".mq4", ".mqh",  # MQL4 (MetaTrader EAs/indicators) carry capability tags too
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
 
 # ---- prose auto-draft classification (cmd_extract) ----

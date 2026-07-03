@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v2.11.1` — 2026-07-03
+
+**MQL4 source is now scanned (`.mq4` / `.mqh` added to `CODE_EXTS`).** MetaTrader EAs and
+indicators carry `// implements:` / `// tested-by:` capability tags like any other source,
+but the scanner never looked at them — so in a MetaTrader repo the whole `mt4/` tree read as
+0% coverage and a confirmed MQL4-only requirement (e.g. an EA panel behaviour) failed the gate
+with "no `implements:` member" even when correctly tagged. Adding `.mq4`/`.mqh` makes those
+tags count. Same downstream repo as the v2.11.0 finding: its `mt4/` coverage was 25% purely
+because two tagged `.mq4` files were invisible. Additive; no behaviour change for non-MQL4
+repos.
+
 ## plugin `v2.11.0` — 2026-07-03
 
 **`health` can no longer read 100/clean while `gate` has link-sync errors (RM-6).** A
