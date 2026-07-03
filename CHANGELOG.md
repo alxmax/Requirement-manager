@@ -1,5 +1,16 @@
 # Changelog
 
+## plugin `v2.11.1` — 2026-07-03
+
+**Repos can declare extra scannable extensions (`REQMAP_EXTRA_CODE_EXTS`).** The scanner
+looks at a fixed set of source extensions (`CODE_EXTS`). A repo whose source language isn't in
+that set had its capability tags go invisible — the file read as un-covered, and a confirmed
+requirement whose only implementation lived in such a file failed the gate with "no
+`implements:` member" even when correctly tagged. The new `REQMAP_EXTRA_CODE_EXTS` env var
+(comma-separated, leading dot optional, e.g. `.foo,bar`) merges extra extensions into
+`CODE_EXTS` at load, so any repo can extend the scan set without forking the engine. Additive;
+unset = unchanged behaviour.
+
 ## plugin `v2.11.0` — 2026-07-03
 
 **`health` can no longer read 100/clean while `gate` has link-sync errors (RM-6).** A

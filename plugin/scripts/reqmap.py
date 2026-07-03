@@ -68,6 +68,18 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
 
+# A repo whose source language the default set doesn't cover can declare extra
+# scannable extensions via the REQMAP_EXTRA_CODE_EXTS env var — comma-separated,
+# leading dot optional (e.g. "REQMAP_EXTRA_CODE_EXTS=.foo,bar"). Merged here so
+# every scan site (endswith(CODE_EXTS)) picks them up without forking the engine.
+_extra_exts = tuple(
+    (e if e.startswith(".") else "." + e)
+    for e in (x.strip() for x in os.environ.get("REQMAP_EXTRA_CODE_EXTS", "").split(","))
+    if e.strip()
+)
+if _extra_exts:
+    CODE_EXTS = CODE_EXTS + _extra_exts
+
 # ---- prose auto-draft classification (cmd_extract) ----
 # These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
 # explicit tag on ANY file, regardless of bucket — buckets never suppress a real tag.

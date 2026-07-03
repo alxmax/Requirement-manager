@@ -1633,6 +1633,27 @@ class MdDiscovery(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
             roles = [m[0] for m in members["CONSILIUM-VOICE-001"]]
             self.assertIn("implements", roles)
 
+    def test_extra_code_exts_env_scans_custom_extension(self):  # REQMAP_EXTRA_CODE_EXTS
+        # A repo can declare extra scannable extensions via the env var; a file with a
+        # custom extension (leading dot in the env value optional) then has its capability
+        # tag picked up. Reload the module so the module-level extension merge re-runs.
+        import importlib
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "widget.foo"),
+                   "// {}: AREA-FEATURE-001\n".format(_ROLE))
+            _write(os.path.join(d, "src", "helper.bar"),
+                   "// {}: AREA-FEATURE-001\n".format(_ROLE))
+            with mock.patch.dict(os.environ, {"REQMAP_EXTRA_CODE_EXTS": ".foo, bar"}):
+                importlib.reload(R)
+                try:
+                    members = R.scan_members(d, os.path.join(d, "requirements"))
+                finally:
+                    importlib.reload(R)  # restore default CODE_EXTS for other tests
+            self.assertIn("AREA-FEATURE-001", members)
+            files = {os.path.basename(m[1]) for m in members["AREA-FEATURE-001"]}
+            self.assertIn("widget.foo", files)   # leading-dot form
+            self.assertIn("helper.bar", files)   # dot auto-prepended
+
 
 class HealthLine(unittest.TestCase):  # tested-by: REQ-CHECK-006
     def _check(self, files):
