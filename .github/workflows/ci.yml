@@ -21,7 +21,12 @@ jobs:
   gate-and-tests:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 (full history) so the changelog-entry check below can
+      # resolve HEAD~1 — the previous commit's plugin.json version — on both
+      # push and pull_request events.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.x"
@@ -30,6 +35,27 @@ jobs:
         run: python scripts/check_versions.py
       - name: Version-gate tests
         run: python -X utf8 scripts/test_check_versions.py
+      # A plugin.json version bump must ship with a matching CHANGELOG.md
+      # entry, or it merges silently undocumented (as v2.9.0 once did).
+      # Stated decision (Consilium dialectic, run
+      # 2026-07-03_1638_requirement-manager-changelog-tagging-ci, Skeptic
+      # goal_fit objection): ship this lighter-form release record now
+      # (a job-summary annotation, no new permissions); real git-tag/GitHub-
+      # Release automation is deferred to a future, separately-tracked
+      # decision — not silently omitted.
+      - name: Version bump has a matching CHANGELOG entry
+        run: |
+          if git rev-parse HEAD~1 >/dev/null 2>&1 && ! git diff --quiet HEAD~1 -- plugin/.claude-plugin/plugin.json; then
+            VERSION=$(python -c "import json; print(json.load(open('plugin/.claude-plugin/plugin.json'))['version'])")
+            if ! grep -qF "\`v$VERSION\`" CHANGELOG.md; then
+              echo "::error::plugin.json version bumped to $VERSION but CHANGELOG.md has no matching 'v$VERSION' heading — add one before merging."
+              exit 1
+            fi
+            {
+              echo "### Release"
+              echo "plugin semver: **v$VERSION** — see \`CHANGELOG.md\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
       - name: Requirement drift gate
