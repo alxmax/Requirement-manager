@@ -1,5 +1,9 @@
 # Changelog
 
+## plugin `v2.12.0` — 2026-07-04
+
+**`health` now reports registry lag — commits since the requirements dir was last touched (RM-6, part 2).** `health` told you whether the requirements that exist are coherent, but not whether the registry as a whole had gone stale while code moved on — a consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted, and nothing surfaced it. `health --json`/print now carry `commits_since_req_touch`, a read-only git-derived count (last commit touching `reqs_dir` → `HEAD`), printed only when non-zero. It is the temporal complement to the untagged-code coverage signal: coverage asks "is this code traced?", lag asks "has the registry moved lately at all?". Advisory only — never a gate, never lowers the score, and absent (not zero) when unmeasurable (no git / no code root / `reqs_dir` untracked). New requirement `REQ-REGISTRYLAG-035`.
+
 ## plugin `v2.11.1` — 2026-07-03
 
 **Repos can declare extra scannable extensions (`REQMAP_EXTRA_CODE_EXTS`).** The scanner

@@ -2690,6 +2690,67 @@ class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertNotIn("untagged", json.loads(out))
 
+    # tested-by: REQ-REGISTRYLAG-035
+    def _mkgit(self, d):
+        subprocess.run(["git", "init", d], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.email", "t@t.com"],
+                       check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "config", "user.name", "T"],
+                       check=True, capture_output=True)
+
+    def _gcommit(self, d, msg):
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "commit", "-m", msg], check=True, capture_output=True)
+
+    def test_commits_since_req_touch_counted(self):
+        # REQ-REGISTRYLAG-035 AC-1 — advisory "registry lag" signal: how many
+        # commits landed since the requirements dir was last touched. It flags a
+        # registry frozen while code races ahead. Informational: never lowers score.
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            self._mkgit(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"), "# T\n")
+            self._gcommit(d, "reqs")
+            for i in range(2):   # two commits that do NOT touch requirements/
+                _write(os.path.join(d, "code{}.py".format(i)), "x = 1\n")
+                self._gcommit(d, "c{}".format(i))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health({"REQ-A-001": self._green()}, members, rdir,
+                             as_json=True, code_root=d)
+            obj = json.loads(buf.getvalue())
+        self.assertEqual(obj["commits_since_req_touch"], 2)
+        self.assertEqual(obj["score"], 100)   # informational — never lowers the score
+
+    def test_commits_since_req_touch_zero_when_fresh(self):
+        # REQ-REGISTRYLAG-035 AC-2 — the most recent commit touched requirements/:
+        # lag is 0 and the key is present (0, not absent) for --json consumers.
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            self._mkgit(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"), "# T\n")
+            self._gcommit(d, "reqs")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health({"REQ-A-001": self._green()}, members, rdir,
+                             as_json=True, code_root=d)
+            obj = json.loads(buf.getvalue())
+        self.assertEqual(obj["commits_since_req_touch"], 0)
+
+    def test_registry_lag_absent_without_git(self):
+        # REQ-REGISTRYLAG-035 AC-3 — a code root that is not a git worktree ->
+        # the key is absent (not zero), mirroring the untagged idiom.
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health({"REQ-A-001": self._green()}, members, d,
+                             as_json=True, code_root=d)
+            obj = json.loads(buf.getvalue())
+        self.assertNotIn("commits_since_req_touch", obj)
+
     def test_orphan_not_green(self):
         # confirmed but no implements member -> orphan, drops out of green
         _, out = self._health({"REQ-A-001": self._green()}, {})

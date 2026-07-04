@@ -119,7 +119,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-07-03"
+MAP_ENGINE_VERSION = "2026-07-04"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -3254,6 +3254,32 @@ def _link_sync_errors(reqs, members):
     return errs
 
 
+def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: REQ-REGISTRYLAG-035
+    """Count commits on HEAD since the last commit that touched `reqs_dir`.
+
+    The advisory "registry lag" signal: a large number means the registry has
+    sat frozen while code raced ahead of it — the exact 18-day-freeze condition
+    that let a money value drift with no requirement update. Returns None (not 0)
+    when unmeasurable — git missing, `code_root` not a git worktree, or `reqs_dir`
+    has no commit in history — so the reading is absent rather than falsely 0.
+    Read-only; never a gate, never enters the score."""
+    try:
+        last = subprocess.run(
+            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", reqs_dir],
+            capture_output=True, text=True, timeout=5)
+        sha = last.stdout.strip()
+        if last.returncode != 0 or not sha:
+            return None
+        cnt = subprocess.run(
+            ["git", "-C", code_root, "rev-list", "--count", f"{sha}..HEAD"],
+            capture_output=True, text=True, timeout=5)
+        if cnt.returncode != 0:
+            return None
+        return int(cnt.stdout.strip())
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return None
+
+
 def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: REQ-HEALTH-017
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
@@ -3320,6 +3346,12 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
     if untagged is not None:
         data["untagged"] = len(untagged)
+    # Registry-lag signal (read-only): commits since requirements/ was last
+    # touched — a frozen registry while code moves ahead. Absent (not 0) when
+    # unmeasurable (no git / no code root), like `untagged`. implements: REQ-REGISTRYLAG-035
+    lag = _commits_since_reqs_touch(code_root, reqs_dir) if code_root else None
+    if lag is not None:
+        data["commits_since_req_touch"] = lag
     if as_badge:
         color = "brightgreen" if score == 100 else "green" if score >= 80 else "yellow" if score >= 60 else "red"
         message = "{}/{} | {}%".format(confirmed, total, score)
@@ -3346,6 +3378,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
     if gate_errors: print("  gate link-sync errors (not clean):{}".format(len(gate_errors)))
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
+    if lag:         print("  commits since requirements touched:{}".format(lag))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
     return 0
