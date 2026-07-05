@@ -2622,6 +2622,86 @@ class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
         self.assertIn("No overlapping", out)
 
 
+class Search(unittest.TestCase):  # tested-by: REQ-SEARCH-036
+    def _search(self, reqs, query, top=5):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_search(reqs, query, top)
+        return code, buf.getvalue()
+
+    def _req(self, title, contract):
+        return {"body": "# {t}\n\n> {t} intent.\n\n## WHAT — Contract (normative)\n- {c}\n".format(
+            t=title, c=contract)}
+
+    def _score_lines(self, out):
+        # the ranked-hit lines look like "  0.287  REQ-...  Title"; the count header
+        # ("2 match(es) ...") starts with a digit too but carries no "REQ-" token.
+        return [ln for ln in out.splitlines()
+                if "REQ-" in ln and ln.strip()[:1].isdigit()]
+
+    def test_query_ranks_matching_requirement_first_with_score(self):  # AC-1
+        reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash baseline"),
+                "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
+        code, out = self._search(reqs, "contract changed against the lock hash")
+        self.assertEqual(code, 0)
+        lines = self._score_lines(out)
+        self.assertTrue(lines, "expected at least one ranked hit")
+        # top hit is the drift requirement, printed with its cosine score (Dimon:
+        # a match is shown WITH its score, never as a bare id)
+        self.assertRegex(lines[0].strip(), r"^\d\.\d{3}\s+REQ-DRIFT-001\b")
+
+    def test_no_lexical_overlap_reports_no_strong_match(self):  # AC-2 — Dimon blocking condition
+        reqs = {"REQ-DRIFT-001": self._req("Drift", "detect when a contract changes against the lock hash"),
+                "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
+        code, out = self._search(reqs, "photosynthesis quarterly dividend wombat")
+        self.assertEqual(code, 0)
+        self.assertIn("No strong match", out)
+        # the failure mode being guarded: NO spurious ranked result below the floor
+        self.assertNotIn("REQ-DRIFT-001", out)
+        self.assertNotIn("REQ-MAP-002", out)
+
+    def test_query_with_only_stopwords_says_no_terms(self):  # AC-3 — distinct from no-match
+        reqs = {"REQ-A-001": self._req("Thing", "does one thing well")}
+        code, out = self._search(reqs, "the and for with")
+        self.assertEqual(code, 0)
+        self.assertIn("No searchable terms", out)
+        self.assertNotIn("No strong match", out)
+
+    def test_top_caps_result_count(self):  # AC-4
+        reqs = {"REQ-DUP-00{}".format(i): self._req("Doc" + str(i),
+                    "validate user input and reject malformed payloads from the client")
+                for i in range(1, 6)}
+        def n(top):
+            _, out = self._search(reqs, "validate user input malformed payloads client", top=top)
+            return len(self._score_lines(out))
+        self.assertEqual(n(2), 2)          # capped
+        self.assertGreater(n(10), 2)       # ...and the cap is real, not a shortage of matches
+
+    def _fx(self, title, intent, contract):
+        # a fixture body with an explicit intent line — matches the golden fixture
+        # in app/scripts/ssr-smoke.jsx field-for-field (title / intent / contract).
+        return {"body": "# {t}\n\n> {i}\n\n## WHAT — Contract (normative)\n- {c}\n".format(
+            t=title, i=intent, c=contract)}
+
+    def test_ranking_matches_viewer_golden_fixture(self):  # parity: app/src/lib/search.js
+        # The viewer ports this exact TF-IDF model (REQ-SEARCH-036). The SSR smoke
+        # asserts the SAME fixture scores 0.4112 on REQ-DRIFT-001 and that a
+        # no-overlap query floors out — both runtimes pinned to one model, so a
+        # drift in either fails here or there.
+        reqs = {
+            "REQ-DRIFT-001": self._fx("Drift", "detect divergence",
+                                      "detect when a contract changes against the lock hash baseline"),
+            "REQ-MAP-002": self._fx("Map", "diagram",
+                                    "render mermaid diagrams of the requirement graph"),
+            "REQ-SCAN-003": self._fx("Scan", "find tags",
+                                     "walk the code and find implements and tested-by tags in source files"),
+        }
+        _, out = self._search(reqs, "contract changed against the lock hash")
+        self.assertRegex(self._score_lines(out)[0].strip(), r"^0\.411\s+REQ-DRIFT-001\b")
+        _, none = self._search(reqs, "banana photosynthesis wombat")
+        self.assertIn("No strong match", none)
+
+
 class Health(unittest.TestCase):  # tested-by: REQ-HEALTH-017
     def _health(self, reqs, members, as_json=False):
         buf = io.StringIO()

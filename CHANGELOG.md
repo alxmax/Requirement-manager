@@ -1,5 +1,11 @@
 # Changelog
 
+## plugin `v2.13.0` — 2026-07-05
+
+**Ranked requirement search — a `search` command and a shared viewer model.** Finding the requirement about a topic meant grepping `requirements/` (exact word, no ranking) or opening the map. The new `reqmap.py search "<query>"` ranks requirements by lexical relevance, most-relevant-first, reusing the same TF-IDF/cosine scoring (`REQ-SIMILAR-016`) that already powers `dupes` — zero new dependencies, gate/lock semantics untouched. Each hit prints its cosine score, and below a calibrated `0.05` floor it prints "No strong match" instead of a spurious top result — the floor sits far below the `0.35` dupes pair-threshold because a short query is a sparse vector, so query-vs-doc cosine runs lower than doc-vs-doc. The map viewer's search box now ranks by the **same** model (`app/src/lib/search.js`, a faithful port), replacing its substring filter, so the CLI (headless/agent/CI) and the viewer (human browsing) agree on what matches; the two runtimes are pinned to one model by a shared golden fixture asserted in both the Python `Search` tests and the viewer's SSR smoke. New requirement `REQ-SEARCH-036`.
+
+`MAP_ENGINE_VERSION` → `2026-07-05`.
+
 ## plugin `v2.12.0` — 2026-07-04
 
 **`health` now reports registry lag — commits since the requirements dir was last touched (RM-6, part 2).** `health` told you whether the requirements that exist are coherent, but not whether the registry as a whole had gone stale while code moved on — a consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted, and nothing surfaced it. `health --json`/print now carry `commits_since_req_touch`, a read-only git-derived count (last commit touching `reqs_dir` → `HEAD`), printed only when non-zero. It is the temporal complement to the untagged-code coverage signal: coverage asks "is this code traced?", lag asks "has the registry moved lately at all?". Advisory only — never a gate, never lowers the score, and absent (not zero) when unmeasurable (no git / no code root / `reqs_dir` untracked). New requirement `REQ-REGISTRYLAG-035`.

@@ -119,7 +119,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-07-04"
+MAP_ENGINE_VERSION = "2026-07-05"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -390,6 +390,23 @@ COMMANDS = {
                 "flag": "--threshold",
                 "type": "float",
                 "help": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged.",
+            },
+        ],
+    },
+    "search": {
+        "summary": (
+            "Rank requirements by lexical relevance to a free-text query (same TF-IDF "
+            "cosine as dupes, reused). Read-only. Prints each hit's score, and says so "
+            "explicitly when nothing clears the relevance floor rather than showing a "
+            "spurious top result. Lexical, not synonym-aware."
+        ),
+        "arg": "QUERY",
+        "params": [
+            {
+                "name": "top",
+                "flag": "--top",
+                "type": "int",
+                "help": "Maximum number of ranked matches to show (default 5).",
             },
         ],
     },
@@ -3169,6 +3186,54 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
     return 0
 
 
+# ---------- search (free-text requirement lookup) ----------
+# Ranks requirements against a free-text query with the SAME lexical TF-IDF/cosine
+# used by `dupes` — reused, not re-implemented. The floor is NOT the dupes 0.35
+# pair-threshold: a short query is a sparse vector, so query-vs-doc cosine runs far
+# lower than doc-vs-doc. Calibrated on the 39-requirement corpus, a correct top hit
+# scores ~0.13-0.67 while a no-lexical-overlap query tops out ~0.00-0.04, so 0.05
+# cleanly separates a real match from noise. Below it, `search` says so rather than
+# presenting a spurious top result with the same authority as a real one.
+SEARCH_FLOOR = 0.05
+SEARCH_TOP = 5
+
+
+def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR):  # implements: REQ-SEARCH-036
+    """Rank requirements by lexical relevance to `query` (cosine over TF-IDF of the
+    same title + intent + Contract text `dupes` compares on). Read-only, always exit
+    zero. Prints each hit's cosine score so a weak match is visible as weak, and emits
+    an explicit no-strong-match line when the best score is below `floor` — so a
+    lexical near-miss is never dressed up as an answer."""
+    qtok = _sim_tokens(query or "")
+    if not qtok:
+        print("No searchable terms in {!r} (need a word of 3+ letters that is not a "
+              "stopword). Nothing to rank.".format(query or ""))
+        return 0
+    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
+    docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
+    if not docs:
+        print("No requirements with contract text to search.")
+        return 0
+    top = max(1, top)
+    corpus = dict(docs)
+    corpus["\x00query"] = qtok        # fold the query into the corpus so idf spans docs+query
+    vecs = _tfidf(corpus)
+    qv = vecs["\x00query"]
+    scored = sorted(((_cosine(qv, vecs[rid]), rid) for rid in docs),
+                    key=lambda x: (-x[0], x[1]))
+    hits = [(s, rid) for s, rid in scored if s >= floor][:top]
+    if not hits:
+        print("No strong match for {!r} (best {:.3f} is below the {:.2f} floor). "
+              "This is lexical search — try different words, or `dupes`/grep.".format(
+                  query, scored[0][0], floor))
+        return 0
+    print("{} match(es) for {!r} — cosine score, lexical (not synonym-aware):\n".format(
+        len(hits), query))
+    for s, rid in hits:
+        print("  {:.3f}  {}  {}".format(s, rid, _req_title(reqs[rid]["body"], rid)))
+    return 0
+
+
 # ---------- health (corpus coherence snapshot) ----------
 def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     """Per-directory coverage report: how many scannable files in each top-level
@@ -4767,6 +4832,7 @@ def main():
             "  gate                 the commit/CI gate: link sync + drift + test-link (report-only)\n"
             "  next                 what to do next (counted risk buckets)\n"
             "  show ID              one-requirement dossier\n"
+            "  search \"query\"        rank requirements by lexical relevance to a query\n"
             "\nAdvanced:\n"
             "  plan                 read-only extraction plan (writes nothing)\n"
             "  dupes                flag requirement pairs with overlapping contracts\n"
@@ -4794,6 +4860,8 @@ def main():
                          "test-link integrity from warn to error.")
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
+    ap.add_argument("--top", type=int, default=None,
+                    help="search: max ranked matches to show (default 5)")
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health|coverage: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
@@ -4865,6 +4933,10 @@ def main():
         return cmd_show(reqs, members, a.arg)
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
+    if a.cmd == "search":
+        if not a.arg:
+            print("usage: reqmap search \"<query>\"   [--top N]"); return 2
+        return cmd_search(reqs, a.arg, a.top if a.top is not None else SEARCH_TOP)
     if a.cmd == "health":
         return cmd_health(reqs, members, reqs_dir, a.as_json,
                           getattr(a, "as_badge", False), code_root=code_root)

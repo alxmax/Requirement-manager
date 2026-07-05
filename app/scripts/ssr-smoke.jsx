@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import App from "../src/App.jsx";
+import { rankRequirements } from "../src/lib/search.js";
 import { setRegistry, REQUIREMENTS } from "../src/lib/data.js";
 import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
@@ -47,6 +48,32 @@ const checks = [
   ["renders Problems nav", appHtml.includes("Problems")],
 ];
 for (const [label, ok] of checks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
+
+// ranked-search parity (REQ-SEARCH-036): the viewer's search must rank by the
+// SAME TF-IDF model as the engine `search` CLI. This golden fixture is asserted
+// identically in the Python `Search` tests (class SearchParity) — the query
+// scores 0.4112 on REQ-DRIFT-001 in BOTH runtimes, and a no-overlap query floors
+// out to nothing. If either runtime drifts from the model, one of these fails.
+const SEARCH_FIXTURE = [
+  { id: "REQ-DRIFT-001", title: "Drift", intent: "detect divergence",
+    contract: ["detect when a contract changes against the lock hash baseline"] },
+  { id: "REQ-MAP-002", title: "Map", intent: "diagram",
+    contract: ["render mermaid diagrams of the requirement graph"] },
+  { id: "REQ-SCAN-003", title: "Scan", intent: "find tags",
+    contract: ["walk the code and find implements and tested-by tags in source files"] },
+];
+const ranked = rankRequirements(SEARCH_FIXTURE, "contract changed against the lock hash");
+const nomatch = rankRequirements(SEARCH_FIXTURE, "banana photosynthesis wombat");
+const searchChecks = [
+  ["ranked search returns the drift requirement first", ranked[0]?.req.id === "REQ-DRIFT-001"],
+  ["ranked search score matches the engine (0.4112)", ranked[0] && Math.abs(ranked[0].score - 0.4112) < 1e-4],
+  ["ranked search shows a score per hit", typeof ranked[0]?.score === "number"],
+  ["ranked search floors out a no-overlap query", nomatch.length === 0],
+];
+for (const [label, ok] of searchChecks) {
   console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
   if (!ok) failures++;
 }
