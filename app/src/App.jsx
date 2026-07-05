@@ -1,6 +1,7 @@
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect, Component } from "react";
 import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
+import { rankRequirements } from "./lib/search.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { MapView } from "./views/MapView.jsx";
@@ -16,10 +17,11 @@ const NAV = [
 ];
 
 function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
-  const q = query.trim().toLowerCase();
-  const hits = q ? REQUIREMENTS.filter(r =>
-    (r.id+" "+r.title+" "+r.intent+" "+r.contract.join(" ")).toLowerCase().includes(q)
-  ).slice(0,8) : [];
+  const q = query.trim();
+  // Ranked relevance — the SAME TF-IDF model as the engine `search` command
+  // (REQ-SEARCH-036), not a substring filter, so the viewer and CLI agree on
+  // what "matches" and in what order. Below the relevance floor -> no hits.
+  const hits = q ? rankRequirements(REQUIREMENTS, q, { top: 8 }) : [];
   return (
     <header className="topbar">
       <div className="brand">
@@ -35,11 +37,12 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
         {q && (
           <div className="search-res">
             {hits.length ? hits.map(h=>(
-              <div className="search-hit" key={h.id} onMouseDown={()=>onSearchPick(h.id)}>
-                <span className="hid">{h.id}</span>
-                <span className="htitle">{h.title}</span>
+              <div className="search-hit" key={h.req.id} onMouseDown={()=>onSearchPick(h.req.id)}>
+                <span className="hid">{h.req.id}</span>
+                <span className="htitle">{h.req.title}</span>
+                <span className="hscore">{h.score.toFixed(2)}</span>
               </div>
-            )) : <div className="search-empty">no match</div>}
+            )) : <div className="search-empty">no strong match</div>}
           </div>
         )}
       </div>

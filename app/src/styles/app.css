@@ -58,7 +58,8 @@ button { font-family: inherit; cursor: pointer; }
 .search-hit:last-child { border-bottom: none; }
 .search-hit:hover, .search-hit.active { background: var(--surface); }
 .search-hit .hid { font: var(--text-id); color: var(--fg); flex: none; }
-.search-hit .htitle { font: var(--text-small); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-hit .htitle { font: var(--text-small); color: var(--fg-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.search-hit .hscore { font: var(--text-small); color: var(--fg-faint); flex: none; font-variant-numeric: tabular-nums; }
 .search-empty { padding: 12px; font: var(--text-small); color: var(--fg-faint); }
 
 /* ---- Buttons ------------------------------------------------------------- */
