@@ -35,6 +35,9 @@ jobs:
         run: python scripts/check_versions.py
       - name: Version-gate tests
         run: python -X utf8 scripts/test_check_versions.py
+      - name: Release-notes extraction tests
+        working-directory: scripts
+        run: python -X utf8 test_changelog_notes.py
       # A plugin.json version bump must ship with a matching CHANGELOG.md
       # entry, or it merges silently undocumented (as v2.9.0 once did).
       # Stated decision (Consilium dialectic, run
