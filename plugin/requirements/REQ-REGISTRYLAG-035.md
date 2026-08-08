@@ -24,10 +24,15 @@ milestone: v2.12
 
 ## WHAT — Contract (normative)
 - The capability shall report the number of commits on `HEAD` since the most recent commit that touched the requirements directory (`reqs_dir`), as "registry lag".
-- The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`) and the commit count from there to `HEAD` (`git rev-list --count`). It shall not parse requirement contents.
-- The `health` command shall include this count: as a `commits_since_req_touch` integer key in its `--json` output, and as a labelled line in its text output emitted only when the count is greater than zero (a lag of 0 is the healthy case and needs no line).
-- The signal shall be read-only and shall never be a gate: it shall not change any exit code, and it shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.
-- The `commits_since_req_touch` key shall be absent (not zero) whenever the value is unmeasurable — no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history — so existing `--json` consumers keep their schema and a missing reading is never mistaken for a fresh registry.
+- The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).
+- It shall not parse requirement contents.
+- The `health` command shall include this count as a `commits_since_req_touch` integer key in its `--json` output.
+- In text output it shall emit a labelled line only when the count is greater than zero; a lag of 0 is the healthy case and needs no line.
+- The signal shall be read-only and shall never be a gate: it shall not change any exit code.
+- It shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.
+- The `commits_since_req_touch` key shall be absent, not zero, whenever the value is unmeasurable.
+- Unmeasurable means: no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history.
+- Absence rather than zero shall preserve the `--json` schema, so a missing reading is never mistaken for a fresh registry.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent; scope and severity mirror the settled Senate decision on the sibling coverage signal ([[REQ-COVERAGE-029]]).

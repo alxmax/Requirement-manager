@@ -486,6 +486,7 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "Why `ac-count-high` and `over-scoped` are exempt: this requirement is the gate's severity table, not a bundle of checks. Each individual check the gate runs already has its own requirement ([[REQ-TESTLINK-018]], [[REQ-ACVERIFY-019]], [[REQ-MEMBERDRIFT-027]], [[REQ-DOCBUNDLE-026]], [[REQ-ORPHANCODE-034]], [[REQ-DRIFTIMPACT-035]]). What remains here is one behaviour — which condition is an ERROR, which is a WARN, and what that does to the exit code — so every clause and criterion shares a single failure mode. Splitting it would scatter the exit-code contract across files instead of clarifying it. Revisit this exemption if a clause ever lands here that is not about severity or exit code.",
         "Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`) is not automatable and surfaces at human review.",
         "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there.",
         "The dev-CI version-coherence script `scripts/check_versions.py` (repo root, never seeded into consumer repos) enforces plugin manifest alignment as the first step in this repo's own CI pipeline (`check_versions.py → gate → map --check → test_reqmap.py`). It is outside the plugin scan root and has no requirement of its own; its invariant (semver consistency across `plugin.json` + `marketplace.json`) is documented in `CLAUDE.md`."
@@ -1077,16 +1078,19 @@
         "The command shall scan all requirements and aggregate the bullet items under each one's `## WHAT — Verify intent` section into a single `_findings.md` written in the requirements directory.",
         "It shall exclude the \"None — …\" placeholder bullet (a requirement that recorded no open question contributes nothing).",
         "In raw mode it shall group findings by requirement, each group and the document header carrying a count; with zero findings it shall still write a well-formed file stating none are open.",
-        "When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view instead: confirmed bugs first ordered by severity (high → low), then product/config decisions, then intentional, then false-positive; bug entries shall show their location and recommended fix when present.",
+        "When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view: confirmed bugs first by severity (high → low), then product/config decisions, then intentional, then false-positive.",
+        "Bug entries shall show their location and recommended fix when present.",
         "It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.",
         "With the raw flag set it shall ignore any sidecar and emit the raw grouped list.",
-        "It shall be deterministic and stdlib-only: it shall not classify findings itself (classification is produced out-of-band by the AI triage pass and supplied through the sidecar) and shall write no file other than `_findings.md`.",
+        "It shall be deterministic and stdlib-only: it shall not classify findings itself.",
+        "It shall write no file other than `_findings.md`.",
         "The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings."
       ],
       "verify": [
         "None — this capability is authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "Classification itself is produced out-of-band by the AI triage pass and supplied through the sidecar; the command only renders what the sidecar already decided.",
         "Staleness is detected by comparing item *counts*, not content — a sidecar that is stale but happens to match the raw count is not flagged.",
         "The sidecar is rendered as the source of truth when present; newly added verify-intent items do not appear in the classified view until the AI triage pass regenerates the sidecar (use `--raw` to see the current raw set)."
       ],
@@ -1202,11 +1206,15 @@
       "intent": "Setting up requirement tracking on a fresh project means doing five fiddly steps in the right order. This is the single \"get started\" command that does all of them for you: it makes the folder, reads your existing code and drafts requirements from it, records a baseline, builds the navigable map, and tells you the one next thing to do. Without it, a newcomer has to learn and chain those steps by hand, and most give up before the project is in a usable state.",
       "contract": [
         "It shall create the requirements directory if it does not exist.",
-        "It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`. The seeded file lists `scripts/reqmap.py` (the vendored engine, whose self-tags would otherwise read as dangling refs) **except** when that file is self-hosting — i.e. it carries membership tags that resolve to requirements already present — in which case the engine is the managed code and must stay scanned, so the line is omitted and a comment explains why.",
+        "It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`.",
+        "The seeded file shall list `scripts/reqmap.py`, the vendored engine, whose self-tags would otherwise read as dangling refs.",
+        "That line shall be omitted, with a comment explaining why, when the engine is self-hosting.",
+        "The engine is self-hosting when it carries membership tags that resolve to requirements already present; it is then managed code and must stay scanned.",
         "It shall draft requirements from existing untagged code by invoking the extract capability, then build the drift lock and the map so the repo is immediately in a gate-passing, navigable state.",
         "It shall print a guided summary that points at a single next command (`reqmap.py next`) plus wiring the gate, rather than an undifferentiated menu.",
         "When nothing was extracted (no supported files, or all ignored) it shall say so distinctly and point at `new` — it shall not print a tracked-requirements summary that masks the empty result.",
-        "It shall be safe to re-run: a second invocation refreshes the lock and map and re-prints the summary without destroying authored requirements or an existing ignore file."
+        "It shall be safe to re-run: a second invocation refreshes the lock and map, then re-prints the summary.",
+        "A re-run shall never destroy authored requirements or an existing ignore file."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1585,6 +1593,7 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "Why `ac-count-high` is exempt: the eight criteria are the branch table of one decision — which (requirement, file) pair is reported as member drift — not eight behaviours that can break apart. Six of them (AC-2 through AC-6, AC-8) are the suppression rules of that same decision. A split would produce two requirements sharing one contract.",
         "File-level granularity with a mono-requirement filter trades reach for silence: drift in a file shared by many requirements (e.g. a single engine file) is not attributed, by design. Repos with one file per capability get the most value.",
         "It asserts a member's bytes changed, not that the change is behaviourally meaningful — a reformat re-baselines like any edit. Re-running sync acknowledges and clears it."
       ],
@@ -1696,21 +1705,24 @@
       "title": "What-should-I-do-next report",
       "intent": "Faced with a whole project of requirements, it's hard to know what to work on first. This command looks at every requirement, spots the gaps — ones with no code, no tests, or unanswered questions — and prints them as a short, prioritised to-do list right in the terminal. It puts the most urgent work at the top so you can just start. Without it, you'd have to open the visual map and eyeball the risk yourself to figure out where to begin.",
       "contract": [
-        "It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` + `RISK_ADVICE` that drive the Risk tab — the dedup of a draft's intent question lives in that shared source, so `next` and the Risk tab show the same signals for the same requirement.",
+        "It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` and `RISK_ADVICE` that drive the Risk tab.",
         "It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.",
         "It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).",
         "Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.",
         "Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.",
         "It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).",
-        "By default it shall show at most the top few items per bucket and, when a bucket has more, print a `... N more — run \\`reqmap.py next --all\\`` line; with `--all` it shall list every item. Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.",
+        "By default it shall show at most the top few items per bucket, printing `... N more` when a bucket has more; `--all` lists every item.",
         "With a registry that has no requirements it shall print a distinct \"no requirements yet\" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.",
-        "It shall scan all scannable files for membership tags and surface any file that carries none as an \"Untagged files\" bucket (lowest priority), with the same top-N/`--all` truncation as other buckets. It shall skip this scan when no `code_root` is provided (e.g. unit-test callers).",
+        "It shall surface every scannable file that carries no membership tag as a lowest-priority \"Untagged files\" bucket, truncated like the others, and shall skip this scan when no `code_root` is given.",
         "It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate)."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.",
+        "The dedup of a draft's intent question lives inside the shared `_risk_signals` source, which is why `next` and the Risk tab report the same signals for the same requirement.",
+        "The untagged-files scan is skipped when no `code_root` is supplied — the usual case for unit-test callers.",
         "A reviewed requirement may legitimately appear in more than one bucket (e.g. a confirmed requirement both `untested` and `unverified-intent`) — these are two distinct actions, by design. A `draft` never double-lists, because its `unverified-intent` is suppressed at the source (subsumed by `unreviewed`).",
         "`next` is the prioritized worklist; `findings` remains the exhaustive raw list of every open verify-intent bullet (including drafts). The two answer different questions — this divergence is intentional and documented, not drift.",
         "`risk:` ordering only discriminates extract-authored drafts (hand-authored requirements have no `risk:` field → score 0, ordered by id)."
@@ -1899,7 +1911,8 @@
       "title": "confirm",
       "intent": "A requirement starts life as a draft and only becomes official once a human has reviewed it. This command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks that it actually points at real code and warns if no test is linked. Doing this by hand means editing the file's header directly, which is easy to get subtly wrong; this command does it safely every time.",
       "contract": [
-        "`confirm <ID>` shall set the requirement's `status` to `confirmed` by editing only the value of the first `status:` line in its leading frontmatter block, preserving indentation and any trailing inline comment, and leaving the body untouched.",
+        "`confirm <ID>` shall set the requirement's `status` to `confirmed`, editing only the value of the first `status:` line in its leading frontmatter block.",
+        "It shall preserve indentation and any trailing inline comment, and leave the body untouched.",
         "It shall refuse (non-zero exit, no write) when the requirement has no `implements:` member, because a `confirmed` requirement with no code is a gate error; it shall print the tag to add.",
         "It shall be idempotent: a requirement already `confirmed` is reported and left unchanged (exit 0).",
         "It shall warn (without failing) when no `tested-by:` member is linked, pointing at the test tag or the `test_exempt:` opt-out, and shall remind the caller to re-lock + regenerate the map.",
@@ -2091,10 +2104,15 @@
       "intent": "`health` reports whether the requirements that exist are coherent, but not whether the registry as a whole has gone stale while code moved on. A downstream consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted with no requirement update — nothing in `health` surfaced that the spec had stopped tracking reality. This adds a read-only count of how many commits have landed since the requirements dir was last touched, so a reviewer sees at a glance that code is racing ahead of the spec. It is the temporal complement to the untagged-code coverage signal ([[REQ-COVERAGE-029]]): coverage answers \"is this code traced?\", lag answers \"has the registry moved lately at all?\". Per the Senate audit that governs the coverage signal (2026-06-21), advisory visibility only — never a hard gate.",
       "contract": [
         "The capability shall report the number of commits on `HEAD` since the most recent commit that touched the requirements directory (`reqs_dir`), as \"registry lag\".",
-        "The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`) and the commit count from there to `HEAD` (`git rev-list --count`). It shall not parse requirement contents.",
-        "The `health` command shall include this count: as a `commits_since_req_touch` integer key in its `--json` output, and as a labelled line in its text output emitted only when the count is greater than zero (a lag of 0 is the healthy case and needs no line).",
-        "The signal shall be read-only and shall never be a gate: it shall not change any exit code, and it shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.",
-        "The `commits_since_req_touch` key shall be absent (not zero) whenever the value is unmeasurable — no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history — so existing `--json` consumers keep their schema and a missing reading is never mistaken for a fresh registry."
+        "The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).",
+        "It shall not parse requirement contents.",
+        "The `health` command shall include this count as a `commits_since_req_touch` integer key in its `--json` output.",
+        "In text output it shall emit a labelled line only when the count is greater than zero; a lag of 0 is the healthy case and needs no line.",
+        "The signal shall be read-only and shall never be a gate: it shall not change any exit code.",
+        "It shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.",
+        "The `commits_since_req_touch` key shall be absent, not zero, whenever the value is unmeasurable.",
+        "Unmeasurable means: no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history.",
+        "Absence rather than zero shall preserve the `--json` schema, so a missing reading is never mistaken for a fresh registry."
       ],
       "verify": [
         "None — authored from known intent; scope and severity mirror the settled Senate decision on the sibling coverage signal ([[REQ-COVERAGE-029]])."
@@ -2150,7 +2168,8 @@
         "The `review` command shall emit a DETERMINISTIC, read-only JSON plan to stdout and write no file; it shall never invoke an LLM. `review` (no arg) covers the whole corpus; `review <ID>` covers one requirement.",
         "The plan shall carry, per requirement, its prose (title, intent/WHY, contract, acceptance, verify-intent) plus cheap STRUCTURAL anchors that are deterministic facts, not judgements (contract-clause count, acceptance count, intent word count, intent-terse, more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`, `requirements_in_plan`).",
         "The plan shall name exactly three AI categories — `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding MUST carry a concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).",
-        "DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write, or regenerate the plan or any AI sidecar; `gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
+        "DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write, or regenerate the plan or any AI sidecar.",
+        "`gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
         "The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive rate. The near-zero-false-positive property comes from MANDATORY human review of each `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).",
         "The AI consumer (the `requirement-quality-review` skill) shall write findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and shall never auto-edit a requirement.",
         "`review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a machine corpus plan with structural anchors, a coverage summary and category guidance for an out-of-band AI consumer — a different audience and shape, so they are not merged."
@@ -2315,11 +2334,16 @@
       "intent": "To find the requirement about a topic today you grep the requirements folder or open the map — grep needs the exact word the author used, and neither ranks results. This ranks every requirement by how well its wording matches a free-text query, most-relevant-first, so \"where is the drift thing?\" lands on the right file without knowing its id. It reuses the same lexical scoring `dupes` already trusts, so it adds a way in, not a new engine. Because the match is lexical it can miss a synonym; when nothing matches well it says so plainly, so a near-miss is never mistaken for the answer — the drift this whole tool exists to prevent.",
       "contract": [
         "The `search \"<query>\"` command shall rank requirements by lexical relevance to the query and print them most-relevant-first. It writes nothing and is read-only.",
-        "It shall score with the same machinery as `dupes` (REQ-SIMILAR-016): the query and every requirement are reduced to the shared bag of words (title, intent line, Contract bullets), weighted with the same smoothed TF-IDF, and compared by cosine. It shall not introduce a second scoring path.",
-        "The map viewer's search box shall rank by this same model, not by a divergent one: its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so the two surfaces agree on what matches and in what order. The port is pinned to the engine by a shared golden fixture asserted in both `app/scripts/ssr-smoke.jsx` and the Python `Search` tests (a fixed query scores identically in both runtimes). One relevance model, two surfaces — CLI for headless/agent/CI callers, the viewer for a human browsing the map.",
+        "It shall reuse the scoring machinery of `dupes` (REQ-SIMILAR-016), never a second scoring path.",
+        "Query and requirement shall each reduce to the shared bag of words (title, intent line, Contract bullets), then compare by cosine over smoothed TF-IDF weights.",
+        "The map viewer's search box shall rank by this same model, not by a divergent one.",
+        "Its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so both surfaces agree on what matches in what order.",
+        "A shared golden fixture shall pin the port to the engine: one fixed query scores identically in `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.",
         "It shall print each shown match with its cosine score, so a weak match is visibly weak and not presented with the authority of a strong one.",
         "It shall show at most `--top` matches, defaulting to five; a non-positive `--top` shall be treated as one.",
-        "It shall apply a relevance floor and, when no requirement scores at or above it, shall print an explicit no-strong-match line that reports the best score and the floor — never a ranked list of below-floor results. The floor shall default to `0.05`, chosen because a short query is a sparse vector whose cosine against a full requirement runs far below the `dupes` pair threshold; on this corpus a correct top hit scores well above it while a no-lexical-overlap query stays below.",
+        "It shall apply a relevance floor and never print a ranked list of below-floor results.",
+        "When no requirement scores at or above the floor, it shall print an explicit no-strong-match line reporting the best score and the floor.",
+        "The floor shall default to `0.05`.",
         "When the query contains no searchable term (empty after tokenizing away short words, stopwords, and pure numbers) it shall say so and rank nothing, distinctly from the no-strong-match case.",
         "Its output shall state that the search is lexical, not synonym-aware, so a user who gets no hit knows to try different words rather than concluding no requirement exists.",
         "It shall always return zero from a well-formed invocation; a missing query argument is a usage error returning non-zero."
@@ -2329,6 +2353,8 @@
       ],
       "notes": [
         "The match is purely lexical (token overlap). A query worded in synonyms of the requirement's text will score low or miss; this is why the floor and the \"not synonym-aware\" label exist, rather than a silent empty or spurious result.",
+        "One relevance model, two surfaces: the CLI for headless/agent/CI callers, the viewer for a human browsing the map. The golden fixture is what keeps them from diverging.",
+        "The `0.05` default was chosen because a short query is a sparse vector whose cosine against a full requirement runs far below the `dupes` pair threshold; on this corpus a correct top hit scores well above it while a no-lexical-overlap query stays below.",
         "The floor is a module constant, not a flag. It was calibrated on this corpus; a very different corpus could warrant a different value, which is a code change, not configuration — keeping the surface minimal.",
         "The query is folded into the corpus for the idf computation, so its terms participate in the document-frequency statistics exactly as the benchmark that validated the ranking did."
       ],
@@ -2428,9 +2454,11 @@
       "intent": "When two requirements quietly describe the same capability, you do not notice until each has grown its own divergent implementation — and now there is a mess to untangle. This compares requirement pairs by their wording and flags the ones that overlap, so a reviewer can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.",
       "contract": [
         "The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
-        "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
+        "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets.",
+        "The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
         "It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.",
-        "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
+        "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).",
+        "The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
         "It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.",
         "The threshold shall default to `0.35` and shall be overridable with `--threshold`.",
         "It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.",
@@ -2624,7 +2652,8 @@
       "contract": [
         "The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.",
         "For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.",
-        "A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or a `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`. A `.py` file that exposes no `def test...` but drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == \"__main__\"` guard also counts — stdlib-only suites commonly take that form rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.",
+        "A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or an `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`.",
+        "A `.py` file with no `def test...` also counts when it drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == \"__main__\"` guard.",
         "When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.",
         "The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.",
         "The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run."
@@ -2633,6 +2662,7 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "The `run`/`main` entry-point form is accepted because stdlib-only suites commonly take that shape rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.",
         "This does not prove that each acceptance criterion is tested. It proves only that real tests exist at the link target. Per-criterion mapping needs a per-criterion tag and is deferred.",
         "Detection is lexical, not a parse. A file that mentions a test-shaped call in a string could pass without real tests. The check targets the common failure: a renamed, deleted, or placeholder file, not a deliberate fake.",
         "Only confirmed requirements are checked. A draft or baseline requirement is exempt, matching the rest of the gate's enforcement scope."

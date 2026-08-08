@@ -64,6 +64,15 @@ jobs:
       - name: Requirement drift gate
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py gate
+      # Clarity rules (SKILL.md "Audience & writing level") made blocking. Without
+      # this step `lint` was mechanised but never executed, so 28 readability
+      # warnings accumulated unseen. --strict fails on error-severity findings
+      # (missing Contract/Acceptance section) and promotes ac-count-high +
+      # over-scoped to errors; a requirement that is genuinely one behaviour opts
+      # out per check via `lint_exempt:` with the reason recorded in its Notes.
+      - name: Requirement clarity lint
+        working-directory: plugin
+        run: python -X utf8 scripts/reqmap.py lint --strict
       - name: Map freshness
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py map --check

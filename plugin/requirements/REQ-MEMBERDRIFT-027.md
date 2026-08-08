@@ -6,6 +6,7 @@ owner: Alex
 priority: should-have
 depends_on: [CORE-DRIFT-003, CORE-SCAN-002, REQ-CHECK-006]
 superseded_by:
+lint_exempt: [ac-count-high]
 milestone: v1.18
 ---
 
@@ -47,6 +48,10 @@ milestone: v1.18
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- Why `ac-count-high` is exempt: the eight criteria are the branch table of one decision —
+  which (requirement, file) pair is reported as member drift — not eight behaviours that can
+  break apart. Six of them (AC-2 through AC-6, AC-8) are the suppression rules of that same
+  decision. A split would produce two requirements sharing one contract.
 - File-level granularity with a mono-requirement filter trades reach for silence: drift in
   a file shared by many requirements (e.g. a single engine file) is not attributed, by
   design. Repos with one file per capability get the most value.

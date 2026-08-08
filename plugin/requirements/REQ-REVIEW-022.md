@@ -30,9 +30,10 @@ milestone: v1.14
   concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is
   advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).
 - DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no
-  LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read,
-  write, or regenerate the plan or any AI sidecar; `gate` shall behave identically whether or
-  not an AI sidecar (`requirements/_ai_review.md`) is present.
+  LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write,
+  or regenerate the plan or any AI sidecar.
+- `gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is
+  present.
 - The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive
   rate. The near-zero-false-positive property comes from MANDATORY human review of each
   `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).

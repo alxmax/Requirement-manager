@@ -17,9 +17,11 @@ milestone: v1.14
 
 ## WHAT — Contract (normative)
 - The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.
-- It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets. The "Notes & limitations" section is excluded, because it is dense and would add noise.
+- It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets.
+- The "Notes & limitations" section is excluded, because it is dense and would add noise.
 - It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.
-- It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`). The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.
+- It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
+- The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.
 - It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.
 - The threshold shall default to `0.35` and shall be overridable with `--threshold`.
 - It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.
