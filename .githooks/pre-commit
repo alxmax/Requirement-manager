@@ -3,7 +3,9 @@
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
 #   2. map staleness  — committed _map.* vs current code   (fix: reqmap.py map)
-# plus the standard requirement<->code drift gate.
+#   3. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
+# plus the standard requirement<->code drift gate. Mirrors the CI order:
+#   check_versions.py -> gate -> lint --strict -> map --check
 #
 # Enable once (from the repo root):  git config core.hooksPath .githooks
 # Bypass once:  git commit --no-verify
@@ -17,6 +19,12 @@ fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin; then
   echo "" >&2
   echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
+  exit 1
+fi
+if ! "$PY" -X utf8 plugin/scripts/reqmap.py lint --strict --root plugin; then
+  echo "" >&2
+  echo "reqmap: requirement lint failed — fix the errors above, add 'lint_exempt:' where the" >&2
+  echo "        shape is deliberate (with the reason in Notes), or commit with --no-verify." >&2
   exit 1
 fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py map --check --root plugin; then
