@@ -19,7 +19,8 @@ milestone: v1.15
 ## WHAT — Contract (normative)
 - The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.
 - For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.
-- A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or a `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`. A `.py` file that exposes no `def test...` but drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard also counts — stdlib-only suites commonly take that form rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.
+- A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or an `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`.
+- A `.py` file with no `def test...` also counts when it drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
 - When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.
 - The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.
 - The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run.
@@ -28,6 +29,7 @@ milestone: v1.15
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- The `run`/`main` entry-point form is accepted because stdlib-only suites commonly take that shape rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.
 - This does not prove that each acceptance criterion is tested. It proves only that real tests exist at the link target. Per-criterion mapping needs a per-criterion tag and is deferred.
 - Detection is lexical, not a parse. A file that mentions a test-shaped call in a string could pass without real tests. The check targets the common failure: a renamed, deleted, or placeholder file, not a deliberate fake.
 - Only confirmed requirements are checked. A draft or baseline requirement is exempt, matching the rest of the gate's enforcement scope.

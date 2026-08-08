@@ -7,7 +7,7 @@ depends_on: [CORE-PARSE-001, CORE-SCAN-002, CORE-DRIFT-003]
 satisfies: [NEED-SSOT-001]
 superseded_by:
 milestone: v1.02
-lint_exempt: [ac-count-high]
+lint_exempt: [ac-count-high, over-scoped]
 ---
 
 # The gate
@@ -48,6 +48,14 @@ lint_exempt: [ac-count-high]
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- Why `ac-count-high` and `over-scoped` are exempt: this requirement is the gate's severity
+  table, not a bundle of checks. Each individual check the gate runs already has its own
+  requirement ([[REQ-TESTLINK-018]], [[REQ-ACVERIFY-019]], [[REQ-MEMBERDRIFT-027]],
+  [[REQ-DOCBUNDLE-026]], [[REQ-ORPHANCODE-034]], [[REQ-DRIFTIMPACT-035]]). What remains here
+  is one behaviour — which condition is an ERROR, which is a WARN, and what that does to the
+  exit code — so every clause and criterion shares a single failure mode. Splitting it would
+  scatter the exit-code contract across files instead of clarifying it. Revisit this exemption
+  if a clause ever lands here that is not about severity or exit code.
 - Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`)
   is not automatable and surfaces at human review.
 - When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed

@@ -21,11 +21,16 @@ milestone: v2.13
 
 ## WHAT — Contract (normative)
 - The `search "<query>"` command shall rank requirements by lexical relevance to the query and print them most-relevant-first. It writes nothing and is read-only.
-- It shall score with the same machinery as `dupes` (REQ-SIMILAR-016): the query and every requirement are reduced to the shared bag of words (title, intent line, Contract bullets), weighted with the same smoothed TF-IDF, and compared by cosine. It shall not introduce a second scoring path.
-- The map viewer's search box shall rank by this same model, not by a divergent one: its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so the two surfaces agree on what matches and in what order. The port is pinned to the engine by a shared golden fixture asserted in both `app/scripts/ssr-smoke.jsx` and the Python `Search` tests (a fixed query scores identically in both runtimes). One relevance model, two surfaces — CLI for headless/agent/CI callers, the viewer for a human browsing the map.
+- It shall reuse the scoring machinery of `dupes` (REQ-SIMILAR-016), never a second scoring path.
+- Query and requirement shall each reduce to the shared bag of words (title, intent line, Contract bullets), then compare by cosine over smoothed TF-IDF weights.
+- The map viewer's search box shall rank by this same model, not by a divergent one.
+- Its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so both surfaces agree on what matches in what order.
+- A shared golden fixture shall pin the port to the engine: one fixed query scores identically in `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.
 - It shall print each shown match with its cosine score, so a weak match is visibly weak and not presented with the authority of a strong one.
 - It shall show at most `--top` matches, defaulting to five; a non-positive `--top` shall be treated as one.
-- It shall apply a relevance floor and, when no requirement scores at or above it, shall print an explicit no-strong-match line that reports the best score and the floor — never a ranked list of below-floor results. The floor shall default to `0.05`, chosen because a short query is a sparse vector whose cosine against a full requirement runs far below the `dupes` pair threshold; on this corpus a correct top hit scores well above it while a no-lexical-overlap query stays below.
+- It shall apply a relevance floor and never print a ranked list of below-floor results.
+- When no requirement scores at or above the floor, it shall print an explicit no-strong-match line reporting the best score and the floor.
+- The floor shall default to `0.05`.
 - When the query contains no searchable term (empty after tokenizing away short words, stopwords, and pure numbers) it shall say so and rank nothing, distinctly from the no-strong-match case.
 - Its output shall state that the search is lexical, not synonym-aware, so a user who gets no hit knows to try different words rather than concluding no requirement exists.
 - It shall always return zero from a well-formed invocation; a missing query argument is a usage error returning non-zero.
@@ -35,6 +40,8 @@ milestone: v2.13
 
 ## WHAT — Notes & known limitations (informative)
 - The match is purely lexical (token overlap). A query worded in synonyms of the requirement's text will score low or miss; this is why the floor and the "not synonym-aware" label exist, rather than a silent empty or spurious result.
+- One relevance model, two surfaces: the CLI for headless/agent/CI callers, the viewer for a human browsing the map. The golden fixture is what keeps them from diverging.
+- The `0.05` default was chosen because a short query is a sparse vector whose cosine against a full requirement runs far below the `dupes` pair threshold; on this corpus a correct top hit scores well above it while a no-lexical-overlap query stays below.
 - The floor is a module constant, not a flag. It was calibrated on this corpus; a very different corpus could warrant a different value, which is a code change, not configuration — keeping the surface minimal.
 - The query is folded into the corpus for the idf computation, so its terms participate in the document-frequency statistics exactly as the benchmark that validated the ranking did.
 

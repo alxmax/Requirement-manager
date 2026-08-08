@@ -296,14 +296,23 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
 python -X utf8 scripts/reqmap.py gate || exit 1
+python -X utf8 scripts/reqmap.py lint --strict || exit 1
 python -X utf8 scripts/reqmap.py map --check
 EOF
 chmod +x .git/hooks/pre-commit
 ```
 
-`map --check` is the second line on purpose: the gate alone is link-sync (a stale or
+`map --check` is there on purpose: the gate alone is link-sync (a stale or
 never-committed map/lock passes it), so a freshness check beside it is what keeps an
 out-of-date map or an uncommitted lock from merging.
+
+`lint --strict` is there for the same reason on the prose axis: the gate proves the
+links are real, not that the requirement is readable. Left un-wired, the clarity rules
+are documentation nobody runs. `--strict` blocks only on error-severity findings (a
+`confirmed` requirement missing its Contract or Acceptance section) plus the promoted
+structural checks; style warnings stay advisory. A requirement whose shape is deliberate
+opts a check out with `lint_exempt: [check-name]` and records the reason in its Notes —
+an exemption a reviewer can argue with beats a warning everyone learns to scroll past.
 
 **GitHub Actions** (enforces the gate for the whole team) — use the published
 action, pinned to `@v1`:
@@ -324,15 +333,20 @@ jobs:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives
         #   freshness: 'true'                # also run `map --check` (default; set 'false' to skip)
+        #   lint: 'true'                     # also run `lint --strict` (default; needs engine >= 2.3.4)
         #   reqmap-repo: owner/name          # only if your committed map targets a different slug
 ```
 
 `warn_if_stale` (the vendored-copy staleness notice) is gated on `CLAUDE_PLUGIN_ROOT`,
 unset in CI — so it is silent and exit-neutral there by design. The action runs the
-gate **and** `map --check` (map freshness) by default. If you prefer not to depend on
+gate **and** `map --check` (map freshness) **and** `lint --strict` by default. The lint step
+runs the consumer's own vendored engine, so it needs `reqmap.py` from plugin v2.3.4 or newer
+(the release that added the `lint_exempt:` escape hatch); pass `lint: 'false'` to skip it.
+If you prefer not to depend on
 the action, run the engine directly instead of the `uses:` line:
 ```yaml
       - run: python -X utf8 scripts/reqmap.py gate
+      - run: python -X utf8 scripts/reqmap.py lint --strict
       - run: python -X utf8 scripts/reqmap.py map --check
 ```
 

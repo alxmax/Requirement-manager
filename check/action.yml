@@ -28,11 +28,23 @@
 # here by design. This action enforces the gate proper (link sync + drift + depends_on)
 # and, by default, map freshness (`map --check`) so a stale/uncommitted map can't merge.
 #
+# `lint` defaults to 'true', like `freshness`. The gate proves the LINKS are real; it says
+# nothing about whether the requirement is readable. Shipping the clarity rules switched off
+# would recreate the exact failure that motivated them: in this repo `lint` was mechanised
+# but never executed anywhere, so 28 findings accumulated unseen until plugin v2.14.0 wired
+# it in. A check that must be opted into is documentation, not a check.
+#
+# The one real compatibility constraint is the VENDORED engine, not the caller: this action
+# runs the consumer's own scripts/reqmap.py. `lint` exists since plugin v1.14.0 and the
+# `lint_exempt:` escape hatch since v2.3.4 — below that, a repo that trips the lint has no
+# way to declare a shape deliberate, so re-seed the engine (or pass `lint: 'false'`) before
+# moving `@v1` onto this commit.
+#
 # Fork-PR safety: keep `permissions: contents: read` in the caller workflow. The gate
 # needs no secrets and no write scope; do not grant them.
 
 name: 'Requirement drift gate'
-description: 'Run the requirement-manager reqmap gate (link sync + drift + depends_on) plus map freshness on every push / PR.'
+description: 'Run the requirement-manager reqmap gate (link sync + drift + depends_on) plus map freshness, and optionally the requirement lint, on every push / PR.'
 branding:
   icon: 'check-circle'
   color: 'green'
@@ -52,6 +64,10 @@ inputs:
     default: '3.x'
   freshness:
     description: 'Also run `reqmap.py map --check` so a stale or never-committed map/lock fails the build. Silent in a repo that does not track a map. Set to "false" to disable.'
+    required: false
+    default: 'true'
+  lint:
+    description: 'Also run `reqmap.py lint --strict` so an unreadable or structurally broken requirement fails the build. Errors only on a confirmed requirement missing its Contract or Acceptance section, plus the strict-promoted structural checks; style findings stay advisory. Needs a vendored engine >= 2.3.4 (the release that added the `lint_exempt:` escape hatch). Set to "false" to disable.'
     required: false
     default: 'true'
   reqmap-repo:
@@ -92,3 +108,12 @@ runs:
           export REQMAP_REPO="${{ inputs.reqmap-repo }}"
         fi
         python -X utf8 "${{ inputs.reqmap-path }}" map --check
+    - name: reqmap requirement lint
+      if: ${{ inputs.lint == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # The gate proves the LINKS are real; it says nothing about whether the
+      # requirement is readable. `lint --strict` is the prose/structure half.
+      # A requirement whose shape is deliberate opts a check out per-check with
+      # `lint_exempt: [check-name]` in its frontmatter.
+      run: python -X utf8 "${{ inputs.reqmap-path }}" lint --strict

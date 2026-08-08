@@ -41,7 +41,7 @@ Version coherence gate (run from repo root, not `plugin/`):
 python scripts/check_versions.py       # asserts plugin.json semver == marketplace.json; validates MAP_ENGINE_VERSION shape
 ```
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all four checks: `check_versions.py` → `reqmap.py gate` → `reqmap.py map --check` → `test_reqmap.py`. (`check` is a deprecated alias for `gate` — removed in the next major.)
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all five checks: `check_versions.py` → `reqmap.py gate` → `reqmap.py lint --strict` → `reqmap.py map --check` → `test_reqmap.py`. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 ## Architecture
 

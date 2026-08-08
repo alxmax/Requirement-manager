@@ -18,11 +18,15 @@ milestone: v1.10
 
 ## WHAT — Contract (normative)
 - It shall create the requirements directory if it does not exist.
-- It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`. The seeded file lists `scripts/reqmap.py` (the vendored engine, whose self-tags would otherwise read as dangling refs) **except** when that file is self-hosting — i.e. it carries membership tags that resolve to requirements already present — in which case the engine is the managed code and must stay scanned, so the line is omitted and a comment explains why.
+- It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`.
+- The seeded file shall list `scripts/reqmap.py`, the vendored engine, whose self-tags would otherwise read as dangling refs.
+- That line shall be omitted, with a comment explaining why, when the engine is self-hosting.
+- The engine is self-hosting when it carries membership tags that resolve to requirements already present; it is then managed code and must stay scanned.
 - It shall draft requirements from existing untagged code by invoking the extract capability, then build the drift lock and the map so the repo is immediately in a gate-passing, navigable state.
 - It shall print a guided summary that points at a single next command (`reqmap.py next`) plus wiring the gate, rather than an undifferentiated menu.
 - When nothing was extracted (no supported files, or all ignored) it shall say so distinctly and point at `new` — it shall not print a tracked-requirements summary that masks the empty result.
-- It shall be safe to re-run: a second invocation refreshes the lock and map and re-prints the summary without destroying authored requirements or an existing ignore file.
+- It shall be safe to re-run: a second invocation refreshes the lock and map, then re-prints the summary.
+- A re-run shall never destroy authored requirements or an existing ignore file.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

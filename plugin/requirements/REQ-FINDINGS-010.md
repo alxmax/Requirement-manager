@@ -19,16 +19,19 @@ milestone: v1.08
 - The command shall scan all requirements and aggregate the bullet items under each one's `## WHAT — Verify intent` section into a single `_findings.md` written in the requirements directory.
 - It shall exclude the "None — …" placeholder bullet (a requirement that recorded no open question contributes nothing).
 - In raw mode it shall group findings by requirement, each group and the document header carrying a count; with zero findings it shall still write a well-formed file stating none are open.
-- When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view instead: confirmed bugs first ordered by severity (high → low), then product/config decisions, then intentional, then false-positive; bug entries shall show their location and recommended fix when present.
+- When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view: confirmed bugs first by severity (high → low), then product/config decisions, then intentional, then false-positive.
+- Bug entries shall show their location and recommended fix when present.
 - It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.
 - With the raw flag set it shall ignore any sidecar and emit the raw grouped list.
-- It shall be deterministic and stdlib-only: it shall not classify findings itself (classification is produced out-of-band by the AI triage pass and supplied through the sidecar) and shall write no file other than `_findings.md`.
+- It shall be deterministic and stdlib-only: it shall not classify findings itself.
+- It shall write no file other than `_findings.md`.
 - The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — this capability is authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- Classification itself is produced out-of-band by the AI triage pass and supplied through the sidecar; the command only renders what the sidecar already decided.
 - Staleness is detected by comparing item *counts*, not content — a sidecar that is stale but happens to match the raw count is not flagged.
 - The sidecar is rendered as the source of truth when present; newly added verify-intent items do not appear in the classified view until the AI triage pass regenerates the sidecar (use `--raw` to see the current raw set).
 

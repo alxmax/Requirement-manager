@@ -21,6 +21,17 @@ if ! "$PY" -X utf8 scripts/reqmap.py gate; then
   echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
   exit 1
 fi
+# Clarity lint: readability/structure rules on non-draft requirements. --strict
+# fails only on error-severity findings (a confirmed requirement missing its
+# Contract or Acceptance section) plus the promoted structural checks. Style
+# warnings stay advisory and never block. A requirement that is genuinely one
+# behaviour opts a check out with `lint_exempt: [check-name]` in its frontmatter.
+if ! "$PY" -X utf8 scripts/reqmap.py lint --strict; then
+  echo "" >&2
+  echo "reqmap: requirement lint failed — fix the errors above, add 'lint_exempt:' where the" >&2
+  echo "        shape is deliberate, or commit with --no-verify." >&2
+  exit 1
+fi
 # Map freshness: if you track requirements/_map.* , a code/requirement edit that
 # shifts them must be regenerated before commit. No committed map -> passes silently.
 if ! "$PY" -X utf8 scripts/reqmap.py map --check; then

@@ -7,9 +7,36 @@
 #   ./sync_reqmap.sh /path/to/repo     # sync cache + one consumer repo
 #   ./sync_reqmap.sh repo1 repo2 ...   # sync cache + multiple consumer repos
 #
-# After syncing a consumer repo, run inside it:
-#   python -X utf8 scripts/reqmap.py sync --accept-drift
+# The vendored engine is LOCATED, not assumed: `scripts/reqmap.py` is the documented
+# path, but a repo may keep it elsewhere (e.g. `requirements/reqmap.py`). A hard-coded
+# path made such a repo skip with "not found — run init first", which reads like a
+# never-seeded repo rather than a wrong guess, so the sync silently did nothing.
+# Only an EXISTING copy is refreshed — this never seeds a repo that has no engine.
+#
+# The post-sync `sync --accept-drift` runs with the environment it inherits. A repo
+# that needs extra scannable extensions must pass them, or the rescan drops those
+# members from the lock and map:
+#   REQMAP_EXTRA_CODE_EXTS=.mq4,.mqh ./sync_reqmap.sh /path/to/that/repo
 set -euo pipefail
+
+# Echo the repo-relative path of an already-vendored reqmap.py, or nothing.
+# Known layouts first (cheap, deterministic), then a bounded search so an
+# unusual layout is found rather than silently skipped.
+find_engine() {
+  local repo="$1" p hit
+  for p in scripts/reqmap.py requirements/reqmap.py reqmap.py; do
+    if [[ -f "$repo/$p" ]]; then printf '%s\n' "$p"; return 0; fi
+  done
+  hit=$(find "$repo" -maxdepth 3 -name reqmap.py \
+          -not -path '*/.git/*' -not -path '*/node_modules/*' \
+          -not -path '*/.worktrees/*' -not -path '*/__pycache__/*' \
+          2>/dev/null | head -1)
+  [[ -n "$hit" ]] && printf '%s\n' "${hit#"$repo"/}"
+  # Always succeed: under `set -e` a non-zero return here would abort the whole
+  # run at `REL=$(find_engine ...)`, killing the sync instead of warning and
+  # moving to the next repo. "Not found" is reported by the empty stdout.
+  return 0
+}
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"
@@ -52,14 +79,19 @@ for REPO in "$@"; do
   if [[ ! -d "$REPO" ]]; then
     echo "  WARN: repo not found: $REPO — skipping"; continue
   fi
-  DEST="$REPO/scripts/reqmap.py"
-  if [[ ! -f "$DEST" ]]; then
-    echo "  WARN: $DEST not found — skipping (run init first)"; continue
+  REL=$(find_engine "$REPO")
+  if [[ -z "$REL" ]]; then
+    echo "  WARN: no vendored reqmap.py under $REPO — skipping (run init first)"; continue
   fi
-  cp "$SRC" "$DEST"
-  [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$REPO/scripts/_map_viewer.html"
-  echo "  → $REPO synced"
-  (cd "$REPO" && python -X utf8 scripts/reqmap.py sync --accept-drift 2>&1 | sed 's/^/     /')
+  ENGINE_DIR=$(dirname "$REL")
+  cp "$SRC" "$REPO/$REL"
+  # Refresh the viewer template only where the repo already has one. Dropping a new
+  # one in would make `map` start emitting _map.html in a repo that never tracked it.
+  if [[ -f "$VIEWER_SRC" && -f "$REPO/$ENGINE_DIR/_map_viewer.html" ]]; then
+    cp "$VIEWER_SRC" "$REPO/$ENGINE_DIR/_map_viewer.html"
+  fi
+  echo "  → $REPO synced ($REL)"
+  (cd "$REPO" && python -X utf8 "$REL" sync --accept-drift 2>&1 | sed 's/^/     /')
 done
 
 echo "done."

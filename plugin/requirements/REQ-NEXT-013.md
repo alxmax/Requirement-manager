@@ -18,21 +18,24 @@ lint_exempt: [ac-count-high]
 > risk yourself to figure out where to begin.
 
 ## WHAT — Contract (normative)
-- It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` + `RISK_ADVICE` that drive the Risk tab — the dedup of a draft's intent question lives in that shared source, so `next` and the Risk tab show the same signals for the same requirement.
+- It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` and `RISK_ADVICE` that drive the Risk tab.
 - It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.
 - It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).
 - Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.
 - Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.
 - It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).
-- By default it shall show at most the top few items per bucket and, when a bucket has more, print a `... N more — run \`reqmap.py next --all\`` line; with `--all` it shall list every item. Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
+- By default it shall show at most the top few items per bucket, printing `... N more` when a bucket has more; `--all` lists every item.
 - With a registry that has no requirements it shall print a distinct "no requirements yet" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.
-- It shall scan all scannable files for membership tags and surface any file that carries none as an "Untagged files" bucket (lowest priority), with the same top-N/`--all` truncation as other buckets. It shall skip this scan when no `code_root` is provided (e.g. unit-test callers).
+- It shall surface every scannable file that carries no membership tag as a lowest-priority "Untagged files" bucket, truncated like the others, and shall skip this scan when no `code_root` is given.
 - It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate).
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
+- The dedup of a draft's intent question lives inside the shared `_risk_signals` source, which is why `next` and the Risk tab report the same signals for the same requirement.
+- The untagged-files scan is skipped when no `code_root` is supplied — the usual case for unit-test callers.
 - A reviewed requirement may legitimately appear in more than one bucket (e.g. a confirmed requirement both `untested` and `unverified-intent`) — these are two distinct actions, by design. A `draft` never double-lists, because its `unverified-intent` is suppressed at the source (subsumed by `unreviewed`).
 - `next` is the prioritized worklist; `findings` remains the exhaustive raw list of every open verify-intent bullet (including drafts). The two answer different questions — this divergence is intentional and documented, not drift.
 - `risk:` ordering only discriminates extract-authored drafts (hand-authored requirements have no `risk:` field → score 0, ordered by id).

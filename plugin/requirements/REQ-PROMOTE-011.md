@@ -16,7 +16,8 @@ milestone: v1.08
 > the file's header directly, which is easy to get subtly wrong; this command does it safely every time.
 
 ## WHAT — Contract (normative)
-- `confirm <ID>` shall set the requirement's `status` to `confirmed` by editing only the value of the first `status:` line in its leading frontmatter block, preserving indentation and any trailing inline comment, and leaving the body untouched.
+- `confirm <ID>` shall set the requirement's `status` to `confirmed`, editing only the value of the first `status:` line in its leading frontmatter block.
+- It shall preserve indentation and any trailing inline comment, and leave the body untouched.
 - It shall refuse (non-zero exit, no write) when the requirement has no `implements:` member, because a `confirmed` requirement with no code is a gate error; it shall print the tag to add.
 - It shall be idempotent: a requirement already `confirmed` is reported and left unchanged (exit 0).
 - It shall warn (without failing) when no `tested-by:` member is linked, pointing at the test tag or the `test_exempt:` opt-out, and shall remind the caller to re-lock + regenerate the map.
