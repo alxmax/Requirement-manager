@@ -354,8 +354,9 @@ COMMANDS = {
     "lint": {
         "summary": (
             "Readability and structure check on non-draft requirements: long sentences "
-            "(>35 words), stacked conditions (3+ and/or joins on a shall/must line), "
-            "missing Contract or Acceptance sections. Read-only; exit-neutral by default."
+            "(>25 words), stacked conditions (3+ and/or joins in one normative line), "
+            "contract clauses with an unnamed 'It' subject, missing Contract or Acceptance "
+            "sections. Read-only; exit-neutral by default."
         ),
         "arg": None,
         "params": [
