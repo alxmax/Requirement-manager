@@ -292,6 +292,49 @@ class Gate(unittest.TestCase):
         _, out = self._check(files)
         self.assertNotIn("validated-against", out)
 
+    def test_bus_verified_only_at_system_level_warns(self):
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: CORE-X-001 @system\ndef test_e2e():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertIn("@system", out)
+
+    def test_bus_with_a_lower_level_link_is_silent(self):
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: CORE-X-001 @system\ndef test_e2e():\n    pass\n",
+            "t_unit.py": "# tested-by: CORE-X-001 @unit\ndef test_unit():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
+    def test_bus_with_no_levelled_link_is_never_judged(self):
+        # opt-in per requirement: an unlevelled tested-by link is not evidence either way
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_plain.py": "# tested-by: CORE-X-001\ndef test_x():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
+    def test_feature_verified_only_at_system_level_is_silent(self):
+        # rule 2 is about foundation code only — a feature may legitimately be end-to-end
+        files = {
+            "REQ-X-001.md": REQ.format(id="REQ-X-001", status="confirmed", layer="feature",
+                                       extra="", title="Feature"),
+            "impl.py": "# implements: REQ-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: REQ-X-001 @system\ndef test_e2e():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_scan_members_deterministic_across_walk_order(self):  # cross-platform parity (Windows-generated map vs Linux CI)

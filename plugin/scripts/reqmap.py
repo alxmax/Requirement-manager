@@ -1609,6 +1609,15 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             if not [x for x in members.get(rid, []) if x[0] == "validated-against"]:
                 warns.append(f"{rid}: confirmed need with no `validated-against:` tag — "
                              "nothing shows the need was actually met")
+        # V-model level fit (warn-only): foundation code covered only end-to-end is slow,
+        # fragile, and localises failures poorly. Unlevelled links are ignored rather than
+        # assumed low-level — assuming would make the rule unfireable in exactly the
+        # half-migrated repos it helps most. Opt-in: no levelled link, no judgement.
+        if m.get("status") == "confirmed" and m.get("layer") == "bus":
+            levels = set(level_cover.get(rid, {}))
+            if levels == {"system"}:
+                warns.append(f"{rid}: bus capability verified only at @system level — "
+                             "add a @unit or @integration `tested-by:` link")
         # owner accountability (warn): a confirmed requirement with owner: auto was never
         # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
         if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
