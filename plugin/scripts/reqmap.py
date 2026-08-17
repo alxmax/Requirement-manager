@@ -1548,6 +1548,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             members = filtered
 
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
+    # V-model opt-in triggers, computed once. Neither this rule nor the level-fit rule can
+    # fire until the repo has deliberately adopted the vocabulary, so installing this engine
+    # adds no warnings to a repo that never annotates a tag (REQ-VLEVEL-037).
+    any_validation = any(x[0] == "validated-against"
+                         for hits in members.values() for x in hits)
+    level_cover = scan_test_levels(code_root, reqs_dir)   # {cap: {level: [...]}}
     satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
     for _rid, _r in reqs.items():
         for _up in _as_list(_r["meta"].get("satisfies")):
@@ -1596,6 +1602,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
                 warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        # V-model validation (warn-only): a `need` is validated, not tested. A unit test
+        # cannot show the RIGHT thing was built, so a need with only code coverage is
+        # false confidence exactly where it costs most. Opt-in via `any_validation`.
+        if is_need and m.get("status") == "confirmed" and any_validation:
+            if not [x for x in members.get(rid, []) if x[0] == "validated-against"]:
+                warns.append(f"{rid}: confirmed need with no `validated-against:` tag — "
+                             "nothing shows the need was actually met")
         # owner accountability (warn): a confirmed requirement with owner: auto was never
         # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
         if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):

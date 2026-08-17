@@ -268,6 +268,30 @@ class Gate(unittest.TestCase):
         self.assertNotIn("missing '## WHAT — Contract'", out)
         self.assertNotIn("missing '## HOW — Acceptance'", out)
 
+    def test_need_without_validation_warns_once_the_repo_opts_in(self):
+        # Two needs: one validated, one not. The repo has opted in (a validated-against
+        # tag exists), so the unvalidated need warns and the validated one does not.
+        files = {
+            "NEED-A-001.md": REQ.format(id="NEED-A-001", status="confirmed", layer="need",
+                                        extra="", title="Validated need"),
+            "NEED-B-002.md": REQ.format(id="NEED-B-002", status="confirmed", layer="need",
+                                        extra="", title="Unvalidated need"),
+            "t_probe.py": "# validated-against: NEED-A-001\ndef test_x():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertIn("NEED-B-002", out)
+        self.assertIn("validated-against", out)
+
+    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):
+        # No validated-against tag anywhere: the rule must not fire at all, so a repo
+        # that never adopts the role sees no new warnings.
+        files = {
+            "NEED-B-002.md": REQ.format(id="NEED-B-002", status="confirmed", layer="need",
+                                        extra="", title="Unvalidated need"),
+        }
+        _, out = self._check(files)
+        self.assertNotIn("validated-against", out)
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_scan_members_deterministic_across_walk_order(self):  # cross-platform parity (Windows-generated map vs Linux CI)
