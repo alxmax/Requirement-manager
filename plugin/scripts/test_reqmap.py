@@ -880,6 +880,23 @@ class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             made = sorted(n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-"))
             self.assertEqual(made, ["DRAFT-KEEP.md"])   # the vendored engine is not drafted
 
+    def test_drafted_contract_carries_the_binding_line_and_no_shall(self):
+        with tempfile.TemporaryDirectory() as d:
+            code_root = os.path.join(d, "src")
+            os.makedirs(code_root)
+            with open(os.path.join(code_root, "widget.py"), "w", encoding="utf-8") as f:
+                f.write("def go():\n    return 1\n")
+            reqs_dir = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_extract({}, {}, code_root, reqs_dir)
+            written = [p for p in os.listdir(reqs_dir) if p.endswith(".md")]
+            self.assertEqual(len(written), 1)
+            with open(os.path.join(reqs_dir, written[0]), encoding="utf-8") as f:
+                text = f.read()
+            self.assertIn("Every line in this section is binding.", text)
+            self.assertNotIn("shall", text.lower())
+
 
 class New(unittest.TestCase):  # tested-by: REQ-NEW-004
     def test_new_scaffolds_from_template_and_substitutes_id(self):

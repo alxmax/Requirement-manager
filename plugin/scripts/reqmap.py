@@ -1746,18 +1746,18 @@ Every line in this section is binding.
      4. Define project terms. Two or more: open with a glossary comment like this one.
      5. Group clauses past five, with bold labels (see below).
      6. Keep under 25 words/sentence, 22 words/bullet — `lint` enforces both.
-     Scope: one capability = one behaviour that fails independently. Many clauses AND
+     Scope: one capability = one behavior that fails independently. Many clauses AND
      many acceptance criteria together mean several capabilities — split them
      (`lint` flags this as 'over-scoped'). -->
 
 **What it does**
 - `<subject>` does one thing, stated so a test could check it. No function names; true
   regardless of how the code is implemented.
-  <!-- Rationale: why this specific behaviour, one clause, only when not self-evident -->
+  <!-- Rationale: why this specific behavior, one clause, only when not self-evident -->
 
 **What it produces**
 - `<subject>` returns <output shape and allowed values>.
-- `<subject>` handles a missing or invalid optional input by <behaviour>.
+- `<subject>` handles a missing or invalid optional input by <behavior>.
 
 ## WHAT — Verify intent (open questions for the human)
 - Observed: <a behavior that may be an AI accident — swallowed error, empty-string
@@ -2069,6 +2069,9 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             "below, then tag the source `# generated-from: {cap}` "
                             "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
                             "## WHAT — Contract (normative)\n"
+                            "Every line in this section is binding.\n"
+                            "<!-- Name the subject, write in present tense, one statement per "
+                            "bullet, under 25 words per sentence. -->\n"
                             "- TODO: the capability this prose defines (author from "
                             "intent, do not copy the prose).\n\n"
                             "## WHAT — Verify intent (open questions for the human)\n"
@@ -2084,8 +2087,8 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                 risk = _risk(src)
                 review = "REVIEW" if risk >= 2 else "auto-baseline"
                 with open(dest, "w", encoding="utf-8") as f:
-                    # new emission schema (Contract / Verify-intent / Acceptance / Current-impl),
-                    # matching cmd_new so a promoted draft needs no reshaping
+                    # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
+                    # needs no reshaping
                     f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
                             f"owner: auto\ndepends_on: []\n"
                             f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
@@ -2093,6 +2096,9 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             f"> DRAFT extracted from {rel}. Describes observed behavior, "
                             f"not validated intent.\n\n"
                             f"## WHAT — Contract (normative)\n"
+                            f"Every line in this section is binding.\n"
+                            f"<!-- Name the subject, write in present tense, one statement per "
+                            f"bullet, under 25 words per sentence. -->\n"
                             f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
                             f"## WHAT — Verify intent (open questions for the human)\n"
                             f"- TODO: anything that looks like an accident (swallowed error, magic "
