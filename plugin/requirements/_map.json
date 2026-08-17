@@ -70,7 +70,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4415"
+          "loc": "scripts/test_reqmap.py:4431"
         }
       ],
       "test_exempt": null,
@@ -157,7 +157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4368"
+          "loc": "scripts/test_reqmap.py:4384"
         }
       ],
       "test_exempt": null,
@@ -341,11 +341,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3017"
+          "loc": "scripts/test_reqmap.py:3033"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4399"
+          "loc": "scripts/test_reqmap.py:4415"
         }
       ],
       "test_exempt": null,
@@ -573,27 +573,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3184"
+          "loc": "scripts/test_reqmap.py:3200"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4166"
+          "loc": "scripts/test_reqmap.py:4182"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4237"
+          "loc": "scripts/test_reqmap.py:4253"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4415"
+          "loc": "scripts/test_reqmap.py:4431"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4438"
+          "loc": "scripts/test_reqmap.py:4454"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4577"
+          "loc": "scripts/test_reqmap.py:4593"
         }
       ],
       "test_exempt": null,
@@ -658,7 +658,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4297"
+          "loc": "scripts/test_reqmap.py:4313"
         }
       ],
       "test_exempt": null,
@@ -714,7 +714,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2748"
+          "loc": "scripts/test_reqmap.py:2764"
         }
       ],
       "test_exempt": null,
@@ -1173,11 +1173,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2705"
+          "loc": "scripts/test_reqmap.py:2721"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2867"
+          "loc": "scripts/test_reqmap.py:2883"
         }
       ],
       "test_exempt": null,
@@ -1248,7 +1248,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4529"
+          "loc": "scripts/test_reqmap.py:4545"
         }
       ],
       "test_exempt": null,
@@ -1548,11 +1548,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3940"
+          "loc": "scripts/test_reqmap.py:3956"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4529"
+          "loc": "scripts/test_reqmap.py:4545"
         }
       ],
       "test_exempt": null,
@@ -1762,7 +1762,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4479"
+          "loc": "scripts/test_reqmap.py:4495"
         }
       ],
       "test_exempt": null,
@@ -1941,11 +1941,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3940"
+          "loc": "scripts/test_reqmap.py:3956"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4479"
+          "loc": "scripts/test_reqmap.py:4495"
         }
       ],
       "test_exempt": null,
@@ -1998,11 +1998,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3210"
+          "loc": "scripts/test_reqmap.py:3226"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4479"
+          "loc": "scripts/test_reqmap.py:4495"
         }
       ],
       "test_exempt": null,
@@ -2137,7 +2137,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2773"
+          "loc": "scripts/test_reqmap.py:2789"
         }
       ],
       "test_exempt": null,
@@ -2191,7 +2191,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3277"
+          "loc": "scripts/test_reqmap.py:3293"
         },
         {
           "role": "implements",
@@ -2305,7 +2305,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3338"
+          "loc": "scripts/test_reqmap.py:3354"
         }
       ],
       "test_exempt": null,
@@ -2368,7 +2368,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2625"
+          "loc": "scripts/test_reqmap.py:2641"
         }
       ],
       "test_exempt": null,
@@ -2425,7 +2425,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2499"
+          "loc": "scripts/test_reqmap.py:2515"
         }
       ],
       "test_exempt": null,
@@ -2503,7 +2503,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2563"
+          "loc": "scripts/test_reqmap.py:2579"
         }
       ],
       "test_exempt": null,
@@ -2622,7 +2622,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3979"
+          "loc": "scripts/test_reqmap.py:3995"
         }
       ],
       "test_exempt": null,
@@ -2680,7 +2680,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2941"
+          "loc": "scripts/test_reqmap.py:2957"
         }
       ],
       "test_exempt": null,
@@ -2750,7 +2750,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3087"
+          "loc": "scripts/test_reqmap.py:3103"
         }
       ],
       "test_exempt": null,

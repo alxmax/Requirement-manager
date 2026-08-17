@@ -2761,9 +2761,9 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
 # NOT checked in v1 — without a term dictionary it is too false-positive-prone on
 # prose that carries code references.
 LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
-LINT_SENTENCE_WORDS = 35       # a single sentence longer than this is flagged (warn)
+LINT_SENTENCE_WORDS = 25       # a single sentence longer than this is flagged (warn)
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
-LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
+LINT_CONTRACT_WORDS = 22       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,

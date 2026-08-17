@@ -2399,6 +2399,22 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         self.assertEqual(longs[0]["severity"], "warn")
         self.assertIn("40-word", longs[0]["detail"])
 
+    def test_sentence_threshold_is_twentyfive(self):
+        # 26 words: over the tightened ceiling, well under the old 35
+        sent = " ".join(["word"] * 26) + "."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract="- " + sent + "\n")))
+        self.assertTrue(any(f["check"] == "long-sentence" for f in fs))
+        # 24 words stays silent, so the ceiling is a ceiling and not an off-by-one
+        ok = " ".join(["word"] * 24) + "."
+        clean = R.lint_requirement("REQ-Y-001", self._req("confirmed", self._body(contract="- " + ok + "\n")))
+        self.assertFalse(any(f["check"] == "long-sentence" for f in clean))
+
+    def test_contract_bullet_threshold_is_twentytwo(self):
+        # two sentences, 24 words total: over the tightened bullet ceiling, under the old 30
+        stmt = "- It creates the folder. " + " ".join(["word"] * 20) + " now."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=stmt + "\n")))
+        self.assertTrue(any(f["check"] == "statement-too-long" for f in fs))
+
     def test_stacked_conditions_warns(self):
         line = "- It shall do A and B and C and D."
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
