@@ -16,16 +16,32 @@ milestone: v1.00
 > nothing downstream can run.
 
 ## WHAT — Contract (normative)
-- It shall parse each `requirements/*.md` file into a record `{meta, body, path}`, where
-  `meta` is the parsed frontmatter and `body` is the markdown after the frontmatter block.
-- The frontmatter grammar shall support scalars, inline `[a, b]` lists, and block-style
-  (`key:` then indented `- item`) lists. A trailing `# comment` shall be stripped from a
-  value; matching surrounding quotes shall be removed from a scalar; an inline list
-  missing its closing `]` shall be parsed leniently rather than kept as a literal string.
-- The `id` shall come from the frontmatter `id:` field, falling back to the filename stem.
-- A file with no leading `---` block shall yield empty `meta` and the whole text as `body`.
-- Files whose name starts with `_` (locks, generated map) shall be excluded; a leading
-  UTF-8 BOM shall be tolerated.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     the frontmatter  the `---` header block at the top of a requirement file.
+     a scalar         a single-value field, such as `status: confirmed`.
+     the body         everything after the frontmatter block.
+     the stem         a filename without its `.md` extension. -->
+
+**What it produces**
+- `load_requirements` parses each `requirements/*.md` file into a record
+  `{meta, body, path}`.
+- `meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter
+  block.
+- The `id` comes from the frontmatter `id:` field, falling back to the filename stem.
+
+**What the frontmatter grammar accepts**
+- The grammar supports scalars, inline `[a, b]` lists, and block-style lists written as
+  `key:` then indented `- item`.
+- A trailing `# comment` is stripped from a value.
+- Matching surrounding quotes are removed from a scalar.
+- An inline list missing its closing `]` is parsed leniently, rather than kept as a
+  literal string.
+
+**Edge cases**
+- A file with no leading `---` block yields empty `meta` and the whole text as `body`.
+- A file whose name starts with `_` (a lock, the generated map) is excluded.
+- A leading UTF-8 BOM is tolerated.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

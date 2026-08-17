@@ -20,28 +20,43 @@ python scripts/reqmap.py next               # 'what should I do next': counted, 
 python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
 python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
+python scripts/reqmap.py coverage           # list source files carrying no implements: tag, grouped by directory (--json)
 python scripts/reqmap.py health             # corpus coherence score + component counts (--json for a CI badge)
 python scripts/reqmap.py draft              # draft requirements from untagged legacy code (input: existing code)
 python scripts/reqmap.py plan               # JSON capability-extraction plan, writes no files (AI-assist; use before draft)
 python scripts/reqmap.py findings           # aggregate open verify-intent items
 python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
 python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
+python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
 
-Run tests (stdlib unittest, no install needed):
+Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
 
 ```bash
-python scripts/test_reqmap.py
-python scripts/reqmap.py map --check   # fails if committed _map.* is stale
+python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
+python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
+python scripts/reqmap.py map --check                               # fails if committed _map.* (or docs/map.html) is stale
 ```
 
-Version coherence gate (run from repo root, not `plugin/`):
+From the **repo root** (not `plugin/`) — the packaging/release side:
 
 ```bash
-python scripts/check_versions.py       # asserts plugin.json semver == marketplace.json; validates MAP_ENGINE_VERSION shape
+python scripts/check_versions.py        # plugin.json semver == marketplace.json (x2); validates MAP_ENGINE_VERSION shape. --fix syncs.
+python -X utf8 scripts/test_check_versions.py
+python -X utf8 scripts/test_changelog_notes.py    # release-notes extraction (CI runs it with cwd=scripts/)
+python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync→gate→map: the AI-agnostic falsification test
+python -X utf8 plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py   # builder smoke + layout/overlap self-checks
+python -X utf8 -m unittest test_excalidraw -v     # from plugin/skills/excalidraw-diagram/scripts/
 ```
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. Pre-commit hook lives at `plugin/hooks/pre-commit`. CI runs all five checks: `check_versions.py` → `reqmap.py gate` → `reqmap.py lint --strict` → `reqmap.py map --check` → `test_reqmap.py`. (`check` is a deprecated alias for `gate` — removed in the next major.)
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate` → `reqmap.py lint --strict` → `reqmap.py map --check` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
+
+**Hooks — two different files, don't confuse them:**
+- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `gate` → `lint --strict` → `map --check`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
+- `plugin/hooks/pre-commit` is the hook **shipped to consumer repos** — editing it changes consumer behaviour and needs a semver bump.
+
+`sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into the local plugin cache and any consumer repos passed as args; it only refreshes an *existing* vendored engine, never seeds one.
 
 ## Architecture
 
@@ -50,15 +65,17 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 - `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: REQ-REVIEW-022`).
 - `excalidraw-diagram` — generates Excalidraw scenes + a self-contained HTML viewer from a system description. Fully independent of `reqmap.py`: its own stdlib-only builder at `skills/excalidraw-diagram/scripts/excalidraw_builder.py` (smoke test + auto-layout/overlap self-checks via `python excalidraw_builder.py`). Example generators live in `skills/excalidraw-diagram/examples/` — `make_full_architecture.py` (the complete-architecture poster), `make_iso5807_flowchart.py` (the reqmap flow in ISO 5807 notation), and `make_excalidraw_skill_flow.py`.
 
-**Generating diagrams *of this repo*:** run a maintained generator from `plugin/skills/excalidraw-diagram/examples/` with `diagrams` as the output arg (e.g. `python plugin/skills/excalidraw-diagram/examples/make_full_architecture.py diagrams`). Outputs land in `diagrams/` (gitignored, regenerable, never committed) — **never** `docs/` (the published Pages site). Do not author ad-hoc generators with an absolute plugin-cache import; reuse the examples (they use a portable relative import).
+**Generating diagrams *of this repo*:** run a maintained generator from `plugin/skills/excalidraw-diagram/examples/` with `diagrams` as the output arg (e.g. `python plugin/skills/excalidraw-diagram/examples/make_full_architecture.py diagrams`). Outputs land in `diagrams/` (gitignored, regenerable, never committed) — **never** `docs/`, which is the published Pages root and holds only reviewed, self-contained HTML (`.gitignore` hard-blocks `docs/*.excalidraw`). Do not author ad-hoc generators with an absolute plugin-cache import; reuse the examples (they use a portable relative import).
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — ~3700 lines, stdlib only, no external dependencies. All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — ~5000 lines, stdlib only, no external dependencies. All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+
+**Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `REQ-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
 
 **Requirement layers:**
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
-- `layer: feature` — compose the bus via `depends_on`. Currently: new, scan, gate, sync, map, draft, plan, findings, init, next, confirm.
+- `layer: feature` — compose the bus via `depends_on`. One per user-facing command (new, scan, gate, sync, map, draft, plan, findings, init, next, confirm, lint, show, dupes, search, health, coverage, site, review, …); `ls plugin/requirements/` is the live list.
 - `layer: need` — an upstream stakeholder need (`NEED-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `REQ-TRACE-020`).
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
@@ -80,14 +97,13 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 - `_memberlock.json` — versioned sidecar (`{_schema, members}`) of dedicated-member content hashes for reverse-direction (member-ahead-of-spec) drift; kept separate so `_reqlock.json` stays a byte-stable cross-repo contract an older seeded engine reads unchanged (`REQ-MEMBERDRIFT-027`) *(committed)*
 - `_findings.md` — aggregated verify-intent triage *(committed)*
 
+**`map` writes outside `plugin/` too.** `_docs_publish_path` (`REQ-PAGES-021`) resolves the **git root**, so a `map` run from `plugin/` also rewrites repo-root `docs/map.html` whenever `docs/` carries a Pages signal (`.nojekyll` or `index.html`) — and `map --check` fails if that published copy drifted. `docs/` is the GitHub Pages root (committed: `map.html`, `architecture.html`, `full_architecture.html`, `index.html`, `.nojekyll`); the `deploy-map` CI job publishes it via OIDC on pushes to `main` and refuses to publish a `map.html` under 10 KB.
+
 The viewer is the Vite + React app under `app/`. Its single-file build is vendored beside the engine as `plugin/scripts/_map_viewer.html` (carries a `<!--REQMAP_DATA-->` marker); the stdlib engine injects each repo's `_map.json` into that marker to produce `_map.html`. So the engine ships a rich UI without itself depending on Node/npm — and emits only `_map.md` + `_map.json` if the template is absent.
 
-**Rebuilding the vendored viewer** (required after any `app/` change):
-```bash
-cd app && npm run build:viewer   # rewrites plugin/scripts/_map_viewer.html
-```
+See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
-**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`candidates --md-glob`) is separate and opt-in.
+**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`plan --md-glob`, internally `cmd_candidates`) is separate and opt-in.
 
 ## Plugin packaging
 
@@ -96,6 +112,8 @@ cd app && npm run build:viewer   # rewrites plugin/scripts/_map_viewer.html
 **Two independent version numbers — don't conflate them:**
 - **Plugin semver** lives in *three* places kept in lockstep by `check_versions.py`: `version` in `plugin.json`, plus the top-level `version` and `plugins[].version` in `marketplace.json`. **Any** shipped change — engine *or* a skill edit — must bump this semver, or installed copies won't pick it up via `/plugin update` (a skill edit with no bump is silently invisible to consumers).
 - **`MAP_ENGINE_VERSION`** inside `reqmap.py` (ISO date `YYYY-MM-DD`, optional `.N` same-day suffix, e.g. `2026-06-03.2`) is engine-only — it lets a seeded copy of `reqmap.py` detect it is behind. Bump it only on engine changes.
+
+**A semver bump must ship with a CHANGELOG entry.** CI fails the build when `plugin/.claude-plugin/plugin.json`'s version changed in the commit but `CHANGELOG.md` has no heading containing `` `vX.Y.Z` `` (the backticked form is what the grep matches). On pushes to `main` the `release` job then cuts tag `vX.Y.Z` from `plugin.json` — idempotent, so a non-bumping push creates nothing — with notes extracted from that same CHANGELOG section by `scripts/changelog_notes.py`. Tags therefore follow `plugin.json`, never the other way round.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 

@@ -17,37 +17,77 @@ milestone: v1.04
 > It turns the registry into something a person can take in at a glance.
 
 ## WHAT — Contract (normative)
-- It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for
-  static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges, todos}`
-  graph for an external front-end). Both are derived views, regenerated, never edited.
-- `_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the
-  repo directory name, else null) identifying the project the map describes, for display in
-  the viewer header. It is derived from the git remote and so differs across forks/clones;
-  it is therefore excluded from the `map --check` freshness diff and resolving it shall never
-  raise or block map generation (git may be absent or the tree may not be a checkout).
-- `_map.json` shall also carry a top-level `todos` array, derived from `TODO.md` (via
-  `_parse_todos`), so the viewer's Roadmap tab can show planned work alongside requirements.
-- There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall
-  contain exactly 4 Mermaid code blocks — System Map, Req→Code, Dependencies, Risk — and
-  each shall carry a legend.
-- `_map.json` shall carry, per node, the requirement's id, layer, status, area, title,
-  intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
-  `used_by`, and risk signals — the same `{nodes, edges}` shape the diagrams are built from.
-- The System Map shall group nodes into per-area subgraphs (a node's `area:` field, else its
-  id prefix), collapse single-node areas into a `misc` box, and omit `depends_on` edges whose
-  target is a bus node OR a high-fan-in hub.
-- The Dependency Map shall be area-level: one node per area (with a capability count), an edge
-  A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.
-- Req→Code shall color an enforced-but-unlinked requirement red and a baseline/draft not-yet-
-  linked one muted grey, collapsing multiple members in one file to a min–max line range.
-- The Risk diagram shall show only requirements with ≥1 risk signal (confirmed+0 members,
-  draft/baseline, or ≥3 dependents), each paired with a scripted recommendation. A `draft`'s
-  open verify-intent question is suppressed (subsumed by its `unreviewed` signal) so a draft is
-  not double-flagged; this dedup lives in `_risk_signals`, shared with the `next` worklist.
-- All requirement-derived text shall be JSON-encoded in `_map.json`, which neutralizes any
-  hostile id/title/body by construction (no markup context to break out of).
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a node          one requirement, as drawn in a diagram or listed in the graph.
+     an edge         one `depends_on` link between two requirements.
+     an area         the group a requirement belongs to: its `area:` field, or the
+                     first part of its id when that field is absent.
+     a bus node      a `layer: bus` requirement — a foundation many others use.
+     a hub           a requirement many others depend on (high fan-in).
+     a risk signal   a warning the engine derives about a requirement, such as
+                     "confirmed but no code links to it". -->
+
+**What it generates**
+- `map` generates two files under `requirements/`: `_map.md` and `_map.json`.
+- `_map.md` holds Mermaid diagrams for static GitHub/GitLab rendering.
+- `_map.json` holds a `{engine_version, repo, nodes, edges, todos}` graph for an
+  external front-end.
+- Both files are derived views. They are regenerated, never edited.
+
+**What `_map.json` carries**
+- `_map.json` carries one node per requirement and one edge per `depends_on`.
+- Each node carries its requirement's id, layer, status, area, title, intent,
+  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
+  `used_by`, and risk signals.
+- That is the same `{nodes, edges}` shape the diagrams are built from.
+- `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
+  repo directory name, else null.
+- `repo` identifies the project the map describes, for display in the viewer header.
+- `repo` is derived from the git remote, so it differs across forks and clones. It is
+  therefore excluded from the `map --check` freshness diff.
+- Resolving `repo` never raises and never blocks map generation, because git may be
+  absent or the tree may not be a checkout.
+- `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
+  `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
+  requirements.
+
+**How a contract is read**
+- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
+  multi-line clause is never truncated to its first physical line.
+- A line that is only a bold label groups the clauses below it. It is a heading, not a
+  clause, and never folds into the clause above.
+
+**What the diagrams show**
+- `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
+  and Risk.
+- Each of those 4 blocks carries a legend.
+- A node's area is its `area:` field, or its id prefix when that field is absent.
+- The System Map groups nodes into per-area subgraphs, and collapses a single-node area
+  into a `misc` box.
+- The System Map omits a `depends_on` edge whose target is a bus node or a high-fan-in
+  hub.
+- The Dependency Map is area-level: one node per area, carrying a capability count.
+- The Dependency Map draws an edge A→B when some capability in A depends on one in B.
+  Per-capability hub edges are not drawn.
+- Req→Code colors an enforced-but-unlinked requirement red, and a baseline or draft
+  not-yet-linked one muted grey.
+- Req→Code collapses multiple members in one file to a min–max line range.
+- The Risk diagram shows only requirements with at least one risk signal
+  (confirmed with zero members; `draft`/`baseline`; ≥3 dependents).
+- The Risk diagram pairs each of them with a scripted recommendation.
+- A `draft`'s open verify-intent question is suppressed, subsumed by its `unreviewed`
+  signal, so a draft is not double-flagged.
+- That dedup lives in `_risk_signals`, shared with the `next` worklist.
+
+**Safety**
+- All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
+  hostile id, title or body by construction. There is no markup context to break out of.
+
+**What is out of scope**
 - The self-contained HTML viewer ([[REQ-VIEWER-007]]) and the GitHub Pages publish+gate
-  ([[REQ-PAGES-021]]) are separate capabilities that consume this map's `_map.json`/`_map.html`.
+  ([[REQ-PAGES-021]]) are separate capabilities. They consume this map's `_map.json` and
+  `_map.html`.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

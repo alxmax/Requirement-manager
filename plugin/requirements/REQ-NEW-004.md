@@ -16,11 +16,21 @@ milestone: v1.02
 > different layouts and the tools that read them start to break.
 
 ## WHAT — Contract (normative)
-- Given a capability id `AREA-NAME-NNN`, it shall write `requirements/<ID>.md` stamped from
-  a template with `AREA-NAME-NNN` replaced by the given id, creating the directory if absent.
-- The scaffold shall be the engine's built-in template; an on-disk `templates/requirement.md`,
-  when present, shall override it.
-- It shall refuse to overwrite an existing file (exit non-zero, write nothing).
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a capability id  an id of the shape `AREA-NAME-NNN`, e.g. `AUTH-LOGIN-001`.
+     the scaffold     the template text a new requirement file is stamped out of. -->
+
+- Given a capability id, `new` writes `requirements/<ID>.md`, stamped from the scaffold
+  with the placeholder `AREA-NAME-NNN` replaced by that id.
+- `new` creates the requirements directory if it is absent.
+- The scaffold is the engine's built-in template.
+- An on-disk `templates/requirement.md`, when present, overrides the built-in template.
+- `new` refuses to overwrite an existing file. It exits non-zero and writes nothing.
+- The emitted Contract section opens with "Every line in this section is binding.", so the
+  author writes clauses in present tense without a `shall` or `must` on each line.
+- The scaffold's guidance names the authoring rules the linter enforces, so a file written
+  from it starts clean.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

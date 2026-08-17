@@ -16,16 +16,44 @@ milestone: v1.14
 > can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.
 
 ## WHAT — Contract (normative)
-- The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.
-- It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets.
-- The "Notes & limitations" section is excluded, because it is dense and would add noise.
-- It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.
-- It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
-- The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.
-- It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.
-- The threshold shall default to `0.35` and shall be overridable with `--threshold`.
-- It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.
-- It shall always return zero. The report is advisory: a human decides whether a flagged pair is a real duplicate.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a bag of words  the list of words taken from one requirement, used to compare it
+                     with another.
+     a token         one word after the text has been cut up and cleaned.
+     TF-IDF          a weight per word: a word that appears in nearly every
+                     requirement counts for little, a rare one counts for more.
+     cosine          a zero-to-one number saying how alike two bags of words are.
+     the threshold   the score a pair has to reach before `dupes` reports it. -->
+
+**What it is**
+- `dupes` reports pairs of requirements whose contracts overlap.
+- `dupes` writes nothing. It only reads and prints.
+
+**What it compares**
+- `dupes` builds a bag of words for each requirement from its title, its intent line,
+  and its Contract bullets.
+- `dupes` leaves the "Notes & limitations" section out of that text, because that
+  section is dense and would add noise.
+- `dupes` tokenizes text into lowercase alphanumeric words of length three or more.
+- `dupes` drops a small stopword set and pure numbers from those tokens.
+
+**How it scores**
+- `dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
+- The smoothing keeps every weight positive, so a two-requirement corpus does not
+  collapse to a zero score.
+- `dupes` scores each pair with cosine similarity in the range zero to one.
+- `dupes` reports only the pairs at or above the threshold.
+- The threshold defaults to `0.35`.
+- `--threshold` overrides that default.
+
+**What it prints**
+- `dupes` prints pairs most-similar-first, each with its score and up to five shared
+  terms, so the reviewer can see why the pair was flagged.
+
+**Exit code**
+- `dupes` always returns zero. The report is advisory: a human decides whether a
+  flagged pair is a real duplicate.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

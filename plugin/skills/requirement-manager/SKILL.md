@@ -230,8 +230,11 @@ knowledge of this project can understand it without asking questions. Rules:
    After the first definition, use the term freely.
 2. On first mention of a named component, attach its role — e.g.
    "Conservator (the voice that looks for risk)".
-3. Keep normative "shall" phrasing for contract lines, but split any sentence that
-   runs long or stacks more than two conditions.
+3. Write contract lines in plain present tense with a named subject — "`init` creates
+   the folder", never "It shall create the folder". The Contract section opens with
+   "Every line in this section is binding.", so no "shall" or "must" is needed on each
+   line. Keep sentences under 25 words and bullets under 22; `lint` enforces both, and
+   warns (`anonymous-subject`) on a clause that opens with a bare "It".
 4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
    One clause, not a paragraph.
 5. Keep all file and function references (e.g. `strip_context.py`,

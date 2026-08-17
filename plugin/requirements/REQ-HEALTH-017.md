@@ -17,17 +17,38 @@ milestone: v1.14
 > stays invisible until it is expensive to fix.
 
 ## WHAT — Contract (normative)
-- The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.
-- It shall compute a headline score: the percentage of requirements that are green on every axis.
-- A requirement is green when it passes every axis at once.
-- The axes are: status `confirmed`, coverage, a test signal, no open verify-intent question, and no drift from the lock.
-- For a `bus` or `feature` requirement, coverage means an `implements` member and the test signal means a `tested-by` member or a `test_exempt` reason.
-- A `need`-layer requirement is covered when at least one requirement `satisfies:` it, and its test axis is always met; a need is fulfilled by requirements, not by code (see [[REQ-TRACE-020]]).
-- A confirmed `need` that no requirement satisfies shall count as an orphan.
-- It shall print component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.
-- With `--json` it shall emit the same numbers as a JSON object, so the console output and a CI badge never disagree.
-- It shall return zero on an empty corpus, printing a score of zero and a hint to bootstrap.
-- It shall always return zero. The snapshot is a report, not a gate.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     an axis     one pass/fail question asked of a requirement.
+     green       a requirement that passes every axis at once.
+     a member    a place in the code tagged as belonging to this requirement.
+     the lock    requirements/_reqlock.json — the saved fingerprint of every contract.
+     a need      a `layer: need` requirement: a stakeholder need other requirements
+                 fulfil, rather than code. -->
+
+**What it is**
+- `health` prints a coherence snapshot of the whole requirement corpus.
+- `health` writes nothing. It only reads and prints.
+
+**How it scores**
+- `health` computes a headline score: the percentage of requirements that are green.
+- The axes are status `confirmed`, coverage, a test signal, no open verify-intent question,
+  and no drift from the lock.
+- For a `bus` or `feature` requirement, coverage means an `implements` member.
+- For those same layers, the test signal means a `tested-by` member or a `test_exempt` reason.
+- A `need` is covered when at least one requirement `satisfies:` it. Its test axis is always
+  met, because a need is fulfilled by requirements rather than by code (see [[REQ-TRACE-020]]).
+- A confirmed `need` that no requirement satisfies counts as an orphan.
+
+**What it prints**
+- `health` prints component counts alongside the score: confirmed, implemented, tested,
+  drafts, orphans, untested, open verify-intent, and drift.
+- `--json` emits the same numbers as a JSON object, so the console output and a CI badge
+  never disagree.
+- On an empty corpus `health` prints a score of zero and a hint to bootstrap.
+
+**Exit code**
+- `health` always returns zero. The snapshot is a report, not a gate.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

@@ -16,12 +16,33 @@ milestone: v1.08
 > the file's header directly, which is easy to get subtly wrong; this command does it safely every time.
 
 ## WHAT — Contract (normative)
-- `confirm <ID>` shall set the requirement's `status` to `confirmed`, editing only the value of the first `status:` line in its leading frontmatter block.
-- It shall preserve indentation and any trailing inline comment, and leave the body untouched.
-- It shall refuse (non-zero exit, no write) when the requirement has no `implements:` member, because a `confirmed` requirement with no code is a gate error; it shall print the tag to add.
-- It shall be idempotent: a requirement already `confirmed` is reported and left unchanged (exit 0).
-- It shall warn (without failing) when no `tested-by:` member is linked, pointing at the test tag or the `test_exempt:` opt-out, and shall remind the caller to re-lock + regenerate the map.
-- Unknown id (no `requirements/<ID>.md`) shall exit non-zero with a clear message.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     frontmatter  the YAML block between the two `---` lines at the top of the file.
+     a member     a place in the code tagged as belonging to this requirement.
+     the lock     requirements/_reqlock.json — the saved fingerprint of every contract. -->
+
+**What it edits**
+- `confirm <ID>` sets the requirement's `status` to `confirmed`.
+- `confirm` edits only the value of the first `status:` line in the leading frontmatter.
+- `confirm` preserves that line's indentation and any trailing inline comment.
+- `confirm` leaves the body untouched.
+
+**When it refuses**
+- `confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes
+  nothing. A `confirmed` requirement with no code is a gate error.
+- A refusal prints the tag the caller needs to add.
+- `confirm` exits non-zero with a clear message for an unknown id, meaning no
+  `requirements/<ID>.md` exists.
+
+**What it warns about**
+- `confirm` warns, without failing, when no `tested-by:` member is linked.
+- That warning points at the test tag to add, or at the `test_exempt:` opt-out.
+- `confirm` reminds the caller to refresh the lock and regenerate the map afterwards.
+
+**Running it again**
+- `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and
+  exits zero.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — behavior is fully specified by the acceptance criteria below.

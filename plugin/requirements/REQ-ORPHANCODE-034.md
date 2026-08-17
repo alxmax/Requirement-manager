@@ -21,23 +21,42 @@ milestone: v2.10
 > pattern as the untagged doc-bundle warning ([[REQ-DOCBUNDLE-026]]).
 
 ## WHAT — Contract (normative)
-- The gate shall warn for each program-logic source file (extensions: `.py .js
-  .ts .tsx .jsx .c .cc .cpp .h .hpp .java .go .rs`) whose physical line count
-  is at least `ORPHAN_CODE_MIN_LOC` and that carries no membership tag
-  (`implements`, `tested-by`, `generated-from`, `validated-against`) and no
-  per-criterion `verifies:` tag.
-- Prose, styling and config extensions (`.md .html .css .sql .yaml .yml`)
-  shall not be considered — prose coverage is [[REQ-DOCBUNDLE-026]]'s concern.
-- It shall honor `.reqmapignore` and the standard scan walk (prune `.git`,
-  `node_modules`, `__pycache__`, the SSOT `requirements/`), so a repo can mark
-  generated or vendored code out of scope rather than tag it.
-- An unreadable file shall be skipped.
-- The check shall be warn-only and shall never change the gate's exit code —
-  including under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a membership tag   a comment naming a requirement this file belongs to.
+     a `verifies:` tag  a comment linking one test to one labelled acceptance
+                        criterion of a requirement.
+     a program file     a source file whose extension is on the program list below.
+     the scan walk      the shared file walk every command uses. -->
+
+**What it warns about**
+- The gate warns for each program file that carries no membership tag and no
+  `verifies:` tag, once that file is at least `ORPHAN_CODE_MIN_LOC` physical
+  lines long.
+- A program file is one ending in `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp
+  .java .go .rs`.
+- A membership tag is one of `implements`, `tested-by`, `generated-from` and
+  `validated-against`.
+- The gate does not consider the prose, styling and config extensions
+  (`.md .html .css .sql .yaml .yml`). Prose coverage is
+  [[REQ-DOCBUNDLE-026]]'s concern.
+
+**What it skips**
+- The check honors `.reqmapignore` and the standard scan walk, so a repo can
+  mark generated or vendored code out of scope rather than tag it.
+- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
+  `requirements/` directory.
+- The check skips a file it cannot read.
+
+**Severity**
+- The check is warn-only and never changes the gate's exit code, including
+  under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on
   REQ-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the
   rational way to pass CI); this stays advisory at any flag combination. -->
-- A file shall be silenced by tagging it or adding it to `.reqmapignore`;
-  there shall be no separate exemption mechanism.
+
+**Silencing a file**
+- An author silences a file by tagging it or by adding it to `.reqmapignore`.
+- There is no separate exemption mechanism.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent; severity ceiling settled by the

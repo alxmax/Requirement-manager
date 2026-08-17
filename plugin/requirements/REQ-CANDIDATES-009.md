@@ -18,19 +18,41 @@ milestone: v1.06
 > actually write up. Without it, you would face a wall of untagged code with no starting map.
 
 ## WHAT — Contract (normative)
-- It shall emit a single JSON object (stdout or `--out PATH`) `{engine_version, bus[],
-  candidates[]}` and write NO `.md` files — it cannot repeat `draft`'s empty-stub failure.
-- It shall walk the code with the same exclusions as scanning (noise dirs, the SSOT dir,
-  and `.reqmapignore` resolved in `requirements/` first), gathering per-file facts: module
-  and symbol docstrings, top-level signatures (Python via `ast`, JS/TS via best-effort
-  parsing), import targets, and line count.
-- Each candidate shall carry `{suggested_id, suggested_layer, files[], docstrings{},
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a candidate    one proposed capability in the plan: a guess that these files
+                    belong together and deserve one requirement.
+     per-file facts what `plan` reads out of a file without interpreting it —
+                    docstrings, signatures, imports, size.
+     the SSOT dir   the `requirements/` directory itself.
+     noise dirs     `.git`, `node_modules`, `__pycache__`. -->
+
+**What it emits**
+- `plan` emits a single JSON object, to stdout or to `--out PATH`, shaped
+  `{engine_version, bus[], candidates[]}`.
+- `plan` writes NO `.md` files. It cannot repeat `draft`'s empty-stub failure.
+
+**What it reads**
+- `plan` walks the code with the same exclusions as scanning: noise dirs, the SSOT dir,
+  and `.reqmapignore` resolved in `requirements/` first.
+- `plan` gathers per-file facts: module and symbol docstrings, top-level signatures,
+  import targets, and line count.
+- `plan` reads top-level signatures from Python via `ast`, and from JS/TS via
+  best-effort parsing.
+- An unparseable file yields empty facts. It never aborts the plan.
+
+**What a candidate carries**
+- Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{},
   signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc,
-  split_candidate}`. `depends_on` shall be derived from imports resolved to other candidates;
-  `suggested_layer` shall be `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.
-- Grouping shall use `requirements/_capmap.json` when present (authoritative) and otherwise
-  fall back to one candidate per file. A file already carrying an `implements:` tag shall be
-  reported via `existing_req`. An unparseable file shall yield empty facts, not abort the plan.
+  split_candidate}`.
+- `depends_on` is derived from imports resolved to other candidates.
+- `suggested_layer` is `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.
+- A file already carrying an `implements:` tag is reported via `existing_req`.
+
+**How it groups files**
+- `plan` groups files by `requirements/_capmap.json` when that file is present, and
+  treats it as authoritative.
+- Absent `_capmap.json`, `plan` falls back to one candidate per file.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

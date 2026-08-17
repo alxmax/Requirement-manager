@@ -17,32 +17,69 @@ lint_exempt: [ac-count-high, over-scoped]
 > code and requirements no longer match. The whole tool exists so this check can run.
 
 ## WHAT — Contract (normative)
-- It shall report an `ERROR` and exit non-zero for any of: a code tag referencing a
-  non-existent capability (dangling tag); an invalid `status` or `layer`; a `depends_on`
-  pointing at a missing id; an enforced (`in-progress`/`implemented`/`confirmed`)
-  requirement with no `implements:` member (a `layer: need` requirement is exempt —
-  see [[REQ-TRACE-020]]).
-- It shall report drift as a `WARN` (never an error): a `confirmed` requirement whose
-  binding hash differs from the lock, naming the member `file:line` locations to re-check.
-- A `confirmed` requirement with no `tested-by:` member shall be a `WARN`, unless its
-  frontmatter carries a `test_exempt: <reason>` opt-out or it is a `layer: need` requirement.
-- A `confirmed` requirement missing a `## WHAT — Contract` section shall be a `WARN`
-  (both `bus` and `feature` layers; does not affect the exit code).
-- A `confirmed` requirement missing a `## HOW — Acceptance` section shall be a `WARN`
-  (both `bus` and `feature` layers; does not affect the exit code).
-- An optional requirement `milestone:` field, when present, shall match the version shape
-  `v<digits>[.<digits>…]` (e.g. `v1.14`); a malformed value is a `WARN` (it is roadmap-only
-  metadata, never build-critical) and a `deprecated` requirement is exempt.
-- A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).
-- A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not
-  git-tracked** shall be a `WARN` naming the file, because an uncommitted lock silently
-  disables drift detection on a fresh CI checkout (no baseline to compare against). The
-  check is fail-open: silent when git is unavailable or the tree is not a work tree.
-- Requirements whose body lacks a `## WHAT — Verify intent` section shall be named in one
-  aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.
-- It shall print an advisory line with the open verify-intent finding count when > 0,
-  without affecting the exit code, and print a summary (requirements, members, errors, warnings).
-- With `--update-lock` (exercised by `sync` and the deprecated `check` alias; the `gate` verb is report-only) it shall write the current binding hashes to `requirements/_reqlock.json`.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     the binding hash  the fingerprint of a requirement's normative sections; when it
+                       stops matching the lock, the contract has changed.
+     drift             a contract whose text has moved on since the lock was written.
+     the lock          requirements/_reqlock.json — the saved fingerprint of every
+                       contract. `_memberlock.json` is its sidecar.
+     a need            a `layer: need` requirement: a stakeholder need other
+                       requirements fulfil, rather than code. -->
+
+**What is an error (exit 1)**
+- `gate` reports an `ERROR` and exits non-zero for every condition in this group.
+- A dangling tag — a code tag referencing a capability no requirement defines — is
+  such a condition.
+- An invalid `status` or an invalid `layer` is such a condition.
+- A `depends_on` pointing at a missing id is such a condition.
+- An enforced requirement with no `implements:` member is such a condition.
+- A requirement is enforced when its status is `in-progress`, `implemented` or
+  `confirmed`.
+- A `layer: need` requirement is exempt from that `implements:` rule — see
+  [[REQ-TRACE-020]].
+
+**What is a warning**
+- `gate` reports drift as a `WARN`, never an error: a `confirmed` requirement whose
+  binding hash differs from the lock.
+- The drift warning names the member `file:line` locations to re-check.
+- A `confirmed` requirement with no `tested-by:` member is a `WARN`.
+- A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt
+  from that test warning.
+- A `layer: need` requirement is exempt from it too.
+- A `confirmed` requirement missing a `## WHAT — Contract` section is a `WARN`, in both
+  the `bus` and `feature` layers. It does not affect the exit code.
+- A `confirmed` requirement missing a `## HOW — Acceptance` section is a `WARN`, in both
+  the `bus` and `feature` layers. It does not affect the exit code.
+- The requirement `milestone:` field is optional. When present it matches the version
+  shape `v<digits>[.<digits>…]`, for example `v1.14`.
+- A malformed `milestone:` value is a `WARN`, because that field is roadmap-only
+  metadata and never build-critical.
+- A `deprecated` requirement is exempt from the `milestone:` shape check.
+- A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run
+  rather than crashing.
+- A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is
+  **not git-tracked** is a `WARN` naming the file.
+- An uncommitted lock silently disables drift detection on a fresh CI checkout, which
+  has no baseline to compare against.
+- That git-tracking check is fail-open: `gate` stays silent when git is unavailable or
+  the tree is not a work tree.
+- `gate` names every requirement whose body lacks a `## WHAT — Verify intent` section in
+  one aggregated legacy-schema `WARN`.
+- `gate` counts those legacy-schema requirements in the summary.
+- The legacy-schema warning does not affect the exit code.
+
+**What it prints**
+- `gate` prints an advisory line carrying the open verify-intent finding count when that
+  count is above zero.
+- That advisory line does not affect the exit code.
+- `gate` prints a summary of requirements, members, errors and warnings.
+
+**Advancing the lock**
+- With `--update-lock`, `gate` writes the current binding hashes to
+  `requirements/_reqlock.json`.
+- `sync` and the deprecated `check` alias pass `--update-lock`.
+- The `gate` verb itself is report-only.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

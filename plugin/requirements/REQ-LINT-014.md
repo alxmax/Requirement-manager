@@ -17,14 +17,42 @@ milestone: v1.14
 > degrades until the documents stop being worth opening.
 
 ## WHAT — Contract (normative)
-- The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.
-- It shall scope its checks to non-draft requirements only (status `baseline`, `in-progress`, `implemented`, or `confirmed`). Drafts are auto-extracted TODO stubs, so linting them would only add noise.
-- It shall run two severities: a structural check is an `error`; a prose or scope check is a `warn`.
-- The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.
-- The `empty-section` check (warn) shall flag a Contract or Acceptance heading that is present but carries no clauses or criteria — it would otherwise pass `missing-section` while documenting nothing.
-- Prose checks shall look only at the Contract and Acceptance sections. The "Notes & limitations" section is exempt, because only deep readers reach it and it may stay dense.
-- Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.
-- It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     non-draft    a requirement whose status is baseline, in-progress, implemented
+                  or confirmed — every status except `draft`.
+     draft        a stub the engine wrote from a TODO item; nobody has reviewed it yet.
+     Contract     the `## WHAT — Contract` section of a requirement file.
+     Acceptance   the `## HOW — Acceptance` section of the same file.
+     prose check  a check on how a sentence reads, not on which sections exist.
+     error, warn  the two severity levels a finding can carry. -->
+
+**What it reads**
+- `lint` reports readability problems and structure problems in requirement files.
+- `lint` writes no file. It only reads and prints.
+- `lint` checks non-draft requirements only — status `baseline`, `in-progress`,
+  `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.
+- `lint` gives each finding one of two severities. A structural check reports an `error`;
+  a prose check or a scope check reports a `warn`.
+
+**The two structural checks**
+- The `missing-section` check reports an `error` when a non-draft requirement has no
+  `## WHAT — Contract` section, or no `## HOW — Acceptance` section.
+- The `empty-section` check reports a `warn` when one of those two headings is present but
+  carries nothing under it: no clauses, no criteria. Such a section passes `missing-section`
+  while documenting nothing.
+
+**What the prose checks look at**
+- The prose checks read the Contract and the Acceptance sections, and no other section.
+- The "Notes & limitations" section is exempt: only deep readers reach it, and it may stay dense.
+- The prose checks skip lines that are not prose — headings, table rows, blockquotes, and any
+  line inside a fenced code block.
+- `lint` strips a bullet's leading marker before the checks read its text.
+
+**Exit code**
+- `lint` returns zero by default, whatever it found.
+- With `--strict`, `lint` returns non-zero when at least one finding has `error` severity.
+- A warning never changes the exit code.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
