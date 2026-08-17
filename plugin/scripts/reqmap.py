@@ -2889,13 +2889,16 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                         "detail": "{}-word sentence (>{}): {}".format(
                             words, LINT_SENTENCE_WORDS, _clip(sent))})
             low = ln.lower()
-            if "shall" in low or "must" in low:
-                joins = len(re.findall(r"\b(?:and|or)\b", low))
-                if joins >= LINT_STACKED_CONNECTORS:
-                    findings.append({
-                        "severity": "warn", "check": "stacked-conditions",
-                        "detail": "{} 'and'/'or' joins in one normative line: {}".format(
-                            joins, _clip(ln))})
+            # Every line in a Contract/Acceptance section is normative by virtue of the
+            # section it sits in, so the join count applies to all of them. This used to be
+            # gated on `"shall" in low or "must" in low`, which made the check silent for the
+            # plain present-tense voice — a clarity rule keyed on a magic word misses clauses.
+            joins = len(re.findall(r"\b(?:and|or)\b", low))
+            if joins >= LINT_STACKED_CONNECTORS:
+                findings.append({
+                    "severity": "warn", "check": "stacked-conditions",
+                    "detail": "{} 'and'/'or' joins in one normative line: {}".format(
+                        joins, _clip(ln))})
     # statement atomicity (warn): a Contract bullet that packs >N words across MULTIPLE
     # sentences is a stacked statement (split it). A single long sentence is already
     # `long-sentence`'s job — gating on len(sents) > 1 keeps the two checks orthogonal

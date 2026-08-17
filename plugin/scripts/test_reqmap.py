@@ -2420,6 +2420,12 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
         self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
 
+    def test_stacked_conditions_fires_without_a_modal_keyword(self):
+        # plain present tense, no 'shall'/'must' anywhere: the check must still fire
+        line = "- `init` creates the folder and the lock and the map and the summary."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
+        self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
+
     def test_code_fence_line_not_flagged(self):
         long_sent = " ".join(["word"] * 50) + "."
         accept = "```\n" + long_sent + "\n```\n"
