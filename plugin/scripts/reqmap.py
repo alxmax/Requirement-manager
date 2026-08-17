@@ -2899,6 +2899,14 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                     "severity": "warn", "check": "stacked-conditions",
                     "detail": "{} 'and'/'or' joins in one normative line: {}".format(
                         joins, _clip(ln))})
+            # Contract only: a clause whose subject is a bare "It" forces the reader to hold
+            # the requirement's title in their head to know what is being promised. Name it.
+            # Acceptance prose is exempt — a Then clause saying "it returns …" reads fine.
+            if name == "contract" and re.match(r"^It\s+[a-z]", ln):
+                findings.append({
+                    "severity": "warn", "check": "anonymous-subject",
+                    "detail": "clause opens with an unnamed 'It' — name the subject: {}".format(
+                        _clip(ln))})
     # statement atomicity (warn): a Contract bullet that packs >N words across MULTIPLE
     # sentences is a stacked statement (split it). A single long sentence is already
     # `long-sentence`'s job — gating on len(sents) > 1 keeps the two checks orthogonal

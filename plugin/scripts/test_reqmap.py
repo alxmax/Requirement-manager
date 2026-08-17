@@ -2426,6 +2426,30 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
         self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
 
+    def test_anonymous_subject_warns_on_unnamed_it(self):
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- It creates the folder.\n")))
+        hits = [f for f in fs if f["check"] == "anonymous-subject"]
+        self.assertTrue(hits)
+        self.assertEqual(hits[0]["severity"], "warn")
+
+    def test_anonymous_subject_silent_when_the_subject_is_named(self):
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- `init` creates the folder.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
+
+    def test_anonymous_subject_is_contract_only(self):
+        # Acceptance prose legitimately says "it" in a Then clause; only the Contract is policed
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(acceptance="- It returns an empty dict.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
+
+    def test_anonymous_subject_ignores_a_word_starting_with_it(self):
+        # 'Items' / 'Iterating' must not be read as the pronoun
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- Items are sorted.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
+
     def test_code_fence_line_not_flagged(self):
         long_sent = " ".join(["word"] * 50) + "."
         accept = "```\n" + long_sent + "\n```\n"
