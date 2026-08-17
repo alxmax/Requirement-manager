@@ -95,7 +95,22 @@
 - [x] Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry. | lane: feature
 - [x] Drift-guard: `gate` (incl. `--json`) regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`. | lane: ops
 
-## v2.8 (deferred — demand-gated)
+## v2.10 — v2.16
+<!-- Backfilled 2026-08-17 (second roadmap-hygiene pass). The same drift the v1.35 section
+     records recurred: seven milestones shipped without a line here. The v1.35 note chose
+     manual hygiene over building a TODO<->requirement coherence check, on the grounds that
+     demand was n=1 — this repo's own stale TODO. It is now n=2, same repo, same failure
+     mode. That does not settle the build/skip question, but it is the second data point the
+     original decision asked for. -->
+- [x] Doc bundle drift signal (`REQ-DOCBUNDLE-026`) | lane: ops
+- [x] Untagged-code coverage report (`coverage`) — `REQ-COVERAGE-029` | lane: feature
+- [x] Registry lag in `health`: commits since the requirements dir was last touched — `REQ-REGISTRYLAG-035` | lane: ops
+- [x] Ranked free-text requirement search (`search`), shared model with the viewer — `REQ-SEARCH-036` | lane: feature
+- [x] Requirement clarity lint enforced in CI, hook and action (v2.14.0) | lane: ops
+- [x] Plain present requirement voice: named subject, no `shall`, tightened lint ceilings (v2.15.0) | lane: feature
+- [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated — `REQ-VLEVEL-037` (v2.16.0) | lane: feature
+
+## Deferred — demand-gated (opened at v2.8)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
      direct-CLI already covers every current shell-capable assistant (Claude Code, Copilot CLI, Gemini CLI,
      Codex), so an MCP server unlocks zero platforms today, and demand is unproven (Deming n=0). BUILD ONLY
