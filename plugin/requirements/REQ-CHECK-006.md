@@ -68,6 +68,9 @@ Every line in this section is binding.
   one aggregated legacy-schema `WARN`.
 - `gate` counts those legacy-schema requirements in the summary.
 - The legacy-schema warning does not affect the exit code.
+- A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at
+  least one such tag (see [[REQ-VLEVEL-037]]).
+- A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.
 
 **What it prints**
 - `gate` prints an advisory line carrying the open verify-intent finding count when that

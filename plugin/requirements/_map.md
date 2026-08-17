@@ -1,7 +1,7 @@
 ---
-generated: 2026-08-17 16:09
+generated: 2026-08-17 16:14
 nodes: 41
-edges: 57
+edges: 59
 ---
 
 # Requirement Map
@@ -312,13 +312,13 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 ```mermaid
 graph LR
   subgraph sg_misc["misc"]
-    REQ_VLEVEL_037["Verification levels<br><small>REQ-VLEVEL-037</small><br>unreviewed, untested"]
+    REQ_VLEVEL_037["Verification levels<br><small>REQ-VLEVEL-037</small><br>untested"]
   end
-  style REQ_VLEVEL_037 fill:#fff3cd,stroke:#a66,color:#630
+  style REQ_VLEVEL_037 fill:#fff9c4,stroke:#aa0,color:#550
 ```
 
 ### Risk Table
 
 | ID | status | members | dependents | risks | recommendation |
 | --- | --- | --- | --- | --- | --- |
-| REQ-VLEVEL-037 | draft | 2 | 0 | unreviewed, untested | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |
+| REQ-VLEVEL-037 | confirmed | 2 | 0 | untested | Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |

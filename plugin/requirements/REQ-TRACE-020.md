@@ -39,6 +39,9 @@ Every line in this section is binding.
 **How a need differs**
 - The `need` layer is exempt from the implements and tested-by checks. A need is satisfied by
   other requirements, not implemented or tested by code.
+- A need is still expected to carry a `validated-against:` link once the repo adopts that
+  role, because being satisfied by requirements is not evidence the need was met
+  (see [[REQ-VLEVEL-037]]).
 
 **Where the links surface**
 - `show` prints the upstream ids a requirement satisfies and the requirements that satisfy it,

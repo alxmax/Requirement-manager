@@ -238,7 +238,8 @@
         "REQ-PROSE-024",
         "REQ-SCAN-005",
         "REQ-SCANCACHE-023",
-        "REQ-SHOW-015"
+        "REQ-SHOW-015",
+        "REQ-VLEVEL-037"
       ],
       "satisfies": [],
       "satisfied_by": [],
@@ -518,6 +519,8 @@
         "`gate` names every requirement whose body lacks a `## WHAT — Verify intent` section in one aggregated legacy-schema `WARN`.",
         "`gate` counts those legacy-schema requirements in the summary.",
         "The legacy-schema warning does not affect the exit code.",
+        "A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at least one such tag (see [[REQ-VLEVEL-037]]).",
+        "A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.",
         "`gate` prints an advisory line carrying the open verify-intent finding count when that count is above zero.",
         "That advisory line does not affect the exit code.",
         "`gate` prints a summary of requirements, members, errors and warnings.",
@@ -555,7 +558,8 @@
         "REQ-MEMBERDRIFT-027",
         "REQ-ORPHANCODE-034",
         "REQ-TESTLINK-018",
-        "REQ-TRACE-020"
+        "REQ-TRACE-020",
+        "REQ-VLEVEL-037"
       ],
       "satisfies": [
         "NEED-SSOT-001"
@@ -2539,6 +2543,7 @@
         "`show` lists the Contract bullets. When the requirement has no `## WHAT — Contract` section, `show` says so instead.",
         "`show` prints dependencies in both directions: the `depends_on` ids, and the reverse edges.",
         "`show` lists the code members grouped by role, each with its `file:line`. When no member is tagged, `show` says so.",
+        "`show` prints the verification level beside a member whose `tested-by:` tag carries one.",
         "`show` lists the open `## WHAT — Verify intent` questions, using the same filter as `findings`, so the \"None\" placeholder is skipped.",
         "`show` lists the risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab, so the three never disagree.",
         "`show` returns zero for a known id and a non-zero code for an unknown one, so a typo is visible to a caller or to CI."
@@ -2858,6 +2863,7 @@
         "The gate warns, and never errors, when a `satisfies:` id resolves to no requirement. An upstream anchor may be authored later, or tracked outside this repo.",
         "The gate warns when a confirmed `need` has no requirement satisfying it, so an unaddressed stakeholder need is visible.",
         "The `need` layer is exempt from the implements and tested-by checks. A need is satisfied by other requirements, not implemented or tested by code.",
+        "A need is still expected to carry a `validated-against:` link once the repo adopts that role, because being satisfied by requirements is not evidence the need was met (see [[REQ-VLEVEL-037]]).",
         "`show` prints the upstream ids a requirement satisfies and the requirements that satisfy it, but only when that requirement takes part in traceability.",
         "The map data carries `satisfies` and `satisfied_by` on each node, plus a list of upstream edges, so a front-end can draw the trace."
       ],
@@ -2993,30 +2999,46 @@
     {
       "id": "REQ-VLEVEL-037",
       "layer": "feature",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Verification levels",
-      "intent": "WHY: 1–3 plain sentences anyone can follow — what this is, why it exists, and what breaks without it. No jargon; this is the angle a non-expert reads first.",
+      "intent": "A `tested-by:` link says a test exists, not how close that test sits to the code — a whole-system run and a single-function check look identical to the tool. This lets a tag name its level, and lets a stakeholder need point at the evidence it was met. Without it the engine models only the left side of the V: you can ask what a requirement depends on, but not \"has anyone ever shown this need was actually satisfied?\".",
       "contract": [
-        "`<subject>` does one thing, stated so a test could check it. No function names; true regardless of how the code is implemented.",
-        "`<subject>` returns <output shape and allowed values>.",
-        "`<subject>` handles a missing or invalid optional input by <behavior>."
+        "A `tested-by:` tag may end with a verification level: `@unit`, `@integration` or `@system`.",
+        "A level written on a tag applies to every id in that tag's comma-separated list.",
+        "A `tested-by:` tag carrying no level, or an unrecognised one, stays an ordinary member link.",
+        "The engine reports, per requirement, each level it is verified at with the `file:line` locations that declare it.",
+        "The level scan stays separate from the member scan, so the member shape every consumer reads is unchanged.",
+        "The engine skips a levelled tag written inside backticks, so a documented example never counts as real coverage.",
+        "The gate warns when a confirmed `need` carries no `validated-against:` member.",
+        "The gate holds that need warning back until the repo carries at least one `validated-against:` tag, so adopting the role is opt-in.",
+        "The gate warns when a confirmed `bus` requirement's levelled `tested-by:` links are all `@system`.",
+        "The gate judges no requirement that has no levelled link, because an unlevelled link is evidence of neither level.",
+        "The gate applies the level-fit rule to the `bus` layer only. A feature may legitimately be covered end to end.",
+        "Both rules are warn-only. Neither changes the gate's exit code.",
+        "`show` prints the verification level beside a member whose `tested-by:` tag carries one.",
+        "`show` prints a member whose tag carries no level with no level marker."
       ],
       "verify": [
-        "Observed: <a behavior that may be an AI accident — swallowed error, empty-string fallback, magic constant, unreachable branch>. Intended, or a bug to fix?"
+        "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "A known fragility/footgun the implementer should know but which is NOT enforced."
+        "The level suffix is invisible to the ordinary tag parser, so an older vendored engine reads a levelled tag, resolves the id, and ignores the level — the annotation is backwards compatible.",
+        "The level is author-declared, not measured: nothing checks that a test tagged `@unit` really isolates one unit. Same lexical-trust limitation as `tested-by` itself (REQ-TESTLINK-018).",
+        "`validated-against:` had sat unused in the role list since the beginning; this requirement is the first consumer of it."
       ],
       "current_impl": [
-        "How the code does it today (the volatile narrative — may drift from the contract)."
+        "`TEST_LEVELS`, `TEST_LEVEL_RE` and `scan_test_levels` in `reqmap.py` collect `{cap: {level: [(file, line)]}}`, masking Python strings and backticked spans first. `cmd_check` computes `any_validation` from the member roles and `level_cover` from the scan, then appends the two warn-only findings. `cmd_show` takes the level map as an optional fourth argument and annotates each member line."
       ],
       "acc": [],
-      "accept": "Contract introduced. -\->\nAC-1  <\!-- verifiable by: automated test | manual | inspection | load test -\->\n  Given  <precondition>\n  When   <action>\n  Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)",
+      "accept": "AC-1\n  Given  a file with `# tested-by: REQ-A-001 @unit` and `# tested-by: REQ-A-001 @system`\n  When   the level scan runs\n  Then   REQ-A-001 reports both levels, each with its `file:line`\nAC-2\n  Given  a tag naming two ids at `@integration`, plus one tag with no level and one `@wrong`\n  When   the level scan runs\n  Then   both ids report `integration`; the other two requirements are absent\nAC-3\n  Given  a levelled tag written inside backticks as a documented example\n  When   the level scan runs\n  Then   that requirement gets no level entry, while a real tag on the next line does\nAC-4\n  Given  two confirmed needs, one carrying a `validated-against:` tag and one carrying none\n  When   the gate runs\n  Then   it warns about the unvalidated need only\nAC-5\n  Given  a confirmed need in a repo with no `validated-against:` tag anywhere\n  When   the gate runs\n  Then   it says nothing about validation\nAC-6\n  Given  a confirmed `bus` requirement whose only levelled link is `@system`\n  When   the gate runs\n  Then   it warns; adding a `@unit` link, dropping to an unlevelled link, or moving to the\n         `feature` layer each silences it\nAC-7\n  Given  a member whose `tested-by:` tag carries `@integration`\n  When   `show` runs\n  Then   `@integration` appears beside that member; with no level data the output is unchanged",
       "input": "",
       "output": "",
       "desc": "",
-      "deps": [],
+      "deps": [
+        "CORE-SCAN-002",
+        "REQ-CHECK-006"
+      ],
       "used_by": [],
       "satisfies": [],
       "satisfied_by": [],
@@ -3032,12 +3054,8 @@
       ],
       "test_exempt": null,
       "milestone": null,
-      "priority": "",
+      "priority": "should-have",
       "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        },
         {
           "signal": "untested",
           "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
@@ -3273,6 +3291,14 @@
     [
       "REQ-VIEWER-007",
       "REQ-MAP-007"
+    ],
+    [
+      "REQ-VLEVEL-037",
+      "CORE-SCAN-002"
+    ],
+    [
+      "REQ-VLEVEL-037",
+      "REQ-CHECK-006"
     ]
   ],
   "todos": [
