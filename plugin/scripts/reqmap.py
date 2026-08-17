@@ -64,6 +64,19 @@ _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip befo
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
 # `#AC-N` suffix is what distinguishes it from a plain requirement reference.
 AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
+# Verification level on a `tested-by:` tag, written `# tested-by: <ID> @integration`.
+# The id is spelled `<ID>` here on purpose: a real-looking id in a PLAIN COMMENT would be
+# scanned as an actual tag. `_scan_file_tags` strips backticked spans only on the .md/.html
+# path; on the code path its guard is `_strip_py_strings`, which masks string literals and
+# leaves comments alone. Docstrings are safe; comments are not.
+# The level applies to the whole tag, so a comma-separated id list shares it — the only
+# unambiguous reading, and it matches how TAG_LIST_RE already groups ids. The suffix is
+# invisible to TAG_RE/TAG_LIST_RE, so an older vendored engine reads a levelled tag,
+# resolves the id, and ignores the level (REQ-VLEVEL-037).
+TEST_LEVELS = ("unit", "integration", "system")
+TEST_LEVEL_RE = re.compile(
+    r"(?<![\w-])tested-by\s*:\s*(" + _ID_PAT + r"(?:\s*,\s*" + _ID_PAT + r")*)"
+    r"\s*@(" + "|".join(TEST_LEVELS) + r")\b")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
@@ -119,7 +132,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-17"
+MAP_ENGINE_VERSION = "2026-08-17.1"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -1124,6 +1137,56 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     return cover
 
 
+def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
+    """Walk the code for `# tested-by: REQ-X @level` tags and return
+    `{cap_id: {level: [(file, line)]}}` — at which V-model level each requirement is
+    verified. Kept separate from `scan_members` on purpose: folding the level into the
+    member tuples would change the `(role, file, line)` shape that `_map.json` and every
+    member consumer depend on. Same walk discipline as `scan_ac_verifies` (respects
+    .reqmapignore, prunes .git/node_modules). Empty when no levelled tag exists."""
+    cover = {}  # cap_id -> {level -> [(file, line)]}
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        dirs.sort()                  # deterministic descent, mirrors scan_members
+        for fn in sorted(files):
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+            except OSError:
+                continue
+            # For .py, mask string-literal content (mirrors _scan_file_tags) so a levelled
+            # tag inside a docstring is not counted as real coverage.
+            is_py = fp.endswith(".py")
+            in_triple = None
+            for i, line in enumerate(lines, 1):
+                s = line
+                if is_py:
+                    s = s.rstrip("\n\r")
+                    if in_triple is not None:
+                        idx = s.find(in_triple)
+                        if idx == -1:
+                            continue
+                        s = s[idx + len(in_triple):]
+                        in_triple = None
+                    s, in_triple = _strip_py_strings(s)
+                # Strip backticked spans before the search, the same phantom-member guard
+                # `_scan_file_tags` applies: a documented EXAMPLE of a levelled tag must not
+                # register as real coverage. Without it this scanner matches the example in
+                # its own constant's comment.
+                s = _BACKTICK_RE.sub("", s)
+                for idlist, level in TEST_LEVEL_RE.findall(s):
+                    for cap in _ID_RE.findall(idlist):
+                        cover.setdefault(cap, {}).setdefault(level, []).append((rel, i))
+    return cover
+
+
 def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
     """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
     Empty when the requirement writes bullet ACs without labels — per-AC coverage
@@ -1485,6 +1548,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             members = filtered
 
     ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
+    # V-model opt-in triggers, computed once. Neither this rule nor the level-fit rule can
+    # fire until the repo has deliberately adopted the vocabulary, so installing this engine
+    # adds no warnings to a repo that never annotates a tag (REQ-VLEVEL-037).
+    any_validation = any(x[0] == "validated-against"
+                         for hits in members.values() for x in hits)
+    level_cover = scan_test_levels(code_root, reqs_dir)   # {cap: {level: [...]}}
     satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
     for _rid, _r in reqs.items():
         for _up in _as_list(_r["meta"].get("satisfies")):
@@ -1533,6 +1602,22 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
                 warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
+        # V-model validation (warn-only): a `need` is validated, not tested. A unit test
+        # cannot show the RIGHT thing was built, so a need with only code coverage is
+        # false confidence exactly where it costs most. Opt-in via `any_validation`.
+        if is_need and m.get("status") == "confirmed" and any_validation:
+            if not [x for x in members.get(rid, []) if x[0] == "validated-against"]:
+                warns.append(f"{rid}: confirmed need with no `validated-against:` tag — "
+                             "nothing shows the need was actually met")
+        # V-model level fit (warn-only): foundation code covered only end-to-end is slow,
+        # fragile, and localises failures poorly. Unlevelled links are ignored rather than
+        # assumed low-level — assuming would make the rule unfireable in exactly the
+        # half-migrated repos it helps most. Opt-in: no levelled link, no judgement.
+        if m.get("status") == "confirmed" and m.get("layer") == "bus":
+            levels = set(level_cover.get(rid, {}))
+            if levels == {"system"}:
+                warns.append(f"{rid}: bus capability verified only at @system level — "
+                             "add a @unit or @integration `tested-by:` link")
         # owner accountability (warn): a confirmed requirement with owner: auto was never
         # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
         if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
@@ -3044,7 +3129,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     return 0
 
 
-def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
+def cmd_show(reqs, members, cap_id, levels=None):  # implements: REQ-SHOW-015  # implements: REQ-VLEVEL-037
     """Print one consolidated, human-readable dossier for a single requirement: its
     status/layer/intent, contract, dependencies (both directions), members grouped
     by role, open verify-intent questions, and risk signals — the 'what does this do
@@ -3089,10 +3174,17 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         print("Satisfied by: " + (", ".join(satisfiers) if satisfiers else "(none)"))
 
     mem = members.get(cap_id, [])
+    # {(file, line): level} for this requirement, so a levelled tested-by link shows the
+    # level it asserts rather than leaving the reader to open the file.
+    at = {}
+    for lvl, hits in (levels or {}).get(cap_id, {}).items():
+        for hit in hits:
+            at[hit] = lvl
     print("\nMembers in code ({}):".format(len(mem)))
     if mem:
         for role, fp, ln in sorted(mem):
-            print("  {:18} {}:{}".format(role, fp, ln))
+            lvl = at.get((fp, ln))
+            print("  {:18} {}:{}{}".format(role, fp, ln, " @" + lvl if lvl else ""))
     else:
         print("  (none tagged)")
 
@@ -4974,7 +5066,7 @@ def main():
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
-        return cmd_show(reqs, members, a.arg)
+        return cmd_show(reqs, members, a.arg, scan_test_levels(code_root, reqs_dir))
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "search":

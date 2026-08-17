@@ -1,5 +1,21 @@
 # Changelog
 
+## plugin `v2.16.0` — 2026-08-17
+
+**The V-model's right side gets levels, and a reserved role is redefined.** A `tested-by:` link said only *that* something tested a requirement, never at what level — a whole-system run and a single-function check looked identical to the tool. So the engine could report "this has no test", but never "this stakeholder need has never been validated", which is the question the V-model exists to answer. `tested-by:` now takes an optional suffix — `@unit`, `@integration`, `@system` — applying to the whole tag, so a comma-separated id list shares one level.
+
+**Breaking for anyone using `validated-against:` — read this.** The role has sat in `ROLES` since the beginning with nothing consuming it, and both skill contracts described it as *"config/data (re-validated on change)"*. It is now the **validation** link: evidence the right thing was built, as opposed to `tested-by:`, which is evidence it was built correctly. Point a `layer: need` requirement at it. If your repo carries `validated-against:` tags under the old documented meaning, they will now be read as validation evidence and will satisfy the new need rule. Nothing breaks and no build fails — but the tags mean something different than they did, so re-read them before relying on the new warning.
+
+The gate gains two warn-only rules, chosen as the two asymmetric mistakes the V-model actually warns about rather than as a strict layer-to-level table. A pairing table was rejected on evidence: this repo's `feature` requirements are unit-tested by direct function calls, which is a sound choice, and a rule that flags 36 of 40 requirements for practising something sound gets ignored within a fortnight. Instead — a confirmed `need` with no `validated-against:` link warns, and a confirmed `bus` requirement whose levelled links are all `@system` warns, because foundation code covered only end-to-end is slow, fragile, and localises failures poorly. Every other combination stays silent, including a `feature` tested end to end.
+
+**Silent on arrival.** Both rules are opt-in and gated separately: the first holds back until your repo carries at least one `validated-against:` tag anywhere, the second until a given requirement carries at least one levelled link. An unlevelled `tested-by:` link is never judged. Neither rule can fire until you deliberately annotate something, so updating adds no warnings to any repo.
+
+**Compatible in both directions.** `TAG_RE` already ignored a trailing `@level`, so an older vendored engine reads a levelled tag, resolves the id, and ignores the suffix. That property is now a binding acceptance criterion rather than an accident.
+
+`show` prints the level beside a member whose tag carries one. New requirement `REQ-VLEVEL-037`, whose own tests are tagged `@unit` — the engine is the first consumer of its own vocabulary. `REQ-TRACE-020`'s blanket `need` exemption is narrowed to match, and `REQ-CHECK-006`'s severity table gains both warnings.
+
+`MAP_ENGINE_VERSION` → `2026-08-17.1`.
+
 ## plugin `v2.15.0` — 2026-08-17
 
 **Requirements are now written in plain present tense, and the linter enforces the reading level.** The corpus passed every clarity check the engine had while still being hard for a newcomer to read. That was not an accident: `LINT_SENTENCE_WORDS` sat at 35 and `LINT_CONTRACT_WORDS` at 30, roughly twice the level being aimed for, so `lint` reported **zero** findings on prose averaging 18.3 words per sentence. Rewriting the prose without moving those numbers would have let it drift straight back.

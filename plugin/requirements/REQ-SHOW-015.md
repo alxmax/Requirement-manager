@@ -42,6 +42,7 @@ Every line in this section is binding.
 - `show` prints dependencies in both directions: the `depends_on` ids, and the reverse edges.
 - `show` lists the code members grouped by role, each with its `file:line`. When no member is
   tagged, `show` says so.
+- `show` prints the verification level beside a member whose `tested-by:` tag carries one.
 
 **What it surfaces**
 - `show` lists the open `## WHAT — Verify intent` questions, using the same filter as

@@ -268,6 +268,73 @@ class Gate(unittest.TestCase):
         self.assertNotIn("missing '## WHAT — Contract'", out)
         self.assertNotIn("missing '## HOW — Acceptance'", out)
 
+    def test_need_without_validation_warns_once_the_repo_opts_in(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # Two needs: one validated, one not. The repo has opted in (a validated-against
+        # tag exists), so the unvalidated need warns and the validated one does not.
+        files = {
+            "NEED-A-001.md": REQ.format(id="NEED-A-001", status="confirmed", layer="need",
+                                        extra="", title="Validated need"),
+            "NEED-B-002.md": REQ.format(id="NEED-B-002", status="confirmed", layer="need",
+                                        extra="", title="Unvalidated need"),
+            "t_probe.py": "# validated-against: NEED-A-001\ndef test_x():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertIn("NEED-B-002", out)
+        self.assertIn("validated-against", out)
+
+    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # No validated-against tag anywhere: the rule must not fire at all, so a repo
+        # that never adopts the role sees no new warnings.
+        files = {
+            "NEED-B-002.md": REQ.format(id="NEED-B-002", status="confirmed", layer="need",
+                                        extra="", title="Unvalidated need"),
+        }
+        _, out = self._check(files)
+        self.assertNotIn("validated-against", out)
+
+    def test_bus_verified_only_at_system_level_warns(self):  # tested-by: REQ-VLEVEL-037 @unit
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: CORE-X-001 @system\ndef test_e2e():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertIn("@system", out)
+
+    def test_bus_with_a_lower_level_link_is_silent(self):  # tested-by: REQ-VLEVEL-037 @unit
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: CORE-X-001 @system\ndef test_e2e():\n    pass\n",
+            "t_unit.py": "# tested-by: CORE-X-001 @unit\ndef test_unit():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
+    def test_bus_with_no_levelled_link_is_never_judged(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # opt-in per requirement: an unlevelled tested-by link is not evidence either way
+        files = {
+            "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
+                                        extra="", title="Foundation"),
+            "impl.py": "# implements: CORE-X-001\ndef go():\n    return 1\n",
+            "t_plain.py": "# tested-by: CORE-X-001\ndef test_x():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
+    def test_feature_verified_only_at_system_level_is_silent(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # rule 2 is about foundation code only — a feature may legitimately be end-to-end
+        files = {
+            "REQ-X-001.md": REQ.format(id="REQ-X-001", status="confirmed", layer="feature",
+                                       extra="", title="Feature"),
+            "impl.py": "# implements: REQ-X-001\ndef go():\n    return 1\n",
+            "t_sys.py": "# tested-by: REQ-X-001 @system\ndef test_e2e():\n    pass\n",
+        }
+        _, out = self._check(files)
+        self.assertNotIn("verified only at @system", out)
+
 
 class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_scan_members_deterministic_across_walk_order(self):  # cross-platform parity (Windows-generated map vs Linux CI)
@@ -378,6 +445,45 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_unreadable_file_skipped(self):  # verifies: CORE-SCAN-002#AC-5
         # _scan_file_tags fails open (None) on a read error; scan_members skips the file
         self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))
+
+    def test_scan_test_levels_collects_levels_per_requirement(self):  # tested-by: REQ-VLEVEL-037 @unit
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "t_one.py"), "w", encoding="utf-8") as f:
+                f.write("# tested-by: REQ-A-001 @unit\n"
+                        "# tested-by: REQ-A-001 @system\n"
+                        "# tested-by: REQ-B-002 @integration\n")
+            got = R.scan_test_levels(d)
+            self.assertEqual(set(got["REQ-A-001"]), {"unit", "system"})
+            self.assertEqual(set(got["REQ-B-002"]), {"integration"})
+            self.assertEqual(got["REQ-B-002"]["integration"], [("t_one.py", 3)])
+
+    def test_scan_test_levels_expands_an_id_list_and_ignores_unlevelled(self):  # tested-by: REQ-VLEVEL-037 @unit
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "t_two.py"), "w", encoding="utf-8") as f:
+                f.write("# tested-by: REQ-A-001, REQ-B-002 @integration\n"
+                        "# tested-by: REQ-C-003\n"              # no level: not collected
+                        "# tested-by: REQ-D-004 @wrong\n")      # not a known level
+            got = R.scan_test_levels(d)
+            self.assertEqual(set(got["REQ-A-001"]), {"integration"})
+            self.assertEqual(set(got["REQ-B-002"]), {"integration"})
+            self.assertNotIn("REQ-C-003", got)
+            self.assertNotIn("REQ-D-004", got)
+
+    def test_scan_test_levels_ignores_a_backticked_example(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # same phantom-member guard _scan_file_tags applies: a documented EXAMPLE of a
+        # levelled tag must not register as real coverage
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "doc.py"), "w", encoding="utf-8") as f:
+                f.write("# write it as `# tested-by: REQ-A-001 @unit` in your test\n"
+                        "# tested-by: REQ-B-002 @unit\n")     # this one is real
+            got = R.scan_test_levels(d)
+            self.assertNotIn("REQ-A-001", got)
+            self.assertEqual(set(got["REQ-B-002"]), {"unit"})
+
+    def test_levelled_tag_still_resolves_as_a_plain_member(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # backwards compatibility: the suffix must not disturb ordinary tag parsing
+        self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
+                         [("tested-by", "REQ-A-001")])
 
 
 class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
@@ -2670,6 +2776,24 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         body = "# T\n>\n> The real intent.\n\n## WHAT — Contract\n- x.\n"
         _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
         self.assertIn("The real intent.", out)
+
+    def test_show_annotates_a_member_with_its_verification_level(self):  # tested-by: REQ-VLEVEL-037 @unit
+        reqs = {"REQ-X-001": self._req()}
+        members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
+        levels = {"REQ-X-001": {"integration": [("t.py", 2)]}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(reqs, members, "REQ-X-001", levels)
+        self.assertIn("@integration", buf.getvalue())
+
+    def test_show_without_level_data_is_unchanged(self):  # tested-by: REQ-VLEVEL-037 @unit
+        reqs = {"REQ-X-001": self._req()}
+        members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(reqs, members, "REQ-X-001")      # old 3-arg call still works
+        self.assertIn("t.py:2", buf.getvalue())
+        self.assertNotIn("@", buf.getvalue().split("Members in code")[-1])
 
 
 class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
