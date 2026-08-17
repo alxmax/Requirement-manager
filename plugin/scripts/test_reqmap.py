@@ -5,6 +5,7 @@ Run: python -m unittest test_reqmap   (from plugin/scripts/)
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -922,6 +923,26 @@ class New(unittest.TestCase):  # tested-by: REQ-NEW-004
             self.assertEqual(code, 1)
             with open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8") as f:
                 self.assertEqual(f.read(), "existing\n")  # untouched
+
+    def test_template_uses_the_plain_present_voice(self):
+        t = R.REQUIREMENT_TEMPLATE
+        self.assertIn("Every line in this section is binding.", t)
+        # No CLAUSE may use a modal — but the guidance comment must stay free to name
+        # 'shall' as the thing not to write, which is the clearest way to say it.
+        # Comments are stripped whole: _lint_prose yields each line of a multi-line
+        # comment separately, so filtering on a leading '<!--' would only drop the first.
+        clauses = R._lint_prose(re.sub(r"<!--.*?-->", "", t, flags=re.DOTALL), "contract")
+        self.assertTrue(clauses)                       # guard: the section actually parsed
+        for ln in clauses:
+            self.assertNotIn("shall", ln.lower())
+            self.assertNotIn("must", ln.lower())
+
+    def test_template_contract_body_passes_its_own_linter(self):
+        # the shipped template must not be flagged by the checks it teaches
+        req = {"meta": {"status": "confirmed"}, "body": R.REQUIREMENT_TEMPLATE.split("---\n", 2)[-1]}
+        checks = {f["check"] for f in R.lint_requirement("AREA-NAME-001", req)}
+        self.assertNotIn("anonymous-subject", checks)
+        self.assertNotIn("long-sentence", checks)
 
 
 class Scan(unittest.TestCase):  # tested-by: REQ-SCAN-005

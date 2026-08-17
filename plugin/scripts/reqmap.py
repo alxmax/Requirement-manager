@@ -1737,18 +1737,27 @@ superseded_by:       # <ID>, if replaced
 > what breaks without it. No jargon; this is the angle a non-expert reads first.
 
 ## WHAT — Contract (normative)
-<!-- Audience: a developer new to THIS project. Define project-specific terms inline
-     on first use; attach roles to named components; keep "shall" phrasing.
-     Assumptions & constraints (external deps, explicit out-of-scope): note them here.
-     Scope: one capability = one behavior that can fail independently. If you accumulate
-     many contract clauses AND many acceptance criteria, you are likely describing several
-     capabilities — split them (the linter flags this as 'over-scoped'). -->
-- The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
-  no function names; true regardless of how the code is implemented).
-  <!-- Rationale: why this specific behavior -->
-- Output shape + allowed values; required vs optional inputs and how it degrades
-  when an optional input is missing/invalid; the decision logic that selects each
-  output (say so explicitly if it is delegated to a model/heuristic).
+Every line in this section is binding.
+<!-- Audience: a developer new to THIS project. Six rules:
+     1. Name the subject: "`init` creates the folder", never "It creates the folder".
+     2. Present tense — no "shall", no "must". The line above already binds every clause.
+     3. One binding statement per bullet; a second sentence only states the first's
+        consequence, never a second obligation.
+     4. Define project terms. Two or more: open with a glossary comment like this one.
+     5. Group clauses past five, with bold labels (see below).
+     6. Keep under 25 words/sentence, 22 words/bullet — `lint` enforces both.
+     Scope: one capability = one behaviour that fails independently. Many clauses AND
+     many acceptance criteria together mean several capabilities — split them
+     (`lint` flags this as 'over-scoped'). -->
+
+**What it does**
+- `<subject>` does one thing, stated so a test could check it. No function names; true
+  regardless of how the code is implemented.
+  <!-- Rationale: why this specific behaviour, one clause, only when not self-evident -->
+
+**What it produces**
+- `<subject>` returns <output shape and allowed values>.
+- `<subject>` handles a missing or invalid optional input by <behaviour>.
 
 ## WHAT — Verify intent (open questions for the human)
 - Observed: <a behavior that may be an AI accident — swallowed error, empty-string
@@ -1758,8 +1767,8 @@ superseded_by:       # <ID>, if replaced
 - A known fragility/footgun the implementer should know but which is NOT enforced.
 
 ## HOW — Acceptance (= tests)
-<!-- Audience: a developer new to THIS project. Keep Given/When/Then concrete and
-     self-explanatory; spell out any term the Contract introduced. -->
+<!-- Keep Given/When/Then concrete and self-explanatory; spell out any term the
+     Contract introduced. -->
 AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
