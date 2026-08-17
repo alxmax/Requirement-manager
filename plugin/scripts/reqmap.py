@@ -30,16 +30,20 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
 import argparse, ast, fnmatch, hashlib, json, math, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
+# Both tag patterns are BUILT from ROLES rather than repeating it. The three used to be
+# maintained by hand, which made ROLES look authoritative while driving nothing: adding a
+# role there changed no behaviour, and the real vocabulary lived inside two regex literals.
+_ROLE_ALT = "|".join(ROLES)
 # the (?<![\w-]) left boundary stops substring matches like `reimplements:` or
 # `x-implements:` from being picked up as a real `implements:` tag
 _ID_PAT = r"[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+"
-TAG_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*(" + _ID_PAT + r")")
+TAG_RE = re.compile(r"(?<![\w-])(" + _ROLE_ALT + r")\s*:\s*(" + _ID_PAT + r")")
 # A single tag may bind several requirements via a comma-separated id list (one
 # `<!-- generated-from: ... -->` listing several ids) — used for a whole-system doc
 # generated from many requirements, so a contract drift on ANY of them lists the doc
 # to re-sync. TAG_RE (single id) stays for callers that only need the tag's start
 # position; TAG_LIST_RE captures the whole id list, which _findall_tags expands.
-TAG_LIST_RE = re.compile(r"(?<![\w-])(implements|generated-from|validated-against|tested-by)\s*:\s*("
+TAG_LIST_RE = re.compile(r"(?<![\w-])(" + _ROLE_ALT + r")\s*:\s*("
                          + _ID_PAT + r"(?:\s*,\s*" + _ID_PAT + r")*)")
 _ID_RE = re.compile(_ID_PAT)
 
@@ -4160,15 +4164,6 @@ def _mermaid_risk(data):  # implements: REQ-MAP-007
         else:
             lines.append("  style {} fill:#fff9c4,stroke:#aa0,color:#550".format(sid))
     return "\n".join(lines)
-
-
-def _add_clicks(diagram, data):
-    """Append Mermaid click statements for every requirement node."""
-    clicks = "\n".join(
-        "  click {} sel_{}".format(_safe_id(n["id"]), _safe_id(n["id"]))
-        for n in data["nodes"]
-    )
-    return diagram + "\n" + clicks
 
 
 # Per-tab legends (parallel to the 4 diagrams, same order) so each view is

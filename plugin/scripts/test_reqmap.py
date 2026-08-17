@@ -480,6 +480,16 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("REQ-A-001", got)
             self.assertEqual(set(got["REQ-B-002"]), {"unit"})
 
+    def test_tag_patterns_are_built_from_roles(self):
+        # ROLES is the vocabulary; both patterns are derived from it. Hand-maintaining
+        # the alternation made ROLES look authoritative while driving nothing.
+        for role in R.ROLES:
+            self.assertEqual(R.TAG_RE.findall("# {}: REQ-A-001".format(role)),
+                             [(role, "REQ-A-001")])
+            self.assertEqual(R.TAG_LIST_RE.findall("# {}: REQ-A-001".format(role)),
+                             [(role, "REQ-A-001")])
+        self.assertEqual(R.TAG_RE.findall("# not-a-role: REQ-A-001"), [])
+
     def test_levelled_tag_still_resolves_as_a_plain_member(self):  # tested-by: REQ-VLEVEL-037 @unit
         # backwards compatibility: the suffix must not disturb ordinary tag parsing
         self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
