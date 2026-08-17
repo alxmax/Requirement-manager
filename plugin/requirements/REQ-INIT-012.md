@@ -17,25 +17,56 @@ milestone: v1.10
 > and most give up before the project is in a usable state.
 
 ## WHAT — Contract (normative)
-- It shall create the requirements directory if it does not exist.
-- It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`.
-- The seeded file shall list `scripts/reqmap.py`, the vendored engine, whose self-tags would otherwise read as dangling refs.
-- That line shall be omitted, with a comment explaining why, when the engine is self-hosting.
-- The engine is self-hosting when it carries membership tags that resolve to requirements already present; it is then managed code and must stay scanned.
-- It shall draft requirements from existing untagged code by invoking the extract capability, then build the drift lock and the map so the repo is immediately in a gate-passing, navigable state.
-- It shall print a guided summary that points at a single next command (`reqmap.py next`) plus wiring the gate, rather than an undifferentiated menu.
-- When nothing was extracted (no supported files, or all ignored) it shall say so distinctly and point at `new` — it shall not print a tracked-requirements summary that masks the empty result.
-- It shall be safe to re-run: a second invocation refreshes the lock and map, then re-prints the summary.
-- A re-run shall never destroy authored requirements or an existing ignore file.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     .reqmapignore  the list of files the scan skips.
+     the lock       requirements/_reqlock.json — the saved fingerprint of every contract.
+     the map        requirements/_map.* — the generated diagrams and graph.
+     self-hosting   a repo where reqmap.py describes ITSELF: the engine file carries
+                    tags pointing at requirements that already live in this same repo. -->
+
+**What it creates**
+- `init` creates the requirements folder if it is missing.
+- `init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites one
+  that is already there.
+- The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look
+  like they point at requirements that do not exist.
+- One exception: if the engine describes itself in this repo, `init` leaves the line out and
+  writes a comment saying why. There the engine is ordinary tracked code, so the scan must
+  keep reading it.
+- "Describes itself" means `scripts/reqmap.py` carries tags whose ids match requirements
+  already in the repo.
+
+**What it runs**
+- `init` drafts requirements from untagged code, writes the lock, then builds the map, in that
+  order. When it finishes, the repo passes the gate and has a map.
+
+**What it prints**
+- `init` ends with a short summary naming one next command: `reqmap.py next`. Not a list of
+  every option.
+- If nothing was drafted, `init` says so in plain words and points at `new`. It never prints a
+  count summary that hides an empty result.
+
+**Running it again**
+- Running `init` twice is safe. The second run refreshes the lock and the map, then prints the
+  summary again.
+- A second run never deletes a requirement someone wrote, and never edits an existing
+  `.reqmapignore`.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
-- The seeded `.reqmapignore` assumes the engine is vendored at `scripts/reqmap.py` (the documented setup path); the self-hosting exception keys off that same path.
-- Self-hosting detection requires requirements to already exist when `.reqmapignore` is first created. A from-scratch self-hosting bootstrap (empty `requirements/`) cannot be detected — nothing resolves yet — so the engine line is written; re-running after authoring requirements does not rewrite the existing file, so such a repo must drop the line by hand. This is an accepted edge.
-- On a repo with no extractable code files the bootstrap still succeeds, producing an empty-but-valid lock and map.
-- `init` orchestrates existing capabilities (extract, check, map); it adds no new analysis of its own.
+- The starter `.reqmapignore` assumes the engine sits at `scripts/reqmap.py` — the documented
+  place to vendor it. The self-hosting exception looks at that same path.
+- Self-hosting can only be detected if requirements already exist when `.reqmapignore` is first
+  written. Bootstrapping a self-hosting repo from an empty `requirements/` folder cannot be
+  detected — there is nothing for the tags to match yet — so the engine line does get written.
+  Re-running later does not rewrite the file, so that repo has to delete the line by hand.
+  Known and accepted.
+- On a repo with no extractable code `init` still succeeds: the lock and map are empty but valid.
+- `init` performs no analysis of its own. It only calls capabilities that already exist
+  (draft, gate, map) in a fixed order.
 
 ## HOW — Acceptance (= tests)
 AC-1

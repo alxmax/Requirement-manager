@@ -17,13 +17,37 @@ milestone: v1.15
 > while its tests have quietly disappeared.
 
 ## WHAT — Contract (normative)
-- The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.
-- For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.
-- A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or an `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`.
-- A `.py` file with no `def test...` also counts when it drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
-- When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.
-- The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.
-- The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     tested-by      a tag in code naming the file that tests a requirement.
+     the gate       the `gate` command, run before every commit.
+     lexically      recognised by the shape of the text, without parsing the language.
+     behavior-sync  keeping the tests a requirement claims in step with the tests that exist. -->
+
+**What it checks**
+- The gate checks every `tested-by` link on a confirmed requirement. This is the deterministic
+  half of behavior-sync.
+- For each distinct `tested-by` file on a confirmed requirement, the gate verifies that the
+  file exists.
+- For each such file the gate also verifies that it holds at least one test function.
+
+**What counts as a test function**
+- The gate recognizes a test function lexically.
+- A Python `def test...(` counts.
+- A JavaScript or TypeScript `function test...(` counts.
+- An `it(` call or a `test(` call counts.
+- A Go `func Test/Benchmark/Example/Fuzz(` counts.
+- A Rust `#[test]` counts.
+- A `.py` file with no `def test...` also counts when it drives its checks from a
+  `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
+
+**What it reports**
+- When a file is missing, unreadable, or holds no test function, the gate adds one warning.
+- That warning names the requirement and the file.
+
+**How loud it is**
+- The check is warn-only. It never adds an error, and never changes whether the gate passes.
+- The check stays silent on a well-formed corpus, so a green gate run gains no noise.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -56,7 +80,9 @@ AC-4
   Then   the error count is unchanged (the check is warn-only)
 
 AC-5
-  Given  a confirmed requirement whose `tested-by` is a `.py` file that has no `def test...` but defines a `run()`/`main()` entry point under an `if __name__ == "__main__"` guard
+  Given  a confirmed requirement whose `tested-by` is a `.py` file with no `def test...`,
+         but which defines a `run()`/`main()` entry point under an
+         `if __name__ == "__main__"` guard
   When   the gate runs
   Then   it adds no warning for that link
 

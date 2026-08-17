@@ -20,20 +20,54 @@ milestone: v2.13
 > to prevent.
 
 ## WHAT — Contract (normative)
-- The `search "<query>"` command shall rank requirements by lexical relevance to the query and print them most-relevant-first. It writes nothing and is read-only.
-- It shall reuse the scoring machinery of `dupes` (REQ-SIMILAR-016), never a second scoring path.
-- Query and requirement shall each reduce to the shared bag of words (title, intent line, Contract bullets), then compare by cosine over smoothed TF-IDF weights.
-- The map viewer's search box shall rank by this same model, not by a divergent one.
-- Its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so both surfaces agree on what matches in what order.
-- A shared golden fixture shall pin the port to the engine: one fixed query scores identically in `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.
-- It shall print each shown match with its cosine score, so a weak match is visibly weak and not presented with the authority of a strong one.
-- It shall show at most `--top` matches, defaulting to five; a non-positive `--top` shall be treated as one.
-- It shall apply a relevance floor and never print a ranked list of below-floor results.
-- When no requirement scores at or above the floor, it shall print an explicit no-strong-match line reporting the best score and the floor.
-- The floor shall default to `0.05`.
-- When the query contains no searchable term (empty after tokenizing away short words, stopwords, and pure numbers) it shall say so and rank nothing, distinctly from the no-strong-match case.
-- Its output shall state that the search is lexical, not synonym-aware, so a user who gets no hit knows to try different words rather than concluding no requirement exists.
-- It shall always return zero from a well-formed invocation; a missing query argument is a usage error returning non-zero.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     bag of words  the words a requirement is reduced to: its title, its intent line and
+                   its Contract bullets.
+     TF-IDF        a weight per word; a word common across the whole corpus counts for less.
+     cosine        a 0-to-1 number saying how close two bags of words are.
+     the floor     the lowest cosine score `search` is willing to call a match.
+     the viewer    the map's HTML front-end (`app/`), which has its own search box.
+     tokenize      cut a text into the separate words that get scored. -->
+
+**What it ranks**
+- `search "<query>"` ranks every requirement by how well its wording matches the query, then
+  prints them most-relevant-first.
+- `search` writes no file. It only reads and prints.
+
+**How it scores**
+- `search` reuses the scoring machinery of `dupes` (REQ-SIMILAR-016). There is never a second
+  scoring path.
+- The query and each requirement both reduce to the same bag of words: title, intent line,
+  Contract bullets.
+- `search` then compares those two bags by cosine over smoothed TF-IDF weights.
+
+**What it prints**
+- `search` prints every match it shows together with that match's cosine score. A weak match
+  then looks weak, instead of carrying the authority of a strong one.
+- `search` shows at most `--top` matches. `--top` defaults to five.
+- A `--top` of zero or less counts as one.
+- `search` applies a relevance floor and never prints a ranked list of below-floor results.
+- When no requirement scores at or above the floor, `search` prints an explicit
+  no-strong-match line reporting the best score and the floor.
+- The floor defaults to `0.05`.
+- When the query holds no searchable term, `search` says so and ranks nothing. That line is
+  distinct from the no-strong-match line.
+- Tokenizing drops short words, stopwords and pure numbers. A query holds no searchable term
+  when nothing survives that.
+- The output of `search` says that the search is lexical, not synonym-aware. A user who gets no
+  hit then knows to try other words rather than conclude no requirement exists.
+
+**Exit code**
+- `search` always returns zero from a well-formed invocation.
+- A missing query argument is a usage error and returns a non-zero code.
+
+**Parity with the viewer**
+- The map viewer's search box ranks by this same model, never by a divergent one.
+- The viewer's ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so
+  both surfaces agree on what matches in what order.
+- A shared golden fixture pins the port to the engine: one fixed query scores identically in
+  `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

@@ -224,8 +224,11 @@ knowledge of this project can understand it without asking questions. Rules:
    After the first definition, use the term freely.
 2. On first mention of a named component, attach its role — e.g.
    "Conservator (the voice that looks for risk)".
-3. Keep normative "shall" phrasing for contract lines, but split any sentence that
-   runs long or stacks more than two conditions.
+3. Write contract lines in plain present tense with a named subject — "`init` creates
+   the folder", never "It shall create the folder". The Contract section opens with
+   "Every line in this section is binding.", so no "shall" or "must" is needed on each
+   line. Keep sentences under 25 words and bullets under 22; `lint` enforces both, and
+   warns (`anonymous-subject`) on a clause that opens with a bare "It".
 4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
    One clause, not a paragraph.
 5. Keep all file and function references (e.g. `strip_context.py`,
@@ -313,7 +316,7 @@ Creation verbs (pick by input, not by outcome):
 | `map` | Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine. | `--check` |
 | `export` | Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html. | `--out` |
 | `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
-| `lint` | Readability and structure check on non-draft requirements: long sentences (>35 words), stacked conditions (3+ and/or joins on a shall/must line), missing Contract or Acceptance sections. Read-only; exit-neutral by default. | `--strict` |
+| `lint` | Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, missing Contract or Acceptance sections. Read-only; exit-neutral by default. | `--strict` |
 | `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
 | `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
 | `search` | Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware. | `--top` |

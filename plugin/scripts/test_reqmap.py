@@ -5,6 +5,7 @@ Run: python -m unittest test_reqmap   (from plugin/scripts/)
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -879,6 +880,23 @@ class Extract(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
             made = sorted(n for n in os.listdir(reqs_dir) if n.startswith("DRAFT-"))
             self.assertEqual(made, ["DRAFT-KEEP.md"])   # the vendored engine is not drafted
 
+    def test_drafted_contract_carries_the_binding_line_and_no_shall(self):
+        with tempfile.TemporaryDirectory() as d:
+            code_root = os.path.join(d, "src")
+            os.makedirs(code_root)
+            with open(os.path.join(code_root, "widget.py"), "w", encoding="utf-8") as f:
+                f.write("def go():\n    return 1\n")
+            reqs_dir = os.path.join(d, "requirements")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_extract({}, {}, code_root, reqs_dir)
+            written = [p for p in os.listdir(reqs_dir) if p.endswith(".md")]
+            self.assertEqual(len(written), 1)
+            with open(os.path.join(reqs_dir, written[0]), encoding="utf-8") as f:
+                text = f.read()
+            self.assertIn("Every line in this section is binding.", text)
+            self.assertNotIn("shall", text.lower())
+
 
 class New(unittest.TestCase):  # tested-by: REQ-NEW-004
     def test_new_scaffolds_from_template_and_substitutes_id(self):
@@ -922,6 +940,26 @@ class New(unittest.TestCase):  # tested-by: REQ-NEW-004
             self.assertEqual(code, 1)
             with open(os.path.join(reqs_dir, "CORE-FOO-001.md"), encoding="utf-8") as f:
                 self.assertEqual(f.read(), "existing\n")  # untouched
+
+    def test_template_uses_the_plain_present_voice(self):
+        t = R.REQUIREMENT_TEMPLATE
+        self.assertIn("Every line in this section is binding.", t)
+        # No CLAUSE may use a modal — but the guidance comment must stay free to name
+        # 'shall' as the thing not to write, which is the clearest way to say it.
+        # Comments are stripped whole: _lint_prose yields each line of a multi-line
+        # comment separately, so filtering on a leading '<!--' would only drop the first.
+        clauses = R._lint_prose(re.sub(r"<!--.*?-->", "", t, flags=re.DOTALL), "contract")
+        self.assertTrue(clauses)                       # guard: the section actually parsed
+        for ln in clauses:
+            self.assertNotIn("shall", ln.lower())
+            self.assertNotIn("must", ln.lower())
+
+    def test_template_contract_body_passes_its_own_linter(self):
+        # the shipped template must not be flagged by the checks it teaches
+        req = {"meta": {"status": "confirmed"}, "body": R.REQUIREMENT_TEMPLATE.split("---\n", 2)[-1]}
+        checks = {f["check"] for f in R.lint_requirement("AREA-NAME-001", req)}
+        self.assertNotIn("anonymous-subject", checks)
+        self.assertNotIn("long-sentence", checks)
 
 
 class Scan(unittest.TestCase):  # tested-by: REQ-SCAN-005
@@ -1753,6 +1791,18 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             ["It shall do the first thing across a wrapped second line and a third line.",
              "A short clause."])
 
+    def test_bullets_skips_clause_group_labels(self):  # voice rule 6: **What it creates**
+        # a bold-only line groups the clauses below it; folding it into the bullet above
+        # would append the next group's title to the previous group's last clause
+        body = ("# T\n\n## WHAT — Contract\n"
+                "**What it creates**\n"
+                "- `init` creates the folder.\n\n"
+                "**What it prints**\n"
+                "- `init` prints one next command.\n")
+        self.assertEqual(
+            R._bullets(body, "contract"),
+            ["`init` creates the folder.", "`init` prints one next command."])
+
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
         self.assertEqual(R._member_roles([{"role": "tested-by", "loc": "t.py:1"}]), ["tested-by"])
@@ -2367,6 +2417,22 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
         self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
 
+    def test_over_scoped_counts_groups_not_clauses(self):
+        # the atomic voice multiplies bullets without widening scope: a grouped contract
+        # is measured by its groups, so splitting one clause into three stays silent
+        big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
+        grouped = ""
+        for g in range(3):                                   # 3 groups, well under the ceiling
+            grouped += "**Group {}**\n".format(g)
+            for c in range(R.LINT_CONTRACT_MAX):             # but 30 clauses in total
+                grouped += "- `cmd` does thing {}-{}.\n".format(g, c)
+        fs = R.lint_requirement("REQ-G-001", self._req("confirmed", self._body(grouped, big_ac)))
+        self.assertNotIn("over-scoped", [f["check"] for f in fs])
+        # an UNGROUPED contract still falls back to counting clauses, as it always did
+        flat = "".join("- `cmd` does thing {}.\n".format(i) for i in range(R.LINT_CONTRACT_MAX + 1))
+        flat_fs = R.lint_requirement("REQ-F-001", self._req("confirmed", self._body(flat, big_ac)))
+        self.assertIn("over-scoped", [f["check"] for f in flat_fs])
+
     def test_empty_section_flags_contentless_heading(self):
         empty = "# T\n\n{}\n{}\n".format(self.CONTRACT, self.ACCEPT)         # both headings, no content
         fs = R.lint_requirement("REQ-E-001", self._req("confirmed", empty))
@@ -2399,10 +2465,56 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         self.assertEqual(longs[0]["severity"], "warn")
         self.assertIn("40-word", longs[0]["detail"])
 
+    def test_sentence_threshold_is_twentyfive(self):
+        # 26 words: over the tightened ceiling, well under the old 35
+        sent = " ".join(["word"] * 26) + "."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract="- " + sent + "\n")))
+        self.assertTrue(any(f["check"] == "long-sentence" for f in fs))
+        # 24 words stays silent, so the ceiling is a ceiling and not an off-by-one
+        ok = " ".join(["word"] * 24) + "."
+        clean = R.lint_requirement("REQ-Y-001", self._req("confirmed", self._body(contract="- " + ok + "\n")))
+        self.assertFalse(any(f["check"] == "long-sentence" for f in clean))
+
+    def test_contract_bullet_threshold_is_twentytwo(self):
+        # two sentences, 24 words total: over the tightened bullet ceiling, under the old 30
+        stmt = "- It creates the folder. " + " ".join(["word"] * 20) + " now."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=stmt + "\n")))
+        self.assertTrue(any(f["check"] == "statement-too-long" for f in fs))
+
     def test_stacked_conditions_warns(self):
         line = "- It shall do A and B and C and D."
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
         self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
+
+    def test_stacked_conditions_fires_without_a_modal_keyword(self):
+        # plain present tense, no 'shall'/'must' anywhere: the check must still fire
+        line = "- `init` creates the folder and the lock and the map and the summary."
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", self._body(contract=line + "\n")))
+        self.assertTrue(any(f["check"] == "stacked-conditions" for f in fs))
+
+    def test_anonymous_subject_warns_on_unnamed_it(self):
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- It creates the folder.\n")))
+        hits = [f for f in fs if f["check"] == "anonymous-subject"]
+        self.assertTrue(hits)
+        self.assertEqual(hits[0]["severity"], "warn")
+
+    def test_anonymous_subject_silent_when_the_subject_is_named(self):
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- `init` creates the folder.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
+
+    def test_anonymous_subject_is_contract_only(self):
+        # Acceptance prose legitimately says "it" in a Then clause; only the Contract is policed
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(acceptance="- It returns an empty dict.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
+
+    def test_anonymous_subject_ignores_a_word_starting_with_it(self):
+        # 'Items' / 'Iterating' must not be read as the pronoun
+        fs = R.lint_requirement(
+            "REQ-X-001", self._req("confirmed", self._body(contract="- Items are sorted.\n")))
+        self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
 
     def test_code_fence_line_not_flagged(self):
         long_sent = " ".join(["word"] * 50) + "."

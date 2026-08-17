@@ -119,7 +119,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-07-05"
+MAP_ENGINE_VERSION = "2026-08-17"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -354,8 +354,9 @@ COMMANDS = {
     "lint": {
         "summary": (
             "Readability and structure check on non-draft requirements: long sentences "
-            "(>35 words), stacked conditions (3+ and/or joins on a shall/must line), "
-            "missing Contract or Acceptance sections. Read-only; exit-neutral by default."
+            "(>25 words), stacked conditions (3+ and/or joins in one normative line), "
+            "contract clauses with an unnamed 'It' subject, missing Contract or Acceptance "
+            "sections. Read-only; exit-neutral by default."
         ),
         "arg": None,
         "params": [
@@ -1736,18 +1737,27 @@ superseded_by:       # <ID>, if replaced
 > what breaks without it. No jargon; this is the angle a non-expert reads first.
 
 ## WHAT — Contract (normative)
-<!-- Audience: a developer new to THIS project. Define project-specific terms inline
-     on first use; attach roles to named components; keep "shall" phrasing.
-     Assumptions & constraints (external deps, explicit out-of-scope): note them here.
-     Scope: one capability = one behavior that can fail independently. If you accumulate
-     many contract clauses AND many acceptance criteria, you are likely describing several
-     capabilities — split them (the linter flags this as 'over-scoped'). -->
-- The feature shall ... (one binding, testable behavior per line; "shall" phrasing;
-  no function names; true regardless of how the code is implemented).
-  <!-- Rationale: why this specific behavior -->
-- Output shape + allowed values; required vs optional inputs and how it degrades
-  when an optional input is missing/invalid; the decision logic that selects each
-  output (say so explicitly if it is delegated to a model/heuristic).
+Every line in this section is binding.
+<!-- Audience: a developer new to THIS project. Six rules:
+     1. Name the subject: "`init` creates the folder", never "It creates the folder".
+     2. Present tense — no "shall", no "must". The line above already binds every clause.
+     3. One binding statement per bullet; a second sentence only states the first's
+        consequence, never a second obligation.
+     4. Define project terms. Two or more: open with a glossary comment like this one.
+     5. Group clauses past five, with bold labels (see below).
+     6. Keep under 25 words/sentence, 22 words/bullet — `lint` enforces both.
+     Scope: one capability = one behavior that fails independently. Many clauses AND
+     many acceptance criteria together mean several capabilities — split them
+     (`lint` flags this as 'over-scoped'). -->
+
+**What it does**
+- `<subject>` does one thing, stated so a test could check it. No function names; true
+  regardless of how the code is implemented.
+  <!-- Rationale: why this specific behavior, one clause, only when not self-evident -->
+
+**What it produces**
+- `<subject>` returns <output shape and allowed values>.
+- `<subject>` handles a missing or invalid optional input by <behavior>.
 
 ## WHAT — Verify intent (open questions for the human)
 - Observed: <a behavior that may be an AI accident — swallowed error, empty-string
@@ -1757,8 +1767,8 @@ superseded_by:       # <ID>, if replaced
 - A known fragility/footgun the implementer should know but which is NOT enforced.
 
 ## HOW — Acceptance (= tests)
-<!-- Audience: a developer new to THIS project. Keep Given/When/Then concrete and
-     self-explanatory; spell out any term the Contract introduced. -->
+<!-- Keep Given/When/Then concrete and self-explanatory; spell out any term the
+     Contract introduced. -->
 AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
@@ -2059,6 +2069,9 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             "below, then tag the source `# generated-from: {cap}` "
                             "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
                             "## WHAT — Contract (normative)\n"
+                            "Every line in this section is binding.\n"
+                            "<!-- Name the subject, write in present tense, one statement per "
+                            "bullet, under 25 words per sentence. -->\n"
                             "- TODO: the capability this prose defines (author from "
                             "intent, do not copy the prose).\n\n"
                             "## WHAT — Verify intent (open questions for the human)\n"
@@ -2074,8 +2087,8 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                 risk = _risk(src)
                 review = "REVIEW" if risk >= 2 else "auto-baseline"
                 with open(dest, "w", encoding="utf-8") as f:
-                    # new emission schema (Contract / Verify-intent / Acceptance / Current-impl),
-                    # matching cmd_new so a promoted draft needs no reshaping
+                    # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
+                    # needs no reshaping
                     f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
                             f"owner: auto\ndepends_on: []\n"
                             f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
@@ -2083,6 +2096,9 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             f"> DRAFT extracted from {rel}. Describes observed behavior, "
                             f"not validated intent.\n\n"
                             f"## WHAT — Contract (normative)\n"
+                            f"Every line in this section is binding.\n"
+                            f"<!-- Name the subject, write in present tense, one statement per "
+                            f"bullet, under 25 words per sentence. -->\n"
                             f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
                             f"## WHAT — Verify intent (open questions for the human)\n"
                             f"- TODO: anything that looks like an accident (swallowed error, magic "
@@ -2761,9 +2777,9 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
 # NOT checked in v1 — without a term dictionary it is too false-positive-prone on
 # prose that carries code references.
 LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
-LINT_SENTENCE_WORDS = 35       # a single sentence longer than this is flagged (warn)
+LINT_SENTENCE_WORDS = 25       # a single sentence longer than this is flagged (warn)
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
-LINT_CONTRACT_WORDS = 30       # a Contract bullet over this many words is flagged (warn)
+LINT_CONTRACT_WORDS = 22       # a Contract bullet over this many words is flagged (warn)
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
@@ -2889,13 +2905,24 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                         "detail": "{}-word sentence (>{}): {}".format(
                             words, LINT_SENTENCE_WORDS, _clip(sent))})
             low = ln.lower()
-            if "shall" in low or "must" in low:
-                joins = len(re.findall(r"\b(?:and|or)\b", low))
-                if joins >= LINT_STACKED_CONNECTORS:
-                    findings.append({
-                        "severity": "warn", "check": "stacked-conditions",
-                        "detail": "{} 'and'/'or' joins in one normative line: {}".format(
-                            joins, _clip(ln))})
+            # Every line in a Contract/Acceptance section is normative by virtue of the
+            # section it sits in, so the join count applies to all of them. This used to be
+            # gated on `"shall" in low or "must" in low`, which made the check silent for the
+            # plain present-tense voice — a clarity rule keyed on a magic word misses clauses.
+            joins = len(re.findall(r"\b(?:and|or)\b", low))
+            if joins >= LINT_STACKED_CONNECTORS:
+                findings.append({
+                    "severity": "warn", "check": "stacked-conditions",
+                    "detail": "{} 'and'/'or' joins in one normative line: {}".format(
+                        joins, _clip(ln))})
+            # Contract only: a clause whose subject is a bare "It" forces the reader to hold
+            # the requirement's title in their head to know what is being promised. Name it.
+            # Acceptance prose is exempt — a Then clause saying "it returns …" reads fine.
+            if name == "contract" and re.match(r"^It\s+[a-z]", ln):
+                findings.append({
+                    "severity": "warn", "check": "anonymous-subject",
+                    "detail": "clause opens with an unnamed 'It' — name the subject: {}".format(
+                        _clip(ln))})
     # statement atomicity (warn): a Contract bullet that packs >N words across MULTIPLE
     # sentences is a stacked statement (split it). A single long sentence is already
     # `long-sentence`'s job — gating on len(sents) > 1 keeps the two checks orthogonal
@@ -2927,13 +2954,23 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
     # false positives near zero: a large-but-cohesive capability rarely maxes both. Advisory
     # only — it surfaces split candidates; the split decision stays with the human.
     if _has_section(body, "contract") and _has_section(body, "acceptan"):
-        contract_n, ac_count = len(_bullets(body, "contract")), _count_ac(body)
+        # Scope units, not sentences. A contract that groups its clauses under bold labels
+        # states one facet per group, so the group count is what says how much the
+        # requirement promises; the clause count only says how finely the prose was split.
+        # Counting clauses alone punished the atomic voice — one obligation per bullet
+        # multiplies bullets without widening scope at all. Ungrouped contracts fall back
+        # to the clause count, which is what this check has always used.
+        groups = sum(1 for ln in _lint_prose(body, "contract")
+                     if re.fullmatch(r"\*\*.+\*\*", ln))
+        contract_n = groups or len(_bullets(body, "contract"))
+        ac_count = _count_ac(body)
         if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
             findings.append({
                 "severity": "warn", "check": "over-scoped",
-                "detail": "{} contract clauses + {} AC (both over {}/{}): likely several "
+                "detail": "{} contract {} + {} AC (both over {}/{}): likely several "
                           "capabilities — consider splitting".format(
-                              contract_n, ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
+                              contract_n, "groups" if groups else "clauses",
+                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
@@ -3759,6 +3796,13 @@ def _bullets(body, name):  # implements: REQ-MAP-007
             continue
         if s.startswith("-"):
             out.append(s[1:].strip())
+        elif re.fullmatch(r"\*\*.+\*\*", s):
+            # A bold-only line labels the clause group below it (the authoring voice
+            # groups clauses once a contract passes five). It is a heading, not prose:
+            # folding it in would append the NEXT group's title to the previous group's
+            # last clause, which then leaks into `show`, the map, and the dupes/search
+            # bag of words.
+            continue
         elif s and not s.startswith("<!--") and out:
             # hanging-indent continuation of the current bullet — fold it back in
             # so multi-line clauses are not truncated to their first physical line.

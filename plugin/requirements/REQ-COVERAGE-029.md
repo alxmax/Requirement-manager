@@ -19,13 +19,36 @@ milestone: v2.6
 > approved only this non-blocking visibility signal.
 
 ## WHAT — Contract (normative)
-- The capability shall report the count of scannable code files that carry no membership tag — "untagged code", code traced to no requirement.
-- The denominator shall be exactly `_scan_untagged`'s (see [[REQ-NEXT-013]]): files matched by the scanner extension walk, minus `.reqmapignore`. Any membership tag (`implements`, `tested-by`, `generated-from`, `validated-against`) counts a file as covered.
-- The `health` command shall include this count: as an `untagged` integer key in its `--json` output, and as a labelled line in its text output.
-- The signal shall be read-only and shall never be a gate: it shall not change any exit code.
-- It shall not lower the health score, because it counts files, not requirements.
-- The `untagged` key shall be absent (not zero) when no code root is scanned, e.g. a unit-test caller, so existing `--json` consumers keep their schema.
-- A file shall be silenced from the count either by tagging it or by adding it to `.reqmapignore`. There shall be no separate exemption mechanism.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     membership tag  a comment in code naming a requirement: `implements`, `tested-by`,
+                     `generated-from` or `validated-against`.
+     untagged code   a scannable code file carrying no membership tag, so it is traced to
+                     no requirement.
+     the denominator the set of files the count is taken over.
+     health score    the single percentage `health` prints for the whole corpus. -->
+
+**What it counts**
+- The capability reports the count of scannable code files that carry no membership tag —
+  "untagged code", code traced to no requirement.
+- The denominator is exactly `_scan_untagged`'s (see [[REQ-NEXT-013]]): the files matched by
+  the scanner extension walk, minus `.reqmapignore`.
+- Any membership tag counts a file as covered. The tags are `implements`, `tested-by`,
+  `generated-from` and `validated-against`.
+
+**Where it appears**
+- The `health` command includes this count as an `untagged` integer key in its `--json` output.
+- The `health` command also includes it as a labelled line in its text output.
+- The `untagged` key is absent, not zero, when no code root is scanned — a unit-test caller,
+  for example. An existing `--json` consumer therefore keeps its schema.
+
+**What it never does**
+- The signal is read-only and is never a gate. It changes no exit code.
+- The signal never lowers the health score, because it counts files, not requirements.
+
+**How a file leaves the count**
+- A file is silenced from the count either by tagging it, or by adding it to `.reqmapignore`.
+- There is no separate exemption mechanism.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent; the Senate audit settled scope and severity.

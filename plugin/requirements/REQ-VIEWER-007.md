@@ -16,23 +16,40 @@ milestone: v1.04
 > engine still emits the diagrams and the JSON.
 
 ## WHAT — Contract (normative)
-- It shall generate `_map.html` — a self-contained, single-file copy of the React viewer
-  (the Vite + React app under `app/`) with this repo's graph inlined as
-  `window.__REQMAP_DATA__`, openable by double-click with no server — WHEN the viewer
-  template `_map_viewer.html` is vendored beside the engine.
-- Absent the template it shall emit nothing (return None) without failing, so `map` still
-  writes `_map.md` + `_map.json` and the stdlib engine works with no extra files.
-- It shall inject the graph by replacing the template's `<!--REQMAP_DATA-->` marker with a
-  single inline `<script>window.__REQMAP_DATA__=…</script>` assignment carrying the same
-  `{nodes, edges}` graph [[REQ-MAP-007]] builds.
-- The injected graph shall be HTML-safe for embedding inside `<script>` via three escapes
-  applied in order (all are V8 no-ops — backslash is silently ignored before `/`, `!`, `-`):
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     the template   scripts/_map_viewer.html — the pre-built React viewer vendored
+                    beside the engine, carrying a `<!--REQMAP_DATA-->` marker.
+     the graph      the `{nodes, edges}` registry data [[REQ-MAP-007]] builds.
+     a V8 no-op     an escape the browser's JavaScript engine reads as if it were
+                    not there, so the data means the same after escaping. -->
+
+**When it writes the viewer**
+- `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside
+  the engine.
+- `_map.html` is a self-contained, single-file copy of the React viewer — the Vite +
+  React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.
+- `_map.html` opens by double-click, with no server.
+- Absent the template, `render_html` emits nothing and returns None without failing.
+- `map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no
+  extra files.
+
+**How it injects the graph**
+- `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
+  `<script>window.__REQMAP_DATA__=…</script>` assignment.
+- That assignment carries the same `{nodes, edges}` graph [[REQ-MAP-007]] builds.
+
+**How it escapes the graph**
+- `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by
+  applying three escapes in order. All three are V8 no-ops: a backslash is silently
+  ignored before `/`, `!` and `-`.
   - `</`   → `<\/`   — prevents `</script>` from closing the element early
   - `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
   - `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
-  The first guard alone was the original contract; the `<!--`/`-->` guards were added in
-  v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore
-  contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.
+- The first guard alone was the original contract. The `<!--` and `-->` guards were added
+  in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and
+  therefore contain literal `<!--`) broke `file://` opening by making
+  `window.__REQMAP_DATA__` null.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
