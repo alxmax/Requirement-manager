@@ -66,13 +66,16 @@ Every line in this section is binding.
 
 ## HOW — Acceptance (= tests)
 AC-1
-  Given  a file with `# tested-by: REQ-A-001 @unit` and `# tested-by: REQ-A-001 @system`
+  Given  tags declaring two levels for one id, a two-id list at `@integration`, one tag
+         with no level and one carrying `@wrong`
   When   the level scan runs
-  Then   REQ-A-001 reports both levels, each with its `file:line`
+  Then   the first id reports both levels with their `file:line`, both listed ids report
+         `integration`, and the unlevelled and unrecognised ones are absent
 AC-2
-  Given  a tag naming two ids at `@integration`, plus one tag with no level and one `@wrong`
-  When   the level scan runs
-  Then   both ids report `integration`; the other two requirements are absent
+  Given  a `tested-by:` tag carrying a level suffix
+  When   the ordinary tag scan reads it
+  Then   it resolves to the same member as an unlevelled tag, so an engine that predates
+         levels reads the id and ignores the suffix
 AC-3
   Given  a levelled tag written inside backticks as a documented example
   When   the level scan runs
