@@ -379,6 +379,45 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         # _scan_file_tags fails open (None) on a read error; scan_members skips the file
         self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))
 
+    def test_scan_test_levels_collects_levels_per_requirement(self):
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "t_one.py"), "w", encoding="utf-8") as f:
+                f.write("# tested-by: REQ-A-001 @unit\n"
+                        "# tested-by: REQ-A-001 @system\n"
+                        "# tested-by: REQ-B-002 @integration\n")
+            got = R.scan_test_levels(d)
+            self.assertEqual(set(got["REQ-A-001"]), {"unit", "system"})
+            self.assertEqual(set(got["REQ-B-002"]), {"integration"})
+            self.assertEqual(got["REQ-B-002"]["integration"], [("t_one.py", 3)])
+
+    def test_scan_test_levels_expands_an_id_list_and_ignores_unlevelled(self):
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "t_two.py"), "w", encoding="utf-8") as f:
+                f.write("# tested-by: REQ-A-001, REQ-B-002 @integration\n"
+                        "# tested-by: REQ-C-003\n"              # no level: not collected
+                        "# tested-by: REQ-D-004 @wrong\n")      # not a known level
+            got = R.scan_test_levels(d)
+            self.assertEqual(set(got["REQ-A-001"]), {"integration"})
+            self.assertEqual(set(got["REQ-B-002"]), {"integration"})
+            self.assertNotIn("REQ-C-003", got)
+            self.assertNotIn("REQ-D-004", got)
+
+    def test_scan_test_levels_ignores_a_backticked_example(self):
+        # same phantom-member guard _scan_file_tags applies: a documented EXAMPLE of a
+        # levelled tag must not register as real coverage
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "doc.py"), "w", encoding="utf-8") as f:
+                f.write("# write it as `# tested-by: REQ-A-001 @unit` in your test\n"
+                        "# tested-by: REQ-B-002 @unit\n")     # this one is real
+            got = R.scan_test_levels(d)
+            self.assertNotIn("REQ-A-001", got)
+            self.assertEqual(set(got["REQ-B-002"]), {"unit"})
+
+    def test_levelled_tag_still_resolves_as_a_plain_member(self):
+        # backwards compatibility: the suffix must not disturb ordinary tag parsing
+        self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
+                         [("tested-by", "REQ-A-001")])
+
 
 class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
     """A large docs/ HTML doc with no generated-from lineage is the doc-sync blind

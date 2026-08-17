@@ -64,6 +64,19 @@ _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip befo
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
 # `#AC-N` suffix is what distinguishes it from a plain requirement reference.
 AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
+# Verification level on a `tested-by:` tag, written `# tested-by: <ID> @integration`.
+# The id is spelled `<ID>` here on purpose: a real-looking id in a PLAIN COMMENT would be
+# scanned as an actual tag. `_scan_file_tags` strips backticked spans only on the .md/.html
+# path; on the code path its guard is `_strip_py_strings`, which masks string literals and
+# leaves comments alone. Docstrings are safe; comments are not.
+# The level applies to the whole tag, so a comma-separated id list shares it — the only
+# unambiguous reading, and it matches how TAG_LIST_RE already groups ids. The suffix is
+# invisible to TAG_RE/TAG_LIST_RE, so an older vendored engine reads a levelled tag,
+# resolves the id, and ignores the level (REQ-VLEVEL-037).
+TEST_LEVELS = ("unit", "integration", "system")
+TEST_LEVEL_RE = re.compile(
+    r"(?<![\w-])tested-by\s*:\s*(" + _ID_PAT + r"(?:\s*,\s*" + _ID_PAT + r")*)"
+    r"\s*@(" + "|".join(TEST_LEVELS) + r")\b")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
@@ -1121,6 +1134,56 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
                     s, in_triple = _strip_py_strings(s)
                 for cap, ac in AC_VERIFY_RE.findall(s):
                     cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+    return cover
+
+
+def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
+    """Walk the code for `# tested-by: REQ-X @level` tags and return
+    `{cap_id: {level: [(file, line)]}}` — at which V-model level each requirement is
+    verified. Kept separate from `scan_members` on purpose: folding the level into the
+    member tuples would change the `(role, file, line)` shape that `_map.json` and every
+    member consumer depend on. Same walk discipline as `scan_ac_verifies` (respects
+    .reqmapignore, prunes .git/node_modules). Empty when no levelled tag exists."""
+    cover = {}  # cap_id -> {level -> [(file, line)]}
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        dirs.sort()                  # deterministic descent, mirrors scan_members
+        for fn in sorted(files):
+            if not fn.endswith(CODE_EXTS):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+            except OSError:
+                continue
+            # For .py, mask string-literal content (mirrors _scan_file_tags) so a levelled
+            # tag inside a docstring is not counted as real coverage.
+            is_py = fp.endswith(".py")
+            in_triple = None
+            for i, line in enumerate(lines, 1):
+                s = line
+                if is_py:
+                    s = s.rstrip("\n\r")
+                    if in_triple is not None:
+                        idx = s.find(in_triple)
+                        if idx == -1:
+                            continue
+                        s = s[idx + len(in_triple):]
+                        in_triple = None
+                    s, in_triple = _strip_py_strings(s)
+                # Strip backticked spans before the search, the same phantom-member guard
+                # `_scan_file_tags` applies: a documented EXAMPLE of a levelled tag must not
+                # register as real coverage. Without it this scanner matches the example in
+                # its own constant's comment.
+                s = _BACKTICK_RE.sub("", s)
+                for idlist, level in TEST_LEVEL_RE.findall(s):
+                    for cap in _ID_RE.findall(idlist):
+                        cover.setdefault(cap, {}).setdefault(level, []).append((rel, i))
     return cover
 
 
