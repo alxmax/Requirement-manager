@@ -2777,6 +2777,24 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
         self.assertIn("The real intent.", out)
 
+    def test_show_annotates_a_member_with_its_verification_level(self):
+        reqs = {"REQ-X-001": self._req()}
+        members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
+        levels = {"REQ-X-001": {"integration": [("t.py", 2)]}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(reqs, members, "REQ-X-001", levels)
+        self.assertIn("@integration", buf.getvalue())
+
+    def test_show_without_level_data_is_unchanged(self):
+        reqs = {"REQ-X-001": self._req()}
+        members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_show(reqs, members, "REQ-X-001")      # old 3-arg call still works
+        self.assertIn("t.py:2", buf.getvalue())
+        self.assertNotIn("@", buf.getvalue().split("Members in code")[-1])
+
 
 class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
     def _sim(self, reqs, threshold=0.35):

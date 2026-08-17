@@ -3129,7 +3129,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     return 0
 
 
-def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
+def cmd_show(reqs, members, cap_id, levels=None):  # implements: REQ-SHOW-015  # implements: REQ-VLEVEL-037
     """Print one consolidated, human-readable dossier for a single requirement: its
     status/layer/intent, contract, dependencies (both directions), members grouped
     by role, open verify-intent questions, and risk signals — the 'what does this do
@@ -3174,10 +3174,17 @@ def cmd_show(reqs, members, cap_id):  # implements: REQ-SHOW-015
         print("Satisfied by: " + (", ".join(satisfiers) if satisfiers else "(none)"))
 
     mem = members.get(cap_id, [])
+    # {(file, line): level} for this requirement, so a levelled tested-by link shows the
+    # level it asserts rather than leaving the reader to open the file.
+    at = {}
+    for lvl, hits in (levels or {}).get(cap_id, {}).items():
+        for hit in hits:
+            at[hit] = lvl
     print("\nMembers in code ({}):".format(len(mem)))
     if mem:
         for role, fp, ln in sorted(mem):
-            print("  {:18} {}:{}".format(role, fp, ln))
+            lvl = at.get((fp, ln))
+            print("  {:18} {}:{}{}".format(role, fp, ln, " @" + lvl if lvl else ""))
     else:
         print("  (none tagged)")
 
@@ -5059,7 +5066,7 @@ def main():
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
-        return cmd_show(reqs, members, a.arg)
+        return cmd_show(reqs, members, a.arg, scan_test_levels(code_root, reqs_dir))
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
     if a.cmd == "search":
