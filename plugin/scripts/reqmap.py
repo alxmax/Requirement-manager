@@ -3786,6 +3786,13 @@ def _bullets(body, name):  # implements: REQ-MAP-007
             continue
         if s.startswith("-"):
             out.append(s[1:].strip())
+        elif re.fullmatch(r"\*\*.+\*\*", s):
+            # A bold-only line labels the clause group below it (the authoring voice
+            # groups clauses once a contract passes five). It is a heading, not prose:
+            # folding it in would append the NEXT group's title to the previous group's
+            # last clause, which then leaks into `show`, the map, and the dupes/search
+            # bag of words.
+            continue
         elif s and not s.startswith("<!--") and out:
             # hanging-indent continuation of the current bullet — fold it back in
             # so multi-line clauses are not truncated to their first physical line.

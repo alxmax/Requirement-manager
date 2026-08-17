@@ -1791,6 +1791,18 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             ["It shall do the first thing across a wrapped second line and a third line.",
              "A short clause."])
 
+    def test_bullets_skips_clause_group_labels(self):  # voice rule 6: **What it creates**
+        # a bold-only line groups the clauses below it; folding it into the bullet above
+        # would append the next group's title to the previous group's last clause
+        body = ("# T\n\n## WHAT — Contract\n"
+                "**What it creates**\n"
+                "- `init` creates the folder.\n\n"
+                "**What it prints**\n"
+                "- `init` prints one next command.\n")
+        self.assertEqual(
+            R._bullets(body, "contract"),
+            ["`init` creates the folder.", "`init` prints one next command."])
+
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
         self.assertEqual(R._member_roles([{"role": "tested-by", "loc": "t.py:1"}]), ["tested-by"])

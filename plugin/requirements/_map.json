@@ -70,7 +70,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4499"
+          "loc": "scripts/test_reqmap.py:4511"
         }
       ],
       "test_exempt": null,
@@ -157,7 +157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4452"
+          "loc": "scripts/test_reqmap.py:4464"
         }
       ],
       "test_exempt": null,
@@ -341,11 +341,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3101"
+          "loc": "scripts/test_reqmap.py:3113"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4483"
+          "loc": "scripts/test_reqmap.py:4495"
         }
       ],
       "test_exempt": null,
@@ -442,7 +442,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2349"
+          "loc": "scripts/test_reqmap.py:2361"
         }
       ],
       "test_exempt": null,
@@ -573,27 +573,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3268"
+          "loc": "scripts/test_reqmap.py:3280"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4250"
+          "loc": "scripts/test_reqmap.py:4262"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4321"
+          "loc": "scripts/test_reqmap.py:4333"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4499"
+          "loc": "scripts/test_reqmap.py:4511"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4522"
+          "loc": "scripts/test_reqmap.py:4534"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4661"
+          "loc": "scripts/test_reqmap.py:4673"
         }
       ],
       "test_exempt": null,
@@ -658,7 +658,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4381"
+          "loc": "scripts/test_reqmap.py:4393"
         }
       ],
       "test_exempt": null,
@@ -714,7 +714,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2832"
+          "loc": "scripts/test_reqmap.py:2844"
         }
       ],
       "test_exempt": null,
@@ -1173,11 +1173,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2789"
+          "loc": "scripts/test_reqmap.py:2801"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2951"
+          "loc": "scripts/test_reqmap.py:2963"
         }
       ],
       "test_exempt": null,
@@ -1193,25 +1193,25 @@
       "title": "First-use bootstrap",
       "intent": "Setting up requirement tracking on a fresh project means doing five fiddly steps in the right order. This is the single \"get started\" command that does all of them for you: it makes the folder, reads your existing code and drafts requirements from it, records a baseline, builds the navigable map, and tells you the one next thing to do. Without it, a newcomer has to learn and chain those steps by hand, and most give up before the project is in a usable state.",
       "contract": [
-        "It shall create the requirements directory if it does not exist.",
-        "It shall write a minimal `.reqmapignore` only when none exists; it shall never overwrite an existing `.reqmapignore`.",
-        "The seeded file shall list `scripts/reqmap.py`, the vendored engine, whose self-tags would otherwise read as dangling refs.",
-        "That line shall be omitted, with a comment explaining why, when the engine is self-hosting.",
-        "The engine is self-hosting when it carries membership tags that resolve to requirements already present; it is then managed code and must stay scanned.",
-        "It shall draft requirements from existing untagged code by invoking the extract capability, then build the drift lock and the map so the repo is immediately in a gate-passing, navigable state.",
-        "It shall print a guided summary that points at a single next command (`reqmap.py next`) plus wiring the gate, rather than an undifferentiated menu.",
-        "When nothing was extracted (no supported files, or all ignored) it shall say so distinctly and point at `new` — it shall not print a tracked-requirements summary that masks the empty result.",
-        "It shall be safe to re-run: a second invocation refreshes the lock and map, then re-prints the summary.",
-        "A re-run shall never destroy authored requirements or an existing ignore file."
+        "`init` creates the requirements folder if it is missing.",
+        "`init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites one that is already there.",
+        "The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look like they point at requirements that do not exist.",
+        "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan must keep reading it.",
+        "\"Describes itself\" means `scripts/reqmap.py` carries tags whose ids match requirements already in the repo.",
+        "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order. When it finishes, the repo passes the gate and has a map.",
+        "`init` ends with a short summary naming one next command: `reqmap.py next`. Not a list of every option.",
+        "If nothing was drafted, `init` says so in plain words and points at `new`. It never prints a count summary that hides an empty result.",
+        "Running `init` twice is safe. The second run refreshes the lock and the map, then prints the summary again.",
+        "A second run never deletes a requirement someone wrote, and never edits an existing `.reqmapignore`."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
-        "The seeded `.reqmapignore` assumes the engine is vendored at `scripts/reqmap.py` (the documented setup path); the self-hosting exception keys off that same path.",
-        "Self-hosting detection requires requirements to already exist when `.reqmapignore` is first created. A from-scratch self-hosting bootstrap (empty `requirements/`) cannot be detected — nothing resolves yet — so the engine line is written; re-running after authoring requirements does not rewrite the existing file, so such a repo must drop the line by hand. This is an accepted edge.",
-        "On a repo with no extractable code files the bootstrap still succeeds, producing an empty-but-valid lock and map.",
-        "`init` orchestrates existing capabilities (extract, check, map); it adds no new analysis of its own."
+        "The starter `.reqmapignore` assumes the engine sits at `scripts/reqmap.py` — the documented place to vendor it. The self-hosting exception looks at that same path.",
+        "Self-hosting can only be detected if requirements already exist when `.reqmapignore` is first written. Bootstrapping a self-hosting repo from an empty `requirements/` folder cannot be detected — there is nothing for the tags to match yet — so the engine line does get written. Re-running later does not rewrite the file, so that repo has to delete the line by hand. Known and accepted.",
+        "On a repo with no extractable code `init` still succeeds: the lock and map are empty but valid.",
+        "`init` performs no analysis of its own. It only calls capabilities that already exist (draft, gate, map) in a fixed order."
       ],
       "current_impl": [
         "`cmd_init` in `reqmap.py` — creates `requirements/`, conditionally seeds `.reqmapignore` via `_reqmapignore_seed` (which applies the self-hosting exception), then calls `cmd_extract` → `cmd_check(update_lock=True)` → `cmd_map`, and prints the guided summary."
@@ -1240,15 +1240,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2109"
+          "loc": "scripts/test_reqmap.py:2121"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2242"
+          "loc": "scripts/test_reqmap.py:2254"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4613"
+          "loc": "scripts/test_reqmap.py:4625"
         }
       ],
       "test_exempt": null,
@@ -1264,14 +1264,19 @@
       "title": "Requirement readability linter",
       "intent": "Requirement documents are only useful if people can actually read them. This is the automatic proofreader's frame: it decides which files get checked, which sections count, how severe a finding is, and whether the build fails. Without it, the clear-writing rules rely on someone re-reading every file by hand, and prose slowly degrades until the documents stop being worth opening.",
       "contract": [
-        "The `lint` command shall report readability and structure violations on requirement files. It writes nothing and is read-only.",
-        "It shall scope its checks to non-draft requirements only (status `baseline`, `in-progress`, `implemented`, or `confirmed`). Drafts are auto-extracted TODO stubs, so linting them would only add noise.",
-        "It shall run two severities: a structural check is an `error`; a prose or scope check is a `warn`.",
-        "The `missing-section` check (error) shall flag a non-draft requirement that lacks a `## WHAT — Contract` section or a `## HOW — Acceptance` section.",
-        "The `empty-section` check (warn) shall flag a Contract or Acceptance heading that is present but carries no clauses or criteria — it would otherwise pass `missing-section` while documenting nothing.",
-        "Prose checks shall look only at the Contract and Acceptance sections. The \"Notes & limitations\" section is exempt, because only deep readers reach it and it may stay dense.",
-        "Prose checks shall skip non-prose lines: headings, table rows, blockquotes, and any line inside a fenced code block. A bullet's leading marker is stripped before its text is checked.",
-        "It shall be exit-neutral by default (always returns zero). With `--strict` it shall return non-zero when at least one error-severity finding exists. A warning never changes the exit code."
+        "`lint` reports readability problems and structure problems in requirement files.",
+        "`lint` writes no file. It only reads and prints.",
+        "`lint` checks non-draft requirements only — status `baseline`, `in-progress`, `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.",
+        "`lint` gives each finding one of two severities. A structural check reports an `error`; a prose check or a scope check reports a `warn`.",
+        "The `missing-section` check reports an `error` when a non-draft requirement has no `## WHAT — Contract` section, or no `## HOW — Acceptance` section.",
+        "The `empty-section` check reports a `warn` when one of those two headings is present but carries nothing under it: no clauses, no criteria. Such a section passes `missing-section` while documenting nothing.",
+        "The prose checks read the Contract and the Acceptance sections, and no other section.",
+        "The \"Notes & limitations\" section is exempt: only deep readers reach it, and it may stay dense.",
+        "The prose checks skip lines that are not prose — headings, table rows, blockquotes, and any line inside a fenced code block.",
+        "`lint` strips a bullet's leading marker before the checks read its text.",
+        "`lint` returns zero by default, whatever it found.",
+        "With `--strict`, `lint` returns non-zero when at least one finding has `error` severity.",
+        "A warning never changes the exit code."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1315,7 +1320,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2377"
+          "loc": "scripts/test_reqmap.py:2389"
         }
       ],
       "test_exempt": null,
@@ -1375,11 +1380,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2361"
+          "loc": "scripts/test_reqmap.py:2373"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2377"
+          "loc": "scripts/test_reqmap.py:2389"
         }
       ],
       "test_exempt": null,
@@ -1476,11 +1481,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3828"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:3834"
+          "loc": "scripts/reqmap.py:3835"
         },
         {
           "role": "implements",
@@ -1488,39 +1489,43 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3893"
+          "loc": "scripts/reqmap.py:3848"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3908"
+          "loc": "scripts/reqmap.py:3900"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3939"
+          "loc": "scripts/reqmap.py:3915"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4027"
+          "loc": "scripts/reqmap.py:3946"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4075"
+          "loc": "scripts/reqmap.py:4034"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4126"
+          "loc": "scripts/reqmap.py:4082"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4134"
+          "loc": "scripts/reqmap.py:4133"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4604"
+          "loc": "scripts/reqmap.py:4141"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4614"
+          "loc": "scripts/reqmap.py:4611"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:4621"
         },
         {
           "role": "tested-by",
@@ -1544,15 +1549,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1819"
+          "loc": "scripts/test_reqmap.py:1831"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4024"
+          "loc": "scripts/test_reqmap.py:4036"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4613"
+          "loc": "scripts/test_reqmap.py:4625"
         }
       ],
       "test_exempt": null,
@@ -1746,23 +1751,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1983"
+          "loc": "scripts/test_reqmap.py:1995"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2091"
+          "loc": "scripts/test_reqmap.py:2103"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2097"
+          "loc": "scripts/test_reqmap.py:2109"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2102"
+          "loc": "scripts/test_reqmap.py:2114"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4563"
+          "loc": "scripts/test_reqmap.py:4575"
         }
       ],
       "test_exempt": null,
@@ -1875,7 +1880,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4630"
+          "loc": "scripts/reqmap.py:4637"
         },
         {
           "role": "tested-by",
@@ -1883,7 +1888,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1820"
+          "loc": "scripts/test_reqmap.py:1832"
         }
       ],
       "test_exempt": null,
@@ -1937,15 +1942,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:1923"
+          "loc": "scripts/test_reqmap.py:1935"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4024"
+          "loc": "scripts/test_reqmap.py:4036"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4563"
+          "loc": "scripts/test_reqmap.py:4575"
         }
       ],
       "test_exempt": null,
@@ -1998,11 +2003,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3294"
+          "loc": "scripts/test_reqmap.py:3306"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4563"
+          "loc": "scripts/test_reqmap.py:4575"
         }
       ],
       "test_exempt": null,
@@ -2137,7 +2142,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2857"
+          "loc": "scripts/test_reqmap.py:2869"
         }
       ],
       "test_exempt": null,
@@ -2187,11 +2192,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4781"
+          "loc": "scripts/reqmap.py:4788"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3361"
+          "loc": "scripts/test_reqmap.py:3373"
         },
         {
           "role": "implements",
@@ -2305,7 +2310,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3422"
+          "loc": "scripts/test_reqmap.py:3434"
         }
       ],
       "test_exempt": null,
@@ -2321,20 +2326,25 @@
       "title": "Free-text requirement search",
       "intent": "To find the requirement about a topic today you grep the requirements folder or open the map — grep needs the exact word the author used, and neither ranks results. This ranks every requirement by how well its wording matches a free-text query, most-relevant-first, so \"where is the drift thing?\" lands on the right file without knowing its id. It reuses the same lexical scoring `dupes` already trusts, so it adds a way in, not a new engine. Because the match is lexical it can miss a synonym; when nothing matches well it says so plainly, so a near-miss is never mistaken for the answer — the drift this whole tool exists to prevent.",
       "contract": [
-        "The `search \"<query>\"` command shall rank requirements by lexical relevance to the query and print them most-relevant-first. It writes nothing and is read-only.",
-        "It shall reuse the scoring machinery of `dupes` (REQ-SIMILAR-016), never a second scoring path.",
-        "Query and requirement shall each reduce to the shared bag of words (title, intent line, Contract bullets), then compare by cosine over smoothed TF-IDF weights.",
-        "The map viewer's search box shall rank by this same model, not by a divergent one.",
-        "Its ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so both surfaces agree on what matches in what order.",
-        "A shared golden fixture shall pin the port to the engine: one fixed query scores identically in `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.",
-        "It shall print each shown match with its cosine score, so a weak match is visibly weak and not presented with the authority of a strong one.",
-        "It shall show at most `--top` matches, defaulting to five; a non-positive `--top` shall be treated as one.",
-        "It shall apply a relevance floor and never print a ranked list of below-floor results.",
-        "When no requirement scores at or above the floor, it shall print an explicit no-strong-match line reporting the best score and the floor.",
-        "The floor shall default to `0.05`.",
-        "When the query contains no searchable term (empty after tokenizing away short words, stopwords, and pure numbers) it shall say so and rank nothing, distinctly from the no-strong-match case.",
-        "Its output shall state that the search is lexical, not synonym-aware, so a user who gets no hit knows to try different words rather than concluding no requirement exists.",
-        "It shall always return zero from a well-formed invocation; a missing query argument is a usage error returning non-zero."
+        "`search \"<query>\"` ranks every requirement by how well its wording matches the query, then prints them most-relevant-first.",
+        "`search` writes no file. It only reads and prints.",
+        "`search` reuses the scoring machinery of `dupes` (REQ-SIMILAR-016). There is never a second scoring path.",
+        "The query and each requirement both reduce to the same bag of words: title, intent line, Contract bullets.",
+        "`search` then compares those two bags by cosine over smoothed TF-IDF weights.",
+        "`search` prints every match it shows together with that match's cosine score. A weak match then looks weak, instead of carrying the authority of a strong one.",
+        "`search` shows at most `--top` matches. `--top` defaults to five.",
+        "A `--top` of zero or less counts as one.",
+        "`search` applies a relevance floor and never prints a ranked list of below-floor results.",
+        "When no requirement scores at or above the floor, `search` prints an explicit no-strong-match line reporting the best score and the floor.",
+        "The floor defaults to `0.05`.",
+        "When the query holds no searchable term, `search` says so and ranks nothing. That line is distinct from the no-strong-match line.",
+        "Tokenizing drops short words, stopwords and pure numbers. A query holds no searchable term when nothing survives that.",
+        "The output of `search` says that the search is lexical, not synonym-aware. A user who gets no hit then knows to try other words rather than conclude no requirement exists.",
+        "`search` always returns zero from a well-formed invocation.",
+        "A missing query argument is a usage error and returns a non-zero code.",
+        "The map viewer's search box ranks by this same model, never by a divergent one.",
+        "The viewer's ranking (`app/src/lib/search.js`) is a faithful port of the engine scoring, so both surfaces agree on what matches in what order.",
+        "A shared golden fixture pins the port to the engine: one fixed query scores identically in `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2368,7 +2378,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2709"
+          "loc": "scripts/test_reqmap.py:2721"
         }
       ],
       "test_exempt": null,
@@ -2425,7 +2435,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2583"
+          "loc": "scripts/test_reqmap.py:2595"
         }
       ],
       "test_exempt": null,
@@ -2503,7 +2513,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2647"
+          "loc": "scripts/test_reqmap.py:2659"
         }
       ],
       "test_exempt": null,
@@ -2562,67 +2572,67 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4165"
+          "loc": "scripts/reqmap.py:4172"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4185"
+          "loc": "scripts/reqmap.py:4192"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4205"
+          "loc": "scripts/reqmap.py:4212"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4208"
+          "loc": "scripts/reqmap.py:4215"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4213"
+          "loc": "scripts/reqmap.py:4220"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4234"
+          "loc": "scripts/reqmap.py:4241"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4246"
+          "loc": "scripts/reqmap.py:4253"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4251"
+          "loc": "scripts/reqmap.py:4258"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4270"
+          "loc": "scripts/reqmap.py:4277"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4560"
+          "loc": "scripts/reqmap.py:4567"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4654"
+          "loc": "scripts/reqmap.py:4661"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4672"
+          "loc": "scripts/reqmap.py:4679"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4680"
+          "loc": "scripts/reqmap.py:4687"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4695"
+          "loc": "scripts/reqmap.py:4702"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4998"
+          "loc": "scripts/reqmap.py:5005"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4063"
+          "loc": "scripts/test_reqmap.py:4075"
         }
       ],
       "test_exempt": null,
@@ -2680,7 +2690,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3025"
+          "loc": "scripts/test_reqmap.py:3037"
         }
       ],
       "test_exempt": null,
@@ -2750,7 +2760,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3171"
+          "loc": "scripts/test_reqmap.py:3183"
         }
       ],
       "test_exempt": null,
@@ -2807,15 +2817,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4743"
+          "loc": "scripts/reqmap.py:4750"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4747"
+          "loc": "scripts/reqmap.py:4754"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4765"
+          "loc": "scripts/reqmap.py:4772"
         },
         {
           "role": "tested-by",
