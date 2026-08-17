@@ -18,16 +18,56 @@ lint_exempt: [ac-count-high]
 > risk yourself to figure out where to begin.
 
 ## WHAT — Contract (normative)
-- It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` and `RISK_ADVICE` that drive the Risk tab.
-- It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.
-- It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).
-- Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.
-- Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.
-- It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).
-- By default it shall show at most the top few items per bucket, printing `... N more` when a bucket has more; `--all` lists every item.
-- With a registry that has no requirements it shall print a distinct "no requirements yet" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.
-- It shall surface every scannable file that carries no membership tag as a lowest-priority "Untagged files" bucket, truncated like the others, and shall skip this scan when no `code_root` is given.
-- It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate).
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     risk signal     one open gap the engine spots on a requirement: no code, no test,
+                     an unanswered question, an unreviewed draft.
+     bucket          one named group of items in the report, e.g. "Needs tests".
+     the Risk tab    the Risk diagram of the generated map, which reads the same signals.
+     membership tag  a comment in code naming a requirement, such as `implements:`.
+     code_root       the directory `next` walks to find files; a caller may omit it. -->
+
+**What it collects**
+- `next` groups every requirement's open risk signals into action buckets.
+- `next` reads those signals from `_risk_signals` and their wording from `RISK_ADVICE`, the
+  same two sources that drive the Risk tab. There is never a second signal path.
+
+**What it prints first**
+- `next` prints a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)`
+  before the buckets.
+- In that header, `tested` counts the requirements that have a `tested-by` member.
+
+**Which buckets it shows**
+- `next` surfaces exactly the actionable buckets: `unimplemented` (Orphans), `untested`
+  (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review).
+- `next` prints those four buckets in that order, most urgent first.
+- `next` omits `blast-radius`, because that signal is a caution, not a task.
+- `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
+  bucket, ranked lowest of all.
+- `next` skips that untagged scan when the caller gives no `code_root`.
+
+**How it orders a bucket**
+- Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:`
+  score, then by id.
+- Priority rank runs `must-have` < `should-have` < `could-have` < `wont-have`. A requirement
+  with no `priority` ranks last.
+- `next` tags an item whose `risk:` is 2 or more with `[REVIEW]`.
+- `next` names the requirement file to open, as `requirements/<ID>.md`.
+
+**How much it shows**
+- By default `next` shows at most the top few items of a bucket.
+- `next` prints a `... N more` line when a bucket holds more items than it showed.
+- With `--all`, `next` lists every item.
+- The "Untagged files" bucket truncates the same way as the others.
+
+**When there is nothing to do**
+- With a registry that holds no requirements, `next` prints a distinct "no requirements yet"
+  message pointing at `init`/`new`. `next` never prints the all-clear line in that case.
+- With requirements but no open signal, `next` prints the all-clear line.
+
+**What it never does**
+- `next` is deterministic and writes no file.
+- `next` always exits zero. The report is advice, not a gate.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

@@ -19,12 +19,30 @@ milestone: v1.16
 > a half-tested requirement passes silently.
 
 ## WHAT — Contract (normative)
-- The gate shall scan code for `# verifies: <id>#AC-N` tags and map each tag to the labelled acceptance criterion it covers. This is the per-criterion half of behaviour-sync.
-- A `verifies` tag shall be recognized only with an `#AC-N` suffix, so a plain requirement reference is never mistaken for a per-criterion one.
-- For a confirmed requirement that labels its criteria (`AC-1`, `AC-2`, ...) and carries at least one `verifies` tag, the gate shall warn for each labelled criterion that has no `verifies` tag.
-- A confirmed requirement with no `verifies` tag shall be exempt, so adopting per-criterion tagging stays opt-in and the coarse `tested-by` check still applies.
-- A requirement whose criteria are unlabelled bullets shall be exempt, because there is no criterion label to address.
-- The check shall be warn-only and shall never change the gate's exit code.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a labelled criterion  an acceptance criterion written as `AC-1`, `AC-2`, and so on,
+                           so a test can name the exact one it covers.
+     the gate              the pre-commit check that reports errors and warnings. -->
+
+**What it reads**
+- The gate scans code for `# verifies: <id>#AC-N` tags and maps each tag to the labelled
+  criterion it covers. This is the per-criterion half of behaviour-sync.
+- The gate recognises a `verifies` tag only with an `#AC-N` suffix, so a plain requirement
+  reference is never mistaken for a per-criterion one.
+
+**When it warns**
+- For a confirmed requirement that labels its criteria and carries at least one `verifies`
+  tag, the gate warns for each labelled criterion that has no `verifies` tag.
+
+**When it stays silent**
+- A confirmed requirement with no `verifies` tag is exempt. Per-criterion tagging is opt-in,
+  and the coarser `tested-by` check still applies to it.
+- A requirement whose criteria are unlabelled bullets is exempt, because there is no criterion
+  label for a tag to address.
+
+**Severity**
+- The check is warn-only. It never changes the gate's exit code.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

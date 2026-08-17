@@ -2417,6 +2417,22 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         one = R.lint_requirement("REQ-OK-001", self._req("confirmed", self._body(big_contract, small_ac)))
         self.assertNotIn("over-scoped", [f["check"] for f in one])           # only one ceiling => silent
 
+    def test_over_scoped_counts_groups_not_clauses(self):
+        # the atomic voice multiplies bullets without widening scope: a grouped contract
+        # is measured by its groups, so splitting one clause into three stays silent
+        big_ac = "".join("- AC {}.\n".format(i) for i in range(R.LINT_AC_MAX + 1))
+        grouped = ""
+        for g in range(3):                                   # 3 groups, well under the ceiling
+            grouped += "**Group {}**\n".format(g)
+            for c in range(R.LINT_CONTRACT_MAX):             # but 30 clauses in total
+                grouped += "- `cmd` does thing {}-{}.\n".format(g, c)
+        fs = R.lint_requirement("REQ-G-001", self._req("confirmed", self._body(grouped, big_ac)))
+        self.assertNotIn("over-scoped", [f["check"] for f in fs])
+        # an UNGROUPED contract still falls back to counting clauses, as it always did
+        flat = "".join("- `cmd` does thing {}.\n".format(i) for i in range(R.LINT_CONTRACT_MAX + 1))
+        flat_fs = R.lint_requirement("REQ-F-001", self._req("confirmed", self._body(flat, big_ac)))
+        self.assertIn("over-scoped", [f["check"] for f in flat_fs])
+
     def test_empty_section_flags_contentless_heading(self):
         empty = "# T\n\n{}\n{}\n".format(self.CONTRACT, self.ACCEPT)         # both headings, no content
         fs = R.lint_requirement("REQ-E-001", self._req("confirmed", empty))

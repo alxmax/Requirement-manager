@@ -2954,13 +2954,23 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
     # false positives near zero: a large-but-cohesive capability rarely maxes both. Advisory
     # only — it surfaces split candidates; the split decision stays with the human.
     if _has_section(body, "contract") and _has_section(body, "acceptan"):
-        contract_n, ac_count = len(_bullets(body, "contract")), _count_ac(body)
+        # Scope units, not sentences. A contract that groups its clauses under bold labels
+        # states one facet per group, so the group count is what says how much the
+        # requirement promises; the clause count only says how finely the prose was split.
+        # Counting clauses alone punished the atomic voice — one obligation per bullet
+        # multiplies bullets without widening scope at all. Ungrouped contracts fall back
+        # to the clause count, which is what this check has always used.
+        groups = sum(1 for ln in _lint_prose(body, "contract")
+                     if re.fullmatch(r"\*\*.+\*\*", ln))
+        contract_n = groups or len(_bullets(body, "contract"))
+        ac_count = _count_ac(body)
         if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
             findings.append({
                 "severity": "warn", "check": "over-scoped",
-                "detail": "{} contract clauses + {} AC (both over {}/{}): likely several "
+                "detail": "{} contract {} + {} AC (both over {}/{}): likely several "
                           "capabilities — consider splitting".format(
-                              contract_n, ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
+                              contract_n, "groups" if groups else "clauses",
+                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.

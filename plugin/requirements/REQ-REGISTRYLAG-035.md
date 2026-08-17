@@ -23,16 +23,37 @@ milestone: v2.12
 > (2026-06-21), advisory visibility only — never a hard gate.
 
 ## WHAT — Contract (normative)
-- The capability shall report the number of commits on `HEAD` since the most recent commit that touched the requirements directory (`reqs_dir`), as "registry lag".
-- The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).
-- It shall not parse requirement contents.
-- The `health` command shall include this count as a `commits_since_req_touch` integer key in its `--json` output.
-- In text output it shall emit a labelled line only when the count is greater than zero; a lag of 0 is the healthy case and needs no line.
-- The signal shall be read-only and shall never be a gate: it shall not change any exit code.
-- It shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.
-- The `commits_since_req_touch` key shall be absent, not zero, whenever the value is unmeasurable.
-- Unmeasurable means: no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history.
-- Absence rather than zero shall preserve the `--json` schema, so a missing reading is never mistaken for a fresh registry.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     registry lag  how many commits have landed since anyone last touched a
+                   requirement file. It answers "has the spec moved lately at all?"
+     reqs_dir      the requirements directory.
+     an axis       one pass/fail question `health` asks of a requirement. -->
+
+**What it measures**
+- Registry lag is the number of commits on `HEAD` since the most recent commit that touched
+  `reqs_dir`.
+- The count comes from git alone: the last commit touching `reqs_dir`
+  (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD`
+  (`git rev-list --count`).
+- The capability never parses requirement contents.
+
+**What it reports**
+- `health --json` includes the count as a `commits_since_req_touch` integer key.
+- Text output carries a labelled line only when the count is above zero. A lag of zero is the
+  healthy case and needs no line.
+
+**What it never does**
+- The signal is read-only and never a gate. It changes no exit code.
+- The signal never lowers the health score, because it is a repo-wide temporal fact rather
+  than a per-requirement axis.
+
+**When it cannot measure**
+- The `commits_since_req_touch` key is absent, not zero, whenever the value is unmeasurable.
+- Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is
+  unavailable, or `reqs_dir` has no commit in history.
+- Absence rather than zero preserves the `--json` schema, so a missing reading is never
+  mistaken for a fresh registry.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent; scope and severity mirror the settled Senate decision on the sibling coverage signal ([[REQ-COVERAGE-029]]).

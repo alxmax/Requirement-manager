@@ -70,7 +70,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4511"
+          "loc": "scripts/test_reqmap.py:4527"
         }
       ],
       "test_exempt": null,
@@ -157,7 +157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4464"
+          "loc": "scripts/test_reqmap.py:4480"
         }
       ],
       "test_exempt": null,
@@ -297,12 +297,12 @@
       "title": "Per-criterion test coverage",
       "intent": "Today the gate can tell you a requirement has *some* test, but not that *each* of its acceptance criteria is actually checked — so a requirement with five criteria and one test looks just as \"covered\" as one with five tests. This links each labelled criterion to the test that verifies it, so the gate can name the exact criterion that nobody tests. Without it, \"Verifiable\" is only true at the whole-requirement level and a half-tested requirement passes silently.",
       "contract": [
-        "The gate shall scan code for `# verifies: <id>#AC-N` tags and map each tag to the labelled acceptance criterion it covers. This is the per-criterion half of behaviour-sync.",
-        "A `verifies` tag shall be recognized only with an `#AC-N` suffix, so a plain requirement reference is never mistaken for a per-criterion one.",
-        "For a confirmed requirement that labels its criteria (`AC-1`, `AC-2`, ...) and carries at least one `verifies` tag, the gate shall warn for each labelled criterion that has no `verifies` tag.",
-        "A confirmed requirement with no `verifies` tag shall be exempt, so adopting per-criterion tagging stays opt-in and the coarse `tested-by` check still applies.",
-        "A requirement whose criteria are unlabelled bullets shall be exempt, because there is no criterion label to address.",
-        "The check shall be warn-only and shall never change the gate's exit code."
+        "The gate scans code for `# verifies: <id>#AC-N` tags and maps each tag to the labelled criterion it covers. This is the per-criterion half of behaviour-sync.",
+        "The gate recognises a `verifies` tag only with an `#AC-N` suffix, so a plain requirement reference is never mistaken for a per-criterion one.",
+        "For a confirmed requirement that labels its criteria and carries at least one `verifies` tag, the gate warns for each labelled criterion that has no `verifies` tag.",
+        "A confirmed requirement with no `verifies` tag is exempt. Per-criterion tagging is opt-in, and the coarser `tested-by` check still applies to it.",
+        "A requirement whose criteria are unlabelled bullets is exempt, because there is no criterion label for a tag to address.",
+        "The check is warn-only. It never changes the gate's exit code."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -341,11 +341,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3113"
+          "loc": "scripts/test_reqmap.py:3129"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4495"
+          "loc": "scripts/test_reqmap.py:4511"
         }
       ],
       "test_exempt": null,
@@ -573,27 +573,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3280"
+          "loc": "scripts/test_reqmap.py:3296"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4262"
+          "loc": "scripts/test_reqmap.py:4278"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4333"
+          "loc": "scripts/test_reqmap.py:4349"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4511"
+          "loc": "scripts/test_reqmap.py:4527"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4534"
+          "loc": "scripts/test_reqmap.py:4550"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4673"
+          "loc": "scripts/test_reqmap.py:4689"
         }
       ],
       "test_exempt": null,
@@ -658,7 +658,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4393"
+          "loc": "scripts/test_reqmap.py:4409"
         }
       ],
       "test_exempt": null,
@@ -674,13 +674,16 @@
       "title": "Untagged-code coverage signal",
       "intent": "reqmap links code to requirements by tags, but nothing reported how much code is linked to nothing — code traceable to no requirement was only visible by running `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at a glance whether code is drifting ahead of the spec. A Senate audit (2026-06-21) rejected enforcing coverage as a hard gate — it is gameable with hollow tags and conflicts with the model where a requirement is a behavior, not a file — and approved only this non-blocking visibility signal.",
       "contract": [
-        "The capability shall report the count of scannable code files that carry no membership tag — \"untagged code\", code traced to no requirement.",
-        "The denominator shall be exactly `_scan_untagged`'s (see [[REQ-NEXT-013]]): files matched by the scanner extension walk, minus `.reqmapignore`. Any membership tag (`implements`, `tested-by`, `generated-from`, `validated-against`) counts a file as covered.",
-        "The `health` command shall include this count: as an `untagged` integer key in its `--json` output, and as a labelled line in its text output.",
-        "The signal shall be read-only and shall never be a gate: it shall not change any exit code.",
-        "It shall not lower the health score, because it counts files, not requirements.",
-        "The `untagged` key shall be absent (not zero) when no code root is scanned, e.g. a unit-test caller, so existing `--json` consumers keep their schema.",
-        "A file shall be silenced from the count either by tagging it or by adding it to `.reqmapignore`. There shall be no separate exemption mechanism."
+        "The capability reports the count of scannable code files that carry no membership tag — \"untagged code\", code traced to no requirement.",
+        "The denominator is exactly `_scan_untagged`'s (see [[REQ-NEXT-013]]): the files matched by the scanner extension walk, minus `.reqmapignore`.",
+        "Any membership tag counts a file as covered. The tags are `implements`, `tested-by`, `generated-from` and `validated-against`.",
+        "The `health` command includes this count as an `untagged` integer key in its `--json` output.",
+        "The `health` command also includes it as a labelled line in its text output.",
+        "The `untagged` key is absent, not zero, when no code root is scanned — a unit-test caller, for example. An existing `--json` consumer therefore keeps its schema.",
+        "The signal is read-only and is never a gate. It changes no exit code.",
+        "The signal never lowers the health score, because it counts files, not requirements.",
+        "A file is silenced from the count either by tagging it, or by adding it to `.reqmapignore`.",
+        "There is no separate exemption mechanism."
       ],
       "verify": [
         "None — authored from known intent; the Senate audit settled scope and severity."
@@ -710,11 +713,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3437"
+          "loc": "scripts/reqmap.py:3447"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2844"
+          "loc": "scripts/test_reqmap.py:2860"
         }
       ],
       "test_exempt": null,
@@ -1063,16 +1066,21 @@
       "title": "Open-findings report",
       "intent": "Every requirement file can carry open questions the author still wants a human to double-check. Scattered across dozens of files, those questions are easy to forget. This command gathers them all into one review list (`_findings.md`) — optionally sorted by an AI helper into real bugs, judgement calls, and false alarms. Without it, the open questions stay buried and never get answered.",
       "contract": [
-        "The command shall scan all requirements and aggregate the bullet items under each one's `## WHAT — Verify intent` section into a single `_findings.md` written in the requirements directory.",
-        "It shall exclude the \"None — …\" placeholder bullet (a requirement that recorded no open question contributes nothing).",
-        "In raw mode it shall group findings by requirement, each group and the document header carrying a count; with zero findings it shall still write a well-formed file stating none are open.",
-        "When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view: confirmed bugs first by severity (high → low), then product/config decisions, then intentional, then false-positive.",
-        "Bug entries shall show their location and recommended fix when present.",
-        "It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.",
-        "With the raw flag set it shall ignore any sidecar and emit the raw grouped list.",
-        "It shall be deterministic and stdlib-only: it shall not classify findings itself.",
-        "It shall write no file other than `_findings.md`.",
-        "The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings."
+        "`findings` scans every requirement and collects the bullet items under each one's `## WHAT — Verify intent` section.",
+        "`findings` writes them into a single `_findings.md` in the requirements directory.",
+        "`findings` excludes the \"None — …\" placeholder bullet. A requirement that recorded no open question therefore contributes nothing.",
+        "In raw mode, `findings` groups the findings by requirement.",
+        "Each group and the document header carry a count.",
+        "With zero findings, `findings` still writes a well-formed file stating that none are open.",
+        "With the raw flag set, `findings` ignores any sidecar and emits the raw grouped list.",
+        "When the sidecar exists and raw mode is off, `findings` renders a classified view.",
+        "That view puts confirmed bugs first, ordered by severity from high to low, then product/config decisions, then intentional, then false-positive.",
+        "A bug entry shows its location and its recommended fix when those are present.",
+        "`findings` emits an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.",
+        "`findings` is deterministic and stdlib-only. It never classifies a finding itself.",
+        "`findings` writes no file other than `_findings.md`.",
+        "The gate prints a non-error advisory line carrying the open-findings count, whenever that count is greater than zero.",
+        "The open-findings count never changes the gate's exit code."
       ],
       "verify": [
         "None — this capability is authored from known intent, not reconstructed from code."
@@ -1127,17 +1135,18 @@
       "title": "Corpus health snapshot",
       "intent": "A project can have dozens of requirements slowly rotting — some never coded, some untested, some out of sync with the code — and nobody notices until it is a mess. This boils the whole registry down to a single health score plus a few counts, so a CI badge or a reviewer sees at a glance whether things are in good shape. Without it, corpus decay stays invisible until it is expensive to fix.",
       "contract": [
-        "The `health` command shall print a coherence snapshot of the whole requirement corpus. It writes nothing and is read-only.",
-        "It shall compute a headline score: the percentage of requirements that are green on every axis.",
-        "A requirement is green when it passes every axis at once.",
-        "The axes are: status `confirmed`, coverage, a test signal, no open verify-intent question, and no drift from the lock.",
-        "For a `bus` or `feature` requirement, coverage means an `implements` member and the test signal means a `tested-by` member or a `test_exempt` reason.",
-        "A `need`-layer requirement is covered when at least one requirement `satisfies:` it, and its test axis is always met; a need is fulfilled by requirements, not by code (see [[REQ-TRACE-020]]).",
-        "A confirmed `need` that no requirement satisfies shall count as an orphan.",
-        "It shall print component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.",
-        "With `--json` it shall emit the same numbers as a JSON object, so the console output and a CI badge never disagree.",
-        "It shall return zero on an empty corpus, printing a score of zero and a hint to bootstrap.",
-        "It shall always return zero. The snapshot is a report, not a gate."
+        "`health` prints a coherence snapshot of the whole requirement corpus.",
+        "`health` writes nothing. It only reads and prints.",
+        "`health` computes a headline score: the percentage of requirements that are green.",
+        "The axes are status `confirmed`, coverage, a test signal, no open verify-intent question, and no drift from the lock.",
+        "For a `bus` or `feature` requirement, coverage means an `implements` member.",
+        "For those same layers, the test signal means a `tested-by` member or a `test_exempt` reason.",
+        "A `need` is covered when at least one requirement `satisfies:` it. Its test axis is always met, because a need is fulfilled by requirements rather than by code (see [[REQ-TRACE-020]]).",
+        "A confirmed `need` that no requirement satisfies counts as an orphan.",
+        "`health` prints component counts alongside the score: confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift.",
+        "`--json` emits the same numbers as a JSON object, so the console output and a CI badge never disagree.",
+        "On an empty corpus `health` prints a score of zero and a hint to bootstrap.",
+        "`health` always returns zero. The snapshot is a report, not a gate."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1169,15 +1178,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3375"
+          "loc": "scripts/reqmap.py:3385"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2801"
+          "loc": "scripts/test_reqmap.py:2817"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2963"
+          "loc": "scripts/test_reqmap.py:2979"
         }
       ],
       "test_exempt": null,
@@ -1232,11 +1241,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3554"
+          "loc": "scripts/reqmap.py:3564"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3583"
+          "loc": "scripts/reqmap.py:3593"
         },
         {
           "role": "tested-by",
@@ -1248,7 +1257,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4625"
+          "loc": "scripts/test_reqmap.py:4641"
         }
       ],
       "test_exempt": null,
@@ -1316,7 +1325,7 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:2995"
+          "loc": "scripts/reqmap.py:3005"
         },
         {
           "role": "tested-by",
@@ -1457,75 +1466,75 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3646"
+          "loc": "scripts/reqmap.py:3656"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3698"
+          "loc": "scripts/reqmap.py:3708"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3706"
+          "loc": "scripts/reqmap.py:3716"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3729"
+          "loc": "scripts/reqmap.py:3739"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3748"
+          "loc": "scripts/reqmap.py:3758"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3769"
+          "loc": "scripts/reqmap.py:3779"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3835"
+          "loc": "scripts/reqmap.py:3845"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3841"
+          "loc": "scripts/reqmap.py:3851"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3848"
+          "loc": "scripts/reqmap.py:3858"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3900"
+          "loc": "scripts/reqmap.py:3910"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3915"
+          "loc": "scripts/reqmap.py:3925"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3946"
+          "loc": "scripts/reqmap.py:3956"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4034"
+          "loc": "scripts/reqmap.py:4044"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4082"
+          "loc": "scripts/reqmap.py:4092"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4133"
+          "loc": "scripts/reqmap.py:4143"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4141"
-        },
-        {
-          "role": "implements",
-          "loc": "scripts/reqmap.py:4611"
+          "loc": "scripts/reqmap.py:4151"
         },
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:4621"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/reqmap.py:4631"
         },
         {
           "role": "tested-by",
@@ -1553,11 +1562,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4036"
+          "loc": "scripts/test_reqmap.py:4052"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4625"
+          "loc": "scripts/test_reqmap.py:4641"
         }
       ],
       "test_exempt": null,
@@ -1698,16 +1707,27 @@
       "title": "What-should-I-do-next report",
       "intent": "Faced with a whole project of requirements, it's hard to know what to work on first. This command looks at every requirement, spots the gaps — ones with no code, no tests, or unanswered questions — and prints them as a short, prioritised to-do list right in the terminal. It puts the most urgent work at the top so you can just start. Without it, you'd have to open the visual map and eyeball the risk yourself to figure out where to begin.",
       "contract": [
-        "It shall group every requirement's open risk signals into action buckets, reusing the same `_risk_signals` and `RISK_ADVICE` that drive the Risk tab.",
-        "It shall print a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets, where `tested` counts requirements with a `tested-by` member.",
-        "It shall surface exactly the actionable buckets — `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review) — in that most-urgent-first order, and shall omit `blast-radius` (a caution, not a task).",
-        "Within each bucket it shall order items by `priority` rank, then by descending extract `risk:` score, then by id.",
-        "Priority rank shall be `must-have` < `should-have` < `could-have` < `wont-have`, with an absent `priority` ranking last.",
-        "It shall tag items with `risk: >= 2` as `[REVIEW]` and name the requirement file to open (`requirements/<ID>.md`).",
-        "By default it shall show at most the top few items per bucket, printing `... N more` when a bucket has more; `--all` lists every item.",
-        "With a registry that has no requirements it shall print a distinct \"no requirements yet\" message pointing at `init`/`new` (never the all-clear line); with requirements but no open signals it shall print the all-clear line.",
-        "It shall surface every scannable file that carries no membership tag as a lowest-priority \"Untagged files\" bucket, truncated like the others, and shall skip this scan when no `code_root` is given.",
-        "It shall be read-only and deterministic: it writes no files and always exits zero (advice, not a gate)."
+        "`next` groups every requirement's open risk signals into action buckets.",
+        "`next` reads those signals from `_risk_signals` and their wording from `RISK_ADVICE`, the same two sources that drive the Risk tab. There is never a second signal path.",
+        "`next` prints a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)` before the buckets.",
+        "In that header, `tested` counts the requirements that have a `tested-by` member.",
+        "`next` surfaces exactly the actionable buckets: `unimplemented` (Orphans), `untested` (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review).",
+        "`next` prints those four buckets in that order, most urgent first.",
+        "`next` omits `blast-radius`, because that signal is a caution, not a task.",
+        "`next` surfaces every scannable file that carries no membership tag as an \"Untagged files\" bucket, ranked lowest of all.",
+        "`next` skips that untagged scan when the caller gives no `code_root`.",
+        "Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:` score, then by id.",
+        "Priority rank runs `must-have` < `should-have` < `could-have` < `wont-have`. A requirement with no `priority` ranks last.",
+        "`next` tags an item whose `risk:` is 2 or more with `[REVIEW]`.",
+        "`next` names the requirement file to open, as `requirements/<ID>.md`.",
+        "By default `next` shows at most the top few items of a bucket.",
+        "`next` prints a `... N more` line when a bucket holds more items than it showed.",
+        "With `--all`, `next` lists every item.",
+        "The \"Untagged files\" bucket truncates the same way as the others.",
+        "With a registry that holds no requirements, `next` prints a distinct \"no requirements yet\" message pointing at `init`/`new`. `next` never prints the all-clear line in that case.",
+        "With requirements but no open signal, `next` prints the all-clear line.",
+        "`next` is deterministic and writes no file.",
+        "`next` always exits zero. The report is advice, not a gate."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1767,7 +1787,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4575"
+          "loc": "scripts/test_reqmap.py:4591"
         }
       ],
       "test_exempt": null,
@@ -1876,11 +1896,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3672"
+          "loc": "scripts/reqmap.py:3682"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4637"
+          "loc": "scripts/reqmap.py:4647"
         },
         {
           "role": "tested-by",
@@ -1904,12 +1924,17 @@
       "title": "confirm",
       "intent": "A requirement starts life as a draft and only becomes official once a human has reviewed it. This command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks that it actually points at real code and warns if no test is linked. Doing this by hand means editing the file's header directly, which is easy to get subtly wrong; this command does it safely every time.",
       "contract": [
-        "`confirm <ID>` shall set the requirement's `status` to `confirmed`, editing only the value of the first `status:` line in its leading frontmatter block.",
-        "It shall preserve indentation and any trailing inline comment, and leave the body untouched.",
-        "It shall refuse (non-zero exit, no write) when the requirement has no `implements:` member, because a `confirmed` requirement with no code is a gate error; it shall print the tag to add.",
-        "It shall be idempotent: a requirement already `confirmed` is reported and left unchanged (exit 0).",
-        "It shall warn (without failing) when no `tested-by:` member is linked, pointing at the test tag or the `test_exempt:` opt-out, and shall remind the caller to re-lock + regenerate the map.",
-        "Unknown id (no `requirements/<ID>.md`) shall exit non-zero with a clear message."
+        "`confirm <ID>` sets the requirement's `status` to `confirmed`.",
+        "`confirm` edits only the value of the first `status:` line in the leading frontmatter.",
+        "`confirm` preserves that line's indentation and any trailing inline comment.",
+        "`confirm` leaves the body untouched.",
+        "`confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes nothing. A `confirmed` requirement with no code is a gate error.",
+        "A refusal prints the tag the caller needs to add.",
+        "`confirm` exits non-zero with a clear message for an unknown id, meaning no `requirements/<ID>.md` exists.",
+        "`confirm` warns, without failing, when no `tested-by:` member is linked.",
+        "That warning points at the test tag to add, or at the `test_exempt:` opt-out.",
+        "`confirm` reminds the caller to refresh the lock and regenerate the map afterwards.",
+        "`confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and exits zero."
       ],
       "verify": [
         "None — behavior is fully specified by the acceptance criteria below."
@@ -1946,11 +1971,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4036"
+          "loc": "scripts/test_reqmap.py:4052"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4575"
+          "loc": "scripts/test_reqmap.py:4591"
         }
       ],
       "test_exempt": null,
@@ -2003,11 +2028,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3306"
+          "loc": "scripts/test_reqmap.py:3322"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4575"
+          "loc": "scripts/test_reqmap.py:4591"
         }
       ],
       "test_exempt": null,
@@ -2096,16 +2121,16 @@
       "title": "Registry-lag signal — commits since the requirements dir was last touched",
       "intent": "`health` reports whether the requirements that exist are coherent, but not whether the registry as a whole has gone stale while code moved on. A downstream consumer's registry sat frozen for 18 days across ~40 code commits while a money value drifted with no requirement update — nothing in `health` surfaced that the spec had stopped tracking reality. This adds a read-only count of how many commits have landed since the requirements dir was last touched, so a reviewer sees at a glance that code is racing ahead of the spec. It is the temporal complement to the untagged-code coverage signal ([[REQ-COVERAGE-029]]): coverage answers \"is this code traced?\", lag answers \"has the registry moved lately at all?\". Per the Senate audit that governs the coverage signal (2026-06-21), advisory visibility only — never a hard gate.",
       "contract": [
-        "The capability shall report the number of commits on `HEAD` since the most recent commit that touched the requirements directory (`reqs_dir`), as \"registry lag\".",
-        "The count shall be computed from git only: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).",
-        "It shall not parse requirement contents.",
-        "The `health` command shall include this count as a `commits_since_req_touch` integer key in its `--json` output.",
-        "In text output it shall emit a labelled line only when the count is greater than zero; a lag of 0 is the healthy case and needs no line.",
-        "The signal shall be read-only and shall never be a gate: it shall not change any exit code.",
-        "It shall never lower the health score, because it is a repo-wide temporal fact, not a per-requirement axis.",
-        "The `commits_since_req_touch` key shall be absent, not zero, whenever the value is unmeasurable.",
-        "Unmeasurable means: no code root supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history.",
-        "Absence rather than zero shall preserve the `--json` schema, so a missing reading is never mistaken for a fresh registry."
+        "Registry lag is the number of commits on `HEAD` since the most recent commit that touched `reqs_dir`.",
+        "The count comes from git alone: the last commit touching `reqs_dir` (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).",
+        "The capability never parses requirement contents.",
+        "`health --json` includes the count as a `commits_since_req_touch` integer key.",
+        "Text output carries a labelled line only when the count is above zero. A lag of zero is the healthy case and needs no line.",
+        "The signal is read-only and never a gate. It changes no exit code.",
+        "The signal never lowers the health score, because it is a repo-wide temporal fact rather than a per-requirement axis.",
+        "The `commits_since_req_touch` key is absent, not zero, whenever the value is unmeasurable.",
+        "Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is unavailable, or `reqs_dir` has no commit in history.",
+        "Absence rather than zero preserves the `--json` schema, so a missing reading is never mistaken for a fresh registry."
       ],
       "verify": [
         "None — authored from known intent; scope and severity mirror the settled Senate decision on the sibling coverage signal ([[REQ-COVERAGE-029]])."
@@ -2134,15 +2159,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3349"
+          "loc": "scripts/reqmap.py:3359"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3443"
+          "loc": "scripts/reqmap.py:3453"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2869"
+          "loc": "scripts/test_reqmap.py:2885"
         }
       ],
       "test_exempt": null,
@@ -2192,11 +2217,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4788"
+          "loc": "scripts/reqmap.py:4798"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3373"
+          "loc": "scripts/test_reqmap.py:3389"
         },
         {
           "role": "implements",
@@ -2310,7 +2335,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3434"
+          "loc": "scripts/test_reqmap.py:3450"
         }
       ],
       "test_exempt": null,
@@ -2374,11 +2399,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3228"
+          "loc": "scripts/reqmap.py:3238"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2721"
+          "loc": "scripts/test_reqmap.py:2737"
         }
       ],
       "test_exempt": null,
@@ -2394,17 +2419,18 @@
       "title": "Single-requirement dossier",
       "intent": "To understand one requirement today you open its file, then hunt through other files to see what depends on it and which code carries it out. This gathers all of that onto one screen: the title and intent, what it promises, what it depends on and what depends on it, where it lives in the code, any open questions, and any risk signals. Without it, answering \"what does this do and where is it?\" means cross-referencing several files by hand.",
       "contract": [
-        "The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.",
-        "It shall print a header line with the id, status, and layer.",
-        "When the requirement carries a `priority` field the header shall append it after the layer, and a `milestone` field after that.",
-        "An absent optional field shall add no empty segment to the header.",
-        "It shall print the title and the intent (the first blockquote of the body, gathered whole when the WHY spans several `>` lines, not truncated to the first line).",
-        "It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.",
-        "It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).",
-        "It shall list the code members grouped by role, each with its `file:line`. When no member is tagged, it shall say so.",
-        "It shall list the open `## WHAT — Verify intent` questions, skipping the \"None\" placeholder, using the same filter as `findings`.",
-        "It shall list the requirement's risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab.",
-        "It shall return zero when the id is found, and a non-zero code when the id is unknown, so a typo is visible to a caller or to CI."
+        "`show <ID>` prints one consolidated, human-readable view of a single requirement.",
+        "`show` writes nothing. It only reads and prints.",
+        "`show` prints a header line carrying the id, the status and the layer.",
+        "The header appends `priority` after the layer when that field is present, then `milestone`.",
+        "An absent optional field adds no empty segment to the header.",
+        "`show` prints the title and the intent. A WHY spanning several `>` lines is gathered whole, never truncated to its first line.",
+        "`show` lists the Contract bullets. When the requirement has no `## WHAT — Contract` section, `show` says so instead.",
+        "`show` prints dependencies in both directions: the `depends_on` ids, and the reverse edges.",
+        "`show` lists the code members grouped by role, each with its `file:line`. When no member is tagged, `show` says so.",
+        "`show` lists the open `## WHAT — Verify intent` questions, using the same filter as `findings`, so the \"None\" placeholder is skipped.",
+        "`show` lists the risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab, so the three never disagree.",
+        "`show` returns zero for a known id and a non-zero code for an unknown one, so a typo is visible to a caller or to CI."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2431,11 +2457,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3037"
+          "loc": "scripts/reqmap.py:3047"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2595"
+          "loc": "scripts/test_reqmap.py:2611"
         }
       ],
       "test_exempt": null,
@@ -2489,31 +2515,31 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3119"
+          "loc": "scripts/reqmap.py:3129"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3126"
+          "loc": "scripts/reqmap.py:3136"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3138"
+          "loc": "scripts/reqmap.py:3148"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3156"
+          "loc": "scripts/reqmap.py:3166"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3168"
+          "loc": "scripts/reqmap.py:3178"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3180"
+          "loc": "scripts/reqmap.py:3190"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:2659"
+          "loc": "scripts/test_reqmap.py:2675"
         }
       ],
       "test_exempt": null,
@@ -2564,75 +2590,75 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3609"
+          "loc": "scripts/reqmap.py:3619"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3681"
+          "loc": "scripts/reqmap.py:3691"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4172"
+          "loc": "scripts/reqmap.py:4182"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4192"
+          "loc": "scripts/reqmap.py:4202"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4212"
+          "loc": "scripts/reqmap.py:4222"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4215"
+          "loc": "scripts/reqmap.py:4225"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4220"
+          "loc": "scripts/reqmap.py:4230"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4241"
+          "loc": "scripts/reqmap.py:4251"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4253"
+          "loc": "scripts/reqmap.py:4263"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4258"
+          "loc": "scripts/reqmap.py:4268"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4277"
+          "loc": "scripts/reqmap.py:4287"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4567"
+          "loc": "scripts/reqmap.py:4577"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4661"
+          "loc": "scripts/reqmap.py:4671"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4679"
+          "loc": "scripts/reqmap.py:4689"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4687"
+          "loc": "scripts/reqmap.py:4697"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4702"
+          "loc": "scripts/reqmap.py:4712"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:5005"
+          "loc": "scripts/reqmap.py:5015"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:4075"
+          "loc": "scripts/test_reqmap.py:4091"
         }
       ],
       "test_exempt": null,
@@ -2648,13 +2674,20 @@
       "title": "Test-link integrity check",
       "intent": "A requirement can claim it is tested by pointing at a test file — but if that file is gone or has no real test in it, the link is a lie and the safety net exists only on paper. This makes the gate check those links: it warns when a `tested-by` file is missing or holds no test, so a broken link cannot pose as coverage. Without it, a project can look fully tested while its tests have quietly disappeared.",
       "contract": [
-        "The gate shall check every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.",
-        "For each distinct `tested-by` file on a confirmed requirement, the gate shall verify two things: the file exists, and it contains at least one test function.",
-        "A test function is recognized lexically: a Python `def test...(`, a JavaScript/TypeScript `function test...(` or an `it(`/`test(` call, a Go `func Test/Benchmark/Example/Fuzz(`, or a Rust `#[test]`.",
+        "The gate checks every `tested-by` link on a confirmed requirement. This is the deterministic half of behavior-sync.",
+        "For each distinct `tested-by` file on a confirmed requirement, the gate verifies that the file exists.",
+        "For each such file the gate also verifies that it holds at least one test function.",
+        "The gate recognizes a test function lexically.",
+        "A Python `def test...(` counts.",
+        "A JavaScript or TypeScript `function test...(` counts.",
+        "An `it(` call or a `test(` call counts.",
+        "A Go `func Test/Benchmark/Example/Fuzz(` counts.",
+        "A Rust `#[test]` counts.",
         "A `.py` file with no `def test...` also counts when it drives its checks from a `run`/`run_tests`/`main` entry point under an `if __name__ == \"__main__\"` guard.",
-        "When a file is missing, unreadable, or holds no test function, the gate shall add one warning naming the requirement and the file.",
-        "The check shall be warn-only. It never adds an error and never changes the pass or fail of the gate.",
-        "The check shall be silent on a well-formed corpus, so it adds no noise to a green gate run."
+        "When a file is missing, unreadable, or holds no test function, the gate adds one warning.",
+        "That warning names the requirement and the file.",
+        "The check is warn-only. It never adds an error, and never changes whether the gate passes.",
+        "The check stays silent on a well-formed corpus, so a green gate run gains no noise."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2669,7 +2702,7 @@
         "`_test_link_problem` in `reqmap.py`, called from `cmd_check` — `_test_link_problem` returns a short reason a file fails the check or an empty string when it passes; `cmd_check` resolves each distinct `tested-by` file against the scan root and appends one warning per failing link."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a confirmed requirement whose `tested-by` file is missing\n  When   the gate runs\n  Then   it adds a warning that names the requirement and the file\n\nAC-2\n  Given  a confirmed requirement whose `tested-by` file exists and contains a `def test...(`\n  When   the gate runs\n  Then   it adds no warning for that link\n\nAC-3\n  Given  a confirmed requirement whose `tested-by` file exists but contains no test function\n  When   the gate runs\n  Then   it adds a warning\n\nAC-4\n  Given  any of the above\n  When   the gate runs\n  Then   the error count is unchanged (the check is warn-only)\n\nAC-5\n  Given  a confirmed requirement whose `tested-by` is a `.py` file that has no `def test...` but defines a `run()`/`main()` entry point under an `if __name__ == \"__main__\"` guard\n  When   the gate runs\n  Then   it adds no warning for that link",
+      "accept": "AC-1\n  Given  a confirmed requirement whose `tested-by` file is missing\n  When   the gate runs\n  Then   it adds a warning that names the requirement and the file\n\nAC-2\n  Given  a confirmed requirement whose `tested-by` file exists and contains a `def test...(`\n  When   the gate runs\n  Then   it adds no warning for that link\n\nAC-3\n  Given  a confirmed requirement whose `tested-by` file exists but contains no test function\n  When   the gate runs\n  Then   it adds a warning\n\nAC-4\n  Given  any of the above\n  When   the gate runs\n  Then   the error count is unchanged (the check is warn-only)\n\nAC-5\n  Given  a confirmed requirement whose `tested-by` is a `.py` file with no `def test...`,\n         but which defines a `run()`/`main()` entry point under an\n         `if __name__ == \"__main__\"` guard\n  When   the gate runs\n  Then   it adds no warning for that link",
       "input": "",
       "output": "",
       "desc": "",
@@ -2690,7 +2723,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3037"
+          "loc": "scripts/test_reqmap.py:3053"
         }
       ],
       "test_exempt": null,
@@ -2706,12 +2739,12 @@
       "title": "Upstream traceability",
       "intent": "A requirement file tells you what a capability does and which code builds it, but not *why it exists* — which stakeholder need it serves. This lets a requirement point upward with a `satisfies:` field, so you can trace from a stakeholder need down to every requirement that fulfils it, and back up from any requirement to the need behind it. Without it, requirements float free of the needs that justify them, and a need can quietly go unaddressed.",
       "contract": [
-        "A requirement may declare a `satisfies:` frontmatter list of upstream ids (a stakeholder `need`, or a higher-level requirement) that it fulfils.",
-        "The gate shall warn (never error) when a `satisfies:` id resolves to no requirement, because an upstream anchor may be authored later or tracked externally.",
-        "The gate shall warn when a confirmed `need` has no requirement that satisfies it, so an unaddressed stakeholder need is visible.",
-        "The `need` layer shall be exempt from the implements and tested-by checks, because a need is satisfied by other requirements, not implemented or tested by code.",
-        "The dossier (`show`) shall print the upstream ids a requirement satisfies and the requirements that satisfy it, but only when the requirement participates in traceability.",
-        "The map data shall carry `satisfies` and `satisfied_by` per node and a list of upstream edges, so a front-end can draw the trace."
+        "A requirement may declare a `satisfies:` frontmatter list of the upstream ids it fulfils.",
+        "The gate warns, and never errors, when a `satisfies:` id resolves to no requirement. An upstream anchor may be authored later, or tracked outside this repo.",
+        "The gate warns when a confirmed `need` has no requirement satisfying it, so an unaddressed stakeholder need is visible.",
+        "The `need` layer is exempt from the implements and tested-by checks. A need is satisfied by other requirements, not implemented or tested by code.",
+        "`show` prints the upstream ids a requirement satisfies and the requirements that satisfy it, but only when that requirement takes part in traceability.",
+        "The map data carries `satisfies` and `satisfied_by` on each node, plus a list of upstream edges, so a front-end can draw the trace."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2756,11 +2789,11 @@
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:3072"
+          "loc": "scripts/reqmap.py:3082"
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_reqmap.py:3183"
+          "loc": "scripts/test_reqmap.py:3199"
         }
       ],
       "test_exempt": null,
@@ -2817,15 +2850,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4750"
+          "loc": "scripts/reqmap.py:4760"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4754"
+          "loc": "scripts/reqmap.py:4764"
         },
         {
           "role": "implements",
-          "loc": "scripts/reqmap.py:4772"
+          "loc": "scripts/reqmap.py:4782"
         },
         {
           "role": "tested-by",

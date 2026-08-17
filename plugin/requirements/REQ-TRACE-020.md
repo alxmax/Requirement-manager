@@ -19,12 +19,32 @@ milestone: v1.17
 > float free of the needs that justify them, and a need can quietly go unaddressed.
 
 ## WHAT — Contract (normative)
-- A requirement may declare a `satisfies:` frontmatter list of upstream ids (a stakeholder `need`, or a higher-level requirement) that it fulfils.
-- The gate shall warn (never error) when a `satisfies:` id resolves to no requirement, because an upstream anchor may be authored later or tracked externally.
-- The gate shall warn when a confirmed `need` has no requirement that satisfies it, so an unaddressed stakeholder need is visible.
-- The `need` layer shall be exempt from the implements and tested-by checks, because a need is satisfied by other requirements, not implemented or tested by code.
-- The dossier (`show`) shall print the upstream ids a requirement satisfies and the requirements that satisfy it, but only when the requirement participates in traceability.
-- The map data shall carry `satisfies` and `satisfied_by` per node and a list of upstream edges, so a front-end can draw the trace.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a need       a `layer: need` requirement: something a stakeholder wants, fulfilled by
+                  other requirements rather than by code.
+     upstream id  the id of the need or higher-level requirement a requirement fulfils.
+     the gate     the pre-commit check that reports errors and warnings.
+     frontmatter  the YAML block between the two `---` lines at the top of the file. -->
+
+**How a link is declared**
+- A requirement may declare a `satisfies:` frontmatter list of the upstream ids it fulfils.
+
+**When the gate warns**
+- The gate warns, and never errors, when a `satisfies:` id resolves to no requirement. An
+  upstream anchor may be authored later, or tracked outside this repo.
+- The gate warns when a confirmed `need` has no requirement satisfying it, so an unaddressed
+  stakeholder need is visible.
+
+**How a need differs**
+- The `need` layer is exempt from the implements and tested-by checks. A need is satisfied by
+  other requirements, not implemented or tested by code.
+
+**Where the links surface**
+- `show` prints the upstream ids a requirement satisfies and the requirements that satisfy it,
+  but only when that requirement takes part in traceability.
+- The map data carries `satisfies` and `satisfied_by` on each node, plus a list of upstream
+  edges, so a front-end can draw the trace.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

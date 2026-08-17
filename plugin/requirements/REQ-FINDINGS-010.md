@@ -16,16 +16,45 @@ milestone: v1.08
 > judgement calls, and false alarms. Without it, the open questions stay buried and never get answered.
 
 ## WHAT — Contract (normative)
-- The command shall scan all requirements and aggregate the bullet items under each one's `## WHAT — Verify intent` section into a single `_findings.md` written in the requirements directory.
-- It shall exclude the "None — …" placeholder bullet (a requirement that recorded no open question contributes nothing).
-- In raw mode it shall group findings by requirement, each group and the document header carrying a count; with zero findings it shall still write a well-formed file stating none are open.
-- When a `_findings_triage.json` sidecar exists and raw mode is off, it shall render a classified view: confirmed bugs first by severity (high → low), then product/config decisions, then intentional, then false-positive.
-- Bug entries shall show their location and recommended fix when present.
-- It shall emit an advisory staleness note when the count of raw verify-intent items differs from the count of triaged items in the sidecar.
-- With the raw flag set it shall ignore any sidecar and emit the raw grouped list.
-- It shall be deterministic and stdlib-only: it shall not classify findings itself.
-- It shall write no file other than `_findings.md`.
-- The drift gate (`gate`) shall print a non-error advisory line with the open-findings count when that count is greater than zero, and shall not change its exit code on account of findings.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     finding          one open question a requirement author left for a human, written as a
+                      bullet under `## WHAT — Verify intent`.
+     the sidecar      `_findings_triage.json` — a file an AI triage pass writes, sorting each
+                      finding into a class and a severity.
+     raw mode         the `--raw` flag: report the findings as written, ignoring the sidecar.
+     classified view  the report shaped by the sidecar's classes instead of by requirement.
+     the gate         the `gate` command, run before every commit. -->
+
+**What it collects**
+- `findings` scans every requirement and collects the bullet items under each one's
+  `## WHAT — Verify intent` section.
+- `findings` writes them into a single `_findings.md` in the requirements directory.
+- `findings` excludes the "None — …" placeholder bullet. A requirement that recorded no open
+  question therefore contributes nothing.
+
+**The raw report**
+- In raw mode, `findings` groups the findings by requirement.
+- Each group and the document header carry a count.
+- With zero findings, `findings` still writes a well-formed file stating that none are open.
+- With the raw flag set, `findings` ignores any sidecar and emits the raw grouped list.
+
+**The classified report**
+- When the sidecar exists and raw mode is off, `findings` renders a classified view.
+- That view puts confirmed bugs first, ordered by severity from high to low, then
+  product/config decisions, then intentional, then false-positive.
+- A bug entry shows its location and its recommended fix when those are present.
+- `findings` emits an advisory staleness note when the count of raw verify-intent items
+  differs from the count of triaged items in the sidecar.
+
+**What it never does**
+- `findings` is deterministic and stdlib-only. It never classifies a finding itself.
+- `findings` writes no file other than `_findings.md`.
+
+**What the gate adds**
+- The gate prints a non-error advisory line carrying the open-findings count, whenever that
+  count is greater than zero.
+- The open-findings count never changes the gate's exit code.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — this capability is authored from known intent, not reconstructed from code.

@@ -17,17 +17,41 @@ milestone: v1.14
 > "what does this do and where is it?" means cross-referencing several files by hand.
 
 ## WHAT — Contract (normative)
-- The `show <ID>` command shall print one consolidated, human-readable view of a single requirement. It writes nothing and is read-only.
-- It shall print a header line with the id, status, and layer.
-- When the requirement carries a `priority` field the header shall append it after the layer, and a `milestone` field after that.
-- An absent optional field shall add no empty segment to the header.
-- It shall print the title and the intent (the first blockquote of the body, gathered whole when the WHY spans several `>` lines, not truncated to the first line).
-- It shall list the Contract bullets. When the requirement has no `## WHAT — Contract` section, it shall say so instead.
-- It shall print dependencies in both directions: the `depends_on` ids, and the ids of requirements that depend on this one (the reverse edges).
-- It shall list the code members grouped by role, each with its `file:line`. When no member is tagged, it shall say so.
-- It shall list the open `## WHAT — Verify intent` questions, skipping the "None" placeholder, using the same filter as `findings`.
-- It shall list the requirement's risk signals with their advice, reusing the same `_risk_signals` source as `next` and the Risk tab.
-- It shall return zero when the id is found, and a non-zero code when the id is unknown, so a typo is visible to a caller or to CI.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     the intent    the first blockquote in a requirement's body — its WHY.
+     a member      a place in the code tagged as belonging to this requirement.
+     reverse edge  a requirement that names this one in its own `depends_on`.
+     risk signal   a warning the engine derives about a requirement, such as
+                   "no test links to it", each paired with advice on what to do. -->
+
+**What it is**
+- `show <ID>` prints one consolidated, human-readable view of a single requirement.
+- `show` writes nothing. It only reads and prints.
+
+**What it prints**
+- `show` prints a header line carrying the id, the status and the layer.
+- The header appends `priority` after the layer when that field is present, then `milestone`.
+- An absent optional field adds no empty segment to the header.
+- `show` prints the title and the intent. A WHY spanning several `>` lines is gathered whole,
+  never truncated to its first line.
+- `show` lists the Contract bullets. When the requirement has no `## WHAT — Contract` section,
+  `show` says so instead.
+
+**What it links**
+- `show` prints dependencies in both directions: the `depends_on` ids, and the reverse edges.
+- `show` lists the code members grouped by role, each with its `file:line`. When no member is
+  tagged, `show` says so.
+
+**What it surfaces**
+- `show` lists the open `## WHAT — Verify intent` questions, using the same filter as
+  `findings`, so the "None" placeholder is skipped.
+- `show` lists the risk signals with their advice, reusing the same `_risk_signals` source as
+  `next` and the Risk tab, so the three never disagree.
+
+**Exit code**
+- `show` returns zero for a known id and a non-zero code for an unknown one, so a typo is
+  visible to a caller or to CI.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
