@@ -136,7 +136,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-17.1"
+MAP_ENGINE_VERSION = "2026-08-17.2"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -3049,8 +3049,13 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
         # Counting clauses alone punished the atomic voice — one obligation per bullet
         # multiplies bullets without widening scope at all. Ungrouped contracts fall back
         # to the clause count, which is what this check has always used.
-        groups = sum(1 for ln in _lint_prose(body, "contract")
-                     if re.fullmatch(r"\*\*.+\*\*", ln))
+        # Counted off _section_raw, not _lint_prose: _lint_prose strips each line, and a
+        # label is defined by sitting at column 0 (see _is_label_line). Given stripped
+        # input every wrapped clause that opens and closes on bold spans counts as a
+        # group, inflating contract_n — and `over-scoped` is an ERROR under --strict, so
+        # that miscount fails CI on a requirement that is not over-scoped.
+        groups = sum(1 for ln in _section_raw(body, "contract").split("\n")
+                     if _is_label_line(ln))
         contract_n = groups or len(_bullets(body, "contract"))
         ac_count = _count_ac(body)
         if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
@@ -3872,6 +3877,22 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
     return "\n".join(out).strip()
 
 
+def _is_label_line(line):  # implements: REQ-MAP-007
+    """True when `line` is a clause-group label: a bold-only line at column 0.
+
+    The authoring voice groups clauses under bold labels once a contract passes
+    five, and those labels are headings, not prose — folding one into the bullet
+    above appends the NEXT group's title to the PREVIOUS group's last clause.
+
+    Position, not marker shape, separates a label from a wrapped clause. A label
+    is written flush left; a hanging-indent continuation is indented. Shape alone
+    cannot tell them apart: a wrapped line may legitimately open and close on bold
+    spans, and matching that as a heading silently deleted the containment half of
+    a two-part join predicate. Pass the RAW line — a stripped string makes every
+    clause look flush left and collapses the section to headings."""
+    return not line[:1].isspace() and re.fullmatch(r"\*\*.+\*\*", line.strip()) is not None
+
+
 def _bullets(body, name):  # implements: REQ-MAP-007
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
@@ -3892,12 +3913,12 @@ def _bullets(body, name):  # implements: REQ-MAP-007
             continue
         if s.startswith("-"):
             out.append(s[1:].strip())
-        elif re.fullmatch(r"\*\*.+\*\*", s):
-            # A bold-only line labels the clause group below it (the authoring voice
-            # groups clauses once a contract passes five). It is a heading, not prose:
-            # folding it in would append the NEXT group's title to the previous group's
-            # last clause, which then leaks into `show`, the map, and the dupes/search
-            # bag of words.
+        elif _is_label_line(line):
+            # A clause-group label — a heading, not prose. Folding it in would append
+            # the NEXT group's title to the previous group's last clause, which then
+            # leaks into `show`, the map, and the dupes/search bag of words. The test
+            # is positional (see _is_label_line), so an indented wrapped clause that
+            # merely opens and closes on bold spans still folds below.
             continue
         elif s and not s.startswith("<!--") and out:
             # hanging-indent continuation of the current bullet — fold it back in

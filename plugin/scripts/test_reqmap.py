@@ -1919,6 +1919,94 @@ class RiskSignals(unittest.TestCase):  # tested-by: REQ-MAP-007
             R._bullets(body, "contract"),
             ["`init` creates the folder.", "`init` prints one next command."])
 
+    # --- clause-group labels are positional, not shape-matched -------------------
+    # A wrapped clause may legitimately open and close on bold spans. Shape-matching
+    # `**...**` swallowed such a line whole; the four tests below pin the boundary
+    # from both sides. The two tests above were individually green while this exact
+    # composite case was broken, so each of these targets their intersection.
+
+    # Verbatim from a requirement whose join predicate lost its "containment" half:
+    # the wrapped line both opens on **containment** and closes on **sanity**.
+    _WRAPPED_BOLD_BOTH_ENDS = (
+        "# T\n\n## WHAT — Contract\n"
+        "- **The per-ticket stamp is a named artifact with a named join predicate.** Stage 6\n"
+        "  joins it by ticket (first row per ticket wins) and shall use it ONLY when both hold:\n"
+        "  **containment** `h4_bar_time + 4h <= entry_dt < h4_bar_time + 8h`, and **sanity**\n"
+        "  `h4_high > 0 and h4_low > 0`. On any failure it falls back to the 5M resample.\n")
+
+    def test_bullets_keeps_wrapped_clause_bounded_by_bold_spans(self):
+        clause = " ".join(R._bullets(self._WRAPPED_BOLD_BOTH_ENDS, "contract"))
+        self.assertIn("containment", clause)     # the half that used to vanish
+        self.assertIn("sanity", clause)
+        self.assertIn("h4_bar_time + 4h", clause)
+
+    def test_bullets_folds_indented_line_that_is_entirely_bold(self):
+        # the residual shape: a continuation whose whole content is one bold span.
+        # Indented, so it continues the clause above rather than labelling a group.
+        body = ("# T\n\n## WHAT — Contract\n"
+                "- The stamp is written for the attached chart's own symbol,\n"
+                "  **and for no other.**\n")
+        self.assertEqual(
+            R._bullets(body, "contract"),
+            ["The stamp is written for the attached chart's own symbol, **and for no other.**"])
+
+    def test_bullets_skips_bold_italic_group_label(self):
+        # ***Label*** is a label too — a narrower bold-span pattern would fold it into
+        # the bullet above, which is the defect the label branch exists to prevent.
+        body = ("# T\n\n## WHAT — Contract\n"
+                "***Example Structure***\n"
+                "- `init` creates the folder.\n")
+        self.assertEqual(R._bullets(body, "contract"), ["`init` creates the folder."])
+
+    def test_is_label_line_is_positional(self):
+        self.assertTrue(R._is_label_line("**What it creates**"))
+        self.assertTrue(R._is_label_line("***Example Structure***"))
+        self.assertFalse(R._is_label_line("  **containment** `x <= y`, and **sanity**"))
+        self.assertFalse(R._is_label_line("  **and for no other.**"))
+        self.assertFalse(R._is_label_line("- **A bullet.** Prose follows."))
+
+    def test_bullets_accounts_for_every_prose_line(self):
+        """Containment invariant: every non-blank, non-comment line inside the section
+        either opens a clause, folds into one, or is a column-0 label. Nothing is
+        silently discarded — the property a shape-specific test cannot assert."""
+        bodies = [
+            self._WRAPPED_BOLD_BOTH_ENDS,
+            ("# T\n\n## WHAT — Contract\n"
+             "**Group one**\n"
+             "- First clause spanning\n"
+             "  **a bold-opened** wrap that ends on **another bold span**\n"
+             "***Group two, italicised***\n"
+             "- Second clause.\n"
+             "  **wholly bold continuation**\n"),
+            ("# T\n\n## WHAT — Contract\n"
+             "- Clause with *single* emphasis and **inline bold** mid-sentence.\n"
+             "\t**tab-indented continuation**\n"),
+        ]
+        for body in bodies:
+            with self.subTest(body=body[:48]):
+                section = R._section_raw(body, "contract").split("\n")
+                prose = [ln for ln in section if ln.strip() and not ln.strip().startswith("<!--")]
+                labels = [ln for ln in prose if R._is_label_line(ln)]
+                joined = " ".join(R._bullets(body, "contract"))
+                for ln in prose:
+                    if ln in labels:
+                        continue
+                    payload = ln.strip().lstrip("-").strip()
+                    self.assertIn(payload, joined,
+                                  "line silently dropped from the parsed contract: %r" % ln)
+
+    def test_over_scoped_group_count_ignores_indented_bold_wraps(self):
+        """The lint's group counter shares _is_label_line with _bullets. Counting off
+        stripped lines made every bold-bounded wrap a group, inflating contract_n —
+        and `over-scoped` is an ERROR under --strict."""
+        body = ("# T\n\n## WHAT — Contract\n"
+                "**Only group**\n"
+                "- A clause that wraps onto\n"
+                "  **a bold-opened** line ending in **a bold span**\n"
+                "  and another **bold-opened** wrap ending in **more bold**\n")
+        section = R._section_raw(body, "contract").split("\n")
+        self.assertEqual(sum(1 for ln in section if R._is_label_line(ln)), 1)
+
     def test_member_roles_handles_tuple_and_dict_shapes(self):
         self.assertEqual(R._member_roles([("implements", "a.py", 1)]), ["implements"])
         self.assertEqual(R._member_roles([{"role": "tested-by", "loc": "t.py:1"}]), ["tested-by"])

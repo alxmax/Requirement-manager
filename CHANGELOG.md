@@ -1,5 +1,21 @@
 # Changelog
 
+## plugin `v2.16.1` — 2026-08-17
+
+**A clause-group label is decided by where it sits, not by the markers around it.** `v2.15.0` taught the voice to group clauses under bold labels, and `_bullets` learned to skip such a line so the next group's title would stop being appended to the previous group's last clause. It skipped them by shape — `re.fullmatch(r"\*\*.+\*\*", s)` — and `.+` is greedy, so it also matched a hanging-indent continuation that merely *opened and closed* on bold spans. Such a line was dropped, silently, from the parsed contract.
+
+A requirement stating a two-part join predicate lost half of it that way: a clause reading *"shall use it ONLY when both hold: **containment** `…`, and **sanity** `…`"* wrapped so that the containment condition began and ended on a bold span. The generated map then read "when both hold:" followed by a single condition. The `.md` source was never touched and `gate` reported `0 errors` throughout — the gate checks that the map agrees with the engine, never that the engine is faithful to the source, so nothing in the toolchain could see it.
+
+The separation that actually holds is positional: a group label is written flush left, a wrapped clause is indented. `_is_label_line` takes the raw line and requires column 0 alongside the bold-only shape. Across a 94-file consumer corpus every one of the 10 bold-only lines sits at column 0 and none is indented, while the line being eaten was indented two spaces.
+
+**Why not simply narrow the pattern.** Excluding an internal `**` — `r"\*\*(?:(?!\*\*).)+\*\*"` — looks like the smaller change and is the wrong one twice over. It cannot decide a continuation whose entire content is one bold span, which stays ambiguous under any shape test and is exactly the case position resolves. And `***bold-italic***` contains `**`, so that pattern stops matching a real label and folds it into the bullet above — reintroducing the defect the label branch exists to prevent.
+
+**Both call sites share the decision now.** The `over-scoped` lint counted clause groups off `_lint_prose`, which strips every line before returning it; on stripped input each bold-bounded wrap counts as its own group and inflates `contract_n`. Since `--strict` promotes `over-scoped` to an error, that miscount could fail CI on a requirement that is not over-scoped. It counts off `_section_raw`, which preserves indentation.
+
+The two existing bullet tests were each green for the whole life of this regression, which lived in the intersection they jointly leave uncovered — so one more example-shaped test would not have been a control. The new cases pin that intersection, add shapes the corpus does not contain at all (bold-italic labels, wholly-bold continuations, tab indentation), and assert a containment invariant: every non-blank, non-comment line inside a section either opens a clause, folds into one, or is a column-0 label. `REQ-MAP-007` stated the rule in shape terms and now states the positional one.
+
+`MAP_ENGINE_VERSION` → `2026-08-17.2`.
+
 ## plugin `v2.16.0` — 2026-08-17
 
 **The V-model's right side gets levels, and a reserved role is redefined.** A `tested-by:` link said only *that* something tested a requirement, never at what level — a whole-system run and a single-function check looked identical to the tool. So the engine could report "this has no test", but never "this stakeholder need has never been validated", which is the question the V-model exists to answer. `tested-by:` now takes an optional suffix — `@unit`, `@integration`, `@system` — applying to the whole tag, so a comma-separated id list shares one level.
