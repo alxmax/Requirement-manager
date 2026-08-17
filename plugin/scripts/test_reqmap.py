@@ -268,7 +268,7 @@ class Gate(unittest.TestCase):
         self.assertNotIn("missing '## WHAT — Contract'", out)
         self.assertNotIn("missing '## HOW — Acceptance'", out)
 
-    def test_need_without_validation_warns_once_the_repo_opts_in(self):
+    def test_need_without_validation_warns_once_the_repo_opts_in(self):  # tested-by: REQ-VLEVEL-037 @unit
         # Two needs: one validated, one not. The repo has opted in (a validated-against
         # tag exists), so the unvalidated need warns and the validated one does not.
         files = {
@@ -282,7 +282,7 @@ class Gate(unittest.TestCase):
         self.assertIn("NEED-B-002", out)
         self.assertIn("validated-against", out)
 
-    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):
+    def test_need_without_validation_is_silent_until_the_repo_opts_in(self):  # tested-by: REQ-VLEVEL-037 @unit
         # No validated-against tag anywhere: the rule must not fire at all, so a repo
         # that never adopts the role sees no new warnings.
         files = {
@@ -292,7 +292,7 @@ class Gate(unittest.TestCase):
         _, out = self._check(files)
         self.assertNotIn("validated-against", out)
 
-    def test_bus_verified_only_at_system_level_warns(self):
+    def test_bus_verified_only_at_system_level_warns(self):  # tested-by: REQ-VLEVEL-037 @unit
         files = {
             "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
                                         extra="", title="Foundation"),
@@ -302,7 +302,7 @@ class Gate(unittest.TestCase):
         _, out = self._check(files)
         self.assertIn("@system", out)
 
-    def test_bus_with_a_lower_level_link_is_silent(self):
+    def test_bus_with_a_lower_level_link_is_silent(self):  # tested-by: REQ-VLEVEL-037 @unit
         files = {
             "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
                                         extra="", title="Foundation"),
@@ -313,7 +313,7 @@ class Gate(unittest.TestCase):
         _, out = self._check(files)
         self.assertNotIn("verified only at @system", out)
 
-    def test_bus_with_no_levelled_link_is_never_judged(self):
+    def test_bus_with_no_levelled_link_is_never_judged(self):  # tested-by: REQ-VLEVEL-037 @unit
         # opt-in per requirement: an unlevelled tested-by link is not evidence either way
         files = {
             "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
@@ -324,7 +324,7 @@ class Gate(unittest.TestCase):
         _, out = self._check(files)
         self.assertNotIn("verified only at @system", out)
 
-    def test_feature_verified_only_at_system_level_is_silent(self):
+    def test_feature_verified_only_at_system_level_is_silent(self):  # tested-by: REQ-VLEVEL-037 @unit
         # rule 2 is about foundation code only — a feature may legitimately be end-to-end
         files = {
             "REQ-X-001.md": REQ.format(id="REQ-X-001", status="confirmed", layer="feature",
@@ -446,7 +446,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         # _scan_file_tags fails open (None) on a read error; scan_members skips the file
         self.assertIsNone(R._scan_file_tags(os.path.join("no", "such", "dir", "x.py")))
 
-    def test_scan_test_levels_collects_levels_per_requirement(self):
+    def test_scan_test_levels_collects_levels_per_requirement(self):  # tested-by: REQ-VLEVEL-037 @unit
         with tempfile.TemporaryDirectory() as d:
             with open(os.path.join(d, "t_one.py"), "w", encoding="utf-8") as f:
                 f.write("# tested-by: REQ-A-001 @unit\n"
@@ -457,7 +457,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertEqual(set(got["REQ-B-002"]), {"integration"})
             self.assertEqual(got["REQ-B-002"]["integration"], [("t_one.py", 3)])
 
-    def test_scan_test_levels_expands_an_id_list_and_ignores_unlevelled(self):
+    def test_scan_test_levels_expands_an_id_list_and_ignores_unlevelled(self):  # tested-by: REQ-VLEVEL-037 @unit
         with tempfile.TemporaryDirectory() as d:
             with open(os.path.join(d, "t_two.py"), "w", encoding="utf-8") as f:
                 f.write("# tested-by: REQ-A-001, REQ-B-002 @integration\n"
@@ -469,7 +469,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("REQ-C-003", got)
             self.assertNotIn("REQ-D-004", got)
 
-    def test_scan_test_levels_ignores_a_backticked_example(self):
+    def test_scan_test_levels_ignores_a_backticked_example(self):  # tested-by: REQ-VLEVEL-037 @unit
         # same phantom-member guard _scan_file_tags applies: a documented EXAMPLE of a
         # levelled tag must not register as real coverage
         with tempfile.TemporaryDirectory() as d:
@@ -480,7 +480,7 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("REQ-A-001", got)
             self.assertEqual(set(got["REQ-B-002"]), {"unit"})
 
-    def test_levelled_tag_still_resolves_as_a_plain_member(self):
+    def test_levelled_tag_still_resolves_as_a_plain_member(self):  # tested-by: REQ-VLEVEL-037 @unit
         # backwards compatibility: the suffix must not disturb ordinary tag parsing
         self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
                          [("tested-by", "REQ-A-001")])
@@ -2777,7 +2777,7 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
         _, out = self._show({"REQ-X-001": self._req(body=body)}, {}, "REQ-X-001")
         self.assertIn("The real intent.", out)
 
-    def test_show_annotates_a_member_with_its_verification_level(self):
+    def test_show_annotates_a_member_with_its_verification_level(self):  # tested-by: REQ-VLEVEL-037 @unit
         reqs = {"REQ-X-001": self._req()}
         members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
         levels = {"REQ-X-001": {"integration": [("t.py", 2)]}}
@@ -2786,7 +2786,7 @@ class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
             R.cmd_show(reqs, members, "REQ-X-001", levels)
         self.assertIn("@integration", buf.getvalue())
 
-    def test_show_without_level_data_is_unchanged(self):
+    def test_show_without_level_data_is_unchanged(self):  # tested-by: REQ-VLEVEL-037 @unit
         reqs = {"REQ-X-001": self._req()}
         members = {"REQ-X-001": [("tested-by", "t.py", 2)]}
         buf = io.StringIO()

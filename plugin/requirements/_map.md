@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-17 17:04
+generated: 2026-08-17 18:03
 nodes: 41
 edges: 59
 ---
@@ -290,6 +290,8 @@ graph LR
   REQ_VLEVEL_037["Verification levels<br><small>REQ-VLEVEL-037</small>"]
   f_scripts_reqmap_py_1140_3132["scripts/reqmap.py:1140-3132"]
   REQ_VLEVEL_037 -->|implements| f_scripts_reqmap_py_1140_3132
+  f_scripts_test_reqmap_py_271_2789["scripts/test_reqmap.py:271-2789"]
+  REQ_VLEVEL_037 -->|tested-by| f_scripts_test_reqmap_py_271_2789
 ```
 
 ## Dependency Map
@@ -311,14 +313,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_misc["misc"]
-    REQ_VLEVEL_037["Verification levels<br><small>REQ-VLEVEL-037</small><br>untested"]
-  end
-  style REQ_VLEVEL_037 fill:#fff9c4,stroke:#aa0,color:#550
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-VLEVEL-037 | confirmed | 2 | 0 | untested | Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |

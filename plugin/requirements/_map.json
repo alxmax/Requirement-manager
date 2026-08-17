@@ -3038,17 +3038,60 @@
         {
           "role": "implements",
           "loc": "scripts/reqmap.py:3132"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:271"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:285"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:295"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:305"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:316"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:327"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:449"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:460"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:472"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:483"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:2780"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_reqmap.py:2789"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "should-have",
-      "risks": [
-        {
-          "signal": "untested",
-          "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
-        }
-      ]
+      "risks": []
     }
   ],
   "edges": [
