@@ -17,21 +17,41 @@ milestone: v1.00
 > behind it would have to be tracked by hand, and would quickly fall out of date.
 
 ## WHAT — Contract (normative)
-- It shall walk a code root and, for every source file in a known extension, find inline
-  tags of the form `role: <ID>` where role is one of `implements`, `generated-from`,
-  `validated-against`, `tested-by`, returning `cap_id -> [(role, relative_file, line), ...]`.
-- Tag IDs shall match `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`; a left-boundary guard shall prevent
-  substring matches such as `reimplements:` or `x-implements:` being read as real tags.
-- The same `(role, ID)` appearing twice on one line shall be recorded once.
-- A single tag may bind several requirements via a comma-separated id list
-  (`role: <ID>, <ID>, ...`); each id is recorded as a member of the same
-  `(role, file, line)`, so a whole-system doc generated from many requirements
-  (`generated-from: A, B, C`) is a member of each and drifts when ANY changes.
-- File paths shall be reported repo-root-relative with POSIX separators.
-- `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory shall be
-  skipped, the latter matched by realpath so a source package merely named `requirements/`
-  is still scanned. Paths matching `.reqmapignore` shall be excluded.
-- An unreadable file shall be skipped without aborting the scan.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a tag             an inline comment of the form `role: <ID>` marking a piece of
+                       code as belonging to a capability.
+     a role            what that code does for the capability.
+     a member          one recorded `(role, file, line)` place in the code.
+     the SSOT dir      the `requirements/` directory itself.
+     a left-boundary   a check that the word before `implements:` really ends there,
+     guard             so `reimplements:` is not read as a tag. -->
+
+**What it finds**
+- `scan_members` walks a code root and, in every source file with a known extension,
+  finds the inline tags.
+- `scan_members` returns `cap_id -> [(role, relative_file, line), ...]`.
+- A role is one of `implements`, `generated-from`, `validated-against` and `tested-by`.
+- A tag ID matches `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`.
+- A left-boundary guard prevents a substring match such as `reimplements:` or
+  `x-implements:` being read as a real tag.
+- The same `(role, ID)` appearing twice on one line is recorded once.
+- File paths are reported repo-root-relative, with POSIX separators.
+
+**Tags naming several requirements**
+- A single tag may bind several requirements through a comma-separated id list,
+  written `role: <ID>, <ID>, ...`.
+- Each id in that list is recorded as a member of the same `(role, file, line)`.
+- A whole-system doc generated from many requirements (`generated-from: A, B, C`) is
+  therefore a member of each, and drifts when ANY of them changes.
+
+**What it skips**
+- `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory are
+  skipped.
+- The SSOT directory is matched by realpath, so a source package merely named
+  `requirements/` is still scanned.
+- Paths matching `.reqmapignore` are excluded.
+- An unreadable file is skipped without aborting the scan.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

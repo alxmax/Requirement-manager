@@ -21,15 +21,32 @@ milestone: v1.17
 > assumption the gate can neither confirm nor deny.
 
 ## WHAT — Contract (normative)
-- The gate shall warn for each file under `docs/` ending in `.html` whose byte size
-  is at least `DOC_BUNDLE_MIN_BYTES` and that carries no `generated-from:` member tag.
-- It shall skip engine-generated outputs: a file whose basename starts with `_`, and
-  the published `map.html` viewer (the engine owns and freshness-checks it separately).
-- It shall honor `.reqmapignore` and the standard scan walk (prune `.git`,
-  `node_modules`, `__pycache__`, the SSOT `requirements/`), so a repo can mark a
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a doc bundle       a whole-system page written out of many requirements at once,
+                        such as an architecture or explainer page.
+     a lineage tag      a `generated-from:` comment naming the requirements a doc
+                        was built from.
+     the scan walk      the shared file walk every command uses. -->
+
+**What it warns about**
+- The gate warns for each file under `docs/` ending in `.html` that carries no
+  `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES`
+  in size.
+- The gate considers only files under `docs/`.
+
+**What it skips**
+- The check skips engine-generated outputs: a file whose basename starts with `_`,
+  and the published `map.html` viewer.
+- The engine owns those two and freshness-checks them separately.
+- The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
   regenerable artifact out of scope rather than tag it.
-- Only files under `docs/` shall be considered; an unreadable file shall be skipped.
-- The check shall be warn-only and shall never change the gate's exit code.
+- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
+  `requirements/` directory.
+- The check skips a file it cannot read.
+
+**Severity**
+- The check is warn-only and never changes the gate's exit code.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

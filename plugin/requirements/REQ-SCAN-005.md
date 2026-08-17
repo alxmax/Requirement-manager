@@ -17,11 +17,20 @@ milestone: v1.04
 > hand to find out where a feature lives or whether it exists yet.
 
 ## WHAT — Contract (normative)
-- It shall print every capability id (the union of loaded requirements and discovered
-  members, in sorted order) followed by its `role file:line` members, one per line.
-- A capability with no members shall print `(no members found)`.
-- A tag pointing at an id with no requirement shall still appear in the listing (so orphan
-  tags and unimplemented requirements both surface).
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a capability id  the id a requirement claims, or the id a code tag points at.
+     a member         a place in the code tagged as belonging to that id.
+     a role           what the member does for it: `implements`, `tested-by`,
+                      `generated-from` or `validated-against`. -->
+
+- `scan` prints every capability id, followed by its `role file:line` members, one
+  member per line.
+- The listed ids are the union of the loaded requirements and the discovered members,
+  in sorted order.
+- A capability with no members prints `(no members found)`.
+- A tag pointing at an id with no requirement still appears in the listing, so orphan
+  tags and unimplemented requirements both surface.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

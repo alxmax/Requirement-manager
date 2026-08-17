@@ -10,10 +10,14 @@
       "title": "Contract hashing & lock",
       "intent": "A requirement file has a \"binding\" part — the precise promise of what the code must do. This takes a tiny fingerprint of just that part and remembers it. The next time anyone runs the tool, it can tell whether that promise changed since the code was last checked. Without it, someone could quietly rewrite what a capability is supposed to do and no one would be told the existing code may no longer match.",
       "contract": [
-        "It shall compute a stable 12-char hex content hash over only the NORMATIVE sections of a requirement body — the `Contract` and `Acceptance` headings (and, for back-compat, the legacy `Input`/`Output`/`Acceptance`) — so that rationale, notes, verify-intent, links and the member list may change without tripping drift.",
-        "The hash shall be deterministic for identical normative content.",
-        "It shall read and write the per-id hash baseline at `requirements/_reqlock.json`; a missing, empty, or unparseable lock shall load as an empty mapping (no crash).",
-        "`save_lock` shall create the requirements directory if absent and write sorted, indented JSON so the lock file is diff-stable."
+        "`binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body.",
+        "The normative sections are the `Contract` and `Acceptance` headings, plus the legacy `Input`/`Output`/`Acceptance` headings kept for back-compat.",
+        "Rationale, notes, verify-intent, links and the member list stay outside the hash, so they may change without tripping drift.",
+        "The hash is deterministic for identical normative content.",
+        "`load_lock` and `save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`.",
+        "A missing, empty or unparseable lock loads as an empty mapping, never a crash.",
+        "`save_lock` creates the requirements directory if it is absent.",
+        "`save_lock` writes sorted, indented JSON, so the lock file is diff-stable."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -86,11 +90,16 @@
       "title": "Requirement reading",
       "intent": "Every command in the tool — the gate, the map, the next-steps list — needs the requirement files as structured data, not raw text. This is the part that reads each Markdown file and hands the rest of the tool clean records to work with. If it breaks, nothing downstream can run.",
       "contract": [
-        "It shall parse each `requirements/*.md` file into a record `{meta, body, path}`, where `meta` is the parsed frontmatter and `body` is the markdown after the frontmatter block.",
-        "The frontmatter grammar shall support scalars, inline `[a, b]` lists, and block-style (`key:` then indented `- item`) lists. A trailing `# comment` shall be stripped from a value; matching surrounding quotes shall be removed from a scalar; an inline list missing its closing `]` shall be parsed leniently rather than kept as a literal string.",
-        "The `id` shall come from the frontmatter `id:` field, falling back to the filename stem.",
-        "A file with no leading `---` block shall yield empty `meta` and the whole text as `body`.",
-        "Files whose name starts with `_` (locks, generated map) shall be excluded; a leading UTF-8 BOM shall be tolerated."
+        "`load_requirements` parses each `requirements/*.md` file into a record `{meta, body, path}`.",
+        "`meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter block.",
+        "The `id` comes from the frontmatter `id:` field, falling back to the filename stem.",
+        "The grammar supports scalars, inline `[a, b]` lists, and block-style lists written as `key:` then indented `- item`.",
+        "A trailing `# comment` is stripped from a value.",
+        "Matching surrounding quotes are removed from a scalar.",
+        "An inline list missing its closing `]` is parsed leniently, rather than kept as a literal string.",
+        "A file with no leading `---` block yields empty `meta` and the whole text as `body`.",
+        "A file whose name starts with `_` (a lock, the generated map) is excluded.",
+        "A leading UTF-8 BOM is tolerated."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -173,13 +182,20 @@
       "title": "Member discovery",
       "intent": "Developers mark a piece of code as belonging to a capability by writing a short note in a comment, like \"implements: LOGIN-001.\" This reads through all the project's source files and collects every one of those notes, so the tool always knows which code answers to which requirement. Without it, the link between a written requirement and the real code behind it would have to be tracked by hand, and would quickly fall out of date.",
       "contract": [
-        "It shall walk a code root and, for every source file in a known extension, find inline tags of the form `role: <ID>` where role is one of `implements`, `generated-from`, `validated-against`, `tested-by`, returning `cap_id -> [(role, relative_file, line), ...]`.",
-        "Tag IDs shall match `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`; a left-boundary guard shall prevent substring matches such as `reimplements:` or `x-implements:` being read as real tags.",
-        "The same `(role, ID)` appearing twice on one line shall be recorded once.",
-        "A single tag may bind several requirements via a comma-separated id list (`role: <ID>, <ID>, ...`); each id is recorded as a member of the same `(role, file, line)`, so a whole-system doc generated from many requirements (`generated-from: A, B, C`) is a member of each and drifts when ANY changes.",
-        "File paths shall be reported repo-root-relative with POSIX separators.",
-        "`.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory shall be skipped, the latter matched by realpath so a source package merely named `requirements/` is still scanned. Paths matching `.reqmapignore` shall be excluded.",
-        "An unreadable file shall be skipped without aborting the scan."
+        "`scan_members` walks a code root and, in every source file with a known extension, finds the inline tags.",
+        "`scan_members` returns `cap_id -> [(role, relative_file, line), ...]`.",
+        "A role is one of `implements`, `generated-from`, `validated-against` and `tested-by`.",
+        "A tag ID matches `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`.",
+        "A left-boundary guard prevents a substring match such as `reimplements:` or `x-implements:` being read as a real tag.",
+        "The same `(role, ID)` appearing twice on one line is recorded once.",
+        "File paths are reported repo-root-relative, with POSIX separators.",
+        "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`.",
+        "Each id in that list is recorded as a member of the same `(role, file, line)`.",
+        "A whole-system doc generated from many requirements (`generated-from: A, B, C`) is therefore a member of each, and drifts when ANY of them changes.",
+        "`.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory are skipped.",
+        "The SSOT directory is matched by realpath, so a source package merely named `requirements/` is still scanned.",
+        "Paths matching `.reqmapignore` are excluded.",
+        "An unreadable file is skipped without aborting the scan."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -361,10 +377,18 @@
       "title": "Capability candidates (extraction plan)",
       "intent": "When you point this tool at an old codebase that has no requirements written down yet, this is the first, look-but-don't-touch step. It reads the code and produces a tidy machine-readable plan that guesses what each capability is — which files belong together, what they depend on, how central each one is — without writing or changing a single requirement file. An author (or an AI assistant) then uses that plan to decide what to actually write up. Without it, you would face a wall of untagged code with no starting map.",
       "contract": [
-        "It shall emit a single JSON object (stdout or `--out PATH`) `{engine_version, bus[], candidates[]}` and write NO `.md` files — it cannot repeat `draft`'s empty-stub failure.",
-        "It shall walk the code with the same exclusions as scanning (noise dirs, the SSOT dir, and `.reqmapignore` resolved in `requirements/` first), gathering per-file facts: module and symbol docstrings, top-level signatures (Python via `ast`, JS/TS via best-effort parsing), import targets, and line count.",
-        "Each candidate shall carry `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate}`. `depends_on` shall be derived from imports resolved to other candidates; `suggested_layer` shall be `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.",
-        "Grouping shall use `requirements/_capmap.json` when present (authoritative) and otherwise fall back to one candidate per file. A file already carrying an `implements:` tag shall be reported via `existing_req`. An unparseable file shall yield empty facts, not abort the plan."
+        "`plan` emits a single JSON object, to stdout or to `--out PATH`, shaped `{engine_version, bus[], candidates[]}`.",
+        "`plan` writes NO `.md` files. It cannot repeat `draft`'s empty-stub failure.",
+        "`plan` walks the code with the same exclusions as scanning: noise dirs, the SSOT dir, and `.reqmapignore` resolved in `requirements/` first.",
+        "`plan` gathers per-file facts: module and symbol docstrings, top-level signatures, import targets, and line count.",
+        "`plan` reads top-level signatures from Python via `ast`, and from JS/TS via best-effort parsing.",
+        "An unparseable file yields empty facts. It never aborts the plan.",
+        "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate}`.",
+        "`depends_on` is derived from imports resolved to other candidates.",
+        "`suggested_layer` is `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.",
+        "A file already carrying an `implements:` tag is reported via `existing_req`.",
+        "`plan` groups files by `requirements/_capmap.json` when that file is present, and treats it as authoritative.",
+        "Absent `_capmap.json`, `plan` falls back to one candidate per file."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -458,17 +482,36 @@
       "title": "The gate",
       "intent": "Specs rot when the code moves on and nobody updates the file that describes it. This is the guard that catches that: run before every commit, it fails the build when code and requirements no longer match. The whole tool exists so this check can run.",
       "contract": [
-        "It shall report an `ERROR` and exit non-zero for any of: a code tag referencing a non-existent capability (dangling tag); an invalid `status` or `layer`; a `depends_on` pointing at a missing id; an enforced (`in-progress`/`implemented`/`confirmed`) requirement with no `implements:` member (a `layer: need` requirement is exempt — see [[REQ-TRACE-020]]).",
-        "It shall report drift as a `WARN` (never an error): a `confirmed` requirement whose binding hash differs from the lock, naming the member `file:line` locations to re-check.",
-        "A `confirmed` requirement with no `tested-by:` member shall be a `WARN`, unless its frontmatter carries a `test_exempt: <reason>` opt-out or it is a `layer: need` requirement.",
-        "A `confirmed` requirement missing a `## WHAT — Contract` section shall be a `WARN` (both `bus` and `feature` layers; does not affect the exit code).",
-        "A `confirmed` requirement missing a `## HOW — Acceptance` section shall be a `WARN` (both `bus` and `feature` layers; does not affect the exit code).",
-        "An optional requirement `milestone:` field, when present, shall match the version shape `v<digits>[.<digits>…]` (e.g. `v1.14`); a malformed value is a `WARN` (it is roadmap-only metadata, never build-critical) and a `deprecated` requirement is exempt.",
-        "A present-but-unreadable `_reqlock.json` shall be a `WARN` (drift skipped, not a crash).",
-        "A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not git-tracked** shall be a `WARN` naming the file, because an uncommitted lock silently disables drift detection on a fresh CI checkout (no baseline to compare against). The check is fail-open: silent when git is unavailable or the tree is not a work tree.",
-        "Requirements whose body lacks a `## WHAT — Verify intent` section shall be named in one aggregated legacy-schema `WARN` and counted in the summary; the exit code is unaffected.",
-        "It shall print an advisory line with the open verify-intent finding count when > 0, without affecting the exit code, and print a summary (requirements, members, errors, warnings).",
-        "With `--update-lock` (exercised by `sync` and the deprecated `check` alias; the `gate` verb is report-only) it shall write the current binding hashes to `requirements/_reqlock.json`."
+        "`gate` reports an `ERROR` and exits non-zero for every condition in this group.",
+        "A dangling tag — a code tag referencing a capability no requirement defines — is such a condition.",
+        "An invalid `status` or an invalid `layer` is such a condition.",
+        "A `depends_on` pointing at a missing id is such a condition.",
+        "An enforced requirement with no `implements:` member is such a condition.",
+        "A requirement is enforced when its status is `in-progress`, `implemented` or `confirmed`.",
+        "A `layer: need` requirement is exempt from that `implements:` rule — see [[REQ-TRACE-020]].",
+        "`gate` reports drift as a `WARN`, never an error: a `confirmed` requirement whose binding hash differs from the lock.",
+        "The drift warning names the member `file:line` locations to re-check.",
+        "A `confirmed` requirement with no `tested-by:` member is a `WARN`.",
+        "A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt from that test warning.",
+        "A `layer: need` requirement is exempt from it too.",
+        "A `confirmed` requirement missing a `## WHAT — Contract` section is a `WARN`, in both the `bus` and `feature` layers. It does not affect the exit code.",
+        "A `confirmed` requirement missing a `## HOW — Acceptance` section is a `WARN`, in both the `bus` and `feature` layers. It does not affect the exit code.",
+        "The requirement `milestone:` field is optional. When present it matches the version shape `v<digits>[.<digits>…]`, for example `v1.14`.",
+        "A malformed `milestone:` value is a `WARN`, because that field is roadmap-only metadata and never build-critical.",
+        "A `deprecated` requirement is exempt from the `milestone:` shape check.",
+        "A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run rather than crashing.",
+        "A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not git-tracked** is a `WARN` naming the file.",
+        "An uncommitted lock silently disables drift detection on a fresh CI checkout, which has no baseline to compare against.",
+        "That git-tracking check is fail-open: `gate` stays silent when git is unavailable or the tree is not a work tree.",
+        "`gate` names every requirement whose body lacks a `## WHAT — Verify intent` section in one aggregated legacy-schema `WARN`.",
+        "`gate` counts those legacy-schema requirements in the summary.",
+        "The legacy-schema warning does not affect the exit code.",
+        "`gate` prints an advisory line carrying the open verify-intent finding count when that count is above zero.",
+        "That advisory line does not affect the exit code.",
+        "`gate` prints a summary of requirements, members, errors and warnings.",
+        "With `--update-lock`, `gate` writes the current binding hashes to `requirements/_reqlock.json`.",
+        "`sync` and the deprecated `check` alias pass `--update-lock`.",
+        "The `gate` verb itself is report-only."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -733,11 +776,14 @@
       "title": "Untagged doc-bundle warning",
       "intent": "A whole-system doc — an architecture or explainer page generated from many requirements — can drift from those requirements for days with nothing linking the two, because a `generated-from:` tag was never added. Drift detection only fires through the tags it can see, so an untagged bundle is a silent blind spot. This surfaces the gap: the gate names a large `docs/` HTML doc that carries no lineage tag, so the author either links it (one tag, possibly a multi-id list) or marks it intentionally out of scope. Without it, \"the docs are in sync\" is an assumption the gate can neither confirm nor deny.",
       "contract": [
-        "The gate shall warn for each file under `docs/` ending in `.html` whose byte size is at least `DOC_BUNDLE_MIN_BYTES` and that carries no `generated-from:` member tag.",
-        "It shall skip engine-generated outputs: a file whose basename starts with `_`, and the published `map.html` viewer (the engine owns and freshness-checks it separately).",
-        "It shall honor `.reqmapignore` and the standard scan walk (prune `.git`, `node_modules`, `__pycache__`, the SSOT `requirements/`), so a repo can mark a regenerable artifact out of scope rather than tag it.",
-        "Only files under `docs/` shall be considered; an unreadable file shall be skipped.",
-        "The check shall be warn-only and shall never change the gate's exit code."
+        "The gate warns for each file under `docs/` ending in `.html` that carries no `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES` in size.",
+        "The gate considers only files under `docs/`.",
+        "The check skips engine-generated outputs: a file whose basename starts with `_`, and the published `map.html` viewer.",
+        "The engine owns those two and freshness-checks them separately.",
+        "The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a regenerable artifact out of scope rather than tag it.",
+        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory.",
+        "The check skips a file it cannot read.",
+        "The check is warn-only and never changes the gate's exit code."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1000,11 +1046,17 @@
       "title": "Legacy extraction",
       "intent": "When an existing project has lots of code but no requirements written down, this gives you a running start: it reads each untagged file and writes a rough draft requirement for it, clearly marked as a draft so no one mistakes a guess for a settled decision. Without it, someone would have to sit down and describe every existing capability from scratch before the tool was useful on an older project. Spec and prompt documents get the same treatment from the companion capability [[REQ-PROSE-024]].",
       "contract": [
-        "It shall walk untagged source files (`.py`/`.js`/`.ts`/`.c`/`.cpp`) and propose one `requirements/DRAFT-*.md` per file, skipping files that already carry a member tag.",
-        "It shall honor `.reqmapignore` (the same fnmatch globs `scan` respects): a file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.",
-        "Every proposal shall be `status: draft` with a TODO body — it captures observed behavior, never canonizing intent or correctness.",
-        "It shall assign a cheap risk score (TODO/FIXME/HACK/XXX markers, suppressions, file size) and route a score ≥ 2 to `REVIEW`, else `auto-baseline`.",
-        "Re-running shall not overwrite an existing draft; the requirements directory shall be created if absent and draft ids shall be path-aware so same-basename files do not collide."
+        "`draft` walks the untagged source files ending in `.py`, `.js`, `.ts`, `.c` or `.cpp`.",
+        "`draft` skips a file that already carries a member tag.",
+        "`draft` honors `.reqmapignore`, the same fnmatch globs `scan` respects.",
+        "A file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.",
+        "`draft` proposes one `requirements/DRAFT-*.md` per remaining file.",
+        "Every proposal carries `status: draft` and a TODO body. It captures observed behavior, and never canonizes intent or correctness.",
+        "`draft` creates the requirements directory if it is absent.",
+        "Draft ids are path-aware, so two files sharing a basename do not collide.",
+        "`draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size.",
+        "`draft` routes a score of 2 or more to `REVIEW`, and any lower score to `auto-baseline`.",
+        "Re-running `draft` never overwrites an existing draft."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1409,17 +1461,33 @@
       "title": "Requirement map (Mermaid MD + JSON)",
       "intent": "A list of requirement files tells you what exists but not how it all connects. This draws the picture: which capability depends on which, what has code, what is at risk — as Mermaid diagrams you can read on GitHub and a JSON graph any front-end can consume. It turns the registry into something a person can take in at a glance.",
       "contract": [
-        "It shall generate two files under `requirements/`: `_map.md` (Mermaid diagrams for static GitHub/GitLab rendering) and `_map.json` (a `{engine_version, repo, nodes, edges, todos}` graph for an external front-end). Both are derived views, regenerated, never edited.",
-        "`_map.json` shall carry a top-level `repo` field — a best-effort `owner/repo` (else the repo directory name, else null) identifying the project the map describes, for display in the viewer header. It is derived from the git remote and so differs across forks/clones; it is therefore excluded from the `map --check` freshness diff and resolving it shall never raise or block map generation (git may be absent or the tree may not be a checkout).",
-        "`_map.json` shall also carry a top-level `todos` array, derived from `TODO.md` (via `_parse_todos`), so the viewer's Roadmap tab can show planned work alongside requirements.",
-        "There shall be one node per requirement and one edge per `depends_on`. `_map.md` shall contain exactly 4 Mermaid code blocks — System Map, Req→Code, Dependencies, Risk — and each shall carry a legend.",
-        "`_map.json` shall carry, per node, the requirement's id, layer, status, area, title, intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`, `used_by`, and risk signals — the same `{nodes, edges}` shape the diagrams are built from.",
-        "The System Map shall group nodes into per-area subgraphs (a node's `area:` field, else its id prefix), collapse single-node areas into a `misc` box, and omit `depends_on` edges whose target is a bus node OR a high-fan-in hub.",
-        "The Dependency Map shall be area-level: one node per area (with a capability count), an edge A→B when some capability in A depends on one in B; per-capability hub edges are not drawn.",
-        "Req→Code shall color an enforced-but-unlinked requirement red and a baseline/draft not-yet- linked one muted grey, collapsing multiple members in one file to a min–max line range.",
-        "The Risk diagram shall show only requirements with ≥1 risk signal (confirmed+0 members, draft/baseline, or ≥3 dependents), each paired with a scripted recommendation. A `draft`'s open verify-intent question is suppressed (subsumed by its `unreviewed` signal) so a draft is not double-flagged; this dedup lives in `_risk_signals`, shared with the `next` worklist.",
-        "All requirement-derived text shall be JSON-encoded in `_map.json`, which neutralizes any hostile id/title/body by construction (no markup context to break out of).",
-        "The self-contained HTML viewer ([[REQ-VIEWER-007]]) and the GitHub Pages publish+gate ([[REQ-PAGES-021]]) are separate capabilities that consume this map's `_map.json`/`_map.html`."
+        "`map` generates two files under `requirements/`: `_map.md` and `_map.json`.",
+        "`_map.md` holds Mermaid diagrams for static GitHub/GitLab rendering.",
+        "`_map.json` holds a `{engine_version, repo, nodes, edges, todos}` graph for an external front-end.",
+        "Both files are derived views. They are regenerated, never edited.",
+        "`_map.json` carries one node per requirement and one edge per `depends_on`.",
+        "Each node carries its requirement's id, layer, status, area, title, intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`, `used_by`, and risk signals.",
+        "That is the same `{nodes, edges}` shape the diagrams are built from.",
+        "`_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo directory name, else null.",
+        "`repo` identifies the project the map describes, for display in the viewer header.",
+        "`repo` is derived from the git remote, so it differs across forks and clones. It is therefore excluded from the `map --check` freshness diff.",
+        "Resolving `repo` never raises and never blocks map generation, because git may be absent or the tree may not be a checkout.",
+        "`_map.json` carries a top-level `todos` array, derived from `TODO.md` via `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside requirements.",
+        "`_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies and Risk.",
+        "Each of those 4 blocks carries a legend.",
+        "A node's area is its `area:` field, or its id prefix when that field is absent.",
+        "The System Map groups nodes into per-area subgraphs, and collapses a single-node area into a `misc` box.",
+        "The System Map omits a `depends_on` edge whose target is a bus node or a high-fan-in hub.",
+        "The Dependency Map is area-level: one node per area, carrying a capability count.",
+        "The Dependency Map draws an edge A→B when some capability in A depends on one in B. Per-capability hub edges are not drawn.",
+        "Req→Code colors an enforced-but-unlinked requirement red, and a baseline or draft not-yet-linked one muted grey.",
+        "Req→Code collapses multiple members in one file to a min–max line range.",
+        "The Risk diagram shows only requirements with at least one risk signal (confirmed with zero members; `draft`/`baseline`; ≥3 dependents).",
+        "The Risk diagram pairs each of them with a scripted recommendation.",
+        "A `draft`'s open verify-intent question is suppressed, subsumed by its `unreviewed` signal, so a draft is not double-flagged.",
+        "That dedup lives in `_risk_signals`, shared with the `next` worklist.",
+        "All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any hostile id, title or body by construction. There is no markup context to break out of.",
+        "The self-contained HTML viewer ([[REQ-VIEWER-007]]) and the GitHub Pages publish+gate ([[REQ-PAGES-021]]) are separate capabilities. They consume this map's `_map.json` and `_map.html`."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1658,9 +1726,11 @@
       "title": "Scaffold a requirement",
       "intent": "When you want to document a new capability, you need a fresh requirement file with all the right sections in place. This command stamps one out from a standard template, so every requirement starts in the same predictable shape instead of being hand-typed from memory. Without it, files drift into different layouts and the tools that read them start to break.",
       "contract": [
-        "Given a capability id `AREA-NAME-NNN`, it shall write `requirements/<ID>.md` stamped from a template with `AREA-NAME-NNN` replaced by the given id, creating the directory if absent.",
-        "The scaffold shall be the engine's built-in template; an on-disk `templates/requirement.md`, when present, shall override it.",
-        "It shall refuse to overwrite an existing file (exit non-zero, write nothing)."
+        "Given a capability id, `new` writes `requirements/<ID>.md`, stamped from the scaffold with the placeholder `AREA-NAME-NNN` replaced by that id.",
+        "`new` creates the requirements directory if it is absent.",
+        "The scaffold is the engine's built-in template.",
+        "An on-disk `templates/requirement.md`, when present, overrides the built-in template.",
+        "`new` refuses to overwrite an existing file. It exits non-zero and writes nothing."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1803,12 +1873,16 @@
       "title": "Orphan-code warning",
       "intent": "A substantial new source file with no membership tag is invisible to every drift signal: it implements behavior no requirement describes, so \"the spec covers the code\" quietly stops being true as the repo grows. `health` counts untagged files ([[REQ-COVERAGE-029]]) but nothing says it at the moment it matters — the commit gate. This warns, at gate time, about each sizeable program file that carries no tag, so the author links it, drafts a requirement for it, or marks it out of scope — the same nudge-not-block pattern as the untagged doc-bundle warning ([[REQ-DOCBUNDLE-026]]).",
       "contract": [
-        "The gate shall warn for each program-logic source file (extensions: `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp .java .go .rs`) whose physical line count is at least `ORPHAN_CODE_MIN_LOC` and that carries no membership tag (`implements`, `tested-by`, `generated-from`, `validated-against`) and no per-criterion `verifies:` tag.",
-        "Prose, styling and config extensions (`.md .html .css .sql .yaml .yml`) shall not be considered — prose coverage is [[REQ-DOCBUNDLE-026]]'s concern.",
-        "It shall honor `.reqmapignore` and the standard scan walk (prune `.git`, `node_modules`, `__pycache__`, the SSOT `requirements/`), so a repo can mark generated or vendored code out of scope rather than tag it.",
-        "An unreadable file shall be skipped.",
-        "The check shall be warn-only and shall never change the gate's exit code — including under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on REQ-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -->",
-        "A file shall be silenced by tagging it or adding it to `.reqmapignore`; there shall be no separate exemption mechanism."
+        "The gate warns for each program file that carries no membership tag and no `verifies:` tag, once that file is at least `ORPHAN_CODE_MIN_LOC` physical lines long.",
+        "A program file is one ending in `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp .java .go .rs`.",
+        "A membership tag is one of `implements`, `tested-by`, `generated-from` and `validated-against`.",
+        "The gate does not consider the prose, styling and config extensions (`.md .html .css .sql .yaml .yml`). Prose coverage is [[REQ-DOCBUNDLE-026]]'s concern.",
+        "The check honors `.reqmapignore` and the standard scan walk, so a repo can mark generated or vendored code out of scope rather than tag it.",
+        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory.",
+        "The check skips a file it cannot read.",
+        "The check is warn-only and never changes the gate's exit code, including under `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on REQ-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -->",
+        "An author silences a file by tagging it or by adding it to `.reqmapignore`.",
+        "There is no separate exemption mechanism."
       ],
       "verify": [
         "None — authored from known intent; severity ceiling settled by the REQ-COVERAGE-029 Senate audit."
@@ -1991,10 +2065,20 @@
       "title": "Promote a TODO item into a requirement draft",
       "intent": "You plan features as checkbox items in `TODO.md`, grouped by milestone. When you decide to build one, you have to turn that line into a real requirement file with a contract and acceptance criteria. This command does the scaffolding step: it finds the TODO item, creates a requirement seeded with its name, milestone and lane, and (optionally) checks the item off — so the roadmap item and its requirement stay connected instead of being retyped by hand.",
       "contract": [
-        "The `new --from-todo` command shall scaffold a new requirement file from an unfinished `TODO.md` item selected by exact name (trimmed, case-insensitive). It shall require an explicit `--id AREA-NAME-NNN`; there is no interactive prompt (the engine runs headless — CI, hooks).",
-        "It shall seed the new requirement from the matched item: the title from the TODO name, `milestone:` from the item's `## vX.Y` section, and `layer:` from the item's `lane:` — where `lane: ops` maps to `feature` (ops is a TODO lane, not a requirement layer). The new requirement's status shall be `draft` (the author reviews, then promotes).",
-        "It shall refuse (non-zero exit, no file written) when the `--id` is absent, the target id already exists, no open TODO matches the name, or the name is ambiguous (more than one open match) — printing a clear message (and, for no match, the list of open items).",
-        "It shall not modify `TODO.md` by default. With `--mark-done` it shall flip the matched item's checkbox `[ ]` → `[x]` (best-effort: a write failure warns and does not fail the command)."
+        "`new --from-todo` scaffolds a new requirement file from an unfinished `TODO.md` item.",
+        "The item is selected by exact name, trimmed and compared case-insensitively.",
+        "`new --from-todo` requires an explicit `--id AREA-NAME-NNN`. There is no interactive prompt, because the engine runs headless.",
+        "`new --from-todo` seeds the new requirement from the matched item: the title from the TODO name, `milestone:` from the item's `## vX.Y` section, `layer:` from the item's `lane:`.",
+        "A `lane: ops` maps to `layer: feature`.",
+        "The new requirement's status is `draft`, so the author reviews it and then promotes it.",
+        "`new --from-todo` refuses with a non-zero exit and no file written when the `--id` is absent.",
+        "The command refuses when the target id already exists.",
+        "The command refuses when no open TODO matches the name.",
+        "The command refuses when the name is ambiguous, meaning more than one open item matches.",
+        "Each refusal prints a clear message. For a name with no match, that message lists the open items.",
+        "`new --from-todo` does not modify `TODO.md` by default.",
+        "With `--mark-done` it flips the matched item's checkbox `[ ]` → `[x]`.",
+        "That flip is best-effort: a write failure warns and does not fail the command."
       ],
       "verify": [
         "None — authored from known intent."
@@ -2245,9 +2329,10 @@
       "title": "List members per capability",
       "intent": "This is the human-readable report that answers two everyday questions: \"where is this capability actually built?\" and \"what have we written down but never built?\" It lists every capability alongside the exact files and lines that claim it, and flags the ones with no code behind them at all. Without it, you would have to grep through the whole codebase by hand to find out where a feature lives or whether it exists yet.",
       "contract": [
-        "It shall print every capability id (the union of loaded requirements and discovered members, in sorted order) followed by its `role file:line` members, one per line.",
-        "A capability with no members shall print `(no members found)`.",
-        "A tag pointing at an id with no requirement shall still appear in the listing (so orphan tags and unimplemented requirements both surface)."
+        "`scan` prints every capability id, followed by its `role file:line` members, one member per line.",
+        "The listed ids are the union of the loaded requirements and the discovered members, in sorted order.",
+        "A capability with no members prints `(no members found)`.",
+        "A tag pointing at an id with no requirement still appears in the listing, so orphan tags and unimplemented requirements both surface."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2477,16 +2562,20 @@
       "title": "Duplicate-capability detector",
       "intent": "When two requirements quietly describe the same capability, you do not notice until each has grown its own divergent implementation — and now there is a mess to untangle. This compares requirement pairs by their wording and flags the ones that overlap, so a reviewer can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.",
       "contract": [
-        "The `dupes` command shall report pairs of requirements whose contracts overlap. It writes nothing and is read-only.",
-        "It shall build a bag of words for each requirement from its title, its intent line, and its Contract bullets.",
-        "The \"Notes & limitations\" section is excluded, because it is dense and would add noise.",
-        "It shall tokenize text into lowercase alphanumeric words of length three or more, dropping a small stopword set and pure numbers.",
-        "It shall weight terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).",
+        "`dupes` reports pairs of requirements whose contracts overlap.",
+        "`dupes` writes nothing. It only reads and prints.",
+        "`dupes` builds a bag of words for each requirement from its title, its intent line, and its Contract bullets.",
+        "`dupes` leaves the \"Notes & limitations\" section out of that text, because that section is dense and would add noise.",
+        "`dupes` tokenizes text into lowercase alphanumeric words of length three or more.",
+        "`dupes` drops a small stopword set and pure numbers from those tokens.",
+        "`dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).",
         "The smoothing keeps every weight positive, so a two-requirement corpus does not collapse to a zero score.",
-        "It shall score each pair with cosine similarity in the range zero to one, and report only pairs at or above the threshold.",
-        "The threshold shall default to `0.35` and shall be overridable with `--threshold`.",
-        "It shall print pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.",
-        "It shall always return zero. The report is advisory: a human decides whether a flagged pair is a real duplicate."
+        "`dupes` scores each pair with cosine similarity in the range zero to one.",
+        "`dupes` reports only the pairs at or above the threshold.",
+        "The threshold defaults to `0.35`.",
+        "`--threshold` overrides that default.",
+        "`dupes` prints pairs most-similar-first, each with its score and up to five shared terms, so the reviewer can see why the pair was flagged.",
+        "`dupes` always returns zero. The report is advisory: a human decides whether a flagged pair is a real duplicate."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2809,13 +2898,18 @@
       "title": "Self-contained HTML map viewer",
       "intent": "The Mermaid diagrams render on GitHub, but a richer interactive view needs a browser app. This inlines the map's JSON graph into a single self-contained HTML file you open by double-click — no server, no install. It is optional: absent the vendored template, the engine still emits the diagrams and the JSON.",
       "contract": [
-        "It shall generate `_map.html` — a self-contained, single-file copy of the React viewer (the Vite + React app under `app/`) with this repo's graph inlined as `window.__REQMAP_DATA__`, openable by double-click with no server — WHEN the viewer template `_map_viewer.html` is vendored beside the engine.",
-        "Absent the template it shall emit nothing (return None) without failing, so `map` still writes `_map.md` + `_map.json` and the stdlib engine works with no extra files.",
-        "It shall inject the graph by replacing the template's `<!--REQMAP_DATA-->` marker with a single inline `<script>window.__REQMAP_DATA__=…</script>` assignment carrying the same `{nodes, edges}` graph [[REQ-MAP-007]] builds.",
-        "The injected graph shall be HTML-safe for embedding inside `<script>` via three escapes applied in order (all are V8 no-ops — backslash is silently ignored before `/`, `!`, `-`):",
+        "`map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine.",
+        "`_map.html` is a self-contained, single-file copy of the React viewer — the Vite + React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.",
+        "`_map.html` opens by double-click, with no server.",
+        "Absent the template, `render_html` emits nothing and returns None without failing.",
+        "`map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no extra files.",
+        "`render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline `<script>window.__REQMAP_DATA__=…</script>` assignment.",
+        "That assignment carries the same `{nodes, edges}` graph [[REQ-MAP-007]] builds.",
+        "`render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order. All three are V8 no-ops: a backslash is silently ignored before `/`, `!` and `-`.",
         "`</`   → `<\\/`   — prevents `</script>` from closing the element early",
         "`<!--` → `<\\!--` — prevents the HTML5 parser entering \"script data escaped\" state",
-        "`-->`  → `-\\->`  — prevents prematurely closing that state if somehow entered The first guard alone was the original contract; the `<!--`/`-->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null."
+        "`-->`  → `-\\->`  — prevents prematurely closing that state if somehow entered",
+        "The first guard alone was the original contract. The `<!--` and `-->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."

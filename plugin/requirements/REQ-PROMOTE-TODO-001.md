@@ -17,18 +17,41 @@ milestone: v1.14
 > so the roadmap item and its requirement stay connected instead of being retyped by hand.
 
 ## WHAT — Contract (normative)
-- The `new --from-todo` command shall scaffold a new requirement file from an unfinished `TODO.md`
-  item selected by exact name (trimmed, case-insensitive). It shall require an explicit
-  `--id AREA-NAME-NNN`; there is no interactive prompt (the engine runs headless — CI, hooks).
-- It shall seed the new requirement from the matched item: the title from the TODO name,
-  `milestone:` from the item's `## vX.Y` section, and `layer:` from the item's `lane:` — where
-  `lane: ops` maps to `feature` (ops is a TODO lane, not a requirement layer). The new
-  requirement's status shall be `draft` (the author reviews, then promotes).
-- It shall refuse (non-zero exit, no file written) when the `--id` is absent, the target id
-  already exists, no open TODO matches the name, or the name is ambiguous (more than one open
-  match) — printing a clear message (and, for no match, the list of open items).
-- It shall not modify `TODO.md` by default. With `--mark-done` it shall flip the matched item's
-  checkbox `[ ]` → `[x]` (best-effort: a write failure warns and does not fail the command).
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     an open item  a `TODO.md` line still checkboxed `[ ]`.
+     a lane        the `lane:` label a TODO item carries, e.g. `ops`. It is a TODO
+                   grouping, not a requirement layer.
+     headless      the engine never asks a question at the terminal, because it runs
+                   in CI and in git hooks where nobody is there to answer. -->
+
+**What it scaffolds**
+- `new --from-todo` scaffolds a new requirement file from an unfinished `TODO.md` item.
+- The item is selected by exact name, trimmed and compared case-insensitively.
+- `new --from-todo` requires an explicit `--id AREA-NAME-NNN`. There is no interactive
+  prompt, because the engine runs headless.
+
+**What it seeds**
+- `new --from-todo` seeds the new requirement from the matched item: the title from the
+  TODO name, `milestone:` from the item's `## vX.Y` section, `layer:` from the item's
+  `lane:`.
+- A `lane: ops` maps to `layer: feature`.
+- The new requirement's status is `draft`, so the author reviews it and then promotes it.
+
+**When it refuses**
+- `new --from-todo` refuses with a non-zero exit and no file written when the `--id` is
+  absent.
+- The command refuses when the target id already exists.
+- The command refuses when no open TODO matches the name.
+- The command refuses when the name is ambiguous, meaning more than one open item
+  matches.
+- Each refusal prints a clear message. For a name with no match, that message lists the
+  open items.
+
+**What it does to `TODO.md`**
+- `new --from-todo` does not modify `TODO.md` by default.
+- With `--mark-done` it flips the matched item's checkbox `[ ]` → `[x]`.
+- That flip is best-effort: a write failure warns and does not fail the command.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent.

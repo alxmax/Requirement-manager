@@ -17,15 +17,33 @@ milestone: v1.00
 > would be told the existing code may no longer match.
 
 ## WHAT — Contract (normative)
-- It shall compute a stable 12-char hex content hash over only the NORMATIVE sections of a
-  requirement body — the `Contract` and `Acceptance` headings (and, for back-compat, the
-  legacy `Input`/`Output`/`Acceptance`) — so that rationale, notes, verify-intent, links
-  and the member list may change without tripping drift.
-- The hash shall be deterministic for identical normative content.
-- It shall read and write the per-id hash baseline at `requirements/_reqlock.json`; a
-  missing, empty, or unparseable lock shall load as an empty mapping (no crash).
-- `save_lock` shall create the requirements directory if absent and write sorted, indented
-  JSON so the lock file is diff-stable.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     the normative sections  the parts of a requirement that promise something, as
+                             opposed to the parts that explain it.
+     the binding hash        the short fingerprint taken over those sections.
+     the lock                requirements/_reqlock.json — one saved fingerprint
+                             per requirement id.
+     drift                   the fingerprint no longer matching the lock, meaning
+                             the promise changed since the code was last checked. -->
+
+**What it hashes**
+- `binding_hash` computes a stable 12-character hex content hash over only the
+  normative sections of a requirement body.
+- The normative sections are the `Contract` and `Acceptance` headings, plus the legacy
+  `Input`/`Output`/`Acceptance` headings kept for back-compat.
+- Rationale, notes, verify-intent, links and the member list stay outside the hash, so
+  they may change without tripping drift.
+- The hash is deterministic for identical normative content.
+
+**Where the baseline lives**
+- `load_lock` and `save_lock` read and write the per-id hash baseline at
+  `requirements/_reqlock.json`.
+- A missing, empty or unparseable lock loads as an empty mapping, never a crash.
+
+**How it writes the lock**
+- `save_lock` creates the requirements directory if it is absent.
+- `save_lock` writes sorted, indented JSON, so the lock file is diff-stable.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

@@ -18,16 +18,36 @@ milestone: v1.06
 > from the companion capability [[REQ-PROSE-024]].
 
 ## WHAT — Contract (normative)
-- It shall walk untagged source files (`.py`/`.js`/`.ts`/`.c`/`.cpp`) and propose one
-  `requirements/DRAFT-*.md` per file, skipping files that already carry a member tag.
-- It shall honor `.reqmapignore` (the same fnmatch globs `scan` respects): a file matching an
-  ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.
-- Every proposal shall be `status: draft` with a TODO body — it captures observed behavior,
-  never canonizing intent or correctness.
-- It shall assign a cheap risk score (TODO/FIXME/HACK/XXX markers, suppressions, file size)
-  and route a score ≥ 2 to `REVIEW`, else `auto-baseline`.
-- Re-running shall not overwrite an existing draft; the requirements directory shall be
-  created if absent and draft ids shall be path-aware so same-basename files do not collide.
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a member tag  a comment naming the requirement a piece of code belongs to.
+     a draft       a `requirements/DRAFT-*.md` file: a guess at what a file does,
+                   marked so nobody mistakes it for a settled decision.
+     the risk score  a cheap number saying how suspect a file looks, used only to
+                     decide whether a human should read the draft first. -->
+
+**What it reads**
+- `draft` walks the untagged source files ending in `.py`, `.js`, `.ts`, `.c` or `.cpp`.
+- `draft` skips a file that already carries a member tag.
+- `draft` honors `.reqmapignore`, the same fnmatch globs `scan` respects.
+- A file matching an ignore pattern is never drafted — notably the vendored
+  `scripts/reqmap.py` engine itself.
+
+**What it writes**
+- `draft` proposes one `requirements/DRAFT-*.md` per remaining file.
+- Every proposal carries `status: draft` and a TODO body. It captures observed
+  behavior, and never canonizes intent or correctness.
+- `draft` creates the requirements directory if it is absent.
+- Draft ids are path-aware, so two files sharing a basename do not collide.
+
+**How it flags risk**
+- `draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers,
+  suppressions and file size.
+- `draft` routes a score of 2 or more to `REVIEW`, and any lower score to
+  `auto-baseline`.
+
+**Running it again**
+- Re-running `draft` never overwrites an existing draft.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
