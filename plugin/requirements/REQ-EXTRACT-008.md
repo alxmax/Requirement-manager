@@ -37,6 +37,8 @@ Every line in this section is binding.
 - `draft` proposes one `requirements/DRAFT-*.md` per remaining file.
 - Every proposal carries `status: draft` and a TODO body. It captures observed
   behavior, and never canonizes intent or correctness.
+- A proposal's Contract section opens with "Every line in this section is binding.",
+  matching what `new` scaffolds, so promoting a draft needs no reshaping.
 - `draft` creates the requirements directory if it is absent.
 - Draft ids are path-aware, so two files sharing a basename do not collide.
 

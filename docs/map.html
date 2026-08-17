@@ -1064,6 +1064,7 @@
         "A file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.",
         "`draft` proposes one `requirements/DRAFT-*.md` per remaining file.",
         "Every proposal carries `status: draft` and a TODO body. It captures observed behavior, and never canonizes intent or correctness.",
+        "A proposal's Contract section opens with \"Every line in this section is binding.\", matching what `new` scaffolds, so promoting a draft needs no reshaping.",
         "`draft` creates the requirements directory if it is absent.",
         "Draft ids are path-aware, so two files sharing a basename do not collide.",
         "`draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size.",
@@ -1409,14 +1410,21 @@
       "title": "Readability & scope checks",
       "intent": "The linter's rulebook: the individual checks that catch hard-to-read or overloaded requirement prose — sentences that run long, lines that stack conditions, bloated or skimpy acceptance lists, contracts that bundle several capabilities, vague quality words, and code spread across too many files. The framework that runs them, scopes them and decides exit codes is [[REQ-LINT-014]]; this is what each check flags.",
       "contract": [
-        "The `long-sentence` check (warn) shall flag any sentence in the Contract or Acceptance section longer than the word threshold (`LINT_SENTENCE_WORDS`, default 35).",
-        "The `stacked-conditions` check (warn) shall flag a normative line that piles up too many clauses joined by conjunctions (`LINT_STACKED_CONNECTORS`, default 3 conjunctions).",
-        "The `statement-too-long` check (warn) shall flag a Contract bullet that exceeds `LINT_CONTRACT_WORDS` (default 30) words and spans more than one sentence.",
-        "The `ac-count-low` check (warn) shall flag an Acceptance section holding one or two criteria (fewer than `LINT_AC_MIN`, default 3); `ac-count-high` shall flag more than `LINT_AC_MAX` (default 7), counted as `- ` bullets or `AC-N` labelled blocks.",
-        "The `over-scoped` check (warn) shall flag a requirement whose Contract exceeds `LINT_CONTRACT_MAX` (default 10) clauses AND whose Acceptance exceeds `LINT_AC_MAX` — a composite signal that several capabilities are bundled into one.",
-        "The `file-spread` check (warn) shall flag a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX` (default 3) distinct files; it is an architectural-diffuseness signal and is skipped when no member data is supplied.",
-        "The `vague-term` check (warn) shall flag a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words like `appropriate` or `robust`.",
-        "Before the `vague-term` scan, backticked code spans are stripped, and one finding is emitted per distinct term."
+        "The `long-sentence` check warns on any sentence in the Contract or Acceptance section longer than `LINT_SENTENCE_WORDS`, default 25.",
+        "The `statement-too-long` check warns on a Contract bullet over `LINT_CONTRACT_WORDS`, default 22, that also spans more than one sentence.",
+        "The `stacked-conditions` check warns on a normative line that joins at least `LINT_STACKED_CONNECTORS` clauses, default 3, with conjunctions.",
+        "`stacked-conditions` reads every normative line. It does not require a `shall` or `must` on the line, because the section already makes the line binding and the authoring voice writes no modal.",
+        "The `anonymous-subject` check warns on a Contract clause opening with a bare \"It\" followed by a verb.",
+        "`anonymous-subject` reads the Contract only. Acceptance prose may say \"it\" in a Then clause and still read clearly.",
+        "The `ac-count-low` check warns on an Acceptance section holding fewer than `LINT_AC_MIN`, default 3, criteria.",
+        "The `ac-count-high` check warns on more than `LINT_AC_MAX`, default 7, criteria, counted as `- ` bullets or `AC-N` labelled blocks.",
+        "The `over-scoped` check warns on a requirement over both ceilings at once: more than `LINT_CONTRACT_MAX` scope units, default 10, with more than `LINT_AC_MAX` criteria.",
+        "`over-scoped` counts clause groups when the Contract carries bold group labels, and counts clauses when it does not. Writing one obligation per bullet multiplies clauses without widening scope, so counting clauses alone would punish the authoring voice.",
+        "The `file-spread` check warns on a requirement whose `implements` members span at least `LINT_FILE_SPREAD_MAX`, default 3, distinct files.",
+        "`file-spread` is an architectural-diffuseness signal and is skipped when no member data is supplied.",
+        "The `vague-term` check warns on a Contract bullet using a word from the closed `LINT_VAGUE_TERMS` set — untestable quality words such as `appropriate`.",
+        "Backticked code spans are stripped before the `vague-term` scan runs.",
+        "`vague-term` emits one finding per distinct term."
       ],
       "verify": [
         "None — split out of [[REQ-LINT-014]] with intent carried over unchanged."
@@ -1425,13 +1433,15 @@
         "`statement-too-long` deliberately ignores a single over-long sentence (that is `long-sentence`'s job), so the two checks never flag the same line twice.",
         "`file-spread` measures where the code lives; `over-scoped` measures contract/acceptance scope — different axes, so one firing says nothing about the other.",
         "Sentence splitting is a deterministic split on `.`, `!`, and `?` — crude, but it only feeds a word count, so the worst case is a missed long sentence, not a false alarm.",
-        "The thresholds are module constants, not configurable from the command line."
+        "The thresholds are module constants, not configurable from the command line.",
+        "`anonymous-subject` reads physical lines, not folded clauses. A wrapped bullet whose continuation line happens to begin with \"It \" is flagged as though that line opened a clause. Rewriting the sentence is the fix; the alternative — folding continuations first — would make every other prose check measure a different unit than the one it measures now.",
+        "`ac-count-high` is exempted here because this requirement is a table of checks: each of the nine criteria pins exactly one check's behaviour. Merging them to reach the ceiling would leave checks tested only implicitly, which is the outcome the count exists to prevent. Same reasoning as [[REQ-CHECK-006]]'s severity table."
       ],
       "current_impl": [
         "The check bodies live in `lint_requirement` (per-requirement checks) and `_lint_prose` (per-section prose walk) in `reqmap.py`; `_sentences` splits lines for the word counts."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a confirmed requirement with a 40-word sentence in its Contract section\n  When   `lint` runs\n  Then   it reports a `long-sentence` warning naming the word count\n\nAC-2\n  Given  a confirmed requirement with a normative line that joins four clauses with \"and\"\n  When   `lint` runs\n  Then   it reports a `stacked-conditions` warning\n\nAC-3\n  Given  a Contract bullet over 30 words spanning two sentences\n  When   `lint` runs\n  Then   it reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`\n\nAC-4\n  Given  an Acceptance section with one criterion\n  When   `lint` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nAC-5\n  Given  a requirement over both ceilings (more than ten contract clauses and more than seven acceptance criteria)\n  When   `lint` runs\n  Then   it reports `over-scoped`; over only one ceiling, none\n\nAC-6\n  Given  a requirement whose `implements` members span three or more distinct files\n  When   `lint` runs with member data\n  Then   it reports `file-spread`; a single file or no member data produce none\n\nAC-7\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `lint` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none",
+      "accept": "AC-1\n  Given  a confirmed requirement with a 40-word sentence in its Contract section\n  When   `lint` runs\n  Then   it reports a `long-sentence` warning naming the word count\n\nAC-2\n  Given  a normative line joining four clauses with conjunctions, carrying no modal verb\n  When   `lint` runs\n  Then   it reports a `stacked-conditions` warning\n\nAC-3\n  Given  a Contract bullet over 30 words spanning two sentences\n  When   `lint` runs\n  Then   it reports `statement-too-long`; a single 40-word sentence reports only `long-sentence`\n\nAC-4\n  Given  an Acceptance section with one criterion\n  When   `lint` runs\n  Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither\n\nAC-5\n  Given  a requirement over both ceilings (more than ten contract scope units and more\n         than seven acceptance criteria)\n  When   `lint` runs\n  Then   it reports `over-scoped`; over only one ceiling, none\n\nAC-6\n  Given  a Contract holding thirty clauses under three bold group labels, plus eight\n         acceptance criteria\n  When   `lint` runs\n  Then   it reports no `over-scoped`, because three groups is under the ceiling; the same\n         thirty clauses ungrouped do report it\n\nAC-7\n  Given  a requirement whose `implements` members span three or more distinct files\n  When   `lint` runs with member data\n  Then   it reports `file-spread`; a single file or no member data produce none\n\nAC-8\n  Given  a Contract bullet containing \"appropriate\" and \"user-friendly\"\n  When   `lint` runs\n  Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none\n\nAC-9\n  Given  a Contract bullet reading \"It creates the folder.\"\n  When   `lint` runs\n  Then   it reports an `anonymous-subject` warning; \"`init` creates the folder.\" reports\n         none, and the same bare \"It\" in an Acceptance criterion reports none",
       "input": "",
       "output": "",
       "desc": "",
@@ -1485,6 +1495,8 @@
         "`repo` is derived from the git remote, so it differs across forks and clones. It is therefore excluded from the `map --check` freshness diff.",
         "Resolving `repo` never raises and never blocks map generation, because git may be absent or the tree may not be a checkout.",
         "`_map.json` carries a top-level `todos` array, derived from `TODO.md` via `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside requirements.",
+        "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line.",
+        "A line that is only a bold label groups the clauses below it. It is a heading, not a clause, and never folds into the clause above.",
         "`_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies and Risk.",
         "Each of those 4 blocks carries a legend.",
         "A node's area is its `area:` field, or its id prefix when that field is absent.",
@@ -1742,7 +1754,9 @@
         "`new` creates the requirements directory if it is absent.",
         "The scaffold is the engine's built-in template.",
         "An on-disk `templates/requirement.md`, when present, overrides the built-in template.",
-        "`new` refuses to overwrite an existing file. It exits non-zero and writes nothing."
+        "`new` refuses to overwrite an existing file. It exits non-zero and writes nothing.",
+        "The emitted Contract section opens with \"Every line in this section is binding.\", so the author writes clauses in present tense without a `shall` or `must` on each line.",
+        "The scaffold's guidance names the authoring rules the linter enforces, so a file written from it starts clean."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."

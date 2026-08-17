@@ -27,6 +27,10 @@ Every line in this section is binding.
 - The scaffold is the engine's built-in template.
 - An on-disk `templates/requirement.md`, when present, overrides the built-in template.
 - `new` refuses to overwrite an existing file. It exits non-zero and writes nothing.
+- The emitted Contract section opens with "Every line in this section is binding.", so the
+  author writes clauses in present tense without a `shall` or `must` on each line.
+- The scaffold's guidance names the authoring rules the linter enforces, so a file written
+  from it starts clean.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

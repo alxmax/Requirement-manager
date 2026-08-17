@@ -52,6 +52,12 @@ Every line in this section is binding.
   `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
   requirements.
 
+**How a contract is read**
+- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
+  multi-line clause is never truncated to its first physical line.
+- A line that is only a bold label groups the clauses below it. It is a heading, not a
+  clause, and never folds into the clause above.
+
 **What the diagrams show**
 - `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
   and Risk.
