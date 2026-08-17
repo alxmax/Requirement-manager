@@ -1,5 +1,23 @@
 # Changelog
 
+## plugin `v2.15.0` — 2026-08-17
+
+**Requirements are now written in plain present tense, and the linter enforces the reading level.** The corpus passed every clarity check the engine had while still being hard for a newcomer to read. That was not an accident: `LINT_SENTENCE_WORDS` sat at 35 and `LINT_CONTRACT_WORDS` at 30, roughly twice the level being aimed for, so `lint` reported **zero** findings on prose averaging 18.3 words per sentence. Rewriting the prose without moving those numbers would have let it drift straight back.
+
+Contract clauses now name their subject (`` `init` creates the folder ``) instead of opening with an anonymous "It", drop `shall` in favour of a single **"Every line in this section is binding."** at the head of the section, and group under bold labels once past five clauses. `REQ-INIT-012` rewritten this way measures **10.8 words per sentence against 18.3, longest sentence 19 against 32, and no project term left undefined against twelve** — with all ten of its normative clauses intact. All 40 requirements in this repo were converted; no contract changed meaning, and the lock was advanced once with `sync --accept-drift`.
+
+**Consumer-visible — thresholds tighten.** `LINT_SENTENCE_WORDS` drops 35 → 25 and `LINT_CONTRACT_WORDS` 30 → 22, so a repo that updates will see new warnings on prose it has not touched. They are warnings: `--strict` promotes only `ac-count-high` and `over-scoped` to errors, so **no consumer build breaks**. `SKILL.md` rule 3 now teaches the new voice instead of the `shall` convention, and both `REQUIREMENT_TEMPLATE` (what `new` writes) and the `draft`/`init` emission were rewritten to match, so generated files start compliant.
+
+**Three linter changes came out of the migration, and two of them are fixes the old voice was hiding.**
+
+- `stacked-conditions` no longer requires a `shall` or `must` on the line before inspecting it. Keyed on a magic word, it would have gone **silent** under the new voice without a single test failing. Removing the guard cost one additional finding across this corpus — a genuinely stacked clause in `REQ-HEALTH-017` that the keyed check had never been able to see.
+- `over-scoped` now counts **scope units** rather than sentences: clause groups when a contract groups its clauses, clauses when it does not. Writing one obligation per bullet multiplies clauses without widening scope — `REQ-NEXT-013` went from 8 dense clauses to 21 atomic ones describing exactly the same command — so counting clauses alone punished the voice it was meant to serve.
+- New `anonymous-subject` warning for a Contract clause opening with a bare "It" — 71 across this corpus when it was switched on. It reads physical lines, so a wrapped bullet whose continuation begins with "It " is flagged; rewriting the sentence is the fix, and `REQ-LINTCHECKS-025` records the limitation.
+
+One rendering bug is fixed alongside: `_bullets()` treated a bold-only line as a hanging-indent continuation, so a clause group's label was folded into the previous group's last clause. That leaked into `show`, the map's contract rendering, and the bag of words behind `dupes` and `search` scoring.
+
+`MAP_ENGINE_VERSION` → `2026-08-17`.
+
 ## plugin `v2.14.0` — 2026-08-08
 
 **Requirement clarity is now enforced, not just documented.** `lint` mechanised the SKILL.md "Audience & writing level" rules, but nothing ever ran it — not CI, not the pre-commit hook — so 28 readability warnings had accumulated across the corpus unseen. `reqmap.py lint --strict` now runs in this repo's CI (`check_versions.py → gate → lint --strict → map --check → test_reqmap.py`) and in the shipped `hooks/pre-commit`, between the gate and the map-freshness check. **Consumer-visible:** a repo that installs the shipped hook now has commits blocked by error-severity lint findings (a `confirmed` requirement missing its Contract or Acceptance section) plus the `--strict`-promoted structural checks; style warnings stay advisory. The published `check@v1` GitHub Action gains a `lint` input running the same check, **on by default** like `freshness` — a check that must be opted into is documentation, not a check. It runs the consumer's own vendored `reqmap.py`, so it needs plugin v2.3.4 or newer (the release that added the `lint_exempt:` escape hatch); `lint: 'false'` skips it. Re-seed the engine in any repo below that floor before moving the `@v1` tag onto this commit.
