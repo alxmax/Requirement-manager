@@ -55,8 +55,10 @@ Every line in this section is binding.
 **How a contract is read**
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
   multi-line clause is never truncated to its first physical line.
-- A line that is only a bold label groups the clauses below it. It is a heading, not a
-  clause, and never folds into the clause above.
+- A clause-group label groups the clauses below it: a bold-only line written flush left.
+  A label is a heading, not a clause, and never folds into the clause above.
+- Position decides a label, not the bold markers alone. An indented wrapped line folds
+  even when it opens and closes on bold spans, so a two-part clause keeps both halves.
 
 **What the diagrams show**
 - `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
