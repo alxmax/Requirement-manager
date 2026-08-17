@@ -151,9 +151,22 @@ engine changes to the cache and any registered consumer repos in one command:
 - **The thread**: code declares membership with a tag, by role:
   - `implements: <ID>`       — hand-written logic (reviewed + tested on change)
   - `generated-from: <ID>`   — derived artifact (regenerated on change)
-  - `validated-against: <ID>`— config/data (re-validated on change)
-  - `tested-by: <ID>`        — the acceptance tests
+  - `validated-against: <ID>`— evidence the RIGHT thing was built (validation)
+  - `tested-by: <ID>`        — evidence it was built CORRECTLY (verification)
   The member list is **discovered by scanning code**, never hand-maintained.
+
+**Verification levels.** A `tested-by:` tag may end with the level the test sits at:
+`# tested-by: AUTH-LOGIN-001 @integration`. The levels are `@unit`, `@integration` and
+`@system`, and the level applies to the whole tag, so a comma-separated id list shares it.
+The suffix is optional — an unlevelled tag stays valid and is never judged.
+
+`validated-against:` answers the other question. Point a `layer: need` requirement at the
+evidence the need was actually met; being *satisfied by* other requirements is not that
+evidence. It carries no level, because it is the top of the V.
+
+The gate warns in exactly two cases, both warn-only and both opt-in: a confirmed `need` with
+no `validated-against:` link, once your repo uses that role anywhere, and a confirmed `bus`
+requirement whose levelled links are all `@system`. Nothing fires until you annotate a tag.
 
 ## Authoring rules (read before touching anything)
 
