@@ -469,6 +469,24 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("REQ-C-003", got)
             self.assertNotIn("REQ-D-004", got)
 
+    def test_scan_test_levels_ignores_a_tag_inside_a_python_string(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # a levelled tag quoted in a docstring or string literal is prose about tagging,
+        # not a claim of coverage — the same masking _scan_file_tags applies
+        body = "\n".join([
+            "def f():",
+            '    """Tag it like tested-by: REQ-DOC-001 @unit in your test."""',
+            '    s = "tested-by: REQ-STR-001 @unit"',
+            "    return s",
+            "# tested-by: REQ-REAL-001 @unit",
+        ]) + "\n"
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "a.py"), "w", encoding="utf-8") as f:
+                f.write(body)
+            got = R.scan_test_levels(d)
+            self.assertNotIn("REQ-DOC-001", got)                   # docstring
+            self.assertNotIn("REQ-STR-001", got)                   # string literal
+            self.assertEqual(set(got["REQ-REAL-001"]), {"unit"})   # real comment tag
+
     def test_scan_test_levels_ignores_a_backticked_example(self):  # tested-by: REQ-VLEVEL-037 @unit
         # same phantom-member guard _scan_file_tags applies: a documented EXAMPLE of a
         # levelled tag must not register as real coverage

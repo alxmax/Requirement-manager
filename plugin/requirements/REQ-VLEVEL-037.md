@@ -39,6 +39,8 @@ Every line in this section is binding.
   reads is unchanged.
 - The engine skips a levelled tag written inside backticks, so a documented example never
   counts as real coverage.
+- In a Python file the engine also skips a levelled tag inside a string literal or a
+  docstring. Prose about how to tag is not a claim of coverage.
 
 **When the gate warns**
 - The gate warns when a confirmed `need` carries no `validated-against:` member.
@@ -77,9 +79,10 @@ AC-2
   Then   it resolves to the same member as an unlevelled tag, so an engine that predates
          levels reads the id and ignores the suffix
 AC-3
-  Given  a levelled tag written inside backticks as a documented example
+  Given  levelled tags that are not real claims — one inside backticks, one in a Python
+         docstring, one in a string literal — alongside one real tag in a comment
   When   the level scan runs
-  Then   that requirement gets no level entry, while a real tag on the next line does
+  Then   only the real tag produces a level entry
 AC-4
   Given  two confirmed needs, one carrying a `validated-against:` tag and one carrying none
   When   the gate runs
