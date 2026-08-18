@@ -3524,51 +3524,39 @@
       "done": true
     },
     {
-      "name": "Doc bundle drift signal (`REQ-DOCBUNDLE-026`)",
+      "name": "Registry lag in `health`: commits since the requirements dir was last touched",
       "lane": "ops",
-      "milestone": "v2.10",
+      "milestone": "v2.12",
       "done": true
     },
     {
-      "name": "Untagged-code coverage report (`coverage`) — `REQ-COVERAGE-029`",
+      "name": "Ranked free-text requirement search (`search`), shared scoring model with the viewer",
       "lane": "feature",
-      "milestone": "v2.10",
+      "milestone": "v2.13",
       "done": true
     },
     {
-      "name": "Registry lag in `health`: commits since the requirements dir was last touched — `REQ-REGISTRYLAG-035`",
+      "name": "Requirement clarity lint enforced in CI, the dev hook and the published action",
       "lane": "ops",
-      "milestone": "v2.10",
+      "milestone": "v2.14",
       "done": true
     },
     {
-      "name": "Ranked free-text requirement search (`search`), shared model with the viewer — `REQ-SEARCH-036`",
+      "name": "Plain present requirement voice: named subject, no `shall`, tightened lint ceilings",
       "lane": "feature",
-      "milestone": "v2.10",
+      "milestone": "v2.15",
       "done": true
     },
     {
-      "name": "Requirement clarity lint enforced in CI, hook and action (v2.14.0)",
-      "lane": "ops",
-      "milestone": "v2.10",
-      "done": true
-    },
-    {
-      "name": "Plain present requirement voice: named subject, no `shall`, tightened lint ceilings (v2.15.0)",
+      "name": "V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link",
       "lane": "feature",
-      "milestone": "v2.10",
-      "done": true
-    },
-    {
-      "name": "V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated — `REQ-VLEVEL-037` (v2.16.0)",
-      "lane": "feature",
-      "milestone": "v2.10",
+      "milestone": "v2.16",
       "done": true
     },
     {
       "name": "MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above.",
       "lane": "feature",
-      "milestone": "v2.10",
+      "milestone": "v2.8",
       "done": false
     }
   ]
