@@ -469,6 +469,24 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("REQ-C-003", got)
             self.assertNotIn("REQ-D-004", got)
 
+    def test_scan_test_levels_ignores_a_tag_inside_a_python_string(self):  # tested-by: REQ-VLEVEL-037 @unit
+        # a levelled tag quoted in a docstring or string literal is prose about tagging,
+        # not a claim of coverage — the same masking _scan_file_tags applies
+        body = "\n".join([
+            "def f():",
+            '    """Tag it like tested-by: REQ-DOC-001 @unit in your test."""',
+            '    s = "tested-by: REQ-STR-001 @unit"',
+            "    return s",
+            "# tested-by: REQ-REAL-001 @unit",
+        ]) + "\n"
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "a.py"), "w", encoding="utf-8") as f:
+                f.write(body)
+            got = R.scan_test_levels(d)
+            self.assertNotIn("REQ-DOC-001", got)                   # docstring
+            self.assertNotIn("REQ-STR-001", got)                   # string literal
+            self.assertEqual(set(got["REQ-REAL-001"]), {"unit"})   # real comment tag
+
     def test_scan_test_levels_ignores_a_backticked_example(self):  # tested-by: REQ-VLEVEL-037 @unit
         # same phantom-member guard _scan_file_tags applies: a documented EXAMPLE of a
         # levelled tag must not register as real coverage
@@ -4932,3 +4950,46 @@ class BugHuntSince(unittest.TestCase):  # tested-by: REQ-CHECK-006
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class RoadmapSignals(unittest.TestCase):  # tested-by: REQ-ROADMAP-038
+    REQ_MS = "---\nid: {id}\nstatus: confirmed\nlayer: feature\nmilestone: {ms}\n---\n\n# T\n"
+
+    def _health(self, todo_text, req_ms="v2.13"):
+        """Build a repo with one milestoned requirement plus an optional TODO.md,
+        run `health --json`, and return the parsed payload."""
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "requirements")
+            _write(os.path.join(reqs_dir, "REQ-A-001.md"),
+                   self.REQ_MS.format(id="REQ-A-001", ms=req_ms))
+            _write(os.path.join(d, "impl.py"), "# implements: REQ-A-001\ndef f():\n    pass\n")
+            if todo_text is not None:
+                _write(os.path.join(d, "TODO.md"), todo_text)
+            reqs = R.load_requirements(reqs_dir)
+            members = R.scan_members(d, reqs_dir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(reqs, members, reqs_dir, code_root=d, as_json=True)
+            return json.loads(buf.getvalue())
+
+    def test_behind_signal_when_the_roadmap_lags(self):  # verifies: REQ-ROADMAP-038#AC-1
+        data = self._health("# TODO\n\n## v2.8\n- [ ] later | lane: feature\n", req_ms="v2.13")
+        self.assertEqual(data["roadmap_behind"], {"todo": "v2.8", "requirements": "v2.13"})
+
+    def test_no_behind_signal_when_the_roadmap_is_current(self):  # verifies: REQ-ROADMAP-038#AC-2
+        data = self._health("# TODO\n\n## v2.16\n- [x] shipped | lane: feature\n", req_ms="v2.13")
+        self.assertNotIn("roadmap_behind", data)
+
+    def test_unversioned_heading_is_listed(self):  # verifies: REQ-ROADMAP-038#AC-3
+        todo = "# TODO\n\n## v2.16\n- [x] a | lane: feature\n\n## Deferred work\n- [ ] b | lane: feature\n"
+        data = self._health(todo, req_ms="v2.13")
+        self.assertEqual(data["roadmap_unversioned_headings"], ["Deferred work"])
+
+    def test_no_todo_file_means_no_roadmap_signals(self):  # verifies: REQ-ROADMAP-038#AC-4
+        data = self._health(None)
+        self.assertNotIn("roadmap_behind", data)
+        self.assertNotIn("roadmap_unversioned_headings", data)
+
+    def test_versions_compare_numerically_not_as_strings(self):  # verifies: REQ-ROADMAP-038#AC-5
+        self.assertGreater(R._version_key("v2.10"), R._version_key("v2.9"))
+        self.assertLess("v2.10", "v2.9")   # the string compare this guards against
