@@ -3624,6 +3624,132 @@
       "lane": "feature",
       "milestone": "v2.8",
       "done": false
+    },
+    {
+      "name": "Decide the beachhead domain (4 named candidates) — tie-break on which gets one external user in 30 days; pipelines currently leads since this repo is already its own demo",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle",
+      "lane": "bus",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Remove app/src/lib/data.js's BAKED requirement data, or generate it from _map.json at build time; if it stays as a fallback, add a CI step that diffs the two and fails on divergence",
+      "lane": "feature",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Bring app/src/ under the gate; fix the .reqmapignore comment claiming the viewer is \"tested via npm build\" — there is no npm step in CI",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": false
+    },
+    {
+      "name": "Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "CI matrix: Python 3.9/3.12/3.13 x ubuntu/windows — prove the `-X utf8` usage actually holds",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Coverage + ruff on the engine, published in the job summary",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Declare and assert the Python floor (3.7 today, accidental)",
+      "lane": "bus",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters",
+      "lane": "bus",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree",
+      "lane": "bus",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget",
+      "lane": "bus",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Get to n=2: one external repo running the gate",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
+    },
+    {
+      "name": "Revisit BSL once there's someone who'd contribute",
+      "lane": "ops",
+      "milestone": "v3",
+      "done": false
     }
   ]
 }
