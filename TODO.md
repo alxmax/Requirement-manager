@@ -129,3 +129,52 @@
      zero-dependency claim for that module only. -->
 - [ ] MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above. | lane: feature
 
+## v2.9
+<!-- Roadmap drafted 2026-08-18 (v2.9-v3 plan, tiers 0-1: prove the thesis — pick a
+     beachhead and make the SSOT claim demonstrable on this repo's own tree).
+
+     Known breaks behind the data.js and scan-reach items below:
+     - app/src/lib/data.js carries 286 lines of BAKED requirement data (13 reqs,
+       manually copied from the registry: contract, acceptance, members) — a second,
+       unsynced source of truth in a tool whose pitch is "one". If CORE-PARSE-001
+       changes, the viewer shows the stale version and no gate notices — the worst
+       possible position for a counter-example.
+     - docs/ sits outside the scan root (CI runs from plugin/), so REQ-DOCBUNDLE-026
+       — built to catch generated HTML bundles with no lineage tag, 50KB threshold —
+       never sees its own docs/full_architecture.html (99KB). The rule exists and is
+       structurally excluded from the one place it should apply.
+     - Generated-artifact policy is inconsistent: Excalidraw output is gitignored
+       (source = generator), but the viewer and docs/ are committed blobs (217KB,
+       145KB) with no CI rebuild check — same problem class, two opposite answers.
+       diagrams/README.md already documents the right one.
+
+     Items 2-4 chain into each other: the scan work makes the tagging possible, and
+     the tagging produces the demo. -->
+- [ ] Decide the beachhead domain (4 named candidates) — tie-break on which gets one external user in 30 days; pipelines currently leads since this repo is already its own demo | lane: ops
+- [ ] Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree | lane: ops
+- [ ] Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle | lane: bus
+- [ ] Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them | lane: ops
+- [ ] Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated | lane: ops
+- [ ] Remove app/src/lib/data.js's BAKED requirement data, or generate it from _map.json at build time; if it stays as a fallback, add a CI step that diffs the two and fails on divergence | lane: feature
+- [ ] Bring app/src/ under the gate; fix the .reqmapignore comment claiming the viewer is "tested via npm build" — there is no npm step in CI | lane: ops
+
+## v3
+<!-- Tiers 2-5 of the same v2.9-v3 roadmap: survive a skeptic's ten minutes, the
+     engineering bar, hardening/scale, and reach.
+     Parked: closing the V-model (system layer + level-correspondence gating).
+     Unpark only if a regulated user asks — and record it as a decision so it reads
+     as scoped-out rather than missed. -->
+- [ ] Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README | lane: ops
+- [ ] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
+- [ ] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
+- [ ] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops
+- [ ] CI matrix: Python 3.9/3.12/3.13 x ubuntu/windows — prove the `-X utf8` usage actually holds | lane: ops
+- [ ] Coverage + ruff on the engine, published in the job summary | lane: ops
+- [ ] Declare and assert the Python floor (3.7 today, accidental) | lane: bus
+- [ ] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
+- [ ] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
+- [ ] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
+- [ ] Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget | lane: bus
+- [ ] Get to n=2: one external repo running the gate | lane: ops
+- [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
+- [ ] Revisit BSL once there's someone who'd contribute | lane: ops
