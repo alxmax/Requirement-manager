@@ -2670,6 +2670,46 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
     return data
 
 
+def _roadmap_signals(root):  # implements: REQ-ROADMAP-038
+    """Read TODO.md and report two read-only roadmap signals, or None when the file
+    is absent (most repos have no TODO.md, and they must see nothing).
+
+    Returns {"newest_milestone": "vX.Y" or None, "unversioned_headings": [str]}.
+
+    `unversioned_headings` is the one that bites. `_parse_todos_from_text` keeps the
+    CURRENT milestone when a `## ` heading does not start with a version, so items
+    under such a heading are silently attributed to the section above instead of being
+    skipped. A cosmetic rename therefore mis-files entries with no visible error."""
+    for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
+        path = os.path.join(base, "TODO.md")
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+        except OSError:
+            return None
+        versions, bad = [], []
+        for line in text.splitlines():
+            s = line.strip()
+            if not s.startswith("## "):
+                continue
+            m = re.match(r"^##\s+(v\d[\d.]*)\b", s)
+            if m:
+                versions.append(m.group(1))
+            else:
+                bad.append(s[3:].strip())
+        newest = max(versions, key=_version_key) if versions else None
+        return {"newest_milestone": newest, "unversioned_headings": bad}
+    return None
+
+
+def _version_key(v):  # implements: REQ-ROADMAP-038
+    """Sort key for a `vX.Y.Z` string: compare numerically per segment, so v2.10
+    sorts above v2.9 where a string compare would not."""
+    return tuple(int(p) for p in v.lstrip("v").split(".") if p.isdigit())
+
+
 def _parse_todos_from_text(text):
     """Parse TODO.md content → list of {name, lane, milestone, done} dicts. Pure.
     Items before the first ## vX.Y heading are silently ignored (milestone is required)."""
@@ -3555,6 +3595,18 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     lag = _commits_since_reqs_touch(code_root, reqs_dir) if code_root else None
     if lag is not None:
         data["commits_since_req_touch"] = lag
+    # Roadmap signals (read-only): does TODO.md still track what shipped, and does every
+    # section heading actually parse as a milestone. Absent (not empty) when the repo has
+    # no TODO.md, so a repo that does not keep one sees nothing. implements: REQ-ROADMAP-038
+    roadmap = _roadmap_signals(code_root) if code_root else None
+    if roadmap is not None:
+        newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
+                          if m.get("milestone")), key=_version_key, default=None)
+        if roadmap["newest_milestone"] and newest_req and                 _version_key(roadmap["newest_milestone"]) < _version_key(newest_req):
+            data["roadmap_behind"] = {"todo": roadmap["newest_milestone"],
+                                      "requirements": newest_req}
+        if roadmap["unversioned_headings"]:
+            data["roadmap_unversioned_headings"] = roadmap["unversioned_headings"]
     if as_badge:
         color = "brightgreen" if score == 100 else "green" if score >= 80 else "yellow" if score >= 60 else "red"
         message = "{}/{} | {}%".format(confirmed, total, score)

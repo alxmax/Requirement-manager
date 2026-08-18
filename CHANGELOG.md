@@ -1,5 +1,22 @@
 # Changelog
 
+## plugin `v2.17.0` — 2026-08-17
+
+**The engine now notices when its own roadmap drifts.** `TODO.md` is this project's roadmap and decision log, and nothing checked that it still matched reality. It fell behind twice — once by seven milestones — and the earlier fix, recorded in the `v1.35` section, chose manual hygiene over automation because demand was n=1. This is the read-only middle ground after n=2.
+
+`health --json` gains two signals, both absent (not empty) when the repo has no `TODO.md`, so a project that keeps none sees nothing new:
+
+- **`roadmap_behind`** — the newest roadmap milestone against the newest `milestone:` on any requirement, reported only when the roadmap is the older of the two. It compares against requirement metadata rather than a package version, because the engine owns the former in every repo and the latter is project-specific.
+- **`roadmap_unversioned_headings`** — every `## ` heading whose first token is not a version. This is the one that actually bit: `_parse_todos_from_text` keeps the *current* milestone when a heading does not parse, so items below it are filed under the section above rather than skipped. A cosmetic rename silently re-filed this repo's only open roadmap item under the wrong version, with no error anywhere.
+
+Versions compare segment by segment as numbers, so `v2.10` ranks above `v2.9` where a string compare reverses them.
+
+Neither signal is a gate: no exit code changes, and the health score is untouched.
+
+Also in this release: `scan_test_levels` masks Python string literals and docstrings alongside its backtick guard, so prose *about* how to tag never counts as coverage. That was real behaviour with no test and no clause — now pinned by both. New requirement `REQ-ROADMAP-038`.
+
+`MAP_ENGINE_VERSION` → `2026-08-17.2`.
+
 ## plugin `v2.16.1` — 2026-08-17
 
 **A clause-group label is decided by where it sits, not by the markers around it.** `v2.15.0` taught the voice to group clauses under bold labels, and `_bullets` learned to skip such a line so the next group's title would stop being appended to the previous group's last clause. It skipped them by shape — `re.fullmatch(r"\*\*.+\*\*", s)` — and `.+` is greedy, so it also matched a hanging-indent continuation that merely *opened and closed* on bold spans. Such a line was dropped, silently, from the parsed contract.
