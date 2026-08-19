@@ -10,8 +10,8 @@ a short-lived token, no stored secrets.
 **Stop your AI agent from drifting away from what you already agreed on.**
 
 A long agent session forgets earlier decisions. A fresh session on the same
-codebase re-implements something a different way. Two agents working the same
-repo make incompatible choices, and nothing tells either of them. The fix
+codebase re-implements something a different way. Two agents working on the
+same repo make incompatible choices, and nothing tells either of them. The fix
 isn't a longer prompt — it's a written contract the agent has to check itself
 against. `requirement-manager` gives every feature of your project one such
 file: a Markdown spec that says *what it should do*. Code links back to it
