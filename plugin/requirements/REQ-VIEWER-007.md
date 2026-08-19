@@ -101,10 +101,12 @@ AC-3
   - `RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields
   - `SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)
   - `app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views
-  These files carry no `implements:` tags because they are outside the plugin scan root —
-  the requirement covers the engine-side injection contract, not the compiled UX layer.
-  The viewer UX is tested by `npm run build:viewer` (Vite build success) and manual
-  inspection, not by reqmap's gate.
+  These files carry no `implements:` tags — app/ is deliberately excluded from the widened
+  repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the
+  engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md)
+  is the only automated check for the viewer, and it is run manually before vendoring, not
+  wired into CI or reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as
+  covered.
 
 ## Links
 - Used by: (auto)
