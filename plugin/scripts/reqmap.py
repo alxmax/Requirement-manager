@@ -83,7 +83,12 @@ TEST_LEVEL_RE = re.compile(
     r"\s*@(" + "|".join(TEST_LEVELS) + r")\b")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
+             ".sh", ".tf",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
+
+# Extensionless filenames scanned by exact basename match (no case-fold — CODE_EXTS
+# is suffix-based and case-sensitive too, so this stays consistent).
+BASENAME_CODE_FILES = {"Dockerfile", "Makefile"}
 
 # A repo whose source language the default set doesn't cover can declare extra
 # scannable extensions via the REQMAP_EXTRA_CODE_EXTS env var — comma-separated,
@@ -96,6 +101,12 @@ _extra_exts = tuple(
 )
 if _extra_exts:
     CODE_EXTS = CODE_EXTS + _extra_exts
+
+
+def _is_code_file(fn):  # implements: CORE-SCAN-002
+    """True if fn should be scanned as code: matches CODE_EXTS, or is an
+    extensionless basename like Dockerfile/Makefile."""
+    return fn.endswith(CODE_EXTS) or fn in BASENAME_CODE_FILES
 
 # ---- prose auto-draft classification (cmd_extract) ----
 # These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
@@ -978,7 +989,7 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent — raw os.walk order is filesystem/OS-dependent
         for fn in sorted(files):     # deterministic file order so the generated map is identical across platforms
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1051,7 +1062,7 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1109,7 +1120,7 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1154,7 +1165,7 @@ def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent, mirrors scan_members
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -2120,7 +2131,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
         dirs.sort()                            # deterministic id/suffix assignment
         for fn in sorted(files):
-            is_code = fn.endswith(tuple(e for e in CODE_EXTS if e not in PROSE_EXTS))
+            is_code = _is_code_file(fn) and not fn.endswith(PROSE_EXTS)
             is_prose = fn.endswith(PROSE_EXTS)
             if not (is_code or is_prose):
                 continue
@@ -3429,7 +3440,7 @@ def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     for dirpath, dirs, files in os.walk(code_root):
         dirs[:] = [d for d in sorted(dirs) if d not in (".git", "__pycache__", "node_modules")]
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             if reqs_abs and os.path.normcase(os.path.abspath(fp)).startswith(reqs_abs + os.sep):
@@ -3691,7 +3702,7 @@ def _wipe(reqs_dir, code_root):
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")

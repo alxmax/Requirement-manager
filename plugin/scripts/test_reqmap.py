@@ -394,6 +394,26 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("TOOL-X-001", members)  # ignored
             self.assertIn("APP-Y-001", members)       # still scanned
 
+    def test_is_code_file_extensions_and_basenames(self):
+        self.assertTrue(R._is_code_file("foo.sh"))
+        self.assertTrue(R._is_code_file("infra.tf"))
+        self.assertTrue(R._is_code_file("Dockerfile"))
+        self.assertTrue(R._is_code_file("Makefile"))
+        self.assertFalse(R._is_code_file("readme.txt"))
+        self.assertFalse(R._is_code_file("dockerfile"))  # exact basename match only, no case-fold
+
+    def test_shell_and_terraform_and_basename_files_are_scanned(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "deploy.sh"), tag("SH-CAP-001") + "\n")
+            _write(os.path.join(d, "infra.tf"), tag("TF-CAP-001") + "\n")
+            _write(os.path.join(d, "Dockerfile"), tag("DOCKER-CAP-001") + "\n")
+            _write(os.path.join(d, "Makefile"), tag("MAKE-CAP-001") + "\n")
+            members = R.scan_members(d, None)
+        self.assertIn("SH-CAP-001", members)
+        self.assertIn("TF-CAP-001", members)
+        self.assertIn("DOCKER-CAP-001", members)
+        self.assertIn("MAKE-CAP-001", members)
+
     def test_reqmapignore_glob_pattern(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "gen", "a.py"), tag("GEN-A-001") + "\n")
