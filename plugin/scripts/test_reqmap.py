@@ -5060,3 +5060,41 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: REQ-ROADMAP-038
     def test_versions_compare_numerically_not_as_strings(self):  # verifies: REQ-ROADMAP-038#AC-5
         self.assertGreater(R._version_key("v2.10"), R._version_key("v2.9"))
         self.assertLess("v2.10", "v2.9")   # the string compare this guards against
+
+
+class ViewerDataSync(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def _fixture_data_js(self, path, entries):
+        body = "const BAKED = [\n" + "".join(
+            '  {{ id:"{id}", contract:[{contract}] }},\n'.format(
+                id=e["id"], contract=",".join('"{}"'.format(c) for c in e["contract"]))
+            for e in entries
+        ) + "];\n"
+        _write(path, body)
+
+    def test_matching_data_js_reports_no_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, [])
+
+    def test_diverged_contract_text_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do Y instead."]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, ["FOO-BAR-001"])
+
+    def test_missing_baked_id_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = []  # the requirement was deleted/renamed in the registry
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, ["FOO-BAR-001"])
+
+    def test_missing_data_js_file_returns_none(self):
+        # fail-open: no viewer checked out (e.g. a shallow consumer clone) is not an error
+        self.assertIsNone(R.check_viewer_data_sync("/no/such/data.js", []))

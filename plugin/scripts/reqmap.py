@@ -1025,6 +1025,18 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     return members
 
 
+def check_viewer_data_sync(data_js_path, map_nodes):  # implements: CORE-SCAN-002
+    """Thin re-export so `gate` can call this without importing a script module
+    by path. Implementation lives in check_viewer_data_sync.py (stdlib, no deps)."""
+    import importlib.util, os as _os
+    spec = importlib.util.spec_from_file_location(
+        "_viewer_data_sync",
+        _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "check_viewer_data_sync.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.check_viewer_data_sync(data_js_path, map_nodes)
+
+
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
 
 
@@ -1690,6 +1702,22 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
             warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
+
+    # app/src/lib/data.js drift (warn-only): the viewer's fallback fixture vs the
+    # live registry. Built here (not via _build_map_data) since only id+contract
+    # is needed — avoids computing used_by/satisfied_by for a check that discards them.
+    _viewer_nodes = [{"id": rid, "contract": _bullets(r["body"], "contract")} for rid, r in reqs.items()]
+    for _candidate in (os.path.join(code_root, "app", "src", "lib", "data.js"),
+                        os.path.join(code_root, "..", "app", "src", "lib", "data.js")):
+        if os.path.exists(_candidate):
+            _drifted = check_viewer_data_sync(_candidate, _viewer_nodes)
+            if _drifted:
+                warns.append(
+                    "app/src/lib/data.js out of sync with {} requirement(s): {} — regenerate its "
+                    "BAKED fixture or accept the drift is intentional for this fallback demo data."
+                    .format(len(_drifted), ", ".join(_drifted)))
+            break
+
     # Reverse depends_on index: a contract drift's blast radius is its direct
     # dependents (one edge, not the transitive closure — a reviewer follows the
     # chain one hop at a time).  # implements: REQ-DRIFTIMPACT-035
