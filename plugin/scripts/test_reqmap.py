@@ -402,6 +402,14 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         self.assertFalse(R._is_code_file("readme.txt"))
         self.assertFalse(R._is_code_file("dockerfile"))  # exact basename match only, no case-fold
 
+    def test_is_code_file_git_hook_basenames(self):
+        # git hook filenames are extensionless and as conventional as Dockerfile/Makefile —
+        # needed so a repo's own .githooks/ scripts are taggable (v2.9 "tag your own pipeline").
+        self.assertTrue(R._is_code_file("pre-commit"))
+        self.assertTrue(R._is_code_file("pre-push"))
+        self.assertTrue(R._is_code_file("commit-msg"))
+        self.assertFalse(R._is_code_file("pre-commit.sample"))  # git's own shipped sample hooks
+
     def test_shell_and_terraform_and_basename_files_are_scanned(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "deploy.sh"), tag("SH-CAP-001") + "\n")

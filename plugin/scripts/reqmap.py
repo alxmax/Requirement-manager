@@ -87,8 +87,14 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
 
 # Extensionless filenames scanned by exact basename match (no case-fold — CODE_EXTS
-# is suffix-based and case-sensitive too, so this stays consistent).
-BASENAME_CODE_FILES = {"Dockerfile", "Makefile"}
+# is suffix-based and case-sensitive too, so this stays consistent). Git hook names
+# (pre-commit, pre-push, ...) are as conventional and unambiguous as Dockerfile/
+# Makefile — a repo's own .githooks/ scripts are exactly the kind of scannable
+# pipeline code v2.9's "tag your own pipeline" item covers; an unrelated file that
+# happens to share one of these names is a harmless no-op scan (no tag = no member).
+BASENAME_CODE_FILES = {"Dockerfile", "Makefile",
+                       "pre-commit", "pre-push", "pre-receive", "post-receive",
+                       "commit-msg", "prepare-commit-msg", "post-checkout", "post-merge"}
 
 # A repo whose source language the default set doesn't cover can declare extra
 # scannable extensions via the REQMAP_EXTRA_CODE_EXTS env var — comma-separated,

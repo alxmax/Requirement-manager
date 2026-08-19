@@ -1,4 +1,5 @@
 # Requirement-manager drift gate — published GitHub Action.
+# implements: REQ-SELFGATE-039
 #
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
 # `<dir>/action.yml`, so this file is consumed as:
