@@ -2,7 +2,7 @@
 # requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
-#   2. map staleness  — committed _map.* vs current code   (fix: reqmap.py map)
+#   2. map staleness  — committed _map.* vs current code   (fix: reqmap.py map --root plugin --code .)
 #   3. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
 #   check_versions.py -> gate -> lint --strict -> map --check
@@ -29,6 +29,6 @@ if ! "$PY" -X utf8 plugin/scripts/reqmap.py lint --strict --root plugin --code .
 fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py map --check --root plugin --code .; then
   echo "" >&2
-  echo "reqmap: committed map is stale — run 'python plugin/scripts/reqmap.py map --root plugin' and stage it." >&2
+  echo "reqmap: committed map is stale — run 'python plugin/scripts/reqmap.py map --root plugin --code .' and stage it." >&2
   exit 1
 fi
