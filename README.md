@@ -19,6 +19,44 @@ AI assistant (Claude Code, Copilot, Gemini CLI, or none), and needs no
 installation — just copy one file. It's especially handy when several people or
 several AI agents touch the same codebase and the specs slowly rot.
 
+## Worked example
+
+One requirement, one agent session, one drift the gate caught — real terminal output, not a mockup:
+
+```
+$ python scripts/reqmap.py new AREA-DEMO-999
+created .\requirements\AREA-DEMO-999.md
+
+$ python scripts/reqmap.py confirm AREA-DEMO-999
+promoted AREA-DEMO-999: draft -> confirmed
+  note: no `tested-by:` member — wire an acceptance test (`# tested-by: AREA-DEMO-999`) or set `test_exempt: <reason>` to silence the untested signal.
+  next: reqmap.py sync
+
+$ python scripts/reqmap.py sync
+  lock update: AREA-DEMO-999 hash changed (new->703e565f)
+lock updated.
+WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
+info  1 open verify-intent finding(s) — run `reqmap.py findings`
+
+1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
+wrote .\requirements\_map.md
+wrote .\requirements\_map.json
+(1 nodes, 0 edges)
+
+$ python scripts/reqmap.py gate
+WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
+WARN  AREA-DEMO-999: DRIFT — contract changed since lock; re-check 1 member(s): scripts/_demo_hello.py:2
+info  1 open verify-intent finding(s) — run `reqmap.py findings`
+
+1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 2 warnings.
+```
+
+Between `sync` and `gate`, the requirement's contract clause changed (`hello`
+returns `'hello'` &rarr; `'hello, world'`) — but the code that backs it,
+`scripts/_demo_hello.py`, was never touched. Nothing else in the toolchain would
+have caught that; `gate` did, because the drift baseline in `_reqlock.json` hashes
+the requirement's own contract text, not just its existence.
+
 ## Why would I want this?
 
 On most projects the "spec" lives in someone's head, a stale wiki, or a ticket
