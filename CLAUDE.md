@@ -43,6 +43,15 @@ cwd. Read-only exploration commands with no committed-artifact freshness concern
 `search`, `next`, `health`, `coverage`, `dupes`, `findings`, `review`) are unaffected either way
 and can be run with or without `--code ..` depending on what you want to inspect.
 
+**A `confirmed` requirement whose members all live outside `plugin/`** (e.g. `REQ-SELFGATE-039`,
+whose 5 members are `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`,
+`.githooks/pre-push`, `sync_reqmap.sh`) can now only pass `gate`'s implements-tag check under the
+widened scan. Running the bare `gate` (no `--code ..`) genuinely ERRORs on such a requirement —
+not a silent miss, a real exit-1 failure — because the narrow scope never reaches any file that
+proves the tag exists. This is an accepted, permanent consequence of the widened-scan design, not
+a bug: CI and the pre-commit hook always run widened, so it never fires there; a human running the
+bare command locally sees a loud, immediately-diagnosable error rather than a silent divergence.
+
 Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
 
 ```bash
