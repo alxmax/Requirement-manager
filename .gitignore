@@ -22,6 +22,9 @@ docs/before_after_ieee29148.*
 # Superpowers session artifacts (top-level)
 .superpowers/
 
+# Superpowers git worktrees (isolated workspaces for subagent-driven implementation)
+.worktrees/
+
 # Excalidraw diagrams: regenerable outputs (see diagrams/README.md for the canonical
 # regeneration command). The dir + README are tracked; the generated scenes/viewers are not.
 diagrams/*.excalidraw
