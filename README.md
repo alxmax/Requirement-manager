@@ -52,7 +52,7 @@ info  1 open verify-intent finding(s) — run `reqmap.py findings`
 ```
 
 Between `sync` and `gate`, the requirement's contract clause changed (`hello`
-returns `'hello'` &rarr; `'hello, world'`) — but the code that backs it,
+returns `'hello'` -> `'hello, world'`) — but the code that backs it,
 `scripts/_demo_hello.py`, was never touched. Nothing else in the toolchain would
 have caught that; `gate` did, because the drift baseline in `_reqlock.json` hashes
 the requirement's own contract text, not just its existence.
