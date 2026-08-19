@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-19 18:15
+generated: 2026-08-19 18:27
 nodes: 43
 edges: 61
 ---
@@ -332,14 +332,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_misc["misc"]
-    REQ_SELFGATE_039["This repo's own gate wiring<br><small>REQ-SELFGATE-039</small><br>untested"]
-  end
-  style REQ_SELFGATE_039 fill:#fff9c4,stroke:#aa0,color:#550
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-SELFGATE-039 | confirmed | 5 | 0 | untested | Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal. |

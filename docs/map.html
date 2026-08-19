@@ -2626,7 +2626,7 @@
         "`.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`, `sync_reqmap.sh` (all repo root)."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nAC-2\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created",
+      "accept": "AC-1\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nAC-2\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created\n\nAC-3\n  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v1`\n  When   their own CI runs that step\n  Then   `check/action.yml` invokes the same gate this repo runs on itself\n\nAC-4\n  Given  a local push attempt with the dev hook enabled and the target branch is `main`\n  When   `.githooks/pre-push` runs\n  Then   the push is blocked before it reaches the remote\n\nAC-5\n  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments\n  When   it completes\n  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local\n         plugin cache and every named consumer repo matches this repo's current copy",
       "input": "",
       "output": "",
       "desc": "",
@@ -2658,15 +2658,10 @@
           "loc": "check/action.yml:2"
         }
       ],
-      "test_exempt": null,
+      "test_exempt": "pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2",
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "untested",
-          "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-SHOW-015",

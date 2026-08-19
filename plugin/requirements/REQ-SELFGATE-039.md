@@ -6,6 +6,7 @@ owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: [REQ-CHECK-006]     # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
+test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2
 # area:              # optional: System Map grouping label (else the id prefix is used)
 ---
 
@@ -43,6 +44,22 @@ AC-2
   Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)
   When   `.githooks/pre-commit` runs
   Then   it fails the commit on the same errors CI would fail on, before the commit is created
+
+AC-3
+  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v1`
+  When   their own CI runs that step
+  Then   `check/action.yml` invokes the same gate this repo runs on itself
+
+AC-4
+  Given  a local push attempt with the dev hook enabled and the target branch is `main`
+  When   `.githooks/pre-push` runs
+  Then   the push is blocked before it reaches the remote
+
+AC-5
+  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments
+  When   it completes
+  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
+         plugin cache and every named consumer repo matches this repo's current copy
 
 ## Example — in practice (optional, non-binding)
 - A contributor enables `git config core.hooksPath .githooks`, edits a requirement with a typo,
