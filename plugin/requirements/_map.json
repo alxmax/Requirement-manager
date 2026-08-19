@@ -3718,34 +3718,40 @@
       "name": "Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree",
       "lane": "ops",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
       "name": "Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle",
       "lane": "bus",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
       "name": "Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them",
       "lane": "ops",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
       "name": "Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated",
       "lane": "ops",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
-      "name": "Remove app/src/lib/data.js's BAKED requirement data, or generate it from _map.json at build time; if it stays as a fallback, add a CI step that diffs the two and fails on divergence",
+      "name": "app/src/lib/data.js's BAKED requirement data: add a CI/gate step that diffs it against the live registry",
       "lane": "feature",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
-      "name": "Bring app/src/ under the gate; fix the .reqmapignore comment claiming the viewer is \"tested via npm build\" — there is no npm step in CI",
+      "name": "Fix the .reqmapignore comment claiming the viewer is \"tested via npm build\" — there is no npm step in CI",
+      "lane": "ops",
+      "milestone": "v2.9",
+      "done": true
+    },
+    {
+      "name": "Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx",
       "lane": "ops",
       "milestone": "v2.9",
       "done": false
