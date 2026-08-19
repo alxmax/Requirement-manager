@@ -31,6 +31,12 @@ python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-f
 python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
 
+**This repo's own CI and pre-commit hook additionally pass `--code ..` / `--code .`** so the
+scan reaches the repo root (`docs/`, `.github/`, `.githooks/`, root-level `scripts/`), per a
+NEW repo-root `.reqmapignore` (kept separate from `plugin/.reqmapignore` — see that file's own
+comment for why). The plugin-only commands above stay the fast local default; the hook and CI
+are what actually enforce the wider scope, so both are updated together.
+
 Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
 
 ```bash

@@ -534,6 +534,45 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
                          [("tested-by", "REQ-A-001")])
 
 
+class RepoRootScan(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def test_default_scan_set_unchanged_without_code_flag(self):
+        # Protects external consumer repos: scan_members(code_root) must be
+        # byte-identical whether or not a sibling .reqmapignore exists one
+        # level up — passing no --code (code_root == a.root) must never see it.
+        with tempfile.TemporaryDirectory() as d:
+            plugin_dir = os.path.join(d, "plugin")
+            _write(os.path.join(plugin_dir, "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            before = R.scan_members(plugin_dir, None)
+            _write(os.path.join(d, ".reqmapignore"), "plugin/scripts/reqmap.py\n")  # repo-root file appears
+            after = R.scan_members(plugin_dir, None)  # code_root still == plugin_dir
+            self.assertEqual(before, after)
+
+    def test_widened_root_excludes_generated_viewer_and_skill_pairs(self):
+        # Regression test for the bug found reading load_ignore(): a NEW
+        # repo-root .reqmapignore (not a relocated one) must exclude the same
+        # generated files once code_root widens to the repo root via --code.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "plugin", "scripts", "_map_viewer.html"), "<!-- generated -->\n")
+            _write(os.path.join(d, "plugin", "skills", "requirement-manager", "SKILL.md"), "# skill\n")
+            _write(os.path.join(d, "plugin", "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            _write(os.path.join(d, ".reqmapignore"),
+                   "plugin/scripts/_map_viewer.html\n"
+                   "plugin/skills/requirement-manager/SKILL.md\n")
+            members = R.scan_members(d, None)  # code_root == repo root (simulates --code ..)
+            self.assertIn("TOOL-X-001", members)
+            all_files = {fp for hits in members.values() for (_r, fp, _l) in hits}
+            self.assertNotIn("plugin/scripts/_map_viewer.html", all_files)
+            self.assertNotIn("plugin/skills/requirement-manager/SKILL.md", all_files)
+
+    def test_widened_root_reaches_docs_and_github(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "notes.md"), tag("DOCS-CAP-001") + "\n")
+            _write(os.path.join(d, ".github", "workflows", "ci.yml"), tag("CI-CAP-001") + "\n")
+            members = R.scan_members(d, None)
+        self.assertIn("DOCS-CAP-001", members)
+        self.assertIn("CI-CAP-001", members)
+
+
 class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
     """A large docs/ HTML doc with no generated-from lineage is the doc-sync blind
     spot — it drifts from the requirements it derives from with nothing linking them."""
