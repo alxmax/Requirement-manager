@@ -5062,7 +5062,7 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: REQ-ROADMAP-038
         self.assertLess("v2.10", "v2.9")   # the string compare this guards against
 
 
-class ViewerDataSync(unittest.TestCase):  # tested-by: CORE-SCAN-002
+class ViewerDataSync(unittest.TestCase):  # tested-by: REQ-VIEWER-007
     def _fixture_data_js(self, path, entries):
         body = "const BAKED = [\n" + "".join(
             '  {{ id:"{id}", contract:[{contract}] }},\n'.format(
@@ -5098,3 +5098,26 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: CORE-SCAN-002
     def test_missing_data_js_file_returns_none(self):
         # fail-open: no viewer checked out (e.g. a shallow consumer clone) is not an error
         self.assertIsNone(R.check_viewer_data_sync("/no/such/data.js", []))
+
+    def test_matching_data_js_with_bracket_in_contract_text_reports_no_drift(self):
+        # regression: a naive non-greedy `contract:\[(.*?)\]` regex stops at the FIRST
+        # ']', truncating any bullet whose own text contains a bracket -- and this
+        # repo's real contracts do (e.g. describing `[a, b]` syntax). A bracket-aware
+        # scanner must find the array's TRUE close, not the first stray ']'.
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            bullet = 'Accepts an inline `[a, b]` list and a `{k: v}` block.'
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": [bullet]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": [bullet]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, [])
+
+    def test_non_utf8_data_js_returns_none(self):
+        # regression: only OSError was caught; a non-UTF-8 file raises UnicodeDecodeError
+        # (a ValueError subclass), which was uncaught and crashed `gate` outright instead
+        # of degrading to a warning.
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            with open(data_js, "wb") as f:
+                f.write(b"\xff\xfe garbage, not valid utf-8")
+            self.assertIsNone(R.check_viewer_data_sync(data_js, []))

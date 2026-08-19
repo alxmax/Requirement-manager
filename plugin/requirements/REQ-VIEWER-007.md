@@ -95,6 +95,9 @@ AC-3
 ## WHERE — Current implementation
 - `render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is
   called by `cmd_map` after `_map.json`/`_map.md` are written.
+- `check_viewer_data_sync` (+ `_vds_*` helpers) in `reqmap.py`, called from `cmd_check` (`gate`):
+  a warn-only heuristic comparing `app/src/lib/data.js`'s hand-authored `BAKED` fallback fixture
+  against the live registry, so a stale demo entry is flagged rather than silently shown forever.
 - The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):
   - `MapView.jsx` — force-graph rendering of the requirement graph
   - `ProblemsView.jsx` — gate errors, drift items, and open risk inbox

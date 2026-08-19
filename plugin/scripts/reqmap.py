@@ -1025,16 +1025,75 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     return members
 
 
-def check_viewer_data_sync(data_js_path, map_nodes):  # implements: CORE-SCAN-002
-    """Thin re-export so `gate` can call this without importing a script module
-    by path. Implementation lives in check_viewer_data_sync.py (stdlib, no deps)."""
-    import importlib.util, os as _os
-    spec = importlib.util.spec_from_file_location(
-        "_viewer_data_sync",
-        _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "check_viewer_data_sync.py"))
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod.check_viewer_data_sync(data_js_path, map_nodes)
+_VDS_STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
+_VDS_ID_CONTRACT_START_RE = re.compile(r'id:"([A-Z][A-Z0-9-]+)"[^{}]*?contract:\[')
+
+
+def _vds_normalize(strings):
+    return sorted(" ".join(s.split()) for s in strings)
+
+
+def _vds_scan_array_body(text, start):
+    """From text[start] (the char right after the '[' that opens a JS array),
+    return the array's raw source text up to its matching ']' — tracking
+    quoted-string state so a stray ']'/'[' INSIDE a contract bullet's own text
+    (e.g. a bullet describing `[a, b]` syntax) doesn't end the scan early.
+    Returns None if the array never closes before EOF."""
+    depth, in_string, i = 1, False, start
+    while i < len(text):
+        c = text[i]
+        if in_string:
+            if c == "\\":
+                i += 2
+                continue
+            if c == '"':
+                in_string = False
+        elif c == '"':
+            in_string = True
+        elif c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                return text[start:i]
+        i += 1
+    return None
+
+
+def _vds_parse_baked(text):
+    """{id: [contract strings]} extracted from app/src/lib/data.js's BAKED array."""
+    out = {}
+    for m in _VDS_ID_CONTRACT_START_RE.finditer(text):
+        block = _vds_scan_array_body(text, m.end())
+        if block is None:
+            continue
+        out[m.group(1)] = [s.replace('\\"', '"') for s in _VDS_STRING_RE.findall(block)]
+    return out
+
+
+def check_viewer_data_sync(data_js_path, map_nodes):  # implements: REQ-VIEWER-007
+    """Compare app/src/lib/data.js's hand-authored BAKED requirement fixture
+    against the live registry (map_nodes: [{"id":..., "contract":[...]}, ...]).
+    Returns a sorted list of requirement IDs where the two disagree — a baked id
+    missing from the live registry, or a whitespace-normalized mismatch in its
+    `contract` bullets. A warn-only heuristic (not a byte-exact diff): it locates
+    each BAKED entry's `contract:[...]` array via bracket-depth + quoted-string
+    tracking (a naive non-greedy regex stops at the FIRST ']', which truncates
+    any bullet whose own text contains a bracket — this repo's actual contracts
+    do, e.g. describing `[a, b]` syntax, so that naive form is not just imprecise
+    but wrong on real data). Returns None (not []) when data_js_path doesn't
+    exist OR can't be decoded as UTF-8 — fail-open, matching load_ignore()'s
+    convention for an optional file."""
+    try:
+        with open(data_js_path, encoding="utf-8") as f:
+            text = f.read()
+    except (OSError, ValueError):   # ValueError covers UnicodeDecodeError
+        return None
+    baked = _vds_parse_baked(text)
+    live = {n["id"]: n.get("contract", []) for n in map_nodes}
+    drift = [rid for rid, contract in baked.items()
+             if rid not in live or _vds_normalize(contract) != _vds_normalize(live[rid])]
+    return sorted(drift)
 
 
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
@@ -1704,12 +1763,16 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                          "— drift detection skipped this run; re-run with --update-lock")
 
     # app/src/lib/data.js drift (warn-only): the viewer's fallback fixture vs the
-    # live registry. Built here (not via _build_map_data) since only id+contract
-    # is needed — avoids computing used_by/satisfied_by for a check that discards them.
-    _viewer_nodes = [{"id": rid, "contract": _bullets(r["body"], "contract")} for rid, r in reqs.items()]
+    # live registry. Skipped entirely (no _viewer_nodes build) unless a data.js
+    # actually exists — true for every consumer repo without a vendored viewer.
     for _candidate in (os.path.join(code_root, "app", "src", "lib", "data.js"),
                         os.path.join(code_root, "..", "app", "src", "lib", "data.js")):
         if os.path.exists(_candidate):
+            # Built here (not via _build_map_data) since only id+contract is
+            # needed — avoids computing used_by/satisfied_by for a check that
+            # discards them.
+            _viewer_nodes = [{"id": rid, "contract": _bullets(r["body"], "contract")}
+                              for rid, r in reqs.items()]
             _drifted = check_viewer_data_sync(_candidate, _viewer_nodes)
             if _drifted:
                 warns.append(
