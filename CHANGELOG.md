@@ -21,6 +21,10 @@ Both were written as failing tests first, then fixed. `REQ-VIEWER-007` gains AC-
 
 The tag immediately earned itself: the poster's glossary still explained **`@v1`** as "git tag of the published GitHub Action", three releases after that line moved to `@v2`. `check_versions.py`'s alias axis had not caught it, because the glossary names the bare `@v1` rather than the full `requirement-manager/check@vN` path it matches on.
 
+**`gate` now names members git does not track** (`REQ-TRACKED-042`). The rule it enforces is that a committed generated artifact may depend only on tracked files — break it and the map records members a fresh checkout cannot produce, so `map --check` fails in CI over a file the reader cannot find. That happened twice in one day here (a gitignored subagent worktree, and a Consilium report carrying a real `generated-from:` tag), and both times the local scan could see what CI never would.
+
+Built on **untracked** rather than gitignored, deliberately: it is the property that actually matters — a merely-uncommitted file breaks reproducibility identically — one `git ls-files` call answers both, and it avoids either hand-parsing gitignore semantics or spawning a `check-ignore` per path. Fail-open outside a git work tree (nothing at all, not "every member is untracked"), warn-only, exit code untouched: a consumer repo may tag an ignored file on purpose, and this nudges the choice into the open rather than overruling it.
+
 `MAP_ENGINE_VERSION` → `2026-08-20.1`.
 
 

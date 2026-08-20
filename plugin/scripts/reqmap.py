@@ -1135,6 +1135,42 @@ def check_viewer_data_sync(data_js_path, map_nodes):  # implements: REQ-VIEWER-0
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
 
 
+def untracked_members(code_root, members):  # implements: REQ-TRACKED-042
+    """Sorted rel-paths of member files git does not track, or None when unknowable.
+
+    The invariant: a committed generated artifact must depend only on TRACKED files.
+    Break it and the map records members a fresh checkout cannot produce, so the
+    committed _map.json is unreproducible - `map --check` then fails in CI for a file
+    that is not in the repo, which reads as a mystery rather than a mistake. That
+    happened twice in one day here: a subagent worktree (a full second copy of the
+    tree, gitignored) and a Consilium report carrying a real `generated-from:` tag.
+    Both were invisible locally, because the local scan can see what CI never will.
+
+    One `git ls-files` call, not one `check-ignore` per path: being untracked is the
+    property that matters, and it also catches a file that is merely uncommitted
+    rather than ignored. Returns None - the fail-open signal, matching
+    `_since_changed_files` - when git is absent or `code_root` is not a work tree.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-c", "core.quotepath=off", "ls-files", "-z"],
+            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=30,
+        )
+        if result.returncode != 0:
+            return None
+    except Exception:
+        return None
+    tracked = {os.path.normcase(p.replace("/", os.sep))
+               for p in result.stdout.split("\0") if p}
+    seen = set()
+    for hits in members.values():
+        for _role, fp, _ln in hits:
+            seen.add(fp)
+    return sorted(fp for fp in seen
+                  if os.path.normcase(fp.replace("/", os.sep)) not in tracked)
+
+
+
 def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-DOCBUNDLE-026
     """Sorted rel-paths of large `docs/` HTML docs that carry no `generated-from:`
     tag — the doc-sync blind spot: a whole-system doc (built from many requirements)
@@ -1858,6 +1894,19 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
                      "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
+
+    # Members git does not track: the committed map records them, but a fresh checkout
+    # has none, so the map cannot be reproduced and `map --check` fails in CI for a file
+    # that is not in the repo. Warn-only and fail-open (silent outside a work tree), so a
+    # consumer who deliberately tags an ignored file is nudged, not blocked.
+    _untracked = untracked_members(code_root, full_members)   # implements: REQ-TRACKED-042
+    if _untracked:
+        warns.append(
+            "{} member(s) are not tracked by git: {} — the committed map records them, but a "
+            "fresh checkout has no such file, so it cannot be regenerated there. Commit them, "
+            "or exclude them in .reqmapignore.".format(
+                len(_untracked), ", ".join(_untracked[:5])
+                + ("" if len(_untracked) <= 5 else ", …")))
 
     # Coverage erosion: a sizeable program file with no requirement link implements
     # behavior no requirement describes. Plain warn — NEVER strict-promoted (the

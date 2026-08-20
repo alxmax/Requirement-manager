@@ -194,7 +194,13 @@
            and check_versions.py asserts action.yml/README/CLAUDE.md name the same major
            (the documented `uses:` line is the SSOT — no separate version file).
            REQ-SELFGATE-039 AC-6/AC-7. Shipped in v2.18.1. -->
-- [ ] Scan vs `.gitignore`: a gitignored-but-tagged file silently changes committed generated artifacts — make the scan skip gitignored paths, or WARN when a member resolves to one | lane: bus
+- [x] Scan vs `.gitignore`: a gitignored-but-tagged file silently changes committed generated artifacts — make the scan skip gitignored paths, or WARN when a member resolves to one | lane: bus
+      <!-- Shipped as REQ-TRACKED-042, the WARN half the item's own note argued for. Built
+           on UNTRACKED rather than gitignored: it is the property that actually matters
+           (a merely-uncommitted file breaks reproducibility identically), one `git ls-files`
+           answers both, and it avoids hand-parsing gitignore semantics or one check-ignore
+           call per path. Fail-open outside a work tree, warn-only, exit code untouched —
+           a consumer may tag an ignored file deliberately. -->
       <!-- Found 2026-08-20 during the check@v2 work (PR #167), twice in one session:
            `.worktrees/**` (an isolated subagent worktree is a FULL second copy of the
            tree — 527 members instead of 261, plus 3 dangling-tag ERRORs from the copies'
