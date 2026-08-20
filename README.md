@@ -376,6 +376,13 @@ are hidden in the chart.
 Items appear as amber dashed bars in the Roadmap tab until you replace them with a
 real requirement file.
 
+## Contributing
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, the gate/test loop, and the two rules that
+explain most review feedback (a behaviour change ships with its requirement; the engine
+stays stdlib-only). Security reports go through private disclosure:
+[`SECURITY.md`](SECURITY.md).
+
 ## License
 
 See [LICENSE](LICENSE) — Business Source License 1.1.

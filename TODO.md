@@ -257,7 +257,14 @@
            warn|error|off, default warn). Kept on @v2 deliberately — warn-only cannot turn a
            green build red, and a new major would have stranded exactly the never-updated
            pins this exists to reach. -->
-- [ ] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
+- [x] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
+      <!-- CONTRIBUTING.md, SECURITY.md, .github/PULL_REQUEST_TEMPLATE.md and two issue
+           forms (bug / feature). Written against what this repo actually enforces — the
+           gate loop, the two-version-number rule, the stdlib-only constraint, the
+           demand-gated stance on new features — rather than generic boilerplate. SECURITY
+           routes to GitHub private advisories (no maintainer email published) and states
+           the real scope: the action runs in consumer CI, and the viewer inlines repo
+           content into a <script> block. -->
 - [x] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
       <!-- `</script>` was already covered. The other two were real and both are fixed:
            U+2028/U+2029 were emitted RAW into the inlined <script> (they end a line in
