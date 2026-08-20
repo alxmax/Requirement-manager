@@ -1,7 +1,7 @@
 ---
-generated: 2026-08-20 20:12
-nodes: 44
-edges: 61
+generated: 2026-08-20 20:43
+nodes: 45
+edges: 62
 ---
 
 # Requirement Map
@@ -45,6 +45,7 @@ graph LR
     REQ_PROSE_024["Prose capability classification & drafting<br><small>REQ-PROSE-024</small>"]
     REQ_PYFLOOR_040["Declared Python support floor<br><small>REQ-PYFLOOR-040</small>"]
     REQ_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>REQ-REGISTRYLAG-035</small>"]
+    REQ_REPRO_041["Committed build artifacts stay re-derivable<br><small>REQ-REPRO-041</small>"]
     REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
     REQ_ROADMAP_038["Roadmap coherence signals<br><small>REQ-ROADMAP-038</small>"]
     REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
@@ -73,6 +74,7 @@ graph LR
   REQ_PROMOTE_TODO_001 --> REQ_NEW_004
   REQ_PROSE_024 --> REQ_EXTRACT_008
   REQ_REGISTRYLAG_035 --> REQ_HEALTH_017
+  REQ_REPRO_041 --> REQ_SELFGATE_039
   REQ_ROADMAP_038 --> REQ_HEALTH_017
   REQ_SEARCH_036 --> REQ_SIMILAR_016
   REQ_SITE_026 --> REQ_MAP_007
@@ -244,6 +246,9 @@ graph LR
   REQ_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_3635_3729
   f_plugin_scripts_test_reqmap_py_3192["plugin/scripts/test_reqmap.py:3192"]
   REQ_REGISTRYLAG_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_3192
+  REQ_REPRO_041["Committed build artifacts stay re-derivable<br><small>REQ-REPRO-041</small>"]
+  f__github_workflows_ci_yml_4[".github/workflows/ci.yml:4"]
+  REQ_REPRO_041 -->|implements| f__github_workflows_ci_yml_4
   REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
   f_plugin_scripts_reqmap_py_5138["plugin/scripts/reqmap.py:5138"]
   REQ_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_5138
@@ -332,7 +337,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>40 caps</small>"]
+  a_REQ["REQ<br><small>41 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px

@@ -1,6 +1,7 @@
 name: ci
 # implements: REQ-SELFGATE-039
 # implements: REQ-PYFLOOR-040
+# implements: REQ-REPRO-041
 
 on:
   push:
@@ -132,6 +133,53 @@ jobs:
         working-directory: plugin/skills/excalidraw-diagram/scripts
         run: python -X utf8 -m unittest test_excalidraw -v
 
+  # Committed build artifacts, re-derived and compared. Two files in this repo are
+  # BUILD OUTPUT that is nonetheless committed, because the whole point is that a
+  # consumer gets them without a toolchain: plugin/scripts/_map_viewer.html (217KB,
+  # the Vite single-file build the stdlib engine injects data into) and
+  # docs/full_architecture.html (99KB, an Excalidraw poster). Nothing checked either
+  # against its source, so a change to app/ or to the generator could ship a viewer
+  # that no longer matched the code it was built from - and the repo would still be
+  # green. Both builds are byte-reproducible today; this job is what keeps them that
+  # way, and turns "regenerable" from a claim in diagrams/README.md into a check.
+  artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+      - name: Install viewer dependencies
+        working-directory: app
+        run: npm ci
+      - name: Rebuild the vendored viewer
+        working-directory: app
+        run: npm run build:viewer
+      # The build writes straight over the committed copy, so the diff IS the check.
+      - name: Vendored viewer matches app/
+        run: |
+          if ! git diff --exit-code -- plugin/scripts/_map_viewer.html; then
+            echo "::error::plugin/scripts/_map_viewer.html is stale - rebuild it with \`cd app && npm run build:viewer\` and commit the result (see app/CLAUDE.md)."
+            exit 1
+          fi
+      # The diagram generator writes a .excalidraw next to its .html, and docs/*.excalidraw
+      # is hard-blocked by .gitignore, so build into a temp dir and compare instead of
+      # regenerating in place.
+      - name: Published architecture diagram matches its generator
+        run: |
+          out=$(mktemp -d)
+          python -X utf8 plugin/skills/excalidraw-diagram/examples/make_full_architecture.py "$out"
+          if ! cmp -s "$out/full_architecture.html" docs/full_architecture.html; then
+            echo "::error::docs/full_architecture.html no longer matches make_full_architecture.py - regenerate it and commit the result."
+            exit 1
+          fi
+          echo "docs/full_architecture.html matches its generator"
+
   # Publish the requirement-map site (the committed docs/ Pages root: map.html,
   # the Excalidraw architecture diagrams, .nojekyll, index redirect) to GitHub
   # Pages — authenticated with the workflow's short-lived OIDC id-token, NO
@@ -186,10 +234,11 @@ jobs:
   # CHANGELOG.md section (scripts/changelog_notes.py), the same heading the
   # version-bump gate already requires, so notes never drift from the changelog.
   release:
-    # Also gated on the matrix: a version that fails on Windows or on the declared
-    # floor must not become a tag consumers install. deploy-map stays on the gate
+    # Also gated on the matrix and on artifact reproducibility: a version that fails
+    # on Windows, on the declared floor, or ships a viewer that no longer matches
+    # app/ must not become a tag consumers install. deploy-map stays on the gate
     # alone — it republishes docs/, which the gate already drift-checks.
-    needs: [gate-and-tests, tests]
+    needs: [gate-and-tests, tests, artifacts]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
