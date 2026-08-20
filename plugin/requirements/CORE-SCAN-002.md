@@ -53,6 +53,9 @@ Every line in this section is binding.
 - Paths matching `.reqmapignore` are excluded.
 - An unreadable file is skipped without aborting the scan.
 
+- `scan_all` returns the members, the per-criterion coverage and the verification levels
+  from a single walk, and each result equals what the three separate scanners return.
+
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
@@ -89,6 +92,12 @@ AC-6
   Given  a tag `generated-from: <ID-A>, <ID-B>` listing several ids
   When   the scan runs
   Then   the file is recorded as a member of both <ID-A> and <ID-B>
+
+AC-7
+  Given  any code tree
+  When   `scan_all` runs
+  Then   its three results equal those of `scan_members`, `scan_ac_verifies` and
+         `scan_test_levels` run separately, and every file is opened once
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

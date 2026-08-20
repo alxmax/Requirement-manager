@@ -47,7 +47,8 @@ const BAKED = [
       "`.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory are skipped.",
       "The SSOT directory is matched by realpath, so a source package merely named `requirements/` is still scanned.",
       "Paths matching `.reqmapignore` are excluded.",
-      "An unreadable file is skipped without aborting the scan." ],
+      "An unreadable file is skipped without aborting the scan.",
+      "`scan_all` returns the members, the per-criterion coverage and the verification levels from a single walk, and each result equals what the three separate scanners return." ],
     acc:[
       "A file containing `# implements: <ID>` produces a member `(implements, file, line)` under `<ID>`.",
       "Excluded directories are not scanned; member paths are POSIX-relative.",

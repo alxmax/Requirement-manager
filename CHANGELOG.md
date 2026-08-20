@@ -1,5 +1,32 @@
 # Changelog
 
+## plugin `v2.21.0` — 2026-08-20
+
+**The gate read every file three times.** `scan_members`, `scan_ac_verifies` and `scan_test_levels` each walked the whole tree and opened every file. On a 10,000-file tree that was 3.06s + 2.76s + 2.81s of the gate's 8.49s — the scan was essentially its entire runtime, performed three times. The benchmark added in v2.20.0 was written to publish a number and ended up explaining one.
+
+`scan_all` now reads each file once and runs all three extractions on the same lines:
+
+| | before | after |
+|---|---|---|
+| one walk, all extractions | — | **2.53s** |
+| `scan_members` alone | 2.62s | 2.62s |
+| `gate` | 8.49s | **2.46s** |
+| scan + gate, end to end | ~11s | **~5s** |
+
+It is not three loops glued together — that would have been the risky version, because the three scanners have genuinely different masking rules (fences and indent blocks for prose, string literals for `.py`, a backtick strip that only the levelled scan applies):
+
+- The walk itself moved into one `_walk_code` generator. Three byte-for-byte copies of that loop is how they drifted apart in the first place.
+- `_scan_file_tags` gained an optional `lines` argument, so a caller that already read the file hands the content over instead of re-reading it. Every existing caller is unchanged.
+- The two coverage scanners' identical per-line masking became **one** pass feeding both regexes, preserving the asymmetry exactly: only the levelled scan strips backticked spans first, so a documented *example* of a levelled tag still does not register as real coverage.
+
+**The safety argument is a test, not a reading of the diff:** `scan_all`'s three results must equal what the three scanners return separately — asserted against both a mixed fixture (prose fences, a `.py` docstring, a backticked example, a `.ts` file) and against this repo's own corpus, where every masking rule is exercised by files that actually use them.
+
+`cmd_check` takes the coverage maps as optional arguments and computes them itself when absent, so tests and any embedding tool keep working untouched. `--cache` stays on `scan_members` alone: it is off on the CI path this speeds up, and duplicating its invalidation rules would trade a measured win for a correctness risk.
+
+**Bookkeeping:** the `v2.20.0` tag was cut at the merge of the first of that release's three stacked PRs, so it does not contain the `artifacts` job, the standing-warning fixes, or `REQ-TRACKED-042` — all of which its changelog entry describes. They ship here instead. A released tag is not worth moving; the entry above it is the correction.
+
+`MAP_ENGINE_VERSION` → `2026-08-20.2`.
+
 ## plugin `v2.20.0` — 2026-08-20
 
 **Two ways hostile-looking text broke the map, and a number for "does this scale".** `</script>` in a requirement body has had a regression test since v2.3.5. The other two characters named on the roadmap had nothing:
