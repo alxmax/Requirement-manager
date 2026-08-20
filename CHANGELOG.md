@@ -1,5 +1,25 @@
 # Changelog
 
+## plugin `v2.22.0` — 2026-08-20
+
+**A consumer's engine could rot for a year and CI would never say so.** `warn_if_stale` — the engine's own "your vendored copy is behind" notice — only fires when `CLAUDE_PLUGIN_ROOT` is set, which happens inside a Claude Code session and nowhere else. CI, the one place that runs on every push, was silent by construction. The cost is invisible and specific: checks that shipped after the vendored copy simply do not run, and the build stays green while covering less than the caller thinks.
+
+The fix could not go in the engine. A stale `reqmap.py` does not contain the check that would report it stale, so the detector has to run from something the consumer does not vendor: the action.
+
+`check@v2` now runs `check/engine_staleness.py` as its first step. It reads `MAP_ENGINE_VERSION` from the vendored engine and from the engine in the action's own checkout, and when the vendored one is older emits a `::warning::` annotation naming both versions — on the run, not buried in the log:
+
+```
+::warning title=Stale reqmap engine::vendored reqmap.py is stale (2025-01-02 < action 2026-08-20.2) - re-seed it ...
+```
+
+- New input `stale-engine`: `warn` (default), `error` (fail the build on it), `off`.
+- Compared against the ref the caller pinned, so an exact-SHA pin is measured against that SHA's engine — the engine they asked for.
+- Fails open in every mode: an unreadable or absent version, or any unexpected internal error, prints a skipped-probe note and exits 0. The probe is never itself the reason a gate run goes red.
+
+**Why this stayed `@v2`.** The major-bump rule is about a default-on step that can newly FAIL a green build — that is what took `freshness` and `lint` to v2. This step is warn-only and exit-neutral, so no existing pin changes verdict. And a `@v3` would have stranded exactly the consumers this exists to reach: the ones who pinned once and never came back.
+
+The probe never runs in this repo's own CI (this repo *is* the engine), so `scripts/test_engine_staleness.py` — 10 tests, wired into both CI test surfaces — is the only thing exercising it before it ships. Filed as `REQ-STALEENGINE-043`.
+
 ## plugin `v2.21.0` — 2026-08-20
 
 **The gate read every file three times.** `scan_members`, `scan_ac_verifies` and `scan_test_levels` each walked the whole tree and opened every file. On a 10,000-file tree that was 3.06s + 2.76s + 2.81s of the gate's 8.49s — the scan was essentially its entire runtime, performed three times. The benchmark added in v2.20.0 was written to publish a number and ended up explaining one.

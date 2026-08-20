@@ -572,7 +572,7 @@
       "notes": [
         "Why `ac-count-high` and `over-scoped` are exempt: this requirement is the gate's severity table, not a bundle of checks. Each individual check the gate runs already has its own requirement ([[REQ-TESTLINK-018]], [[REQ-ACVERIFY-019]], [[REQ-MEMBERDRIFT-027]], [[REQ-DOCBUNDLE-026]], [[REQ-ORPHANCODE-034]], [[REQ-DRIFTIMPACT-035]]). What remains here is one behaviour — which condition is an ERROR, which is a WARN, and what that does to the exit code — so every clause and criterion shares a single failure mode. Splitting it would scatter the exit-code contract across files instead of clarifying it. Revisit this exemption if a clause ever lands here that is not about severity or exit code.",
         "Errors stop CI (exit 1); warnings do not. Intent sync (promote `baseline → confirmed`) is not automatable and surfaces at human review.",
-        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there.",
+        "When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the variable is unset in CI, so the notice is silent and exit-neutral there. The CI half of that signal cannot live here — a stale engine does not contain the check that reports it stale — so it ships with the published action instead ([[REQ-STALEENGINE-043]]).",
         "The dev-CI version-coherence script `scripts/check_versions.py` (repo root, never seeded into consumer repos) enforces plugin manifest alignment as the first step in this repo's own CI pipeline (`check_versions.py → gate → map --check → test_reqmap.py`). It is outside the plugin scan root and has no requirement of its own; its invariant (semver consistency across `plugin.json` + `marketplace.json`) is documented in `CLAUDE.md`."
       ],
       "current_impl": [
@@ -596,6 +596,7 @@
         "REQ-MEMBERDRIFT-027",
         "REQ-ORPHANCODE-034",
         "REQ-SELFGATE-039",
+        "REQ-STALEENGINE-043",
         "REQ-TESTLINK-018",
         "REQ-TRACE-020",
         "REQ-TRACKED-042",
@@ -2791,7 +2792,8 @@
         "REQ-CHECK-006"
       ],
       "used_by": [
-        "REQ-REPRO-041"
+        "REQ-REPRO-041",
+        "REQ-STALEENGINE-043"
       ],
       "satisfies": [],
       "satisfied_by": [],
@@ -3087,6 +3089,69 @@
       ],
       "test_exempt": null,
       "milestone": "v1.35",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-STALEENGINE-043",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Stale vendored engine, reported in CI",
+      "intent": "Every consumer repo runs its own vendored copy of `reqmap.py`, and that copy only improves when someone re-seeds it. The engine's own staleness notice (`warn_if_stale`) is gated on `CLAUDE_PLUGIN_ROOT`, which exists in a Claude Code session and nowhere else — so it is silent in CI, the one place that runs on every push and the one place a months-old engine actually costs something: checks that shipped since are simply absent, and nothing says so.",
+      "contract": [
+        "The staleness probe compares the vendored engine's `MAP_ENGINE_VERSION` against the reference engine's.",
+        "`check/action.yml` runs the probe as a step of the published gate action.",
+        "The probe's `--mode` selects its behaviour: `warn`, `error`, or `off`.",
+        "The action's `stale-engine` input sets that mode and defaults to `warn`.",
+        "A vendored engine older than the reference produces one message naming both versions and the re-seed remedy.",
+        "In `warn` the message is a warning and the exit code stays 0.",
+        "In `error` the same condition exits 1.",
+        "Under GitHub Actions the message is emitted as a `::warning::` workflow annotation, so it surfaces on the run rather than only in the log.",
+        "`off` produces no output and exit 0.",
+        "A vendored engine at or ahead of the reference version produces no warning.",
+        "A version that cannot be read from either file — absent file, unparseable value — is reported as a skipped probe with exit 0, in every mode, because an unreadable version is not evidence of staleness.",
+        "An unexpected internal failure of the probe is reported the same way: a skipped probe, exit 0. The probe is never itself the reason a gate run goes red."
+      ],
+      "verify": [
+        "None — the gap is stated in the engine's own comment (`warn_if_stale` is \"silent in CI\") and in `check/action.yml`'s scope note."
+      ],
+      "notes": [
+        "Why this cannot live in the engine, next to [[REQ-CHECK-006]]'s `warn_if_stale`: a stale vendored engine does not contain the check that would report it stale. The detector has to run from something the consumer does not vendor — the action, which is always current for whatever `@vN` they reference.",
+        "The reference version is whatever the pinned action ref ships. A consumer pinned to an exact old SHA is compared against that SHA's engine, which is the honest answer: it is the engine they asked for.",
+        "Default `warn`, not `error`: adding a step that can newly fail a green build is a breaking change for an existing `@v2` pin. A repo that wants the hard stop opts in."
+      ],
+      "current_impl": [
+        "`check/engine_staleness.py`, invoked by the `reqmap engine staleness` step in `check/action.yml`."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a vendored engine older than the reference engine\n  When   the probe runs in `warn` mode\n  Then   it prints one message naming both versions and exits 0\n\nAC-2\n  Given  the same pair of engines\n  When   the probe runs in `error` mode\n  Then   it exits 1\n\nAC-3\n  Given  any pair of engines\n  When   the probe runs in `off` mode\n  Then   it prints nothing and exits 0\n\nAC-4\n  Given  a vendored engine at or ahead of the reference version\n  When   the probe runs in `warn` or `error` mode\n  Then   no staleness message appears and it exits 0\n\nAC-5\n  Given  a vendored or reference file that is missing or carries no readable\n         `MAP_ENGINE_VERSION`, or a probe that raises unexpectedly\n  When   the probe runs in `error` mode\n  Then   it reports the probe as skipped and exits 0\n\nAC-6\n  Given  `GITHUB_ACTIONS` is set in the environment\n  When   the probe reports a stale engine\n  Then   the message is a `::warning::` annotation; without that variable it is a plain\n         `WARN` line",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-CHECK-006",
+        "REQ-SELFGATE-039"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "check/action.yml:3"
+        },
+        {
+          "role": "implements",
+          "loc": "check/engine_staleness.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_engine_staleness.py:49"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
       "priority": "",
       "risks": []
     },
@@ -3715,6 +3780,14 @@
       "REQ-PAGES-021"
     ],
     [
+      "REQ-STALEENGINE-043",
+      "REQ-CHECK-006"
+    ],
+    [
+      "REQ-STALEENGINE-043",
+      "REQ-SELFGATE-039"
+    ],
+    [
       "REQ-TESTLINK-018",
       "REQ-CHECK-006"
     ],
@@ -4064,7 +4137,7 @@
       "name": "Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters",
       "lane": "bus",
       "milestone": "v3",
-      "done": false
+      "done": true
     },
     {
       "name": "Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates",

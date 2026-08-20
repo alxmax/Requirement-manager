@@ -8,9 +8,11 @@
     "REQ-SELFGATE-039": {
       ".githooks/pre-commit": "bcfc068fa3ea0275ccf9dd72bd23849a3ebc37f40b43954d29cdad6cacdad289",
       ".githooks/pre-push": "3824b141fa44ac6bb0afa5625cbd68f5705498c84fefe925848b422946bae9ad",
-      "check/action.yml": "3a9e563327e48fbbfd4691297ddfba65b89eaf42fdfa2e04dca0b24bff97ee9c",
       "scripts/check_versions.py": "44eca87ea51e54a9c8eb2dfa15d2b42e05c3b616e020de721d2581ac53846fc7",
       "sync_reqmap.sh": "4a0c10a01b101e65788feeab06b5fd30d82c1538fc5ad8d6d151a88d9dc9a573"
+    },
+    "REQ-STALEENGINE-043": {
+      "check/engine_staleness.py": "6dd46f9ce1c815bc3a707bd0ce801a152b4cde1a90e63e6bb1eca56fdc34e71f"
     }
   }
 }

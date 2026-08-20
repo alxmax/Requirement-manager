@@ -1,5 +1,6 @@
 # Requirement-manager drift gate — published GitHub Action.
 # implements: REQ-SELFGATE-039
+# implements: REQ-STALEENGINE-043
 #
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
 # `<dir>/action.yml`, so this file is consumed as:
@@ -37,10 +38,13 @@
 # Adding a default-on check to an existing pin is a breaking change for the caller;
 # that is what the new major is for.
 #
-# Scope note: reqmap's vendored-copy staleness warning (warn_if_stale) is gated on the
-# CLAUDE_PLUGIN_ROOT env var, which is unset in CI — so it is silent and exit-neutral
-# here by design. This action enforces the gate proper (link sync + drift + depends_on)
-# and, by default, map freshness (`map --check`) so a stale/uncommitted map can't merge.
+# Scope note: reqmap's own vendored-copy staleness warning (warn_if_stale) is gated on the
+# CLAUDE_PLUGIN_ROOT env var, which is unset in CI — so it stays silent here. That is why
+# this action carries its own probe (`engine_staleness.py`, the first step below): a stale
+# vendored engine cannot contain the check that reports it stale, so the detector has to
+# run from the action, which is always current for the `@vN` the caller references. Beyond
+# that, this action enforces the gate proper (link sync + drift + depends_on) and, by
+# default, map freshness (`map --check`) so a stale/uncommitted map can't merge.
 #
 # `lint` defaults to 'true', like `freshness`. The gate proves the LINKS are real; it says
 # nothing about whether the requirement is readable. Shipping the clarity rules switched off
@@ -84,6 +88,10 @@ inputs:
     description: 'Also run `reqmap.py lint --strict` so an unreadable or structurally broken requirement fails the build. Errors only on a confirmed requirement missing its Contract or Acceptance section, plus the strict-promoted structural checks; style findings stay advisory. Needs a vendored engine >= 2.3.4 (the release that added the `lint_exempt:` escape hatch). Set to "false" to disable.'
     required: false
     default: 'true'
+  stale-engine:
+    description: 'What to do when the vendored reqmap.py is OLDER than the engine this action ships: "warn" (default) prints a workflow annotation naming both versions and leaves the exit code alone, "error" fails the build, "off" says nothing. Compared against the engine in this action''s own checkout, so it reports staleness relative to the @vN (or SHA) the caller pinned.'
+    required: false
+    default: 'warn'
   reqmap-repo:
     description: 'owner/name to pin the map regeneration to (sets REQMAP_REPO) — needed ONLY when the committed map is generated for a different slug than this repo (e.g. a private repo that publishes to a public mirror). Leave empty to use the repo''s own git remote.'
     required: false
@@ -98,6 +106,34 @@ runs:
     - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ inputs.python-version }}
+    # First, so the rest of the run reads in context: a checker that shipped after the
+    # vendored engine simply is not running, and this is the only place that says so.
+    # Warn-only by default — a new step that could newly fail a green build would be a
+    # breaking change for an existing @v2 pin. Fails open (exit 0) when either version
+    # is unreadable; see check/engine_staleness.py.
+    - name: reqmap engine staleness
+      if: ${{ inputs.stale-engine != 'off' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # The `|| status=$?` dance is what makes "warn-only" true of the STEP and not just
+      # of the script: in warn mode nothing here — a probe that isn't where we expect it,
+      # a python that won't start — may turn a previously green build red, because that
+      # would be a breaking change for a pin that did not move. `error` opted into loud.
+      run: |
+        probe="$GITHUB_ACTION_PATH/engine_staleness.py"
+        status=0
+        if [ ! -f "$probe" ]; then
+          echo "NOTE  engine staleness probe skipped: $probe not found"
+          exit 0
+        fi
+        python -X utf8 "$probe" \
+          --vendored "${{ inputs.reqmap-path }}" \
+          --mode "${{ inputs.stale-engine }}" || status=$?
+        if [ "$status" -ne 0 ] && [ "${{ inputs.stale-engine }}" != "error" ]; then
+          echo "NOTE  engine staleness probe skipped: exited $status"
+          exit 0
+        fi
+        exit "$status"
     - name: reqmap gate
       shell: bash
       working-directory: ${{ inputs.working-directory }}
