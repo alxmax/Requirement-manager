@@ -4642,6 +4642,59 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+class UntrackedMembers(unittest.TestCase):  # tested-by: REQ-TRACKED-042
+    """A member git does not track breaks reproducibility of the committed map.
+
+    Both real instances came from a gitignored directory the local scan could see and
+    CI never could: a subagent worktree, and a Consilium report carrying a real
+    `generated-from:` tag. Each produced a committed map naming files absent from a
+    fresh checkout, and surfaced only as a confusing CI-only staleness failure.
+    """
+
+    def _repo(self, d):
+        subprocess.run(["git", "init", d], check=True, capture_output=True)
+        for cfg in (["config", "user.email", "t@t.com"], ["config", "user.name", "T"]):
+            subprocess.run(["git", "-C", d] + cfg, check=True, capture_output=True)
+
+    def _members(self, *paths):
+        return {"REQ-A-001": [("implements", p, 1) for p in paths]}
+
+    def test_untracked_member_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            _write(os.path.join(d, "tracked.py"), "x=1" + chr(10))
+            _write(os.path.join(d, "ignored.py"), "x=1" + chr(10))
+            subprocess.run(["git", "-C", d, "add", "tracked.py"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", d, "commit", "-m", "t"], check=True, capture_output=True)
+            out = R.untracked_members(d, self._members("tracked.py", "ignored.py"))
+            self.assertEqual(out, ["ignored.py"])
+
+    def test_all_tracked_reports_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            _write(os.path.join(d, "a.py"), "x=1" + chr(10))
+            subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", d, "commit", "-m", "t"], check=True, capture_output=True)
+            self.assertEqual(R.untracked_members(d, self._members("a.py")), [])
+
+    def test_nested_member_path_is_matched(self):
+        """git ls-files emits POSIX separators; members carry them too, but the
+        comparison must survive a Windows checkout either way."""
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            _write(os.path.join(d, "src", "pkg", "a.py"), "x=1" + chr(10))
+            subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+            subprocess.run(["git", "-C", d, "commit", "-m", "t"], check=True, capture_output=True)
+            self.assertEqual(R.untracked_members(d, self._members("src/pkg/a.py")), [])
+
+    def test_outside_a_work_tree_fails_open(self):
+        """None, not [] — the same fail-open signal _since_changed_files uses. A repo
+        distributed as a tarball must not be told its every member is untracked."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.py"), "x=1" + chr(10))
+            self.assertIsNone(R.untracked_members(d, self._members("a.py")))
+
+
 class AdversarialInjection(unittest.TestCase):  # tested-by: REQ-MAP-007
     """Hostile requirement text reaching the generated HTML and JSON.
 
