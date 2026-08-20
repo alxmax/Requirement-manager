@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose a capability the tool does not have
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Features here are demand-gated on purpose: several proposals in `TODO.md` are
+        recorded as deliberately **not built**, with the reasoning, because the demand was
+        n=1 or the check would have been noisier than the drift it caught. Making the case
+        that this is not one of those is most of the work.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The drift or failure this would have caught
+      description: >
+        Concretely — what went wrong, or would have, that the existing commands did not
+        surface? A real incident beats a hypothetical one.
+    validations:
+      required: true
+  - type: textarea
+    id: existing
+    attributes:
+      label: Why the existing commands don't cover it
+      description: >
+        `gate`, `lint`, `health`, `coverage`, `dupes`, `findings`, `show`, `next` — which
+        did you try, and where did each fall short?
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: What it should do
+      description: >
+        Error or warning? Default-on or opt-in? A new command, or a check inside an
+        existing one? Say what the false-positive case looks like — a check that cries wolf
+        gets switched off, which is worse than not having it.
+  - type: input
+    id: who
+    attributes:
+      label: Who else needs this
+      description: Your repo, your team, a project you can point at. "Would be nice" is fine — just say so.
