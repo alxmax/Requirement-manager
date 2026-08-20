@@ -110,6 +110,9 @@ Do not push tags by hand.
   `artifacts` job that re-derives the committed viewer and diagram builds byte-for-byte.
 - Explain *why* in the PR body. This repo's history is its design record — several
   decisions are documented mainly as the reasoning attached to the change that made them.
+- If your change reverses one of the decisions in [`docs/adr/`](docs/adr/README.md), say which
+  one and what new evidence justifies it. Each record names its own revisit condition, so this
+  is a question with an answer rather than a matter of taste.
 
 ## Licensing
 
