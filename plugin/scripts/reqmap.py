@@ -4448,7 +4448,7 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     out = os.path.join(reqs_dir, "_map.md")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
-        f.write(_build_md_text(data))
+        f.write(_utf8_safe(_build_md_text(data)))
     return out
 
 
@@ -4941,6 +4941,25 @@ def _since_changed_files(ref, code_root):
         return None
 
 
+def _utf8_safe(text):  # implements: REQ-MAP-007
+    """Text with any lone surrogate replaced by U+FFFD, so the write cannot fail.
+
+    A lone surrogate has no UTF-8 encoding, so `open(..., encoding="utf-8").write()`
+    raises UnicodeEncodeError and takes the whole `map` run down - and with it the
+    gate's map-freshness check. It is not a theoretical input: os.walk hands back a
+    filename whose bytes are not valid UTF-8 surrogate-escaped, and member paths go
+    straight into the map. Losing one character beats losing the command.
+
+    The fast path is a C-level encode that touches nothing; the per-character walk
+    runs only for a string that genuinely cannot be encoded.
+    """
+    try:
+        text.encode("utf-8")
+        return text
+    except UnicodeEncodeError:
+        return "".join("\uFFFD" if 0xD800 <= ord(c) <= 0xDFFF else c for c in text)
+
+
 def _build_json_text(data):  # implements: REQ-MAP-007
     """The registry graph as a JSON string: {engine_version, repo, nodes, edges}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
@@ -4948,7 +4967,7 @@ def _build_json_text(data):  # implements: REQ-MAP-007
     payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
                "nodes": data["nodes"], "edges": data["edges"],
                "todos": data.get("todos", [])}
-    return json.dumps(payload, indent=2, ensure_ascii=False)
+    return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
 def render_json(data, reqs_dir):  # implements: REQ-MAP-007
@@ -5097,6 +5116,13 @@ def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
         .replace("</", "<\\/")
         .replace("<!--", "<\\!--")
         .replace("-->", "-\\->")
+        # U+2028/U+2029 are LINE TERMINATORS in JavaScript but ordinary characters
+        # in JSON, so ensure_ascii=False emits them raw and any engine older than
+        # ES2019 reads the blob as an unterminated string - one character in one
+        # requirement title kills the whole viewer. The escaped forms are valid JSON
+        # for the same characters, so the parsed value is unchanged.
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
     )
     script = "<script>window.__REQMAP_DATA__=" + blob + ";</script>"
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)

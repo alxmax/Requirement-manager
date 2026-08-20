@@ -19,7 +19,7 @@
   "REQ-INIT-012": "fc9c2ca57e55",
   "REQ-LINT-014": "eb3e85d62f1f",
   "REQ-LINTCHECKS-025": "ed3042db78f1",
-  "REQ-MAP-007": "addff51262a3",
+  "REQ-MAP-007": "6e504e16dc43",
   "REQ-MEMBERDRIFT-027": "8c4bf382f81f",
   "REQ-NEW-004": "aa0ab0b4dd77",
   "REQ-NEXT-013": "b2c59c1413dd",
@@ -42,6 +42,6 @@
   "REQ-SITE-026": "adb0a8f525b2",
   "REQ-TESTLINK-018": "03b3a0bbc701",
   "REQ-TRACE-020": "b0933c34be1e",
-  "REQ-VIEWER-007": "4e7f0e7f13cc",
+  "REQ-VIEWER-007": "200183cd2873",
   "REQ-VLEVEL-037": "ca933173e553"
 }

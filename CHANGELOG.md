@@ -2,6 +2,15 @@
 
 ## plugin `v2.20.0` — 2026-08-20
 
+**Two ways hostile-looking text broke the map, and a number for "does this scale".** `</script>` in a requirement body has had a regression test since v2.3.5. The other two characters named on the roadmap had nothing:
+
+- **U+2028 / U+2029 were emitted raw into the inlined `<script>`.** They end a line in JavaScript but are ordinary characters in JSON, so `ensure_ascii=False` passed them straight through and any engine older than ES2019 read the assignment as an unterminated string — one character in one requirement title killing the entire viewer. Now escaped to ` `/` `, which denote the same characters in JSON, so the parsed graph is unchanged (pinned by a round-trip test).
+- **A lone surrogate crashed `map` outright.** A lone surrogate has no UTF-8 encoding, so the write raised `UnicodeEncodeError` and took the whole command down — and with it the gate's map-freshness check. Not a theoretical input: `os.walk` hands back a filename whose bytes are not valid UTF-8 surrogate-escaped, and member paths go straight into the map. `_utf8_safe` now degrades it to U+FFFD for both `_map.json` and `_map.md`; the fast path is a C-level encode that touches nothing, and the per-character walk runs only for a string that genuinely cannot be encoded.
+
+Both were written as failing tests first, then fixed. `REQ-VIEWER-007` gains AC-5 and the escape clause; `REQ-MAP-007`'s AC-7 widens to cover the surrogate case rather than growing an eighth criterion it has no room for.
+
+**A published benchmark** (`scripts/benchmark_scan.py`, numbers in the README). On 10,000 source files and 100 requirements: `scan_members` 3.06s, `gate` 8.49s, map render 0.03s. It was written to publish a number and ended up explaining one — the gate performs **three full walks of the tree**, not one (`scan_members` + `scan_ac_verifies` + `scan_test_levels`, 8.63s combined ≈ its entire runtime). Filed as its own roadmap item: the three scanners have different masking rules, so merging them is a real refactor, not three loops glued together. Deliberately not wired into CI — a shared runner's I/O makes timing assertions meaningless, and a flaky perf gate teaches people to ignore red.
+
 **The gate's two standing warnings are gone, and neither was cosmetic.** Every run printed the same pair. Both turned out to be real, and one of them was the check itself being wrong.
 
 **1. The viewer's demo dataset had drifted from the registry it copies.** `app/src/lib/data.js` carries a hand-authored `BAKED` fixture so the viewer has something to show with no engine present, and 13 of its entries claim to mirror real requirements. Their contract text was **written in the `shall` voice that v2.15 removed from the registry** — so the tool's own demo showcased the style its linter now rejects, and a reader with no engine saw a system that no longer existed. All 13 refreshed from the live `_map.json`, and a new test asserts *this repo's* fixture against *this repo's* registry, so the drift cannot come back silently.
@@ -11,6 +20,9 @@
 **3. `docs/full_architecture.html` now carries its lineage.** The 99KB architecture poster is exactly the case `REQ-DOCBUNDLE-026` exists for — a whole-system doc built from many requirements, with nothing linking the two — and it was the one large bundle in this repo that had no `generated-from:` tag. `make_full_architecture.py` now stamps `<!-- generated-from: CORE-PARSE-001, CORE-SCAN-002, CORE-DRIFT-003, REQ-CHECK-006, REQ-MAP-007, REQ-VIEWER-007 -->` into the page it generates, scoped to what the diagram actually depicts rather than everything it touches. A contract change in any of the six now lists the poster as needing a redraw.
 
 The tag immediately earned itself: the poster's glossary still explained **`@v1`** as "git tag of the published GitHub Action", three releases after that line moved to `@v2`. `check_versions.py`'s alias axis had not caught it, because the glossary names the bare `@v1` rather than the full `requirement-manager/check@vN` path it matches on.
+
+`MAP_ENGINE_VERSION` → `2026-08-20.1`.
+
 
 `MAP_ENGINE_VERSION` → `2026-08-20.1`.
 

@@ -286,6 +286,31 @@ commit SHA instead if you want a frozen ref. `@v1` still works and still runs th
 gate-only step list it always did, but it no longer moves — it needs an engine seeded
 from plugin v2.0.0+, and `@v2` needs v2.3.4+ (the release that added `lint_exempt:`).
 
+## How fast is it on a big repo
+
+Measured, not asserted — `python -X utf8 scripts/benchmark_scan.py` builds a synthetic
+tree and times the operations you actually wait on. On **10,000 source files / 100
+requirements** (Python 3.11, Windows, warm cache):
+
+| operation | seconds |
+|---|---|
+| `load_requirements` | 0.03 |
+| `scan_members` | 3.06 |
+| `scan_ac_verifies` | 2.76 |
+| `scan_test_levels` | 2.81 |
+| **`gate` (all of it)** | **8.49** |
+| build + render map | 0.03 |
+
+Reading the table: the gate costs three full walks of the tree, not one — `scan_members`,
+`scan_ac_verifies` and `scan_test_levels` each open every file, and together they are
+essentially the gate's whole runtime. That is a known inefficiency with an obvious fix
+(one walk, three extractions); it is on the roadmap rather than done, and 8.5s for 10k
+files is fast enough that it has not been urgent.
+
+The benchmark is deliberately **not** wired into CI: a shared runner's I/O varies far too
+much for a timing assertion to mean anything, and a flaky performance gate teaches people
+to ignore red.
+
 ## Glossary (the jargon, in plain words)
 
 - **Capability / requirement** — one thing your app does, described in one file.

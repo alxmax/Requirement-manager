@@ -244,7 +244,22 @@
            cannot drift apart. Cannot catch <3.6 (f-strings fail at compile time). -->
 - [ ] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
 - [ ] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
-- [ ] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
+- [x] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
+      <!-- `</script>` was already covered. The other two were real and both are fixed:
+           U+2028/U+2029 were emitted RAW into the inlined <script> (they end a line in
+           JavaScript but not in JSON, so a pre-ES2019 engine reads an unterminated string
+           and the whole viewer dies on one character in one title), and a lone surrogate
+           CRASHED `map` outright with UnicodeEncodeError — reachable in the real world via
+           a filename whose bytes are not valid UTF-8, since os.walk surrogate-escapes those
+           and member paths go into the map. Now escaped / degraded to U+FFFD, with the
+           tests written first. Benchmark: scripts/benchmark_scan.py, numbers published in
+           the README. -->
+- [ ] One tree walk instead of three: `gate` calls scan_members + scan_ac_verifies + scan_test_levels, each opening every file — 3.06s + 2.76s + 2.81s of its 8.49s on a 10k-file tree | lane: bus
+      <!-- Found 2026-08-20 by the benchmark above, which was written to publish a number and
+           ended up explaining it. The three scanners have different masking rules (fences,
+           string literals, tag vocabularies), so this is a real refactor and not a merge of
+           three loops — hence its own item rather than a drive-by. Not urgent: 8.5s for 10k
+           files is acceptable, and the cost is invisible below ~1k files. -->
 - [ ] Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget | lane: bus
 - [ ] Get to n=2: one external repo running the gate | lane: ops
 - [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
