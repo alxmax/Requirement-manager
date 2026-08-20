@@ -1054,6 +1054,13 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
 
 _VDS_STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
 _VDS_ID_CONTRACT_START_RE = re.compile(r'id:"([A-Z][A-Z0-9-]+)"[^{}]*?contract:\[')
+# An entry the fixture INVENTS: the viewer's demo dataset carries a fake orphan and a
+# fake deprecated capability so the Risk and Problems tabs have something to show with
+# no engine present. Those ids cannot exist in any registry, so comparing them against
+# one reported permanent drift - the check crying wolf about data that is doing its job.
+# Marked entries are skipped; an UNMARKED id missing from the registry still reports,
+# because that is the real signal (a requirement renamed out from under the fixture).
+_VDS_DEMO_ONLY_RE = re.compile(r'demoOnly\s*:\s*true')
 
 
 def _vds_normalize(strings):
@@ -1088,9 +1095,11 @@ def _vds_scan_array_body(text, start):
 
 
 def _vds_parse_baked(text):
-    """{id: [contract strings]} extracted from app/src/lib/data.js's BAKED array."""
+    """{id: [contract strings]} from data.js's BAKED array, minus `demoOnly:true` entries."""
     out = {}
     for m in _VDS_ID_CONTRACT_START_RE.finditer(text):
+        if _VDS_DEMO_ONLY_RE.search(m.group(0)):
+            continue                      # invented demo state — no registry counterpart
         block = _vds_scan_array_body(text, m.end())
         if block is None:
             continue

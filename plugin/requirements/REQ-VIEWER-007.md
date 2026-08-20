@@ -108,6 +108,10 @@ AC-5
 - `check_viewer_data_sync` (+ `_vds_*` helpers) in `reqmap.py`, called from `cmd_check` (`gate`):
   a warn-only heuristic comparing `app/src/lib/data.js`'s hand-authored `BAKED` fallback fixture
   against the live registry, so a stale demo entry is flagged rather than silently shown forever.
+  A fixture entry marked `demoOnly:true` is skipped: the demo dataset deliberately invents an
+  orphan and a deprecated capability so the Risk and Problems tabs have signals with no engine
+  present, and those ids cannot exist in any registry. An id left unmarked and absent from the
+  registry is still reported — that is a requirement renamed out from under the fixture.
 - The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):
   - `MapView.jsx` — force-graph rendering of the requirement graph
   - `ProblemsView.jsx` — gate errors, drift items, and open risk inbox
