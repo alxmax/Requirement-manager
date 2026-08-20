@@ -100,7 +100,9 @@ Every line in this section is binding.
   is not automatable and surfaces at human review.
 - When `CLAUDE_PLUGIN_ROOT` is set and the vendored engine is older than the installed
   plugin's copy, `gate` prints an advisory staleness notice (`warn_if_stale`); the
-  variable is unset in CI, so the notice is silent and exit-neutral there.
+  variable is unset in CI, so the notice is silent and exit-neutral there. The CI half of
+  that signal cannot live here — a stale engine does not contain the check that reports it
+  stale — so it ships with the published action instead ([[REQ-STALEENGINE-043]]).
 - The dev-CI version-coherence script `scripts/check_versions.py` (repo root, never seeded
   into consumer repos) enforces plugin manifest alignment as the first step in this repo's
   own CI pipeline (`check_versions.py → gate → map --check → test_reqmap.py`). It is

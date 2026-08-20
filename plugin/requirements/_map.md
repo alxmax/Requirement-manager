@@ -1,7 +1,7 @@
 ---
-generated: 2026-08-20 21:55
-nodes: 46
-edges: 64
+generated: 2026-08-20 23:05
+nodes: 47
+edges: 66
 ---
 
 # Requirement Map
@@ -55,6 +55,7 @@ graph LR
     REQ_SHOW_015["Single-requirement dossier<br><small>REQ-SHOW-015</small>"]
     REQ_SIMILAR_016["Duplicate-capability detector<br><small>REQ-SIMILAR-016</small>"]
     REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
+    REQ_STALEENGINE_043["Stale vendored engine, reported in CI<br><small>REQ-STALEENGINE-043</small>"]
     REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
     REQ_TRACE_020["Upstream traceability<br><small>REQ-TRACE-020</small>"]
     REQ_TRACKED_042["Untracked members reported<br><small>REQ-TRACKED-042</small>"]
@@ -81,6 +82,7 @@ graph LR
   REQ_SITE_026 --> REQ_MAP_007
   REQ_SITE_026 --> REQ_VIEWER_007
   REQ_SITE_026 --> REQ_PAGES_021
+  REQ_STALEENGINE_043 --> REQ_SELFGATE_039
   REQ_VIEWER_007 --> REQ_MAP_007
   style CORE_DRIFT_003 stroke-width:3px
   style CORE_PARSE_001 stroke-width:3px
@@ -319,6 +321,13 @@ graph LR
   REQ_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_4055_5520
   f_plugin_scripts_test_reqmap_py_4458["plugin/scripts/test_reqmap.py:4458"]
   REQ_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_4458
+  REQ_STALEENGINE_043["Stale vendored engine, reported in CI<br><small>REQ-STALEENGINE-043</small>"]
+  f_check_action_yml_3["check/action.yml:3"]
+  REQ_STALEENGINE_043 -->|implements| f_check_action_yml_3
+  f_check_engine_staleness_py_2["check/engine_staleness.py:2"]
+  REQ_STALEENGINE_043 -->|implements| f_check_engine_staleness_py_2
+  f_scripts_test_engine_staleness_py_49["scripts/test_engine_staleness.py:49"]
+  REQ_STALEENGINE_043 -->|tested-by| f_scripts_test_engine_staleness_py_49
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
   f_plugin_scripts_reqmap_py_1744_1882["plugin/scripts/reqmap.py:1744-1882"]
   REQ_TESTLINK_018 -->|implements| f_plugin_scripts_reqmap_py_1744_1882
@@ -355,7 +364,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_CORE["CORE<br><small>3 caps</small>"]
-  a_REQ["REQ<br><small>42 caps</small>"]
+  a_REQ["REQ<br><small>43 caps</small>"]
   a_misc["misc<br><small>1 caps</small>"]
   a_REQ --> a_CORE
   style a_CORE stroke-width:3px

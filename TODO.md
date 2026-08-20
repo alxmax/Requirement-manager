@@ -248,7 +248,15 @@
            installable on current GitHub runners, so supporting them would be untested.
            A test asserts MIN_PYTHON == the oldest python in the CI matrix, so the two
            cannot drift apart. Cannot catch <3.6 (f-strings fail at compile time). -->
-- [ ] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
+- [x] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
+      <!-- Shipped in v2.22.0 as REQ-STALEENGINE-043, in the ACTION rather than the engine:
+           a stale vendored reqmap.py does not contain the check that would report it stale,
+           so the detector has to run from something the consumer does not vendor.
+           check/engine_staleness.py compares the vendored MAP_ENGINE_VERSION against the
+           engine in the action's own checkout and annotates the run (`stale-engine`:
+           warn|error|off, default warn). Kept on @v2 deliberately — warn-only cannot turn a
+           green build red, and a new major would have stranded exactly the never-updated
+           pins this exists to reach. -->
 - [ ] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
 - [x] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
       <!-- `</script>` was already covered. The other two were real and both are fixed:

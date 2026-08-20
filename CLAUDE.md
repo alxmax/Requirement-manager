@@ -146,3 +146,13 @@ The skill contract (authoritative on authoring rules, statuses, and the gate) is
 ```yaml
 - uses: alxmax/requirement-manager/check@v2
 ```
+
+The action also ships `check/engine_staleness.py` (`REQ-STALEENGINE-043`): it compares the
+consumer's vendored `MAP_ENGINE_VERSION` against the engine in the action's own checkout and
+annotates the run when the vendored copy is behind — the CI half of `warn_if_stale`, which is
+silent outside a Claude Code session. It deliberately did **not** take the major to `@v3`: the
+rule above is about a step that can newly FAIL a green build, and this one is warn-only
+(`stale-engine: warn|error|off`, default `warn`) and fails open on anything unexpected. Bumping
+would have stranded exactly the stale-pin consumers it exists to reach. Its test lives at
+`scripts/test_engine_staleness.py` — the probe never runs in this repo's own CI, so that suite
+is the only thing exercising it before it ships.

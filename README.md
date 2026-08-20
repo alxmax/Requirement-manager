@@ -276,9 +276,12 @@ jobs:
 
 The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`
 — both default-on, both switchable off with `freshness: 'false'` / `lint: 'false'`.
-Inputs `reqmap-path` and `working-directory` adapt it to wherever you vendored the
-engine — see [`check/action.yml`](check/action.yml). Or skip the action entirely:
-`- run: python -X utf8 scripts/reqmap.py gate`.
+It also warns when the `reqmap.py` you vendored is older than the engine the pinned
+`check@vN` ships, so a copy that quietly stopped running half the checks says so on the
+run instead of staying green in silence (`stale-engine: 'error'` to fail the build on it,
+`'off'` to silence it). Inputs `reqmap-path` and `working-directory` adapt it to wherever
+you vendored the engine — see [`check/action.yml`](check/action.yml). Or skip the action
+entirely: `- run: python -X utf8 scripts/reqmap.py gate`.
 
 `@v2` is a major-alias tag: it is force-moved onto every released commit, so it always
 resolves to the latest release on that interface line. Pin an exact `vX.Y.Z` tag or a
