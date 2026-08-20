@@ -153,7 +153,34 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-19"
+MAP_ENGINE_VERSION = "2026-08-20"
+
+# Declared support floor, deliberately equal to the OLDEST version CI actually runs
+# (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
+# (subprocess.run's capture_output/text, stream.reconfigure), but 3.7 and 3.8 are not
+# installable on current GitHub runners, so promising them would be a claim nothing
+# proves - the failure mode this project exists to prevent. Move this only together
+# with the matrix that tests it.
+MIN_PYTHON = (3, 9)
+
+
+def _python_floor_error(version_info=None):  # implements: REQ-PYFLOOR-040
+    """Return a message when the interpreter is below MIN_PYTHON, else None.
+
+    A pure predicate rather than an inline exit, so a test can pin the floor on any
+    interpreter - a test process cannot spawn a 3.8 to watch the real thing happen.
+    Note what this cannot catch: the module uses f-strings, so an interpreter below
+    3.6 fails at COMPILE time and never reaches this check. 3.6-3.8 - the range a
+    real user plausibly still has - get the readable message. ASCII only: a legacy
+    Windows codepage is exactly where an old interpreter turns up.
+    """
+    major, minor = tuple(version_info or sys.version_info)[:2]
+    if (major, minor) >= MIN_PYTHON:
+        return None
+    return ("reqmap needs Python %d.%d or newer (running %d.%d). The engine is stdlib-only, "
+            "so a newer interpreter is the entire fix - no install, no dependencies: re-run "
+            "with one, e.g. `python%d.%d scripts/reqmap.py ...`."
+            % (MIN_PYTHON[0], MIN_PYTHON[1], major, minor, MIN_PYTHON[0], MIN_PYTHON[1]))
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -5121,6 +5148,13 @@ def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
 
 
 def main():
+    # Refuse an interpreter below the declared floor before anything else runs, so the
+    # user gets one readable line instead of an AttributeError from some stdlib call
+    # that did not exist yet.
+    floor = _python_floor_error()
+    if floor:
+        print(floor)
+        return 2
     # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
     # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
     # reqmap.py check` would crash with UnicodeEncodeError and fail the gate on an

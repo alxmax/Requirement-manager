@@ -18,9 +18,10 @@ file: a Markdown spec that says *what it should do*. Code links back to it
 with a one-line comment, and a small Python script checks that the two never
 fall out of sync — and draws you a map of how everything connects.
 
-The engine is a single stdlib-only Python script. It runs in any repo, with any
-AI assistant (Claude Code, Copilot, Gemini CLI, or none), and needs no
-installation — just copy one file. It's especially handy when several people or
+The engine is a single stdlib-only Python script (3.9+ — the oldest version CI
+actually tests, on Linux and Windows). It runs in any repo, with any AI assistant
+(Claude Code, Copilot, Gemini CLI, or none), and needs no installation — just copy
+one file. It's especially handy when several people or
 several AI agents touch the same codebase and the specs slowly rot.
 
 ## Worked example

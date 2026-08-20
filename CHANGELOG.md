@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v2.19.0` — 2026-08-20
+
+**The portability claim gets evidence.** The engine's pitch is "one stdlib-only file, runs anywhere with Python" — and the whole proof was a single CI job on ubuntu with `python-version: "3.x"`. The supported floor was therefore accidental (3.7, because nothing in the code needed more), and `-X utf8`, a convention that exists *specifically* for Windows codepages, had never once run on Windows in CI.
+
+- **Declared floor: Python 3.9** (`MIN_PYTHON`, new `REQ-PYFLOOR-040`). Deliberately the oldest version CI actually runs, not the oldest the code happens to tolerate: 3.7 and 3.8 cannot be installed on current GitHub runners, so promising them would be a claim nothing proves — the exact failure mode this project exists to prevent. `reqmap.py` now refuses an older interpreter before any command runs, with one ASCII line naming the required version, the running version and the fix, and exit 2 — instead of an `AttributeError` from deep inside a command. The check is a pure predicate (`_python_floor_error`) so the floor is pinned by tests on any interpreter; it cannot help below 3.6, where f-strings make the module fail at compile time, and that limit is written down in the requirement's Notes.
+- **New `tests` matrix job: 3.9 / 3.12 / 3.13 x ubuntu-latest / windows-latest**, `fail-fast: false`, running every suite (engine, version gate, release notes, cross-tool falsification, Excalidraw builder + tests). Kept separate from `gate-and-tests`, which stays a single authoritative verdict on this repo's requirement corpus — running the gate six times would produce six identical answers.
+- **A test asserts the two stay equal**: `MIN_PYTHON` against the oldest quoted Python in `ci.yml`, so raising the floor without moving the matrix (or the reverse) fails the build. It skips cleanly in a seeded consumer repo that has no `.github/` of ours.
+- `release` now needs the matrix as well as the gate — a version that fails on Windows or on the floor must not become a tag consumers install. `deploy-map` still needs only the gate, since it republishes `docs/`, which the gate already drift-checks.
+- Docs corrected where they promised more than was tested: `check/action.yml`'s `python-version` said "any 3.x works", and README / both SKILL files described the engine without naming a version.
+
+`MAP_ENGINE_VERSION` → `2026-08-20`.
+
 ## plugin `v2.18.1` — 2026-08-20
 
 **The published Action stops rotting.** `alxmax/requirement-manager/check@v1` was tagged on 2026-06-15 at plugin v2.1.0 content and never moved again — 193 commits behind `main` by the time anyone noticed, while the README kept advertising it as the way to run the gate in CI. Moving the alias was a manual step with nothing to remind a maintainer it existed.

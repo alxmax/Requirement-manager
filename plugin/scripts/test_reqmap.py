@@ -4582,6 +4582,56 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+class PythonFloor(unittest.TestCase):  # tested-by: REQ-PYFLOOR-040
+    """The declared support floor. The predicate is tested rather than a real old
+    interpreter: CI cannot install a 3.8 to watch reqmap refuse it, and a floor that is
+    only asserted in prose is the failure mode this project exists to prevent."""
+
+    def test_below_floor_names_both_versions_and_the_fix(self):
+        msg = R._python_floor_error((3, 8, 10))
+        self.assertIsNotNone(msg)
+        self.assertIn("3.9", msg)          # required
+        self.assertIn("3.8", msg)          # running
+        self.assertIn("stdlib-only", msg)  # the fix: any newer interpreter, no install
+        self.assertTrue(msg.isascii(), "message must survive a legacy Windows codepage")
+
+    def test_at_and_above_floor_report_nothing(self):
+        for v in [R.MIN_PYTHON, (3, 12, 0), (3, 14, 1), (4, 0, 0)]:
+            self.assertIsNone(R._python_floor_error(v), v)
+
+    def test_running_interpreter_is_at_or_above_the_declared_floor(self):
+        self.assertIsNone(R._python_floor_error())
+
+    def test_main_refuses_an_old_interpreter_with_exit_2(self):
+        import contextlib
+        buf = io.StringIO()
+        old_argv, old_ver = sys.argv, R.sys.version_info
+        sys.argv = ["reqmap", "health"]
+        try:
+            R.sys.version_info = (3, 8, 10, "final", 0)
+            with contextlib.redirect_stdout(buf):
+                rc = R.main()
+        finally:
+            R.sys.version_info = old_ver
+            sys.argv = old_argv
+        self.assertEqual(rc, 2)                        # refusal, not a command result
+        self.assertIn("needs Python 3.9", buf.getvalue())
+
+    def test_floor_matches_the_oldest_python_in_the_ci_matrix(self):
+        """AC-3: the declared floor and the proven floor are one number. Skipped when
+        the workflow is absent -- a seeded consumer copy has no .github/ of ours."""
+        ci = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.abspath(R.__file__)))), ".github", "workflows", "ci.yml")
+        if not os.path.exists(ci):
+            self.skipTest("ci.yml not present (engine seeded outside this repo)")
+        text = open(ci, encoding="utf-8").read()
+        found = re.findall(r'"(3\.\d+)"', text)
+        self.assertTrue(found, "no quoted python versions found in ci.yml")
+        oldest = min(tuple(int(x) for x in v.split(".")) for v in found)
+        self.assertEqual(oldest, R.MIN_PYTHON,
+                         "MIN_PYTHON %r != oldest CI python %r" % (R.MIN_PYTHON, oldest))
+
+
 class IntentVerbDispatch(unittest.TestCase):  # tested-by: REQ-CHECK-006
     """The renamed CLI surface: gate (report-only) + check (deprecation alias)."""
 
