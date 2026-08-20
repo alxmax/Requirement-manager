@@ -8,16 +8,16 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
-python scripts/reqmap.py gate               # gate: link sync + drift + test-link integrity (warn) — run before every commit; report-only, never touches the lock
-python scripts/reqmap.py sync               # rescan + advance drift baseline + regen map in one step; use --accept-drift when a confirmed/implemented contract changed
-python scripts/reqmap.py map                # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
+python scripts/reqmap.py gate --code ..     # gate: link sync + drift + test-link integrity (warn) — run before every commit; report-only, never touches the lock
+python scripts/reqmap.py sync --code ..     # rescan + advance drift baseline + regen map in one step; use --accept-drift when a confirmed/implemented contract changed
+python scripts/reqmap.py map --code ..      # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
 python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats   # inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. init runs this best-effort.
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
 python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
 python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
-python scripts/reqmap.py lint               # readability/structure check on non-draft requirements (--strict fails on errors)
+python scripts/reqmap.py lint --code ..     # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
 python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
 python scripts/reqmap.py search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
@@ -31,12 +31,33 @@ python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-f
 python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
 
+**`gate`/`sync`/`lint`/`map` above already carry `--code ..`** so the scan reaches the repo root
+(`docs/`, `.github/`, `.githooks/`, root-level `scripts/`), per a NEW repo-root `.reqmapignore`
+(kept separate from `plugin/.reqmapignore` — see that file's own comment for why). This is not
+optional for these four: the *committed* `_reqlock.json`/`_map.json`/`_map.md`/`docs/map.html`
+are generated from the widened scan (member `loc` paths are `code_root`-relative, so a copy
+generated without `--code ..` reports every existing member's path one level off and fails
+freshness checks against the real committed files). `.githooks/pre-commit` already runs from
+the repo root, so it passes `--code .` instead of `--code ..` — same target, different starting
+cwd. Read-only exploration commands with no committed-artifact freshness concern (`scan`, `show`,
+`search`, `next`, `health`, `coverage`, `dupes`, `findings`, `review`) are unaffected either way
+and can be run with or without `--code ..` depending on what you want to inspect.
+
+**A `confirmed` requirement whose members all live outside `plugin/`** (e.g. `REQ-SELFGATE-039`,
+whose 5 members are `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`,
+`.githooks/pre-push`, `sync_reqmap.sh`) can now only pass `gate`'s implements-tag check under the
+widened scan. Running the bare `gate` (no `--code ..`) genuinely ERRORs on such a requirement —
+not a silent miss, a real exit-1 failure — because the narrow scope never reaches any file that
+proves the tag exists. This is an accepted, permanent consequence of the widened-scan design, not
+a bug: CI and the pre-commit hook always run widened, so it never fires there; a human running the
+bare command locally sees a loud, immediately-diagnosable error rather than a silent divergence.
+
 Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
 
 ```bash
 python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
 python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
-python scripts/reqmap.py map --check                               # fails if committed _map.* (or docs/map.html) is stale
+python scripts/reqmap.py map --check --code ..                     # fails if committed _map.* (or docs/map.html) is stale
 ```
 
 From the **repo root** (not `plugin/`) — the packaging/release side:
@@ -50,7 +71,7 @@ python -X utf8 plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py   
 python -X utf8 -m unittest test_excalidraw -v     # from plugin/skills/excalidraw-diagram/scripts/
 ```
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate` → `reqmap.py lint --strict` → `reqmap.py map --check` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` → `reqmap.py lint --strict --code ..` → `reqmap.py map --check --code ..` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 **Hooks — two different files, don't confuse them:**
 - `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `gate` → `lint --strict` → `map --check`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.

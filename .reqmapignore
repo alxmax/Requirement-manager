@@ -1,0 +1,47 @@
+# Paths reqmap should not scan when invoked with --code pointed at the repo
+# root (this repo's own CI + pre-commit hook only, via `--code ..`/`--code .`).
+# The narrow default invocation (cd plugin/ && reqmap.py gate, no --code) never
+# reads this file — it reads plugin/.reqmapignore instead. The two are kept in
+# sync deliberately, NOT merged into one relocated file: moving plugin's own
+# .reqmapignore to the repo root would silently stop excluding these same
+# paths for the narrow invocation, since load_ignore() checks reqs_dir then
+# code_root, and code_root differs between the two invocation styles.
+
+plugin/scripts/_map_viewer.html
+
+plugin/skills/excalidraw-diagram/SKILL.md
+plugin/skills/excalidraw-diagram/SKILL.universal.md
+plugin/skills/excalidraw-diagram/examples/*.py
+plugin/skills/excalidraw-diagram/references/excalidraw_format.md
+
+plugin/skills/requirement-manager/SKILL.md
+plugin/skills/requirement-manager/SKILL.universal.md
+
+plugin/docs/superpowers/specs/*.md
+
+# Session working artifacts (specs/plans), gitignored, not capability implementations.
+docs/superpowers/**
+
+# app/ (Vite+React viewer source) stays outside the widened scan this round —
+# see REQ-VIEWER-007's WHERE section. `npm run smoke` is the only automated
+# check for it and is not wired into CI (tracked separately, not this pass).
+app/**
+
+# docs/map.html is the published render of the SAME generated viewer template
+# excluded above (plugin/scripts/_map_viewer.html) — it inlines this repo's own
+# _map.json, which embeds CORE-SCAN-002's prose (its own "implements: LOGIN-001"
+# illustration and its "AC-1" acceptance-criterion label) as plain JS/JSON text.
+# Once code_root reaches docs/, that inlined text matches TAG_RE and reads as a
+# dangling tag pointing at a requirement that doesn't exist. Never a hand-authored
+# member; excluded for the same reason as the template it's rendered from.
+docs/map.html
+# docs/architecture.html is a reviewed, hand-authored diagram (produced by the
+# excalidraw-diagram skill) that renders a code-editor mockup illustrating the
+# tagging syntax from README.md's own walkthrough, using the same fictional
+# "AUTH-LOGIN-001" example id — not a real membership tag. Unlike README.md's
+# fenced ```python block, the diagram's syntax-highlighted markup isn't inside a
+# backtick fence the prose scanner recognizes, so the illustration is excluded by
+# path instead. This file already carries real generated-from: tags to other
+# requirements; excluding it here is a scope decision for this pass (matching
+# app/'s), not a claim that its content should never be drift-checked.
+docs/architecture.html

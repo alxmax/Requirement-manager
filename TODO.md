@@ -151,12 +151,34 @@
      Items 2-4 chain into each other: the scan work makes the tagging possible, and
      the tagging produces the demo. -->
 - [ ] Decide the beachhead domain (4 named candidates) — tie-break on which gets one external user in 30 days; pipelines currently leads since this repo is already its own demo | lane: ops
-- [ ] Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree | lane: ops
-- [ ] Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle | lane: bus
-- [ ] Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them | lane: ops
-- [ ] Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated | lane: ops
-- [ ] Remove app/src/lib/data.js's BAKED requirement data, or generate it from _map.json at build time; if it stays as a fallback, add a CI step that diffs the two and fails on divergence | lane: feature
-- [ ] Bring app/src/ under the gate; fix the .reqmapignore comment claiming the viewer is "tested via npm build" — there is no npm step in CI | lane: ops
+- [x] Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree | lane: ops
+      <!-- Real count was 5,307, not 5,199 — TODO's own estimate was stale too; README now says ~5300. -->
+- [x] Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle | lane: bus
+      <!-- Shipped as `--code ..`/`--code .` for THIS repo's CI/hook only (Trias deliberation
+           .consilium/runs/2026-08-18_1640_v29-scan-root-codeexts-viewer-trias.json rejected
+           auto-widening the shared engine default as a silent-failure risk to consumer repos
+           scoped to a subdirectory on purpose). Also widened Dockerfile/Makefile basename
+           matching to the standard git hook names (pre-commit, pre-push, ...) — needed for the
+           next item below. REQ-DOCBUNDLE-026 now WARNs on docs/full_architecture.html, confirmed live. -->
+- [x] Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them | lane: ops
+      <!-- REQ-SELFGATE-039. A confirmed requirement whose members are all outside plugin/
+           genuinely ERRORs under the narrow gate invocation (not just a coverage miss) —
+           documented in CLAUDE.md as an accepted, loud-not-silent consequence. -->
+- [x] Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated | lane: ops
+      <!-- README "Worked example" section — real captured output, run in an isolated sandbox
+           (not in-place) to avoid touching this repo's own committed lock state. -->
+- [x] app/src/lib/data.js's BAKED requirement data: add a CI/gate step that diffs it against the live registry | lane: feature
+      <!-- Kept as a hand-maintained fallback (preserves the zero-dependency demo story) rather
+           than removed/generated at build time — a new warn-only `gate` check flags drifted IDs
+           instead of failing the build on divergence (the majority Trias vote's design: warn,
+           don't gate, since the viewer's fallback fixture is explicitly demo data). Caught 2 real
+           bugs in its own first implementation during code review (bracket-truncating regex,
+           uncaught UnicodeDecodeError) — both fixed before shipping. -->
+- [x] Fix the .reqmapignore comment claiming the viewer is "tested via npm build" — there is no npm step in CI | lane: ops
+- [ ] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
+      <!-- Deliberately deferred (2-1 majority in the same Trias deliberation): app/ stays in the
+           repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is
+           real, not before. -->
 
 ## v3
 <!-- Tiers 2-5 of the same v2.9-v3 roadmap: survive a skeptic's ten minutes, the

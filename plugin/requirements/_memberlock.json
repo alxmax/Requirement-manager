@@ -2,8 +2,15 @@
   "_schema": 1,
   "members": {
     "REQ-REVIEW-022": {
-      "skills/requirement-quality-review/SKILL.md": "ac0eebecc69ff0b77c3954b58cd4f1142c6a565fc250528eb18aab9f7ac86451",
-      "skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+      "plugin/skills/requirement-quality-review/SKILL.md": "ac0eebecc69ff0b77c3954b58cd4f1142c6a565fc250528eb18aab9f7ac86451",
+      "plugin/skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+    },
+    "REQ-SELFGATE-039": {
+      ".githooks/pre-commit": "bcfc068fa3ea0275ccf9dd72bd23849a3ebc37f40b43954d29cdad6cacdad289",
+      ".githooks/pre-push": "3824b141fa44ac6bb0afa5625cbd68f5705498c84fefe925848b422946bae9ad",
+      ".github/workflows/ci.yml": "8c6bf39947cfb4b4c1518783b4a6b32cf561122fb998a9d189add1facd2a4d87",
+      "check/action.yml": "a523d19d02c08a382d55f15c8bfeddb0e22f1b292e19e513529c69b5c2c7e750",
+      "sync_reqmap.sh": "4a0c10a01b101e65788feeab06b5fd30d82c1538fc5ad8d6d151a88d9dc9a573"
     }
   }
 }

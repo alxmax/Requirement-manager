@@ -394,6 +394,34 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
             self.assertNotIn("TOOL-X-001", members)  # ignored
             self.assertIn("APP-Y-001", members)       # still scanned
 
+    def test_is_code_file_extensions_and_basenames(self):
+        self.assertTrue(R._is_code_file("foo.sh"))
+        self.assertTrue(R._is_code_file("infra.tf"))
+        self.assertTrue(R._is_code_file("Dockerfile"))
+        self.assertTrue(R._is_code_file("Makefile"))
+        self.assertFalse(R._is_code_file("readme.txt"))
+        self.assertFalse(R._is_code_file("dockerfile"))  # exact basename match only, no case-fold
+
+    def test_is_code_file_git_hook_basenames(self):
+        # git hook filenames are extensionless and as conventional as Dockerfile/Makefile —
+        # needed so a repo's own .githooks/ scripts are taggable (v2.9 "tag your own pipeline").
+        self.assertTrue(R._is_code_file("pre-commit"))
+        self.assertTrue(R._is_code_file("pre-push"))
+        self.assertTrue(R._is_code_file("commit-msg"))
+        self.assertFalse(R._is_code_file("pre-commit.sample"))  # git's own shipped sample hooks
+
+    def test_shell_and_terraform_and_basename_files_are_scanned(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "deploy.sh"), tag("SH-CAP-001") + "\n")
+            _write(os.path.join(d, "infra.tf"), tag("TF-CAP-001") + "\n")
+            _write(os.path.join(d, "Dockerfile"), tag("DOCKER-CAP-001") + "\n")
+            _write(os.path.join(d, "Makefile"), tag("MAKE-CAP-001") + "\n")
+            members = R.scan_members(d, None)
+        self.assertIn("SH-CAP-001", members)
+        self.assertIn("TF-CAP-001", members)
+        self.assertIn("DOCKER-CAP-001", members)
+        self.assertIn("MAKE-CAP-001", members)
+
     def test_reqmapignore_glob_pattern(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "gen", "a.py"), tag("GEN-A-001") + "\n")
@@ -512,6 +540,45 @@ class Scanning(unittest.TestCase):  # tested-by: CORE-SCAN-002
         # backwards compatibility: the suffix must not disturb ordinary tag parsing
         self.assertEqual(R._findall_tags("# tested-by: REQ-A-001 @unit"),
                          [("tested-by", "REQ-A-001")])
+
+
+class RepoRootScan(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def test_default_scan_set_unchanged_without_code_flag(self):
+        # Protects external consumer repos: scan_members(code_root) must be
+        # byte-identical whether or not a sibling .reqmapignore exists one
+        # level up — passing no --code (code_root == a.root) must never see it.
+        with tempfile.TemporaryDirectory() as d:
+            plugin_dir = os.path.join(d, "plugin")
+            _write(os.path.join(plugin_dir, "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            before = R.scan_members(plugin_dir, None)
+            _write(os.path.join(d, ".reqmapignore"), "plugin/scripts/reqmap.py\n")  # repo-root file appears
+            after = R.scan_members(plugin_dir, None)  # code_root still == plugin_dir
+            self.assertEqual(before, after)
+
+    def test_widened_root_excludes_generated_viewer_and_skill_pairs(self):
+        # Regression test for the bug found reading load_ignore(): a NEW
+        # repo-root .reqmapignore (not a relocated one) must exclude the same
+        # generated files once code_root widens to the repo root via --code.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "plugin", "scripts", "_map_viewer.html"), "<!-- generated -->\n")
+            _write(os.path.join(d, "plugin", "skills", "requirement-manager", "SKILL.md"), "# skill\n")
+            _write(os.path.join(d, "plugin", "scripts", "reqmap.py"), tag("TOOL-X-001") + "\n")
+            _write(os.path.join(d, ".reqmapignore"),
+                   "plugin/scripts/_map_viewer.html\n"
+                   "plugin/skills/requirement-manager/SKILL.md\n")
+            members = R.scan_members(d, None)  # code_root == repo root (simulates --code ..)
+            self.assertIn("TOOL-X-001", members)
+            all_files = {fp for hits in members.values() for (_r, fp, _l) in hits}
+            self.assertNotIn("plugin/scripts/_map_viewer.html", all_files)
+            self.assertNotIn("plugin/skills/requirement-manager/SKILL.md", all_files)
+
+    def test_widened_root_reaches_docs_and_github(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "docs", "notes.md"), tag("DOCS-CAP-001") + "\n")
+            _write(os.path.join(d, ".github", "workflows", "ci.yml"), tag("CI-CAP-001") + "\n")
+            members = R.scan_members(d, None)
+        self.assertIn("DOCS-CAP-001", members)
+        self.assertIn("CI-CAP-001", members)
 
 
 class DocBundle(unittest.TestCase):  # tested-by: REQ-DOCBUNDLE-026
@@ -4993,3 +5060,64 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: REQ-ROADMAP-038
     def test_versions_compare_numerically_not_as_strings(self):  # verifies: REQ-ROADMAP-038#AC-5
         self.assertGreater(R._version_key("v2.10"), R._version_key("v2.9"))
         self.assertLess("v2.10", "v2.9")   # the string compare this guards against
+
+
+class ViewerDataSync(unittest.TestCase):  # tested-by: REQ-VIEWER-007
+    def _fixture_data_js(self, path, entries):
+        body = "const BAKED = [\n" + "".join(
+            '  {{ id:"{id}", contract:[{contract}] }},\n'.format(
+                id=e["id"], contract=",".join('"{}"'.format(c) for c in e["contract"]))
+            for e in entries
+        ) + "];\n"
+        _write(path, body)
+
+    def test_matching_data_js_reports_no_drift(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, [])
+
+    def test_diverged_contract_text_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": ["It shall do Y instead."]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, ["FOO-BAR-001"])
+
+    def test_missing_baked_id_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": ["It shall do X."]}])
+            map_nodes = []  # the requirement was deleted/renamed in the registry
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, ["FOO-BAR-001"])
+
+    def test_missing_data_js_file_returns_none(self):
+        # fail-open: no viewer checked out (e.g. a shallow consumer clone) is not an error
+        self.assertIsNone(R.check_viewer_data_sync("/no/such/data.js", []))
+
+    def test_matching_data_js_with_bracket_in_contract_text_reports_no_drift(self):
+        # regression: a naive non-greedy `contract:\[(.*?)\]` regex stops at the FIRST
+        # ']', truncating any bullet whose own text contains a bracket -- and this
+        # repo's real contracts do (e.g. describing `[a, b]` syntax). A bracket-aware
+        # scanner must find the array's TRUE close, not the first stray ']'.
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            bullet = 'Accepts an inline `[a, b]` list and a `{k: v}` block.'
+            self._fixture_data_js(data_js, [{"id": "FOO-BAR-001", "contract": [bullet]}])
+            map_nodes = [{"id": "FOO-BAR-001", "contract": [bullet]}]
+            drift = R.check_viewer_data_sync(data_js, map_nodes)
+            self.assertEqual(drift, [])
+
+    def test_non_utf8_data_js_returns_none(self):
+        # regression: only OSError was caught; a non-UTF-8 file raises UnicodeDecodeError
+        # (a ValueError subclass), which was uncaught and crashed `gate` outright instead
+        # of degrading to a warning.
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            with open(data_js, "wb") as f:
+                f.write(b"\xff\xfe garbage, not valid utf-8")
+            self.assertIsNone(R.check_viewer_data_sync(data_js, []))

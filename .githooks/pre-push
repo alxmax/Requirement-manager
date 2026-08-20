@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# implements: REQ-SELFGATE-039
 # Block direct pushes to main/master (mirrors the global ~/.git-hooks guard).
 # Repo-tracked here because this repo sets `core.hooksPath .githooks`, which
 # overrides the global hooksPath — without this copy the global guard would not

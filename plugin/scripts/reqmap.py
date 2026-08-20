@@ -83,7 +83,18 @@ TEST_LEVEL_RE = re.compile(
     r"\s*@(" + "|".join(TEST_LEVELS) + r")\b")
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
+             ".sh", ".tf",
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
+
+# Extensionless filenames scanned by exact basename match (no case-fold — CODE_EXTS
+# is suffix-based and case-sensitive too, so this stays consistent). Git hook names
+# (pre-commit, pre-push, ...) are as conventional and unambiguous as Dockerfile/
+# Makefile — a repo's own .githooks/ scripts are exactly the kind of scannable
+# pipeline code v2.9's "tag your own pipeline" item covers; an unrelated file that
+# happens to share one of these names is a harmless no-op scan (no tag = no member).
+BASENAME_CODE_FILES = {"Dockerfile", "Makefile",
+                       "pre-commit", "pre-push", "pre-receive", "post-receive",
+                       "commit-msg", "prepare-commit-msg", "post-checkout", "post-merge"}
 
 # A repo whose source language the default set doesn't cover can declare extra
 # scannable extensions via the REQMAP_EXTRA_CODE_EXTS env var — comma-separated,
@@ -96,6 +107,12 @@ _extra_exts = tuple(
 )
 if _extra_exts:
     CODE_EXTS = CODE_EXTS + _extra_exts
+
+
+def _is_code_file(fn):  # implements: CORE-SCAN-002
+    """True if fn should be scanned as code: matches CODE_EXTS, or is an
+    extensionless basename like Dockerfile/Makefile."""
+    return fn.endswith(CODE_EXTS) or fn in BASENAME_CODE_FILES
 
 # ---- prose auto-draft classification (cmd_extract) ----
 # These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
@@ -136,7 +153,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-17.2"
+MAP_ENGINE_VERSION = "2026-08-19"
 
 # ---------------------------------------------------------------------------
 # COMMANDS registry — single source of truth for the CLI command set.
@@ -978,7 +995,7 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent — raw os.walk order is filesystem/OS-dependent
         for fn in sorted(files):     # deterministic file order so the generated map is identical across platforms
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1006,6 +1023,77 @@ def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCA
     if use_cache:
         _save_scancache(reqs_dir, new)   # `new` omits vanished files → prune
     return members
+
+
+_VDS_STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
+_VDS_ID_CONTRACT_START_RE = re.compile(r'id:"([A-Z][A-Z0-9-]+)"[^{}]*?contract:\[')
+
+
+def _vds_normalize(strings):
+    return sorted(" ".join(s.split()) for s in strings)
+
+
+def _vds_scan_array_body(text, start):
+    """From text[start] (the char right after the '[' that opens a JS array),
+    return the array's raw source text up to its matching ']' — tracking
+    quoted-string state so a stray ']'/'[' INSIDE a contract bullet's own text
+    (e.g. a bullet describing `[a, b]` syntax) doesn't end the scan early.
+    Returns None if the array never closes before EOF."""
+    depth, in_string, i = 1, False, start
+    while i < len(text):
+        c = text[i]
+        if in_string:
+            if c == "\\":
+                i += 2
+                continue
+            if c == '"':
+                in_string = False
+        elif c == '"':
+            in_string = True
+        elif c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                return text[start:i]
+        i += 1
+    return None
+
+
+def _vds_parse_baked(text):
+    """{id: [contract strings]} extracted from app/src/lib/data.js's BAKED array."""
+    out = {}
+    for m in _VDS_ID_CONTRACT_START_RE.finditer(text):
+        block = _vds_scan_array_body(text, m.end())
+        if block is None:
+            continue
+        out[m.group(1)] = [s.replace('\\"', '"') for s in _VDS_STRING_RE.findall(block)]
+    return out
+
+
+def check_viewer_data_sync(data_js_path, map_nodes):  # implements: REQ-VIEWER-007
+    """Compare app/src/lib/data.js's hand-authored BAKED requirement fixture
+    against the live registry (map_nodes: [{"id":..., "contract":[...]}, ...]).
+    Returns a sorted list of requirement IDs where the two disagree — a baked id
+    missing from the live registry, or a whitespace-normalized mismatch in its
+    `contract` bullets. A warn-only heuristic (not a byte-exact diff): it locates
+    each BAKED entry's `contract:[...]` array via bracket-depth + quoted-string
+    tracking (a naive non-greedy regex stops at the FIRST ']', which truncates
+    any bullet whose own text contains a bracket — this repo's actual contracts
+    do, e.g. describing `[a, b]` syntax, so that naive form is not just imprecise
+    but wrong on real data). Returns None (not []) when data_js_path doesn't
+    exist OR can't be decoded as UTF-8 — fail-open, matching load_ignore()'s
+    convention for an optional file."""
+    try:
+        with open(data_js_path, encoding="utf-8") as f:
+            text = f.read()
+    except (OSError, ValueError):   # ValueError covers UnicodeDecodeError
+        return None
+    baked = _vds_parse_baked(text)
+    live = {n["id"]: n.get("contract", []) for n in map_nodes}
+    drift = [rid for rid, contract in baked.items()
+             if rid not in live or _vds_normalize(contract) != _vds_normalize(live[rid])]
+    return sorted(drift)
 
 
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
@@ -1051,7 +1139,7 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1109,7 +1197,7 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1154,7 +1242,7 @@ def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
         _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent, mirrors scan_members
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
@@ -1673,6 +1761,26 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
             warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
+
+    # app/src/lib/data.js drift (warn-only): the viewer's fallback fixture vs the
+    # live registry. Skipped entirely (no _viewer_nodes build) unless a data.js
+    # actually exists — true for every consumer repo without a vendored viewer.
+    for _candidate in (os.path.join(code_root, "app", "src", "lib", "data.js"),
+                        os.path.join(code_root, "..", "app", "src", "lib", "data.js")):
+        if os.path.exists(_candidate):
+            # Built here (not via _build_map_data) since only id+contract is
+            # needed — avoids computing used_by/satisfied_by for a check that
+            # discards them.
+            _viewer_nodes = [{"id": rid, "contract": _bullets(r["body"], "contract")}
+                              for rid, r in reqs.items()]
+            _drifted = check_viewer_data_sync(_candidate, _viewer_nodes)
+            if _drifted:
+                warns.append(
+                    "app/src/lib/data.js out of sync with {} requirement(s): {} — regenerate its "
+                    "BAKED fixture or accept the drift is intentional for this fallback demo data."
+                    .format(len(_drifted), ", ".join(_drifted)))
+            break
+
     # Reverse depends_on index: a contract drift's blast radius is its direct
     # dependents (one edge, not the transitive closure — a reviewer follows the
     # chain one hop at a time).  # implements: REQ-DRIFTIMPACT-035
@@ -2120,7 +2228,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
         dirs.sort()                            # deterministic id/suffix assignment
         for fn in sorted(files):
-            is_code = fn.endswith(tuple(e for e in CODE_EXTS if e not in PROSE_EXTS))
+            is_code = _is_code_file(fn) and not fn.endswith(PROSE_EXTS)
             is_prose = fn.endswith(PROSE_EXTS)
             if not (is_code or is_prose):
                 continue
@@ -3429,7 +3537,7 @@ def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     for dirpath, dirs, files in os.walk(code_root):
         dirs[:] = [d for d in sorted(dirs) if d not in (".git", "__pycache__", "node_modules")]
         for fn in sorted(files):
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             if reqs_abs and os.path.normcase(os.path.abspath(fp)).startswith(reqs_abs + os.sep):
@@ -3691,7 +3799,7 @@ def _wipe(reqs_dir, code_root):
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)
         for fn in files:
-            if not fn.endswith(CODE_EXTS):
+            if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")

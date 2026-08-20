@@ -7,17 +7,59 @@ repo's own requirement graph, published to GitHub Pages. Once the Pages source i
 "GitHub Actions", the `deploy-map` job republishes it on every push to `main` via OIDC —
 a short-lived token, no stored secrets.
 
-**Keep your code and your specs from drifting apart.**
+**Stop your AI agent from drifting away from what you already agreed on.**
 
-`requirement-manager` gives every feature of your project a single home: one
-Markdown file that says *what it should do*. Your code links back to that file
-with a one-line comment. A small Python script then checks that the two never
+A long agent session forgets earlier decisions. A fresh session on the same
+codebase re-implements something a different way. Two agents working on the
+same repo make incompatible choices, and nothing tells either of them. The fix
+isn't a longer prompt — it's a written contract the agent has to check itself
+against. `requirement-manager` gives every feature of your project one such
+file: a Markdown spec that says *what it should do*. Code links back to it
+with a one-line comment, and a small Python script checks that the two never
 fall out of sync — and draws you a map of how everything connects.
 
 The engine is a single stdlib-only Python script. It runs in any repo, with any
 AI assistant (Claude Code, Copilot, Gemini CLI, or none), and needs no
 installation — just copy one file. It's especially handy when several people or
 several AI agents touch the same codebase and the specs slowly rot.
+
+## Worked example
+
+One requirement, one agent session, one drift the gate caught — real terminal output, not a mockup:
+
+```
+$ python scripts/reqmap.py new AREA-DEMO-999
+created .\requirements\AREA-DEMO-999.md
+
+$ python scripts/reqmap.py confirm AREA-DEMO-999
+promoted AREA-DEMO-999: draft -> confirmed
+  note: no `tested-by:` member — wire an acceptance test (`# tested-by: AREA-DEMO-999`) or set `test_exempt: <reason>` to silence the untested signal.
+  next: reqmap.py sync
+
+$ python scripts/reqmap.py sync
+  lock update: AREA-DEMO-999 hash changed (new->703e565f)
+lock updated.
+WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
+info  1 open verify-intent finding(s) — run `reqmap.py findings`
+
+1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
+wrote .\requirements\_map.md
+wrote .\requirements\_map.json
+(1 nodes, 0 edges)
+
+$ python scripts/reqmap.py gate
+WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
+WARN  AREA-DEMO-999: DRIFT — contract changed since lock; re-check 1 member(s): scripts/_demo_hello.py:2
+info  1 open verify-intent finding(s) — run `reqmap.py findings`
+
+1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 2 warnings.
+```
+
+Between `sync` and `gate`, the requirement's contract clause changed (`hello`
+returns `'hello'` -> `'hello, world'`) — but the code that backs it,
+`scripts/_demo_hello.py`, was never touched. Nothing else in the toolchain would
+have caught that; `gate` did, because the drift baseline in `_reqlock.json` hashes
+the requirement's own contract text, not just its existence.
 
 ## Why would I want this?
 
@@ -269,7 +311,8 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, ~3700 lines)
+  scripts/reqmap.py                         the engine (Python stdlib only, ~5300 lines)
+  scripts/test_reqmap.py                    the engine's own regression suite (importable: `python scripts/test_reqmap.py`)
   requirements/*.md                         the source of truth (one file per capability)
   requirements/_reqlock.json                the drift baseline (committed)
 scripts/
