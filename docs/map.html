@@ -2363,6 +2363,55 @@
       "risks": []
     },
     {
+      "id": "REQ-REPRO-041",
+      "layer": "feature",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Committed build artifacts stay re-derivable",
+      "intent": "Two files here are build output that is committed anyway, because the whole promise is that a consumer gets them without installing a toolchain. Nothing checked either one against the source it came from, so an edit to the viewer app or to a diagram generator could ship an artifact that no longer matched its own code, with the repo still green.",
+      "contract": [
+        "`plugin/scripts/_map_viewer.html` derives from `app/`, built by `npm run build:viewer`.",
+        "`docs/full_architecture.html` derives from `plugin/skills/excalidraw-diagram/examples/make_full_architecture.py`.",
+        "The `artifacts` CI job rebuilds each covered artifact from its source on every push and pull request.",
+        "The job fails the build when a rebuilt artifact differs from the committed one.",
+        "The failure message names the stale file and the command that regenerates it.",
+        "The `release` job runs only after `artifacts` passes, so a stale artifact never reaches a published tag."
+      ],
+      "verify": [
+        "None — both builds were measured as byte-reproducible before this check was written."
+      ],
+      "notes": [
+        "`docs/architecture.html` stays out of scope: a human authored it, and `map --check` already covers the regions the engine owns inside it.",
+        "Byte-for-byte comparison requires the artifacts' line endings to be a property of the repository, not of the machine that built them: `.gitattributes` pins `app/viewer.html`, the vendored viewer and the published diagram to LF. Without that the Windows and Linux builds of the same source disagree, and `core.autocrlf` hides the disagreement locally.",
+        "The check assumes both builds stay byte-reproducible. A Node major bump or a Vite upgrade can break that, and the job reports it as a stale artifact — re-vendor the viewer in the same commit that moves the toolchain.",
+        "The diagram half compares against a temp directory rather than regenerating in place, because the generator writes a sibling `.excalidraw` and `.gitignore` blocks `docs/*.excalidraw`."
+      ],
+      "current_impl": [
+        "`.github/workflows/ci.yml` — the `artifacts` job, and `release`'s dependency on it."
+      ],
+      "acc": [],
+      "accept": "AC-1\n  Given  a commit that changes `app/` without re-committing the built viewer\n  When   the `artifacts` job runs\n  Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command\n\nAC-2\n  Given  a commit that changes the architecture generator without re-committing its output\n  When   the `artifacts` job runs\n  Then   it fails and names `docs/full_architecture.html` and the rebuild command\n\nAC-3\n  Given  a tree whose committed artifacts match their sources\n  When   the `artifacts` job runs\n  Then   it passes and `release` becomes eligible to run",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "REQ-SELFGATE-039"
+      ],
+      "used_by": [],
+      "satisfies": [],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": ".github/workflows/ci.yml:4"
+        }
+      ],
+      "test_exempt": "pipeline wiring (a CI job that rebuilds and compares) — the behavior IS the comparison, observed by CI running it; a unit test would only re-assert that a byte compare compares",
+      "milestone": null,
+      "priority": "",
+      "risks": []
+    },
+    {
       "id": "REQ-REVIEW-022",
       "layer": "feature",
       "status": "confirmed",
@@ -2693,7 +2742,9 @@
       "deps": [
         "REQ-CHECK-006"
       ],
-      "used_by": [],
+      "used_by": [
+        "REQ-REPRO-041"
+      ],
       "satisfies": [],
       "satisfied_by": [],
       "members": [
@@ -3491,6 +3542,10 @@
       "REQ-HEALTH-017"
     ],
     [
+      "REQ-REPRO-041",
+      "REQ-SELFGATE-039"
+    ],
+    [
       "REQ-REVIEW-022",
       "CORE-PARSE-001"
     ],
@@ -3852,7 +3907,7 @@
       "name": "Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both",
       "lane": "ops",
       "milestone": "v3",
-      "done": false
+      "done": true
     },
     {
       "name": "Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve",
@@ -3980,6 +4035,5 @@ Error generating stack: `+i.message+`
 </head>
 <body>
 <div id="root"></div>
-
 </body>
 </html>

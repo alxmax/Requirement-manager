@@ -1,3 +1,15 @@
 # The git hook is executed by /bin/sh — it must keep LF endings even on Windows
 # checkouts, or sh chokes on the CR.
 plugin/hooks/pre-commit text eol=lf
+
+# Committed BUILD ARTIFACTS and the template one of them inlines verbatim. Without a
+# pinned eol these files differ by the platform that produced them: on Windows the
+# viewer template checks out CRLF and Vite copies those bytes straight into the bundle,
+# and Python's default newline translation did the same to the diagram. `core.autocrlf`
+# then hid it locally (it normalizes on the way in), so the mismatch only appeared in
+# CI, on Linux, as a whole-file diff of visually identical lines. REQ-REPRO-041's job
+# compares these byte for byte, so their line endings have to be a property of the repo
+# rather than of the machine that last built them.
+app/viewer.html text eol=lf
+plugin/scripts/_map_viewer.html text eol=lf
+docs/full_architecture.html text eol=lf
