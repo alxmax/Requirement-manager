@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v2.20.0` — 2026-08-20
+
+**The gate's two standing warnings are gone, and neither was cosmetic.** Every run printed the same pair. Both turned out to be real, and one of them was the check itself being wrong.
+
+**1. The viewer's demo dataset had drifted from the registry it copies.** `app/src/lib/data.js` carries a hand-authored `BAKED` fixture so the viewer has something to show with no engine present, and 13 of its entries claim to mirror real requirements. Their contract text was **written in the `shall` voice that v2.15 removed from the registry** — so the tool's own demo showcased the style its linter now rejects, and a reader with no engine saw a system that no longer existed. All 13 refreshed from the live `_map.json`, and a new test asserts *this repo's* fixture against *this repo's* registry, so the drift cannot come back silently.
+
+**2. Two of the "drifted" ids were never real, and the check should not have flagged them.** The fixture deliberately invents an orphan (`REQ-SYNC-014`) and a deprecated capability (`REQ-CACHE-014`) so the Risk and Problems tabs have signals to display. Those ids cannot exist in any registry, so comparing them against one produced permanent drift — the check crying wolf about data doing exactly its job. Entries now opt out with `demoOnly:true`, and `check_viewer_data_sync` skips them. The marker is deliberately opt-in rather than a loosening of the rule: an **unmarked** id missing from the registry still reports, because that is the real signal (a requirement renamed out from under the fixture), and a test pins that distinction.
+
+**3. `docs/full_architecture.html` now carries its lineage.** The 99KB architecture poster is exactly the case `REQ-DOCBUNDLE-026` exists for — a whole-system doc built from many requirements, with nothing linking the two — and it was the one large bundle in this repo that had no `generated-from:` tag. `make_full_architecture.py` now stamps `<!-- generated-from: CORE-PARSE-001, CORE-SCAN-002, CORE-DRIFT-003, REQ-CHECK-006, REQ-MAP-007, REQ-VIEWER-007 -->` into the page it generates, scoped to what the diagram actually depicts rather than everything it touches. A contract change in any of the six now lists the poster as needing a redraw.
+
+The tag immediately earned itself: the poster's glossary still explained **`@v1`** as "git tag of the published GitHub Action", three releases after that line moved to `@v2`. `check_versions.py`'s alias axis had not caught it, because the glossary names the bare `@v1` rather than the full `requirement-manager/check@vN` path it matches on.
+
+`MAP_ENGINE_VERSION` → `2026-08-20.1`.
+
 ## plugin `v2.19.0` — 2026-08-20
 
 **The portability claim gets evidence.** The engine's pitch is "one stdlib-only file, runs anywhere with Python" — and the whole proof was a single CI job on ubuntu with `python-version: "3.x"`. The supported floor was therefore accidental (3.7, because nothing in the code needed more), and `-X utf8`, a convention that exists *specifically* for Windows codepages, had never once run on Windows in CI.

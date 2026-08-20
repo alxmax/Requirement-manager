@@ -5178,6 +5178,43 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: REQ-VIEWER-007
         ) + "];\n"
         _write(path, body)
 
+    def test_demo_only_entry_is_not_compared(self):
+        """The fixture INVENTS two states the registry cannot contain - a fake orphan and
+        a fake deprecated capability - so the viewer's Risk and Problems tabs have
+        something to show with no engine present. Comparing those against the registry
+        reported permanent drift: the check crying wolf about data doing its job."""
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            _write(data_js, 'const BAKED = ['
+                   + chr(10) + '  { id:"REAL-ONE-001", contract:["Alpha does X."] },'
+                   + chr(10) + '  { id:"FAKE-DEMO-999", demoOnly:true, contract:["Invented."] },'
+                   + chr(10) + '];' + chr(10))
+            drift = R.check_viewer_data_sync(data_js, [{"id": "REAL-ONE-001",
+                                                       "contract": ["Alpha does X."]}])
+            self.assertEqual(drift, [])
+
+    def test_unmarked_missing_id_is_still_reported(self):
+        """The marker must not blunt the real signal: an entry that CLAIMS to mirror a
+        requirement, whose id no longer exists (renamed out from under the fixture),
+        still counts as drift."""
+        with tempfile.TemporaryDirectory() as d:
+            data_js = os.path.join(d, "data.js")
+            self._fixture_data_js(data_js, [{"id": "GONE-AWAY-001", "contract": ["X."]}])
+            self.assertEqual(R.check_viewer_data_sync(data_js, []), ["GONE-AWAY-001"])
+
+    def test_repo_fixture_is_in_sync_with_its_own_registry(self):
+        """The end-to-end assertion the two tests above only approximate: THIS repo's
+        data.js against THIS repo's committed _map.json. Skipped where either is absent
+        (a seeded consumer copy has neither)."""
+        root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(R.__file__))))
+        data_js = os.path.join(root, "app", "src", "lib", "data.js")
+        map_json = os.path.join(root, "plugin", "requirements", "_map.json")
+        if not (os.path.exists(data_js) and os.path.exists(map_json)):
+            self.skipTest("not running inside the requirement-manager repo")
+        with open(map_json, encoding="utf-8") as f:
+            nodes = json.load(f)["nodes"]
+        self.assertEqual(R.check_viewer_data_sync(data_js, nodes), [])
+
     def test_matching_data_js_reports_no_drift(self):
         with tempfile.TemporaryDirectory() as d:
             data_js = os.path.join(d, "data.js")
