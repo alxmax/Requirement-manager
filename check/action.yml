@@ -73,7 +73,7 @@ inputs:
     required: false
     default: '.'
   python-version:
-    description: 'Python to set up for the gate (stdlib-only; any 3.x works).'
+    description: 'Python to set up for the gate (stdlib-only; 3.9+, the engine''s declared floor).'
     required: false
     default: '3.x'
   freshness:

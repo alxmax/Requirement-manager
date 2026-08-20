@@ -83,7 +83,8 @@ intent triage before any other action.
 
 ## Setup (first use in a repo)
 
-The engine is a single stdlib-only script. Seed it into the target repo once:
+The engine is a single stdlib-only script, Python 3.9+ (it refuses an older interpreter
+with one readable line rather than a stdlib error). Seed it into the target repo once:
 
 ```bash
 mkdir -p scripts requirements

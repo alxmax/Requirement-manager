@@ -1,5 +1,6 @@
 name: ci
 # implements: REQ-SELFGATE-039
+# implements: REQ-PYFLOOR-040
 
 on:
   push:
@@ -86,6 +87,51 @@ jobs:
           python -X utf8 excalidraw_builder.py
           python -X utf8 -m unittest test_excalidraw -v
 
+  # Portability matrix. The engine claims "stdlib only, runs anywhere with Python",
+  # and until now one job on ubuntu + `python-version: 3.x` was the whole evidence for
+  # it — so the floor was accidental (3.7, untested) and the `-X utf8` convention that
+  # exists specifically FOR Windows had never run on Windows in CI. This job is the
+  # proof: the oldest entry equals reqmap.py's MIN_PYTHON (REQ-PYFLOOR-040 AC-3 asserts
+  # they stay equal), and both OSes run every suite. Deliberately separate from
+  # gate-and-tests: the gate is a single authoritative verdict about THIS repo's
+  # requirement corpus, not a per-interpreter one, and running it six times would
+  # just be six identical answers.
+  tests:
+    name: tests (py${{ matrix.python }} on ${{ matrix.os }})
+    strategy:
+      # One red cell must not hide the others: knowing a failure is "3.9 everywhere"
+      # vs "windows everywhere" is the whole diagnostic value of a matrix.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.9", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0        # test_cross_tool seeds a repo and shells out to git
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      # No `shell:` overrides below — each step is a single `python` invocation, so the
+      # runner's default shell (bash on Linux, pwsh on Windows) never sees shell syntax.
+      - name: Engine regression tests
+        working-directory: plugin/scripts
+        run: python -X utf8 -m unittest test_reqmap -v
+      - name: Version-gate tests
+        run: python -X utf8 scripts/test_check_versions.py
+      - name: Release-notes extraction tests
+        working-directory: scripts
+        run: python -X utf8 test_changelog_notes.py
+      - name: Cross-tool falsification (seed engine -> sync -> gate -> map)
+        run: python -X utf8 scripts/test_cross_tool.py
+      - name: Excalidraw builder smoke
+        working-directory: plugin/skills/excalidraw-diagram/scripts
+        run: python -X utf8 excalidraw_builder.py
+      - name: Excalidraw tests
+        working-directory: plugin/skills/excalidraw-diagram/scripts
+        run: python -X utf8 -m unittest test_excalidraw -v
+
   # Publish the requirement-map site (the committed docs/ Pages root: map.html,
   # the Excalidraw architecture diagrams, .nojekyll, index redirect) to GitHub
   # Pages — authenticated with the workflow's short-lived OIDC id-token, NO
@@ -140,7 +186,10 @@ jobs:
   # CHANGELOG.md section (scripts/changelog_notes.py), the same heading the
   # version-bump gate already requires, so notes never drift from the changelog.
   release:
-    needs: gate-and-tests
+    # Also gated on the matrix: a version that fails on Windows or on the declared
+    # floor must not become a tag consumers install. deploy-map stays on the gate
+    # alone — it republishes docs/, which the gate already drift-checks.
+    needs: [gate-and-tests, tests]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:

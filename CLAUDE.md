@@ -71,6 +71,10 @@ python -X utf8 plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py   
 python -X utf8 -m unittest test_excalidraw -v     # from plugin/skills/excalidraw-diagram/scripts/
 ```
 
+**Python floor: 3.9** (`MIN_PYTHON` in `reqmap.py`, `REQ-PYFLOOR-040`). It is deliberately the oldest version CI runs, not the oldest the code happens to work on (3.7): a floor nothing tests is a claim, not a guarantee. `reqmap.py` refuses an older interpreter with one readable line and exit 2. Raising it means moving the matrix and `MIN_PYTHON` together — a test asserts they stay equal.
+
+CI has **two** test surfaces, don't confuse them: `gate-and-tests` (ubuntu, `3.x`) is the single authoritative verdict on this repo's requirement corpus; `tests` is the portability matrix (3.9/3.12/3.13 x ubuntu/windows) that runs every suite and nothing else. `release` needs both; `deploy-map` needs only the gate.
+
 The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` → `reqmap.py lint --strict --code ..` → `reqmap.py map --check --code ..` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 **Hooks — two different files, don't confuse them:**
