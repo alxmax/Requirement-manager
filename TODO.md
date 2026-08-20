@@ -212,7 +212,18 @@
            middle ground is the WARN half: `map`/`gate` shell out to git ONCE, best-effort,
            and warn when a discovered member is gitignored — loud instead of silent, no
            behaviour change for consumer repos that deliberately tag ignored files. -->
-- [ ] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
+- [x] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
+      <!-- Shipped in v2.19.0 as the `artifacts` job. Both builds were measured first and
+           are byte-reproducible: `npm run build:viewer` reproduced the committed 217KB
+           viewer exactly, and make_full_architecture.py reproduced docs/full_architecture.html
+           exactly, twice. The viewer half is a literal `git diff --exit-code` (the build
+           overwrites the committed file in place); the diagram half builds into a temp dir
+           and compares, because the generator drops a sibling .excalidraw and
+           `docs/*.excalidraw` is hard-blocked by .gitignore. `release` now needs this job. Filed as
+           REQ-REPRO-041, split out of REQ-SELFGATE-039 after the clarity lint flagged
+           the merged requirement at 8 acceptance criteria.
+           NOT covered: docs/architecture.html, which is hand-authored — its engine-owned
+           regions are already checked by `map --check`. -->
 - [x] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
       <!-- Done 2026-08-20: PR #167 (check@v2) landed as a real merge commit, e56886c.
            HEAD~1 resolves again, so the changelog-entry gate is live rather than a
