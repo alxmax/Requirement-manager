@@ -50,6 +50,10 @@ Every line in this section is binding.
   in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and
   therefore contain literal `<!--`) broke `file://` opening by making
   `window.__REQMAP_DATA__` null.
+- `render_html` also escapes U+2028 and U+2029 to their `\\u2028`/`\\u2029` forms.
+  Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the
+  assignment into an unterminated string on any engine older than ES2019. The escaped forms
+  denote the same characters in JSON, so the parsed graph is unchanged.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -86,6 +90,12 @@ AC-3
   Given  no template is vendored
   When   `map` runs
   Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)
+
+AC-5
+  Given  a requirement whose title or contract contains U+2028 or U+2029
+  When   `map` writes `_map.html`
+  Then   neither character appears raw in the file, and the inlined graph still parses to
+         the original text
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
