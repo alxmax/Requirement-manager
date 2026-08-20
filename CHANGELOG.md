@@ -10,6 +10,12 @@
 - `release` now needs the matrix as well as the gate — a version that fails on Windows or on the floor must not become a tag consumers install. `deploy-map` still needs only the gate, since it republishes `docs/`, which the gate already drift-checks.
 - Docs corrected where they promised more than was tested: `check/action.yml`'s `python-version` said "any 3.x works", and README / both SKILL files described the engine without naming a version.
 
+**The matrix paid for itself on its first run** — three defects that a single ubuntu job structurally could not see:
+
+- **`--since` failed OPEN on Windows.** `_since_changed_files` builds its changed-set from `git rev-parse --show-toplevel`, which always returns the long path form, while the caller's `code_root` can carry an 8.3 short component (`C:/Users/RUNNER~1/...`). `abspath` + `normcase` normalize separators and case but not short-vs-long, so the two sets never intersected: every member dropped out of the changed-set and `gate --since` reported a clean tree **with a dangling tag still in it**. Both sides now go through one `_path_key` (`realpath` then `normcase`), which also fixes the POSIX shape of the same defect — a repo reached through a symlinked path — now covered by a symlink regression test.
+- **16 tests never ran in the documented invocation.** `if __name__ == "__main__": unittest.main()` sat mid-file, above `RoadmapSignals` and `ViewerDataSync`, so `python test_reqmap.py` executed it before those classes existed: 478 collected instead of 494. CI runs `-m unittest`, which imports the module fully, so CI never saw the gap. The entry point now stays last.
+- **A test leaked the process cwd into its own result.** `cmd_check`'s `code_root` defaults to `"."`, and `test_strict_drift_exits_1` counts DRIFT lines without passing one — so run from `plugin/` it scanned the real corpus, saw a second DRIFT line and failed, while passing from `plugin/scripts/`. Both are invocations `CLAUDE.md` documents. Now hermetic.
+
 `MAP_ENGINE_VERSION` → `2026-08-20`.
 
 ## plugin `v2.18.1` — 2026-08-20

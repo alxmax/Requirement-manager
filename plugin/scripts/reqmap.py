@@ -1660,7 +1660,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             for cap, entries in members.items():
                 kept = [
                     (role, fp, ln) for role, fp, ln in entries
-                    if os.path.normcase(os.path.abspath(os.path.join(code_root, fp))) in changed
+                    if _path_key(os.path.join(code_root, fp)) in changed
                 ]
                 if kept:
                     filtered[cap] = kept
@@ -4872,6 +4872,25 @@ SITE_TEMPLATE = """\
 """  # implements: REQ-SITE-026
 
 
+def _path_key(path):  # implements: REQ-CHECK-006
+    """Comparison key for a filesystem path: fully resolved, then case-folded.
+
+    `abspath` is not enough where a git-derived path meets a caller-derived one.
+    It normalizes separators and (with normcase) case, but leaves an 8.3 SHORT
+    component alone: `C:/Users/RUNNER~1/...` from the caller and
+    `C:/Users/runneradmin/...` from `git rev-parse --show-toplevel` (always long
+    form) are the same directory and compare unequal. In `--since` that made every
+    member fall out of the changed-set, so the gate reported a clean tree with a
+    dangling tag still in it - a gate failing OPEN, silently, on Windows only.
+    Found by the CI portability matrix on its first run (REQ-PYFLOOR-040).
+
+    realpath resolves the short form, and symlinks with it - a repo reached through
+    a symlinked path hit the same mismatch on POSIX. Both sides of every comparison
+    go through this one function, so resolution can never apply to just one of them.
+    """
+    return os.path.normcase(os.path.realpath(path))
+
+
 def _since_changed_files(ref, code_root):
     """Return set of absolute paths changed since `ref`, or None on failure.
 
@@ -4907,7 +4926,7 @@ def _since_changed_files(ref, code_root):
         for line in result.stdout.splitlines():
             line = line.strip()
             if line:
-                files.add(os.path.normcase(os.path.abspath(os.path.join(root, line))))
+                files.add(_path_key(os.path.join(root, line)))
         return files
     except Exception:
         return None

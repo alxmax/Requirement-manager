@@ -4011,11 +4011,17 @@ class CheckStrict(unittest.TestCase):
             reqs = R.load_requirements(rdir)
             members = R.scan_members(d, rdir)
             buf = io.StringIO()
+            # code_root=d is not optional here: cmd_check defaults it to "." and this
+            # assertion counts DRIFT lines, so without it the run scans whatever the
+            # process cwd happens to be. From plugin/ that is the REAL corpus, whose
+            # own drift added a second DRIFT line and failed the test - passing from
+            # plugin/scripts/ and failing from plugin/, both documented invocations.
             with redirect_stdout(buf):
-                rc_normal = R.cmd_check(reqs, members, rdir, update_lock=False)
+                rc_normal = R.cmd_check(reqs, members, rdir, update_lock=False, code_root=d)
             buf2 = io.StringIO()
             with redirect_stdout(buf2):
-                rc_strict = R.cmd_check(reqs, members, rdir, update_lock=False, strict=True)
+                rc_strict = R.cmd_check(reqs, members, rdir, update_lock=False,
+                                        code_root=d, strict=True)
             self.assertEqual(rc_normal, 0, "without --strict, drift must exit 0")
             self.assertEqual(rc_strict, 1, "with --strict, drift must exit 1")
             # promoted warn must appear exactly once, not twice
@@ -4252,6 +4258,60 @@ class CheckSince(unittest.TestCase):
             out = buf.getvalue()
             self.assertIn("WARN", out, "must WARN when git is unavailable")
             self.assertEqual(rc, 0, "clean corpus exits 0 even on git failure")
+
+    def test_since_matches_when_the_root_is_spelled_differently(self):
+        """A code_root spelled differently from git's own toplevel still matches.
+
+        Regression for the Windows-only fail-open the CI portability matrix found on
+        its first run: the caller's code_root carried an 8.3 short component
+        (C:/Users/RUNNER~1/...) while `git rev-parse --show-toplevel` returns the
+        long form, so abspath+normcase never made the two sets intersect, every member
+        dropped out of the changed-set, and the gate passed a tree with a dangling tag
+        in it. Reproduced here through a symlinked path, the POSIX shape of the same
+        defect: both spellings must resolve to one key.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            real = os.path.join(d, "real-checkout")
+            os.makedirs(real)
+            link = os.path.join(d, "lnk")
+            try:
+                os.symlink(real, link, target_is_directory=True)
+            except (OSError, NotImplementedError, AttributeError):
+                self.skipTest("symlinks unavailable (Windows without developer mode)")
+            self._init_git_repo(real)
+            rdir = os.path.join(real, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- does X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(real, "src_a.py"),
+                   "# {}: REQ-A-001\n".format("impl" + "ements"))
+            self._commit_all(real, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", real, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True).stdout.strip()
+            _write(os.path.join(real, "ghost.py"),
+                   "# {}: REQ-GHOST-999\n".format("impl" + "ements"))
+            self._commit_all(real, "add-ghost")
+
+            # Everything below addresses the repo through the LINK spelling.
+            lrdir = os.path.join(link, "requirements")
+            reqs = R.load_requirements(lrdir)
+            members = R.scan_members(link, lrdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, lrdir, update_lock=False,
+                                 code_root=link, since=base_ref)
+            self.assertEqual(rc, 1,
+                             "a dangling tag must still be caught when code_root is "
+                             "spelled differently than git's toplevel")
+
+    def test_path_key_folds_an_alternate_spelling_of_one_directory(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = os.path.join(d, "x.py")
+            _write(f, "x=1\n")
+            indirect = os.path.join(d, "sub", "..", "x.py")
+            self.assertEqual(R._path_key(f), R._path_key(indirect))
+            self.assertEqual(R._path_key(f), R._path_key(os.path.realpath(f)))
 
     def test_since_from_subdir_of_git_root(self):
         """--since must work when code_root is a subdirectory of the git root.
@@ -5062,11 +5122,8 @@ class BugHuntSince(unittest.TestCase):  # tested-by: REQ-CHECK-006
             subprocess.run(["git", "-C", d, "commit", "-m", "change"], check=True, capture_output=True)
             files = R._since_changed_files(base, d)
             self.assertIsNotNone(files)
-            self.assertIn(os.path.normcase(os.path.abspath(fp)), files)
+            self.assertIn(R._path_key(fp), files)   # not abspath: 8.3 short names
 
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
 
 
 class RoadmapSignals(unittest.TestCase):  # tested-by: REQ-ROADMAP-038
@@ -5171,3 +5228,12 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: REQ-VIEWER-007
             with open(data_js, "wb") as f:
                 f.write(b"\xff\xfe garbage, not valid utf-8")
             self.assertIsNone(R.check_viewer_data_sync(data_js, []))
+
+# Entry point stays LAST on purpose. It used to sit mid-file, above
+# RoadmapSignals and ViewerDataSync, so `python test_reqmap.py` ran
+# unittest.main() before those classes were even defined: 478 tests
+# collected instead of 494, 16 silently skipped in the invocation
+# CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
+# module first, so CI never saw the gap.
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
