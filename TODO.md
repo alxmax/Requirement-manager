@@ -260,7 +260,18 @@
            and member paths go into the map. Now escaped / degraded to U+FFFD, with the
            tests written first. Benchmark: scripts/benchmark_scan.py, numbers published in
            the README. -->
-- [ ] One tree walk instead of three: `gate` calls scan_members + scan_ac_verifies + scan_test_levels, each opening every file — 3.06s + 2.76s + 2.81s of its 8.49s on a 10k-file tree | lane: bus
+- [x] One tree walk instead of three: `gate` calls scan_members + scan_ac_verifies + scan_test_levels, each opening every file — 3.06s + 2.76s + 2.81s of its 8.49s on a 10k-file tree | lane: bus
+      <!-- Shipped as `scan_all` (CORE-SCAN-002 AC-7). Not a merge of three loops: the walk
+           moved into one `_walk_code` generator, `_scan_file_tags` gained an optional
+           `lines` argument so a caller that already read the file can hand the content
+           over, and the two coverage scanners' identical masking loops became one pass
+           feeding both regexes — preserving the asymmetry that only the levelled scan
+           strips backticks first. Measured on the same 10k tree: scan_all 2.53s (a single
+           walk cost 2.62s before), gate 8.49s -> 2.46s, scan+gate ~11s -> ~5s. Safety
+           argument is a test asserting scan_all == the three scanners, run against both a
+           mixed fixture and this repo's real corpus. --cache stays on scan_members alone:
+           it is off on the CI path this speeds up, and duplicating its invalidation rules
+           would trade a measured win for a correctness risk. -->
       <!-- Found 2026-08-20 by the benchmark above, which was written to publish a number and
            ended up explaining it. The three scanners have different masking rules (fences,
            string literals, tag vocabularies), so this is a real refactor and not a merge of

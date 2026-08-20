@@ -153,7 +153,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-20.1"
+MAP_ENGINE_VERSION = "2026-08-20.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -896,8 +896,13 @@ def _strip_py_strings(s):
     return ''.join(out), None
 
 
-def _scan_file_tags(fp):  # implements: CORE-SCAN-002
-    """Read one file; return membership tags as [[role, cap, line], ...] or None on read error.
+def _scan_file_tags(fp, lines=None):  # implements: CORE-SCAN-002
+    """Membership tags in one file as [[role, cap, line], ...], or None on read error.
+
+    `lines` lets a caller that has already read the file hand the content over, so the
+    single-walk scanner (`scan_all`) reads each file once for all three extractors
+    instead of three times. `fp` is still required: the masking rules key off its
+    extension. Reading it here when `lines` is None keeps every existing caller working.
 
     Context-aware per file class — admits a tag only when NOT in an excluded zone:
 
@@ -914,11 +919,12 @@ def _scan_file_tags(fp):  # implements: CORE-SCAN-002
     """
     ext = os.path.splitext(fp)[1].lower()
     out = []
-    try:
-        with open(fp, encoding="utf-8", errors="ignore") as f:
-            lines = f.readlines()
-    except OSError:
-        return None
+    if lines is None:
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+        except OSError:
+            return None
 
     if ext in PROSE_EXTS:
         fence = None   # None = not fenced; else the opening fence string e.g. "```"
@@ -1003,6 +1009,83 @@ def _save_scancache(reqs_dir, cache):  # implements: REQ-SCANCACHE-023
             json.dump(cache, f, indent=2, sort_keys=True)
     except OSError:
         pass
+
+
+def _walk_code(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+    """Yield (abs_path, posix_rel_path) for every scannable file under `code_root`.
+
+    The one place the walk discipline lives: prune noise dirs and the SSOT output dir,
+    descend and read in sorted order so a generated map is identical across platforms,
+    keep only known code files, and honour `.reqmapignore`. Three scanners used to carry
+    a byte-for-byte copy of this loop, which is how they drifted apart in the first place.
+    """
+    ignore = load_ignore(code_root, reqs_dir)
+    for dirpath, dirs, files in os.walk(code_root):
+        _prune_dirs(dirpath, dirs, reqs_dir)
+        dirs.sort()                  # deterministic descent — raw os.walk order is OS-dependent
+        for fn in sorted(files):     # deterministic file order — the map must not depend on the filesystem
+            if not _is_code_file(fn):
+                continue
+            fp = os.path.join(dirpath, fn)
+            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
+            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+                continue
+            yield fp, rel
+
+
+def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: REQ-ACVERIFY-019
+    """Accumulate `verifies:` and levelled `tested-by:` hits from one file's lines.
+
+    One masking pass feeding both regexes, because the two scanners this replaces did
+    the identical per-line work twice. The asymmetry is preserved exactly: only the
+    levelled scan strips backticked spans first, so a documented EXAMPLE of a levelled
+    tag does not register as real coverage, while `verifies:` keeps its raw scan.
+    """
+    is_py = fp.endswith(".py")
+    in_triple = None
+    for i, line in enumerate(lines, 1):
+        s = line
+        if is_py:
+            s = s.rstrip("\n\r")
+            if in_triple is not None:
+                idx = s.find(in_triple)
+                if idx == -1:
+                    continue
+                s = s[idx + len(in_triple):]
+                in_triple = None
+            s, in_triple = _strip_py_strings(s)
+        for cap, ac in AC_VERIFY_RE.findall(s):
+            ac_out.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+        for idlist, level in TEST_LEVEL_RE.findall(_BACKTICK_RE.sub("", s)):
+            for cap in _ID_RE.findall(idlist):
+                level_out.setdefault(cap, {}).setdefault(level, []).append((rel, i))
+
+
+def scan_all(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+    """(members, ac_cover, level_cover) from ONE walk that reads each file once.
+
+    The gate used to call three scanners that each walked the whole tree and opened
+    every file: on a 10,000-file tree that measured 3.06s + 2.76s + 2.81s of its 8.49s
+    total — the scan was essentially the entire runtime, done three times. Results are
+    identical to calling `scan_members` / `scan_ac_verifies` / `scan_test_levels`
+    separately; a test asserts that equality rather than trusting the refactor.
+
+    `scan_members`'s opt-in mtime cache is deliberately not reproduced here: it is off
+    on the gate/CI path this exists to speed up, and duplicating its invalidation rules
+    would trade a measured win for a correctness risk.
+    """
+    members, ac_cover, level_cover = {}, {}, {}
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+        except OSError:
+            continue          # unreadable file is skipped, never fatal — matches scan_members
+        for role, cap, line in _scan_file_tags(fp, lines) or []:
+            members.setdefault(cap, []).append((role, rel, line))
+        _extract_coverage(fp, rel, lines, ac_cover, level_cover)
+    return members, ac_cover, level_cover
+
 
 
 def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCAN-002
@@ -1682,7 +1765,8 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
             "(def test.../func TestX.../#[test]/it()/py run|main under __main__)")
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True):  # implements: REQ-CHECK-006
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,
+              ac_cover=None, level_cover=None):  # implements: REQ-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
@@ -1711,13 +1795,19 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                     filtered[cap] = kept
             members = filtered
 
-    ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
+    # Both coverage maps come from the caller on the CLI path, where `scan_all` already
+    # produced them in the same walk that produced `members` — three passes over the
+    # tree collapsed into one. Computed here when absent, so every other caller
+    # (tests, an embedding tool) keeps working unchanged.
+    if ac_cover is None:
+        ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
     # V-model opt-in triggers, computed once. Neither this rule nor the level-fit rule can
     # fire until the repo has deliberately adopted the vocabulary, so installing this engine
     # adds no warnings to a repo that never annotates a tag (REQ-VLEVEL-037).
     any_validation = any(x[0] == "validated-against"
                          for hits in members.values() for x in hits)
-    level_cover = scan_test_levels(code_root, reqs_dir)   # {cap: {level: [...]}}
+    if level_cover is None:
+        level_cover = scan_test_levels(code_root, reqs_dir)   # {cap: {level: [...]}}
     satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
     for _rid, _r in reqs.items():
         for _up in _as_list(_r["meta"].get("satisfies")):
@@ -5369,7 +5459,14 @@ def main():
         return cmd_gen_integration(reqs_dir, code_root)
 
     reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root, reqs_dir, cache=a.cache)
+    # One walk for the commands that need coverage too (gate/sync/check); the rest only
+    # ever asked for members. --cache stays on scan_members, the only scanner that
+    # implements it — see scan_all's docstring for why it is not duplicated there.
+    _ac_cover = _level_cover = None
+    if a.cmd in ("gate", "check", "sync") and not a.cache:
+        members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir)
+    else:
+        members = scan_members(code_root, reqs_dir, cache=a.cache)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
@@ -5394,13 +5491,15 @@ def main():
     if a.cmd == "gate":
         # report-only: link sync + drift + test-link; never touches the lock.
         return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
-                         getattr(a, "since", None))
+                         getattr(a, "since", None),
+                         ac_cover=_ac_cover, level_cover=_level_cover)
     if a.cmd == "sync":
         # rescan + regenerate map + advance the drift baseline (guarded). Members were
         # already scanned above; cmd_check rewrites the lock unless confirmed drift is
         # detected without --accept-drift, then map regenerates only on success.
         rc = cmd_check(reqs, members, reqs_dir, True, code_root, strict=a.strict,
-                       accept_drift=getattr(a, "accept_drift", False))
+                       accept_drift=getattr(a, "accept_drift", False),
+                       ac_cover=_ac_cover, level_cover=_level_cover)
         if rc == 0:
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc
@@ -5411,7 +5510,8 @@ def main():
               "lock+map). Forwarding to legacy behavior; the alias is removed in the next major.",
               file=sys.stderr)
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
-                       getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False))
+                       getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False),
+                       ac_cover=_ac_cover, level_cover=_level_cover)
         if a.update_lock and rc == 0:        # mirror sync: don't regen the map on a failing gate
             cmd_map(reqs, members, reqs_dir, code_root)
         return rc

@@ -295,17 +295,18 @@ requirements** (Python 3.11, Windows, warm cache):
 | operation | seconds |
 |---|---|
 | `load_requirements` | 0.03 |
-| `scan_members` | 3.06 |
-| `scan_ac_verifies` | 2.76 |
-| `scan_test_levels` | 2.81 |
-| **`gate` (all of it)** | **8.49** |
+| `scan_all` — one walk, every extraction | 2.53 |
+| `gate` (given that walk) | 2.46 |
 | build + render map | 0.03 |
 
-Reading the table: the gate costs three full walks of the tree, not one — `scan_members`,
-`scan_ac_verifies` and `scan_test_levels` each open every file, and together they are
-essentially the gate's whole runtime. That is a known inefficiency with an obvious fix
-(one walk, three extractions); it is on the roadmap rather than done, and 8.5s for 10k
-files is fast enough that it has not been urgent.
+The gate used to cost **three** full walks of the tree rather than one: `scan_members`,
+`scan_ac_verifies` and `scan_test_levels` each opened every file, and together they were
+essentially its entire runtime (3.06s + 2.76s + 2.81s of 8.49s). `scan_all` reads each
+file once and runs all three extractions on the same lines — it now costs about what a
+single walk cost before (2.53s vs 2.62s for `scan_members` alone), and scanning plus
+gating a 10k-file tree went from ~11s to ~5s. A test asserts `scan_all` returns exactly
+what the three scanners return, because "they look the same" is not evidence when each
+has different masking rules.
 
 The benchmark is deliberately **not** wired into CI: a shared runner's I/O varies far too
 much for a timing assertion to mean anything, and a flaky performance gate teaches people

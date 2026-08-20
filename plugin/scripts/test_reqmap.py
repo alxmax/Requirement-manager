@@ -4642,6 +4642,67 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+NL = chr(10)
+
+
+class SingleWalkEquivalence(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    """scan_all must return exactly what the three separate scanners return.
+
+    This is the whole safety argument for the refactor: the three scanners have
+    DIFFERENT masking rules (fences and indents for prose, string literals for .py,
+    a backtick strip for levelled tags only), so "they look the same" is not evidence.
+    Equality is asserted on real trees instead, including this repo's own.
+    """
+
+    def _tree(self, d):
+        _write(os.path.join(d, "requirements", "REQ-A-001.md"),
+               "---" + NL + "id: REQ-A-001" + NL + "status: confirmed" + NL + "layer: bus" + NL
+               + "---" + NL + NL + "# T" + NL)
+        impl = "impl" + "ements"
+        _write(os.path.join(d, "src", "a.py"),
+               "# {}: REQ-A-001".format(impl) + NL
+               + "def test_x():  # verifies: REQ-A-001#AC-1" + NL
+               + "    return 1" + NL)
+        _write(os.path.join(d, "src", "b.py"),
+               '"""A docstring mentioning verifies: REQ-A-001#AC-9 must NOT count."""' + NL
+               + "# tested-by: REQ-A-001 @unit" + NL)
+        _write(os.path.join(d, "notes.md"),
+               "Prose showing `# tested-by: REQ-A-001 @system` in backticks must not count." + NL
+               + "```" + NL + "# {}: REQ-FENCED-999".format(impl) + NL + "```" + NL)
+        _write(os.path.join(d, "src", "c.ts"),
+               "// {}: REQ-A-001".format(impl) + NL + "// verifies: REQ-A-001#AC-2" + NL)
+        return os.path.join(d, "requirements")
+
+    def test_matches_the_three_scanners_on_a_mixed_tree(self):  # verifies: CORE-SCAN-002#AC-7
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._tree(d)
+            one = R.scan_all(d, rdir)
+            three = (R.scan_members(d, rdir), R.scan_ac_verifies(d, rdir),
+                     R.scan_test_levels(d, rdir))
+            self.assertEqual(one, three)
+            self.assertIn("REQ-A-001", one[0])          # the fixture is not vacuous
+            self.assertNotIn("REQ-FENCED-999", one[0])  # fenced example still excluded
+            self.assertEqual(one[1]["REQ-A-001"].get("AC-9"), None)   # docstring excluded
+
+    def test_matches_the_three_scanners_on_this_repo(self):
+        """The fixture above is a model; this is the real corpus, every masking rule
+        exercised by files that actually use them. Skipped outside the repo."""
+        root = os.path.dirname(os.path.dirname(os.path.abspath(R.__file__)))
+        rdir = os.path.join(root, "requirements")
+        if not os.path.isdir(rdir):
+            self.skipTest("not running inside the requirement-manager repo")
+        self.assertEqual(R.scan_all(root, rdir),
+                         (R.scan_members(root, rdir), R.scan_ac_verifies(root, rdir),
+                          R.scan_test_levels(root, rdir)))
+
+    def test_unreadable_file_is_skipped_not_fatal(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = self._tree(d)
+            os.makedirs(os.path.join(d, "src", "weird.py"), exist_ok=True)  # a DIR named .py
+            members, _ac, _lv = R.scan_all(d, rdir)
+            self.assertIn("REQ-A-001", members)
+
+
 class UntrackedMembers(unittest.TestCase):  # tested-by: REQ-TRACKED-042
     """A member git does not track breaks reproducibility of the committed map.
 
