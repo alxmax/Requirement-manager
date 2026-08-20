@@ -1,0 +1,51 @@
+name: Bug report
+description: The gate, the map, a command, or the action did something wrong
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A correctness bug in the gate — a missed drift, a false warning, a wrong member
+        list — belongs here. For something that could let repository *content* execute
+        code or inject script into the generated viewer, use private reporting instead:
+        see [SECURITY.md](../blob/main/SECURITY.md).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran and its output, verbatim. Trim it, don't paraphrase it.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Smallest reproduction you have
+      description: >
+        A requirement file plus the tagged line is usually enough. If it only reproduces in
+        your own repo, say which of these applies: many members, non-ASCII paths, symlinks,
+        submodules, generated files, a monorepo layout.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: >
+        Plugin semver (plugin/.claude-plugin/plugin.json), MAP_ENGINE_VERSION from the top
+        of your vendored scripts/reqmap.py, Python version, OS. If you are using the
+        action, the ref you pinned.
+      placeholder: "plugin 2.21.0 · engine 2026-08-20.2 · Python 3.12 · Windows 11 · check@v2"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Before filing
+      options:
+        - label: I re-ran with `-X utf8` (Windows encoding failures look like unrelated crashes)
+        - label: My vendored `reqmap.py` is current, or I have said which version it is above
