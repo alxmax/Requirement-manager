@@ -138,7 +138,7 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v1`. The `@v1` git tag is independent of the plugin semver and of `MAP_ENGINE_VERSION` — bump it manually when the action interface changes. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v2`. The `@vN` alias is a third version axis, independent of the plugin semver and of `MAP_ENGINE_VERSION`. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md` and this file agree (the documented `uses:` line is the source of truth — there is no separate version file). Bump the major by editing those three references in one commit, and only for a change that breaks an existing caller — adding a default-on step counts, which is why `@v1` (gate-only, frozen at v2.1.0 content) was left in place rather than re-pointed. Consumer repos use it as:
 ```yaml
-- uses: alxmax/requirement-manager/check@v1
+- uses: alxmax/requirement-manager/check@v2
 ```

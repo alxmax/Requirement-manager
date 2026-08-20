@@ -4,7 +4,7 @@
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
 # `<dir>/action.yml`, so this file is consumed as:
 #
-#     uses: alxmax/requirement-manager/check@v1
+#     uses: alxmax/requirement-manager/check@v2
 #
 # Usage (in a consumer repo that has vendored scripts/reqmap.py per the skill setup):
 #
@@ -17,12 +17,25 @@
 #         runs-on: ubuntu-latest
 #         steps:
 #           - uses: actions/checkout@v4
-#           - uses: alxmax/requirement-manager/check@v1
+#           - uses: alxmax/requirement-manager/check@v2
 #
-# Versioning: `@v1` is the git tag the maintainer pushes; it pins the engine to the
-# repo content at that tag. Pin to `@v1` (moves with backward-compatible fixes) or to
-# an exact tag / commit SHA for full reproducibility. The tag is independent of the
+# Versioning: `@vN` is a MAJOR-ALIAS tag naming the action's interface line, not a
+# release. The `uses:` reference above IS its source of truth — there is no separate
+# version file to fall out of step with the docs — and `.github/workflows/ci.yml`'s
+# release job reads the major from this file and force-moves the tag onto every commit
+# it releases, so the alias always resolves to the latest released content on that line
+# and cannot silently rot behind the repo again. scripts/check_versions.py asserts this
+# file, README.md and CLAUDE.md all name the same major. Pin to `@v2` (moves with backward-compatible fixes) or to an exact
+# `vX.Y.Z` tag / commit SHA for full reproducibility. The alias is independent of the
 # plugin semver and of reqmap.py's MAP_ENGINE_VERSION.
+#
+# `@v1` is FROZEN at plugin v2.1.0 content (tag pushed 2026-06-15) and no longer
+# moves: existing pins keep working exactly as they did, and get nothing new. The
+# major bump to `@v2` is not cosmetic — the `freshness` and `lint` steps below default
+# to 'true', so re-pointing `@v1` onto this commit would newly FAIL a consumer build
+# that was green (a stale committed map, or a requirement the clarity lint rejects).
+# Adding a default-on check to an existing pin is a breaking change for the caller;
+# that is what the new major is for.
 #
 # Scope note: reqmap's vendored-copy staleness warning (warn_if_stale) is gated on the
 # CLAUDE_PLUGIN_ROOT env var, which is unset in CI — so it is silent and exit-neutral
@@ -39,7 +52,7 @@
 # runs the consumer's own scripts/reqmap.py. `lint` exists since plugin v1.14.0 and the
 # `lint_exempt:` escape hatch since v2.3.4 — below that, a repo that trips the lint has no
 # way to declare a shape deliberate, so re-seed the engine (or pass `lint: 'false'`) before
-# moving `@v1` onto this commit.
+# adopting `@v2`.
 #
 # Fork-PR safety: keep `permissions: contents: read` in the caller workflow. The gate
 # needs no secrets and no write scope; do not grant them.
@@ -91,9 +104,9 @@ runs:
       # `gate` is the intent-verb name for the report-only check (v2.0.0+).
       # The engine keeps `check` as a deprecation alias, so a consumer whose workflow
       # calls `check` directly keeps working. This action, however, invokes `gate` —
-      # so only move/cut the `@v1` tag onto a v2.0.0+ commit once consumers can be
-      # expected to have re-seeded reqmap.py (>=2.0.0). An older vendored engine does
-      # not know `gate` and would exit 2.
+      # so `@v2` requires a re-seeded reqmap.py (>=2.0.0). An older vendored engine does
+      # not know `gate` and would exit 2 — one more reason this line is `@v2`, not a
+      # re-pointed `@v1`.
       run: python -X utf8 "${{ inputs.reqmap-path }}" gate
     - name: reqmap map freshness
       if: ${{ inputs.freshness == 'true' }}

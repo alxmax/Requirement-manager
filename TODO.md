@@ -186,7 +186,14 @@
      Parked: closing the V-model (system layer + level-correspondence gating).
      Unpark only if a regulated user asks — and record it as a decision so it reads
      as scoped-out rather than missed. -->
-- [ ] Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README | lane: ops
+- [x] Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README | lane: ops
+      <!-- Neither: re-pointing @v1 would have BROKEN consumers (the action gained two
+           default-on steps, freshness + lint, since v2.1.0 — a green build could newly
+           fail), so @v1 is frozen and the line moved to @v2. The rot itself is the real
+           fix: ci.yml's release job force-moves the alias onto every released commit,
+           and check_versions.py asserts action.yml/README/CLAUDE.md name the same major
+           (the documented `uses:` line is the SSOT — no separate version file).
+           REQ-SELFGATE-039 AC-6/AC-7. Shipped in v2.18.1. -->
 - [ ] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
 - [ ] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
 - [ ] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops

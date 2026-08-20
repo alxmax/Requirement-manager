@@ -19,8 +19,14 @@ import check_versions as CV
 
 
 def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
-           engine="2026-06-21.4", plugins=None):
+           engine="2026-06-21.4", plugins=None, action_majors=("v2", "v2", "v2")):
+    """action_majors: the major each of (action.yml, README.md, CLAUDE.md) references;
+    None for a file that carries no reference at all."""
     d = Path(d)
+    (d / "check").mkdir(parents=True, exist_ok=True)
+    for rel, major in zip(CV.ACTION_REF_FILES, action_majors):
+        body = "" if major is None else "uses: alxmax/requirement-manager/check@{}".format(major)
+        (d / rel).write_text(body, encoding="utf-8")
     (d / "plugin" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
     (d / ".claude-plugin").mkdir(parents=True, exist_ok=True)
     (d / "plugin" / "scripts").mkdir(parents=True, exist_ok=True)
@@ -81,6 +87,28 @@ class CheckVersions(unittest.TestCase):
                 '"""example: MAP_ENGINE_VERSION = "not-a-date" """\n'
                 'MAP_ENGINE_VERSION = "2026-06-21.4"\n', encoding="utf-8")
             self.assertEqual(self._run(d), 0)   # unanchored regex matched the docstring -> 1
+
+    def test_action_alias_mismatch_fails(self):  # tested-by: REQ-SELFGATE-039
+        """The README advertising a different major than the action publishes is the
+        exact failure this axis exists for: @v1 in the docs, moved-on content in the repo."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, action_majors=("v2", "v1", "v2"))
+            self.assertEqual(self._run(d), 1)
+
+    def test_action_alias_missing_reference_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, action_majors=("v2", None, "v2"))
+            self.assertEqual(self._run(d), 1)
+
+    def test_action_alias_bare_at_v1_in_prose_is_not_a_reference(self):
+        """`@v1` named in prose (documenting the frozen line) must not read as a live
+        reference — only the full published path counts."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d)
+            (Path(d) / "CLAUDE.md").write_text(
+                "`@v1` is frozen and no longer moves." + chr(10) +
+                "- uses: alxmax/requirement-manager/check@v2", encoding="utf-8")
+            self.assertEqual(self._run(d), 0)
 
     def test_engine_version_revision_suffix(self):
         for engine, expected in [("2026-06-03.2", 0),   # valid same-day revision
