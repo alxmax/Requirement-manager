@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-20 18:03
+generated: 2026-08-20 18:15
 nodes: 43
 edges: 61
 ---
@@ -306,8 +306,6 @@ graph LR
   f_plugin_scripts_test_reqmap_py_3506["plugin/scripts/test_reqmap.py:3506"]
   REQ_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_3506
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
-  f__consilium_FEEDBACK_html_59[".consilium/FEEDBACK.html:59"]
-  REQ_VIEWER_007 -->|generated-from| f__consilium_FEEDBACK_html_59
   f_plugin_scripts_reqmap_py_1074_5050["plugin/scripts/reqmap.py:1074-5050"]
   REQ_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1074_5050
   f_plugin_scripts_test_reqmap_py_1415_5065["plugin/scripts/test_reqmap.py:1415-5065"]

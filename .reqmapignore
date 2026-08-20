@@ -30,6 +30,14 @@ docs/superpowers/**
 # prevent, and it would bake .worktrees/ paths into a locally regenerated map.
 .worktrees/**
 
+# Consilium deliberation artifacts (gitignored, .gitignore:3). Same class as the
+# worktrees above, and it bites harder: .consilium/FEEDBACK.html carries a real
+# `generated-from:` tag, so a map regenerated on a machine that has run Consilium
+# gains a member the CI checkout cannot reproduce — `map --check` then fails on CI
+# for a file that is not in the repo. Committed generated artifacts must depend only
+# on tracked files.
+.consilium/**
+
 # app/ (Vite+React viewer source) stays outside the widened scan this round —
 # see REQ-VIEWER-007's WHERE section. `npm run smoke` is the only automated
 # check for it and is not wired into CI (tracked separately, not this pass).

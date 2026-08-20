@@ -3111,10 +3111,6 @@
       "satisfied_by": [],
       "members": [
         {
-          "role": "generated-from",
-          "loc": ".consilium/FEEDBACK.html:59"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1074"
         },
