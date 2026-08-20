@@ -6,7 +6,7 @@ owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: [REQ-CHECK-006]     # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
-test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2
+test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2. AC-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)
 # area:              # optional: System Map grouping label (else the id prefix is used)
 ---
 
@@ -22,6 +22,9 @@ Every line in this section is binding.
 - `.github/workflows/ci.yml`'s `gate-and-tests` job invokes `reqmap.py gate` / `lint --strict`
   / `map --check` on every push and pull request.
 - `check/action.yml` packages the same invocation as a reusable GitHub Action for consumer repos.
+- `ci.yml`'s `release` job force-moves the action's major-alias tag — the `@vN` named by the
+  `uses:` reference in `check/action.yml` — onto the commit the current `plugin.json` version
+  is tagged at, on every push to `main`.
 - `.githooks/pre-commit` mirrors the CI order locally, before a commit is created.
 - `.githooks/pre-push` blocks a direct push to `main`.
 - `sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into
@@ -46,7 +49,7 @@ AC-2
   Then   it fails the commit on the same errors CI would fail on, before the commit is created
 
 AC-3
-  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v1`
+  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`
   When   their own CI runs that step
   Then   `check/action.yml` invokes the same gate this repo runs on itself
 
@@ -61,6 +64,17 @@ AC-5
   Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
          plugin cache and every named consumer repo matches this repo's current copy
 
+AC-6
+  Given  a push to `main`, whether or not it bumps `plugin.json`
+  When   the `release` job's alias step runs
+  Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the
+         current `plugin.json` version, so `check@vN` resolves to the latest released content
+
+AC-7
+  Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN`
+  When   `scripts/check_versions.py` runs in the `gate-and-tests` job
+  Then   it exits 1 and names the file that disagrees, before the alias can be published
+
 ## Example — in practice (optional, non-binding)
 - A contributor enables `git config core.hooksPath .githooks`, edits a requirement with a typo,
   and `git commit` fails locally with the same error CI would have caught later.
@@ -68,6 +82,8 @@ AC-5
 ## WHERE — Current implementation
 - `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`,
   `sync_reqmap.sh` (all repo root).
+- The alias axis is asserted by `scripts/check_versions.py` (`ACTION_REF_FILES`), covered by
+  `scripts/test_check_versions.py`.
 
 ## Links
 - Used by: (auto)

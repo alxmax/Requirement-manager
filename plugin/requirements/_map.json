@@ -2600,6 +2600,7 @@
       "contract": [
         "`.github/workflows/ci.yml`'s `gate-and-tests` job invokes `reqmap.py gate` / `lint --strict` / `map --check` on every push and pull request.",
         "`check/action.yml` packages the same invocation as a reusable GitHub Action for consumer repos.",
+        "`ci.yml`'s `release` job force-moves the action's major-alias tag — the `@vN` named by the `uses:` reference in `check/action.yml` — onto the commit the current `plugin.json` version is tagged at, on every push to `main`.",
         "`.githooks/pre-commit` mirrors the CI order locally, before a commit is created.",
         "`.githooks/pre-push` blocks a direct push to `main`.",
         "`sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into the local plugin cache and any consumer repos passed as arguments."
@@ -2611,10 +2612,11 @@
         "This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own behavior — that contract lives in [[REQ-CHECK-006]]."
       ],
       "current_impl": [
-        "`.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`, `sync_reqmap.sh` (all repo root)."
+        "`.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`, `sync_reqmap.sh` (all repo root).",
+        "The alias axis is asserted by `scripts/check_versions.py` (`ACTION_REF_FILES`), covered by `scripts/test_check_versions.py`."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nAC-2\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created\n\nAC-3\n  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v1`\n  When   their own CI runs that step\n  Then   `check/action.yml` invokes the same gate this repo runs on itself\n\nAC-4\n  Given  a local push attempt with the dev hook enabled and the target branch is `main`\n  When   `.githooks/pre-push` runs\n  Then   the push is blocked before it reaches the remote\n\nAC-5\n  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments\n  When   it completes\n  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local\n         plugin cache and every named consumer repo matches this repo's current copy",
+      "accept": "AC-1\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nAC-2\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created\n\nAC-3\n  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`\n  When   their own CI runs that step\n  Then   `check/action.yml` invokes the same gate this repo runs on itself\n\nAC-4\n  Given  a local push attempt with the dev hook enabled and the target branch is `main`\n  When   `.githooks/pre-push` runs\n  Then   the push is blocked before it reaches the remote\n\nAC-5\n  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments\n  When   it completes\n  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local\n         plugin cache and every named consumer repo matches this repo's current copy\n\nAC-6\n  Given  a push to `main`, whether or not it bumps `plugin.json`\n  When   the `release` job's alias step runs\n  Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the\n         current `plugin.json` version, so `check@vN` resolves to the latest released content\n\nAC-7\n  Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN`\n  When   `scripts/check_versions.py` runs in the `gate-and-tests` job\n  Then   it exits 1 and names the file that disagrees, before the alias can be published",
       "input": "",
       "output": "",
       "desc": "",
@@ -2644,9 +2646,17 @@
         {
           "role": "implements",
           "loc": "check/action.yml:2"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/check_versions.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_check_versions.py:91"
         }
       ],
-      "test_exempt": "pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2",
+      "test_exempt": "pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2. AC-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)",
       "milestone": null,
       "priority": "",
       "risks": []
@@ -3100,6 +3110,10 @@
       "satisfies": [],
       "satisfied_by": [],
       "members": [
+        {
+          "role": "generated-from",
+          "loc": ".consilium/FEEDBACK.html:59"
+        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1074"
@@ -3760,7 +3774,7 @@
       "name": "Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README",
       "lane": "ops",
       "milestone": "v3",
-      "done": false
+      "done": true
     },
     {
       "name": "Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both",

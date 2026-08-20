@@ -165,3 +165,32 @@ jobs:
           python -X utf8 scripts/changelog_notes.py "$VERSION" > RELEASE_NOTES.md
           gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --notes-file RELEASE_NOTES.md
           echo "cut release $TAG" >> "$GITHUB_STEP_SUMMARY"
+
+      # The published Action (check/action.yml) is consumed as `.../check@vN`, a MAJOR
+      # ALIAS that has to be re-pointed at the newest release or it rots: `@v1` sat 193
+      # commits behind main for two months while the README kept advertising it, because
+      # moving it was a manual step nobody was reminded to take. So: derive the major
+      # from the `uses:` reference the docs themselves publish (check_versions.py asserts
+      # action.yml / README.md / CLAUDE.md all name the same one) and force-move it onto
+      # the commit the CURRENT plugin.json version is tagged at. Deliberately outside the
+      # "already released, exit 0" shortcut above and re-asserted on every push to main:
+      # re-pointing the alias at where it already is is a no-op push, so a run that failed
+      # halfway (or a tag moved by hand) self-heals on the next push instead of staying
+      # silently wrong until someone reads the README and notices.
+      - name: Move the action's major-alias tag onto the released commit
+        run: |
+          ALIAS=$(grep -oE 'requirement-manager/check@v[0-9]+' check/action.yml | head -n1 | sed 's/.*@//')
+          case "$ALIAS" in
+            v[0-9]*) ;;
+            *) echo "::error::no 'requirement-manager/check@vN' reference in check/action.yml - cannot derive the alias tag"; exit 1 ;;
+          esac
+          VERSION=$(python -c "import json; print(json.load(open('plugin/.claude-plugin/plugin.json'))['version'])")
+          TAG="v$VERSION"
+          # Fetch it explicitly: the tag may have been created remotely by the step above,
+          # in which case this checkout has never seen it. rev-list peels an annotated tag
+          # to its commit, so the alias always names a commit whatever the tag's type.
+          git fetch --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          TARGET=$(git rev-list -n 1 "$TAG")
+          git tag -f "$ALIAS" "$TARGET"
+          git push --force origin "refs/tags/$ALIAS"
+          echo "action alias $ALIAS -> $TAG ($TARGET)" >> "$GITHUB_STEP_SUMMARY"

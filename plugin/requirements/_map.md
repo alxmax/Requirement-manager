@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-19 22:49
+generated: 2026-08-20 18:03
 nodes: 43
 edges: 61
 ---
@@ -276,6 +276,10 @@ graph LR
   REQ_SELFGATE_039 -->|implements| f__github_workflows_ci_yml_2
   f_check_action_yml_2["check/action.yml:2"]
   REQ_SELFGATE_039 -->|implements| f_check_action_yml_2
+  f_scripts_check_versions_py_2["scripts/check_versions.py:2"]
+  REQ_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
+  f_scripts_test_check_versions_py_91["scripts/test_check_versions.py:91"]
+  REQ_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_91
   REQ_SHOW_015["Single-requirement dossier<br><small>REQ-SHOW-015</small>"]
   f_plugin_scripts_reqmap_py_3289["plugin/scripts/reqmap.py:3289"]
   REQ_SHOW_015 -->|implements| f_plugin_scripts_reqmap_py_3289
@@ -302,6 +306,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_3506["plugin/scripts/test_reqmap.py:3506"]
   REQ_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_3506
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
+  f__consilium_FEEDBACK_html_59[".consilium/FEEDBACK.html:59"]
+  REQ_VIEWER_007 -->|generated-from| f__consilium_FEEDBACK_html_59
   f_plugin_scripts_reqmap_py_1074_5050["plugin/scripts/reqmap.py:1074-5050"]
   REQ_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1074_5050
   f_plugin_scripts_test_reqmap_py_1415_5065["plugin/scripts/test_reqmap.py:1415-5065"]

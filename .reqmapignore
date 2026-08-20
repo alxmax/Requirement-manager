@@ -22,6 +22,14 @@ plugin/docs/superpowers/specs/*.md
 # Session working artifacts (specs/plans), gitignored, not capability implementations.
 docs/superpowers/**
 
+# Isolated subagent worktrees (gitignored since 13634a0). Each holds a FULL second
+# copy of this tree, so a widened local scan double-counts every member and reports
+# the copies' README/docs illustration ids (AUTH-LOGIN-001, LOGIN-001, AC-1) as
+# dangling-tag ERRORS. CI checks out a clean tree and never sees them, so without
+# this the local gate and CI disagree — exactly the divergence the gate exists to
+# prevent, and it would bake .worktrees/ paths into a locally regenerated map.
+.worktrees/**
+
 # app/ (Vite+React viewer source) stays outside the widened scan this round —
 # see REQ-VIEWER-007's WHERE section. `npm run smoke` is the only automated
 # check for it and is not wired into CI (tracked separately, not this pass).
