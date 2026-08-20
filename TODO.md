@@ -194,6 +194,24 @@
            and check_versions.py asserts action.yml/README/CLAUDE.md name the same major
            (the documented `uses:` line is the SSOT — no separate version file).
            REQ-SELFGATE-039 AC-6/AC-7. Shipped in v2.18.1. -->
+- [ ] Scan vs `.gitignore`: a gitignored-but-tagged file silently changes committed generated artifacts — make the scan skip gitignored paths, or WARN when a member resolves to one | lane: bus
+      <!-- Found 2026-08-20 during the check@v2 work (PR #167), twice in one session:
+           `.worktrees/**` (an isolated subagent worktree is a FULL second copy of the
+           tree — 527 members instead of 261, plus 3 dangling-tag ERRORs from the copies'
+           README illustration ids) and `.consilium/FEEDBACK.html` (gitignored, but carries
+           a real `generated-from:` tag — 261 members locally vs 260 on CI, so `map --check`
+           failed on CI for a file that is not in the repo). Both were fixed by hand-adding
+           a `.reqmapignore` entry mirroring `.gitignore` — which is the manual step that
+           keeps being missed. A committed generated artifact must depend only on TRACKED
+           files, and nothing enforces that today; the failure is silent locally and only
+           surfaces as a confusing CI-only staleness error.
+           Design tension to settle before building: reading `.gitignore` means either
+           shelling out to `git check-ignore` (fails in a non-git tree / adds a git
+           dependency to a stdlib-only engine) or hand-parsing gitignore semantics
+           (negations, dir-only rules, nested files — a known-deep rabbit hole). The cheap
+           middle ground is the WARN half: `map`/`gate` shell out to git ONCE, best-effort,
+           and warn when a discovered member is gitignored — loud instead of silent, no
+           behaviour change for consumer repos that deliberately tag ignored files. -->
 - [ ] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
 - [ ] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
 - [ ] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops
