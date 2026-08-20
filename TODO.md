@@ -241,7 +241,15 @@
            every suite. Deliberately NOT a matrixed gate-and-tests: the gate is one
            authoritative verdict on the requirement corpus, not a per-interpreter one.
            `release` now needs the matrix too; `deploy-map` still needs only the gate. -->
-- [ ] Coverage + ruff on the engine, published in the job summary | lane: ops
+- [x] Coverage + ruff on the engine, published in the job summary | lane: ops
+      <!-- New `quality` job in ci.yml. Coverage came out at 92% (2492/2721 statements)
+           and ruff's bug-class rules (E9,F) were already clean, which set the design:
+           E9,F is the only failing subset — meaningful but unable to redden a green
+           build — and ruff's other 132 findings are published as advisory, since most
+           of them (96 x UP032 f-string, 8 x blind-except) describe deliberate choices
+           in this engine rather than defects. No coverage floor yet: publish the number
+           first, argue about a threshold once there is a series. Not in `release`'s
+           needs — it is the one job that installs from PyPI (both tools pinned). -->
 - [x] Declare and assert the Python floor (3.7 today, accidental) | lane: bus
       <!-- REQ-PYFLOOR-040, v2.19.0. Floor = 3.9, chosen as the oldest version CI can
            actually run rather than the oldest the code tolerates (3.7): 3.7/3.8 are not

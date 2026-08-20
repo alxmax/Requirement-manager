@@ -186,6 +186,59 @@ jobs:
           fi
           echo "docs/full_architecture.html matches its generator"
 
+  # Two numbers about the engine that nothing published before: how much of it the
+  # suite actually executes, and what a linter makes of it. Both land in the run's job
+  # summary rather than scrolling past in a log.
+  #
+  # Only ONE part can fail: `E9,F` - syntax errors and undefined names, the rules that
+  # find real defects rather than style. That subset is clean today, so this job cannot
+  # newly redden a green build, and it stays meaningful: a check that can never fail is
+  # documentation. Everything else ruff reports (f-string modernisation, blind excepts,
+  # subprocess-without-check) is published as advisory. Several of those are deliberate
+  # in this engine - `except Exception: return None` IS the fail-open contract in half a
+  # dozen places - so mass-fixing them would be a style rewrite disguised as a lint fix.
+  #
+  # No coverage floor yet: publish the number first, argue about a threshold once there
+  # is a series to argue from. Deliberately NOT in `release`'s needs - the authoritative
+  # verdicts on this repo stay dependency-free, and this is the one job that installs
+  # from PyPI. Both tools are pinned so a new release cannot turn the build red overnight.
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.x"
+      - name: Install pinned tooling
+        run: python -m pip install --disable-pip-version-check --quiet ruff==0.16.4 coverage==7.15.4
+      - name: Ruff - bug-class rules
+        working-directory: plugin/scripts
+        run: python -m ruff check --select E9,F reqmap.py
+      - name: Engine coverage + lint report
+        working-directory: plugin/scripts
+        run: |
+          python -X utf8 -m coverage run --source=. --omit="test_*.py" test_reqmap.py > /dev/null
+          python -m coverage json -o coverage.json --quiet
+          {
+            echo "## Engine quality"
+            echo
+            python - <<'PY'
+          import json
+          t = json.load(open("coverage.json"))["totals"]
+          covered = t["num_statements"] - t["missing_lines"]
+          print("**Coverage** - `test_reqmap.py` over `reqmap.py`: **{:.0f}%** "
+                "({} of {} statements executed).".format(
+                    t["percent_covered"], covered, t["num_statements"]))
+          PY
+            echo
+            echo "**Ruff** - \`E9,F\` (syntax errors, undefined names) is the failing subset above and is clean. The rest is advisory:"
+            echo
+            echo '```'
+            python -m ruff check --statistics --exit-zero reqmap.py
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f coverage.json .coverage
+
   # Publish the requirement-map site (the committed docs/ Pages root: map.html,
   # the Excalidraw architecture diagrams, .nojekyll, index redirect) to GitHub
   # Pages — authenticated with the workflow's short-lived OIDC id-token, NO
