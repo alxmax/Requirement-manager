@@ -213,11 +213,24 @@
            and warn when a discovered member is gitignored — loud instead of silent, no
            behaviour change for consumer repos that deliberately tag ignored files. -->
 - [ ] Add an npm job asserting `git diff --exit-code` on plugin/scripts/_map_viewer.html, and the same check for regenerated Excalidraw diagrams — closes the committed-build-artifact hole for both | lane: ops
-- [ ] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
+- [x] Stop squashing main; land the next change as a visible PR — this also revives the changelog gate, which currently no-ops because HEAD~1 doesn't resolve | lane: ops
+      <!-- Done 2026-08-20: PR #167 (check@v2) landed as a real merge commit, e56886c.
+           HEAD~1 resolves again, so the changelog-entry gate is live rather than a
+           silent no-op — and the release job proved itself on that same merge: it cut
+           v2.18.1 and force-moved the @v2 alias onto the released commit. -->
 - [ ] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops
-- [ ] CI matrix: Python 3.9/3.12/3.13 x ubuntu/windows — prove the `-X utf8` usage actually holds | lane: ops
+- [x] CI matrix: Python 3.9/3.12/3.13 x ubuntu/windows — prove the `-X utf8` usage actually holds | lane: ops
+      <!-- Shipped in v2.19.0 as a separate `tests` job (6 cells, fail-fast: false) running
+           every suite. Deliberately NOT a matrixed gate-and-tests: the gate is one
+           authoritative verdict on the requirement corpus, not a per-interpreter one.
+           `release` now needs the matrix too; `deploy-map` still needs only the gate. -->
 - [ ] Coverage + ruff on the engine, published in the job summary | lane: ops
-- [ ] Declare and assert the Python floor (3.7 today, accidental) | lane: bus
+- [x] Declare and assert the Python floor (3.7 today, accidental) | lane: bus
+      <!-- REQ-PYFLOOR-040, v2.19.0. Floor = 3.9, chosen as the oldest version CI can
+           actually run rather than the oldest the code tolerates (3.7): 3.7/3.8 are not
+           installable on current GitHub runners, so supporting them would be untested.
+           A test asserts MIN_PYTHON == the oldest python in the CI matrix, so the two
+           cannot drift apart. Cannot catch <3.6 (f-strings fail at compile time). -->
 - [ ] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
 - [ ] Repo hygiene: CONTRIBUTING, SECURITY.md, issue and PR templates | lane: ops
 - [ ] Adversarial tests on injected HTML (</script>, U+2028, lone surrogates) and a published benchmark on a 10k-file tree | lane: bus
