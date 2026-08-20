@@ -4642,6 +4642,65 @@ class Site(unittest.TestCase):  # tested-by: REQ-SITE-026
         self.assertNotIn("excalidraw_builder", src)   # link-only; no import/exec coupling
 
 
+class AdversarialInjection(unittest.TestCase):  # tested-by: REQ-MAP-007
+    """Hostile requirement text reaching the generated HTML and JSON.
+
+    `</script>` already had a regression test. These are the two that did not:
+    the JS line terminators, and a lone surrogate - which is reachable in the
+    real world through a FILENAME whose bytes are not valid UTF-8, since os.walk
+    hands those back surrogate-escaped and member paths go straight into the map.
+    """
+
+    LS, PS = chr(0x2028), chr(0x2029)
+    LONE = chr(0xD800)
+
+    def _data(self, title, contract=None):
+        return {"repo": "r", "edges": [], "todos": [],
+                "nodes": [{"id": "A-B-001", "title": title, "contract": contract or [],
+                           "status": "confirmed", "layer": "bus", "members": [],
+                           "risk": 0, "acc": [], "deps": []}]}
+
+    def test_js_line_terminators_never_reach_the_script_blob_raw(self):  # tested-by: REQ-VIEWER-007
+        """U+2028/U+2029 terminate a line in JavaScript. Raw in the inlined blob they
+        are a syntax error on any engine older than ES2019 - the whole viewer dies on
+        one character in one requirement title."""
+        out = R._inject_viewer("<html><!--REQMAP_DATA--></html>",
+                               self._data("a" + self.LS + "b", ["c" + self.PS + "d"]))
+        self.assertNotIn(self.LS, out)
+        self.assertNotIn(self.PS, out)
+        self.assertIn(chr(92) + "u2028", out)      # escaped, not dropped
+        self.assertIn(chr(92) + "u2029", out)
+
+    def test_escaped_line_terminators_still_parse_back_to_the_original(self):
+        """The escape must be lossless: the viewer shows the character, not a mangle."""
+        out = R._inject_viewer("<!--REQMAP_DATA-->", self._data("a" + self.LS + "b"))
+        blob = out[len("<script>window.__REQMAP_DATA__="):-len(";</script>")]
+        self.assertEqual(json.loads(blob)["nodes"][0]["title"], "a" + self.LS + "b")
+
+    def test_lone_surrogate_does_not_crash_the_json_write(self):
+        """A lone surrogate cannot be encoded as UTF-8: the write raised
+        UnicodeEncodeError and `map` died outright, taking the gate's map-freshness
+        check with it. Degrade to U+FFFD instead."""
+        with tempfile.TemporaryDirectory() as d:
+            R.render_json(self._data("x" + self.LONE), d)
+            body = open(os.path.join(d, "_map.json"), encoding="utf-8").read()
+            self.assertIn(chr(0xFFFD), body)
+            self.assertNotIn(self.LONE, body)
+            json.loads(body)                       # still valid JSON
+
+    def test_lone_surrogate_does_not_crash_the_markdown_write(self):
+        with tempfile.TemporaryDirectory() as d:
+            R.render_md(self._data("x" + self.LONE), d)
+            body = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
+            self.assertNotIn(self.LONE, body)
+
+    def test_clean_data_is_untouched_by_the_guard(self):
+        """The sanitizer must be inert on normal text, including non-ASCII."""
+        text = R._build_json_text(self._data("café — ünïcode ✓"))
+        self.assertIn("café — ünïcode ✓", text)
+        self.assertNotIn(chr(0xFFFD), text)
+
+
 class PythonFloor(unittest.TestCase):  # tested-by: REQ-PYFLOOR-040
     """The declared support floor. The predicate is tested rather than a real old
     interpreter: CI cannot install a 3.8 to watch reqmap refuse it, and a floor that is

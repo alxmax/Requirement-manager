@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-20 19:09
+generated: 2026-08-20 20:12
 nodes: 44
 edges: 61
 ---
@@ -93,13 +93,13 @@ graph LR
   CORE_DRIFT_003["Contract hashing & lock<br><small>CORE-DRIFT-003</small>"]
   f_plugin_scripts_reqmap_py_1360_1404["plugin/scripts/reqmap.py:1360-1404"]
   CORE_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_1360_1404
-  f_plugin_scripts_test_reqmap_py_153_4944["plugin/scripts/test_reqmap.py:153-4944"]
-  CORE_DRIFT_003 -->|tested-by| f_plugin_scripts_test_reqmap_py_153_4944
+  f_plugin_scripts_test_reqmap_py_153_5003["plugin/scripts/test_reqmap.py:153-5003"]
+  CORE_DRIFT_003 -->|tested-by| f_plugin_scripts_test_reqmap_py_153_5003
   CORE_PARSE_001["Requirement reading<br><small>CORE-PARSE-001</small>"]
   f_plugin_scripts_reqmap_py_719_790["plugin/scripts/reqmap.py:719-790"]
   CORE_PARSE_001 -->|implements| f_plugin_scripts_reqmap_py_719_790
-  f_plugin_scripts_test_reqmap_py_50_4897["plugin/scripts/test_reqmap.py:50-4897"]
-  CORE_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_50_4897
+  f_plugin_scripts_test_reqmap_py_50_4956["plugin/scripts/test_reqmap.py:50-4956"]
+  CORE_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_50_4956
   CORE_SCAN_002["Member discovery<br><small>CORE-SCAN-002</small>"]
   f_plugin_scripts_reqmap_py_112_1008["plugin/scripts/reqmap.py:112-1008"]
   CORE_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_112_1008
@@ -110,8 +110,8 @@ graph LR
   REQ_ACVERIFY_019["Per-criterion test coverage<br><small>REQ-ACVERIFY-019</small>"]
   f_plugin_scripts_reqmap_py_1216_1755["plugin/scripts/reqmap.py:1216-1755"]
   REQ_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_py_1216_1755
-  f_plugin_scripts_test_reqmap_py_3436_4928["plugin/scripts/test_reqmap.py:3436-4928"]
-  REQ_ACVERIFY_019 -->|tested-by| f_plugin_scripts_test_reqmap_py_3436_4928
+  f_plugin_scripts_test_reqmap_py_3436_4987["plugin/scripts/test_reqmap.py:3436-4987"]
+  REQ_ACVERIFY_019 -->|tested-by| f_plugin_scripts_test_reqmap_py_3436_4987
   REQ_CANDIDATES_009["Capability candidates (extraction plan)<br><small>REQ-CANDIDATES-009</small>"]
   f_plugin_scripts_reqmap_py_2356_2504["plugin/scripts/reqmap.py:2356-2504"]
   REQ_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_2356_2504
@@ -120,13 +120,13 @@ graph LR
   REQ_CHECK_006["The gate<br><small>REQ-CHECK-006</small>"]
   f_plugin_scripts_reqmap_py_1347_4875["plugin/scripts/reqmap.py:1347-4875"]
   REQ_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1347_4875
-  f_plugin_scripts_test_reqmap_py_143_5106["plugin/scripts/test_reqmap.py:143-5106"]
-  REQ_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_143_5106
+  f_plugin_scripts_test_reqmap_py_143_5165["plugin/scripts/test_reqmap.py:143-5165"]
+  REQ_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_143_5165
   REQ_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>REQ-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_193_1915["plugin/scripts/reqmap.py:193-1915"]
   REQ_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_193_1915
-  f_plugin_scripts_test_reqmap_py_4826["plugin/scripts/test_reqmap.py:4826"]
-  REQ_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_4826
+  f_plugin_scripts_test_reqmap_py_4885["plugin/scripts/test_reqmap.py:4885"]
+  REQ_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_4885
   REQ_COVERAGE_029["Untagged-code coverage signal<br><small>REQ-COVERAGE-029</small>"]
   f_plugin_scripts_reqmap_py_3723["plugin/scripts/reqmap.py:3723"]
   REQ_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_py_3723
@@ -175,8 +175,8 @@ graph LR
   REQ_INIT_012["First-use bootstrap<br><small>REQ-INIT-012</small>"]
   f_plugin_scripts_reqmap_py_3852_3881["plugin/scripts/reqmap.py:3852-3881"]
   REQ_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_3852_3881
-  f_plugin_scripts_test_reqmap_py_2410_5058["plugin/scripts/test_reqmap.py:2410-5058"]
-  REQ_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_py_2410_5058
+  f_plugin_scripts_test_reqmap_py_2410_5117["plugin/scripts/test_reqmap.py:2410-5117"]
+  REQ_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_py_2410_5117
   REQ_LINT_014["Requirement readability linter<br><small>REQ-LINT-014</small>"]
   f_plugin_scripts_reqmap_py_3068_3274["plugin/scripts/reqmap.py:3068-3274"]
   REQ_LINT_014 -->|implements| f_plugin_scripts_reqmap_py_3068_3274
@@ -188,10 +188,10 @@ graph LR
   f_plugin_scripts_test_reqmap_py_2662_2678["plugin/scripts/test_reqmap.py:2662-2678"]
   REQ_LINTCHECKS_025 -->|tested-by| f_plugin_scripts_test_reqmap_py_2662_2678
   REQ_MAP_007["Requirement map (Mermaid MD + JSON)<br><small>REQ-MAP-007</small>"]
-  f_plugin_scripts_reqmap_py_2752_4945["plugin/scripts/reqmap.py:2752-4945"]
-  REQ_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_2752_4945
-  f_plugin_scripts_test_reqmap_py_880_5058["plugin/scripts/test_reqmap.py:880-5058"]
-  REQ_MAP_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_880_5058
+  f_plugin_scripts_reqmap_py_2752_4964["plugin/scripts/reqmap.py:2752-4964"]
+  REQ_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_2752_4964
+  f_plugin_scripts_test_reqmap_py_880_5117["plugin/scripts/test_reqmap.py:880-5117"]
+  REQ_MAP_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_880_5117
   REQ_MEMBERDRIFT_027["Reverse-direction member drift<br><small>REQ-MEMBERDRIFT-027</small>"]
   f_plugin_scripts_reqmap_py_1420_1507["plugin/scripts/reqmap.py:1420-1507"]
   REQ_MEMBERDRIFT_027 -->|implements| f_plugin_scripts_reqmap_py_1420_1507
@@ -205,28 +205,28 @@ graph LR
   REQ_NEXT_013["What-should-I-do-next report<br><small>REQ-NEXT-013</small>"]
   f_plugin_scripts_reqmap_py_1160_2944["plugin/scripts/reqmap.py:1160-2944"]
   REQ_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1160_2944
-  f_plugin_scripts_test_reqmap_py_2284_5008["plugin/scripts/test_reqmap.py:2284-5008"]
-  REQ_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_py_2284_5008
+  f_plugin_scripts_test_reqmap_py_2284_5067["plugin/scripts/test_reqmap.py:2284-5067"]
+  REQ_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_py_2284_5067
   REQ_ORPHANCODE_034["Orphan-code warning<br><small>REQ-ORPHANCODE-034</small>"]
   f_plugin_scripts_reqmap_py_1187_1855["plugin/scripts/reqmap.py:1187-1855"]
   REQ_ORPHANCODE_034 -->|implements| f_plugin_scripts_reqmap_py_1187_1855
   f_plugin_scripts_test_reqmap_py_739["plugin/scripts/test_reqmap.py:739"]
   REQ_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_py_739
   REQ_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>REQ-PAGES-021</small>"]
-  f_plugin_scripts_reqmap_py_2903_4961["plugin/scripts/reqmap.py:2903-4961"]
-  REQ_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_2903_4961
+  f_plugin_scripts_reqmap_py_2903_4980["plugin/scripts/reqmap.py:2903-4980"]
+  REQ_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_2903_4980
   f_plugin_scripts_test_reqmap_py_1442_2121["plugin/scripts/test_reqmap.py:1442-2121"]
   REQ_PAGES_021 -->|tested-by| f_plugin_scripts_test_reqmap_py_1442_2121
   REQ_PROMOTE_011["confirm<br><small>REQ-PROMOTE-011</small>"]
   f_plugin_scripts_reqmap_py_2127_2153["plugin/scripts/reqmap.py:2127-2153"]
   REQ_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_2127_2153
-  f_plugin_scripts_test_reqmap_py_2224_5008["plugin/scripts/test_reqmap.py:2224-5008"]
-  REQ_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2224_5008
+  f_plugin_scripts_test_reqmap_py_2224_5067["plugin/scripts/test_reqmap.py:2224-5067"]
+  REQ_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2224_5067
   REQ_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>REQ-PROMOTE-TODO-001</small>"]
   f_plugin_scripts_reqmap_py_2039_2095["plugin/scripts/reqmap.py:2039-2095"]
   REQ_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_2039_2095
-  f_plugin_scripts_test_reqmap_py_3629_5008["plugin/scripts/test_reqmap.py:3629-5008"]
-  REQ_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_3629_5008
+  f_plugin_scripts_test_reqmap_py_3629_5067["plugin/scripts/test_reqmap.py:3629-5067"]
+  REQ_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_3629_5067
   REQ_PROSE_024["Prose capability classification & drafting<br><small>REQ-PROSE-024</small>"]
   f_plugin_scripts_reqmap_py_2195_2248["plugin/scripts/reqmap.py:2195-2248"]
   REQ_PROSE_024 -->|implements| f_plugin_scripts_reqmap_py_2195_2248
@@ -237,16 +237,16 @@ graph LR
   REQ_PYFLOOR_040 -->|implements| f__github_workflows_ci_yml_3
   f_plugin_scripts_reqmap_py_167["plugin/scripts/reqmap.py:167"]
   REQ_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_167
-  f_plugin_scripts_test_reqmap_py_4645["plugin/scripts/test_reqmap.py:4645"]
-  REQ_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_4645
+  f_plugin_scripts_test_reqmap_py_4704["plugin/scripts/test_reqmap.py:4704"]
+  REQ_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_4704
   REQ_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>REQ-REGISTRYLAG-035</small>"]
   f_plugin_scripts_reqmap_py_3635_3729["plugin/scripts/reqmap.py:3635-3729"]
   REQ_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_3635_3729
   f_plugin_scripts_test_reqmap_py_3192["plugin/scripts/test_reqmap.py:3192"]
   REQ_REGISTRYLAG_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_3192
   REQ_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>REQ-REVIEW-022</small>"]
-  f_plugin_scripts_reqmap_py_5112["plugin/scripts/reqmap.py:5112"]
-  REQ_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_5112
+  f_plugin_scripts_reqmap_py_5138["plugin/scripts/reqmap.py:5138"]
+  REQ_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_5138
   f_plugin_scripts_test_reqmap_py_3696["plugin/scripts/test_reqmap.py:3696"]
   REQ_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_py_3696
   f_plugin_skills_requirement_quality_review_SKILL_md_6["plugin/skills/requirement-quality-review/SKILL.md:6"]
@@ -256,8 +256,8 @@ graph LR
   REQ_ROADMAP_038["Roadmap coherence signals<br><small>REQ-ROADMAP-038</small>"]
   f_plugin_scripts_reqmap_py_2808_3735["plugin/scripts/reqmap.py:2808-3735"]
   REQ_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_py_2808_3735
-  f_plugin_scripts_test_reqmap_py_5129["plugin/scripts/test_reqmap.py:5129"]
-  REQ_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_py_5129
+  f_plugin_scripts_test_reqmap_py_5188["plugin/scripts/test_reqmap.py:5188"]
+  REQ_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_py_5188
   REQ_SCAN_005["List members per capability<br><small>REQ-SCAN-005</small>"]
   f_plugin_scripts_reqmap_py_1544["plugin/scripts/reqmap.py:1544"]
   REQ_SCAN_005 -->|implements| f_plugin_scripts_reqmap_py_1544
@@ -299,8 +299,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_2982["plugin/scripts/test_reqmap.py:2982"]
   REQ_SIMILAR_016 -->|tested-by| f_plugin_scripts_test_reqmap_py_2982
   REQ_SITE_026["Generate & maintain a project presentation page<br><small>REQ-SITE-026</small>"]
-  f_plugin_scripts_reqmap_py_3907_5336["plugin/scripts/reqmap.py:3907-5336"]
-  REQ_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_3907_5336
+  f_plugin_scripts_reqmap_py_3907_5362["plugin/scripts/reqmap.py:3907-5362"]
+  REQ_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_3907_5362
   f_plugin_scripts_test_reqmap_py_4458["plugin/scripts/test_reqmap.py:4458"]
   REQ_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_4458
   REQ_TESTLINK_018["Test-link integrity check<br><small>REQ-TESTLINK-018</small>"]
@@ -314,10 +314,10 @@ graph LR
   f_plugin_scripts_test_reqmap_py_3506["plugin/scripts/test_reqmap.py:3506"]
   REQ_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_3506
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
-  f_plugin_scripts_reqmap_py_1101_5096["plugin/scripts/reqmap.py:1101-5096"]
-  REQ_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1101_5096
-  f_plugin_scripts_test_reqmap_py_1415_5172["plugin/scripts/test_reqmap.py:1415-5172"]
-  REQ_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1415_5172
+  f_plugin_scripts_reqmap_py_1101_5122["plugin/scripts/reqmap.py:1101-5122"]
+  REQ_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1101_5122
+  f_plugin_scripts_test_reqmap_py_1415_5231["plugin/scripts/test_reqmap.py:1415-5231"]
+  REQ_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1415_5231
   REQ_VLEVEL_037["Verification levels<br><small>REQ-VLEVEL-037</small>"]
   f_plugin_scripts_reqmap_py_1259_3316["plugin/scripts/reqmap.py:1259-3316"]
   REQ_VLEVEL_037 -->|implements| f_plugin_scripts_reqmap_py_1259_3316

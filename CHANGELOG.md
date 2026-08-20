@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v2.20.0` — 2026-08-20
+
+**Two ways hostile-looking text broke the map, and a number for "does this scale".** `</script>` in a requirement body has had a regression test since v2.3.5. The other two characters named on the roadmap had nothing:
+
+- **U+2028 / U+2029 were emitted raw into the inlined `<script>`.** They end a line in JavaScript but are ordinary characters in JSON, so `ensure_ascii=False` passed them straight through and any engine older than ES2019 read the assignment as an unterminated string — one character in one requirement title killing the entire viewer. Now escaped to ` `/` `, which denote the same characters in JSON, so the parsed graph is unchanged (pinned by a round-trip test).
+- **A lone surrogate crashed `map` outright.** A lone surrogate has no UTF-8 encoding, so the write raised `UnicodeEncodeError` and took the whole command down — and with it the gate's map-freshness check. Not a theoretical input: `os.walk` hands back a filename whose bytes are not valid UTF-8 surrogate-escaped, and member paths go straight into the map. `_utf8_safe` now degrades it to U+FFFD for both `_map.json` and `_map.md`; the fast path is a C-level encode that touches nothing, and the per-character walk runs only for a string that genuinely cannot be encoded.
+
+Both were written as failing tests first, then fixed. `REQ-VIEWER-007` gains AC-5 and the escape clause; `REQ-MAP-007`'s AC-7 widens to cover the surrogate case rather than growing an eighth criterion it has no room for.
+
+**A published benchmark** (`scripts/benchmark_scan.py`, numbers in the README). On 10,000 source files and 100 requirements: `scan_members` 3.06s, `gate` 8.49s, map render 0.03s. It was written to publish a number and ended up explaining one — the gate performs **three full walks of the tree**, not one (`scan_members` + `scan_ac_verifies` + `scan_test_levels`, 8.63s combined ≈ its entire runtime). Filed as its own roadmap item: the three scanners have different masking rules, so merging them is a real refactor, not three loops glued together. Deliberately not wired into CI — a shared runner's I/O makes timing assertions meaningless, and a flaky perf gate teaches people to ignore red.
+
+`MAP_ENGINE_VERSION` → `2026-08-20.1`.
+
 ## plugin `v2.19.0` — 2026-08-20
 
 **The portability claim gets evidence.** The engine's pitch is "one stdlib-only file, runs anywhere with Python" — and the whole proof was a single CI job on ubuntu with `python-version: "3.x"`. The supported floor was therefore accidental (3.7, because nothing in the code needed more), and `-X utf8`, a convention that exists *specifically* for Windows codepages, had never once run on Windows in CI.
