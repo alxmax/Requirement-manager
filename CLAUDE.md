@@ -75,6 +75,8 @@ python -X utf8 -m unittest test_excalidraw -v     # from plugin/skills/excalidra
 
 CI has **two** test surfaces, don't confuse them: `gate-and-tests` (ubuntu, `3.x`) is the single authoritative verdict on this repo's requirement corpus; `tests` is the portability matrix (3.9/3.12/3.13 x ubuntu/windows) that runs every suite and nothing else. `release` needs both; `deploy-map` needs only the gate.
 
+A third, non-authoritative job — `quality` — measures the engine rather than verifying it: `coverage` over `test_reqmap.py` (92% at the time of writing) and `ruff`, both published to the run's job summary. Only `ruff --select E9,F` (syntax errors, undefined names) can fail it; every other rule is advisory, because several ruff complaints describe deliberate choices here (`except Exception: return None` IS the fail-open contract in a dozen places). It is the only job that installs from PyPI, both tools pinned, and it is deliberately **not** in `release`'s `needs` — the authoritative verdicts stay dependency-free. There is no coverage floor yet, on purpose: publish the number first.
+
 The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` → `reqmap.py lint --strict --code ..` → `reqmap.py map --check --code ..` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 **Hooks — two different files, don't confuse them:**
