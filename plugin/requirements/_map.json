@@ -2370,6 +2370,7 @@
       ],
       "notes": [
         "`docs/architecture.html` stays out of scope: a human authored it, and `map --check` already covers the regions the engine owns inside it.",
+        "Byte-for-byte comparison requires the artifacts' line endings to be a property of the repository, not of the machine that built them: `.gitattributes` pins `app/viewer.html`, the vendored viewer and the published diagram to LF. Without that the Windows and Linux builds of the same source disagree, and `core.autocrlf` hides the disagreement locally.",
         "The check assumes both builds stay byte-reproducible. A Node major bump or a Vite upgrade can break that, and the job reports it as a stale artifact — re-vendor the viewer in the same commit that moves the toolchain.",
         "The diagram half compares against a temp directory rather than regenerating in place, because the generator writes a sibling `.excalidraw` and `.gitignore` blocks `docs/*.excalidraw`."
       ],
