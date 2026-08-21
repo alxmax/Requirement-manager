@@ -163,6 +163,16 @@ jobs:
       - name: Install viewer dependencies
         working-directory: app
         run: npm ci
+      # The app's ONLY automated check, and until now it never ran here — so a render
+      # throw or a broken i18n boundary could reach main with every job green. It was
+      # left out because the smoke reads app/public/data.json, which is gitignored: a
+      # fresh checkout has no fixture. `npm run sync` builds one from the COMMITTED
+      # plugin/requirements/_map.json, so the smoke runs against this repo's real
+      # registry rather than a stand-in. Placed before the build: a render throw should
+      # fail in seconds, not after a Vite build.
+      - name: Viewer SSR smoke
+        working-directory: app
+        run: npm run sync && npm run smoke
       - name: Rebuild the vendored viewer
         working-directory: app
         run: npm run build:viewer
