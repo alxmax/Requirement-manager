@@ -1,5 +1,25 @@
 # Changelog
 
+## plugin `v2.23.0` — 2026-08-21
+
+**The viewer speaks Romanian, and refuses to translate your requirements.** The self-contained `_map.html` had exactly one language, and the interesting part of adding a second is not the dictionary — it is the line the dictionary must not cross.
+
+A locale control sits beside the theme toggle in the top bar. It translates **UI chrome only**: nav, tab labels, section headers, buttons, empty states.
+
+Two categories are deliberately left alone:
+
+- **Requirement content.** Id, title, intent, contract clauses, acceptance criteria and member paths stay in the language their author wrote them in. They are the artifact under review; translating them would put words in the author's mouth and break the match with the `.md` file on disk.
+- **The engine's own vocabulary.** `confirmed`, `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`, and the ERROR/WARN/REVIEW severities are literal values in the requirement files and in the gate's output. A reader who sees a translated status here and `status: confirmed` in the file has been handed a puzzle, not a translation.
+
+Implementation notes, because the shape was chosen against a known-bad alternative:
+
+- i18n is authored **into the JSX** (`app/src/lib/i18n.jsx` plus `t()` call sites) — not applied to the built bundle as a DOM overlay. A post-hoc patch of the built file lives outside every diff the build tracks and any rebuild silently wipes it.
+- The dictionary is keyed by the **English source string**, so the JSX stays readable in English and a missing entry degrades to English instead of to `nav.map.label`.
+- Split-node headers like `What — Contract … normative` are translated as separate strings, which is why the leading-space trap that bites exact-match DOM dictionaries cannot occur here.
+- The choice is remembered per reader via `localStorage` (guarded for SSR and for browsers that throw on the accessor) and is **never written into the generated file** — `_map.html` stays byte-identical regardless of what anyone last selected.
+
+Six assertions were added to the SSR smoke, the app's only automated check, and they test both directions: that a section header translates, and that the requirement's title, contract and status do **not**. `REQ-VIEWER-007` gains the contract clauses and AC-6.
+
 ## plugin `v2.22.0` — 2026-08-20
 
 **A consumer's engine could rot for a year and CI would never say so.** `warn_if_stale` — the engine's own "your vendored copy is behind" notice — only fires when `CLAUDE_PLUGIN_ROOT` is set, which happens inside a Claude Code session and nowhere else. CI, the one place that runs on every push, was silent by construction. The cost is invisible and specific: checks that shipped after the vendored copy simply do not run, and the build stays green while covering less than the caller thinks.

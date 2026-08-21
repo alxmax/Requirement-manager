@@ -55,6 +55,17 @@ Every line in this section is binding.
   assignment into an unterminated string on any engine older than ES2019. The escaped forms
   denote the same characters in JSON, so the parsed graph is unchanged.
 
+**What language it shows**
+- The viewer renders its own UI chrome in English by default.
+- A locale control in the viewer's top bar switches that chrome to another bundled language.
+- Requirement content is never translated: id, title, intent, contract clauses, acceptance
+  criteria and member paths stay in the language their author wrote them in.
+- The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and
+  severity values stay the literal strings the requirement files and the gate use.
+- A chrome string with no entry in the active locale falls back to its English text.
+- The reader's chosen locale is remembered on their machine and is never written into the
+  generated file, so `_map.html` stays byte-identical whatever anyone last selected.
+
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
@@ -97,6 +108,13 @@ AC-5
   Then   neither character appears raw in the file, and the inlined graph still parses to
          the original text
 
+AC-6
+  Given  the viewer rendered with a non-English locale selected
+  When   a requirement's spec is shown
+  Then   the section headers appear in that language while the requirement's own title,
+         contract and acceptance text stay exactly as authored, and `status` / `layer`
+         values stay literal
+
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana runs `reqmap.py map`, then double-clicks `_map.html`. It opens in her browser with the
@@ -112,6 +130,10 @@ AC-5
   orphan and a deprecated capability so the Risk and Problems tabs have signals with no engine
   present, and those ids cannot exist in any registry. An id left unmarked and absent from the
   registry is still reported — that is a requirement renamed out from under the fixture.
+- The locale dictionary and provider live in `app/src/lib/i18n.jsx`; the toggle is part of the
+  top bar in `app/src/App.jsx`. Both are outside the plugin scan root, like the rest of the app,
+  so the SSR smoke (`npm run smoke`) is what holds them — it asserts both directions: that a
+  header translates, and that requirement content and engine vocabulary do not.
 - The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):
   - `MapView.jsx` — force-graph rendering of the requirement graph
   - `ProblemsView.jsx` — gate errors, drift items, and open risk inbox

@@ -330,7 +330,7 @@
 - [ ] Get to n=2: one external repo running the gate | lane: ops
 - [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
 - [ ] Revisit BSL once there's someone who'd contribute | lane: ops
-- [ ] Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language) | lane: feature
+- [x] Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language) | lane: feature
       <!-- Found 2026-08-21. A rough prototype validated the shape of the problem: a
            dictionary of exact-match EN strings + a few regex rules for interpolated
            counts ("N / M clauses covered"), applied via TreeWalker over the app root's
@@ -350,3 +350,12 @@
            and a toggle wired into the header component's own state rather than a
            DOM-level overlay. Demand-gated: no filed request yet — revisit if someone
            asks. -->
+      <!-- Shipped in v2.23.0, built exactly the way this note prescribed: i18n authored
+           into the JSX (app/src/lib/i18n.jsx + t() call sites), never a post-hoc patch of
+           the built bundle. The demand gate was cleared by a direct request. Two things
+           are deliberately NOT translated: requirement content (the artifact under review)
+           and the engine's own vocabulary (status/layer/role/severity are literal values
+           in the .md files and in gate output). The dictionary is keyed by the English
+           source string, so a missing entry degrades to English. Locale is remembered in
+           localStorage and never written into _map.html, which stays byte-identical.
+           Six SSR-smoke assertions cover both directions; REQ-VIEWER-007 +AC-6. -->

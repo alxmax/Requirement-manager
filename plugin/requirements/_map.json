@@ -3355,7 +3355,13 @@
         "`<!--` → `<\\!--` — prevents the HTML5 parser entering \"script data escaped\" state",
         "`-->`  → `-\\->`  — prevents prematurely closing that state if somehow entered",
         "The first guard alone was the original contract. The `<!--` and `-->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.",
-        "`render_html` also escapes U+2028 and U+2029 to their `\\\\u2028`/`\\\\u2029` forms. Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the assignment into an unterminated string on any engine older than ES2019. The escaped forms denote the same characters in JSON, so the parsed graph is unchanged."
+        "`render_html` also escapes U+2028 and U+2029 to their `\\\\u2028`/`\\\\u2029` forms. Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the assignment into an unterminated string on any engine older than ES2019. The escaped forms denote the same characters in JSON, so the parsed graph is unchanged.",
+        "The viewer renders its own UI chrome in English by default.",
+        "A locale control in the viewer's top bar switches that chrome to another bundled language.",
+        "Requirement content is never translated: id, title, intent, contract clauses, acceptance criteria and member paths stay in the language their author wrote them in.",
+        "The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and severity values stay the literal strings the requirement files and the gate use.",
+        "A chrome string with no entry in the active locale falls back to its English text.",
+        "The reader's chosen locale is remembered on their machine and is never written into the generated file, so `_map.html` stays byte-identical whatever anyone last selected."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -3368,6 +3374,7 @@
       "current_impl": [
         "`render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is called by `cmd_map` after `_map.json`/`_map.md` are written.",
         "`check_viewer_data_sync` (+ `_vds_*` helpers) in `reqmap.py`, called from `cmd_check` (`gate`): a warn-only heuristic comparing `app/src/lib/data.js`'s hand-authored `BAKED` fallback fixture against the live registry, so a stale demo entry is flagged rather than silently shown forever. A fixture entry marked `demoOnly:true` is skipped: the demo dataset deliberately invents an orphan and a deprecated capability so the Risk and Problems tabs have signals with no engine present, and those ids cannot exist in any registry. An id left unmarked and absent from the registry is still reported — that is a requirement renamed out from under the fixture.",
+        "The locale dictionary and provider live in `app/src/lib/i18n.jsx`; the toggle is part of the top bar in `app/src/App.jsx`. Both are outside the plugin scan root, like the rest of the app, so the SSR smoke (`npm run smoke`) is what holds them — it asserts both directions: that a header translates, and that requirement content and engine vocabulary do not.",
         "The Vite+React source lives in `app/src/views/` (repo root, outside the plugin scan root):",
         "`MapView.jsx` — force-graph rendering of the requirement graph",
         "`ProblemsView.jsx` — gate errors, drift items, and open risk inbox",
@@ -3376,7 +3383,7 @@
         "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags — app/ is deliberately excluded from the widened repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md) is the only automated check for the viewer, and it is run manually before vendoring, not wired into CI or reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as covered."
       ],
       "acc": [],
-      "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-4\n  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)\n\nAC-5\n  Given  a requirement whose title or contract contains U+2028 or U+2029\n  When   `map` writes `_map.html`\n  Then   neither character appears raw in the file, and the inlined graph still parses to\n         the original text",
+      "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-4\n  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)\n\nAC-5\n  Given  a requirement whose title or contract contains U+2028 or U+2029\n  When   `map` writes `_map.html`\n  Then   neither character appears raw in the file, and the inlined graph still parses to\n         the original text\n\nAC-6\n  Given  the viewer rendered with a non-English locale selected\n  When   a requirement's spec is shown\n  Then   the section headers appear in that language while the requirement's own title,\n         contract and acceptance text stay exactly as authored, and `status` / `layer`\n         values stay literal",
       "input": "",
       "output": "",
       "desc": "",
@@ -4173,7 +4180,7 @@
       "name": "Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language)",
       "lane": "feature",
       "milestone": "v3",
-      "done": false
+      "done": true
     }
   ]
 }
