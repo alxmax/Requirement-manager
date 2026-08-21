@@ -6,6 +6,7 @@ import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
 import { Pill, Btn, statusKind } from "../lib/ui.jsx";
 import { Icon, LocateGlyph } from "../lib/icons.jsx";
 import { computeLayout, colorFor, buildEdgePath, NODE_W, NODE_CY } from "../lib/layout.js";
+import { useI18n } from "../lib/i18n.jsx";
 
 function NodeBox({ r, pos, selected, highlighted, edgeEnd, riskClass, onClick }) {
   const p = pos[r.id]; if (!p) return null;
@@ -109,6 +110,7 @@ function mdInline(s) {
 }
 
 function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
+  const { t } = useI18n();
   if (!r) return null;
   return (
     <aside className="panel">
@@ -116,22 +118,22 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
         <span className="pid">{r.id}</span>
         <Pill kind={statusKind(r.status)}>{r.status}</Pill>
         <Pill kind={r.layer}>{r.layer}</Pill>
-        <button className="locate-btn" title="center & highlight in the map" onClick={onLocate}><LocateGlyph /></button>
-        <button className="btn-icon bare x" title="close" onClick={onClose}><Icon name="x" size={16} /></button>
+        <button className="locate-btn" title={t("center & highlight in the map")} onClick={onLocate}><LocateGlyph /></button>
+        <button className="btn-icon bare x" title={t("close")} onClick={onClose}><Icon name="x" size={16} /></button>
       </div>
       <h2>{r.title}</h2>
-      <div className="lbl">Why — Intent</div>
+      <div className="lbl">{t("Why — Intent")}</div>
       <p className="why">{r.intent}</p>
 
-      <div className="lbl">What — Contract</div>
+      <div className="lbl">{t("What — Contract")}</div>
       <ul>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>
 
-      <div className="lbl">How — Acceptance</div>
+      <div className="lbl">{t("How — Acceptance")}</div>
       {r.gwt
         ? <div className="gwt-mini members" style={{ whiteSpace: "pre-wrap" }}>{r.gwt}</div>
         : <ul>{(r.acc || []).map((a, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(a) }} />)}</ul>}
 
-      <div className="lbl">Where — Members in code</div>
+      <div className="lbl">{t("Where — Members in code")}</div>
       <div className="members">
         {r.members.length
           ? r.members.map((m, i) => <div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
@@ -140,17 +142,17 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
             : <div className="member" style={{ color: "var(--status-error)" }}>(no members found)</div>}
       </div>
 
-      <div className="kv"><span className="k">Depends on</span><span className="v">{r.deps.join(" · ") || "— (bus)"}</span></div>
-      <div className="kv"><span className="k">Used by</span><span className="v">{r.usedBy.join(" · ") || "—"}</span></div>
+      <div className="kv"><span className="k">{t("Depends on")}</span><span className="v">{r.deps.join(" · ") || "— (bus)"}</span></div>
+      <div className="kv"><span className="k">{t("Used by")}</span><span className="v">{r.usedBy.join(" · ") || "—"}</span></div>
 
       {r.risks && r.risks.length > 0 && (<>
-        <div className="lbl risk">Risk — recommended action</div>
+        <div className="lbl risk">{t("Risk — recommended action")}</div>
         {r.risks.map((rk, i) => <div className="members" key={i} style={{ marginTop: 4 }}>
           <b style={{ color: "var(--fg)" }}>{rk.signal}</b> — <span style={{ color: "var(--fg-muted)" }}>{rk.advice}</span></div>)}
       </>)}
 
       <div style={{ marginTop: 18 }}>
-        <Btn variant="secondary" icon="file-text" onClick={() => onOpenSpec(r.id)}>Open full spec</Btn>
+        <Btn variant="secondary" icon="file-text" onClick={() => onOpenSpec(r.id)}>{t("Open full spec")}</Btn>
       </div>
     </aside>
   );
@@ -164,6 +166,7 @@ const MAP_TABS = [
 ];
 
 export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState("system");
   const [selEdge, setSelEdge] = useState(null); // [a,b] of the clicked edge, or null
   const sel = selId ? REQ_BY_ID[selId] : null;
@@ -209,8 +212,8 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
   return (
     <div className="main">
       <div className="tabbar">
-        {MAP_TABS.map(t => (
-          <button key={t.key} className={"tab" + (tab === t.key ? " on" : "")} onClick={() => { setTab(t.key); setSelEdge(null); }}>{t.label}</button>
+        {MAP_TABS.map(mt => (
+          <button key={mt.key} className={"tab" + (tab === mt.key ? " on" : "")} onClick={() => { setTab(mt.key); setSelEdge(null); }}>{t(mt.label)}</button>
         ))}
         <div className="tab-legend">{legend}</div>
       </div>

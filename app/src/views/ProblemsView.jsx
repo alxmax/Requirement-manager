@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { REQUIREMENTS, coverageOf } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 
 /* derive a flat problem list from the registry (exported so App can count it) */
 export function computeProblems() {
@@ -38,6 +39,7 @@ export function computeProblems() {
 }
 
 export function ProblemsView({ openSpec }) {
+  const { t } = useI18n();
   const [filter, setFilter] = useState("ALL");
   const all = computeProblems();
   const counts = all.reduce((a,p)=>{ a[p.sev]=(a[p.sev]||0)+1; return a; }, {});
@@ -52,14 +54,14 @@ export function ProblemsView({ openSpec }) {
   return (
     <div className="main">
       <div className="tabbar">
-        <Tab k="ALL" label="All" n={all.length} />
-        <Tab k="ERROR" label="Errors" n={counts.ERROR||0} />
-        <Tab k="WARN" label="Warnings" n={counts.WARN||0} />
-        <Tab k="REVIEW" label="Review" n={counts.REVIEW||0} />
+        <Tab k="ALL" label={t("All")} n={all.length} />
+        <Tab k="ERROR" label={t("Errors")} n={counts.ERROR||0} />
+        <Tab k="WARN" label={t("Warnings")} n={counts.WARN||0} />
+        <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW||0} />
         <div className="tab-legend">
           {(counts.ERROR||0) > 0
-            ? <><Icon name="triangle-alert" size={14} style={{color:"var(--status-error)"}} /> gate blocks the build — {counts.ERROR} error</>
-            : <><Icon name="shield-check" size={14} style={{color:"var(--status-confirmed)"}} /> gate passes</>}
+            ? <><Icon name="triangle-alert" size={14} style={{color:"var(--status-error)"}} /> {t("gate blocks the build — {n} error", { n: counts.ERROR })}</>
+            : <><Icon name="shield-check" size={14} style={{color:"var(--status-confirmed)"}} /> {t("gate passes")}</>}
         </div>
       </div>
 
@@ -81,7 +83,7 @@ export function ProblemsView({ openSpec }) {
         {shown.length===0 && (
           <div className="prob-empty">
             <Icon name="shield-check" size={22} style={{color:"var(--status-confirmed)"}} />
-            <div>Nothing here — no <b>{filter.toLowerCase()}</b> signals open.</div>
+            <div>{t("Nothing here — no {kind} signals open.", { kind: filter.toLowerCase() })}</div>
           </div>
         )}
       </div>

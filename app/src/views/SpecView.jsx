@@ -2,6 +2,7 @@
 import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, datesOf } from "../lib/data.js";
 import { Pill, statusKind } from "../lib/ui.jsx";
+import { useI18n } from "../lib/i18n.jsx";
 
 // HTML-escape before the backtick→<code> transform: the output feeds
 // dangerouslySetInnerHTML with untrusted requirement text from _map.json.
@@ -51,6 +52,7 @@ function PriorityBadge({ priority }) {
 }
 
 function SpecDoc({ r, onNav }) {
+  const { t } = useI18n();
   if (!r) return null;
   return (
     <div className="spec">
@@ -72,18 +74,18 @@ function SpecDoc({ r, onNav }) {
       </div>
       <h1>{r.title}</h1>
       <div className="sec why-sec">
-        <div className="eyebrow">Why — Intent <span>{r.layer === "bus" ? "foundation" : "feature"}</span></div>
+        <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}</span></div>
         <p className="blockquote">{r.intent}</p>
       </div>
       <CovStrip r={r} />
 
       <div className="sec">
-        <div className="eyebrow">What — Contract <span className="rule" /> normative</div>
+        <div className="eyebrow">{t("What — Contract")} <span className="rule" /> {t("normative")}</div>
         <ul>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(c)}} />)}</ul>
       </div>
 
       <div className="sec">
-        <div className="eyebrow">How — Acceptance <span className="rule" /> = tests</div>
+        <div className="eyebrow">{t("How — Acceptance")} <span className="rule" /> {t("= tests")}</div>
         {r.gwt
           ? <div className="gwt">{r.gwt.split("\n").map((ln,i)=>(
               <div key={i}>{ln}</div>))}</div>
@@ -91,19 +93,19 @@ function SpecDoc({ r, onNav }) {
       </div>
 
       <div className="sec">
-        <div className="eyebrow">Where — Members in code</div>
+        <div className="eyebrow">{t("Where — Members in code")}</div>
         <div className="members-box">
           {r.members.length
             ? r.members.map((m,i)=><div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
             : r.layer === "need"
-              ? <div className="member" style={{color:"var(--fg-muted)"}}>(satisfied-by other requirements — no direct code)</div>
-              : <div className="member" style={{color:"var(--status-error)"}}>(no members found — orphan)</div>}
+              ? <div className="member" style={{color:"var(--fg-muted)"}}>{t("(satisfied-by other requirements — no direct code)")}</div>
+              : <div className="member" style={{color:"var(--status-error)"}}>{t("(no members found — orphan)")}</div>}
         </div>
       </div>
 
       {r.risks && r.risks.length>0 && (
         <div className="sec">
-          <div className="eyebrow warn">Risk — recommended action</div>
+          <div className="eyebrow warn">{t("Risk — recommended action")}</div>
           {r.risks.map((rk,i)=>(
             <div className="member" key={i} style={{font:"var(--text-body)",color:"var(--fg-secondary)"}}>
               <b style={{color:"var(--fg)"}}>{rk.signal}</b> — {rk.advice}</div>

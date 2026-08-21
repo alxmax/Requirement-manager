@@ -13,6 +13,7 @@ import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
+import { I18nProvider, translate } from "../src/lib/i18n.jsx";
 
 // feed the real engine export through the adapter, exactly as the browser would
 // (run from the app/ directory: `node scripts/run-ssr-smoke.mjs`)
@@ -93,6 +94,33 @@ const xssChecks = [
   ["SpecView escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
 ];
 for (const [label, ok] of xssChecks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
+
+// i18n: the toggle must translate UI CHROME and leave requirement content alone.
+// Rendered inside the provider with the locale forced, since the provider's own
+// initial value comes from localStorage, which does not exist here.
+setRegistry(json.nodes.map(adaptNode));
+const spec = (locale) => renderToString(
+  <I18nProvider initialLocale={locale}>
+    <SpecView selId="REQ-MAP-007" setSelId={noop} />
+  </I18nProvider>);
+const specEn = spec("en"), specRo = spec("ro");
+const reqUnderTest = REQUIREMENTS.find(r => r.id === "REQ-MAP-007");
+const i18nChecks = [
+  ["i18n: English is the default rendering", specEn.includes("Where — Members in code")],
+  ["i18n: Romanian translates a section header",
+    specRo.includes("Unde — Membri în cod") && !specRo.includes("Where — Members in code")],
+  ["i18n: an unknown string falls back to English rather than blanking",
+    translate("ro", "Not In The Dictionary") === "Not In The Dictionary"],
+  ["i18n: placeholders interpolate", translate("ro", "{n} members bound", { n: 7 }) === "7 membri legați"],
+  // The boundary the feature exists to respect: the artifact under review is never translated.
+  ["i18n: requirement title stays in the author's language", specRo.includes(reqUnderTest.title)],
+  ["i18n: engine vocabulary stays literal (status value, not a translation)",
+    specRo.includes(reqUnderTest.status)],
+];
+for (const [label, ok] of i18nChecks) {
   console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
   if (!ok) failures++;
 }

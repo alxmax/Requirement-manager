@@ -4,11 +4,13 @@ import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
 import { rankRequirements } from "./lib/search.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
+import { useI18n, LOCALES } from "./lib/i18n.jsx";
 import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
 import { SpecView } from "./views/SpecView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 
+/* `label` is the English source string, also the i18n dictionary key — see lib/i18n.jsx. */
 const NAV = [
   { key:"map",     label:"Map",      icon:"network" },
   { key:"problems",label:"Problems", icon:"triangle-alert" },
@@ -17,6 +19,7 @@ const NAV = [
 ];
 
 function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
+  const { t, locale, setLocale } = useI18n();
   const q = query.trim();
   // Ranked relevance — the SAME TF-IDF model as the engine `search` command
   // (REQ-SEARCH-036), not a substring filter, so the viewer and CLI agree on
@@ -28,11 +31,11 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
         <Logomark size={26} />
         <span className="wm">Requirement<b> Manager</b></span>
       </div>
-      <span className="repo"><span className="dot" />{REPO || "local repo"}</span>
+      <span className="repo"><span className="dot" />{REPO || t("local repo")}</span>
       <div className="spacer" />
       <div className="search">
         <span className="ico"><Icon name="search" size={15} /></span>
-        <input className="search-inp" placeholder="Search id, title, contract…"
+        <input className="search-inp" placeholder={t("Search id, title, contract…")}
           value={query} onChange={e=>setQuery(e.target.value)} />
         {q && (
           <div className="search-res">
@@ -42,11 +45,16 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
                 <span className="htitle">{h.req.title}</span>
                 <span className="hscore">{h.score.toFixed(2)}</span>
               </div>
-            )) : <div className="search-empty">no strong match</div>}
+            )) : <div className="search-empty">{t("no strong match")}</div>}
           </div>
         )}
       </div>
-      <button className="btn-icon bare" title="toggle theme" onClick={()=>setTheme(theme==="light"?"dark":"light")}>
+      <button className="btn-icon bare" title={t("switch language")} aria-label={t("switch language")}
+        onClick={()=>setLocale(LOCALES[(LOCALES.findIndex(l=>l.code===locale)+1) % LOCALES.length].code)}
+        style={{fontFamily:"var(--font-mono)",fontSize:11,fontWeight:600,letterSpacing:".04em",width:34}}>
+        {(LOCALES.find(l=>l.code===locale) || LOCALES[0]).label}
+      </button>
+      <button className="btn-icon bare" title={t("toggle theme")} onClick={()=>setTheme(theme==="light"?"dark":"light")}>
         <Icon name={theme==="light"?"moon":"sun"} size={17} />
       </button>
     </header>
@@ -54,6 +62,7 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
 }
 
 function Rail({ view, setView }) {
+  const { t } = useI18n();
   const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
   const todoCount = TODOS.filter(t => !t.done).length;
@@ -70,18 +79,18 @@ function Rail({ view, setView }) {
 
   return (
     <nav className="rail">
-      <div className="rail-section" style={{paddingTop:2}}>Workspace</div>
+      <div className="rail-section" style={{paddingTop:2}}>{t("Workspace")}</div>
       {NAV.map(n=>(
         <div key={n.key} className={"nav-item"+(view===n.key?" active":"")} onClick={()=>setView(n.key)}>
           <Icon name={n.icon} size={17} className="ico" />
-          {n.label}
+          {t(n.label)}
           {n.key==="problems" && errCount>0
             ? <span className="count" style={{color:"#fff",background:"var(--coral-600)",borderRadius:"var(--radius-pill)",padding:"1px 7px"}}>{counts[n.key]}</span>
             : <span className="count">{counts[n.key]}</span>}
         </div>
       ))}
       <div className="rail-stat">
-        <div className="rail-section" style={{paddingTop:0,paddingLeft:0}}>Registry</div>
+        <div className="rail-section" style={{paddingTop:0,paddingLeft:0}}>{t("Registry")}</div>
         <div className="stat-row"><span className="sw" style={{background:"var(--status-confirmed)"}} />confirmed<span className="n">{confirmed}</span></div>
         <div className="stat-row"><span className="sw" style={{background:"var(--status-drift)"}} />in-progress<span className="n">{inProgress}</span></div>
         <div className="stat-row"><span className="sw" style={{background:"var(--status-draft)"}} />draft<span className="n">{draft}</span></div>
@@ -89,7 +98,7 @@ function Rail({ view, setView }) {
         <div className="stat-row"><span className="sw" style={{background:"var(--cov-exempt)"}} />deprecated<span className="n">{deprecated}</span></div>
         <div className="stat-row" style={{marginTop:6,borderTop:"1px solid var(--border-soft)",paddingTop:8}}>
           <Icon name="git-branch" size={14} className="ico" style={{color:"var(--fg-faint)"}} />
-          <span style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-faint)"}}>{bound} members bound</span>
+          <span style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-faint)"}}>{t("{n} members bound", { n: bound })}</span>
         </div>
       </div>
       <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid var(--border-soft)",textAlign:"center"}}>
