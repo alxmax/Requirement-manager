@@ -4168,6 +4168,12 @@
       "lane": "ops",
       "milestone": "v3",
       "done": false
+    },
+    {
+      "name": "Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language)",
+      "lane": "feature",
+      "milestone": "v3",
+      "done": false
     }
   ]
 }

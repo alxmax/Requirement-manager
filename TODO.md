@@ -312,3 +312,23 @@
 - [ ] Get to n=2: one external repo running the gate | lane: ops
 - [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
 - [ ] Revisit BSL once there's someone who'd contribute | lane: ops
+- [ ] Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language) | lane: feature
+      <!-- Found 2026-08-21. A rough prototype validated the shape of the problem: a
+           dictionary of exact-match EN strings + a few regex rules for interpolated
+           counts ("N / M clauses covered"), applied via TreeWalker over the app root's
+           text nodes and re-applied on every render via a debounced MutationObserver
+           (the app always re-renders in English, so only the non-English direction
+           needs active re-translation; restoring English is the same dictionary
+           inverted). One gotcha the prototype surfaced: eyebrow-header suffixes like
+           " normative" / " = tests" carry a LEADING space in the actual JSX children
+           array that isn't visible when skimming minified source — an exact-match
+           dictionary is unforgiving of that, so every split-node entry needs verifying
+           against a live DOM, not just the source text.
+           The real implementation should NOT patch the built bundle post-hoc (that only
+           works as a throwaway hack, since it lives outside any diff the build tracks
+           and any regen wipes it) — it should author i18n INTO the JSX source
+           (plugin/app/*) before the Vite build: a string-extraction step (or i18n keys
+           used directly in JSX instead of literal English), a locale file per language,
+           and a toggle wired into the header component's own state rather than a
+           DOM-level overlay. Demand-gated: no filed request yet — revisit if someone
+           asks. -->
