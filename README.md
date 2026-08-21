@@ -378,7 +378,7 @@ real requirement file.
 
 ## Why it works the way it does
 
-Thirteen decisions that shape the tool — the single-file engine, what may fail a build versus
+Fourteen decisions that shape the tool — the single-file engine, what may fail a build versus
 only warn, the deliberately parked half of the V-model, and three things considered and *not*
 built — are recorded as ADRs in [`docs/adr/`](docs/adr/README.md), with the evidence each was
 decided on and the condition that would justify revisiting it.

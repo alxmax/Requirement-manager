@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Thirteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
+Fourteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
 were previously findable only by reading every release note in order.
 
 An ADR here records a decision that is **expensive to reverse** or that a reader would
@@ -10,7 +10,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 
 | # | Decision | Status |
 |---|---|---|
-| [0001](0001-single-file-stdlib-engine.md) | One stdlib-only file, vendored into each repo | Accepted (open question) |
+| [0001](0001-single-file-stdlib-engine.md) | One stdlib-only file, vendored into each repo | Accepted (size question settled by 0014) |
 | [0002](0002-error-versus-warning.md) | What may fail a build, and what may only warn | Accepted |
 | [0003](0003-drift-baseline-shape.md) | Contract hash in the lock, member hashes in a sidecar | Accepted |
 | [0004](0004-hand-rolled-frontmatter-parser.md) | A hand-rolled frontmatter parser, not a YAML library | Accepted |
@@ -23,6 +23,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0011](0011-python-floor-is-what-ci-runs.md) | The Python floor is the oldest version CI runs | Accepted |
 | [0012](0012-internal-consistency-lint-rejected.md) | No internal-consistency lint | Rejected |
 | [0013](0013-business-source-license.md) | Business Source License 1.1 | Accepted (revisit trigger open) |
+| [0014](0014-engine-stays-one-file.md) | The engine stays one file, and gets no size gate | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
