@@ -308,7 +308,25 @@
            string literals, tag vocabularies), so this is a real refactor and not a merge of
            three loops — hence its own item rather than a drive-by. Not urgent: 8.5s for 10k
            files is acceptable, and the cost is invisible below ~1k files. -->
-- [ ] Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget | lane: bus
+- [x] Settle the 5,199-line module: split with a concatenating build, or keep single-file with an ADR plus a CI line-count budget | lane: bus
+      <!-- Settled 2026-08-21 as ADR-0014: keep one file, NO split and NO line-count gate.
+           Nine-senator Senate audit, two rounds, verdict MODIFY
+           (runs/senate/2026-08-21_004654-reqmap-module-size.json). Not one senator defended
+           the split. Three findings decided it: (1) the premise was never established — every
+           option argued from line count and none named a failure caused by it, against 511
+           tests, 92% coverage and 130 commits in that file with no size-attributable incident;
+           (2) a fixed threshold here is not a control limit but an arbitrary line — median
+           commit +11 lines while the top 10 commits carry 59% of all growth, so a budget fires
+           on a burst feature landing and is silent across the ordinary commits, which ADR-0002
+           says gets switched off; (3) the split's economics are inverted — ADR-0005's
+           byte-compare is cheap because it fires rarely, while this file is touched by 130 of
+           ~390 commits, and it adds two SILENT failure modes a byte-compare cannot catch (a
+           hand-edit reverted by the next build, a symbol shadowed by concatenation order) plus
+           relocation of the 175 implements: tags feeding the committed _reqlock/_map.
+           ADR-0001 corrected in the same change: its stale "~5,200 lines" is now the measured
+           5,544 with a date, and its Status no longer carries the open question. Re-open
+           triggers are numeric: 3+ merge conflicts on the file in a rolling 90 days, or
+           crossing 8,000 lines, or a named external consumer wanting the split form. -->
 - [ ] Get to n=2: one external repo running the gate | lane: ops
 - [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
 - [ ] Revisit BSL once there's someone who'd contribute | lane: ops

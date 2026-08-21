@@ -1,6 +1,6 @@
 # ADR-0001 — One stdlib-only file, vendored into each repo
 
-- **Status:** Accepted, with an open question about the file's size
+- **Status:** Accepted. Its size question is settled by [ADR-0014](0014-engine-stays-one-file.md) — no split, no gate.
 - **Decided:** 2026-06-03 (first engine release), reaffirmed through v2.22.0
 - **Evidence:** `CHANGELOG.md` `v1.11.0` upgrade notes, `v2.11.1`; `CLAUDE.md` "Single engine file"
 
@@ -30,10 +30,14 @@ file. The published GitHub Action runs the consumer's own copy, not one it bring
   behaviour because an upstream release happened. That is the point, and it is also the cost —
   see [ADR-0010](0010-staleness-detection-in-the-action.md), the whole problem of a copy that
   never gets updated.
-- The module is ~5,200 lines. It stays navigable because it is strictly layered (parse → scan →
-  gate → render) and every capability carries a requirement id, but the number is a real
-  liability and is tracked as an open roadmap item: split behind a concatenating build, or keep
-  one file and add a CI line-count budget.
+- The module is **5,544 lines** (measured 2026-08-21; restate it with its date whenever this
+  record is revised, rather than letting a "~" absorb the drift — the previous figure here was
+  344 lines behind reality). It stays navigable because it is strictly layered (parse → scan →
+  gate → render) and every capability carries a requirement id — note that this is an authorial
+  claim, asserted by section banners and convention, not something any test or lint rule
+  enforces. Whether the size is worth structural machinery was audited and answered in
+  [ADR-0014](0014-engine-stays-one-file.md): no split, no size gate, with numeric triggers to
+  reopen it.
 - Some things are simply refused. A YAML library ([ADR-0004](0004-hand-rolled-frontmatter-parser.md)),
   a Markdown parser, a graph library — each would be the smaller local change and the larger
   global one.
