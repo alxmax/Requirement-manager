@@ -96,6 +96,8 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
+**Design decisions live in `docs/adr/`** (13 records, index at `docs/adr/README.md`) — the single-file engine, the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and three rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+
 **Single engine file:** `plugin/scripts/reqmap.py` — ~5000 lines, stdlib only, no external dependencies. All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `REQ-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.

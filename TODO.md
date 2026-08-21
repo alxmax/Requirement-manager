@@ -235,7 +235,15 @@
            HEAD~1 resolves again, so the changelog-entry gate is live rather than a
            silent no-op — and the release job proved itself on that same merge: it cut
            v2.18.1 and force-moved the @v2 alias onto the released commit. -->
-- [ ] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops
+- [x] Extract ADRs to docs/adr/ — ten decisions pulled out of changelog prose, including the deliberate V-model omission | lane: ops
+      <!-- 13 records, not 10: the changelog carried more load-bearing decisions than the item
+           estimated. Three are REJECTIONS (internal-consistency lint, the V-model pairing
+           table folded into ADR-0007, auto-widening the scan root) — a rejection is worth as
+           much as an acceptance here, since without the record the gap reads as an oversight
+           and someone re-proposes the version that was already measured and refuted. Each
+           record carries the evidence it was decided on and its revisit condition. Linked
+           from README, CLAUDE.md and CONTRIBUTING.md; not linked into docs/architecture.html,
+           whose nav is an engine-owned region. -->
 - [x] CI matrix: Python 3.9/3.12/3.13 x ubuntu/windows — prove the `-X utf8` usage actually holds | lane: ops
       <!-- Shipped in v2.19.0 as a separate `tests` job (6 cells, fail-fast: false) running
            every suite. Deliberately NOT a matrixed gate-and-tests: the gate is one
