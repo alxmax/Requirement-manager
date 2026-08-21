@@ -604,7 +604,7 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">All 18 commands</h2>
+      <h2 class="reveal">All 21 commands</h2>
       <p class="lead reveal">
         One stdlib-only Python script. No installation, no dependencies.
         Seed it with <code>cp</code>; run it from the directory where <code>requirements/</code> lives.
@@ -689,6 +689,18 @@ has not been re-touched.</pre></div>
       <div class="cmd">
         <div class="cmd-n"><code>export</code></div>
         <div class="cmd-d">Emit just <code>_map.json</code> for an external front-end. <span class="fl">--out PATH</span> or <span class="fl">--out -</span> for stdout.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>search "&lt;query&gt;"</code></div>
+        <div class="cmd-d">Rank requirements by lexical relevance, most-relevant first — the same TF-IDF/cosine model <code>dupes</code> uses, and the same one the viewer's search box runs, so CLI and UI agree on what matches. <span class="fl">--top</span> caps the hit count. Below a calibrated floor it prints "no strong match" rather than a spurious first result.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>coverage</code></div>
+        <div class="cmd-d">List the source files carrying no <code>implements:</code> tag, grouped by directory — the code your registry does not trace. <span class="fl">--json</span> for machine output. Read-only: it reports, it never gates.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>gen-integration</code></div>
+        <div class="cmd-d">Regenerate <code>tool_definition.json</code> (the function-calling schema non-Claude assistants read) and the command table inside <code>SKILL.universal.md</code> from the <code>COMMANDS</code> registry — the CLI's single source of truth. Never hand-edit those two; <code>gate</code> fails when they drift from the registry.</div>
       </div>
     </div>
   </div>
