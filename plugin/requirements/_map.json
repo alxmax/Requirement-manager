@@ -4215,6 +4215,18 @@
       "done": true
     },
     {
+      "name": "`lint` check for redundant \"shall\"/\"must\" on a Contract clause (REQ-LINTCHECKS-025 AC-10)",
+      "lane": "feature",
+      "milestone": "v2.9",
+      "done": true
+    },
+    {
+      "name": "Opt-in requirement-content translation: `reqmap.py translate` + viewer badge (REQ-TRANSLATE-044)",
+      "lane": "feature",
+      "milestone": "v2.9",
+      "done": true
+    },
+    {
       "name": "Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx",
       "lane": "ops",
       "milestone": "v2.9",

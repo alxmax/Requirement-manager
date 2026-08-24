@@ -175,6 +175,20 @@
            bugs in its own first implementation during code review (bracket-truncating regex,
            uncaught UnicodeDecodeError) — both fixed before shipping. -->
 - [x] Fix the .reqmapignore comment claiming the viewer is "tested via npm build" — there is no npm step in CI | lane: ops
+- [x] `lint` check for redundant "shall"/"must" on a Contract clause (REQ-LINTCHECKS-025 AC-10) | lane: feature
+      <!-- PR #186. The Contract section already opens with "Every line in this section is
+           binding.", so the modal is dead weight — and in a non-English requirement corpus
+           `shall` is also a stray anglicism, caught in a consumer repo's 29 files / 261 places
+           before this check existed. -->
+- [x] Opt-in requirement-content translation: `reqmap.py translate` + viewer badge (REQ-TRANSLATE-044) | lane: feature
+      <!-- PR #187. The v2.23.0 EN/RO toggle (line below) covers UI chrome only, which fails a
+           reader who does not read the corpus's language AT ALL. `translate` is manual/opt-in,
+           the only subcommand that shells out to `claude -p`, never called by gate/sync/lint/
+           map/CI — cache is read-only-inlined by map/export. Every translated field renders
+           behind a visible "machine-translated, unreviewed" badge; falls back to source text
+           with no cache entry. Scoped from a 9-senator Senate audit (MODIFY, 3 blocking + 3
+           advisory conditions) plus a follow-up request for majority-language corpus detection
+           instead of mandatory per-file `lang:` tagging. -->
 - [ ] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
       <!-- Deliberately deferred (2-1 majority in the same Trias deliberation): app/ stays in the
            repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is
