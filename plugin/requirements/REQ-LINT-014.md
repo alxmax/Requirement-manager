@@ -59,8 +59,8 @@ Every line in this section is binding.
 
 ## WHAT — Notes & known limitations (informative)
 - The individual warn checks (long-sentence, stacked-conditions, statement-too-long,
-  ac-count, over-scoped, file-spread, vague-term) are a separate capability —
-  [[REQ-LINTCHECKS-025]] — running under the same `lint` command.
+  ac-count, over-scoped, file-spread, vague-term, redundant-modal) are a separate
+  capability — [[REQ-LINTCHECKS-025]] — running under the same `lint` command.
 - Jargon-before-definition detection is intentionally out of scope for this version.
   Without a dictionary of project terms, any heuristic for "undefined jargon" produces
   too many false positives on prose that carries code references. It may arrive later

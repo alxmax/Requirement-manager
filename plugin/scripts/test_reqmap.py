@@ -2896,6 +2896,24 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         self.assertFalse(any(f["check"] == "vague-term" for f in fs))
 
+    def test_redundant_modal_warns(self):
+        body = self._body(contract="- The system shall log the event and must retry once.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        modal = [f for f in fs if f["check"] == "redundant-modal"]
+        self.assertEqual(len(modal), 2)          # 'shall' + 'must'
+        self.assertEqual(modal[0]["severity"], "warn")
+
+    def test_redundant_modal_skips_code_spans(self):
+        # a backticked identifier that happens to contain the word is not flagged
+        body = self._body(contract="- `shall_retry` controls whether the job repeats.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertFalse(any(f["check"] == "redundant-modal" for f in fs))
+
+    def test_redundant_modal_silent_on_present_tense(self):
+        body = self._body(contract="- The system logs the event and retries once.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        self.assertFalse(any(f["check"] == "redundant-modal" for f in fs))
+
 
 class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015
     def _show(self, reqs, members, cap_id):
