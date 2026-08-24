@@ -125,5 +125,40 @@ for (const [label, ok] of i18nChecks) {
   if (!ok) failures++;
 }
 
+// i18n content translation (opt-in, cached, always marked) — REQ-TRANSLATE-042.
+// A node with a cached en-locale translation renders the translated text WITH the
+// "machine-translated, unreviewed" badge; a node with no cache entry (the default
+// for every requirement until `reqmap.py translate` runs) renders the author's
+// text and shows no badge at all — the untranslated path must stay unchanged.
+setRegistry([adaptNode({
+  id: "I18N-CONTENT-TEST-001", title: "Titlu original", area: "I18N", layer: "feature",
+  status: "confirmed", intent: "Motivul original.", contract: ["- Clauza originală."],
+  acc: ["- Criteriul original."], members: [], deps: [], used_by: [],
+  i18n: { en: { title: "Original title", intent: "The original reason.",
+                contract: "- The original clause.", acceptance: "- The original criterion." } },
+})]);
+const translatedSpecEn = renderToString(
+  <I18nProvider initialLocale="en"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
+const translatedSpecRo = renderToString(
+  <I18nProvider initialLocale="ro"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
+setRegistry([adaptNode({
+  id: "I18N-NOCACHE-TEST-001", title: "Titlu fără cache", area: "I18N", layer: "feature",
+  status: "confirmed", intent: "Motiv.", contract: ["- Clauză."], acc: ["- Criteriu."],
+  members: [], deps: [], used_by: [],
+})]);
+const noCacheSpecEn = renderToString(
+  <I18nProvider initialLocale="en"><SpecView selId="I18N-NOCACHE-TEST-001" setSelId={noop} /></I18nProvider>);
+const i18nContentChecks = [
+  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],
+  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],
+  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],
+  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],
+];
+for (const [label, ok] of i18nContentChecks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
+setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
+
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
 process.exit(failures ? 1 : 0);

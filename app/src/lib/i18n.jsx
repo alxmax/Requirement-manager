@@ -1,11 +1,23 @@
-/* i18n — UI chrome only, never requirement content.
+/* i18n — UI chrome, plus opt-in, cached, always-marked requirement content.
  *
- * The line this module must not cross: it translates the frame around the data
- * (nav, tab labels, section headers, buttons, empty states) and NOTHING the
- * registry itself carries. A requirement's id, title, intent, contract clauses,
- * acceptance criteria and member paths stay in the author's language, because
- * they are the artifact under review — translating them would put words in the
- * author's mouth and break the match with the .md file on disk.
+ * UI chrome (nav, tab labels, section headers, buttons, empty states) is
+ * translated live from the dictionary below — that boundary is unchanged.
+ *
+ * Requirement CONTENT (id, title, intent, contract clauses, acceptance
+ * criteria, member paths) stays in the author's language by default, for the
+ * original reason: it is the artifact under review, and translating it live
+ * would put words in the author's mouth and break the match with the .md file
+ * on disk. The one exception is opt-in and never silent: `reqmap.py translate`
+ * — a separate, MANUAL engine command, never run by gate/sync/lint/CI/the
+ * pre-commit hook — caches a `claude -p` translation per requirement, gated by
+ * a structural-fidelity check, in requirements/_i18n/<locale>.json. `map`
+ * inlines that cache onto each node as `node.i18n[locale]`, read-only, no
+ * network call of its own. `translatedText()` below is the ONLY thing that
+ * reads it, and it always reports whether a value came from the cache
+ * (`isTranslated`) — callers render an explicit "machine-translated,
+ * unreviewed" badge next to it (see SpecView.jsx) and NEVER present it as the
+ * authored source. Absent a cache entry, content still falls back to the
+ * author's own text, exactly as before.
  *
  * The engine's own vocabulary is out of scope too, deliberately: `confirmed`,
  * `in-progress`, `draft`, `orphan`, `deprecated`, `bus`/`feature`/`need`, and the
@@ -91,6 +103,17 @@ function interpolate(s, params) {
 export function translate(locale, s, params) {
   const table = DICT[locale];
   return interpolate((table && table[s]) || s, params);
+}
+
+/* Read a cached content translation for `field` ("title" | "intent" |
+ * "contract" | "acceptance") off `node.i18n[locale]`. Falls back to
+ * `fallback` (the author's own text, or null when the caller has its own
+ * fallback rendering) when no cache entry exists — never throws, never
+ * fabricates a translation. `isTranslated` is the only signal callers need to
+ * decide whether to show the "machine-translated, unreviewed" badge. */
+export function translatedText(node, locale, field, fallback = null) {
+  const cached = node && node.i18n && node.i18n[locale] && node.i18n[locale][field];
+  return cached ? { text: cached, isTranslated: true } : { text: fallback, isTranslated: false };
 }
 
 function readStored() {

@@ -1,0 +1,162 @@
+---
+id: REQ-TRANSLATE-044
+status: baseline
+layer: feature
+owner: Alex
+depends_on: [CORE-PARSE-001, REQ-MAP-007, REQ-VIEWER-007]
+superseded_by:
+milestone:
+lint_exempt: [ac-count-high]
+---
+
+# Opt-in requirement-content translation
+
+> `i18n.jsx` (REQ-VIEWER-007) draws a hard line: the locale toggle translates UI
+> chrome only, never requirement content — a requirement's title, intent, contract
+> and acceptance criteria stay in the author's language, because they are the
+> artifact under review and translating them live would put words in the author's
+> mouth. That line held until a corpus is written entirely in one language and a
+> reader of the other language cannot use the viewer at all. This capability adds
+> the one exception: a manual, opt-in command that caches a machine translation per
+> requirement, gated by a structural check, always rendered with a visible
+> "machine-translated, unreviewed" marker — never presented as the authored source,
+> and never reachable from anything that gates a commit or a CI run.
+
+## WHAT — Contract (normative)
+Every line in this section is binding.
+- `translate` is reached ONLY by typing `reqmap.py translate` — it is never called
+  by `gate`, `sync`, `lint`, `map`, `export`, or the pre-commit hook. It is the
+  only subcommand that invokes an external `claude` CLI subprocess.
+- `corpus_lang(reqs)` detects the corpus's majority language (`ro` or `en`) by
+  classifying each requirement's title+WHY+Contract+Acceptance text: Romanian
+  diacritics are a certain signal; below that, whichever of a small RO/EN stopword
+  list scores more hits wins. A per-file `lang: ro|en` frontmatter value overrides
+  detection for that file.
+- `translate [--to ro|en]` translates every requirement whose effective language
+  matches the corpus majority into the target locale (default: the other of
+  `ro`/`en`), caching results in `requirements/_i18n/<target>.json`, one file per
+  target locale, keyed by requirement id.
+- The cache key is `translation_hash(body, title)` — a hash over title + WHY +
+  Contract + Acceptance, distinct from `binding_hash()` (Contract+Acceptance only,
+  CORE-DRIFT-003): a title-only edit also invalidates a cached translation,
+  which reusing `binding_hash` would miss.
+- Before a translation is cached, `_translation_preserves_structure()` compares the
+  source and translated text's backticked-span multiset, numeric-literal multiset,
+  and ordered heading/bullet markers. A mismatch skips the entry with a `WARN` and
+  writes nothing for it — it never partially caches a corrupted translation.
+- A missing/erroring `claude` CLI, a timeout, or a malformed (missing-marker)
+  response also skips that entry with a `WARN`. `translate` always exits 0 and
+  never aborts the batch on a single entry's failure — it is a report-and-cache
+  tool, not a gate.
+- A cache hit (stored hash matches current content) is skipped without invoking
+  `claude` — cost is proportional to what changed, not to corpus size.
+- `map` and `export` read `requirements/_i18n/*.json` (when present) and attach
+  `node.i18n[locale] = {title, intent, contract, acceptance}` for any node whose
+  cached hash still matches its current content; a stale entry (source edited
+  since the last `translate` run) is silently dropped, never served. Neither
+  command calls `claude` — this is a file read, so `map --check` stays exactly as
+  deterministic and `claude`-free as before this capability existed.
+- The viewer consumes `node.i18n` ONLY through `translatedText()` (i18n.jsx),
+  which reports `isTranslated` alongside the text. Every caller that renders
+  `isTranslated` text renders the "machine-translated, unreviewed" badge next to
+  it. Absent a cache entry, content renders in the author's own language exactly
+  as before this capability existed.
+
+## WHAT — Verify intent (open questions for the human)
+- The stopword lists in `_RO_STOPWORDS`/`_EN_STOPWORDS` are small and generic
+  (chosen for a majority-vote signal across a whole corpus, not sentence-level
+  precision). Good enough as shipped, or should they grow before this is used on
+  a much larger or more code-heavy corpus?
+- `translate` currently supports exactly `ro`/`en`. Worth generalizing the
+  language set now, or wait for a second real consumer language to shape the API?
+
+## WHAT — Notes & known limitations (informative)
+- One `claude -p` call per requirement, not four — the prompt asks for all four
+  fields back in one marker-delimited response (`_TRANSLATE_MARKERS`), which is
+  what keeps a cold-cache run at N calls instead of 4N.
+- `TRANSLATOR_VERSION` is folded into the cache key so bumping the prompt or the
+  target model invalidates every cached entry in one step, without hand-editing
+  the cache file.
+- The structural-fidelity check is deliberately mechanical (backticks, numbers,
+  line-leading markers) — it catches a translation that drops or mangles
+  identifiers/numbers/structure, not one that is fluent but semantically wrong.
+  That is exactly why the badge exists: fidelity-checked is not human-reviewed.
+- `translate` writes one aggregate `_i18n/<locale>.json`, not one file per
+  requirement — same shape as the existing `_reqlock.json`/`_memberlock.json`
+  per-id lock-file convention (CORE-DRIFT-003), not a new pattern.
+- `ac-count-high` is exempted: each of the eight criteria pins exactly one
+  module's behavior (detection, hashing, fidelity check, two fail-open paths,
+  caching, and two map-read paths). Merging them to reach the ceiling would test
+  several behaviors implicitly per AC — same reasoning as REQ-LINTCHECKS-025.
+
+## HOW — Acceptance (= tests)
+AC-1
+  Given  Romanian text with diacritics, English text, and a code-only string
+  When   `detect_lang` runs on each
+  Then   it returns `ro`, `en`, and `None` respectively
+
+AC-2
+  Given  a corpus of 2 Romanian requirements and 1 English requirement
+  When   `corpus_lang` runs
+  Then   it returns `ro` (majority); a `lang: en` frontmatter override on a
+         Romanian-text file flips that file's effective language to `en`
+
+AC-3
+  Given  two requirement bodies identical except for the `# ` title line
+  When   `translation_hash` runs on each
+  Then   the hashes differ, while `binding_hash` (Contract+Acceptance only) on
+         the same two bodies stays equal — proof the wider span is necessary
+
+AC-4
+  Given  a translated string that drops a backticked identifier or a number
+         present in the source
+  When   `_translation_preserves_structure` compares them
+  Then   it returns false; an unrelated wording change with the same
+         backticks/numbers/markers returns true
+
+AC-5
+  Given  `subprocess.run` raises (the `claude` CLI is absent)
+  When   `cmd_translate` runs
+  Then   it prints a WARN naming the requirement, writes no cache file, and
+         exits 0
+
+AC-6
+  Given  a mocked `claude -p` call returning a well-formed four-marker response
+  When   `cmd_translate` runs once, then runs again with the source unchanged
+  Then   the first run writes a cache entry and calls the CLI once; the second
+         run is a cache hit and does not call the CLI at all
+
+AC-7
+  Given  a `requirements/_i18n/en.json` cache file with an entry whose hash
+         matches a requirement's current content
+  When   `_build_map_data` + `_attach_translations` run with `subprocess.run`
+         mocked to raise on any call
+  Then   the matching node carries `node.i18n.en` and no `claude` call was made
+
+AC-8
+  Given  a cache entry whose stored hash does NOT match the requirement's
+         current content (source edited since the last `translate` run)
+  When   `_load_translations` runs
+  Then   that entry is absent from the result — never served stale
+
+## Example — in practice (optional, non-binding)
+- A consumer repo's corpus is 68 Romanian-authored requirements. An English-only
+  reviewer opens the viewer, switches locale to EN, and the Contract sections
+  render in English with a small amber "machine-translated, unreviewed" badge
+  next to each — legible, but visibly not the artifact of record. The maintainer
+  runs `reqmap.py translate` once after a batch of edits; only the edited
+  requirements' cache entries change.
+
+## WHERE — Current implementation
+- Engine: `detect_lang`, `corpus_lang`, `translation_hash`, `_structural_signature`,
+  `_run_claude_translate`, `cmd_translate`, `_load_translations`,
+  `_attach_translations` in `reqmap.py`; wired into `cmd_map`/`cmd_export` (read
+  path) and the CLI dispatcher (`translate` command, `--to` flag).
+- Viewer: `translatedText()` in `app/src/lib/i18n.jsx`; consumed by `SpecDoc` in
+  `app/src/views/SpecView.jsx` (title, intent, contract, acceptance + badge);
+  `adaptNode()` in `app/src/lib/loadData.js` forwards `node.i18n` from the engine
+  export.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)

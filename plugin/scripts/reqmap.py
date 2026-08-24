@@ -21,6 +21,9 @@ Subcommands:
   findings          aggregate open verify-intent items into requirements/_findings.md
   confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
   review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted quality review
+  translate [--to ro|en]  manual, opt-in: cache a `claude -p` translation of the corpus's
+                    majority-language requirements into requirements/_i18n/<locale>.json.
+                    Never called by gate/sync/lint/map/the pre-commit hook.
   check             DEPRECATED alias for `gate` (report) / `sync` (with --update-lock); removed next major
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
@@ -566,6 +569,30 @@ COMMANDS = {
         ),
         "arg": "ID",
         "params": [],
+    },
+    "translate": {
+        "summary": (
+            "Manual, opt-in: detect the corpus's majority language (per-file `lang:` "
+            "frontmatter override honored first), then cache a `claude -p` translation "
+            "of every requirement written in that language into "
+            "requirements/_i18n/<target>.json. A structural-fidelity check (backticked "
+            "spans, numbers, heading/bullet markers) gates every cache write; a missing "
+            "`claude` CLI, a timeout, or a failed check skips that entry with a warning "
+            "instead of aborting. `map`/`export` inline the cache into the graph "
+            "read-only, with no `claude` call of their own — this command is the ONLY "
+            "way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map "
+            "or the pre-commit hook."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "translate_to",
+                "flag": "--to",
+                "type": "str",
+                "help": "Target locale, 'ro' or 'en' (default: the other of the two from "
+                        "the detected corpus majority).",
+            },
+        ],
     },
     "site": {
         "summary": (
@@ -3033,10 +3060,300 @@ def _parse_todos(root):
     return []
 
 
+# ---------------------------------------------------------------------------
+# Content translation (`translate`) — implements: REQ-TRANSLATE-044
+#
+# Manual and opt-in only. NOTHING in this block is called from gate/sync/lint/
+# map/the pre-commit hook — `translate` is reached exclusively by typing
+# `reqmap.py translate`. That is deliberate: it is the only subcommand that
+# shells out to an external LLM CLI, and this engine's gate/sync/CI path must
+# stay usable on a machine that has never heard of `claude`. `map`/`export`
+# below only ever READ an already-committed cache file — never the CLI — so
+# they stay exactly as deterministic as before this block existed.
+# ---------------------------------------------------------------------------
+TRANSLATOR_VERSION = "1"   # bump to invalidate every cached translation at once
+                           # (e.g. after changing _TRANSLATE_PROMPT or the model)
+
+_RO_DIACRITICS = "ăâîșțĂÂÎȘȚ"
+# Small, deliberately generic stopword lists — this is a majority-vote signal over
+# a whole corpus, not a per-sentence classifier, so it does not need to be exhaustive.
+_RO_STOPWORDS = frozenset({
+    "și", "este", "sunt", "pentru", "care", "această", "acest", "aceste", "dacă",
+    "sau", "din", "cu", "la", "de", "un", "o", "nu", "se", "fi", "prin", "între",
+    "toate", "fiecare", "asupra", "unde", "cum", "atunci", "fără", "după",
+})
+_EN_STOPWORDS = frozenset({
+    "the", "and", "is", "are", "for", "this", "that", "with", "from", "not",
+    "be", "to", "of", "in", "on", "a", "an", "when", "where", "each", "every",
+    "without", "after", "then", "if", "or",
+})
+
+
+def _strip_code(text):  # implements: REQ-TRANSLATE-044
+    """Drop fenced code blocks and inline `backticked` spans before a prose scan —
+    an identifier's language must never sway a language-detection heuristic."""
+    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+    return re.sub(r"`[^`]*`", " ", text)
+
+
+def detect_lang(text):  # implements: REQ-TRANSLATE-044
+    """RO/EN classifier over prose stripped of code spans. Romanian diacritics are a
+    near-certain signal; below that, whichever stopword list scores more hits wins.
+    Returns 'ro', 'en', or None when neither signal fires (too little prose, or a
+    requirement that is nearly all code/identifiers) — None means 'undetermined',
+    not 'English'."""
+    bare = _strip_code(text)
+    if any(ch in bare for ch in _RO_DIACRITICS):
+        return "ro"
+    words = [w.lower() for w in _WORD_RE.findall(bare)]
+    ro_hits = sum(1 for w in words if w in _RO_STOPWORDS)
+    en_hits = sum(1 for w in words if w in _EN_STOPWORDS)
+    if ro_hits == 0 and en_hits == 0:
+        return None
+    return "ro" if ro_hits > en_hits else "en"
+
+
+def _translation_source_text(body, title):  # implements: REQ-TRANSLATE-044
+    """The exact span that gets translated and hashed: title + WHY + Contract +
+    Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance only) —
+    a title-only edit must also invalidate a cached translation."""
+    return "\n".join([
+        title, _first_quote(body),
+        _section_raw(body, "contract"), _section_raw(body, "acceptan"),
+    ])
+
+
+def translation_hash(body, title):  # implements: REQ-TRANSLATE-044
+    """Cache-invalidation key for one requirement's translation. NOT binding_hash() —
+    see _translation_source_text. Includes TRANSLATOR_VERSION so bumping the prompt
+    or the model invalidates every cached entry in one step, not file-by-file."""
+    h = hashlib.sha256()
+    h.update(_translation_source_text(body, title).encode("utf-8"))
+    h.update(TRANSLATOR_VERSION.encode("utf-8"))
+    return h.hexdigest()[:12]
+
+
+def _effective_lang(r):  # implements: REQ-TRANSLATE-044
+    """A requirement's language: an explicit `lang: ro|en` frontmatter override wins;
+    otherwise it is detected from the translated span. The override is the escape
+    hatch for the rare file the heuristic gets wrong (e.g. a Romanian requirement
+    whose Contract is mostly backticked English identifiers)."""
+    override = (r["meta"].get("lang") or "").strip().lower()
+    if override in ("ro", "en"):
+        return override
+    return detect_lang(_translation_source_text(r["body"], _title(r["body"])))
+
+
+def corpus_lang(reqs):  # implements: REQ-TRANSLATE-044
+    """Majority language across the whole corpus (per-file lang: override honored
+    first). Returns 'ro' or 'en'; None only when every file is undetermined (e.g.
+    an empty registry) — never guessed."""
+    counts = {"ro": 0, "en": 0}
+    for r in reqs.values():
+        lang = _effective_lang(r)
+        if lang in counts:
+            counts[lang] += 1
+    if counts["ro"] == 0 and counts["en"] == 0:
+        return None
+    return "ro" if counts["ro"] >= counts["en"] else "en"
+
+
+def _structural_signature(text):  # implements: REQ-TRANSLATE-044
+    """(backtick-span multiset, numeric-literal multiset, ordered structural markers)
+    — what a translation must preserve exactly. Used to gate a cache write: a
+    translation that drops a backticked identifier or a number is a mistranslation
+    of normative text, not a style choice."""
+    backticks = tuple(sorted(re.findall(r"`[^`]*`", text)))
+    numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
+    markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
+    return (backticks, numbers, markers)
+
+
+def _translation_preserves_structure(source, translated):  # implements: REQ-TRANSLATE-044
+    return _structural_signature(source) == _structural_signature(translated)
+
+
+_LANG_NAMES = {"ro": "Romanian", "en": "English"}
+_TRANSLATE_MARKERS = ("TITLE", "INTENT", "CONTRACT", "ACCEPTANCE")
+_TRANSLATE_PROMPT = (
+    "Translate the following software requirement from {src} to {dst}. This is a "
+    "technical, normative document - preserve meaning exactly. Keep all markdown "
+    "formatting, every backticked `identifier` verbatim and unchanged, every number "
+    "unchanged, and the same list/heading structure line for line.\n\n"
+    "Return EXACTLY four sections, each starting on its own line with the literal "
+    "marker shown below, and nothing else - no commentary, no code fence:\n"
+    "===TITLE===\n<translated title>\n"
+    "===INTENT===\n<translated intent>\n"
+    "===CONTRACT===\n<translated contract>\n"
+    "===ACCEPTANCE===\n<translated acceptance>\n\n"
+    "--- SOURCE ---\n"
+    "===TITLE===\n{title}\n"
+    "===INTENT===\n{intent}\n"
+    "===CONTRACT===\n{contract}\n"
+    "===ACCEPTANCE===\n{acceptance}\n"
+)
+
+
+def _parse_translated_sections(text):  # implements: REQ-TRANSLATE-044
+    """Split the model's marker-delimited response into {title, intent, contract,
+    acceptance}. Returns None on any malformed response (a missing marker) — a
+    partial parse is never used, only all four fields or none."""
+    pattern = "(%s)" % "|".join("===%s===" % m for m in _TRANSLATE_MARKERS)
+    chunks = re.split(pattern, text)
+    parts, current = {}, None
+    for chunk in chunks:
+        m = re.match(r"===(\w+)===$", chunk)
+        if m:
+            current = m.group(1)
+            continue
+        if current:
+            parts[current] = chunk.strip()
+            current = None
+    if not all(m in parts for m in _TRANSLATE_MARKERS):
+        return None
+    return {k.lower(): parts[k] for k in _TRANSLATE_MARKERS}
+
+
+def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lang):  # implements: REQ-TRANSLATE-044
+    """Invoke `claude -p` once per requirement and parse its four-section response.
+    Returns {title, intent, contract, acceptance} on success, or None on ANY
+    failure — CLI missing, non-zero exit, timeout, or a malformed response. The
+    caller treats None as 'skip this entry', never as an error to propagate: this
+    is the fail-open boundary between an optional external tool and everything
+    else in the engine."""
+    prompt = _TRANSLATE_PROMPT.format(
+        src=_LANG_NAMES[src_lang], dst=_LANG_NAMES[dst_lang],
+        title=title, intent=intent, contract=contract, acceptance=acceptance)
+    try:
+        proc = subprocess.run(
+            ["claude", "-p", prompt],
+            capture_output=True, text=True, encoding="utf-8", timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0 or not proc.stdout.strip():
+        return None
+    return _parse_translated_sections(proc.stdout)
+
+
+def cmd_translate(reqs, reqs_dir, target=None):  # implements: REQ-TRANSLATE-044
+    """Translate every requirement written in the corpus's detected majority
+    language into `target` (default: the other of {ro, en}), caching results in
+    requirements/_i18n/<target>.json. Manual and opt-in — see the module-level
+    comment above this block. Fails open per entry: a missing/erroring `claude`
+    CLI, a timeout, or a translation that fails the structural-fidelity check is
+    skipped with a warning; it never aborts the batch or raises. Cache hits (hash
+    unchanged since the last successful translation) are skipped without calling
+    the CLI. Always exits 0 — this is a report-and-cache tool, never a gate."""
+    src = corpus_lang(reqs)
+    if src is None:
+        print("translate: no requirements to classify - nothing to do.")
+        return 0
+    dst = target or ("en" if src == "ro" else "ro")
+    if dst == src:
+        print("translate: target '{}' matches the corpus's detected language "
+              "'{}' - nothing to translate.".format(dst, src))
+        return 0
+
+    cache_path = os.path.join(reqs_dir, "_i18n", "{}.json".format(dst))
+    cache = {}
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, encoding="utf-8") as f:
+                cache = json.load(f)
+        except (OSError, ValueError):
+            cache = {}
+
+    translated = cached = skipped = 0
+    for rid, r in sorted(reqs.items()):
+        if _effective_lang(r) != src:
+            continue   # already in the target language (or undetermined) - leave it
+        title = _title(r["body"])
+        intent = _first_quote(r["body"])
+        contract = _section_raw(r["body"], "contract")
+        acceptance = _section_raw(r["body"], "acceptan")
+        h = translation_hash(r["body"], title)
+        entry = cache.get(rid)
+        if entry and entry.get("hash") == h:
+            cached += 1
+            continue
+        parsed = _run_claude_translate(title, intent, contract, acceptance, src, dst)
+        if parsed is None:
+            print("  WARN  {}: claude CLI unavailable, failed, or returned a "
+                  "malformed response - skipped".format(rid))
+            skipped += 1
+            continue
+        source_text = "\n".join([title, intent, contract, acceptance])
+        translated_text = "\n".join([parsed["title"], parsed["intent"],
+                                      parsed["contract"], parsed["acceptance"]])
+        if not _translation_preserves_structure(source_text, translated_text):
+            print("  WARN  {}: translation failed the structural-fidelity check "
+                  "(backtick/number/heading mismatch) - skipped".format(rid))
+            skipped += 1
+            continue
+        cache[rid] = dict(parsed, hash=h)
+        translated += 1
+
+    if translated:
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
+        print("wrote {}".format(cache_path))
+    print("translate: {} translated, {} cache hit, {} skipped ({} -> {})".format(
+        translated, cached, skipped, src, dst))
+    return 0
+
+
+def _load_translations(reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
+    """Read every requirements/_i18n/<locale>.json cache file and return
+    {rid: {locale: {title, intent, contract, acceptance}}} for entries whose
+    stored hash still matches the requirement's CURRENT content. A stale entry
+    (source edited since the last `translate` run) is silently dropped rather
+    than served — this is what keeps `map`/`map --check` deterministic and
+    `claude`-free: they only ever read a file already sitting on disk, and they
+    never serve a translation known to be out of date."""
+    i18n_dir = os.path.join(reqs_dir, "_i18n")
+    if not os.path.isdir(i18n_dir):
+        return {}
+    out = {}
+    for fname in sorted(os.listdir(i18n_dir)):
+        if not fname.endswith(".json"):
+            continue
+        locale = fname[:-len(".json")]
+        try:
+            with open(os.path.join(i18n_dir, fname), encoding="utf-8") as f:
+                cache = json.load(f)
+        except (OSError, ValueError):
+            continue
+        for rid, entry in cache.items():
+            r = reqs.get(rid)
+            if not r or not isinstance(entry, dict):
+                continue
+            title = _title(r["body"])
+            if entry.get("hash") != translation_hash(r["body"], title):
+                continue
+            out.setdefault(rid, {})[locale] = {
+                k: entry.get(k, "") for k in ("title", "intent", "contract", "acceptance")
+            }
+    return out
+
+
+def _attach_translations(data, reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
+    """Mutate data['nodes'] in place, adding node['i18n'] = {locale: {...}} for
+    any node with a fresh cached translation. Shared by cmd_map and cmd_export
+    so both emit the same graph — no `claude` call here, file reads only."""
+    i18n = _load_translations(reqs, reqs_dir)
+    for node in data["nodes"]:
+        if node["id"] in i18n:
+            node["i18n"] = i18n[node["id"]]
+    return data
+
+
 def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-MAP-007
     data = _build_map_data(reqs, members)
     data["repo"] = _repo_name(root)
     data["todos"] = _parse_todos(root)
+    _attach_translations(data, reqs, reqs_dir)
 
     if check:
         return _map_check(data, reqs_dir, root)
@@ -3064,6 +3381,7 @@ def cmd_export(reqs, members, reqs_dir, root=".", out=None):  # implements: REQ-
     data = _build_map_data(reqs, members)
     data["repo"] = _repo_name(root)
     data["todos"] = _parse_todos(root)   # mirror cmd_map so export is byte-equivalent
+    _attach_translations(data, reqs, reqs_dir)
     text = _build_json_text(data)
     target = out if out else os.path.join(reqs_dir, "_map.json")
     if target == "-":
@@ -5457,6 +5775,9 @@ def main():
                     help="site: print docs/ findings + the suggested command; writes nothing")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
+    ap.add_argument("--to", dest="translate_to", default=None, choices=["ro", "en"],
+                    help="translate: target locale (default: the other of ro/en from "
+                         "the detected corpus majority)")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -5554,6 +5875,8 @@ def main():
         return cmd_findings(reqs, reqs_dir, a.raw)
     if a.cmd == "review":
         return cmd_review(reqs, a.arg)
+    if a.cmd == "translate":
+        return cmd_translate(reqs, reqs_dir, target=a.translate_to)
     if a.cmd == "confirm":
         if not a.arg:
             print("usage: reqmap confirm AREA-NAME-NNN"); return 2

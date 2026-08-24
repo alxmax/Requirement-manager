@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v2.25.0` — 2026-08-25
+
+**A consumer's viewer speaks Romanian and refuses to translate your requirements — until every requirement is in the reader's second language.** `v2.23.0` drew a hard line: the locale toggle translates UI chrome only, never requirement content, because translating the artifact under review live would put words in the author's mouth. That line was right for a mixed-language reader who mostly understands the source — it fails completely for a reviewer who does not read the corpus's language at all.
+
+`reqmap.py translate [--to ro|en]` adds the one exception, kept manual and opt-in on purpose: it is the ONLY subcommand that shells out to an external LLM (`claude -p`), and this engine's `gate`/`sync`/`lint`/`map`/pre-commit path stays exactly as `claude`-free as before — nothing above calls it.
+
+- Detects the corpus's majority language (Romanian diacritics, else a stopword-frequency vote); a per-file `lang: ro|en` frontmatter value overrides detection for the rare misclassified file.
+- Caches results in `requirements/_i18n/<locale>.json`, keyed by a content hash over title + WHY + Contract + Acceptance — deliberately not `binding_hash()` (Contract+Acceptance only), so a title-only edit still invalidates the cache.
+- A structural-fidelity check (backticked spans, numbers, heading/bullet markers must match) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a `WARN` instead of aborting the batch. Cache hits skip the CLI call entirely.
+- `map`/`export` inline the cache onto each node **read-only** — a file read, never a `claude` call — so `map --check` in CI stays exactly as deterministic as before.
+- The viewer never presents cached text as the author's own: every translated field renders behind a visible "machine-translated, unreviewed" badge (`translatedText()` in `i18n.jsx`), and falls back to the source text whenever no cache entry exists.
+
+`REQ-TRANSLATE-044` carries the full contract (8 ACs, `lint_exempt: ac-count-high` — same reasoning as `REQ-LINTCHECKS-025`: each AC pins one module's behavior).
+
 ## plugin `v2.24.0` — 2026-08-24
 
 **A Contract section written in Romanian had "shall" in it — nothing caught that.** The style rule already existed ("Audience & writing level" in `SKILL.md`: plain present tense, no `shall`/`must` — the section already opens with "Every line in this section is binding."), but it was documentation only. A consumer repo's requirement corpus carried the anglicism in 29 files and 261 places before anyone noticed, because `lint` had no check for it.
