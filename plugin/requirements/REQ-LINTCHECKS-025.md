@@ -64,6 +64,13 @@ Every line in this section is binding.
 - Backticked code spans are stripped before the `vague-term` scan runs.
 - `vague-term` emits one finding per distinct term.
 
+**Redundant-modal check**
+- The `redundant-modal` check warns on a Contract bullet using `shall` or `must` —
+  the closed `LINT_MODAL_WORDS` set.
+- Backticked code spans are stripped before the `redundant-modal` scan runs, same as
+  `vague-term`.
+- `redundant-modal` emits one finding per distinct term.
+
 ## WHAT — Verify intent (open questions for the human)
 - None — split out of [[REQ-LINT-014]] with intent carried over unchanged.
 
@@ -133,6 +140,12 @@ AC-9
   When   `lint` runs
   Then   it reports an `anonymous-subject` warning; "`init` creates the folder." reports
          none, and the same bare "It" in an Acceptance criterion reports none
+
+AC-10
+  Given  a Contract bullet reading "The system shall log the event and must retry once."
+  When   `lint` runs
+  Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked
+         `shall_retry` identifier and a plain present-tense bullet report none
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

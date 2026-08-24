@@ -3210,6 +3210,11 @@ LINT_VAGUE_TERMS = frozenset({
     "quick", "quickly", "easy", "easily", "simple", "user-friendly", "seamless",
     "seamlessly", "intuitive", "various", "etc",
 })
+# Redundant normative modals: the Contract section opens with "Every line in this
+# section is binding.", so "shall"/"must" on each clause is dead weight — and in a
+# non-English requirement corpus "shall" is also a stray anglicism (see Audience &
+# writing level, rule 3). Closed list, checked as a whole word, case-insensitive.
+LINT_MODAL_WORDS = frozenset({"shall", "must"})
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z-]*")
 
 
@@ -3402,6 +3407,21 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                     "severity": "warn", "check": "vague-term",
                     "detail": "vague word '{}' (no testable meaning): {}".format(
                         w, _clip(ln))})
+    # redundant modal (warn): "shall"/"must" on a Contract clause is either dead weight
+    # (the section header already binds every line) or a stray English modal dropped into
+    # a non-English clause. Same one-finding-per-distinct-term shape as vague-term, above.
+    seen_modal = set()
+    for ln in _lint_prose(body, "contract"):
+        bare = re.sub(r"`[^`]*`", " ", ln)
+        for w in _WORD_RE.findall(bare):
+            lw = w.lower()
+            if lw in LINT_MODAL_WORDS and lw not in seen_modal:
+                seen_modal.add(lw)
+                findings.append({
+                    "severity": "warn", "check": "redundant-modal",
+                    "detail": "redundant modal '{}' (the Contract header already binds "
+                              "every line — use plain present tense): {}".format(
+                                  w, _clip(ln))})
     # file-spread (warn): a requirement whose implements members span many distinct FILES is
     # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
     # cannot see, since a tight contract can still be smeared across many files. Auto-off when
@@ -3424,7 +3444,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
-    ac-count-high (warn), vague-term (warn). Read-only. Exit-neutral by default; with
+    ac-count-high (warn), vague-term (warn), redundant-modal (warn). Read-only. Exit-neutral by default; with
     --strict it exits non-zero on any error-severity finding AND promotes structural
     checks (ac-count-high) to error severity.
     Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
