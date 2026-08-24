@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v2.24.0` — 2026-08-24
+
+**A Contract section written in Romanian had "shall" in it — nothing caught that.** The style rule already existed ("Audience & writing level" in `SKILL.md`: plain present tense, no `shall`/`must` — the section already opens with "Every line in this section is binding."), but it was documentation only. A consumer repo's requirement corpus carried the anglicism in 29 files and 261 places before anyone noticed, because `lint` had no check for it.
+
+`lint` gains `redundant-modal`: it flags `shall`/`must` on a Contract clause, same shape as the existing `vague-term` check — closed word list, backticked spans stripped first, one finding per distinct term, `warn` severity. Running it against this repo's own corpus surfaced 17 pre-existing hits, left as advisory (not fixed in this release — the check's job is to make them visible, not to silently rewrite prose).
+
+`REQ-LINTCHECKS-025` documents the check with AC-10; `REQ-LINT-014`'s check-list note is updated to match.
+
 ## plugin `v2.23.0` — 2026-08-21
 
 **The viewer speaks Romanian, and refuses to translate your requirements.** The self-contained `_map.html` had exactly one language, and the interesting part of adding a second is not the dictionary — it is the line the dictionary must not cross.
