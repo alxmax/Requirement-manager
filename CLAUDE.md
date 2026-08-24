@@ -28,6 +28,7 @@ python scripts/reqmap.py plan               # JSON capability-extraction plan, w
 python scripts/reqmap.py findings           # aggregate open verify-intent items
 python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
 python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
+python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in only: cache a `claude -p` translation of the corpus's majority-language requirements into requirements/_i18n/<locale>.json. Never called by gate/sync/lint/map/the pre-commit hook.
 python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
 

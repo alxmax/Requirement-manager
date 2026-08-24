@@ -6,6 +6,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -2913,6 +2914,150 @@ class Lint(unittest.TestCase):  # tested-by: REQ-LINT-014  # tested-by: REQ-LINT
         body = self._body(contract="- The system logs the event and retries once.\n")
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         self.assertFalse(any(f["check"] == "redundant-modal" for f in fs))
+
+
+class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
+    RO_BODY = ("# Titlu în română\n\n"
+               "> Aici explicăm de ce această cerință există și ce problemă rezolvă.\n\n"
+               "## WHAT — Contract (normative)\n"
+               "- Sistemul calculează suma `TOTAL` și afișează 2 zecimale.\n\n"
+               "## HOW — Acceptance (= tests)\n"
+               "- Given un total de 10\n  When se afișează\n  Then arată 10.00\n")
+    EN_BODY = ("# English title\n\n"
+               "> Here we explain why this requirement exists and what problem it solves.\n\n"
+               "## WHAT — Contract (normative)\n"
+               "- The system calculates the `TOTAL` sum and shows 2 decimals.\n\n"
+               "## HOW — Acceptance (= tests)\n"
+               "- Given a total of 10\n  When it is shown\n  Then it reads 10.00\n")
+
+    def _req(self, body, lang=None, status="confirmed"):
+        meta = {"status": status}
+        if lang:
+            meta["lang"] = lang
+        return {"meta": meta, "body": body}
+
+    def _tmp_reqs_dir(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        return d
+
+    def test_detect_lang_diacritics(self):
+        self.assertEqual(R.detect_lang(self.RO_BODY), "ro")
+
+    def test_detect_lang_english(self):
+        self.assertEqual(R.detect_lang(self.EN_BODY), "en")
+
+    def test_detect_lang_undetermined_on_code_only(self):
+        self.assertIsNone(R.detect_lang("`foo_bar()` `baz.qux` `1234`"))
+
+    def test_corpus_lang_is_majority_vote(self):
+        reqs = {"REQ-A-001": self._req(self.RO_BODY), "REQ-B-002": self._req(self.RO_BODY),
+                "REQ-C-003": self._req(self.EN_BODY)}
+        self.assertEqual(R.corpus_lang(reqs), "ro")
+
+    def test_lang_frontmatter_override_wins_over_detection(self):
+        # Romanian prose, but explicitly tagged as English — override must win.
+        reqs = {"REQ-A-001": self._req(self.RO_BODY, lang="en")}
+        self.assertEqual(R.corpus_lang(reqs), "en")
+
+    def test_translation_hash_changes_on_title_edit(self):
+        # binding_hash() (Contract+Acceptance only) would NOT change here — that is
+        # exactly the gap this hash exists to close.
+        body_a = self.RO_BODY
+        body_b = self.RO_BODY.replace("Titlu în română", "Titlu modificat")
+        h_a = R.translation_hash(body_a, R._title(body_a))
+        h_b = R.translation_hash(body_b, R._title(body_b))
+        self.assertNotEqual(h_a, h_b)
+        # sanity: only the title changed, so binding_hash (Contract+Acceptance only)
+        # stays THE SAME — proof that reusing it would have missed this edit.
+        self.assertEqual(R.binding_hash(body_a), R.binding_hash(body_b))
+
+    def test_structural_signature_catches_dropped_backtick(self):
+        source = "The `TOTAL` sum uses 2 decimals."
+        good = "Suma `TOTAL` folosește 2 zecimale."
+        bad = "Suma TOTAL folosește 2 zecimale."   # backtick dropped
+        self.assertTrue(R._translation_preserves_structure(source, good))
+        self.assertFalse(R._translation_preserves_structure(source, bad))
+
+    def test_structural_signature_catches_dropped_number(self):
+        source = "Rounds to 2 decimals."
+        bad = "Rounds to decimals."   # number dropped
+        self.assertFalse(R._translation_preserves_structure(source, bad))
+
+    def test_parse_translated_sections_well_formed(self):
+        text = ("===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
+        parsed = R._parse_translated_sections(text)
+        self.assertEqual(parsed, {"title": "T", "intent": "I", "contract": "C", "acceptance": "A"})
+
+    def test_parse_translated_sections_missing_marker_is_none(self):
+        text = "===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n"   # no ACCEPTANCE
+        self.assertIsNone(R._parse_translated_sections(text))
+
+    def test_cmd_translate_fails_open_when_cli_missing(self):
+        reqs_dir = self._tmp_reqs_dir()
+        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
+        with mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_translate(reqs, reqs_dir)
+        self.assertEqual(rc, 0)                              # never a gate, always exits 0
+        self.assertIn("skipped", buf.getvalue())
+        self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_i18n", "en.json")))  # nothing cached
+
+    def test_cmd_translate_happy_path_writes_cache_and_hits_on_rerun(self):
+        reqs_dir = self._tmp_reqs_dir()
+        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
+        fake_response = ("===TITLE===\nEnglish title\n"
+                          "===INTENT===\nHere we explain why this requirement exists and "
+                          "what problem it solves.\n"
+                          "===CONTRACT===\n- The system calculates the `TOTAL` sum and shows "
+                          "2 decimals.\n"
+                          "===ACCEPTANCE===\n- Given a total of 10\n  When it is shown\n  "
+                          "Then it reads 10.00\n")
+        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
+        with mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m:
+            rc = R.cmd_translate(reqs, reqs_dir, target="en")
+        self.assertEqual(rc, 0)
+        self.assertEqual(m.call_count, 1)
+        cache_path = os.path.join(reqs_dir, "_i18n", "en.json")
+        self.assertTrue(os.path.exists(cache_path))
+        with open(cache_path, encoding="utf-8") as f:
+            cache = json.load(f)
+        self.assertEqual(cache["REQ-A-001"]["title"], "English title")
+
+        # re-run with unchanged content: cache hit, claude is NOT called again
+        with mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m2:
+            R.cmd_translate(reqs, reqs_dir, target="en")
+        self.assertEqual(m2.call_count, 0)
+
+    def test_map_never_invokes_claude(self):
+        # `map`/`export` must stay fully deterministic and claude-free — they only
+        # ever read an already-committed cache file.
+        reqs_dir = self._tmp_reqs_dir()
+        i18n_dir = os.path.join(reqs_dir, "_i18n")
+        os.makedirs(i18n_dir)
+        body = self.RO_BODY
+        h = R.translation_hash(body, R._title(body))
+        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
+            json.dump({"REQ-A-001": {"hash": h, "title": "English title", "intent": "I",
+                                      "contract": "C", "acceptance": "A"}}, f)
+        reqs = {"REQ-A-001": self._req(body)}
+        with mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
+                "map must never shell out to claude")):
+            data = R._build_map_data(reqs, {})
+            R._attach_translations(data, reqs, reqs_dir)
+        node = next(n for n in data["nodes"] if n["id"] == "REQ-A-001")
+        self.assertEqual(node["i18n"]["en"]["title"], "English title")
+
+    def test_stale_cache_entry_is_dropped_not_served(self):
+        reqs_dir = self._tmp_reqs_dir()
+        i18n_dir = os.path.join(reqs_dir, "_i18n")
+        os.makedirs(i18n_dir)
+        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
+            json.dump({"REQ-A-001": {"hash": "stale-hash-does-not-match", "title": "Old"}}, f)
+        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
+        out = R._load_translations(reqs, reqs_dir)
+        self.assertNotIn("REQ-A-001", out)
 
 
 class Show(unittest.TestCase):  # tested-by: REQ-SHOW-015

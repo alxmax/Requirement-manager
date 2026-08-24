@@ -2,7 +2,18 @@
 import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, datesOf } from "../lib/data.js";
 import { Pill, statusKind } from "../lib/ui.jsx";
-import { useI18n } from "../lib/i18n.jsx";
+import { useI18n, translatedText } from "../lib/i18n.jsx";
+
+// A cached translation is opt-in and unreviewed — this badge is the one thing
+// standing between "machine text" and "looks like the author wrote it".
+// Never render translated content without it (see i18n.jsx's module comment).
+function TranslatedBadge() {
+  return (
+    <span className="i18n-badge" title="Machine-translated by `reqmap.py translate`; not reviewed by the author — the source .md is the artifact of record.">
+      machine-translated, unreviewed
+    </span>
+  );
+}
 
 // HTML-escape before the backtick→<code> transform: the output feeds
 // dangerouslySetInnerHTML with untrusted requirement text from _map.json.
@@ -52,8 +63,12 @@ function PriorityBadge({ priority }) {
 }
 
 function SpecDoc({ r, onNav }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   if (!r) return null;
+  const title = translatedText(r, locale, "title", r.title);
+  const intent = translatedText(r, locale, "intent", r.intent);
+  const contract = translatedText(r, locale, "contract");
+  const acceptance = translatedText(r, locale, "acceptance");
   return (
     <div className="spec">
       <div className="spec-sheet">
@@ -72,24 +87,28 @@ function SpecDoc({ r, onNav }) {
         <Pill kind={r.layer}>{r.layer}</Pill>
         {r.priority && <PriorityBadge priority={r.priority} />}
       </div>
-      <h1>{r.title}</h1>
+      <h1>{title.text}{title.isTranslated && <TranslatedBadge />}</h1>
       <div className="sec why-sec">
-        <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}</span></div>
-        <p className="blockquote">{r.intent}</p>
+        <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
+        <p className="blockquote">{intent.text}</p>
       </div>
       <CovStrip r={r} />
 
       <div className="sec">
-        <div className="eyebrow">{t("What — Contract")} <span className="rule" /> {t("normative")}</div>
-        <ul>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(c)}} />)}</ul>
+        <div className="eyebrow">{t("What — Contract")} <span className="rule" /> {t("normative")}{contract.isTranslated && <TranslatedBadge />}</div>
+        {contract.isTranslated
+          ? <div className="gwt">{contract.text.split("\n").map((ln,i)=><div key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(ln)}} />)}</div>
+          : <ul>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(c)}} />)}</ul>}
       </div>
 
       <div className="sec">
-        <div className="eyebrow">{t("How — Acceptance")} <span className="rule" /> {t("= tests")}</div>
-        {r.gwt
-          ? <div className="gwt">{r.gwt.split("\n").map((ln,i)=>(
-              <div key={i}>{ln}</div>))}</div>
-          : <ul>{(r.acc||[]).map((a,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(a)}} />)}</ul>}
+        <div className="eyebrow">{t("How — Acceptance")} <span className="rule" /> {t("= tests")}{acceptance.isTranslated && <TranslatedBadge />}</div>
+        {acceptance.isTranslated
+          ? <div className="gwt">{acceptance.text.split("\n").map((ln,i)=><div key={i}>{ln}</div>)}</div>
+          : (r.gwt
+            ? <div className="gwt">{r.gwt.split("\n").map((ln,i)=>(
+                <div key={i}>{ln}</div>))}</div>
+            : <ul>{(r.acc||[]).map((a,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(a)}} />)}</ul>)}
       </div>
 
       <div className="sec">

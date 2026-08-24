@@ -184,6 +184,10 @@ button { font-family: inherit; cursor: pointer; }
 .spec .eyebrow { font: var(--text-caption); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--accent); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; white-space: nowrap; }
 .spec .eyebrow .rule { display: none; }
 .spec .eyebrow.warn { color: var(--status-drift); }
+/* machine-translated content marker — see i18n.jsx's translatedText(). Deliberately
+   loud (amber, normal-case) so it never reads as part of the authored document. */
+.i18n-badge { display: inline-flex; align-items: center; margin-left: 8px; padding: 2px 8px; font: var(--text-caption); font-size: 11px; font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--status-drift); background: var(--status-drift-bg); border: 1px solid var(--status-drift-ln); border-radius: var(--radius-pill); white-space: nowrap; vertical-align: middle; }
+h1 .i18n-badge { font-size: 12px; }
 .spec ul { margin: 0; padding-left: 18px; }
 .spec li { font: var(--text-body); color: var(--fg-secondary); margin-bottom: 8px; letter-spacing: var(--track-normal); }
 .spec code { font-family: var(--font-mono); font-size: 13px; background: var(--surface); padding: 1px 5px; border-radius: var(--radius-1); color: var(--fg); }

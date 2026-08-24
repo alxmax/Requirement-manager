@@ -34,6 +34,9 @@ export function adaptNode(n) {
     test_exempt: n.test_exempt,
     milestone: n.milestone || null,
     priority: n.priority || "",
+    // cached content translations, keyed by locale — see i18n.jsx's
+    // translatedText(). Absent for nodes with no `reqmap.py translate` cache.
+    i18n: (n.i18n && typeof n.i18n === "object") ? n.i18n : null,
   };
 }
 

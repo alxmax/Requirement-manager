@@ -445,6 +445,27 @@
   {
     "type": "function",
     "function": {
+      "name": "reqmap_translate",
+      "description": "Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "translate_to": {
+            "type": "string",
+            "description": "Target locale, 'ro' or 'en' (default: the other of the two from the detected corpus majority)."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "reqmap_site",
       "description": "Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current.",
       "parameters": {
