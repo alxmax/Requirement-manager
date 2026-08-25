@@ -45,6 +45,9 @@ Every line in this section is binding.
 - `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
   bucket, ranked lowest of all.
 - `next` skips that untagged scan when the caller gives no `code_root`.
+- An Orphans item may have members recorded in the committed `_map.json` that this scan did
+  not find. Then `next` adds a note naming one such member and suggesting `--code <dir>`.
+  The note is advice; the item stays in the bucket.
 
 **How it orders a bucket**
 - Within a bucket, `next` orders items by `priority` rank, then by descending extract `risk:`
@@ -126,6 +129,11 @@ AC-9
   Given  scannable files in the repo with no membership tag
   When   `next` runs with a code_root
   Then   they are listed under "Untagged files" with a `reqmap.py draft` suggestion
+
+AC-10
+  Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one
+  When   `next` runs with a `reqs_dir`
+  Then   the Orphans bucket carries a note naming that member and `--code`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
