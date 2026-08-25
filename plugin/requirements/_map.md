@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-25 21:04
+generated: 2026-08-25 21:11
 nodes: 48
 edges: 69
 ---
@@ -386,14 +386,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_misc["misc"]
-    REQ_TRANSLATE_044["Opt-in requirement-content translation<br><small>REQ-TRANSLATE-044</small><br>unreviewed, unverified-intent"]
-  end
-  style REQ_TRANSLATE_044 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-TRANSLATE-044 | baseline | 15 | 0 | unreviewed, unverified-intent | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. Has open `## WHAT — Verify intent` question(s): run `reqmap.py findings`, resolve each in `requirements/_findings.md`, then fold the answer into the Contract or delete the bullet. |
