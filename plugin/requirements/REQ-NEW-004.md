@@ -31,6 +31,9 @@ Every line in this section is binding.
   author writes clauses in present tense without a `shall` or `must` on each line.
 - The scaffold's guidance names the authoring rules the linter enforces, so a file written
   from it starts clean.
+- `new` warns, and still exits zero, when another requirement in the same area already uses
+  the same `NNN` number. Ids stay unique by their full text; the warning keeps numbers
+  unambiguous in conversation.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -59,6 +62,11 @@ AC-4
   Given  no on-disk template
   When   `new` runs
   Then   the built-in scaffold (Contract + Acceptance sections) is used
+
+AC-5
+  Given  `REQ-MAP-007.md` already in the registry
+  When   `new REQ-VIEWER-007` runs
+  Then   the file is created, the exit code is 0, and a warning names `REQ-MAP-007`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

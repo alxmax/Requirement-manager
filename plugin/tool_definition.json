@@ -107,7 +107,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_sync",
-      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step. Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed.",
+      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step (a committed _findings.md is refreshed too). Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed.",
       "parameters": {
         "type": "object",
         "properties": {

@@ -5605,6 +5605,135 @@ class ViewerDataSync(unittest.TestCase):  # tested-by: REQ-VIEWER-007
 # Entry point stays LAST on purpose. It used to sit mid-file, above
 # RoadmapSignals and ViewerDataSync, so `python test_reqmap.py` ran
 # unittest.main() before those classes were even defined: 478 tests
+
+class FindingsFreshness(unittest.TestCase):  # tested-by: REQ-FINDINGS-010
+    """A committed _findings.md is a derived view: `map` refreshes it when present,
+    `map --check` flags it stale, and neither ever creates it."""
+    def _seed(self, d, items):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-X-001.md"), _req_with_verify("AREA-X-001", items))
+        return rd
+
+    def _map(self, d, rd, check=False):
+        reqs = R.load_requirements(rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_map(reqs, {}, rd, d, check)
+        return code, buf.getvalue()
+
+    def _findings(self, rd):
+        with redirect_stdout(io.StringIO()):
+            R.cmd_findings(R.load_requirements(rd), rd)
+
+    def test_map_never_creates_findings(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, ["a?"])
+            self._map(d, rd)
+            self.assertFalse(os.path.exists(os.path.join(rd, "_findings.md")))
+
+    def test_map_refreshes_existing_findings(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, ["a?"])
+            self._findings(rd)
+            self._seed(d, ["a?", "b?"])            # the requirement gains a question
+            self._map(d, rd)
+            with open(os.path.join(rd, "_findings.md"), encoding="utf-8") as f:
+                self.assertIn("b?", f.read())
+
+    def test_absent_findings_is_not_stale(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, ["a?"])
+            self._map(d, rd)
+            code, out = self._map(d, rd, check=True)
+            self.assertEqual(code, 0)
+            self.assertIn("fresh", out)
+
+    def test_fresh_findings_passes_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, ["a?"])
+            self._findings(rd)
+            self._map(d, rd)
+            code, _ = self._map(d, rd, check=True)
+            self.assertEqual(code, 0)
+
+    def test_stale_findings_fails_check(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, ["a?"])
+            self._findings(rd)
+            self._map(d, rd)
+            _write(os.path.join(rd, "_findings.md"), "# Open findings\n\n_stale copy_\n")
+            code, out = self._map(d, rd, check=True)
+            self.assertEqual(code, 1)
+            self.assertIn("_findings.md", out)
+            self.assertIn("stale", out)
+
+
+class NextOrphanHint(unittest.TestCase):  # tested-by: REQ-NEXT-013
+    """An Orphans item whose node in the committed _map.json records a member is a
+    scan-scope problem, not a missing tag — say so."""
+    def _run(self, reqs, rd):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_next(reqs, {}, reqs_dir=rd)
+        return code, buf.getvalue()
+
+    def _reqs(self):
+        return {"REQ-A-001": {"meta": {"status": "confirmed"}, "body": "# T\n"}}
+
+    def test_note_names_recorded_member_and_code_flag(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements"); os.makedirs(rd)
+            _write(os.path.join(rd, "_map.json"), json.dumps({"nodes": [
+                {"id": "REQ-A-001", "members": [{"role": "implements", "loc": ".githooks/pre-commit:2"}]}],
+                "edges": []}))
+            code, out = self._run(self._reqs(), rd)
+            self.assertEqual(code, 0)
+            self.assertIn("Orphans", out)                  # still an orphan for THIS scan
+            self.assertIn(".githooks/pre-commit:2", out)
+            self.assertIn("--code", out)
+
+    def test_no_note_without_committed_map(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements"); os.makedirs(rd)
+            _, out = self._run(self._reqs(), rd)
+            self.assertIn("Orphans", out)
+            self.assertNotIn("--code", out)
+
+    def test_no_note_when_map_records_no_member(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements"); os.makedirs(rd)
+            _write(os.path.join(rd, "_map.json"), json.dumps({"nodes": [
+                {"id": "REQ-A-001", "members": []}], "edges": []}))
+            _, out = self._run(self._reqs(), rd)
+            self.assertNotIn("--code", out)
+
+
+class NewNumberCollision(unittest.TestCase):  # tested-by: REQ-NEW-004
+    def _new(self, rd, cap_id):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_new(rd, None, cap_id)
+        return code, buf.getvalue()
+
+    def test_same_area_same_number_warns_but_creates(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-MAP-007.md"), "---\nid: REQ-MAP-007\n---\n# M\n")
+            code, out = self._new(rd, "REQ-VIEWER-007")
+            self.assertEqual(code, 0)
+            self.assertTrue(os.path.exists(os.path.join(rd, "REQ-VIEWER-007.md")))
+            self.assertIn("WARN", out)
+            self.assertIn("REQ-MAP-007", out)
+
+    def test_different_area_same_number_is_silent(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "CORE-PARSE-001.md"), "---\nid: CORE-PARSE-001\n---\n# P\n")
+            code, out = self._new(rd, "NEED-SSOT-001")
+            self.assertEqual(code, 0)
+            self.assertNotIn("WARN", out)
+
+
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.

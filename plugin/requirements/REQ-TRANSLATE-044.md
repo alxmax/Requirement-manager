@@ -1,6 +1,6 @@
 ---
 id: REQ-TRANSLATE-044
-status: baseline
+status: confirmed
 layer: feature
 owner: Alex
 depends_on: [CORE-PARSE-001, REQ-MAP-007, REQ-VIEWER-007]
@@ -63,12 +63,7 @@ Every line in this section is binding.
   as before this capability existed.
 
 ## WHAT — Verify intent (open questions for the human)
-- The stopword lists in `_RO_STOPWORDS`/`_EN_STOPWORDS` are small and generic
-  (chosen for a majority-vote signal across a whole corpus, not sentence-level
-  precision). Good enough as shipped, or should they grow before this is used on
-  a much larger or more code-heavy corpus?
-- `translate` currently supports exactly `ro`/`en`. Worth generalizing the
-  language set now, or wait for a second real consumer language to shape the API?
+- None — both open questions answered 2026-08-25; the decisions are recorded in Notes.
 
 ## WHAT — Notes & known limitations (informative)
 - One `claude -p` call per requirement, not four — the prompt asks for all four
@@ -84,6 +79,15 @@ Every line in this section is binding.
 - `translate` writes one aggregate `_i18n/<locale>.json`, not one file per
   requirement — same shape as the existing `_reqlock.json`/`_memberlock.json`
   per-id lock-file convention (CORE-DRIFT-003), not a new pattern.
+- Decision (2026-08-25): the stopword lists stay small. They feed a majority vote
+  across a whole corpus, not sentence-level precision, and a per-file `lang:` value
+  overrides a misclassification. Grow them only when a real corpus is misclassified —
+  and add that corpus as a test case when it happens.
+- Decision (2026-08-25): the language set stays `ro`/`en` until a second real consumer
+  language shapes the API. The cache is already per-locale (`_i18n/<locale>.json`), so
+  adding a language later is additive; what a third language needs is its own detection
+  signal (a stopword list) and a name in the prompt, and guessing those without a user
+  would fix the wrong shape.
 - `ac-count-high` is exempted: each of the eight criteria pins exactly one
   module's behavior (detection, hashing, fidelity check, two fail-open paths,
   caching, and two map-read paths). Merging them to reach the ceiling would test

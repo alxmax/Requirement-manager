@@ -51,6 +51,13 @@ Every line in this section is binding.
 - `findings` is deterministic and stdlib-only. It never classifies a finding itself.
 - `findings` writes no file other than `_findings.md`.
 
+**How a committed report stays fresh**
+- `map` rewrites `_findings.md` when that file already exists. `sync` runs `map`, so it
+  refreshes a committed report along with the map.
+- `map` never creates `_findings.md`. Running `findings` once opts a repo in.
+- `map --check` reports `_findings.md` stale when the committed copy differs from a fresh
+  render, the same way it judges `_map.md` and `_map.json`. An absent file is never stale.
+
 **What the gate adds**
 - The gate prints a non-error advisory line carrying the open-findings count, whenever that
   count is greater than zero.
@@ -89,6 +96,16 @@ AC-5
   Given  at least one requirement with an open verify-intent item
   When   `gate` runs
   Then   it prints an advisory line naming the open-findings count without affecting the error count
+
+AC-6
+  Given  a committed `_findings.md`, and a requirement that then gains a verify-intent item
+  When   `map` runs
+  Then   `_findings.md` carries the new item, and with no `_findings.md` present `map` creates none
+
+AC-7
+  Given  a committed `_findings.md` that no longer matches the requirements
+  When   `map --check` runs
+  Then   it names `_findings.md` as stale and exits non-zero
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

@@ -7,7 +7,7 @@ Subcommands:
   new AREA-NAME-NNN   scaffold a requirement from the built-in template (--from-todo seeds from TODO.md)
   scan              list code members (implements/generated-from/... tags) per capability
   gate              the gate: link sync + drift + test-link integrity; exit non-zero on error (pre-commit/CI)
-  sync              rescan + advance the drift baseline + regen the map (--accept-drift for an edited contract)
+  sync              rescan + advance the drift baseline + regen the map and a committed _findings.md (--accept-drift for an edited contract)
   map               generate requirements/_map.md (Mermaid) + _map.json (graph) [+ _map.html viewer]
   site              inject/refresh engine-owned regions into a presentation page (--attach/--regions/--diagram)
   export            emit the registry graph as requirements/_map.json (for a front-end)
@@ -156,7 +156,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-25"
+MAP_ENGINE_VERSION = "2026-08-25.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -305,7 +305,8 @@ COMMANDS = {
     "sync": {
         "summary": (
             "Rescan code members, advance the drift baseline, and regenerate the map in "
-            "one step. Run after editing requirement files or tagging new code members. "
+            "one step (a committed _findings.md is refreshed too). Run after editing "
+            "requirement files or tagging new code members. "
             "Use --accept-drift when a confirmed or implemented contract changed."
         ),
         "arg": None,
@@ -2191,6 +2192,28 @@ AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
 """
 
 
+def _warn_number_collision(reqs_dir, cap_id):  # implements: REQ-NEW-004
+    """Advisory: another requirement in the same area already uses this NNN. Ids are
+    unique by their full text, so nothing breaks — but REQ-MAP-007 beside
+    REQ-VIEWER-007 is the kind of pair people talk past each other about."""
+    parts = cap_id.split("-")
+    if len(parts) < 3:
+        return
+    area, num = parts[0], parts[-1]
+    try:
+        names = sorted(os.listdir(reqs_dir))
+    except OSError:
+        return
+    for fn in names:
+        if not fn.endswith(".md") or fn.startswith("_"):
+            continue
+        other = fn[:-3]
+        op = other.split("-")
+        if other != cap_id and len(op) >= 3 and op[0] == area and op[-1] == num:
+            print("WARN  {} already uses number {} in area {} — ids stay unique by their full "
+                  "text, but a distinct NNN keeps the two from being confused.".format(other, num, area))
+
+
 def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
@@ -2209,6 +2232,7 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
     print(f"created {dest}")
+    _warn_number_collision(reqs_dir, cap_id)
     return 0
 
 
@@ -2261,6 +2285,7 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     with open(dest, "w", encoding="utf-8") as f:
         f.write(t)
     print(f"created {dest} (draft, milestone {todo['milestone']}, layer {layer}) from TODO {todo['name']!r}")
+    _warn_number_collision(reqs_dir, cap_id)
     if mark_done:
         n = _mark_todo_done(root, todo["name"])
         print(f"marked TODO {todo['name']!r} done in TODO.md" if n
@@ -2885,12 +2910,10 @@ def _render_findings_triaged(triage, raw_total):
     return "\n".join(L) + "\n", n, len(bugs)
 
 
-def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
-    """Aggregate every requirement's open verify-intent items into
-    requirements/_findings.md. If a `_findings_triage.json` sidecar exists (and
-    --raw is off), render the verified, classified view from it instead; else the
-    raw grouped list. Stdlib-only: the AI triage that produces the sidecar lives
-    in the skill, not here (same split as candidates vs AI-authoring)."""
+def _render_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
+    """The `_findings.md` text and its counts, without writing anything. Shared by
+    `findings` (which writes it) and `map --check` (which compares the committed
+    copy against it). Returns (md, total, n_groups, used_triage, n_tri, n_bugs)."""
     groups = collect_findings(reqs)
     total = sum(len(items) for _rid, _t, items in groups)
 
@@ -2910,7 +2933,16 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
     else:
         md, n_tri, n_bugs = _render_findings_raw(groups, total)
         used_triage = False
+    return md, total, len(groups), used_triage, n_tri, n_bugs
 
+
+def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
+    """Aggregate every requirement's open verify-intent items into
+    requirements/_findings.md. If a `_findings_triage.json` sidecar exists (and
+    --raw is off), render the verified, classified view from it instead; else the
+    raw grouped list. Stdlib-only: the AI triage that produces the sidecar lives
+    in the skill, not here (same split as candidates vs AI-authoring)."""
+    md, total, n_groups, used_triage, n_tri, n_bugs = _render_findings(reqs, reqs_dir, raw)
     os.makedirs(reqs_dir, exist_ok=True)
     out = os.path.join(reqs_dir, "_findings.md")
     with open(out, "w", encoding="utf-8") as f:
@@ -2920,7 +2952,7 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
     # triage view was rendered
     extra = ", {} triaged, {} confirmed bug(s)".format(n_tri, n_bugs) if used_triage else ""
     print("{} open finding(s) across {} requirement(s){} -> {}"
-          .format(total, len(groups), extra, out))
+          .format(total, n_groups, extra, out))
     return 0
 
 
@@ -3359,7 +3391,7 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     _attach_translations(data, reqs, reqs_dir)
 
     if check:
-        return _map_check(data, reqs_dir, root)
+        return _map_check(data, reqs_dir, root, reqs)
 
     md_out   = render_md(data, reqs_dir)
     json_out = render_json(data, reqs_dir)
@@ -3374,6 +3406,8 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
                 dst.write(src.read())
             print("wrote {}".format(docs_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
+    if os.path.exists(os.path.join(reqs_dir, "_findings.md")):  # implements: REQ-FINDINGS-010
+        cmd_findings(reqs, reqs_dir)   # a committed report follows the requirements it summarizes
     return 0
 
 
@@ -3408,6 +3442,25 @@ def _risk_score(meta):  # implements: REQ-NEXT-013
 
 
 _PRIORITY_ORDER = {"must-have": 0, "should-have": 1, "could-have": 2, "wont-have": 3}
+
+
+def _recorded_members(reqs_dir, ids):  # implements: REQ-NEXT-013
+    """{id: first member loc} from the committed `_map.json`, for those of `ids` whose
+    node records a member there. The narrow default scan (no --code) cannot see a
+    member outside its root, so a requirement lands in Orphans while the committed
+    map proves it has code — this is what turns that into a hint instead of a
+    puzzle. Fail-open ({}) when the map is absent or unreadable."""
+    try:
+        with open(os.path.join(reqs_dir, "_map.json"), encoding="utf-8") as f:
+            nodes = json.load(f).get("nodes", [])
+    except (OSError, ValueError):
+        return {}
+    want, out = set(ids), {}
+    for n in nodes:
+        mem = n.get("members") or []
+        if n.get("id") in want and mem and isinstance(mem[0], dict):
+            out[n["id"]] = mem[0].get("loc", "")
+    return out
 
 
 def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: REQ-NEXT-013
@@ -3473,6 +3526,13 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         if not show_all and len(ids) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
+        if sig == "unimplemented" and reqs_dir:
+            recorded = _recorded_members(reqs_dir, [rid for rid, _ in ids])
+            if recorded:
+                rid0 = sorted(recorded)[0]
+                print("  note: the committed _map.json records member(s) for {} of these (e.g. {} <- {}) "
+                      "that this scan did not reach — if they live outside the scan root, "
+                      "re-run with `--code <dir>`.\n".format(len(recorded), rid0, recorded[rid0]))
     if untagged:
         shown_u = untagged if show_all else untagged[:top_n]
         print("Untagged files ({})".format(len(untagged)))
@@ -4430,7 +4490,7 @@ def _strip_generated(text):
                      and not l.lstrip().startswith('"repo":'))
 
 
-def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
+def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
     """Freshness gate: regenerate the map in memory and compare to the committed
     files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
     that shifts the map can't be committed without regenerating it. A map that was
@@ -4451,6 +4511,15 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
             on_disk = f.read()
         if _strip_generated(on_disk) != _strip_generated(fresh):
             stale.append(name)
+    # Committed findings report: derived from the requirements' verify-intent bullets,
+    # so a committed copy goes stale exactly like _map.* does (this repo's sat stale
+    # for eleven weeks). Absent = never generated = not stale, same convention.
+    findings_out = os.path.join(reqs_dir, "_findings.md")  # implements: REQ-FINDINGS-010
+    if reqs is not None and os.path.exists(findings_out):
+        with open(findings_out, encoding="utf-8") as f:
+            on_disk = f.read()
+        if on_disk != _render_findings(reqs, reqs_dir)[0]:
+            stale.append("_findings.md")
     # Published GitHub Pages copy: docs/map.html must equal a fresh viewer render.
     # Reading text-mode (not bytes) normalises CRLF/LF so a copy written on Windows
     # is not falsely flagged against the LF in-memory render. The comparison runs
@@ -4479,7 +4548,7 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
             if disk_stats != _render_region("stats", ctx):
                 stale.append(os.path.basename(site_target))
     if stale:
-        print("FAIL  map is stale: {} — run `reqmap.py map` and commit the result."
+        print("FAIL  map is stale: {} — run `reqmap.py sync` and commit the result."
               .format(", ".join(stale)))
         return 1
     print("OK  map is fresh.")
@@ -5298,7 +5367,7 @@ SITE_TEMPLATE = """\
     <h2>All 18 commands</h2>
     <div class="cmds">
       <div class="cmd gate"><code>gate</code><p>The gate. Links resolve, drift detected, test-links verified. Run before every commit + in CI.</p></div>
-      <div class="cmd"><code>sync</code><p>Rescan + advance the drift baseline + regen the map. --accept-drift for an edited confirmed contract.</p></div>
+      <div class="cmd"><code>sync</code><p>Rescan + advance the drift baseline + regen the map (and a committed _findings.md). --accept-drift for an edited confirmed contract.</p></div>
       <div class="cmd"><code>init</code><p>First-time bootstrap: scaffold, draft from code, lock, map, next-steps. Idempotent.</p></div>
       <div class="cmd"><code>map</code><p>Generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer).</p></div>
       <div class="cmd"><code>site</code><p>Inject engine-owned regions (nav links + counts) into a presentation page. --attach/--diagram.</p></div>

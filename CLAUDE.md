@@ -9,7 +9,7 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
 python scripts/reqmap.py gate --code ..     # gate: link sync + drift + test-link integrity (warn) — run before every commit; report-only, never touches the lock
-python scripts/reqmap.py sync --code ..     # rescan + advance drift baseline + regen map in one step; use --accept-drift when a confirmed/implemented contract changed
+python scripts/reqmap.py sync --code ..     # rescan + advance drift baseline + regen map (+ a committed _findings.md) in one step; use --accept-drift when a confirmed/implemented contract changed
 python scripts/reqmap.py map --code ..      # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
 python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats   # inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. init runs this best-effort.
 python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
@@ -127,7 +127,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 - `_map.html` — a self-contained single-file copy of the React viewer (`app/`) with this repo's `_map.json` inlined; opens by double-click, no server. *Regenerable (template + `_map.json`), gitignored — not committed.*
 - `_reqlock.json` — content hash baseline for drift detection (one hash per requirement = the contract; prose-ahead-of-code direction) *(committed)*
 - `_memberlock.json` — versioned sidecar (`{_schema, members}`) of dedicated-member content hashes for reverse-direction (member-ahead-of-spec) drift; kept separate so `_reqlock.json` stays a byte-stable cross-repo contract an older seeded engine reads unchanged (`REQ-MEMBERDRIFT-027`) *(committed)*
-- `_findings.md` — aggregated verify-intent triage *(committed)*
+- `_findings.md` — aggregated verify-intent triage *(committed; `map`/`sync` refresh it once it exists, `map --check` flags it stale)*
 
 **`map` writes outside `plugin/` too.** `_docs_publish_path` (`REQ-PAGES-021`) resolves the **git root**, so a `map` run from `plugin/` also rewrites repo-root `docs/map.html` whenever `docs/` carries a Pages signal (`.nojekyll` or `index.html`) — and `map --check` fails if that published copy drifted. `docs/` is the GitHub Pages root (committed: `map.html`, `architecture.html`, `full_architecture.html`, `index.html`, `.nojekyll`); the `deploy-map` CI job publishes it via OIDC on pushes to `main` and refuses to publish a `map.html` under 10 KB.
 

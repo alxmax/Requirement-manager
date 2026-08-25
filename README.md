@@ -200,7 +200,7 @@ any assistant — or with no assistant at all.
 |---|---|
 | `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
 | `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias.) |
-| `sync` | Rescan + advance the drift baseline + regenerate the map in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
+| `sync` | Rescan + advance the drift baseline + regenerate the map (and a committed `_findings.md`) in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
 | `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Reads `TODO.md` from the repo root and inlines a `todos` array for the Roadmap tab. |
 | `site --attach <page>` | Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. `--regions nav,stats`, `--diagram <rel>` links an Excalidraw HTML. |
 | `next` | "What should I work on next?" — a prioritized, actionable list |
