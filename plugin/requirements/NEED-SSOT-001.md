@@ -19,9 +19,9 @@ lint_exempt: [ac-count-low]
 > every feature below is here because it fulfils part of it.
 
 ## WHAT — Contract (normative)
-- The project shall keep a single written source of truth for each capability, living next to the code.
-- Drift between a capability's description and its code shall be caught before it ships, not after.
-- A reader shall be able to navigate from any capability to the code that implements it and the tests that verify it.
+- The project keeps a single written source of truth for each capability, living next to the code.
+- Drift between a capability's description and its code is caught before it ships, not after.
+- A reader can navigate from any capability to the code that implements it and the tests that verify it.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

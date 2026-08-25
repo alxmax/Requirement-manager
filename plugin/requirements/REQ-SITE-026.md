@@ -16,22 +16,22 @@ milestone: v1.35
 > and scaffolding one when none exists — so the page never drifts from the registry.
 
 ## WHAT — Contract (normative)
-- `site --attach <page.html>` shall inject the requested marker-delimited regions
+- `site --attach <page.html>` injects the requested marker-delimited regions
   (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each
   region's paired markers and preserving all other (authored) content. A re-run with no
-  underlying change shall produce a byte-identical file (idempotent).
-- When the `--attach` target does not exist, `site` shall scaffold a self-contained default
+  underlying change produces a byte-identical file (idempotent).
+- When the `--attach` target does not exist, `site` scaffolds a self-contained default
   page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.
-- The `nav` region shall emit a link only when its target resolves: Live Map when a sibling
+- The `nav` region emits a link only when its target resolves: Live Map when a sibling
   `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git
-  remote resolves. A missing git remote, missing artifact, or non-checkout shall never raise.
-- The engine shall never import or execute the excalidraw skill's builder; the Diagram entry
+  remote resolves. A missing git remote, missing artifact, or non-checkout never raises.
+- The engine never imports or executes the excalidraw skill's builder; the Diagram entry
   is a link only.
-- `init` shall, unless `--no-site` is given, run a best-effort `site` step after `map`:
-  refresh `nav`+`stats` in `docs/architecture.html` if it exists, else scaffold it plus a
-  Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step shall not
+- `init`, unless `--no-site` is given, runs a best-effort `site` step after `map`:
+  refreshes `nav`+`stats` in `docs/architecture.html` if it exists, else scaffolds it plus a
+  Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step does not
   abort `init`.
-- `map --check` shall flag the site page stale when its on-disk `stats` region differs from a
+- `map --check` flags the site page stale when its on-disk `stats` region differs from a
   fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page
   that was never generated, or that lacks a `stats` region, is not stale.
 

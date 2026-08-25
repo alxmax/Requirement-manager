@@ -17,19 +17,19 @@ milestone: v2.4
 > each use-case has a single, unambiguous entry point.
 
 ## WHAT — Contract (normative)
-- Invoking `python excalidraw_builder.py` with **no arguments** shall run the
-  builder smoke test, print a human-readable summary, and exit 0 on success.
-  This is the CI health-check entry point and must not be shadowed by a new
+- Invoking `python excalidraw_builder.py` with **no arguments** runs the
+  builder smoke test, prints a human-readable summary, and exits 0 on success.
+  This is the CI health-check entry point and is never shadowed by a new
   default verb.
-- `python excalidraw_builder.py render <scene.excalidraw> [out_dir]` shall
-  read an existing `.excalidraw` file and write a fresh self-contained
+- `python excalidraw_builder.py render <scene.excalidraw> [out_dir]` reads
+  an existing `.excalidraw` file and writes a fresh self-contained
   `<basename>.html` viewer beside it (or into `out_dir` when given). The
-  source `.excalidraw` file shall not be modified.
-- `python excalidraw_builder.py discover <repo> [out.py]` shall scan `<repo>`
-  for source files and emit a runnable multi-layer poster stub (STRUCTURE layer
+  source `.excalidraw` file is never modified.
+- `python excalidraw_builder.py discover <repo> [out.py]` scans `<repo>`
+  for source files and emits a runnable multi-layer poster stub (STRUCTURE layer
   pre-populated, WORKFLOW / INTEGRATION / MODES / MODEL / DATA layers
   commented as scaffolds) to `out.py` (default: `make_diagram.py`).
-- Any unrecognised verb shall exit with code 2 and print a usage message.
+- Any unrecognised verb exits with code 2 and prints a usage message.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent.

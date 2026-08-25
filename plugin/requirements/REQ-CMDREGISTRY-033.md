@@ -17,13 +17,13 @@ milestone: v2.7
 > undetected.
 
 ## WHAT — Contract (normative)
-- A `COMMANDS` dict shall be the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.
-- Argparse choices shall be derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.
-- `tool_definition.json` (the function-calling schema) shall be generated from `COMMANDS` by the `gen-integration` command.
-- The `SKILL.universal.md` command table shall be generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region shall not be touched.
-- Internal commands (e.g. `gen-integration`) shall be excluded from AI-facing generated artifacts.
-- The gate shall fail (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.
-- All generators and the gate check shall be stdlib-only; no third-party imports are permitted.
+- A `COMMANDS` dict is the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.
+- Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.
+- `tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the `gen-integration` command.
+- The `SKILL.universal.md` command table is generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is never touched.
+- Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated artifacts.
+- The gate fails (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.
+- All generators and the gate check are stdlib-only; no third-party imports are permitted.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — intent and scope confirmed by implementation.

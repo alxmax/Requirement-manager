@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v2.25.1` — 2026-08-25
+
+**Two engine releases told every consumer they were up to date.** `v2.24.0` (the `redundant-modal` lint check) and `v2.25.0` (`translate`) both changed `reqmap.py` without moving `MAP_ENGINE_VERSION`, which stayed at `2026-08-20.2`. That constant is the only thing a seeded copy — and `check/engine_staleness.py` in the published action — can compare, so a consumer on the 08-20 engine was reported current while missing both features. Nothing checked the rule; it lived in `CLAUDE.md` as a sentence.
+
+- `MAP_ENGINE_VERSION` → `2026-08-25`. New `scripts/check_engine_bump.py` makes the rule mechanical: any diff to `plugin/scripts/reqmap.py` must also change the version line. CI runs it against `HEAD~1` in `gate-and-tests`; the dev pre-commit hook runs it on the staged diff. Own suite (`scripts/test_check_engine_bump.py`) seeds a throwaway git repo for both modes.
+- **`SKILL.md` and `SKILL.universal.md` still told consumers to pin `check@v1`** — the gate-only alias frozen at v2.1.0 — three releases after `README.md`/`CLAUDE.md` moved to `@v2`, and right above prose describing `@v2`-only inputs (`lint:`, `freshness:`). `check_versions.py`'s `ACTION_REF_FILES` did not include the skill files, so its alias axis never saw them. Both now say `@v2` and both are in the list (7 references asserted, was 5); a regression test pins a lagging skill file as a failure.
+- `translate` now hands the prompt to `claude -p` on stdin instead of as one argv element — a whole requirement in a single argument would hit Windows' ~32 KB command-line ceiling on a large corpus (largest here is ~9.5 KB today; the limit was silent).
+- `lint`: the 15 `redundant-modal` warnings left visible-but-unfixed in `v2.24.0` are now fixed (69 `shall`/`must` clauses across 13 Contract sections rewritten in plain present tense — wording only, no contract change; lock advanced with `--accept-drift`). The two `file-spread` warnings (`REQ-REVIEW-022`, `REQ-SELFGATE-039`) are exempted with the reason in each Notes section: spanning those files *is* the capability. `lint --strict` now reports 0 warnings on this corpus.
+- The viewer's baked demo fixture (`app/src/lib/data.js`) mirrors `REQ-INIT-012`'s rewritten clause, so `gate`'s viewer-data-sync check is silent again; `_map_viewer.html` rebuilt from it (`npm run build:viewer`).
+- `_findings.md` regenerated — the committed copy dated from v1.12.0 and said "0 open" while `REQ-TRANSLATE-044` carries two open verify-intent questions.
+- Repo-root `.reqmapignore` now excludes `.pytest_cache/`, `.ruff_cache/`, `.superpowers/` and `diagrams/` (all gitignored): a local `next`/`coverage`/`health` reported 47 "untagged files" CI could never see.
+- Five `open(...).read()` sites in the engine use a context manager; four stale "`npm run smoke` is not wired into CI" comments (`.reqmapignore` ×2, `app/CLAUDE.md`, `REQ-VIEWER-007`) corrected — the `artifacts` job has run it since v2.23.0.
+
 ## plugin `v2.25.0` — 2026-08-25
 
 **A consumer's viewer speaks Romanian and refuses to translate your requirements — until every requirement is in the reader's second language.** `v2.23.0` drew a hard line: the locale toggle translates UI chrome only, never requirement content, because translating the artifact under review live would put words in the author's mouth. That line was right for a mixed-language reader who mostly understands the source — it fails completely for a reviewer who does not read the corpus's language at all.

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-08-20.2",
+  "engine_version": "2026-08-25",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -50,19 +50,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1515"
+          "loc": "plugin/scripts/reqmap.py:1516"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1538"
+          "loc": "plugin/scripts/reqmap.py:1539"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1542"
+          "loc": "plugin/scripts/reqmap.py:1543"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1559"
+          "loc": "plugin/scripts/reqmap.py:1560"
         },
         {
           "role": "tested-by",
@@ -147,23 +147,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:746"
+          "loc": "plugin/scripts/reqmap.py:747"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:756"
+          "loc": "plugin/scripts/reqmap.py:757"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:769"
+          "loc": "plugin/scripts/reqmap.py:770"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:777"
+          "loc": "plugin/scripts/reqmap.py:778"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:817"
+          "loc": "plugin/scripts/reqmap.py:818"
         },
         {
           "role": "tested-by",
@@ -253,27 +253,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:840"
+          "loc": "plugin/scripts/reqmap.py:841"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:857"
+          "loc": "plugin/scripts/reqmap.py:858"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:926"
+          "loc": "plugin/scripts/reqmap.py:927"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1041"
+          "loc": "plugin/scripts/reqmap.py:1042"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1091"
+          "loc": "plugin/scripts/reqmap.py:1092"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1118"
+          "loc": "plugin/scripts/reqmap.py:1119"
         },
         {
           "role": "tested-by",
@@ -301,9 +301,9 @@
       "title": "Stakeholder need — specs and code stay in sync",
       "intent": "On most projects the \"spec\" lives in someone's head, a stale wiki, or a ticket nobody reads, so over time the code says one thing and the docs say another. The people who own this project need the opposite: a single written source of truth for each capability that the build itself keeps honest. This is the underlying need the whole tool exists to serve — every feature below is here because it fulfils part of it.",
       "contract": [
-        "The project shall keep a single written source of truth for each capability, living next to the code.",
-        "Drift between a capability's description and its code shall be caught before it ships, not after.",
-        "A reader shall be able to navigate from any capability to the code that implements it and the tests that verify it."
+        "The project keeps a single written source of truth for each capability, living next to the code.",
+        "Drift between a capability's description and its code is caught before it ships, not after.",
+        "A reader can navigate from any capability to the code that implements it and the tests that verify it."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -381,19 +381,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1063"
+          "loc": "plugin/scripts/reqmap.py:1064"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1371"
+          "loc": "plugin/scripts/reqmap.py:1372"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1464"
+          "loc": "plugin/scripts/reqmap.py:1465"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1917"
+          "loc": "plugin/scripts/reqmap.py:1918"
         },
         {
           "role": "tested-by",
@@ -454,35 +454,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2531"
+          "loc": "plugin/scripts/reqmap.py:2532"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2566"
+          "loc": "plugin/scripts/reqmap.py:2567"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2589"
+          "loc": "plugin/scripts/reqmap.py:2590"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2612"
+          "loc": "plugin/scripts/reqmap.py:2613"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2629"
+          "loc": "plugin/scripts/reqmap.py:2630"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2648"
+          "loc": "plugin/scripts/reqmap.py:2649"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2654"
+          "loc": "plugin/scripts/reqmap.py:2655"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2679"
+          "loc": "plugin/scripts/reqmap.py:2680"
         },
         {
           "role": "tested-by",
@@ -602,35 +602,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1502"
+          "loc": "plugin/scripts/reqmap.py:1503"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1602"
+          "loc": "plugin/scripts/reqmap.py:1603"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1684"
+          "loc": "plugin/scripts/reqmap.py:1685"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1721"
+          "loc": "plugin/scripts/reqmap.py:1722"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1729"
+          "loc": "plugin/scripts/reqmap.py:1730"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1796"
+          "loc": "plugin/scripts/reqmap.py:1797"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2068"
+          "loc": "plugin/scripts/reqmap.py:2069"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5361"
+          "loc": "plugin/scripts/reqmap.py:5368"
         },
         {
           "role": "tested-by",
@@ -706,13 +706,13 @@
       "title": "CLI command registry + generated integration artifacts",
       "intent": "`tool_definition.json` and the `SKILL.universal.md` command table were hand-maintained mirrors of the CLI and silently drifted whenever a command was added or renamed. A single declarative `COMMANDS` registry — with generation and a gate drift-guard — makes those mirrors impossible to diverge undetected.",
       "contract": [
-        "A `COMMANDS` dict shall be the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.",
-        "Argparse choices shall be derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.",
-        "`tool_definition.json` (the function-calling schema) shall be generated from `COMMANDS` by the `gen-integration` command.",
-        "The `SKILL.universal.md` command table shall be generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region shall not be touched.",
-        "Internal commands (e.g. `gen-integration`) shall be excluded from AI-facing generated artifacts.",
-        "The gate shall fail (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.",
-        "All generators and the gate check shall be stdlib-only; no third-party imports are permitted."
+        "A `COMMANDS` dict is the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.",
+        "Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.",
+        "`tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the `gen-integration` command.",
+        "The `SKILL.universal.md` command table is generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is never touched.",
+        "Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated artifacts.",
+        "The gate fails (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.",
+        "All generators and the gate check are stdlib-only; no third-party imports are permitted."
       ],
       "verify": [
         "None — intent and scope confirmed by implementation."
@@ -751,7 +751,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2090"
+          "loc": "plugin/scripts/reqmap.py:2091"
         },
         {
           "role": "tested-by",
@@ -810,7 +810,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4209"
+          "loc": "plugin/scripts/reqmap.py:4212"
         },
         {
           "role": "tested-by",
@@ -864,7 +864,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1284"
+          "loc": "plugin/scripts/reqmap.py:1285"
         },
         {
           "role": "tested-by",
@@ -884,11 +884,11 @@
       "title": "Drift blast-radius: name dependents",
       "intent": "When a confirmed requirement's contract drifts, the gate names the requirement and its code members — but not the requirements built on top of it via `depends_on`. An upstream contract change can invalidate a downstream requirement's assumptions with no signal at all, and the reviewer has to reconstruct the blast radius by hand from the map. The dependency graph is already in memory at gate time; naming the dependents turns one drift warning into an actionable review list.",
       "contract": [
-        "When the gate reports a contract drift for a requirement, and at least one other requirement lists the drifted one in `depends_on`, the same warning line shall also name those dependent requirement ids.",
-        "The dependent list shall be sorted and deduplicated, so the output is deterministic across platforms and walk orders.",
-        "Only direct dependents shall be named (one edge, not the transitive closure). <!-- Rationale: transitive closures explode on bus-layer nodes and bury the signal; a reviewer follows the chain one hop at a time. -->",
-        "A drifted requirement with no dependents shall produce the existing warning unchanged — no empty \"dependents\" clause.",
-        "The addition shall not change the drift warning's severity: it stays warn-only by default and promotable by `--strict`, exactly as before."
+        "When the gate reports a contract drift for a requirement, and at least one other requirement lists the drifted one in `depends_on`, the same warning line also names those dependent requirement ids.",
+        "The dependent list is sorted and deduplicated, so the output is deterministic across platforms and walk orders.",
+        "Only direct dependents are named (one edge, not the transitive closure). <!-- Rationale: transitive closures explode on bus-layer nodes and bury the signal; a reviewer follows the chain one hop at a time. -->",
+        "A drifted requirement with no dependents produces the existing warning unchanged — no empty \"dependents\" clause.",
+        "The addition does not change the drift warning's severity: it stays warn-only by default and promotable by `--strict`, exactly as before."
       ],
       "verify": [
         "None — authored from known intent."
@@ -915,7 +915,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1975"
+          "loc": "plugin/scripts/reqmap.py:1976"
         },
         {
           "role": "tested-by",
@@ -935,15 +935,15 @@
       "title": "Excalidraw scene builder — core API",
       "intent": "The excalidraw-diagram skill needs a stdlib-only Python library that turns declarative shape and arrow declarations into a valid Excalidraw scene file and a self-contained HTML viewer, with no external dependencies, so the skill can be vendored into any environment without install friction.",
       "contract": [
-        "`Scene()` shall produce a valid Excalidraw JSON scene (schema version 2) with a `type: \"excalidraw\"` root and a `elements` list compatible with excalidraw.com import.",
-        "`Scene` shall expose shape primitives: `box`, `ellipse`, `diamond`, `frame`.",
-        "`Scene` shall expose ISO 5807 flowchart aliases: `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation`, `connector`.",
-        "`Scene` shall expose layout helpers: `row`, `column`, `grid`, `enclose`, `lane`, `pipeline`, `section`, `align`, `distribute`.",
-        "`Scene` shall expose annotation helpers: `title`, `label`, `legend`, `glossary`, `role`.",
-        "`Scene` shall expose connector helpers: `arrow`, `free_arrow`, `path`, `route_under`.",
-        "`.save(basename, out_dir)` shall write both `<basename>.excalidraw` (the scene JSON) and `<basename>.html` (a self-contained viewer) in one call and raise `RuntimeError` if called more than once on the same `Scene`.",
-        "`Scene(seed=<int>)` shall produce byte-identical output across re-runs.",
-        "The builder shall have no external dependencies — stdlib only."
+        "`Scene()` produces a valid Excalidraw JSON scene (schema version 2) with a `type: \"excalidraw\"` root and a `elements` list compatible with excalidraw.com import.",
+        "`Scene` exposes shape primitives: `box`, `ellipse`, `diamond`, `frame`.",
+        "`Scene` exposes ISO 5807 flowchart aliases: `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation`, `connector`.",
+        "`Scene` exposes layout helpers: `row`, `column`, `grid`, `enclose`, `lane`, `pipeline`, `section`, `align`, `distribute`.",
+        "`Scene` exposes annotation helpers: `title`, `label`, `legend`, `glossary`, `role`.",
+        "`Scene` exposes connector helpers: `arrow`, `free_arrow`, `path`, `route_under`.",
+        "`.save(basename, out_dir)` writes both `<basename>.excalidraw` (the scene JSON) and `<basename>.html` (a self-contained viewer) in one call and raises `RuntimeError` if called more than once on the same `Scene`.",
+        "`Scene(seed=<int>)` produces byte-identical output across re-runs.",
+        "The builder has no external dependencies — stdlib only."
       ],
       "verify": [
         "None — authored from known intent."
@@ -992,15 +992,15 @@
       "title": "Excalidraw quality gates",
       "intent": "A diagram that ships with overlapping shapes, arrows that cut through unrelated boxes, unlegended colours, text that spills outside its box, an arrow too short to draw a visible line, or a label wider than the arrow it sits on is unreadable to an outsider. Hard-fail gates at `.save()` time make these defects impossible to ship silently.",
       "contract": [
-        "`.save()` shall support five named gates, each accepting `\"warn\"` (default, prints) or `\"error\"` (raises `ValueError`): `crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`, `label_fit_check`.",
-        "`crossing_check`: a bound arrow whose straight centre-to-centre path passes through an unrelated box shall trigger the gate.",
-        "`legend_check`: a fill colour used on any shape but absent from the `legend()` key shall trigger the gate (fires only after `legend()` is rendered; a scene with no legend is exempt).",
-        "`overflow_check`: a shape whose bound text is larger than the shape bounds (text spills outside) shall trigger the gate.",
-        "`text_overlap_check`: two free captions or label elements that geometrically overlap each other shall trigger the gate.",
-        "`label_fit_check`: a bound arrow whose text label is wider than the connector it sits on — leaving less than ~24px of visible line on each side, measuring the label box projected onto the arrow direction — shall trigger the gate (the label crowds the arrowheads or spills onto the joined boxes).",
-        "`.save()` shall additionally enforce two hard gates that raise `ValueError` by default (no `\"warn\"`/`\"error\"` mode), each with an opt-out flag for a deliberate exception: overlapping non-container shapes (`allow_overlap=True`) and a bound arrow clamped too short to render a visible line — only its label would show — (`allow_short_arrows=True`).",
-        "The inspection methods `check_overlaps()`, `check_arrow_crossings()`, `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`, `check_short_arrows()`, `check_arrow_label_fit()` shall each return a list of offending items (empty list = clean) and be callable before `.save()`.",
-        "`test_excalidraw.py` shall exercise the five named gates in both `\"warn\"` and `\"error\"` modes, and the two hard gates, for each maintained example generator."
+        "`.save()` supports five named gates, each accepting `\"warn\"` (default, prints) or `\"error\"` (raises `ValueError`): `crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`, `label_fit_check`.",
+        "`crossing_check`: a bound arrow whose straight centre-to-centre path passes through an unrelated box triggers the gate.",
+        "`legend_check`: a fill colour used on any shape but absent from the `legend()` key triggers the gate (fires only after `legend()` is rendered; a scene with no legend is exempt).",
+        "`overflow_check`: a shape whose bound text is larger than the shape bounds (text spills outside) triggers the gate.",
+        "`text_overlap_check`: two free captions or label elements that geometrically overlap each other trigger the gate.",
+        "`label_fit_check`: a bound arrow whose text label is wider than the connector it sits on — leaving less than ~24px of visible line on each side, measuring the label box projected onto the arrow direction — triggers the gate (the label crowds the arrowheads or spills onto the joined boxes).",
+        "`.save()` additionally enforces two hard gates that raise `ValueError` by default (no `\"warn\"`/`\"error\"` mode), each with an opt-out flag for a deliberate exception: overlapping non-container shapes (`allow_overlap=True`) and a bound arrow clamped too short to render a visible line — only its label would show — (`allow_short_arrows=True`).",
+        "The inspection methods `check_overlaps()`, `check_arrow_crossings()`, `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`, `check_short_arrows()`, `check_arrow_label_fit()` each return a list of offending items (empty list = clean) and are callable before `.save()`.",
+        "`test_excalidraw.py` exercises the five named gates in both `\"warn\"` and `\"error\"` modes, and the two hard gates, for each maintained example generator."
       ],
       "verify": [
         "None — authored from known intent."
@@ -1048,10 +1048,10 @@
       "title": "Excalidraw builder CLI verbs",
       "intent": "Diagrams need to be rebuilt when source changes: either from a generator script (the main authoring path), from a hand-edited `.excalidraw` file (viewer rebuild only), or from an existing repo that needs a scaffolded starting point (discover). The CLI exposes these as three distinct verbs so each use-case has a single, unambiguous entry point.",
       "contract": [
-        "Invoking `python excalidraw_builder.py` with **no arguments** shall run the builder smoke test, print a human-readable summary, and exit 0 on success. This is the CI health-check entry point and must not be shadowed by a new default verb.",
-        "`python excalidraw_builder.py render <scene.excalidraw> [out_dir]` shall read an existing `.excalidraw` file and write a fresh self-contained `<basename>.html` viewer beside it (or into `out_dir` when given). The source `.excalidraw` file shall not be modified.",
-        "`python excalidraw_builder.py discover <repo> [out.py]` shall scan `<repo>` for source files and emit a runnable multi-layer poster stub (STRUCTURE layer pre-populated, WORKFLOW / INTEGRATION / MODES / MODEL / DATA layers commented as scaffolds) to `out.py` (default: `make_diagram.py`).",
-        "Any unrecognised verb shall exit with code 2 and print a usage message."
+        "Invoking `python excalidraw_builder.py` with **no arguments** runs the builder smoke test, prints a human-readable summary, and exits 0 on success. This is the CI health-check entry point and is never shadowed by a new default verb.",
+        "`python excalidraw_builder.py render <scene.excalidraw> [out_dir]` reads an existing `.excalidraw` file and writes a fresh self-contained `<basename>.html` viewer beside it (or into `out_dir` when given). The source `.excalidraw` file is never modified.",
+        "`python excalidraw_builder.py discover <repo> [out.py]` scans `<repo>` for source files and emits a runnable multi-layer poster stub (STRUCTURE layer pre-populated, WORKFLOW / INTEGRATION / MODES / MODEL / DATA layers commented as scaffolds) to `out.py` (default: `make_diagram.py`).",
+        "Any unrecognised verb exits with code 2 and prints a usage message."
       ],
       "verify": [
         "None — authored from known intent."
@@ -1141,15 +1141,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2362"
+          "loc": "plugin/scripts/reqmap.py:2363"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2423"
+          "loc": "plugin/scripts/reqmap.py:2424"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2514"
+          "loc": "plugin/scripts/reqmap.py:2515"
         },
         {
           "role": "tested-by",
@@ -1214,11 +1214,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2800"
+          "loc": "plugin/scripts/reqmap.py:2801"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2887"
+          "loc": "plugin/scripts/reqmap.py:2888"
         },
         {
           "role": "tested-by",
@@ -1286,7 +1286,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4147"
+          "loc": "plugin/scripts/reqmap.py:4150"
         },
         {
           "role": "tested-by",
@@ -1313,7 +1313,7 @@
         "`init` creates the requirements folder if it is missing.",
         "`init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites one that is already there.",
         "The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look like they point at requirements that do not exist.",
-        "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan must keep reading it.",
+        "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan keeps reading it.",
         "\"Describes itself\" means `scripts/reqmap.py` carries tags whose ids match requirements already in the repo.",
         "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order. When it finishes, the repo passes the gate and has a map.",
         "`init` ends with a short summary naming one next command: `reqmap.py next`. Not a list of every option.",
@@ -1349,11 +1349,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4338"
+          "loc": "plugin/scripts/reqmap.py:4341"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4367"
+          "loc": "plugin/scripts/reqmap.py:4370"
         },
         {
           "role": "tested-by",
@@ -1421,19 +1421,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3539"
+          "loc": "plugin/scripts/reqmap.py:3542"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3574"
+          "loc": "plugin/scripts/reqmap.py:3577"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3606"
+          "loc": "plugin/scripts/reqmap.py:3609"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3760"
+          "loc": "plugin/scripts/reqmap.py:3763"
         },
         {
           "role": "tested-by",
@@ -1501,11 +1501,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3568"
+          "loc": "plugin/scripts/reqmap.py:3571"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3606"
+          "loc": "plugin/scripts/reqmap.py:3609"
         },
         {
           "role": "tested-by",
@@ -1599,51 +1599,47 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2927"
+          "loc": "plugin/scripts/reqmap.py:2928"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3352"
+          "loc": "plugin/scripts/reqmap.py:3355"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3377"
+          "loc": "plugin/scripts/reqmap.py:3380"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4430"
+          "loc": "plugin/scripts/reqmap.py:4433"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4482"
+          "loc": "plugin/scripts/reqmap.py:4489"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4490"
+          "loc": "plugin/scripts/reqmap.py:4497"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4513"
+          "loc": "plugin/scripts/reqmap.py:4520"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4532"
+          "loc": "plugin/scripts/reqmap.py:4539"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4553"
+          "loc": "plugin/scripts/reqmap.py:4560"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4569"
+          "loc": "plugin/scripts/reqmap.py:4576"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4635"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4641"
+          "loc": "plugin/scripts/reqmap.py:4642"
         },
         {
           "role": "implements",
@@ -1651,43 +1647,47 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4700"
+          "loc": "plugin/scripts/reqmap.py:4655"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4715"
+          "loc": "plugin/scripts/reqmap.py:4707"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4746"
+          "loc": "plugin/scripts/reqmap.py:4722"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4834"
+          "loc": "plugin/scripts/reqmap.py:4753"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4873"
+          "loc": "plugin/scripts/reqmap.py:4841"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4924"
+          "loc": "plugin/scripts/reqmap.py:4880"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4932"
+          "loc": "plugin/scripts/reqmap.py:4931"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5421"
+          "loc": "plugin/scripts/reqmap.py:4939"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5440"
+          "loc": "plugin/scripts/reqmap.py:5428"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5450"
+          "loc": "plugin/scripts/reqmap.py:5447"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:5457"
         },
         {
           "role": "tested-by",
@@ -1739,14 +1739,14 @@
       "title": "Reverse-direction member drift",
       "intent": "Drift detection has one eye open. `_reqlock.json` stores one hash per requirement — the contract — so it fires when the *prose* moves ahead of the code. The reverse is invisible: a member (the code or doc that realises a requirement) can change while the contract sits untouched, so behaviour ships and the spec quietly goes stale. This is the mechanical half of intent-sync: hash the dedicated members too, and warn when one moves while its requirement does not. Without it, \"confirmed\" can silently mean \"confirmed six versions ago\", and only a human re-reading both sides would ever notice.",
       "contract": [
-        "Member content hashes shall live in a separate, versioned sidecar `_memberlock.json` (`{\"_schema\": N, \"members\": {id: {relfile: sha}}}`), so `_reqlock.json` stays a byte-stable cross-repo contract that an older seeded engine reads unchanged.",
-        "The sidecar shall fail open (treated as empty) when absent, corrupt, or written by a newer `_schema` than the engine knows — degrading to \"reverse-drift off this run\" rather than crashing or mis-comparing.",
-        "Member hashes shall be recorded only for files dedicated to ONE requirement (an `implements:`/`generated-from:` member of exactly one id); a file shared by several requirements is excluded, because a change there cannot be attributed without noise.",
-        "Member hashes shall be computed on line-ending-normalized bytes (CRLF and lone CR folded to LF), so a lock generated on a CRLF working tree (Windows `core.autocrlf=true`) matches one verified on LF (Linux/CI). Without this every member shows spurious cross-platform drift, which `--strict` escalates to errors — mirrors the contract hash, already LF-normalized via the text-mode body parse.",
-        "The gate shall warn for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not. A requirement whose contract also drifted is skipped (forward drift already owns it).",
-        "A member with no recorded baseline shall not warn, so a freshly-tagged file is baselined on the next sync rather than nagged on first sight.",
-        "The check shall be warn-only by default and shall be promoted to an error under `--strict` (it joins the same strict set as contract drift).",
-        "`--update-lock` shall re-baseline the sidecar in lockstep with `_reqlock.json`."
+        "Member content hashes live in a separate, versioned sidecar `_memberlock.json` (`{\"_schema\": N, \"members\": {id: {relfile: sha}}}`), so `_reqlock.json` stays a byte-stable cross-repo contract that an older seeded engine reads unchanged.",
+        "The sidecar fails open (treated as empty) when absent, corrupt, or written by a newer `_schema` than the engine knows — degrading to \"reverse-drift off this run\" rather than crashing or mis-comparing.",
+        "Member hashes are recorded only for files dedicated to ONE requirement (an `implements:`/`generated-from:` member of exactly one id); a file shared by several requirements is excluded, because a change there cannot be attributed without noise.",
+        "Member hashes are computed on line-ending-normalized bytes (CRLF and lone CR folded to LF), so a lock generated on a CRLF working tree (Windows `core.autocrlf=true`) matches one verified on LF (Linux/CI). Without this every member shows spurious cross-platform drift, which `--strict` escalates to errors — mirrors the contract hash, already LF-normalized via the text-mode body parse.",
+        "The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not. A requirement whose contract also drifted is skipped (forward drift already owns it).",
+        "A member with no recorded baseline does not warn, so a freshly-tagged file is baselined on the next sync rather than nagged on first sight.",
+        "The check is warn-only by default and is promoted to an error under `--strict` (it joins the same strict set as contract drift).",
+        "`--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -1775,27 +1775,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1575"
+          "loc": "plugin/scripts/reqmap.py:1576"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1579"
+          "loc": "plugin/scripts/reqmap.py:1580"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1595"
+          "loc": "plugin/scripts/reqmap.py:1596"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1629"
+          "loc": "plugin/scripts/reqmap.py:1630"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1644"
+          "loc": "plugin/scripts/reqmap.py:1645"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1662"
+          "loc": "plugin/scripts/reqmap.py:1663"
         },
         {
           "role": "tested-by",
@@ -1848,7 +1848,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2193"
+          "loc": "plugin/scripts/reqmap.py:2194"
         },
         {
           "role": "tested-by",
@@ -1920,15 +1920,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1315"
+          "loc": "plugin/scripts/reqmap.py:1316"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3397"
+          "loc": "plugin/scripts/reqmap.py:3400"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3410"
+          "loc": "plugin/scripts/reqmap.py:3413"
         },
         {
           "role": "tested-by",
@@ -2001,11 +2001,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1342"
+          "loc": "plugin/scripts/reqmap.py:1343"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2030"
+          "loc": "plugin/scripts/reqmap.py:2031"
         },
         {
           "role": "tested-by",
@@ -2025,9 +2025,9 @@
       "title": "Publish & gate the GitHub Pages map copy",
       "intent": "The map viewer is most useful when it is published — a URL anyone can open, no checkout required. This capability copies the freshly-built viewer into a repo's GitHub Pages folder and then guards that published copy, so the page people actually read can never quietly fall behind the registry it claims to show.",
       "contract": [
-        "When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub Pages signal (a `.nojekyll` or `index.html` file present), `map` shall also copy `_map.html` to `docs/map.html`. When no signal is present, or git is absent, `docs/map.html` is not written — the behaviour is opt-in by folder contents, so a repo that does not publish a page is unaffected.",
-        "`map --check` (the no-write freshness gate) shall additionally flag `docs/map.html` as stale when it differs from a fresh viewer render of the current registry. This applies only when the Pages signal and the viewer template `_map_viewer.html` are both present and `docs/map.html` already exists. A copy that was never generated is not stale (the same absent-file rule the gate applies to `_map.*`).",
-        "The freshness comparison shall read the on-disk copy as text so a platform newline difference (CRLF vs LF) never raises a false positive. It shall exclude the git-derived `repo` field (as the `_map.json` check does), so a fork or clone with a different remote is not spuriously flagged; the rest of the injected data carries no wall-clock value, so the comparison is deterministic."
+        "When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub Pages signal (a `.nojekyll` or `index.html` file present), `map` also copies `_map.html` to `docs/map.html`. When no signal is present, or git is absent, `docs/map.html` is not written — the behaviour is opt-in by folder contents, so a repo that does not publish a page is unaffected.",
+        "`map --check` (the no-write freshness gate) additionally flags `docs/map.html` as stale when it differs from a fresh viewer render of the current registry. This applies only when the Pages signal and the viewer template `_map_viewer.html` are both present and `docs/map.html` already exists. A copy that was never generated is not stale (the same absent-file rule the gate applies to `_map.*`).",
+        "The freshness comparison reads the on-disk copy as text so a platform newline difference (CRLF vs LF) never raises a false positive. It excludes the git-derived `repo` field (as the `_map.json` check does), so a fork or clone with a different remote is not spuriously flagged; the rest of the injected data carries no wall-clock value, so the comparison is deterministic."
       ],
       "verify": [
         "None — authored from known intent, not reconstructed from code."
@@ -2057,15 +2057,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3368"
+          "loc": "plugin/scripts/reqmap.py:3371"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4456"
+          "loc": "plugin/scripts/reqmap.py:4460"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5466"
+          "loc": "plugin/scripts/reqmap.py:5473"
         },
         {
           "role": "tested-by",
@@ -2124,11 +2124,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2302"
+          "loc": "plugin/scripts/reqmap.py:2303"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2328"
+          "loc": "plugin/scripts/reqmap.py:2329"
         },
         {
           "role": "tested-by",
@@ -2195,11 +2195,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2214"
+          "loc": "plugin/scripts/reqmap.py:2215"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2270"
+          "loc": "plugin/scripts/reqmap.py:2271"
         },
         {
           "role": "tested-by",
@@ -2223,13 +2223,13 @@
       "title": "Prose capability classification & drafting",
       "intent": "Specs and prompts written as text documents can be capabilities too, not just code. When `draft` runs, this part decides which text files deserve a draft requirement, which are only kept in sync, and which are ignored as boilerplate — then writes the drafts. Without it, prompt and spec files would stay invisible to the registry, or every README would pollute it with junk drafts.",
       "contract": [
-        "`draft` shall also produce `draft`-status requirements from untagged **prose** files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.",
-        "Each prose file shall be classified into one of three buckets before drafting:",
+        "`draft` also produces `draft`-status requirements from untagged **prose** files (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.",
+        "Each prose file is classified into one of three buckets before drafting:",
         "**ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).",
         "**sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`. These are never drafted as their own requirement, but become a member (and are drift-checked) when a human tags them `generated-from: <ID>`.",
         "**capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These are auto-drafted.",
-        "The buckets shall govern auto-drafting ONLY; an explicit tag on any file is always honored by the scanner regardless of bucket (so a hand-tagged README is still a member).",
-        "A prose draft shall be scaffolded from the file's title (frontmatter `title:`, else the first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings, recorded as an authoring hint.",
+        "The buckets govern auto-drafting ONLY; an explicit tag on any file is always honored by the scanner regardless of bucket (so a hand-tagged README is still a member).",
+        "A prose draft is scaffolded from the file's title (frontmatter `title:`, else the first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings, recorded as an authoring hint.",
         "The source prose is never the contract: the drift hash anchors on the authored Contract + Acceptance, so the prose may later drift freely from the authored requirement."
       ],
       "verify": [
@@ -2256,15 +2256,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2370"
+          "loc": "plugin/scripts/reqmap.py:2371"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2395"
+          "loc": "plugin/scripts/reqmap.py:2396"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2423"
+          "loc": "plugin/scripts/reqmap.py:2424"
         },
         {
           "role": "tested-by",
@@ -2388,11 +2388,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4121"
+          "loc": "plugin/scripts/reqmap.py:4124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4215"
+          "loc": "plugin/scripts/reqmap.py:4218"
         },
         {
           "role": "tested-by",
@@ -2461,13 +2461,13 @@
       "title": "AI requirement-quality review (deterministic plan + advisory pass)",
       "intent": "Deterministic lint catches the SHAPE of a requirement (long sentences, vague words, size). It cannot judge MEANING — whether a contract clause is actually testable, whether the WHY explains intent or just restates the title, whether the acceptance criteria really exercise the contract. This emits a deterministic, machine-readable plan of each requirement's prose so an AI can make that semantic judgement out of band — advisory only, never the gate, never auto-applied. A human always decides; the engine never calls an LLM.",
       "contract": [
-        "The `review` command shall emit a DETERMINISTIC, read-only JSON plan to stdout and write no file; it shall never invoke an LLM. `review` (no arg) covers the whole corpus; `review <ID>` covers one requirement.",
-        "The plan shall carry, per requirement, its prose (title, intent/WHY, contract, acceptance, verify-intent) plus cheap STRUCTURAL anchors that are deterministic facts, not judgements (contract-clause count, acceptance count, intent word count, intent-terse, more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`, `requirements_in_plan`).",
-        "The plan shall name exactly three AI categories — `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding MUST carry a concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).",
-        "DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write, or regenerate the plan or any AI sidecar.",
-        "`gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
+        "The `review` command emits a DETERMINISTIC, read-only JSON plan to stdout and writes no file; it never invokes an LLM. `review` (no arg) covers the whole corpus; `review <ID>` covers one requirement.",
+        "The plan carries, per requirement, its prose (title, intent/WHY, contract, acceptance, verify-intent) plus cheap STRUCTURAL anchors that are deterministic facts, not judgements (contract-clause count, acceptance count, intent word count, intent-terse, more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`, `requirements_in_plan`).",
+        "The plan names exactly three AI categories — `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding carries a concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).",
+        "DETERMINISM WALL: the plan is byte-reproducible across runs (no clock, no randomness, no LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) reads, writes, or regenerates the plan or any AI sidecar.",
+        "`gate` behaves identically whether or not an AI sidecar (`requirements/_ai_review.md`) is present.",
         "The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive rate. The near-zero-false-positive property comes from MANDATORY human review of each `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).",
-        "The AI consumer (the `requirement-quality-review` skill) shall write findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and shall never auto-edit a requirement.",
+        "The AI consumer (the `requirement-quality-review` skill) writes findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and never auto-edits a requirement.",
         "`review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a machine corpus plan with structural anchors, a coverage summary and category guidance for an out-of-band AI consumer — a different audience and shape, so they are not merged."
       ],
       "verify": [
@@ -2476,7 +2476,8 @@
       "notes": [
         "The `untestable-contract` / `acceptance-doesnt-cover-contract` categories are deliberately judged by the AI, not the engine: a deterministic clause↔acceptance mapping is REQ-ACVERIFY-019's job (`# verifies: <id>#AC-N`), and a reliable semantic \"cover\" check has no deterministic form.",
         "`jargon-used-before-defined` was deliberately NOT included — REQ-LINT-014 deferred it for lack of a domain dictionary, and an LLM does not dissolve that false-positive wall.",
-        "The sidecar is its own channel (not folded into `_findings.md`) precisely to keep the deterministic findings surface reproducible; mixing a non-deterministic AI pass into it would break that property."
+        "The sidecar is its own channel (not folded into `_findings.md`) precisely to keep the deterministic findings surface reproducible; mixing a non-deterministic AI pass into it would break that property.",
+        "`lint_exempt: file-spread` — the `implements:` members are the engine's `review` command, the advisory skill contract and its AI-agnostic variant: one capability whose deterministic half and advisory half deliberately live in different files, not a diffuse one."
       ],
       "current_impl": [
         "`cmd_review` in `reqmap.py` (the deterministic plan emitter), dispatched from `main()` for the `review` subcommand; the out-of-band consumer is the `requirement-quality-review` skill."
@@ -2495,7 +2496,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5624"
+          "loc": "plugin/scripts/reqmap.py:5632"
         },
         {
           "role": "tested-by",
@@ -2556,15 +2557,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2983"
+          "loc": "plugin/scripts/reqmap.py:2984"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3017"
+          "loc": "plugin/scripts/reqmap.py:3018"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4221"
+          "loc": "plugin/scripts/reqmap.py:4224"
         },
         {
           "role": "tested-by",
@@ -2613,7 +2614,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1699"
+          "loc": "plugin/scripts/reqmap.py:1700"
         },
         {
           "role": "tested-by",
@@ -2633,11 +2634,11 @@
       "title": "Opt-in scan cache",
       "intent": "Scanning re-reads and re-parses every source file on every run to find membership tags. On a large repo that can be the slow part. This is an opt-in cache: when you ask for it, an unchanged file is skipped on the next scan. It is off by default and changes nothing about the results — only the speed — so the gate stays exactly as deterministic as before.",
       "contract": [
-        "The `--cache` flag (off by default) shall enable a per-file scan cache for `scan_members`. The default path and the CI/gate path shall never read or write the cache unless `--cache` is given.",
-        "The cache shall be a sidecar `requirements/_scancache.json`, keyed per file by `(mtime_ns, size)` → the membership tags found in that file. It is machine-local and gitignored — never committed (mtimes differ across machines, so a committed cache would be meaningless/stale).",
-        "With the cache on: an unchanged file (matching `mtime_ns` AND `size`) shall reuse its cached tags; a changed or new file shall be re-parsed and its entry refreshed; a file no longer present shall be pruned (absent from the rewritten cache).",
-        "The cache shall be a PURE performance optimization: `scan_members(cache=True)` returns results byte-identical to `scan_members(cache=False)` for any consistent cache — same members, same order.",
-        "The cache shall fail open and best-effort: an absent, unreadable, or corrupt cache yields an empty cache (full re-scan), and an unwritable cache directory shall never fail or alter the scan."
+        "The `--cache` flag (off by default) enables a per-file scan cache for `scan_members`. The default path and the CI/gate path never read or write the cache unless `--cache` is given.",
+        "The cache is a sidecar `requirements/_scancache.json`, keyed per file by `(mtime_ns, size)` → the membership tags found in that file. It is machine-local and gitignored — never committed (mtimes differ across machines, so a committed cache would be meaningless/stale).",
+        "With the cache on: an unchanged file (matching `mtime_ns` AND `size`) reuses its cached tags; a changed or new file is re-parsed and its entry refreshed; a file no longer present is pruned (absent from the rewritten cache).",
+        "The cache is a PURE performance optimization: `scan_members(cache=True)` returns results byte-identical to `scan_members(cache=False)` for any consistent cache — same members, same order.",
+        "The cache fails open and best-effort: an absent, unreadable, or corrupt cache yields an empty cache (full re-scan), and an unwritable cache directory never fails or alters the scan."
       ],
       "verify": [
         "None — authored from a Consilium design deliberation (.consilium/runs/2026-06-09_1630_scan-cache.json)."
@@ -2663,15 +2664,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1018"
+          "loc": "plugin/scripts/reqmap.py:1019"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1022"
+          "loc": "plugin/scripts/reqmap.py:1023"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1032"
+          "loc": "plugin/scripts/reqmap.py:1033"
         },
         {
           "role": "tested-by",
@@ -2739,7 +2740,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4000"
+          "loc": "plugin/scripts/reqmap.py:4003"
         },
         {
           "role": "tested-by",
@@ -2770,7 +2771,8 @@
         "None — authored from known intent (this repo's own documented dev workflow)."
       ],
       "notes": [
-        "This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own behavior — that contract lives in [[REQ-CHECK-006]]."
+        "This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own behavior — that contract lives in [[REQ-CHECK-006]].",
+        "`lint_exempt: file-spread` — spanning CI, the composite action, both dev hooks and the sync script is the capability (the gate wired at every entry point), not a sign it is diffuse."
       ],
       "current_impl": [
         "`.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`, `sync_reqmap.sh` (all repo root).",
@@ -2817,7 +2819,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "scripts/test_check_versions.py:91"
+          "loc": "scripts/test_check_engine_bump.py:56"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_check_versions.py:93"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_check_versions.py:100"
         }
       ],
       "test_exempt": "pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2. AC-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)",
@@ -2872,7 +2882,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3802"
+          "loc": "plugin/scripts/reqmap.py:3805"
         },
         {
           "role": "tested-by",
@@ -2934,27 +2944,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3891"
+          "loc": "plugin/scripts/reqmap.py:3894"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3898"
+          "loc": "plugin/scripts/reqmap.py:3901"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3910"
+          "loc": "plugin/scripts/reqmap.py:3913"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3928"
+          "loc": "plugin/scripts/reqmap.py:3931"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3940"
+          "loc": "plugin/scripts/reqmap.py:3943"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3952"
+          "loc": "plugin/scripts/reqmap.py:3955"
         },
         {
           "role": "tested-by",
@@ -2974,12 +2984,12 @@
       "title": "Generate & maintain a project presentation page",
       "intent": "A project is easier to grasp from one presentation page than from a folder of files. This capability lets the engine keep that page's links and key numbers current — injecting engine-owned regions into a page the author still controls, and scaffolding one when none exists — so the page never drifts from the registry.",
       "contract": [
-        "`site --attach <page.html>` shall inject the requested marker-delimited regions (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each region's paired markers and preserving all other (authored) content. A re-run with no underlying change shall produce a byte-identical file (idempotent).",
-        "When the `--attach` target does not exist, `site` shall scaffold a self-contained default page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.",
-        "The `nav` region shall emit a link only when its target resolves: Live Map when a sibling `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git remote resolves. A missing git remote, missing artifact, or non-checkout shall never raise.",
-        "The engine shall never import or execute the excalidraw skill's builder; the Diagram entry is a link only.",
-        "`init` shall, unless `--no-site` is given, run a best-effort `site` step after `map`: refresh `nav`+`stats` in `docs/architecture.html` if it exists, else scaffold it plus a Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step shall not abort `init`.",
-        "`map --check` shall flag the site page stale when its on-disk `stats` region differs from a fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page that was never generated, or that lacks a `stats` region, is not stale."
+        "`site --attach <page.html>` injects the requested marker-delimited regions (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each region's paired markers and preserving all other (authored) content. A re-run with no underlying change produces a byte-identical file (idempotent).",
+        "When the `--attach` target does not exist, `site` scaffolds a self-contained default page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.",
+        "The `nav` region emits a link only when its target resolves: Live Map when a sibling `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git remote resolves. A missing git remote, missing artifact, or non-checkout never raises.",
+        "The engine never imports or executes the excalidraw skill's builder; the Diagram entry is a link only.",
+        "`init`, unless `--no-site` is given, runs a best-effort `site` step after `map`: refreshes `nav`+`stats` in `docs/architecture.html` if it exists, else scaffolds it plus a Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step does not abort `init`.",
+        "`map --check` flags the site page stale when its on-disk `stats` region differs from a fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page that was never generated, or that lacks a `stats` region, is not stale."
       ],
       "verify": [
         "None — authored from known intent."
@@ -3009,71 +3019,71 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4393"
+          "loc": "plugin/scripts/reqmap.py:4396"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4465"
+          "loc": "plugin/scripts/reqmap.py:4471"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4963"
+          "loc": "plugin/scripts/reqmap.py:4970"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4983"
+          "loc": "plugin/scripts/reqmap.py:4990"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5003"
+          "loc": "plugin/scripts/reqmap.py:5010"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5006"
+          "loc": "plugin/scripts/reqmap.py:5013"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5011"
+          "loc": "plugin/scripts/reqmap.py:5018"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5032"
+          "loc": "plugin/scripts/reqmap.py:5039"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5044"
+          "loc": "plugin/scripts/reqmap.py:5051"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5049"
+          "loc": "plugin/scripts/reqmap.py:5056"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5068"
+          "loc": "plugin/scripts/reqmap.py:5075"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5358"
+          "loc": "plugin/scripts/reqmap.py:5365"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5490"
+          "loc": "plugin/scripts/reqmap.py:5497"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5508"
+          "loc": "plugin/scripts/reqmap.py:5515"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5516"
+          "loc": "plugin/scripts/reqmap.py:5523"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5531"
+          "loc": "plugin/scripts/reqmap.py:5538"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5861"
+          "loc": "plugin/scripts/reqmap.py:5869"
         },
         {
           "role": "tested-by",
@@ -3197,11 +3207,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1771"
+          "loc": "plugin/scripts/reqmap.py:1772"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1909"
+          "loc": "plugin/scripts/reqmap.py:1910"
         },
         {
           "role": "tested-by",
@@ -3256,23 +3266,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1865"
+          "loc": "plugin/scripts/reqmap.py:1866"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1937"
+          "loc": "plugin/scripts/reqmap.py:1938"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2935"
+          "loc": "plugin/scripts/reqmap.py:2936"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2977"
+          "loc": "plugin/scripts/reqmap.py:2978"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3837"
+          "loc": "plugin/scripts/reqmap.py:3840"
         },
         {
           "role": "tested-by",
@@ -3324,11 +3334,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1248"
+          "loc": "plugin/scripts/reqmap.py:1249"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2019"
+          "loc": "plugin/scripts/reqmap.py:2020"
         },
         {
           "role": "tested-by",
@@ -3389,59 +3399,59 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3064"
+          "loc": "plugin/scripts/reqmap.py:3065"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3092"
+          "loc": "plugin/scripts/reqmap.py:3093"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3099"
+          "loc": "plugin/scripts/reqmap.py:3100"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3116"
+          "loc": "plugin/scripts/reqmap.py:3117"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3126"
+          "loc": "plugin/scripts/reqmap.py:3127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3136"
+          "loc": "plugin/scripts/reqmap.py:3137"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3147"
+          "loc": "plugin/scripts/reqmap.py:3148"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3161"
+          "loc": "plugin/scripts/reqmap.py:3162"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3172"
+          "loc": "plugin/scripts/reqmap.py:3173"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3197"
+          "loc": "plugin/scripts/reqmap.py:3198"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3217"
+          "loc": "plugin/scripts/reqmap.py:3218"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3239"
+          "loc": "plugin/scripts/reqmap.py:3242"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3307"
+          "loc": "plugin/scripts/reqmap.py:3310"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3341"
+          "loc": "plugin/scripts/reqmap.py:3344"
         },
         {
           "role": "tested-by",
@@ -3507,7 +3517,7 @@
         "`ProblemsView.jsx` — gate errors, drift items, and open risk inbox",
         "`RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields",
         "`SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)",
-        "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags — app/ is deliberately excluded from the widened repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md) is the only automated check for the viewer, and it is run manually before vendoring, not wired into CI or reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as covered."
+        "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags — app/ is deliberately excluded from the widened repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md) runs in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the committed copy differs; per-file tagging of app/src stays outside reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as covered."
       ],
       "acc": [],
       "accept": "AC-1\n  Given  the vendored `_map_viewer.html` template is present\n  When   `map` runs\n  Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a\n         `window.__REQMAP_DATA__` assignment carrying one node per requirement\n\nAC-2\n  Given  a requirement field containing `</script>`\n  When   the viewer is rendered\n  Then   the sequence is escaped (`<\\/`) so it cannot close the inline-data script early\n\nAC-4\n  Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)\n  When   the viewer is rendered\n  Then   `<!--` is escaped to `<\\!--` in the inlined blob so the HTML5 parser never\n         enters \"script data escaped\" state, and `window.__REQMAP_DATA__` is always\n         accessible from the deferred bundle (verified: file:// opens without error)\n\nAC-3\n  Given  no template is vendored\n  When   `map` runs\n  Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)\n\nAC-5\n  Given  a requirement whose title or contract contains U+2028 or U+2029\n  When   `map` writes `_map.html`\n  Then   neither character appears raw in the file, and the inlined graph still parses to\n         the original text\n\nAC-6\n  Given  the viewer rendered with a non-English locale selected\n  When   a requirement's spec is shown\n  Then   the section headers appear in that language while the requirement's own title,\n         contract and acceptance text stay exactly as authored, and `status` / `layer`\n         values stay literal",
@@ -3530,19 +3540,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1220"
+          "loc": "plugin/scripts/reqmap.py:1221"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5579"
+          "loc": "plugin/scripts/reqmap.py:5587"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5583"
+          "loc": "plugin/scripts/reqmap.py:5591"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5608"
+          "loc": "plugin/scripts/reqmap.py:5616"
         },
         {
           "role": "tested-by",
@@ -3612,11 +3622,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1414"
+          "loc": "plugin/scripts/reqmap.py:1415"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3802"
+          "loc": "plugin/scripts/reqmap.py:3805"
         },
         {
           "role": "tested-by",

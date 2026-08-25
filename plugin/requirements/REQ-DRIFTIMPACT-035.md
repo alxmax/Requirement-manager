@@ -22,15 +22,15 @@ milestone: v2.10
 ## WHAT — Contract (normative)
 - When the gate reports a contract drift for a requirement, and at least one
   other requirement lists the drifted one in `depends_on`, the same warning
-  line shall also name those dependent requirement ids.
-- The dependent list shall be sorted and deduplicated, so the output is
+  line also names those dependent requirement ids.
+- The dependent list is sorted and deduplicated, so the output is
   deterministic across platforms and walk orders.
-- Only direct dependents shall be named (one edge, not the transitive
+- Only direct dependents are named (one edge, not the transitive
   closure). <!-- Rationale: transitive closures explode on bus-layer nodes and
   bury the signal; a reviewer follows the chain one hop at a time. -->
-- A drifted requirement with no dependents shall produce the existing warning
+- A drifted requirement with no dependents produces the existing warning
   unchanged — no empty "dependents" clause.
-- The addition shall not change the drift warning's severity: it stays
+- The addition does not change the drift warning's severity: it stays
   warn-only by default and promotable by `--strict`, exactly as before.
 
 ## WHAT — Verify intent (open questions for the human)

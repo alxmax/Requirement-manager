@@ -16,18 +16,18 @@ milestone: v1.15
 > the results — only the speed — so the gate stays exactly as deterministic as before.
 
 ## WHAT — Contract (normative)
-- The `--cache` flag (off by default) shall enable a per-file scan cache for `scan_members`. The
-  default path and the CI/gate path shall never read or write the cache unless `--cache` is given.
-- The cache shall be a sidecar `requirements/_scancache.json`, keyed per file by `(mtime_ns, size)`
+- The `--cache` flag (off by default) enables a per-file scan cache for `scan_members`. The
+  default path and the CI/gate path never read or write the cache unless `--cache` is given.
+- The cache is a sidecar `requirements/_scancache.json`, keyed per file by `(mtime_ns, size)`
   → the membership tags found in that file. It is machine-local and gitignored — never committed
   (mtimes differ across machines, so a committed cache would be meaningless/stale).
-- With the cache on: an unchanged file (matching `mtime_ns` AND `size`) shall reuse its cached
-  tags; a changed or new file shall be re-parsed and its entry refreshed; a file no longer present
-  shall be pruned (absent from the rewritten cache).
-- The cache shall be a PURE performance optimization: `scan_members(cache=True)` returns results
+- With the cache on: an unchanged file (matching `mtime_ns` AND `size`) reuses its cached
+  tags; a changed or new file is re-parsed and its entry refreshed; a file no longer present
+  is pruned (absent from the rewritten cache).
+- The cache is a PURE performance optimization: `scan_members(cache=True)` returns results
   byte-identical to `scan_members(cache=False)` for any consistent cache — same members, same order.
-- The cache shall fail open and best-effort: an absent, unreadable, or corrupt cache yields an
-  empty cache (full re-scan), and an unwritable cache directory shall never fail or alter the scan.
+- The cache fails open and best-effort: an absent, unreadable, or corrupt cache yields an
+  empty cache (full re-scan), and an unwritable cache directory never fails or alters the scan.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from a Consilium design deliberation (.consilium/runs/2026-06-09_1630_scan-cache.json).

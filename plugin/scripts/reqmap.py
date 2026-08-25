@@ -156,7 +156,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-20.2"
+MAP_ENGINE_VERSION = "2026-08-25"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -701,7 +701,8 @@ _REGION_RE = re.compile(r"(<!--##REQMAP:COMMANDS##-->)(.*?)(<!--##/REQMAP:COMMAN
 
 def _write_region(path, body):
     """Replace the delimited region body in `path`; prose outside is untouched."""
-    text = open(path, encoding="utf-8").read()
+    with open(path, encoding="utf-8") as f:
+        text = f.read()
     new = _REGION_RE.sub(lambda m: m.group(1) + "\n" + body + "\n" + m.group(3), text)
     if new != text:
         with open(path, "w", encoding="utf-8") as f:
@@ -3225,8 +3226,10 @@ def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lan
         src=_LANG_NAMES[src_lang], dst=_LANG_NAMES[dst_lang],
         title=title, intent=intent, contract=contract, acceptance=acceptance)
     try:
+        # The prompt travels on stdin, not argv: a whole requirement in one argument
+        # would hit Windows' ~32k command-line ceiling on a large corpus.
         proc = subprocess.run(
-            ["claude", "-p", prompt],
+            ["claude", "-p"], input=prompt,
             capture_output=True, text=True, encoding="utf-8", timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
@@ -4444,7 +4447,8 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
         path = os.path.join(reqs_dir, name)
         if not os.path.exists(path):
             continue   # nothing committed to be stale against
-        on_disk = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            on_disk = f.read()
         if _strip_generated(on_disk) != _strip_generated(fresh):
             stale.append(name)
     # Published GitHub Pages copy: docs/map.html must equal a fresh viewer render.
@@ -4458,14 +4462,17 @@ def _map_check(data, reqs_dir, root="."):  # implements: REQ-MAP-007
     if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
             fresh_html = _inject_viewer(f.read(), data)
-        if _strip_generated(open(docs_out, encoding="utf-8").read()) != _strip_generated(fresh_html):
+        with open(docs_out, encoding="utf-8") as f:
+            docs_html = f.read()
+        if _strip_generated(docs_html) != _strip_generated(fresh_html):
             stale.append(os.path.basename(docs_out))
     # Site presentation page: gate the deterministic STATS region only. NAV embeds
     # the git-derived repo URL (fork-specific) and is excluded, mirroring the
     # `repo`-field exclusion in _strip_generated.  # implements: REQ-SITE-026
     site_target = _site_default_target(root)
     if site_target and os.path.exists(site_target):
-        on_disk = open(site_target, encoding="utf-8").read()
+        with open(site_target, encoding="utf-8") as f:
+            on_disk = f.read()
         disk_stats = _extract_region(on_disk, "stats")
         if disk_stats is not None:
             ctx = _site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
@@ -5556,7 +5563,8 @@ def cmd_site(reqs, members, root=".", attach=None,
     ctx = _site_context_from_data(data, repo_url=repo_url, map_ok=map_ok, diagram_rel=diagram_rel)
 
     if os.path.isfile(attach):
-        html = open(attach, encoding="utf-8").read()
+        with open(attach, encoding="utf-8") as f:
+            html = f.read()
         mode = "refreshed"
     else:                                   # scaffold mode
         os.makedirs(os.path.dirname(attach) or ".", exist_ok=True)

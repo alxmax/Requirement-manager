@@ -6,6 +6,7 @@ owner: Alex
 depends_on: [CORE-PARSE-001]
 superseded_by:
 milestone: v1.14
+lint_exempt: [file-spread]
 ---
 
 # AI requirement-quality review (deterministic plan + advisory pass)
@@ -18,28 +19,28 @@ milestone: v1.14
 > auto-applied. A human always decides; the engine never calls an LLM.
 
 ## WHAT — Contract (normative)
-- The `review` command shall emit a DETERMINISTIC, read-only JSON plan to stdout and write no
-  file; it shall never invoke an LLM. `review` (no arg) covers the whole corpus; `review <ID>`
+- The `review` command emits a DETERMINISTIC, read-only JSON plan to stdout and writes no
+  file; it never invokes an LLM. `review` (no arg) covers the whole corpus; `review <ID>`
   covers one requirement.
-- The plan shall carry, per requirement, its prose (title, intent/WHY, contract, acceptance,
+- The plan carries, per requirement, its prose (title, intent/WHY, contract, acceptance,
   verify-intent) plus cheap STRUCTURAL anchors that are deterministic facts, not judgements
   (contract-clause count, acceptance count, intent word count, intent-terse, more-contract-than-
   acceptance), and a corpus `coverage_summary` (`total_requirements`, `requirements_in_plan`).
-- The plan shall name exactly three AI categories — `untestable-contract`, `why-restates-title`,
-  `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding MUST carry a
+- The plan names exactly three AI categories — `untestable-contract`, `why-restates-title`,
+  `acceptance-doesnt-cover-contract` — and a finding contract: every AI finding carries a
   concrete `suggested_rewrite`, only high-confidence findings are emitted, and severity is
   advisory-only (never `error`/`warn`, never carried in the engine's severity vocabulary).
-- DETERMINISM WALL: the plan shall be byte-reproducible across runs (no clock, no randomness, no
-  LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) shall read, write,
-  or regenerate the plan or any AI sidecar.
-- `gate` shall behave identically whether or not an AI sidecar (`requirements/_ai_review.md`) is
+- DETERMINISM WALL: the plan is byte-reproducible across runs (no clock, no randomness, no
+  LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) reads, writes,
+  or regenerates the plan or any AI sidecar.
+- `gate` behaves identically whether or not an AI sidecar (`requirements/_ai_review.md`) is
   present.
 - The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive
   rate. The near-zero-false-positive property comes from MANDATORY human review of each
   `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).
-- The AI consumer (the `requirement-quality-review` skill) shall write findings to a separate,
+- The AI consumer (the `requirement-quality-review` skill) writes findings to a separate,
   clearly-labelled "AI — advisory (non-deterministic)" sidecar — never `_findings.md` (which
-  stays deterministic) and never the gate — and shall never auto-edit a requirement.
+  stays deterministic) and never the gate — and never auto-edits a requirement.
 - `review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a
   machine corpus plan with structural anchors, a coverage summary and category guidance for an
   out-of-band AI consumer — a different audience and shape, so they are not merged.
@@ -56,6 +57,9 @@ milestone: v1.14
 - The sidecar is its own channel (not folded into `_findings.md`) precisely to keep the
   deterministic findings surface reproducible; mixing a non-deterministic AI pass into it would
   break that property.
+- `lint_exempt: file-spread` — the `implements:` members are the engine's `review` command, the
+  advisory skill contract and its AI-agnostic variant: one capability whose deterministic half and
+  advisory half deliberately live in different files, not a diffuse one.
 
 ## HOW — Acceptance (= tests)
 AC-1

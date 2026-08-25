@@ -33,9 +33,9 @@ docs/superpowers/specs/*.md
 # --- app/ and repo-root scripts/ ---
 # app/ (Vite+React viewer source) and scripts/check_versions.py live at the
 # repo root — OUTSIDE plugin/'s scan root. They carry no implements: tags by
-# design: `npm run smoke` (app/CLAUDE.md) is the only automated check for the
-# viewer, and it is run manually, not wired into CI — this is a known gap
-# (TODO.md), not a claim that npm build already covers it. app/ is also
+# design: CI's `artifacts` job runs `npm run smoke` and rebuilds the vendored
+# viewer to prove it matches app/, but per-file tagging of app/src is still a
+# known gap (TODO.md), not a claim that npm build already covers it. app/ is also
 # excluded from the widened repo-root scan via the top-level .reqmapignore
 # (app/**), so this comment documents intent for the narrow invocation too.
 # The version-gate script is dev-CI tooling described in CLAUDE.md and

@@ -332,7 +332,7 @@ opts a check out with `lint_exempt: [check-name]` and records the reason in its 
 an exemption a reviewer can argue with beats a warning everyone learns to scroll past.
 
 **GitHub Actions** (enforces the gate for the whole team) — use the published
-action, pinned to `@v1`:
+action, pinned to `@v2`:
 
 ```yaml
 # .github/workflows/reqmap.yml
@@ -345,7 +345,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v1
+      - uses: alxmax/requirement-manager/check@v2
         # with:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives

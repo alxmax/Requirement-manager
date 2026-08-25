@@ -21,28 +21,28 @@ milestone: v1.18
 > versions ago", and only a human re-reading both sides would ever notice.
 
 ## WHAT — Contract (normative)
-- Member content hashes shall live in a separate, versioned sidecar `_memberlock.json`
+- Member content hashes live in a separate, versioned sidecar `_memberlock.json`
   (`{"_schema": N, "members": {id: {relfile: sha}}}`), so `_reqlock.json` stays a
   byte-stable cross-repo contract that an older seeded engine reads unchanged.
-- The sidecar shall fail open (treated as empty) when absent, corrupt, or written by a
+- The sidecar fails open (treated as empty) when absent, corrupt, or written by a
   newer `_schema` than the engine knows — degrading to "reverse-drift off this run"
   rather than crashing or mis-comparing.
-- Member hashes shall be recorded only for files dedicated to ONE requirement (an
+- Member hashes are recorded only for files dedicated to ONE requirement (an
   `implements:`/`generated-from:` member of exactly one id); a file shared by several
   requirements is excluded, because a change there cannot be attributed without noise.
-- Member hashes shall be computed on line-ending-normalized bytes (CRLF and lone CR folded
+- Member hashes are computed on line-ending-normalized bytes (CRLF and lone CR folded
   to LF), so a lock generated on a CRLF working tree (Windows `core.autocrlf=true`) matches
   one verified on LF (Linux/CI). Without this every member shows spurious cross-platform
   drift, which `--strict` escalates to errors — mirrors the contract hash, already
   LF-normalized via the text-mode body parse.
-- The gate shall warn for each confirmed requirement whose dedicated member changed since
+- The gate warns for each confirmed requirement whose dedicated member changed since
   the sidecar while the requirement's own contract hash did not. A requirement whose
   contract also drifted is skipped (forward drift already owns it).
-- A member with no recorded baseline shall not warn, so a freshly-tagged file is baselined
+- A member with no recorded baseline does not warn, so a freshly-tagged file is baselined
   on the next sync rather than nagged on first sight.
-- The check shall be warn-only by default and shall be promoted to an error under
+- The check is warn-only by default and is promoted to an error under
   `--strict` (it joins the same strict set as contract drift).
-- `--update-lock` shall re-baseline the sidecar in lockstep with `_reqlock.json`.
+- `--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.

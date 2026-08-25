@@ -17,32 +17,32 @@ milestone: v2.4
 > these defects impossible to ship silently.
 
 ## WHAT — Contract (normative)
-- `.save()` shall support five named gates, each accepting `"warn"` (default,
+- `.save()` supports five named gates, each accepting `"warn"` (default,
   prints) or `"error"` (raises `ValueError`): `crossing_check`, `legend_check`,
   `overflow_check`, `text_overlap_check`, `label_fit_check`.
 - `crossing_check`: a bound arrow whose straight centre-to-centre path passes
-  through an unrelated box shall trigger the gate.
+  through an unrelated box triggers the gate.
 - `legend_check`: a fill colour used on any shape but absent from the
-  `legend()` key shall trigger the gate (fires only after `legend()` is
+  `legend()` key triggers the gate (fires only after `legend()` is
   rendered; a scene with no legend is exempt).
 - `overflow_check`: a shape whose bound text is larger than the shape bounds
-  (text spills outside) shall trigger the gate.
+  (text spills outside) triggers the gate.
 - `text_overlap_check`: two free captions or label elements that geometrically
-  overlap each other shall trigger the gate.
+  overlap each other trigger the gate.
 - `label_fit_check`: a bound arrow whose text label is wider than the connector
   it sits on — leaving less than ~24px of visible line on each side, measuring
-  the label box projected onto the arrow direction — shall trigger the gate
+  the label box projected onto the arrow direction — triggers the gate
   (the label crowds the arrowheads or spills onto the joined boxes).
-- `.save()` shall additionally enforce two hard gates that raise `ValueError`
+- `.save()` additionally enforces two hard gates that raise `ValueError`
   by default (no `"warn"`/`"error"` mode), each with an opt-out flag for a
   deliberate exception: overlapping non-container shapes (`allow_overlap=True`)
   and a bound arrow clamped too short to render a visible line — only its label
   would show — (`allow_short_arrows=True`).
 - The inspection methods `check_overlaps()`, `check_arrow_crossings()`,
   `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`,
-  `check_short_arrows()`, `check_arrow_label_fit()` shall each return a list of
-  offending items (empty list = clean) and be callable before `.save()`.
-- `test_excalidraw.py` shall exercise the five named gates in both `"warn"` and
+  `check_short_arrows()`, `check_arrow_label_fit()` each return a list of
+  offending items (empty list = clean) and are callable before `.save()`.
+- `test_excalidraw.py` exercises the five named gates in both `"warn"` and
   `"error"` modes, and the two hard gates, for each maintained example
   generator.
 

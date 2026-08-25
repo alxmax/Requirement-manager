@@ -39,9 +39,20 @@ docs/superpowers/**
 .consilium/**
 
 # app/ (Vite+React viewer source) stays outside the widened scan this round —
-# see REQ-VIEWER-007's WHERE section. `npm run smoke` is the only automated
-# check for it and is not wired into CI (tracked separately, not this pass).
+# see REQ-VIEWER-007's WHERE section. CI's `artifacts` job runs `npm run smoke`
+# and rebuilds the vendored viewer to prove it matches app/; per-file tagging
+# of app/src is still open (TODO.md).
 app/**
+
+# Local-only caches and session artifacts (all gitignored). CI never sees them,
+# so leaving them scannable makes `next`/`coverage`/`health` report untagged
+# files that do not exist in the repo.
+.pytest_cache/**
+*/.pytest_cache/**
+.ruff_cache/**
+.superpowers/**
+# diagrams/: regenerable Excalidraw outputs (gitignored) + a README. No members.
+diagrams/**
 
 # docs/map.html is the published render of the SAME generated viewer template
 # excluded above (plugin/scripts/_map_viewer.html) — it inlines this repo's own

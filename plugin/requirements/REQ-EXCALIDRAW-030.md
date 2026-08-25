@@ -16,23 +16,23 @@ milestone: v2.4
 > can be vendored into any environment without install friction.
 
 ## WHAT — Contract (normative)
-- `Scene()` shall produce a valid Excalidraw JSON scene (schema version 2) with
+- `Scene()` produces a valid Excalidraw JSON scene (schema version 2) with
   a `type: "excalidraw"` root and a `elements` list compatible with
   excalidraw.com import.
-- `Scene` shall expose shape primitives: `box`, `ellipse`, `diamond`, `frame`.
-- `Scene` shall expose ISO 5807 flowchart aliases: `process`, `terminator`,
+- `Scene` exposes shape primitives: `box`, `ellipse`, `diamond`, `frame`.
+- `Scene` exposes ISO 5807 flowchart aliases: `process`, `terminator`,
   `decision`, `data`, `predefined_process`, `preparation`, `connector`.
-- `Scene` shall expose layout helpers: `row`, `column`, `grid`, `enclose`,
+- `Scene` exposes layout helpers: `row`, `column`, `grid`, `enclose`,
   `lane`, `pipeline`, `section`, `align`, `distribute`.
-- `Scene` shall expose annotation helpers: `title`, `label`, `legend`,
+- `Scene` exposes annotation helpers: `title`, `label`, `legend`,
   `glossary`, `role`.
-- `Scene` shall expose connector helpers: `arrow`, `free_arrow`, `path`,
+- `Scene` exposes connector helpers: `arrow`, `free_arrow`, `path`,
   `route_under`.
-- `.save(basename, out_dir)` shall write both `<basename>.excalidraw` (the
+- `.save(basename, out_dir)` writes both `<basename>.excalidraw` (the
   scene JSON) and `<basename>.html` (a self-contained viewer) in one call and
-  raise `RuntimeError` if called more than once on the same `Scene`.
-- `Scene(seed=<int>)` shall produce byte-identical output across re-runs.
-- The builder shall have no external dependencies — stdlib only.
+  raises `RuntimeError` if called more than once on the same `Scene`.
+- `Scene(seed=<int>)` produces byte-identical output across re-runs.
+- The builder has no external dependencies — stdlib only.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent.
