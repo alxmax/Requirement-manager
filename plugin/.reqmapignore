@@ -4,6 +4,9 @@
 # the engine must stay scanned. Add other vendored/generated paths below.
 # The bundled single-file viewer is a generated artifact, never a member.
 scripts/_map_viewer.html
+# Local test caches (gitignored): CI never sees them, and they are not code.
+.pytest_cache/**
+*/.pytest_cache/**
 
 # --- excalidraw-diagram skill ---
 # SKILL.md and its cross-platform SKILL.universal.md variant: classified as the

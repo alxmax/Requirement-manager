@@ -61,6 +61,14 @@ Every line in this section is binding.
 
 ## WHAT — Notes & known limitations (informative)
 - The member list is discovered, never hand-maintained — that is the first thing to rot.
+- The realpath comparison for the SSOT directory runs only for a directory whose name
+  matches it; resolving every directory was 62% of one consumer's gate time (4,900 upload
+  folders). A directory that a `.reqmapignore` pattern ending in `/**` or `/*` covers is not
+  descended at all — every file under it matched the pattern anyway, so results are identical.
+- Scanned schema files and basenames grew from the first consumer evidence run (2026-08-25):
+  `.prisma`, `.graphql`, `.proto`, `Caddyfile`, `Jenkinsfile`, `Procfile`, `Vagrantfile`, and any
+  `Dockerfile.<variant>`. A
+  tag in any other type is reported by [[REQ-UNSCANNEDTAG-045]] rather than lost.
 
 ## HOW — Acceptance (= tests)
 AC-1

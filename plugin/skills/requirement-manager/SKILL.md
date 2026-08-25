@@ -284,6 +284,7 @@ expected and acceptable.
 | AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
 | member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
 | untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
+| tag in a file type the scan never reads (not a member) | **WARN** | exit 0 |
 | orphan code (150+-line program file with no membership tag) | **WARN** (never strict-promoted) | exit 0 |
 
 Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI

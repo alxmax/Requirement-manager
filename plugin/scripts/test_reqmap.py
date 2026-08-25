@@ -5734,6 +5734,131 @@ class NewNumberCollision(unittest.TestCase):  # tested-by: REQ-NEW-004
             self.assertNotIn("WARN", out)
 
 
+
+class PruneDirs(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    """The walk's prune step: SSOT dir by realpath (name-gated), ignored dirs not descended."""
+
+    def test_source_package_named_requirements_is_still_scanned(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-A-001.md"), REQ.format(id="REQ-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(d, "pkg", "requirements", "impl.py"), "x = 1  " + tag("REQ-A-001"))
+            members = R.scan_members(d, rd)
+            self.assertIn("pkg/requirements/impl.py", [fp for _, fp, _ in members["REQ-A-001"]])
+
+    def test_ssot_dir_is_pruned_and_realpath_is_name_gated(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            os.makedirs(os.path.join(d, "src"))
+            dirs = ["requirements", "src", "node_modules"]
+            calls = []
+            real = os.path.realpath
+            with mock.patch.object(R.os.path, "realpath", side_effect=lambda p: calls.append(p) or real(p)):
+                R._prune_dirs(d, dirs, rd)
+            self.assertEqual(dirs, ["src"])
+            self.assertTrue(all("requirements" in os.path.basename(c) for c in calls))   # never for src/
+
+    def test_ignore_dir_pattern_prunes_the_walk(self):
+        dirs = ["build", "src", "docs"]
+        R._prune_dirs("/root", dirs, None, code_root="/root", ignore=["build/**", "docs/*.md"])
+        self.assertEqual(dirs, ["src", "docs"])        # docs/*.md is a file pattern: docs stays
+
+    def test_dockerfile_variants_and_schema_files_are_code(self):
+        for fn in ("Dockerfile.converter", "Dockerfile.dev", "Caddyfile", "schema.prisma", "api.graphql", "x.proto"):
+            self.assertTrue(R._is_code_file(fn), fn)
+        self.assertFalse(R._is_code_file("Dockerfile-notes.txt"))
+
+    def test_prune_without_ignore_keeps_everything_but_noise(self):
+        dirs = [".git", "build", "__pycache__", "src"]
+        R._prune_dirs("/root", dirs, None)
+        self.assertEqual(dirs, ["build", "src"])
+
+
+class UntaggedIgnoreBucket(unittest.TestCase):  # tested-by: REQ-NEXT-013
+    def test_meta_prose_is_not_untagged(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "CLAUDE.md"), "# guide" + chr(10))
+            _write(os.path.join(d, "TODO.md"), "- [ ] x" + chr(10))
+            _write(os.path.join(d, "README.md"), "# readme" + chr(10))
+            _write(os.path.join(d, "a.py"), "x = 1" + chr(10))
+            out = R._scan_untagged(d)
+            self.assertIn("a.py", out)
+            self.assertIn("README.md", out)             # sync-only prose is still listed
+            self.assertNotIn("CLAUDE.md", out)
+            self.assertNotIn("TODO.md", out)
+
+
+class EngineVersionFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
+    def test_engine_version_alone_is_not_stale(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"), REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            reqs = R.load_requirements(rd)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(reqs, {}, rd, d)
+            p = os.path.join(rd, "_map.json")
+            with open(p, encoding="utf-8") as f:
+                text = f.read()
+            self.assertIn('"engine_version": "' + R.MAP_ENGINE_VERSION + '"', text)
+            _write(p, text.replace('"engine_version": "' + R.MAP_ENGINE_VERSION + '"', '"engine_version": "2000-01-01"'))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_map(reqs, {}, rd, d, True)
+            self.assertEqual(code, 0, buf.getvalue())
+
+
+class UnscannedTags(unittest.TestCase):  # tested-by: REQ-UNSCANNEDTAG-045
+    """A tag in a file type the scan never reads is not a member — say so."""
+
+    def _repo(self, d):
+        subprocess.run(["git", "init", d], check=True, capture_output=True)
+        for cfg in (["config", "user.email", "t@t.com"], ["config", "user.name", "T"]):
+            subprocess.run(["git", "-C", d] + cfg, check=True, capture_output=True)
+
+    def _commit_all(self, d):
+        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
+        subprocess.run(["git", "-C", d, "commit", "-q", "-m", "t"], check=True, capture_output=True)
+
+    def test_tag_in_unscanned_type_is_reported_and_gate_warns(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-A-001.md"), REQ.format(id="REQ-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(d, "a.py"), "x = 1  " + tag("REQ-A-001"))
+            _write(os.path.join(d, "config.custom"), "# implements: REQ-A-001" + chr(10))
+            _write(os.path.join(d, "notes.txt"), "no tag here" + chr(10))
+            _write(os.path.join(d, "_derived.custom"), "implements: REQ-A-001" + chr(10))   # _-prefixed: skipped
+            _write(os.path.join(d, ".toolrc"), "# example: implements: REQ-A-001" + chr(10))    # dotfile: skipped
+            with open(os.path.join(d, "pic.png"), "wb") as f:
+                f.write(b"\x89PNG implements: REQ-A-001")
+            self._commit_all(d)
+            self.assertEqual(R.tagged_unscanned_files(d, rd), ["config.custom"])
+            reqs = R.load_requirements(rd)
+            members = R.scan_members(d, rd)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rd, False, code_root=d)
+            self.assertEqual(rc, 0)
+            self.assertIn("never reads", buf.getvalue())
+            self.assertIn("config.custom", buf.getvalue())
+
+    def test_reqmapignore_and_ssot_dir_are_skipped(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d)
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "REQ-A-001.md"), REQ.format(id="REQ-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(rd, "map.custom"), "implements: REQ-A-001" + chr(10))        # under the SSOT dir
+            _write(os.path.join(d, "vendor", "x.custom"), "implements: REQ-A-001" + chr(10))  # ignored path
+            _write(os.path.join(d, ".reqmapignore"), "vendor/**" + chr(10))
+            self._commit_all(d)
+            self.assertEqual(R.tagged_unscanned_files(d, rd), [])
+
+    def test_outside_git_returns_none(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "config.custom"), "implements: REQ-A-001" + chr(10))
+            self.assertIsNone(R.tagged_unscanned_files(d))
+
+
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.

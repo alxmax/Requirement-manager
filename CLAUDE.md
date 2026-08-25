@@ -135,7 +135,7 @@ The viewer is the Vite + React app under `app/`. Its single-file build is vendor
 
 See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
-**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .go .rs .html .css .sql .yaml .yml .md` (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs). Prunes `.git`, `node_modules`, `__pycache__` automatically. Non-code capability *discovery* (`plan --md-glob`, internally `cmd_candidates`) is separate and opt-in.
+**Scanning scope:** walks the repo for `.py .js .ts .tsx .jsx .c .cpp .h .hpp .cc .java .go .rs .html .css .sql .yaml .yml .sh .tf .prisma .graphql .proto .md` plus the basenames `Dockerfile Makefile Caddyfile Jenkinsfile Procfile Vagrantfile`, `Dockerfile.*` variants and git hook names (`.md` so prose capabilities — prompts/specs — can carry membership tags). Respects `.reqmapignore` (fnmatch globs); a pattern ending in `/**` or `/*` also prunes the walk. Prunes `.git`, `node_modules`, `__pycache__` automatically. A tag in any other file type is reported by the gate (`REQ-UNSCANNEDTAG-045`), not silently lost. Non-code capability *discovery* (`plan --md-glob`, internally `cmd_candidates`) is separate and opt-in.
 
 ## Plugin packaging
 

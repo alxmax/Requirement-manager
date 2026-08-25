@@ -48,6 +48,8 @@ Every line in this section is binding.
   therefore excluded from the `map --check` freshness diff.
 - Resolving `repo` never raises and never blocks map generation, because git may be
   absent or the tree may not be a checkout.
+- `engine_version` is likewise excluded from the `map --check` freshness diff. Updating the
+  vendored engine alone never makes a committed map stale; the next `sync` refreshes it.
 - `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
   `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
   requirements.

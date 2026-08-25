@@ -87,6 +87,7 @@ TEST_LEVEL_RE = re.compile(
 CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".sh", ".tf",
+             ".prisma", ".graphql", ".proto",   # schema files: a consumer tagged schema.prisma and nothing read it
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
 
 # Extensionless filenames scanned by exact basename match (no case-fold — CODE_EXTS
@@ -96,6 +97,7 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
 # pipeline code v2.9's "tag your own pipeline" item covers; an unrelated file that
 # happens to share one of these names is a harmless no-op scan (no tag = no member).
 BASENAME_CODE_FILES = {"Dockerfile", "Makefile",
+                       "Caddyfile", "Jenkinsfile", "Procfile", "Vagrantfile",
                        "pre-commit", "pre-push", "pre-receive", "post-receive",
                        "commit-msg", "prepare-commit-msg", "post-checkout", "post-merge"}
 
@@ -113,9 +115,10 @@ if _extra_exts:
 
 
 def _is_code_file(fn):  # implements: CORE-SCAN-002
-    """True if fn should be scanned as code: matches CODE_EXTS, or is an
-    extensionless basename like Dockerfile/Makefile."""
-    return fn.endswith(CODE_EXTS) or fn in BASENAME_CODE_FILES
+    """True if fn should be scanned as code: matches CODE_EXTS, an extensionless
+    basename like Dockerfile/Makefile, or a Dockerfile variant (`Dockerfile.dev`,
+    `Dockerfile.converter` — a consumer tagged one and nothing read it)."""
+    return fn.endswith(CODE_EXTS) or fn in BASENAME_CODE_FILES or fn.startswith("Dockerfile.")
 
 # ---- prose auto-draft classification (cmd_extract) ----
 # These buckets govern AUTO behavior (drafting) ONLY. scan_members still honors an
@@ -156,7 +159,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-25.2"
+MAP_ENGINE_VERSION = "2026-08-25.3"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -839,19 +842,38 @@ def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
     return reqs
 
 
-def _prune_dirs(dirpath, dirs, reqs_dir):  # implements: CORE-SCAN-002
+_REQS_REAL_CACHE = {}   # reqs_dir -> realpath, resolved once per process
+
+
+def _prune_dirs(dirpath, dirs, reqs_dir, code_root=None, ignore=()):  # implements: CORE-SCAN-002
     """Drop noise dirs and the SSOT output dir from an os.walk in place.
 
     Excludes ONLY the actual requirements dir (by realpath), not every folder
     that happens to be named 'requirements' — a source package named
-    requirements/ must still be scanned."""
-    reqs_real = os.path.realpath(reqs_dir) if reqs_dir else None
+    requirements/ must still be scanned. The realpath comparison runs only for a
+    directory whose NAME matches the SSOT dir's: resolving every directory on the
+    walk was 62% of one consumer's gate time (4,900 upload folders, 35k realpath
+    calls for a 216-file scan).
+
+    With `code_root` and `ignore`, a directory that a `.reqmapignore` pattern ending
+    in `/**` or `/*` already covers is not descended at all. Every file under it
+    matched the pattern anyway, so the result is identical — only the stat calls go."""
+    reqs_name = os.path.normcase(os.path.basename(os.path.normpath(reqs_dir))) if reqs_dir else None
+    dir_pats = [p for p in ignore if p.endswith(("/**", "/*"))]
     keep = []
     for d in dirs:
         if d in (".git", "node_modules", "__pycache__"):
             continue
-        if reqs_real and os.path.realpath(os.path.join(dirpath, d)) == reqs_real:
-            continue
+        if reqs_name and os.path.normcase(d) == reqs_name:
+            real = _REQS_REAL_CACHE.get(reqs_dir)
+            if real is None:
+                real = _REQS_REAL_CACHE[reqs_dir] = os.path.realpath(reqs_dir)
+            if os.path.realpath(os.path.join(dirpath, d)) == real:
+                continue
+        if dir_pats and code_root is not None:
+            rel = os.path.relpath(os.path.join(dirpath, d), code_root).replace(os.sep, "/") + "/"
+            if any(fnmatch.fnmatch(rel, p) for p in dir_pats):
+                continue
         keep.append(d)
     dirs[:] = keep
 
@@ -1050,7 +1072,7 @@ def _walk_code(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
     """
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
+        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         dirs.sort()                  # deterministic descent — raw os.walk order is OS-dependent
         for fn in sorted(files):     # deterministic file order — the map must not depend on the filesystem
             if not _is_code_file(fn):
@@ -1283,6 +1305,63 @@ def untracked_members(code_root, members):  # implements: REQ-TRACKED-042
 
 
 
+# Never worth opening for a tag: a tag can only live in text a human wrote.
+_BINARY_EXTS = (".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".zip", ".gz", ".tgz", ".7z",
+                ".woff", ".woff2", ".ttf", ".otf", ".eot", ".docx", ".xlsx", ".pptx", ".exe",
+                ".dll", ".so", ".dylib", ".bin", ".jar", ".class", ".pyc", ".lock", ".mp3", ".mp4")
+_UNSCANNED_MAX_BYTES = 1_000_000
+
+
+def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: REQ-UNSCANNEDTAG-045
+    """Sorted rel-paths of TRACKED files the scan never reads (extension/basename
+    outside CODE_EXTS/BASENAME_CODE_FILES) that nonetheless carry a membership tag,
+    or None when git cannot answer. A tag in such a file is silently not a member:
+    the first consumer run had a tagged Caddyfile and a tagged Prisma schema, both
+    invisible. Bounded by `git ls-files` like untracked_members, skips `.reqmapignore`
+    matches, the SSOT dir, `_`-prefixed and binary/oversized files; a non-UTF-8 file
+    is skipped, never reported."""
+    try:
+        result = subprocess.run(
+            ["git", "-c", "core.quotepath=off", "ls-files", "-z"],
+            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=30,
+        )
+        if result.returncode != 0:
+            return None
+    except Exception:
+        return None
+    ignore = load_ignore(code_root, reqs_dir)
+    reqs_rel = None
+    if reqs_dir:
+        try:
+            reqs_rel = os.path.relpath(reqs_dir, code_root).replace(os.sep, "/") + "/"
+        except ValueError:
+            reqs_rel = None
+    out = []
+    for rel in result.stdout.split("\0"):
+        if not rel:
+            continue
+        fn = os.path.basename(rel)
+        # dotfiles are config, and their comments quote tags as examples (this repo's own
+        # .reqmapignore explains an illustration id) — never a place a real member lives
+        if _is_code_file(fn) or fn.startswith(("_", ".")) or fn.lower().endswith(_BINARY_EXTS):
+            continue
+        if reqs_rel and not reqs_rel.startswith("../") and rel.startswith(reqs_rel):
+            continue
+        if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
+            continue
+        fp = os.path.join(code_root, rel.replace("/", os.sep))
+        try:
+            if os.path.getsize(fp) > _UNSCANNED_MAX_BYTES:
+                continue
+            with open(fp, encoding="utf-8") as f:
+                text = f.read()
+        except (OSError, ValueError):
+            continue
+        if TAG_RE.search(text):
+            out.append(rel)
+    return sorted(out)
+
+
 def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-DOCBUNDLE-026
     """Sorted rel-paths of large `docs/` HTML docs that carry no `generated-from:`
     tag — the doc-sync blind spot: a whole-system doc (built from many requirements)
@@ -1296,7 +1375,7 @@ def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-
     ignore = load_ignore(code_root, reqs_dir)
     out = []
     for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
+        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         for fn in sorted(files):
             if not fn.endswith(".html") or fn.startswith("_") or fn == "map.html":
                 continue
@@ -1320,7 +1399,7 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
     ignore = load_ignore(code_root, reqs_dir)
     untagged = []
     for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
+        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         dirs.sort()
         for fn in sorted(files):
             if not _is_code_file(fn):
@@ -1329,6 +1408,8 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
+            if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
+                continue   # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by contract (REQ-PROSE-024)
             tags = _scan_file_tags(fp)
             if tags is not None and not tags:
                 untagged.append(rel)
@@ -1352,7 +1433,7 @@ def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: REQ-ORP
     ignore = load_ignore(code_root, reqs_dir)
     out = []
     for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
+        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         for fn in sorted(files):
             if not fn.endswith(ORPHAN_CODE_EXTS):
                 continue
@@ -1378,7 +1459,7 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     cover = {}  # cap_id -> {ac_label -> [(file, line)]}
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
+        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
         for fn in sorted(files):
             if not _is_code_file(fn):
@@ -2026,6 +2107,16 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             "or exclude them in .reqmapignore.".format(
                 len(_untracked), ", ".join(_untracked[:5])
                 + ("" if len(_untracked) <= 5 else ", …")))
+
+    # Tags the scan cannot see: a tag in a file type outside CODE_EXTS is not a member,
+    # and until now nothing said so. Warn-only, fail-open outside a work tree.
+    _unscanned = tagged_unscanned_files(code_root, reqs_dir)   # implements: REQ-UNSCANNEDTAG-045
+    if _unscanned:
+        warns.append(
+            "{} tag(s) in file type(s) the scan never reads: {} — those files are not members. "
+            "Move the tag into a scannable file, or ask for the type to be added to the scan.".format(
+                len(_unscanned), ", ".join(_unscanned[:5])
+                + ("" if len(_unscanned) <= 5 else ", …")))
 
     # Coverage erosion: a sizeable program file with no requirement link implements
     # behavior no requirement describes. Plain warn — NEVER strict-promoted (the
@@ -4487,7 +4578,8 @@ def _strip_generated(text):
     forks/clones — comparing it would make `map --check` spuriously fail on a fork."""
     return "\n".join(l for l in text.splitlines()
                      if not l.startswith("generated: ")
-                     and not l.lstrip().startswith('"repo":'))
+                     and not l.lstrip().startswith('"repo":')
+                     and not l.lstrip().startswith('"engine_version":'))
 
 
 def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
