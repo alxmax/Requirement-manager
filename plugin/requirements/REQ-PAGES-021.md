@@ -18,17 +18,17 @@ milestone: v1.04
 
 ## WHAT — Contract (normative)
 - When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub
-  Pages signal (a `.nojekyll` or `index.html` file present), `map` shall also copy `_map.html`
+  Pages signal (a `.nojekyll` or `index.html` file present), `map` also copies `_map.html`
   to `docs/map.html`. When no signal is present, or git is absent, `docs/map.html` is not
   written — the behaviour is opt-in by folder contents, so a repo that does not publish a
   page is unaffected.
-- `map --check` (the no-write freshness gate) shall additionally flag `docs/map.html` as stale
+- `map --check` (the no-write freshness gate) additionally flags `docs/map.html` as stale
   when it differs from a fresh viewer render of the current registry. This applies only when
   the Pages signal and the viewer template `_map_viewer.html` are both present and
   `docs/map.html` already exists. A copy that was never generated is not stale (the same
   absent-file rule the gate applies to `_map.*`).
-- The freshness comparison shall read the on-disk copy as text so a platform newline
-  difference (CRLF vs LF) never raises a false positive. It shall exclude the git-derived
+- The freshness comparison reads the on-disk copy as text so a platform newline
+  difference (CRLF vs LF) never raises a false positive. It excludes the git-derived
   `repo` field (as the `_map.json` check does), so a fork or clone with a different remote
   is not spuriously flagged; the rest of the injected data carries no wall-clock value, so
   the comparison is deterministic.

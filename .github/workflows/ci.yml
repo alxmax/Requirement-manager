@@ -66,6 +66,14 @@ jobs:
               echo "plugin semver: **v$VERSION** — see \`CHANGELOG.md\`."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+      # An engine change must move MAP_ENGINE_VERSION, or seeded copies (and the
+      # action's staleness probe) keep reporting themselves current — v2.24.0 and
+      # v2.25.0 both shipped that way. HEAD~1 is the merge base on a PR checkout
+      # and the previous tip on a push; the script SKIPs when it does not resolve.
+      - name: Engine change carries a MAP_ENGINE_VERSION bump
+        run: python scripts/check_engine_bump.py --base HEAD~1
+      - name: Engine-bump check tests
+        run: python -X utf8 scripts/test_check_engine_bump.py
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
       - name: Requirement drift gate
@@ -125,6 +133,8 @@ jobs:
         run: python -X utf8 -m unittest test_reqmap -v
       - name: Version-gate tests
         run: python -X utf8 scripts/test_check_versions.py
+      - name: Engine-bump check tests
+        run: python -X utf8 scripts/test_check_engine_bump.py
       - name: Engine-staleness probe tests
         run: python -X utf8 scripts/test_engine_staleness.py
       - name: Release-notes extraction tests

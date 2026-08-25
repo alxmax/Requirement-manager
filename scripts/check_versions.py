@@ -20,7 +20,8 @@ Three independent axes are checked:
               line, and the release job force-moves it onto each released commit. The
               documented `uses:` reference IS the source of truth (there is no separate
               version file to fall out of step with the docs), so every occurrence
-              across check/action.yml, README.md and CLAUDE.md must name the same major.
+              across check/action.yml, README.md, CLAUDE.md and the two requirement-manager
+              SKILL files must name the same major.
               This axis exists because `@v1` sat frozen 193 commits behind main for two
               months while the README kept advertising it.
 
@@ -46,7 +47,13 @@ MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap.py"
 # Files that quote the action's major-alias tag. action.yml is listed first: it is the
 # file the tag actually publishes, so it is reported as the canonical one on a mismatch.
-ACTION_REF_FILES = ("check/action.yml", "README.md", "CLAUDE.md")
+ACTION_REF_FILES = (
+    "check/action.yml", "README.md", "CLAUDE.md",
+    # The skill files are what a consumer actually reads when wiring CI — they
+    # advertised `@v1` for three releases after the docs above moved to `@v2`.
+    "plugin/skills/requirement-manager/SKILL.md",
+    "plugin/skills/requirement-manager/SKILL.universal.md",
+)
 
 # line-anchored so a docstring/comment mention before the real assignment can't win
 MAP_ENGINE_RE = re.compile(r'^MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)

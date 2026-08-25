@@ -143,9 +143,9 @@ AC-6
   These files carry no `implements:` tags — app/ is deliberately excluded from the widened
   repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the
   engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md)
-  is the only automated check for the viewer, and it is run manually before vendoring, not
-  wired into CI or reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as
-  covered.
+  runs in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the
+  committed copy differs; per-file tagging of app/src stays outside reqmap's gate — a known
+  gap, tracked in TODO.md, not silently claimed as covered.
 
 ## Links
 - Used by: (auto)

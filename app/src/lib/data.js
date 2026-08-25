@@ -288,7 +288,7 @@ const BAKED = [
       "`init` creates the requirements folder if it is missing.",
       "`init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites one that is already there.",
       "The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look like they point at requirements that do not exist.",
-      "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan must keep reading it.",
+      "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan keeps reading it.",
       "\"Describes itself\" means `scripts/reqmap.py` carries tags whose ids match requirements already in the repo.",
       "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order. When it finishes, the repo passes the gate and has a map.",
       "`init` ends with a short summary naming one next command: `reqmap.py next`. Not a list of every option.",

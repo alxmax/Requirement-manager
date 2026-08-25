@@ -2,8 +2,17 @@
   "_schema": 1,
   "members": {
     "REQ-REVIEW-022": {
-      "skills/requirement-quality-review/SKILL.md": "ac0eebecc69ff0b77c3954b58cd4f1142c6a565fc250528eb18aab9f7ac86451",
-      "skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+      "plugin/skills/requirement-quality-review/SKILL.md": "ac0eebecc69ff0b77c3954b58cd4f1142c6a565fc250528eb18aab9f7ac86451",
+      "plugin/skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+    },
+    "REQ-SELFGATE-039": {
+      ".githooks/pre-commit": "14855c4cd9fbe5bfecf8f5f4a966bab6a24e351cbc21c938ac772f724ac7e52c",
+      ".githooks/pre-push": "3824b141fa44ac6bb0afa5625cbd68f5705498c84fefe925848b422946bae9ad",
+      "scripts/check_versions.py": "c1a27f6264332bacef21a79bd524346738e2e3978fe48106acc4c5ea20778736",
+      "sync_reqmap.sh": "4a0c10a01b101e65788feeab06b5fd30d82c1538fc5ad8d6d151a88d9dc9a573"
+    },
+    "REQ-STALEENGINE-043": {
+      "check/engine_staleness.py": "6dd46f9ce1c815bc3a707bd0ce801a152b4cde1a90e63e6bb1eca56fdc34e71f"
     }
   }
 }

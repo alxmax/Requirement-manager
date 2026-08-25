@@ -3,10 +3,11 @@
 # requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
-#   2. map staleness  — committed _map.* vs current code   (fix: reqmap.py map --root plugin --code .)
-#   3. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
+#   2. engine bump    — reqmap.py staged without a MAP_ENGINE_VERSION change (fix: bump it)
+#   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py map --root plugin --code .)
+#   4. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
-#   check_versions.py -> gate -> lint --strict -> map --check
+#   check_versions.py -> check_engine_bump.py -> gate -> lint --strict -> map --check
 #
 # Enable once (from the repo root):  git config core.hooksPath .githooks
 # Bypass once:  git commit --no-verify
@@ -15,6 +16,11 @@ if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
 if ! "$PY" scripts/check_versions.py; then
   echo "" >&2
   echo "version drift — run 'python scripts/check_versions.py --fix' to sync, then re-stage." >&2
+  exit 1
+fi
+if ! "$PY" -X utf8 scripts/check_engine_bump.py --staged; then
+  echo "" >&2
+  echo "engine changed without a MAP_ENGINE_VERSION bump — set it to today's date in reqmap.py and re-stage." >&2
   exit 1
 fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin --code .; then

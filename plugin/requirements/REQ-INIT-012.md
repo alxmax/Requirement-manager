@@ -32,8 +32,8 @@ Every line in this section is binding.
 - The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look
   like they point at requirements that do not exist.
 - One exception: if the engine describes itself in this repo, `init` leaves the line out and
-  writes a comment saying why. There the engine is ordinary tracked code, so the scan must
-  keep reading it.
+  writes a comment saying why. There the engine is ordinary tracked code, so the scan keeps
+  reading it.
 - "Describes itself" means `scripts/reqmap.py` carries tags whose ids match requirements
   already in the repo.
 

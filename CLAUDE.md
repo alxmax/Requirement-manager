@@ -66,6 +66,8 @@ From the **repo root** (not `plugin/`) — the packaging/release side:
 ```bash
 python scripts/check_versions.py        # plugin.json semver == marketplace.json (x2); validates MAP_ENGINE_VERSION shape. --fix syncs.
 python -X utf8 scripts/test_check_versions.py
+python scripts/check_engine_bump.py --base main   # reqmap.py changed => MAP_ENGINE_VERSION must have changed (CI: --base HEAD~1; hook: --staged)
+python -X utf8 scripts/test_check_engine_bump.py
 python -X utf8 scripts/test_changelog_notes.py    # release-notes extraction (CI runs it with cwd=scripts/)
 python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync→gate→map: the AI-agnostic falsification test
 python -X utf8 plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py   # builder smoke + layout/overlap self-checks
@@ -81,7 +83,7 @@ A third, non-authoritative job — `quality` — measures the engine rather than
 The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` → `reqmap.py lint --strict --code ..` → `reqmap.py map --check --code ..` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — removed in the next major.)
 
 **Hooks — two different files, don't confuse them:**
-- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `gate` → `lint --strict` → `map --check`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
+- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `check_engine_bump.py --staged` → `gate` → `lint --strict` → `map --check`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
 - `plugin/hooks/pre-commit` is the hook **shipped to consumer repos** — editing it changes consumer behaviour and needs a semver bump.
 
 `sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into the local plugin cache and any consumer repos passed as args; it only refreshes an *existing* vendored engine, never seeds one.
@@ -99,7 +101,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 
 **Design decisions live in `docs/adr/`** (14 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and three rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — 5,544 lines measured 2026-08-21, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — 5,895 lines measured 2026-08-25, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `REQ-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
 
@@ -141,13 +143,13 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 **Two independent version numbers — don't conflate them:**
 - **Plugin semver** lives in *three* places kept in lockstep by `check_versions.py`: `version` in `plugin.json`, plus the top-level `version` and `plugins[].version` in `marketplace.json`. **Any** shipped change — engine *or* a skill edit — must bump this semver, or installed copies won't pick it up via `/plugin update` (a skill edit with no bump is silently invisible to consumers).
-- **`MAP_ENGINE_VERSION`** inside `reqmap.py` (ISO date `YYYY-MM-DD`, optional `.N` same-day suffix, e.g. `2026-06-03.2`) is engine-only — it lets a seeded copy of `reqmap.py` detect it is behind. Bump it only on engine changes.
+- **`MAP_ENGINE_VERSION`** inside `reqmap.py` (ISO date `YYYY-MM-DD`, optional `.N` same-day suffix, e.g. `2026-06-03.2`) is engine-only — it lets a seeded copy of `reqmap.py` detect it is behind. Bump it on **every** change to `reqmap.py`, comments included (the staleness probe compares files, not behaviour); `scripts/check_engine_bump.py` enforces this in CI (`--base HEAD~1`) and in the dev hook (`--staged`).
 
 **A semver bump must ship with a CHANGELOG entry.** CI fails the build when `plugin/.claude-plugin/plugin.json`'s version changed in the commit but `CHANGELOG.md` has no heading containing `` `vX.Y.Z` `` (the backticked form is what the grep matches). On pushes to `main` the `release` job then cuts tag `vX.Y.Z` from `plugin.json` — idempotent, so a non-bumping push creates nothing — with notes extracted from that same CHANGELOG section by `scripts/changelog_notes.py`. Tags therefore follow `plugin.json`, never the other way round.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v2`. The `@vN` alias is a third version axis, independent of the plugin semver and of `MAP_ENGINE_VERSION`. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md` and this file agree (the documented `uses:` line is the source of truth — there is no separate version file). Bump the major by editing those three references in one commit, and only for a change that breaks an existing caller — adding a default-on step counts, which is why `@v1` (gate-only, frozen at v2.1.0 content) was left in place rather than re-pointed. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v2`. The `@vN` alias is a third version axis, independent of the plugin semver and of `MAP_ENGINE_VERSION`. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). Bump the major by editing those five references in one commit, and only for a change that breaks an existing caller — adding a default-on step counts, which is why `@v1` (gate-only, frozen at v2.1.0 content) was left in place rather than re-pointed. Consumer repos use it as:
 ```yaml
 - uses: alxmax/requirement-manager/check@v2
 ```

@@ -348,12 +348,13 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 5,544 lines on 2026-08-21)
+  scripts/reqmap.py                         the engine (Python stdlib only, 5,895 lines on 2026-08-25)
   scripts/test_reqmap.py                    the engine's own regression suite (importable: `python scripts/test_reqmap.py`)
   requirements/*.md                         the source of truth (one file per capability)
   requirements/_reqlock.json                the drift baseline (committed)
 scripts/
   check_versions.py                         version-coherence gate (plugin.json vs marketplace.json)
+  check_engine_bump.py                      engine-change gate (reqmap.py diff => MAP_ENGINE_VERSION must move)
   test_cross_tool.py                        headless integration test — sync->gate->map, no AI needed
 app/                                        the React viewer (built into the single-file _map.html)
 docs/                                       guides, plans + specs

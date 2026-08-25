@@ -17,9 +17,9 @@ milestone: v1.06
 > every README would pollute it with junk drafts.
 
 ## WHAT — Contract (normative)
-- `draft` shall also produce `draft`-status requirements from untagged **prose** files
+- `draft` also produces `draft`-status requirements from untagged **prose** files
   (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.
-- Each prose file shall be classified into one of three buckets before drafting:
+- Each prose file is classified into one of three buckets before drafting:
   - **ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`,
     `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`,
     `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).
@@ -28,9 +28,9 @@ milestone: v1.06
     drift-checked) when a human tags them `generated-from: <ID>`.
   - **capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These
     are auto-drafted.
-- The buckets shall govern auto-drafting ONLY; an explicit tag on any file is always
+- The buckets govern auto-drafting ONLY; an explicit tag on any file is always
   honored by the scanner regardless of bucket (so a hand-tagged README is still a member).
-- A prose draft shall be scaffolded from the file's title (frontmatter `title:`, else the
+- A prose draft is scaffolded from the file's title (frontmatter `title:`, else the
   first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings,
   recorded as an authoring hint.
 - The source prose is never the contract: the drift hash anchors on the authored

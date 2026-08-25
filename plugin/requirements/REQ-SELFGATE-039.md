@@ -6,6 +6,7 @@ owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: [REQ-CHECK-006]     # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
+lint_exempt: [file-spread]
 test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per AC-1/AC-2. AC-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)
 # area:              # optional: System Map grouping label (else the id prefix is used)
 ---
@@ -36,6 +37,8 @@ Every line in this section is binding.
 ## WHAT — Notes & known limitations (informative)
 - This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own
   behavior — that contract lives in [[REQ-CHECK-006]].
+- `lint_exempt: file-spread` — spanning CI, the composite action, both dev hooks and the sync
+  script is the capability (the gate wired at every entry point), not a sign it is diffuse.
 
 ## HOW — Acceptance (= tests)
 AC-1

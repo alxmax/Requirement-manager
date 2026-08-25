@@ -19,13 +19,15 @@ import check_versions as CV
 
 
 def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
-           engine="2026-06-21.4", plugins=None, action_majors=("v2", "v2", "v2")):
-    """action_majors: the major each of (action.yml, README.md, CLAUDE.md) references;
-    None for a file that carries no reference at all."""
+           engine="2026-06-21.4", plugins=None, action_majors=()):
+    """action_majors: the major each file in CV.ACTION_REF_FILES (in order) references;
+    None for a file that carries no reference at all. Files past the end of the
+    tuple default to "v2"."""
     d = Path(d)
-    (d / "check").mkdir(parents=True, exist_ok=True)
-    for rel, major in zip(CV.ACTION_REF_FILES, action_majors):
+    majors = tuple(action_majors) + ("v2",) * (len(CV.ACTION_REF_FILES) - len(action_majors))
+    for rel, major in zip(CV.ACTION_REF_FILES, majors):
         body = "" if major is None else "uses: alxmax/requirement-manager/check@{}".format(major)
+        (d / rel).parent.mkdir(parents=True, exist_ok=True)
         (d / rel).write_text(body, encoding="utf-8")
     (d / "plugin" / ".claude-plugin").mkdir(parents=True, exist_ok=True)
     (d / ".claude-plugin").mkdir(parents=True, exist_ok=True)
@@ -93,6 +95,14 @@ class CheckVersions(unittest.TestCase):
         exact failure this axis exists for: @v1 in the docs, moved-on content in the repo."""
         with tempfile.TemporaryDirectory() as d:
             _setup(d, action_majors=("v2", "v1", "v2"))
+            self.assertEqual(self._run(d), 1)
+
+    def test_action_alias_skill_file_lagging_fails(self):  # tested-by: REQ-SELFGATE-039
+        """SKILL.md is the file a consumer copies its workflow from. It kept `@v1` for
+        three releases after README/CLAUDE.md moved to `@v2` because it was not in
+        ACTION_REF_FILES — this pins that it is now."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, action_majors=("v2", "v2", "v2", "v1", "v2"))
             self.assertEqual(self._run(d), 1)
 
     def test_action_alias_missing_reference_fails(self):
