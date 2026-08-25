@@ -189,6 +189,20 @@
            with no cache entry. Scoped from a 9-senator Senate audit (MODIFY, 3 blocking + 3
            advisory conditions) plus a follow-up request for majority-language corpus detection
            instead of mandatory per-file `lang:` tagging. -->
+- [x] Scan-evidence run 6 — Management_Dashboard (TS/TSX, SQL, shell, Dockerfile, Caddyfile, Prisma, YAML, JSON, Markdown): four engine defects found and fixed in v2.27.0 | lane: ops
+      <!-- 2026-08-25, PR #191. Findings: (1) tags in Caddyfile / schema.prisma / Dockerfile.converter
+           were invisible — types added + REQ-UNSCANNEDTAG-045 gate warning for the next case;
+           (2) realpath on every walked dir = 62% of gate time (4,900 upload folders) — name-gated,
+           plus .reqmapignore `/**` patterns prune the walk: 11.2 s -> 4.1 s -> 0.6 s;
+           (3) _map.json "stale" on engine_version alone — excluded from the freshness diff;
+           (4) `next` listed CLAUDE.md/TODO.md as untagged — ignore bucket honoured.
+           JSON: only config JSON present (tsconfig, package.json, eslintrc) — no tagging
+           convention needed on this evidence; revisit with a Grafana/OpenAPI-JSON repo.
+           Consumer-side (handed back, not engine): 42/44 draft + 0 confirmed -> triage; stale
+           committed _findings.md (caught by v2.26.0); no reqmap step in its CI; storage/ and
+           prisma/migrations/ untagged; stray empty `Caddyfile;C` dir.
+           Remaining runs of the matrix: 1 C/C++ (the item below), 2 frontend, 3 infra/pipelines,
+           4 backend, 5 markdown-heavy. -->
 - [ ] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
       <!-- Deliberately deferred (2-1 majority in the same Trias deliberation): app/ stays in the
            repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is

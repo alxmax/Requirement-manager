@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v2.27.0` — 2026-08-25
+
+**First scan-evidence run on a real consumer (Management_Dashboard: NestJS + Next.js, 288 tracked files — TS/TSX, SQL, shell, Dockerfiles, Caddyfile, Prisma, YAML, JSON, Markdown). Four engine defects, all fixed here; the corpus-side findings went back to the consumer.**
+
+- **Tags in file types the scan never read were silently not members.** `Caddyfile` and `apps/api/prisma/schema.prisma` both carried `implements:` tags; neither type was scanned, so two requirements lost their members with the gate green. Two fixes, one local and one general: `.prisma`, `.graphql`, `.proto`, `Caddyfile`, `Jenkinsfile`, `Procfile`, `Vagrantfile` and any `Dockerfile.<variant>` (`Dockerfile.converter` was the third invisible tag) are now scanned — and new `REQ-UNSCANNEDTAG-045` makes the next case visible: `gate` warns (warn-only, fail-open outside git) when a tracked, non-scannable, non-binary file under 1 MB carries a tag. Dotfiles, `_`-prefixed files, `.reqmapignore` matches and the SSOT dir are skipped (this repo's own `.reqmapignore` quotes an illustration tag in a comment). Consumer members: 282 → 286.
+- **62% of the consumer's gate time was `os.path.realpath`**: `_prune_dirs` resolved every directory on the walk to find the SSOT dir — 34,596 calls across three walks for a 216-file scan, driven by a 4,900-folder upload directory. It now resolves only a directory whose *name* matches the SSOT dir's (same exclusion, contract unchanged), and a `.reqmapignore` pattern ending in `/**` or `/*` prunes the walk instead of filtering every file under it (identical results by construction). Gate on the consumer: 11.2 s → 4.1 s; 0.6 s once `apps/api/storage/**` is ignored.
+- **`map --check` failed on the consumer for `_map.json` whose only difference was `engine_version`** — nodes, edges and todos identical. Updating the vendored engine alone no longer makes a committed map stale: `engine_version` joins `repo` and `generated:` in the freshness-diff exclusions (`REQ-MAP-007`). The next `sync` still refreshes it.
+- **`next` listed `CLAUDE.md` and `TODO.md` as "Untagged files"** with advice to run `draft` — which never drafts them, because `REQ-PROSE-024` puts meta prose in the *ignore* bucket. The bucket now honours that bucket (`REQ-NEXT-013`); sync-only prose (`README`, `docs/`) is still listed, because it *can* carry a `generated-from:` tag.
+- Also seen on the consumer, not engine defects: its committed `_findings.md` was stale (9 vs 10 live) — caught by `v2.26.0`'s new check on first contact; 42/44 requirements are `draft` with 0 confirmed (the skill's triage path); its CI has no reqmap gate step; `package-lock.json`/`tsconfig`-class JSON was the only JSON present, so no JSON tagging convention is needed on this evidence.
+
 ## plugin `v2.26.0` — 2026-08-25
 
 **A committed `_findings.md` that said "0 open" for eleven weeks — and two smaller lies the tooling told during the same audit.** `v2.25.1` regenerated the file by hand; this release makes that unnecessary, and closes the two follow-ups the audit left open.

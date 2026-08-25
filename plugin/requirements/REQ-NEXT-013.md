@@ -44,6 +44,8 @@ Every line in this section is binding.
 - `next` omits `blast-radius`, because that signal is a caution, not a task.
 - `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
   bucket, ranked lowest of all.
+- That bucket omits prose in the auto-draft "ignore" bucket (`CLAUDE.md`, `TODO.md`,
+  `CHANGELOG.md`, `LICENSE`, `_`-prefixed files): those are invisible to reqmap by contract.
 - `next` skips that untagged scan when the caller gives no `code_root`.
 - An Orphans item may have members recorded in the committed `_map.json` that this scan did
   not find. Then `next` adds a note naming one such member and suggesting `--code <dir>`.
