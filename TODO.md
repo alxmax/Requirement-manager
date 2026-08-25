@@ -203,6 +203,31 @@
            prisma/migrations/ untagged; stray empty `Caddyfile;C` dir.
            Remaining runs of the matrix: 1 C/C++ (the item below), 2 frontend, 3 infra/pipelines,
            4 backend, 5 markdown-heavy. -->
+- [x] Scan-evidence runs 1–5 — zlib+curl (C/C++), excalidraw (TS/React), awesome-compose (infra), gin+httpx (Go/Python), fabric (Markdown prompts): ten engine fixes in v2.28.0 | lane: ops
+      <!-- 2026-08-25, PR #192, five Sonnet subagents in parallel on the same protocol (inventory,
+           coverage, plan, draft, gate, next/health/dupes, native-comment probe, edge probes).
+           Per run:
+           1 C/C++ (zlib 271 files, curl 4,449): scanner 16/16 probes OK, 0 false tags; `plan` gave
+             0 candidates for zlib and only tests/*.py for curl (CANDIDATE_EXTS); `dupes | head`
+             OSError 22 on Windows. Fixed: plan reach, REQ-PIPE-046. Left: curl's 2,066 extensionless
+             tests/data/test### fixtures are outside any extension-based scan.
+           2 frontend (excalidraw): .scss = 82 files = the only stylesheet format, invisible;
+             plan 663 vs draft 687; draft ignored 15 signatures plan had read; dupes 1,748 pairs.
+             Fixed: exts, plan reach, observed surface, dupes placeholder skip.
+           3 infra (awesome-compose, 502 files, 35 Dockerfiles): plan 0 infra candidates; tagged
+             .env skipped by the unscanned-tag check; .cs/.vue/.php invisible. Fixed: all three.
+             Left (design): a tag in a YAML value string or a Dockerfile heredoc counts — TAG_RE is
+             context-free on purpose; lowercase `dockerfile` is not a Dockerfile (case-sensitive,
+             warned correctly).
+           4 backend (gin, httpx): zero defects — string masking, test-link, verifies:#AC-N,
+             syntax-error and 5 MB files all per contract. Observations fixed: class methods in
+             plan facts (httpx _client.py: 3 helpers shown, 78 methods hidden), is_test flag.
+           5 markdown (fabric, 396 .md, 255 patterns/*/system.md): lowercase readme.md drafted
+             (case-sensitive README rule); 204/255 drafts said "no section headings" because the
+             corpus uses `#` for every section; dupes 6,340 pairs. Fixed: all three. Left: .rst/
+             .txt/.adoc/.ipynb/.mdx outside the scan; "IDENTITY and PURPOSE" is the H1 title of
+             151/255 patterns (path-aware ids still distinct).
+           JSON convention: still no evidence for one — every JSON seen was config or lockfile. -->
 - [ ] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
       <!-- Deliberately deferred (2-1 majority in the same Trias deliberation): app/ stays in the
            repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is

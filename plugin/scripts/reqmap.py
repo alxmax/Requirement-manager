@@ -30,7 +30,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, fnmatch, hashlib, json, math, os, re, subprocess, sys
+import argparse, ast, errno, fnmatch, hashlib, json, math, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # Both tag patterns are BUILT from ROLES rather than repeating it. The three used to be
@@ -88,6 +88,8 @@ CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cpp", ".h", ".hpp",
              ".cc", ".java", ".go", ".rs", ".html", ".css", ".sql", ".yaml", ".yml",
              ".sh", ".tf",
              ".prisma", ".graphql", ".proto",   # schema files: a consumer tagged schema.prisma and nothing read it
+             ".scss", ".sass", ".less", ".vue", ".svelte", ".mjs", ".cjs", ".mts", ".cts",   # frontend run: excalidraw's ONLY stylesheet format was .scss
+             ".cs", ".php", ".rb", ".kt", ".kts", ".swift", ".scala", ".ex", ".exs", ".dart", ".toml",   # infra/backend runs
              ".md")  # .md scanned for tags so prose capabilities (prompts/specs) can be members
 
 # Extensionless filenames scanned by exact basename match (no case-fold — CODE_EXTS
@@ -159,7 +161,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-25.3"
+MAP_ENGINE_VERSION = "2026-08-25.4"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1341,9 +1343,10 @@ def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: REQ-UNSCANN
         if not rel:
             continue
         fn = os.path.basename(rel)
-        # dotfiles are config, and their comments quote tags as examples (this repo's own
-        # .reqmapignore explains an illustration id) — never a place a real member lives
-        if _is_code_file(fn) or fn.startswith(("_", ".")) or fn.lower().endswith(_BINARY_EXTS):
+        # git's and the engine's own dotfiles quote tags as examples (this repo's
+        # .reqmapignore explains an illustration id); any other dotfile — .env was the
+        # infra run's case — is as tag-worthy as a Makefile and is reported
+        if _is_code_file(fn) or fn.startswith(("_", ".git", ".reqmap")) or fn.lower().endswith(_BINARY_EXTS):
             continue
         if reqs_rel and not reqs_rel.startswith("../") and rel.startswith(reqs_rel):
             continue
@@ -1419,7 +1422,9 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
 ORPHAN_CODE_MIN_LOC = 150   # a program file this big with no tag is a coverage hole, not a stub
 # program-logic extensions only: prose/config/styling coverage is REQ-DOCBUNDLE-026's concern
 ORPHAN_CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cc", ".cpp",
-                    ".h", ".hpp", ".java", ".go", ".rs")
+                    ".h", ".hpp", ".java", ".go", ".rs",
+                    ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
+                    ".cs", ".php", ".rb", ".kt", ".kts", ".swift", ".scala", ".ex", ".exs", ".dart")
 
 
 def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: REQ-ORPHANCODE-034
@@ -2499,7 +2504,7 @@ def classify_prose(rel):  # implements: REQ-PROSE-024
     if base.startswith("_"):                      # generated _map.*, _findings.md
         return "ignore"
     # Bucket 2 — sync-only.
-    if base == "README" or base.startswith("README."):
+    if base.upper() == "README" or base.upper().startswith("README."):   # readme.md is a README too
         return "sync_only"
     if rel == "docs" or rel.startswith("docs/"):
         return "sync_only"
@@ -2516,7 +2521,7 @@ def _prose_facts(src):  # implements: REQ-PROSE-024
     The scaffold lists headings as an authoring hint — never the contract."""
     meta, body = parse_frontmatter(src)
     title = meta.get("title") or None
-    headings = []
+    headings, h1_sections = [], []
     for line in body.splitlines():
         s = line.strip()
         if title is None:
@@ -2532,9 +2537,15 @@ def _prose_facts(src):  # implements: REQ-PROSE-024
         if m:
             headings.append(m.group(1).strip())
             continue
+        m = re.match(r"#\s+(.+)", s)                          # a further H1: flat, single-level prose
+        if m:
+            h1_sections.append(m.group(1).strip())
+            continue
         for inner in re.findall(r"<h2[^>]*>(.*?)</h2>", s, re.I):  # html H2
             headings.append(re.sub(r"<[^>]+>", "", inner).strip())
-    return title, headings
+    # A prompt corpus (fabric: 255 files) writes every section as `# `: with no H2 at
+    # all, the later H1s ARE the sections, and the hint would otherwise be empty.
+    return title, (headings or h1_sections)
 
 
 def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008  # implements: REQ-PROSE-024
@@ -2602,6 +2613,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
             else:
                 risk = _risk(src)
                 review = "REVIEW" if risk >= 2 else "auto-baseline"
+                surface = _observed_surface(_file_facts(os.path.join(dirpath, fn), rel))
                 with open(dest, "w", encoding="utf-8") as f:
                     # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
                     # needs no reshaping
@@ -2621,11 +2633,29 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             f"constant, dead branch) — intended, or a bug to fix?\n\n"
                             f"## HOW — Acceptance (= tests)\n"
                             f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
-                            f"## WHERE — Current implementation\n- {rel}\n")
+                            f"## WHERE — Current implementation\n- {rel}\n{surface}")
             proposed += 1
             print(f"{review:14} {cap}  <- {rel}")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")
     return 0
+
+
+def _observed_surface(facts, limit=12):  # implements: REQ-EXTRACT-008
+    """Authoring hint for a code draft's WHERE section: the module docstring's first
+    line and the top-level signatures `plan` already knows how to read. Empty string
+    when the language has no parser. Non-binding by construction — it lives under
+    WHERE, never in the Contract, so a promoted draft still needs an authored contract."""
+    sigs = list(facts.get("signatures") or [])
+    doc = (facts.get("docstrings") or {}).get("module")
+    if not sigs and not doc:
+        return ""
+    lines = ["", "Observed surface (auto, non-binding — an authoring hint, not the contract):"]
+    if doc:
+        lines.append("- module: {}".format(doc))
+    lines += ["- `{}`".format(s) for s in sigs[:limit]]
+    if len(sigs) > limit:
+        lines.append("- … {} more".format(len(sigs) - limit))
+    return "\n".join(lines) + "\n"
 
 
 def _risk(src):  # implements: REQ-EXTRACT-008
@@ -2640,7 +2670,22 @@ def _risk(src):  # implements: REQ-EXTRACT-008
 # Stage 1 of AI extraction: gather the raw material an authoring step (a human or
 # an LLM agent) needs to write a real, capability-level requirement. READ-ONLY —
 # emits a JSON plan, writes NO .md, so it cannot repeat extract's empty-stub failure.
-CANDIDATE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx")
+# Languages `plan` can read FACTS from (docstrings, signatures). Every scannable code
+# file is a candidate regardless — three evidence runs (zlib: 0 candidates for 94 C
+# files, gin: none for 99 Go files, awesome-compose: none for 35 Dockerfiles) showed
+# a plan that silently omitted most of what `draft` then produced.
+CANDIDATE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs", ".mts", ".cts")
+_TEST_DIR_NAMES = {"test", "tests", "spec", "specs", "__tests__", "testing", "e2e"}
+_TEST_FILE_SUFFIXES = ("_test.py", "_test.go", "_test.rs", "_spec.rb", ".test.ts", ".test.tsx",
+                       ".test.js", ".test.jsx", ".spec.ts", ".spec.tsx", ".spec.js", ".e2e.ts")
+
+
+def _is_test_path(rel):  # implements: REQ-CANDIDATES-009
+    """Test code by convention (a `tests/` segment, `test_*.py`, `*_test.go`, `*.spec.ts`)."""
+    parts = rel.replace(os.sep, "/").split("/")
+    base = parts[-1]
+    return (any(p in _TEST_DIR_NAMES for p in parts[:-1])
+            or base.startswith("test_") or base.endswith(_TEST_FILE_SUFFIXES))
 BUS_FANIN_THRESHOLD = 5      # a module this many capabilities depend on is bus-like
 SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not auto-split
 
@@ -2664,6 +2709,12 @@ def _py_facts(src):  # implements: REQ-CANDIDATES-009
                 node.name, ", ".join(a.arg for a in node.args.args)))
         elif isinstance(node, ast.ClassDef):
             facts["signatures"].append("class {}".format(node.name))
+            # the public surface of a class-based module IS its methods (httpx's
+            # _client.py hid 78 of them behind 3 module-level helpers)
+            for sub in node.body:
+                if isinstance(sub, (ast.FunctionDef, ast.AsyncFunctionDef)) and not sub.name.startswith("_"):
+                    facts["signatures"].append("def {}.{}({})".format(
+                        node.name, sub.name, ", ".join(a.arg for a in sub.args.args if a.arg != "self")))
         else:
             continue
         d = ast.get_docstring(node)
@@ -2736,8 +2787,10 @@ def _file_facts(path, rel):  # implements: REQ-CANDIDATES-009
         facts = _py_facts(src)
     elif rel.endswith(".md"):
         facts = _md_facts(src)
-    else:
+    elif rel.endswith(CANDIDATE_EXTS):
         facts = _js_facts(src)
+    else:   # a candidate the engine has no parser for: still listed, facts empty
+        facts = {"signatures": [], "docstrings": {}, "imports": []}
     facts["loc"] = len(src.splitlines())
     facts["signatures"] = facts["signatures"][:40]
     return facts
@@ -2786,7 +2839,7 @@ def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: REQ-CANDI
             rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
-            if fn.endswith(CANDIDATE_EXTS):
+            if _is_code_file(fn) and not fn.endswith(PROSE_EXTS):
                 out.append(rel)
             elif fn.endswith(".md") and any(fnmatch.fnmatch(rel, g) for g in md_globs):
                 out.append(rel)
@@ -2867,6 +2920,7 @@ def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # i
             "docstrings": docs, "signatures": sigs[:60], "imports": sorted(imps),
             "depends_on": deps, "tested_by": tested_by, "loc": loc,
             "existing_req": existing, "split_candidate": loc > SPLIT_LOC_THRESHOLD,
+            "is_test": bool(g["files"]) and all(_is_test_path(f) for f in g["files"]),
         })
 
     fanin = {}
@@ -4049,6 +4103,15 @@ def _sim_tokens(text):  # implements: REQ-SIMILAR-016
             if len(t) >= 3 and not t.isdigit() and t not in _SIMILAR_STOP]
 
 
+def _placeholder_contract(body):  # implements: REQ-SIMILAR-016
+    """True when every Contract bullet is still a `TODO:` scaffold line. Five evidence
+    runs scored thousands of freshly-drafted stubs as near-duplicates of each other on
+    template text alone (fabric: 6,340 pairs for 638 drafts) — nothing authored, nothing
+    to compare."""
+    bullets = _bullets(body, "contract")
+    return bool(bullets) and all(b.strip().upper().startswith("TODO") for b in bullets)
+
+
 def _sim_text(body):  # implements: REQ-SIMILAR-016
     """The text similarity is computed on: title, intent line, and Contract bullets.
     Notes & limitations is left out — it is dense and would only add noise."""
@@ -4109,8 +4172,13 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
     can spot a probable duplicate or a capability that should be merged. Read-only and
     always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
     does not inflate the score. Callers pass a validated threshold in (0, 1]."""
-    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()}
+    placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
+    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()
+            if rid not in placeholder}
     docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
+    if placeholder:
+        print("skipped {} requirement(s) whose Contract is still the draft placeholder — "
+              "dupes compares authored contracts only.\n".format(len(placeholder)))
     if len(docs) < 2:
         print("Need at least two requirements with contract text to compare.")
         return 0
@@ -6052,5 +6120,31 @@ def main():
         return cmd_promote(reqs, members, a.arg)
 
 
+def _pipe_closed():  # implements: REQ-PIPE-046
+    """The reader (`| head`) stopped listening: point stdout at the null device so the
+    interpreter's shutdown flush cannot raise a second time, and exit clean."""
+    try:
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+    except Exception:
+        pass
+    return 0
+
+
+def _run_cli(entry=None):  # implements: REQ-PIPE-046
+    """Run `main` (or `entry`), turning a closed output pipe into a quiet exit 0.
+    Windows has no SIGPIPE: a reader that closes early surfaces as OSError EINVAL (22),
+    on POSIX as BrokenPipeError/EPIPE — `dupes | head` on a 1,141-requirement corpus
+    died with a traceback on the primary supported OS. Every other OSError propagates."""
+    try:
+        return (entry or main)() or 0
+    except BrokenPipeError:
+        return _pipe_closed()
+    except OSError as e:
+        if e.errno in (errno.EPIPE, errno.EINVAL):
+            return _pipe_closed()
+        raise
+
+
 if __name__ == "__main__":
-    sys.exit(main() or 0)
+    sys.exit(_run_cli())

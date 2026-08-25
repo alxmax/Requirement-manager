@@ -37,6 +37,8 @@ Every line in this section is binding.
   section is dense and would add noise.
 - `dupes` tokenizes text into lowercase alphanumeric words of length three or more.
 - `dupes` drops a small stopword set and pure numbers from those tokens.
+- `dupes` skips a requirement whose Contract bullets are all still the draft placeholder
+  (`TODO: …`), and prints how many it skipped. An unauthored contract has nothing to compare.
 
 **How it scores**
 - `dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
@@ -88,6 +90,11 @@ AC-5
   Given  any corpus
   When   `dupes` runs
   Then   it returns zero
+
+AC-6
+  Given  two fresh drafts whose Contract is the placeholder, and two authored requirements
+  When   `dupes` runs
+  Then   the drafts are skipped with a count line, and only the authored pair can be reported
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

@@ -2,6 +2,7 @@
 
 Run: python -m unittest test_reqmap   (from plugin/scripts/)
 """
+import errno
 import io
 import json
 import os
@@ -5828,11 +5829,12 @@ class UnscannedTags(unittest.TestCase):  # tested-by: REQ-UNSCANNEDTAG-045
             _write(os.path.join(d, "config.custom"), "# implements: REQ-A-001" + chr(10))
             _write(os.path.join(d, "notes.txt"), "no tag here" + chr(10))
             _write(os.path.join(d, "_derived.custom"), "implements: REQ-A-001" + chr(10))   # _-prefixed: skipped
-            _write(os.path.join(d, ".toolrc"), "# example: implements: REQ-A-001" + chr(10))    # dotfile: skipped
+            _write(os.path.join(d, ".gitattributes"), "# example: implements: REQ-A-001" + chr(10))  # git dotfile: skipped
+            _write(os.path.join(d, ".env"), "# implements: REQ-A-001" + chr(10))                    # .env: reported
             with open(os.path.join(d, "pic.png"), "wb") as f:
                 f.write(b"\x89PNG implements: REQ-A-001")
             self._commit_all(d)
-            self.assertEqual(R.tagged_unscanned_files(d, rd), ["config.custom"])
+            self.assertEqual(R.tagged_unscanned_files(d, rd), [".env", "config.custom"])
             reqs = R.load_requirements(rd)
             members = R.scan_members(d, rd)
             buf = io.StringIO()
@@ -5857,6 +5859,137 @@ class UnscannedTags(unittest.TestCase):  # tested-by: REQ-UNSCANNEDTAG-045
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "config.custom"), "implements: REQ-A-001" + chr(10))
             self.assertIsNone(R.tagged_unscanned_files(d))
+
+
+
+class MatrixScanReach(unittest.TestCase):  # tested-by: CORE-SCAN-002
+    def test_matrix_languages_are_code(self):
+        for fn in ("a.scss", "App.vue", "x.svelte", "m.mjs", "c.cjs", "Program.cs", "index.php",
+                   "app.rb", "Main.kt", "build.gradle.kts", "App.swift", "Main.scala", "mix.exs", "main.dart", "pyproject.toml"):
+            self.assertTrue(R._is_code_file(fn), fn)
+
+
+class ProseBuckets(unittest.TestCase):  # tested-by: REQ-PROSE-024
+    def test_lowercase_readme_is_sync_only(self):
+        self.assertEqual(R.classify_prose("data/patterns/x/readme.md"), "sync_only")
+        self.assertEqual(R.classify_prose("Readme.rst.md"), "sync_only")
+
+    def test_h1_only_prose_keeps_its_sections(self):
+        title, heads = R._prose_facts("# IDENTITY and PURPOSE\n\ntext\n\n# STEPS\n\n# OUTPUT INSTRUCTIONS\n")
+        self.assertEqual(title, "IDENTITY and PURPOSE")
+        self.assertEqual(heads, ["STEPS", "OUTPUT INSTRUCTIONS"])
+
+    def test_h2_present_wins_over_later_h1(self):
+        title, heads = R._prose_facts("# Title\n\n## Real section\n\n# Stray H1\n")
+        self.assertEqual(heads, ["Real section"])
+
+
+class PlanReach(unittest.TestCase):  # tested-by: REQ-CANDIDATES-009
+    def _plan(self, d):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        members = R.scan_members(d, rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_candidates(reqs, members, d, rd, None)
+        return json.loads(buf.getvalue())
+
+    def test_unparsed_languages_are_candidates_and_tests_are_flagged(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "main.go"), "package main" + chr(10) + "func main() {}" + chr(10))
+            _write(os.path.join(d, "zlib.h"), "int deflate(int x);" + chr(10))
+            _write(os.path.join(d, "Dockerfile"), "FROM scratch" + chr(10))
+            _write(os.path.join(d, "tests", "test_x.py"), "def test_a():" + chr(10) + "    pass" + chr(10))
+            _write(os.path.join(d, "lib.py"), '"""mod."""' + chr(10) + "def f(a):" + chr(10) + "    return a" + chr(10))
+            plan = self._plan(d)
+            by_file = {c["files"][0]: c for c in plan["candidates"]}
+            for f in ("main.go", "zlib.h", "Dockerfile", "tests/test_x.py", "lib.py"):
+                self.assertIn(f, by_file, f)
+            self.assertEqual(by_file["main.go"]["signatures"], [])
+            self.assertTrue(by_file["tests/test_x.py"]["is_test"])
+            self.assertFalse(by_file["lib.py"]["is_test"])
+            self.assertTrue(any(x.endswith("def f(a)") for x in by_file["lib.py"]["signatures"]))
+
+    def test_class_methods_are_signatures(self):
+        facts = R._py_facts("class Client:" + chr(10) + "    def get(self, url):" + chr(10) + "        pass" + chr(10)
+                            + "    def _hidden(self):" + chr(10) + "        pass" + chr(10))
+        self.assertIn("class Client", facts["signatures"])
+        self.assertIn("def Client.get(url)", facts["signatures"])
+        self.assertNotIn("def Client._hidden()", facts["signatures"])
+
+    def test_is_test_path_conventions(self):
+        for p in ("tests/x.py", "src/__tests__/a.ts", "pkg/foo_test.go", "web/app.spec.ts", "test_core.py"):
+            self.assertTrue(R._is_test_path(p), p)
+        for p in ("src/core.py", "lib/testing_utils_guide.md", "attest.py"):
+            self.assertFalse(R._is_test_path(p), p)
+
+
+class DraftObservedSurface(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
+    def test_where_lists_signatures_contract_stays_todo(self):
+        with tempfile.TemporaryDirectory() as d:
+            code = os.path.join(d, "code")
+            _write(os.path.join(code, "svc.py"),
+                   '"""Talks to the API."""' + chr(10) + "def fetch(url):" + chr(10) + "    pass" + chr(10)
+                   + "def parse(text, strict):" + chr(10) + "    pass" + chr(10))
+            _write(os.path.join(code, "raw.go"), "package raw" + chr(10))
+            rd = os.path.join(d, "requirements")
+            with redirect_stdout(io.StringIO()):
+                R.cmd_extract({}, {}, code, rd)
+            with open(os.path.join(rd, "DRAFT-SVC.md"), encoding="utf-8") as f:
+                svc = f.read()
+            where = svc.split("## WHERE")[1]
+            self.assertIn("`def fetch(url)`", where)
+            self.assertIn("`def parse(text, strict)`", where)
+            self.assertIn("module: Talks to the API.", where)
+            self.assertIn("- TODO: the observed behavior", svc.split("## WHAT — Contract")[1].split("##")[0])
+            with open(os.path.join(rd, "DRAFT-RAW.md"), encoding="utf-8") as f:
+                self.assertNotIn("Observed surface", f.read())     # no parser for Go: no hint, no noise
+
+
+class DupesSkipPlaceholders(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
+    def _req(self, title, contract):
+        return {"body": "# {t}" + chr(10) + chr(10) + "> {t} intent." + chr(10) + chr(10)
+                + "## WHAT — Contract (normative)" + chr(10) + "- {c}" + chr(10)}
+
+    def test_placeholder_drafts_are_skipped_with_count(self):
+        reqs = {
+            "DRAFT-A": {"body": "# A" + chr(10) + chr(10) + "> DRAFT extracted from a.py." + chr(10) + chr(10)
+                        + "## WHAT — Contract (normative)" + chr(10) + "- TODO: the observed behavior (characterization)." + chr(10)},
+            "DRAFT-B": {"body": "# B" + chr(10) + chr(10) + "> DRAFT extracted from b.py." + chr(10) + chr(10)
+                        + "## WHAT — Contract (normative)" + chr(10) + "- TODO: the observed behavior (characterization)." + chr(10)},
+            "REQ-X-001": {"body": "# Upload" + chr(10) + chr(10) + "> Upload intent." + chr(10) + chr(10)
+                          + "## WHAT — Contract (normative)" + chr(10) + "- `upload` stores the file under the tenant bucket." + chr(10)},
+            "REQ-Y-002": {"body": "# Upload copy" + chr(10) + chr(10) + "> Upload copy intent." + chr(10) + chr(10)
+                          + "## WHAT — Contract (normative)" + chr(10) + "- `upload` stores the file under the tenant bucket." + chr(10)},
+        }
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35)
+        out = buf.getvalue()
+        self.assertIn("skipped 2 requirement(s)", out)
+        self.assertNotIn("DRAFT-A", out.split("skipped", 1)[1].split(chr(10), 1)[1])
+        self.assertIn("REQ-X-001  <->  REQ-Y-002", out)
+
+
+class ClosedPipe(unittest.TestCase):  # tested-by: REQ-PIPE-046
+    def test_broken_pipe_and_windows_einval_exit_zero(self):
+        def boom_pipe():
+            raise BrokenPipeError()
+        def boom_einval():
+            raise OSError(errno.EINVAL, "Invalid argument")
+        with mock.patch.object(R, "_pipe_closed", return_value=0):
+            self.assertEqual(R._run_cli(boom_pipe), 0)
+            self.assertEqual(R._run_cli(boom_einval), 0)
+
+    def test_other_oserror_propagates(self):
+        def boom():
+            raise OSError(errno.ENOENT, "missing")
+        with self.assertRaises(OSError):
+            R._run_cli(boom)
+
+    def test_normal_exit_code_passes_through(self):
+        self.assertEqual(R._run_cli(lambda: 3), 3)
+        self.assertEqual(R._run_cli(lambda: None), 0)
 
 
 # collected instead of 494, 16 silently skipped in the invocation

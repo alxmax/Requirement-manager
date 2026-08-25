@@ -37,14 +37,18 @@ Every line in this section is binding.
   and `.reqmapignore` resolved in `requirements/` first.
 - `plan` gathers per-file facts: module and symbol docstrings, top-level signatures,
   import targets, and line count.
-- `plan` reads top-level signatures from Python via `ast`, and from JS/TS via
-  best-effort parsing.
+- `plan` lists every scannable code file as a candidate, the same set `draft` walks.
+  A file in a language `plan` cannot parse is still a candidate, with empty facts.
+- `plan` reads top-level signatures from Python via `ast` — functions, classes and the
+  public methods of each class — and from JS/TS via best-effort parsing.
 - An unparseable file yields empty facts. It never aborts the plan.
 
 **What a candidate carries**
 - Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{},
   signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc,
-  split_candidate}`.
+  split_candidate, is_test}`.
+- `is_test` is true when every file of the candidate is test code by convention: a
+  `tests/`-style directory segment, a `test_*` basename, or a `*_test`/`*.spec` suffix.
 - `depends_on` is derived from imports resolved to other candidates.
 - `suggested_layer` is `bus` when `importer_count ≥ BUS_FANIN_THRESHOLD`, else `feature`.
 - A file already carrying an `implements:` tag is reported via `existing_req`.
@@ -92,6 +96,11 @@ AC-6
   Given  a module imported by `BUS_FANIN_THRESHOLD` or more candidates
   When   `plan` runs
   Then   it is suggested as `bus`
+
+AC-7
+  Given  a `.go` file and a `tests/test_x.py` file, and no `_capmap.json`
+  When   `plan` runs
+  Then   both are candidates; the `.go` one carries empty signatures and the test one carries `is_test: true`
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
