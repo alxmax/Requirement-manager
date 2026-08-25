@@ -33,8 +33,9 @@ Every line in this section is binding.
 
 **What it skips**
 - The check skips paths matching `.reqmapignore`, files under the SSOT directory, files
-  whose basename starts with `_` or `.` (dotfiles are config, and their comments quote tags
-  as examples), and files larger than one megabyte.
+  whose basename starts with `_`, `.git` or `.reqmap` (their comments quote tags as
+  examples), and files larger than one megabyte. Any other dotfile, such as `.env`, is
+  checked like any file.
 - A file that is not valid UTF-8 text is skipped. Binary files never produce a warning.
 
 **What it never does**

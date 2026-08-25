@@ -67,7 +67,9 @@ Every line in this section is binding.
   descended at all — every file under it matched the pattern anyway, so results are identical.
 - Scanned schema files and basenames grew from the first consumer evidence run (2026-08-25):
   `.prisma`, `.graphql`, `.proto`, `Caddyfile`, `Jenkinsfile`, `Procfile`, `Vagrantfile`, and any
-  `Dockerfile.<variant>`. A
+  `Dockerfile.<variant>`; the five-repo matrix run the same day added `.scss/.sass/.less`,
+  `.vue/.svelte`, `.mjs/.cjs/.mts/.cts`, `.cs/.php/.rb/.kt/.kts/.swift/.scala/.ex/.exs/.dart`
+  and `.toml`. A
   tag in any other type is reported by [[REQ-UNSCANNEDTAG-045]] rather than lost.
 
 ## HOW — Acceptance (= tests)

@@ -27,7 +27,8 @@ Every line in this section is binding.
                      decide whether a human should read the draft first. -->
 
 **What it reads**
-- `draft` walks the untagged source files ending in `.py`, `.js`, `.ts`, `.c` or `.cpp`.
+- `draft` walks every untagged scannable code file — the extensions and basenames the
+  scan reads — plus prose in the capability bucket.
 - `draft` skips a file that already carries a member tag.
 - `draft` honors `.reqmapignore`, the same fnmatch globs `scan` respects.
 - A file matching an ignore pattern is never drafted — notably the vendored
@@ -50,6 +51,12 @@ Every line in this section is binding.
 
 **Running it again**
 - Re-running `draft` never overwrites an existing draft.
+
+**What a code proposal shows**
+- A code proposal's WHERE section lists the file's observed surface — the module
+  docstring's first line and its top-level signatures — when the language has a parser.
+- That surface is an authoring hint under WHERE, never a Contract line. The Contract
+  stays a TODO until a human writes it.
 
 ## WHAT — Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
@@ -89,6 +96,11 @@ AC-5
   Given  an existing draft and same-basename files in different dirs
   When   `draft` re-runs
   Then   the draft is not overwritten and the basenames do not collide
+
+AC-6
+  Given  an untagged `.py` file with a module docstring and two top-level functions
+  When   `draft` runs
+  Then   its proposal's WHERE section names both signatures, and its Contract is still the TODO placeholder
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

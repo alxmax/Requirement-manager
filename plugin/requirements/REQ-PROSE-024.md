@@ -23,7 +23,8 @@ milestone: v1.06
   - **ignore** — meta/boilerplate that is never a capability: `CLAUDE.md`, `AGENTS.md`,
     `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`,
     `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`, …).
-  - **sync_only** — `README`/`README.*`, everything under `docs/`, and every `*.html`.
+  - **sync_only** — `README`/`README.*` in any letter case, everything under `docs/`, and
+    every `*.html`.
     These are never drafted as their own requirement, but become a member (and are
     drift-checked) when a human tags them `generated-from: <ID>`.
   - **capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These
@@ -33,6 +34,8 @@ milestone: v1.06
 - A prose draft is scaffolded from the file's title (frontmatter `title:`, else the
   first `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings,
   recorded as an authoring hint.
+- When a file has no `##` heading at all, its later `#` headings are the sections instead,
+  so flat single-level prose (a prompt library) still yields a hint.
 - The source prose is never the contract: the drift hash anchors on the authored
   Contract + Acceptance, so the prose may later drift freely from the authored requirement.
 
