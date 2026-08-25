@@ -4552,7 +4552,7 @@
       "name": "Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line",
       "lane": "ops",
       "milestone": "v3",
-      "done": false
+      "done": true
     },
     {
       "name": "Revisit BSL once there's someone who'd contribute",

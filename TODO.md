@@ -381,7 +381,12 @@
            triggers are numeric: 3+ merge conflicts on the file in a rolling 90 days, or
            crossing 8,000 lines, or a named external consumer wanting the split form. -->
 - [ ] Get to n=2: one external repo running the gate | lane: ops
-- [ ] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
+- [x] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
+      <!-- Closed 2026-08-25 by scan-evidence run 1 (v2.28.0, PR #192): madler/zlib (271 files) +
+           curl/curl (4,449 files, 759 .c / 257 .h). Scanner 16/16 native-comment and edge probes
+           (block comments, #define lines, CRLF, Latin-1 bytes), 0 false-positive tags, gate 3.6 s on
+           curl. What it found was around the scanner (plan reach, dupes noise, Windows pipe) — fixed
+           in the same release. A generated-code-heavy automotive tree is a separate run if ever needed. -->
 - [ ] Revisit BSL once there's someone who'd contribute | lane: ops
 - [x] Viewer i18n: an EN/RO (or pluggable-locale) toggle button for the self-contained HTML viewer, translating static UI chrome only (nav, tab labels, section headers, buttons, badges) — never requirement content (titles/intent/contract/AC stay author-language) | lane: feature
       <!-- Found 2026-08-21. A rough prototype validated the shape of the problem: a
