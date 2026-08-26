@@ -208,7 +208,7 @@ any assistant — or with no assistant at all.
 | `scan` | List which code belongs to which requirement |
 | `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors. |
 | `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
-| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35. |
+| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35. A requirement and its own test-suite requirement (linked by `tested-by`) are skipped and counted, not reported. |
 | `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge. |
 | `export` | Emit just the graph JSON (for an external front-end) |
 | `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |

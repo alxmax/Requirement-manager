@@ -161,7 +161,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-25.4"
+MAP_ENGINE_VERSION = "2026-08-27"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4166,12 +4166,34 @@ def _threshold_arg(v):  # implements: REQ-SIMILAR-016
     return f
 
 
-def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-016
+def _test_suite_pairs(members):
+    """Pairs (A, B) where a `tested-by` member file of A is an `implements` member of B —
+    i.e. B is the requirement that IS A's test suite. Such a pair shares vocabulary by
+    construction and is a known link, not a duplicate. Empty when no member map is given."""
+    impl_of = {}   # file -> set of requirement ids implemented in it
+    for rid, mem in (members or {}).items():
+        for role, f, _ in mem:
+            if role == "implements":
+                impl_of.setdefault(f, set()).add(rid)
+    linked = set()
+    for rid, mem in (members or {}).items():
+        for role, f, _ in mem:
+            if role == "tested-by":
+                for other in impl_of.get(f, ()):
+                    if other != rid:
+                        linked.add(frozenset((rid, other)))
+    return linked
+
+
+def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements: REQ-SIMILAR-016
     """Report requirement pairs whose contracts overlap at or above `threshold`
     (cosine over TF-IDF of title + intent + Contract), most-similar-first, so a human
     can spot a probable duplicate or a capability that should be merged. Read-only and
     always exit 0 (advisory). Smoothed idf down-weights shared boilerplate so it
-    does not inflate the score. Callers pass a validated threshold in (0, 1]."""
+    does not inflate the score. Callers pass a validated threshold in (0, 1].
+    With `members`, a pair linked by `tested-by` (one requirement is the other's test
+    suite) is skipped and counted instead of reported."""
+    linked = _test_suite_pairs(members)
     placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
     docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()
             if rid not in placeholder}
@@ -4185,14 +4207,21 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD):  # implements: REQ-SIMILAR-0
     vecs = _tfidf(docs)
     ids = sorted(vecs)
     pairs = []
+    skipped_linked = 0
     for i in range(len(ids)):
         for j in range(i + 1, len(ids)):
             s = _cosine(vecs[ids[i]], vecs[ids[j]])
             if s >= threshold:
+                if frozenset((ids[i], ids[j])) in linked:
+                    skipped_linked += 1
+                    continue
                 shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
                                 key=lambda t: (-(vecs[ids[i]][t] + vecs[ids[j]][t]), t))[:5]
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
+    if skipped_linked:
+        print("skipped {} pair(s) linked by tested-by (a requirement and its own test suite "
+              "share vocabulary by construction).\n".format(skipped_linked))
     if not pairs:
         print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared.".format(
             threshold, len(docs)))
@@ -6056,7 +6085,7 @@ def main():
             print("usage: reqmap show <ID>"); return 2
         return cmd_show(reqs, members, a.arg, scan_test_levels(code_root, reqs_dir))
     if a.cmd == "dupes":
-        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD)
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members)
     if a.cmd == "search":
         if not a.arg:
             print("usage: reqmap search \"<query>\"   [--top N]"); return 2

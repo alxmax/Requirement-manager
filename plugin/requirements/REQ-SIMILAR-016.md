@@ -39,6 +39,10 @@ Every line in this section is binding.
 - `dupes` drops a small stopword set and pure numbers from those tokens.
 - `dupes` skips a requirement whose Contract bullets are all still the draft placeholder
   (`TODO: …`), and prints how many it skipped. An unauthored contract has nothing to compare.
+- `dupes` skips a pair linked by `tested-by` — one requirement's `tested-by` file is the
+  other's `implements` file, so the second requirement IS the first one's test suite —
+  and prints how many such pairs it skipped. Such a pair shares vocabulary by construction
+  and is a known link, not a duplicate.
 
 **How it scores**
 - `dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
@@ -96,6 +100,11 @@ AC-6
   When   `dupes` runs
   Then   the drafts are skipped with a count line, and only the authored pair can be reported
 
+AC-7
+  Given  a requirement A whose `tested-by` file implements requirement B, with overlapping contracts
+  When   `dupes` runs with the member map
+  Then   the pair A–B is not reported and a "linked by tested-by" count line is printed; without the member map it is reported as before
+
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana suspects two of her requirements overlap. She runs `reqmap.py dupes` and sees a pair
@@ -103,7 +112,7 @@ AC-6
   one is a subset of the other, and merges them before either grows its own divergent code.
 
 ## WHERE — Current implementation
-- `cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf` and `_cosine` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, and `_cosine` scores each pair. `cmd_similar` sorts the pairs and prints them with their shared terms.
+- `cmd_similar`, `_sim_text`, `_sim_tokens`, `_tfidf`, `_cosine` and `_test_suite_pairs` in `reqmap.py` — `_sim_text` gathers the compared text, `_sim_tokens` builds the bag of words, `_tfidf` weights terms with smoothed inverse-document frequency, `_cosine` scores each pair, and `_test_suite_pairs` derives the tested-by-linked pairs from the member map. `cmd_similar` sorts the pairs and prints them with their shared terms.
 
 ## Links
 - Used by: (auto)

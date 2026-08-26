@@ -3187,6 +3187,25 @@ class Similar(unittest.TestCase):  # tested-by: REQ-SIMILAR-016
         terms = line.split("shared terms:")[1].strip().split(", ")
         self.assertEqual(terms, sorted(terms))
 
+    def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7
+        # A requirement and the requirement that IS its test suite share vocabulary by
+        # construction; with the member map the pair is a known tested-by link, not a dupe.
+        c = "resolve the dispatch model for each senator from prompt frontmatter"
+        reqs = {"SCRIPTS-MODELS": self._req("Model resolution", c),
+                "SCRIPTS-TEST-MODELS": self._req("Model resolution tests", c)}
+        members = {"SCRIPTS-MODELS": [("implements", "scripts/models.py", 1),
+                                      ("tested-by", "tests/test_models.py", 3)],
+                   "SCRIPTS-TEST-MODELS": [("implements", "tests/test_models.py", 3)]}
+        code, out = self._sim(reqs, 0.35)          # no members: reported as before
+        self.assertIn("SCRIPTS-MODELS  <->  SCRIPTS-TEST-MODELS", out)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_similar(reqs, 0.35, members)
+        out = buf.getvalue()
+        self.assertEqual(code, 0)
+        self.assertNotIn("<->", out)
+        self.assertIn("skipped 1 pair(s) linked by tested-by", out)
+
     def test_unrelated_not_reported(self):
         reqs = {"REQ-A-001": self._req("Parser", "parse yaml frontmatter into a dictionary structure"),
                 "REQ-B-002": self._req("Roadmap", "render mermaid gantt diagrams for milestones")}

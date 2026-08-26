@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v2.28.1` — 2026-08-27
+
+**`dupes` reported a requirement and its own test suite as probable duplicates.** On a consumer corpus that keeps one requirement per script *and* one per test module (Senate: `SCRIPTS-X` / `SCRIPTS-TEST-X`), 9 of 32 flagged pairs were exactly that — scores 0.42–0.60, near the top of the list — and the reviewer learned to scroll past the report. The two share vocabulary by construction, and the corpus already says so: the test requirement's `implements` file is the other's `tested-by` file.
+
+- `cmd_similar` now takes the member map (`dupes` passes it from the scan) and skips a pair linked by `tested-by`, printing `skipped N pair(s) linked by tested-by` instead. Without a member map (library callers, the existing tests) behaviour is unchanged. `REQ-SIMILAR-016` +AC-7; Senate corpus 32 → 23 pairs, and every pair still involving a test requirement is a genuine cross-link (e.g. two different test suites), not a suite reported against its own subject.
+- `MAP_ENGINE_VERSION` → `2026-08-27`.
+
 ## plugin `v2.28.0` — 2026-08-25
 
 **The rest of the scan-evidence matrix, run the same day: five foreign repositories, five language families, ten engine fixes.** Run 6 (`v2.27.0`) was one consumer. These are strangers: `madler/zlib` + `curl/curl` (C/C++, 4,449 files), `excalidraw/excalidraw` (TS/React), `docker/awesome-compose` (Dockerfiles, compose YAML, 11 app languages), `gin-gonic/gin` + `encode/httpx` (Go, Python), `danielmiessler/fabric` (396 Markdown prompt files). Each run: inventory → `coverage` → `plan` → `draft` → `gate` → `next`/`health`/`dupes` → a native-comment-style tag probe per language → edge probes. Zero crashes on the protocol itself; zero false-positive tag hits across all seven repos (`TAG_RE`'s boundary guard held); the C/C++ scanner passed 16/16 probes (block comments, `#define` lines, CRLF, Latin-1 bytes). What broke was everything around the scanner.
