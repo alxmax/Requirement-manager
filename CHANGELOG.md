@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v2.29.1` — 2026-08-31
+
+**A consumer's System Map drew its edges as endless horizontal lines. The cause was a dependency cycle meeting a ranking loop that cannot converge on one.**
+
+- **`depends_on` cycles were invisible.** The gate checked that every `depends_on` target exists and never that the graph is acyclic, so three cycles sat in a 59-requirement corpus (`ACCESSLOG-077 -> CI-UPLOAD-037 -> EMPLOYEES-036 -> TENANT-034 -> ACCESSLOG-077`, and two around `SIGN-APPLY-049`) with nothing reporting them. New `_dependency_cycles` walks the registry in sorted order and the gate names each distinct cycle. **WARN, not ERROR, deliberately**: a dangling `depends_on` is a typo with one fix, a cycle is a modelling call across several requirements, and promoting it would fail a build that was green yesterday with none of the consumer's own lines changed (ADR-0002). It stays a warning under `--strict` too. `REQ-CHECK-006` +AC-14.
+- **The viewer's layout could not survive one.** `rankNodes` ranks by longest path through repeated relaxation, which never converges on a cycle: every pass adds one to every node around it, so the loop ran its full budget and returned **maxRank 236 for 59 nodes** — a DAG of 59 cannot exceed 58. That is a **71,362px-wide canvas** with ~230 empty columns, and `buildEdgePath` dutifully stepped each edge through every one of them. Cycle-closing edges (found by an iterative DFS) are now excluded from the ranking and still drawn. Same corpus: **maxRank 236 → 12, width 71,362px → 4,412px**. An acyclic registry is unaffected by construction — no back edges, nothing removed. `REQ-VIEWER-007` +AC-7, asserted in the SSR smoke.
+- `MAP_ENGINE_VERSION` → `2026-08-31.1`; vendored viewer rebuilt.
+
 ## plugin `v2.29.0` — 2026-08-31
 
 **Ten findings from a consumer session on a 55-requirement corpus, fixed.** The report is one repo's real use of `v2.28.1` (`Management_Dashboard`, ~390 members); every item below was reproduced against this repo's own corpus or its code before being changed.

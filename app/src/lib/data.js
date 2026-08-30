@@ -95,7 +95,7 @@ const BAKED = [
 
   { id:"REQ-CHECK-006", area:"REQ", title:"The gate", layer:"feature", status:"confirmed",
     intent:"Fail the build when code and requirements have fallen out of sync.",
-    contract:[
+    contract:[[
       "`gate` reports an `ERROR` and exits non-zero for every condition in this group.",
       "A dangling tag — a code tag referencing a capability no requirement defines — is such a condition.",
       "An invalid `status` or an invalid `layer` is such a condition.",
@@ -122,12 +122,15 @@ const BAKED = [
       "The legacy-schema warning does not affect the exit code.",
       "A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at least one such tag (see [[REQ-VLEVEL-037]]).",
       "A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.",
+      "A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.",
+      "The cycle warning stays a warning under `--strict`, so an existing corpus keeps its exit code when the engine is upgraded.",
       "`gate` prints an advisory line carrying the open verify-intent finding count when that count is above zero.",
       "That advisory line does not affect the exit code.",
       "`gate` prints a summary of requirements, members, errors and warnings.",
       "With `--update-lock`, `gate` writes the current binding hashes to `requirements/_reqlock.json`.",
       "`sync` and the deprecated `check` alias pass `--update-lock`.",
-      "The `gate` verb itself is report-only." ],
+      "The `gate` verb itself is report-only.",
+    ]],
     acc:[
       "A tag referencing a non-existent capability produces an `ERROR` and exit 1.",
       "A `confirmed` requirement with no `implements` member produces an `ERROR`.",

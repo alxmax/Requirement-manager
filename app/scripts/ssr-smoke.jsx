@@ -14,6 +14,7 @@ import { ProblemsView } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
 import { I18nProvider, translate } from "../src/lib/i18n.jsx";
+import { computeLayout } from "../src/lib/layout.js";
 
 // feed the real engine export through the adapter, exactly as the browser would
 // (run from the app/ directory: `node scripts/run-ssr-smoke.mjs`)
@@ -158,6 +159,35 @@ for (const [label, ok] of i18nContentChecks) {
   console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
   if (!ok) failures++;
 }
+// ---- layout on a CYCLIC registry -------------------------------------------
+// A `depends_on` cycle is a modelling error the gate reports, but the viewer still
+// has to draw the registry. Longest-path ranking never converges on a cycle: it
+// ran its full pass budget and returned maxRank 236 for a real 59-node corpus
+// (a DAG of 59 cannot exceed 58), i.e. a 71,000px canvas of empty columns.
+const cyc = [
+  { id: "A-1", deps: ["B-2"] },
+  { id: "B-2", deps: ["C-3"] },
+  { id: "C-3", deps: ["A-1"] },          // closes the cycle
+  { id: "D-4", deps: ["A-1"] },
+];
+const cycLayout = computeLayout(cyc);
+const cycMaxRank = Math.max(...Object.values(cycLayout.rankOf));
+const chain = Array.from({ length: 12 }, (_, i) => ({
+  id: `L-${i}`, deps: i < 11 ? [`L-${i + 1}`] : [],       // an honest 12-deep DAG
+}));
+const chainMaxRank = Math.max(...Object.values(computeLayout(chain).rankOf));
+const layoutChecks = [
+  ["layout: a cycle cannot rank beyond the node count", cycMaxRank <= cyc.length - 1],
+  ["layout: a cyclic graph stays in a bounded canvas", cycLayout.width < 2000],
+  ["layout: every node still gets a position", cyc.every((r) => cycLayout.pos[r.id])],
+  ["layout: cycle-closing edges are still drawn", cycLayout.edges.length === 4],
+  ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],
+];
+for (const [label, ok] of layoutChecks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
+
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");

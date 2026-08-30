@@ -287,6 +287,7 @@ expected and acceptable.
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
 | committed map stale (`_map.*`, `_findings.md`, published `docs/map.html`) | **WARN** | exit 0 |
+| `depends_on` cycle (the dependency order is unsatisfiable) | **WARN** | exit 0 |
 
 Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI
 for a corpus where all requirements are confirmed and lock is current).

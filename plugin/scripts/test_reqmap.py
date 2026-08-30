@@ -4098,6 +4098,73 @@ class SuggestVerifies(unittest.TestCase):  # tested-by: REQ-SUGGESTVERIFIES-047
             self.assertIn("// {}:".format("verifies"), out)        # JS comment syntax
 
 
+class DependsOnCycles(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """A cycle makes the layering claim false, and nothing looked for one — it showed
+    up as a 71,000px-wide viewer canvas on a real 59-requirement corpus."""
+
+    def _req(self, rid, deps):
+        return REQ.format(id=rid, status="confirmed", layer="feature",
+                          extra="depends_on: [{}]\n".format(", ".join(deps)), title=rid)
+
+    def _load(self, d, graph):
+        for rid, deps in graph.items():
+            _write(os.path.join(d, rid + ".md"), self._req(rid, deps) + "\n" + _ac_body())
+            _write(os.path.join(d, rid.lower().replace("-", "_") + ".py"), tag(rid) + "\n")
+        return R.load_requirements(d)
+
+    def test_no_cycle_reports_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": [], "A-X-003": ["A-X-002"]})
+            self.assertEqual(R._dependency_cycles(reqs), [])
+
+    def test_two_node_cycle_found(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
+            cycles = R._dependency_cycles(reqs)
+            self.assertEqual(len(cycles), 1)
+            self.assertEqual(cycles[0][0], cycles[0][-1])          # closes where it opened
+            self.assertEqual(set(cycles[0]), {"A-X-001", "A-X-002"})
+
+    def test_longer_cycle_reported_once(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-003"],
+                                  "A-X-003": ["A-X-001"], "A-X-004": ["A-X-001"]})
+            cycles = R._dependency_cycles(reqs)
+            self.assertEqual(len(cycles), 1)
+            self.assertEqual(len(cycles[0]), 4)                    # 3 nodes + the repeat
+
+    def test_dangling_dependency_is_not_a_cycle(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._load(d, {"A-X-001": ["GHOST-X-999"]})
+            self.assertEqual(R._dependency_cycles(reqs), [])
+
+    def test_self_dependency_is_a_cycle(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs = self._load(d, {"A-X-001": ["A-X-001"]})
+            self.assertEqual(len(R._dependency_cycles(reqs)), 1)
+
+    def test_gate_warns_and_does_not_error(self):  # verifies: REQ-CHECK-006#AC-14
+        with tempfile.TemporaryDirectory() as d:
+            self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            out = buf.getvalue()
+            self.assertIn("depends_on cycle", out)
+            self.assertIn("A-X-001 -> A-X-002 -> A-X-001", out)
+            self.assertEqual(code, 0)                              # warn-only
+
+    def test_strict_does_not_promote_the_cycle_warning(self):
+        # a consumer whose corpus has a cycle must not see a green CI turn red on upgrade
+        with tempfile.TemporaryDirectory() as d:
+            self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d, strict=True)
+            self.assertEqual(code, 0)
+
+
 class SyncMapNotRegenerated(unittest.TestCase):  # tested-by: REQ-CHECK-006
     """`sync` writes the lock even when the gate errors, but skips the map — the two
     then disagree, `gate` passes locally, and CI fails on `map --check`."""

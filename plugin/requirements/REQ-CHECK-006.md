@@ -71,6 +71,9 @@ Every line in this section is binding.
 - A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at
   least one such tag (see [[REQ-VLEVEL-037]]).
 - A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.
+- A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.
+- The cycle warning stays a warning under `--strict`, so an existing corpus keeps its
+  exit code when the engine is upgraded.
 
 **What it prints**
 - `gate` prints an advisory line carrying the open verify-intent finding count when that
@@ -175,6 +178,11 @@ AC-13
   Given  a `_reqlock.json` (or `_memberlock.json`) present on disk but not git-tracked, inside a git work tree
   When   `gate` runs
   Then   it produces a `WARN` naming the file; once the file is tracked, or when run outside a git work tree, it produces none
+
+AC-14
+  Given  two requirements whose `depends_on` fields point at each other
+  When   the gate runs
+  Then   it warns once, naming the chain, and the exit code stays 0
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
