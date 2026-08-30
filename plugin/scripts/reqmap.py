@@ -166,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-31"
+MAP_ENGINE_VERSION = "2026-08-31.1"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2282,6 +2282,16 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         warns.append("{}/{} requirement(s) use the legacy schema (no '## WHAT — Verify "
                      "intent' section) — `findings` is inactive for them: {}"
                      .format(len(legacy), len(reqs), ", ".join(legacy)))
+
+    # depends_on cycles (warn-only): a cycle makes the dependency order unsatisfiable.
+    # Warn and not error, deliberately: a dangling `depends_on` target is a typo with
+    # one fix, while a cycle is a modelling call across several requirements — turning
+    # it into an error would fail a build that was green yesterday, on an upgrade, with
+    # no line of the consumer's own changed (ADR-0002).  # implements: REQ-CHECK-006
+    for _cyc in _dependency_cycles(reqs):
+        warns.append("depends_on cycle: " + " -> ".join(_cyc)
+                     + " — no requirement in a cycle can be built before the others; "
+                       "drop the edge that closes it")
 
     # Map freshness (warn-only): the committed map is GENERATED from this registry, so
     # a requirement edit leaves it stale — and `gate` said nothing, so a consumer who
@@ -4582,6 +4592,49 @@ def _link_sync_errors(reqs, members):
         if m.get("status") in ENFORCED and not impls:
             errs.append(f"{rid}: status {m['status']} but no implements: tag found in code")
     return errs
+
+
+def _dependency_cycles(reqs):  # implements: REQ-CHECK-006
+    """Every `depends_on` cycle in the registry, as a list of id lists, each ending
+    where it began (`A, B, C, A`). Deterministic: nodes and edges are walked in
+    sorted order, so the same corpus always reports the same cycles in the same
+    shape.
+
+    A cycle means the layering claim is false — no requirement in it can be built
+    before the others — and nothing looked for one. It surfaced as a rendering
+    artifact instead: the viewer ranks by longest path, which never converges on a
+    cycle, so a 59-requirement corpus with three cycles laid out 236 columns wide
+    and drew its edges as endless horizontal lines. That is the symptom; this is
+    the cause, and it belongs in the gate's report, not in a diagram."""
+    adj = {rid: [d for d in sorted(_as_list(r["meta"].get("depends_on"))) if d in reqs]
+           for rid, r in reqs.items()}
+    state, stack, cycles, seen = {}, [], [], set()
+    for root in sorted(adj):
+        if state.get(root):
+            continue
+        # iterative DFS — a deep chain must not hit the interpreter's recursion limit
+        work = [(root, iter(adj[root]))]
+        state[root] = 1
+        stack.append(root)
+        while work:
+            node, it = work[-1]
+            nxt = next(it, None)
+            if nxt is None:
+                state[node] = 2
+                stack.pop()
+                work.pop()
+                continue
+            if state.get(nxt) == 1:                      # closes a cycle
+                cyc = stack[stack.index(nxt):] + [nxt]
+                key = frozenset(cyc)
+                if key not in seen:
+                    seen.add(key)
+                    cycles.append(cyc)
+            elif state.get(nxt) != 2:
+                state[nxt] = 1
+                stack.append(nxt)
+                work.append((nxt, iter(adj[nxt])))
+    return cycles
 
 
 def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: REQ-REGISTRYLAG-035

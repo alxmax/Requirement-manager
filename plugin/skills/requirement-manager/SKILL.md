@@ -293,6 +293,7 @@ expected and acceptable.
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
 | committed map stale (`_map.*`, `_findings.md`, published `docs/map.html`) | **WARN** | exit 0 |
+| `depends_on` cycle (the dependency order is unsatisfiable) | **WARN** | exit 0 |
 | member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
 | untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
 | tag in a file type the scan never reads (not a member) | **WARN** | exit 0 |

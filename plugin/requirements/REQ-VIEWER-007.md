@@ -55,6 +55,11 @@ Every line in this section is binding.
   assignment into an unterminated string on any engine older than ES2019. The escaped forms
   denote the same characters in JSON, so the parsed graph is unchanged.
 
+**How it places the nodes**
+- The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
+- The viewer excludes a cycle-closing edge from that ranking, and still draws it.
+- No node ranks higher than the number of nodes, whatever the registry's shape.
+
 **What language it shows**
 - The viewer renders its own UI chrome in English by default.
 - A locale control in the viewer's top bar switches that chrome to another bundled language.
@@ -89,6 +94,11 @@ AC-2
   Given  a requirement field containing `</script>`
   When   the viewer is rendered
   Then   the sequence is escaped (`<\/`) so it cannot close the inline-data script early
+
+AC-7
+  Given  a registry whose `depends_on` edges form a cycle
+  When   the layout is computed
+  Then   every node is placed, no rank exceeds the node count, and the closing edge is drawn
 
 AC-4
   Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)

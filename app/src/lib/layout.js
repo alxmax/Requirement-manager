@@ -20,13 +20,52 @@ export function edgesWithin(reqs, ids) {
   return out;
 }
 
-/** Longest-path rank so that for every edge a→b (a depends_on b), rank(b) > rank(a). */
+/** Edges that close a cycle, found by DFS: an edge into a node still on the
+ * recursion stack. Returned as a Set of "a\u0000b" keys.
+ *
+ * A `depends_on` cycle is a modelling error the gate reports, but the viewer must
+ * still draw such a registry, and draw it legibly. Ranking a cyclic graph by
+ * longest-path relaxation never converges: every pass adds one to every node
+ * around the cycle, so the loop runs its full `ids.length` passes and the ranks
+ * come out as high as it was allowed to count. A real corpus of 59 requirements
+ * with three cycles produced maxRank 236 — where a DAG of 59 nodes cannot exceed
+ * 58 — which is a 71,000px-wide canvas with ~230 empty columns, and edges drawn
+ * as near-endless horizontal lines stepping through every one of them. */
+function backEdges(ids, edges) {
+  const out = {};
+  ids.forEach((id) => (out[id] = []));
+  for (const [a, b] of edges) if (out[a]) out[a].push(b);
+  const state = {}, back = new Set();          // 0/undef = unseen, 1 = on stack, 2 = done
+  const visit = (root) => {
+    // iterative DFS: a deep chain must not blow the JS stack in a viewer
+    const stack = [[root, 0]];
+    state[root] = 1;
+    while (stack.length) {
+      const frame = stack[stack.length - 1];
+      const [u, i] = frame;
+      if (i >= out[u].length) { state[u] = 2; stack.pop(); continue; }
+      frame[1]++;
+      const v = out[u][i];
+      if (state[v] === 1) back.add(u + "\u0000" + v);        // closes a cycle
+      else if (state[v] !== 2) { state[v] = 1; stack.push([v, 0]); }
+    }
+  };
+  for (const id of ids) if (!state[id]) visit(id);
+  return back;
+}
+
+/** Longest-path rank so that for every edge a→b (a depends_on b), rank(b) > rank(a).
+ * Cycle-closing edges are excluded from the ranking (they are still drawn), so the
+ * remaining graph is a DAG and the relaxation converges in at most `ids.length`
+ * passes with rank <= ids.length - 1. */
 function rankNodes(ids, edges) {
+  const back = backEdges(ids, edges);
+  const acyclic = edges.filter(([a, b]) => !back.has(a + "\u0000" + b));
   const rank = {};
   ids.forEach((id) => (rank[id] = 0));
   for (let pass = 0; pass < ids.length; pass++) {
     let changed = false;
-    for (const [a, b] of edges) if (rank[b] < rank[a] + 1) { rank[b] = rank[a] + 1; changed = true; }
+    for (const [a, b] of acyclic) if (rank[b] < rank[a] + 1) { rank[b] = rank[a] + 1; changed = true; }
     if (!changed) break;
   }
   return rank;
