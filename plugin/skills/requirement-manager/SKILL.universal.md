@@ -135,12 +135,22 @@ plugin present.
   frontmatter (machine-readable) + prose body (human-readable). Nothing else
   restates the contract — code and docs *reference* it by id, never re-describe it.
 - **Optional frontmatter fields**: `milestone: vX.Y` places a requirement on the Roadmap tab (e.g. `milestone: v1.04`). It must be a version of the shape `v<digits>[.<digits>…]` — start with `v`, digits and dots only; the gate WARNs on a malformed value (advisory metadata, never build-critical). Use zero-padded minor versions (`v1.04`, not `v1.4`) to avoid ambiguity.
-- **Two layers** (think Factorio main bus + cells):
+- **Two working layers** (think Factorio main bus + cells), plus two that carry no
+  code of their own:
   - `layer: bus` — foundation capabilities, defined once, shared (telemetry,
     config, logging, an invocation primitive). Crisp output → crisp boundary.
+    A bus is defined by **high fan-in**; `lint` warns on a `bus` nothing depends on.
   - `layer: feature` — capabilities that compose the bus. They `depends_on` bus ids.
+  - `layer: need` — an upstream stakeholder need, covered **upward** by the
+    `satisfies:` edges other requirements declare toward it.
+  - `layer: aggregate` — a requirement whose implementation IS its dependencies':
+    it adds no behaviour, it asserts that N capabilities work together (an MVP
+    acceptance criterion is the archetype). Covered **downward** by its own
+    `depends_on`, which must not be empty.
   - If you cannot tell where a requirement ends, factor the shared part onto the bus.
-  - **Both layers** require `## WHAT — Contract` and `## HOW — Acceptance` at
+  - `need` and `aggregate` are exempt from the `implements:` rule — they are covered
+    by an edge, not by a tag. Everything else about them is unchanged.
+  - **Every layer** requires `## WHAT — Contract` and `## HOW — Acceptance` at
     `confirmed` status. Bus capabilities are not exempt — unspecified bus
     contracts are the most expensive to discover late.
 - **The thread**: code declares membership with a tag, by role:
@@ -272,10 +282,11 @@ expected and acceptable.
 | Check | Level | Effect on exit code |
 |---|---|---|
 | link sync (dangling tag, enforced req with no member, bad `depends_on`) | **ERROR** | exit 1 |
-| test-link integrity (tested-by file missing or holds no test function) | **WARN** | exit 0 |
+| test-link integrity (tested-by file missing or holds no test function) — **at every status**; strict-promoted only for `confirmed` | **WARN** | exit 0 |
 | drift (confirmed contract changed vs lock, members not re-touched) | **WARN** | exit 0 |
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
-| AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
+| AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
+| committed map stale (`_map.*`, `_findings.md`, published `docs/map.html`) | **WARN** | exit 0 |
 
 Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI
 for a corpus where all requirements are confirmed and lock is current).
@@ -343,6 +354,7 @@ Creation verbs (pick by input, not by outcome):
 | `translate` | Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook. | `--to` |
 | `site` | Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current. | `--attach`, `--regions`, `--diagram`, `--detect` |
 | `coverage` | Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability. | `--json` |
+| `suggest-verifies` | Propose `# verifies: <id>#AC-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags. | `--apply` |
 <!--##/REQMAP:COMMANDS##-->
 
 **`check` is a deprecated alias for `gate`** — kept for backward compat.

@@ -1,6 +1,6 @@
 /* SpecView — a rendered requirement document (frontmatter → WHY → WHAT → HOW → WHERE). */
 import { Fragment } from "react";
-import { REQUIREMENTS, REQ_BY_ID, coverageDetail, datesOf } from "../lib/data.js";
+import { REQUIREMENTS, REQ_BY_ID, coverageDetail, exemptReason } from "../lib/data.js";
 import { Pill, statusKind } from "../lib/ui.jsx";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
 
@@ -19,24 +19,30 @@ function TranslatedBadge() {
 // dangerouslySetInnerHTML with untrusted requirement text from _map.json.
 function mdInlineSpec(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`([^`]+)`/g,'<code>$1</code>'); }
 
+// The coverage strip shows a fraction ONLY when the engine measured one (the
+// requirement labels its criteria and at least one carries a `# verifies:` tag).
+// No measurement, no number: the badge alone. A count nobody computed reads as
+// authoritative and sends its owner hunting for tests that already exist.
+// The `created`/`updated` dates that used to sit here were derived from the
+// LENGTH OF THE ID and printed beside the `git log` command that would have
+// produced them — removed outright rather than faked more convincingly.
 function CovStrip({ r }) {
-  const { state, clauses, covered, gap } = coverageDetail(r);
-  const d = datesOf(r);
+  const { state, measured, clauses, covered, gap } = coverageDetail(r);
   const segs = [];
-  for (let i=0;i<clauses;i++) segs.push(i < covered ? "on" : (state==="partial" ? "gap" : "off"));
+  if (measured) for (let i=0;i<clauses;i++) segs.push(i < covered ? "on" : (state==="partial" ? "gap" : "off"));
+  let label;
+  if (state === "exempt") label = exemptReason(r);
+  else if (measured) label = covered+" / "+clauses+" criteria verified";
+  else if (state === "tested") label = "acceptance test linked · no per-criterion tags";
+  else label = "no acceptance test linked";
   return (
     <div className="cov-strip">
       <div className="cov-row">
         <span className={"cov-badge cov-"+state}><span className="cd" />{state}</span>
-        <span className="cov-count">{state==="exempt" ? (r.status==="deprecated" ? "deprecated — skipped by the gate" : "test-exempt — skipped by the gate") : covered+" / "+clauses+" clauses covered"}</span>
-        <div className="cov-bar">{segs.map((s,i)=><span key={i} className={"cseg "+s} />)}</div>
+        <span className="cov-count">{label}</span>
+        {measured && <div className="cov-bar">{segs.map((s,i)=><span key={i} className={"cseg "+s} />)}</div>}
       </div>
       {gap && state==="partial" && <div className="cov-gap">gap · {gap}</div>}
-      <div className="cov-dates">
-        {d.deprecated
-          ? <span><b>deprecated</b> {d.deprecated} <span className="gitc">git log -S</span></span>
-          : <><span><b>created</b> {d.created} <span className="gitc">git log --diff-filter=A</span></span><span><b>updated</b> {d.updated} <span className="gitc">git log -L</span></span></>}
-      </div>
     </div>
   );
 }
@@ -116,7 +122,7 @@ function SpecDoc({ r, onNav }) {
         <div className="members-box">
           {r.members.length
             ? r.members.map((m,i)=><div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
-            : r.layer === "need"
+            : (r.layer === "need" || r.layer === "aggregate")
               ? <div className="member" style={{color:"var(--fg-muted)"}}>{t("(satisfied-by other requirements — no direct code)")}</div>
               : <div className="member" style={{color:"var(--status-error)"}}>{t("(no members found — orphan)")}</div>}
         </div>

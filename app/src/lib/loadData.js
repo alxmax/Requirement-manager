@@ -32,6 +32,12 @@ export function adaptNode(n) {
     // forward the gate's test-exemption so coverageOf() can return "exempt"
     // instead of falsely flagging exempt requirements as "untested"
     test_exempt: n.test_exempt,
+    // per-criterion coverage, emitted ONLY for a requirement that adopted
+    // `# verifies:` tagging. Undefined means not measured — coverageDetail() then
+    // renders no fraction rather than inventing one.
+    clauses: n.clauses,
+    covered: n.covered,
+    gap: n.gap,
     milestone: n.milestone || null,
     priority: n.priority || "",
     // cached content translations, keyed by locale — see i18n.jsx's

@@ -131,7 +131,12 @@ META_IGNORE_NAMES = {"CLAUDE.md", "AGENTS.md", "GEMINI.md", "CONTRIBUTING.md",
                      "SKILL.md", "TODO.md", "CHANGELOG.md"}
 
 VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", "deprecated"}
-VALID_LAYER = {"bus", "feature", "need"}  # 'need' = an upstream stakeholder need, satisfied-by (not implemented-by)
+# 'need'      = an upstream stakeholder need, satisfied-by (not implemented-by)
+# 'aggregate' = a requirement whose implementation IS its dependencies' — it adds no
+#               behavior of its own, it asserts that N capabilities work together
+#               (an MVP acceptance requirement is the archetype). Covered by its
+#               depends_on edges, the mirror of how a need is covered by satisfies.
+VALID_LAYER = {"bus", "feature", "need", "aggregate"}
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
@@ -161,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-27"
+MAP_ENGINE_VERSION = "2026-08-31"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -647,6 +652,22 @@ COMMANDS = {
                 "flag": "--json",
                 "type": "bool",
                 "help": "Emit structured JSON output (for CI consumption).",
+            },
+        ],
+    },
+    "suggest-verifies": {
+        "summary": (
+            "Propose `# verifies: <id>#AC-N` tags for tests already named after the "
+            "criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can "
+            "be adopted on an existing corpus. Read-only; --apply writes the tags."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": "Write the proposed tags into the test files (ambiguous matches are never written).",
             },
         ],
     },
@@ -1549,11 +1570,29 @@ def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
     return cover
 
 
-def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
-    """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
-    Empty when the requirement writes bullet ACs without labels — per-AC coverage
-    only applies to requirements that label their criteria, so unlabelled ones are
-    silently exempt (no false 'unverified' warning)."""
+_AC_LABEL_RE = re.compile(r"^(AC-\d+)\b")
+_HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
+# The template records how a criterion is checked as an HTML comment on its label:
+# `AC-1  <!-- verifiable by: automated test -->`. Only this vocabulary marks a
+# criterion a machine can never verify; an ABSENT marker means automatable, so a
+# corpus that never adopted the marker keeps exactly the behavior it had.
+_AC_VERIFIABLE_RE = re.compile(r"verifiable\s+by\s*:([^>]*)", re.I)
+_AC_MANUAL_WORDS = ("manual", "inspection", "review", "demo", "walkthrough", "sign-off")
+
+
+def _acc_blocks(body):  # implements: REQ-ACVERIFY-019
+    """Parse the HOW — Acceptance section into one record per criterion:
+    `{"label": "AC-1" or "", "text": <folded prose>, "manual": bool}`.
+
+    Two authoring shapes exist and both count: the labelled Gherkin BLOCK the
+    template prescribes (`AC-1` followed by indented Given/When/Then lines) and a
+    plain `- ` bullet. `_bullets` sees only the second, which is why the emitted
+    `acc` list was empty for every requirement written the prescribed way — the map,
+    the viewer, and any downstream count had nothing to read (50/50 nodes here).
+
+    One parser, three callers (`_acc_items`, `_labeled_acs`, `_count_ac`) so a
+    criterion cannot be counted by one and missed by another. The block-start test
+    is `_count_ac`'s verbatim, keeping `len(_acc_blocks(b)) == _count_ac(b)`."""
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -1569,10 +1608,62 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
             continue
         if not grab:
             continue
-        m = re.match(r"^(AC-\d+)\b", s)
-        if m and m.group(1) not in out:
-            out.append(m.group(1))
+        m = _AC_LABEL_RE.match(s)
+        if m or s.startswith("- "):
+            label = m.group(1) if m else ""
+            out.append({"label": label, "raw": [s[len(label):] if m else s[2:]]})
+        elif s and out:
+            # continuation of the criterion above (an indented Given/When/Then line,
+            # or a marker comment on its own line) — folded in, so a multi-line
+            # criterion is never truncated to its first physical line.
+            out[-1]["raw"].append(s)
+    blocks = []
+    for b in out:
+        raw = " ".join(b["raw"]).strip()
+        mark = _AC_VERIFIABLE_RE.search(raw)
+        marker = mark.group(1) if mark else ""
+        blocks.append({
+            "label": b["label"],
+            "text": _HTML_COMMENT_RE.sub("", raw).strip(),
+            # `|` means the template's unedited placeholder list ("automated test |
+            # manual | inspection | load test") — an author who never chose is not
+            # declaring the criterion manual.
+            "manual": "|" not in marker and any(w in marker.lower() for w in _AC_MANUAL_WORDS),
+        })
+    return blocks
+
+
+def _acc_items(body):  # implements: REQ-MAP-007
+    """Acceptance criteria as display strings, for the emitted `acc` list: an
+    `AC-1 — Given … When … Then …` line per labelled block, or the bullet text."""
+    out = []
+    for b in _acc_blocks(body):
+        label, text = b["label"], b["text"]
+        item = f"{label} — {text}" if label and text else (label or text)
+        if item:
+            out.append(item)
     return out
+
+
+def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
+    """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
+    Empty when the requirement writes bullet ACs without labels — per-AC coverage
+    only applies to requirements that label their criteria, so unlabelled ones are
+    silently exempt (no false 'unverified' warning)."""
+    out = []
+    for b in _acc_blocks(body):
+        if b["label"] and b["label"] not in out:
+            out.append(b["label"])
+    return out
+
+
+def _automatable_acs(body):  # implements: REQ-ACVERIFY-019
+    """`_labeled_acs` minus the criteria marked `verifiable by: inspection|manual`.
+    A criterion a human checks by reading can never carry a `# verifies:` tag, so
+    counting it as unverified is a warning no one can ever clear — the marker the
+    template already prescribes is the answer, it simply was not read here."""
+    return [b["label"] for b in _acc_blocks(body)
+            if b["label"] and not b["manual"]]
 
 
 # ---------- hashing / drift ----------
@@ -1855,6 +1946,35 @@ _CALL_TEST_EXTS = (".js", ".ts", ".tsx", ".jsx", ".mjs", ".cjs")
 _PY_TEST_ENTRY_RE = re.compile(r"^\s*def\s+(?:run|run_tests|main)\s*\(", re.MULTILINE)
 _PY_MAIN_GUARD_RE = re.compile(r"""if\s+__name__\s*==\s*["']__main__["']""")
 
+# A shell suite declares a test as a bash function (`test_x() {`, `function test_x {`)
+# or a bats case (`@test "…" {`) — none of which match the Python/JS/Go/Rust idioms
+# above, so four real bash suites warned permanently in a consumer repo. The filename
+# conventions are honored too: naming a file `*.test.sh` AND tagging it `tested-by`
+# are two independent declarations that it is a test.
+_SH_TEST_EXTS = (".sh", ".bash", ".zsh", ".bats")
+_SH_TEST_NAME_RE = re.compile(r"(?:^|[._-])test[._-]|[._-]test$|^test[._-]", re.I)
+_SH_TEST_RE = re.compile(
+    r"(?m)^\s*(?:@test\b"
+    r"|(?:function\s+)?(?:test|assert|check|expect|should)[\w:.-]*\s*\(\s*\)"
+    r"|function\s+(?:test|assert|check|expect|should)[\w:.-]*\b)", re.I)
+
+
+# A requirement whose implementation is not its own code. Both layers are covered by
+# an EDGE instead of an `implements:` tag: a `need` by the `satisfies:` edges pointing
+# up at it, an `aggregate` by its own `depends_on` edges pointing down.
+IMPL_EXEMPT_LAYERS = ("need", "aggregate")
+
+
+def _impl_exempt(meta):  # implements: REQ-TRACE-020
+    """True when a requirement is exempt from the "confirmed code must exist" rule.
+
+    One predicate, four callers (gate link-sync, `health`, the risk signals, and
+    `confirm`). They disagreed before: three exempted `layer: need` and `confirm` did
+    not, so the layer's own reference case could not be promoted by the command that
+    exists to promote it — `NEED-SSOT-001` is `confirmed` here only because the file
+    was hand-edited around `confirm`."""
+    return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
+
 
 def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     """Return a short reason a `tested-by` file fails the behavior-sync check, or ''
@@ -1876,8 +1996,12 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     if (path.lower().endswith(".py")
             and _PY_TEST_ENTRY_RE.search(src) and _PY_MAIN_GUARD_RE.search(src)):
         return ""
+    if path.lower().endswith(_SH_TEST_EXTS):  # implements: REQ-TESTLINK-018
+        stem = os.path.splitext(os.path.basename(path))[0]
+        if _SH_TEST_NAME_RE.search(stem) or _SH_TEST_RE.search(src):
+            return ""
     return ("contains no test function "
-            "(def test.../func TestX.../#[test]/it()/py run|main under __main__)")
+            "(def test.../func TestX.../#[test]/it()/bash test_x()/py run|main under __main__)")
 
 
 def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,
@@ -1993,22 +2117,35 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             warns.append(f"{rid}: confirmed requirement has owner: auto — assign a named owner")
         # behavior-sync (warn-only): a tested-by link must point at a file that
         # exists and actually holds tests, else it asserts coverage it lacks.
-        if m.get("status") == "confirmed" and tests:
+        # Checked at EVERY status, not only `confirmed`: a link pointing at a React
+        # component instead of its spec is wrong the day it is written, and hiding
+        # that until promotion means the corpus is audited exactly when it is largest.
+        # A non-confirmed requirement warns but is never strict-promoted, so a
+        # draft-heavy consumer's `--strict` CI cannot start failing on this.
+        if tests:
             for fp in sorted({t[1] for t in tests}):  # implements: REQ-TESTLINK-018
                 problem = _test_link_problem(os.path.join(code_root, fp))
                 if problem:
-                    strict_warns.append(f"{rid}: tested-by {fp} {problem}")
+                    bucket = strict_warns if m.get("status") == "confirmed" else warns
+                    bucket.append(f"{rid}: tested-by {fp} {problem}")
         # per-AC coverage (warn-only): a confirmed requirement that LABELS its criteria
         # (AC-1, AC-2, ...) should have a `# verifies: <id>#AC-N` tag for each. Only
         # fires once at least one criterion is covered, so adopting per-AC tagging is
         # opt-in: a requirement with zero verifies tags keeps the coarse tested-by check.
+        # ONE aggregated line, not one per missing criterion: a corpus that tagged 110
+        # criteria correctly saw its warning count fall only 171 -> 98, because every
+        # requirement that entered the regime lit up a warning per criterion still to
+        # do. Partial adoption is the step being asked for; it must not cost more than
+        # tagging nothing. Machine-unverifiable criteria are excluded (_automatable_acs).
         if m.get("status") == "confirmed":  # implements: REQ-ACVERIFY-019
-            labels = _labeled_acs(r["body"])
+            labels = _automatable_acs(r["body"])
             covered = ac_cover.get(rid, {})
             if labels and covered:
-                for ac in labels:
-                    if ac not in covered:
-                        warns.append(f"{rid}: {ac} has no `# verifies: {rid}#{ac}` tag — criterion unverified")
+                missing = [ac for ac in labels if ac not in covered]
+                if missing:
+                    warns.append(
+                        f"{rid}: {len(labels) - len(missing)}/{len(labels)} automatable criteria "
+                        f"carry a `# verifies:` tag — missing " + ", ".join(missing))
         if m.get("status") == "confirmed":
             if not _has_section(r["body"], "contract"):
                 warns.append(
@@ -2146,6 +2283,24 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                      "intent' section) — `findings` is inactive for them: {}"
                      .format(len(legacy), len(reqs), ", ".join(legacy)))
 
+    # Map freshness (warn-only): the committed map is GENERATED from this registry, so
+    # a requirement edit leaves it stale — and `gate` said nothing, so a consumer who
+    # runs only `gate` before committing (what this repo's own docs tell them to do)
+    # learns it from a red CI run. Reported here; still enforced by `map --check`.
+    # Skipped under update_lock: `sync` regenerates the map moments later.
+    if not update_lock:  # implements: REQ-MAP-007
+        try:
+            stale_map = _stale_artifacts(
+                # full_members, not the --since-filtered view: a scoped gate must not
+                # report the map stale for members it deliberately did not look at.
+                _assemble_map_data(reqs, full_members, reqs_dir, code_root, ac_cover),
+                reqs_dir, code_root, reqs)
+        except Exception:
+            stale_map = []            # fail-open — a freshness probe never blocks the gate
+        if stale_map:
+            warns.append("committed map is stale: " + ", ".join(stale_map)
+                         + " — run `reqmap.py sync` (or `map`) and commit the result")
+
     if strict:
         errors.extend(strict_warns)
     else:
@@ -2220,7 +2375,7 @@ REQUIREMENT_TEMPLATE = """\
 ---
 id: AREA-NAME-NNN
 status: draft        # draft | baseline | in-progress | implemented | confirmed | deprecated
-layer: feature       # bus | feature | need
+layer: feature       # bus | feature | need | aggregate
 owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: []       # ids of bus/other capabilities this builds on
@@ -2461,7 +2616,17 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
         print(f"{cap_id} is already confirmed.")
         return 0
     roles = [m[0] for m in members.get(cap_id, [])]
-    if "implements" not in roles:
+    meta = r["meta"]
+    if _impl_exempt(meta):
+        # `need`/`aggregate` are covered by an edge, not by a tag — the same exemption
+        # the gate, `health` and the risk map already apply (_impl_exempt). The edge is
+        # still checked, so the exemption is a different rule, not a hole: an aggregate
+        # with no dependencies is exactly the orphan this refusal exists to catch.
+        if meta.get("layer") == "aggregate" and not _as_list(meta.get("depends_on")):
+            print(f"refusing: {cap_id} is `layer: aggregate` but its `depends_on` is empty — "
+                  "an aggregate is implemented BY its dependencies; list them first.")
+            return 1
+    elif "implements" not in roles:
         print(f"refusing: {cap_id} has no `implements:` member — a confirmed requirement "
               f"must point to code. Tag the implementing code `# implements: {cap_id}` first.")
         return 1
@@ -2474,6 +2639,12 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
     with open(r["path"], "w", encoding="utf-8") as f:
         f.write(new_text)
     print(f"promoted {cap_id}: {cur or '(unset)'} -> confirmed")
+    if _impl_exempt(meta):
+        print(f"  note: `layer: {meta.get('layer')}` — covered by its "
+              f"{'satisfies:' if meta.get('layer') == 'need' else 'depends_on'} edges, "
+              "not by an implements: tag.")
+        print("  next: reqmap.py sync")
+        return 0
     if "tested-by" not in roles:
         print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
               f"or set `test_exempt: <reason>` to silence the untested signal.")
@@ -3102,9 +3273,32 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
 
 
 # ---------- map (HTML) ----------
-def _build_map_data(reqs, members):  # implements: REQ-MAP-007
+def _attach_ac_coverage(node, body, covered):  # implements: REQ-ACVERIFY-019
+    """Add `clauses` / `covered` / `gap` to a node, but ONLY when the requirement has
+    adopted per-AC tagging: it labels criteria AND at least one carries a `verifies:`
+    tag. Absent means "not measured", and every reader must render it as such.
+
+    The viewer used to invent the pair when it was absent — `clauses` from the number
+    of CONTRACT lines, `covered` all-or-nothing from the tested-by badge — so a
+    requirement with three real tests read "0 / 8 clauses covered" and sent its owner
+    on an investigation. A number nobody computed is worse than no number."""
+    labels = [b["label"] for b in _acc_blocks(body) if b["label"] and not b["manual"]]
+    if not labels or not covered:
+        return
+    missing = [ac for ac in labels if ac not in covered]
+    node["clauses"] = len(labels)
+    node["covered"] = len(labels) - len(missing)
+    if missing:
+        node["gap"] = "no `verifies:` tag for " + ", ".join(missing)
+
+
+def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
     """Assemble the {nodes, edges} registry graph that drives every rendered
-    surface (HTML map, Mermaid blocks, and the JSON export). Pure: no IO."""
+    surface (HTML map, Mermaid blocks, and the JSON export). Pure: no IO.
+
+    `ac_cover` ({id: {AC-N: [...]}}, from `scan_ac_verifies`) is what turns the
+    per-criterion coverage the gate already computes into something the viewer can
+    render honestly; omitted, the coverage fields are simply absent."""
     used_by = {rid: [] for rid in reqs}
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
@@ -3129,7 +3323,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
             "verify": _bullets(r["body"], "verify intent"),
             "notes": _bullets(r["body"], "notes"),
             "current_impl": _bullets(r["body"], "current implementation"),
-            "acc": _bullets(r["body"], "acceptan"),          # AC bullets if any
+            "acc": _acc_items(r["body"]),                    # AC blocks AND bullets
             "accept": _section_raw(r["body"], "acceptan"),    # raw acceptance (AC blocks, line breaks kept)
             # legacy schema (Input / Description / Output) — kept so old docs still render
             "input": _section(r["body"], "input"),
@@ -3148,6 +3342,7 @@ def _build_map_data(reqs, members):  # implements: REQ-MAP-007
                  "members": members.get(rid, []),
                  "verify": _bullets(r["body"], "verify intent"), "test_exempt": m.get("test_exempt")})],
         })
+        _attach_ac_coverage(data["nodes"][-1], r["body"], (ac_cover or {}).get(rid, {}))
     for rid, r in reqs.items():
         for dep in _as_list(r["meta"].get("depends_on")):
             if dep in reqs:                    # skip dangling targets — no phantom node
@@ -3529,11 +3724,8 @@ def _attach_translations(data, reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
     return data
 
 
-def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-MAP-007
-    data = _build_map_data(reqs, members)
-    data["repo"] = _repo_name(root)
-    data["todos"] = _parse_todos(root)
-    _attach_translations(data, reqs, reqs_dir)
+def cmd_map(reqs, members, reqs_dir, root=".", check=False, ac_cover=None):  # implements: REQ-MAP-007
+    data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
 
     if check:
         return _map_check(data, reqs_dir, root, reqs)
@@ -3556,14 +3748,29 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False):  # implements: REQ-
     return 0
 
 
-def cmd_export(reqs, members, reqs_dir, root=".", out=None):  # implements: REQ-MAP-007
+def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # implements: REQ-MAP-007
+    """The graph plus the three fields every rendered surface needs on top of it
+    (repo, todos, translations). One assembler, so `map`, `export` and the gate's
+    freshness probe cannot build three subtly different documents and disagree about
+    which one is stale."""
+    if ac_cover is None:
+        # `init` and any embedding caller pass none; computing it here (instead of
+        # emitting a coverage-less map) keeps every writer of _map.json byte-identical,
+        # so `map --check` cannot flag a map as stale merely because a different
+        # command wrote it.
+        ac_cover = scan_ac_verifies(root, reqs_dir)
+    data = _build_map_data(reqs, members, ac_cover)
+    data["repo"] = _repo_name(root)
+    data["todos"] = _parse_todos(root)
+    _attach_translations(data, reqs, reqs_dir)
+    return data
+
+
+def cmd_export(reqs, members, reqs_dir, root=".", out=None, ac_cover=None):  # implements: REQ-MAP-007
     """Emit the registry graph as JSON for an external front-end to consume.
     Same {nodes, edges} shape that drives the map; '-' = stdout, --out PATH, or
     requirements/_map.json by default."""
-    data = _build_map_data(reqs, members)
-    data["repo"] = _repo_name(root)
-    data["todos"] = _parse_todos(root)   # mirror cmd_map so export is byte-equivalent
-    _attach_translations(data, reqs, reqs_dir)
+    data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
     text = _build_json_text(data)
     target = out if out else os.path.join(reqs_dir, "_map.json")
     if target == "-":
@@ -3725,6 +3932,11 @@ LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC ov
 LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
                                # 'file-spread' diffuseness signal (warn) — auto-off below it,
                                # so silent in single-file repos (near-zero false positive)
+LINT_BUS_FANOUT_MIN = 3        # a `layer: bus` with ZERO dependents and this many dependencies
+                               # is the inverse of a bus ('layer-mismatch', warn). Three, because
+                               # this corpus's largest fan-out is three and none of its bus
+                               # requirements has zero fan-in — so the check is silent here and
+                               # fires on the shape that produced it (0 in / 12 out).
 # Closed list of vague QUALITY words that make a normative bullet un-testable
 # (IEEE 29148 "Unambiguous"). Deliberately excludes size words (high/low/small/many)
 # and weak modals — they are too often legitimately precise in this domain, and a
@@ -3787,35 +3999,18 @@ def _clip(s, n=60):  # implements: REQ-LINT-014
 def _count_ac(body):
     """Count acceptance criteria in the HOW — Acceptance section.
     Handles both bullet-list ACs (- ...) and labeled AC blocks (AC-N ...).
-    Skips fenced code blocks (so a ``` example with bullet lines doesn't inflate
-    the count) and detects the section with the anchored heading predicate (so a
-    `## Notes — acceptance …` commentary heading isn't mistaken for it) — keeping
-    this count in agreement with _has_section/_bullets and the gate."""
-    grab, seen, count, fenced = False, False, 0, False
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
-            grab = (not seen) and _heading_label_is(s, "acceptan")
-            if grab:
-                seen = True
-            continue
-        if not grab:
-            continue
-        if s.startswith("- ") or re.match(r"^AC-\d+\b", s):
-            count += 1
-    return count
+    Delegates to `_acc_blocks`, the single parser of that section, so the count
+    `lint` and `next` reason about cannot drift from the criteria the map emits."""
+    return len(_acc_blocks(body))
 
 
-def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # implements: REQ-LINTCHECKS-025
+def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-LINT-014  # implements: REQ-LINTCHECKS-025
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only.
     `member_list` (optional [(role, file, line), ...]) enables the member-based
     file-spread check; when omitted, that check is skipped.
+    `fanin` (optional int — how many requirements depend on this one) enables the
+    layer-mismatch check; when omitted, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are silently
     skipped and not counted against the requirement."""
     exempt = set(_as_list(r["meta"].get("lint_exempt")))
@@ -3960,6 +4155,21 @@ def lint_requirement(rid, r, member_list=None):  # implements: REQ-LINT-014  # i
                 "severity": "warn", "check": "file-spread",
                 "detail": "implements span {} files (>= {}): capability may be diffuse — "
                           "confirm cohesion or split".format(len(impl_files), LINT_FILE_SPREAD_MAX)})
+    # layer-mismatch (warn): `bus` is DEFINED by fan-in ("foundation, high fan-in"),
+    # and nothing checked it. A requirement with no dependents and many dependencies is
+    # the exact inverse — a roof labelled a foundation. It reads as bus in the map, in
+    # `next`, and in every diagnostic built on the layer, so the mislabel misleads
+    # precisely where the layer is supposed to help. `layer: aggregate` is the label
+    # such a requirement wants.
+    if (fanin is not None and r["meta"].get("layer") == "bus"
+            and fanin == 0
+            and len(_as_list(r["meta"].get("depends_on"))) >= LINT_BUS_FANOUT_MIN):
+        findings.append({
+            "severity": "warn", "check": "layer-mismatch",
+            "detail": "layer: bus but nothing depends on it and it depends on {} "
+                      "requirement(s) — that is a roof, not a foundation; consider "
+                      "`layer: aggregate` or `feature`".format(
+                          len(_as_list(r["meta"].get("depends_on"))))})
     if exempt:
         findings = [f for f in findings if f["check"] not in exempt]
     return findings
@@ -3979,9 +4189,14 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
+    fanin = {rid: 0 for rid in reqs}                      # implements: REQ-LINTCHECKS-025
+    for _rid, _r in reqs.items():
+        for _dep in _as_list(_r["meta"].get("depends_on")):
+            if _dep in fanin:
+                fanin[_dep] += 1
     errors = warns = 0
     for rid, r in targets:
-        fs = lint_requirement(rid, r, (members or {}).get(rid))
+        fs = lint_requirement(rid, r, (members or {}).get(rid), fanin.get(rid))
         exempt = set(_as_list(r["meta"].get("lint_exempt")))
         if not fs and not exempt:
             continue
@@ -4361,7 +4576,7 @@ def _link_sync_errors(reqs, members):
             errs.append(f"dangling tag: code references {cap} but no requirement exists")
     for rid, r in reqs.items():
         m = r["meta"]
-        if m.get("layer") == "need":
+        if _impl_exempt(m):
             continue
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
         if m.get("status") in ENFORCED and not impls:
@@ -4424,9 +4639,14 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         roles = _member_roles(members.get(rid, []))
         has_impl = "implements" in roles
         # a need is covered by being satisfied, not implemented, and its test
-        # axis is waived — a need is fulfilled by requirements, not by code
+        # axis is waived — a need is fulfilled by requirements, not by code.
+        # An aggregate is covered the same way, downward: by its depends_on edges.
         is_need = m.get("layer") == "need"
-        covered = (rid in satisfied) if is_need else has_impl
+        covered = has_impl
+        if is_need:
+            covered = rid in satisfied
+        elif _impl_exempt(m):                     # aggregate: covered by its dependencies
+            covered = bool(_as_list(m.get("depends_on")))
         has_test_member = "tested-by" in roles
         has_test = has_test_member or bool(m.get("test_exempt"))
         is_confirmed = status == "confirmed"
@@ -4679,17 +4899,11 @@ def _strip_generated(text):
                      and not l.lstrip().startswith('"engine_version":'))
 
 
-def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
-    """Freshness gate: regenerate the map in memory and compare to the committed
-    files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
-    that shifts the map can't be committed without regenerating it. A map that was
-    never generated (file absent) is NOT stale — consumers who don't track maps pass.
-    The `generated:` timestamp is ignored so an unchanged map never trips on time.
-
-    Also asserts the published `docs/map.html` (when docs/ carries a Pages signal
-    and the viewer template is present) matches a fresh viewer render — so the
-    GitHub Pages copy cannot silently drift from the registry. Skipped when that
-    copy was never generated, matching the file-absent convention above."""
+def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
+    """Names of the committed generated artifacts that no longer match a fresh
+    render of `data` — the whole of the freshness verdict, with no printing and no
+    exit code, so `map --check` (which fails) and `gate` (which warns) read the same
+    answer instead of implementing it twice."""
     stale = []
     for name, fresh in (("_map.md", _build_md_text(data)),
                         ("_map.json", _build_json_text(data))):
@@ -4736,6 +4950,16 @@ def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
             ctx = _site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
             if disk_stats != _render_region("stats", ctx):
                 stale.append(os.path.basename(site_target))
+    return stale
+
+
+def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
+    """Freshness gate: regenerate the map in memory and compare to the committed
+    files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
+    that shifts the map can't be committed without regenerating it. A map that was
+    never generated (file absent) is NOT stale — consumers who don't track maps pass.
+    The `generated:` timestamp is ignored so an unchanged map never trips on time."""
+    stale = _stale_artifacts(data, reqs_dir, root, reqs)
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py sync` and commit the result."
               .format(", ".join(stale)))
@@ -5074,7 +5298,7 @@ def _risk_signals(node):
     # requirements, not implemented by code, so the gate exempts it (REQ-TRACE-020) —
     # mirror that here, else the Risk/Problems views flag a passing gate as failing.
     roles = _member_roles(node.get("members"))
-    if node["status"] in ENFORCED and "implements" not in roles and node.get("layer") != "need":
+    if node["status"] in ENFORCED and "implements" not in roles and not _impl_exempt(node):
         signals.append("unimplemented")
     if node["status"] in ("draft", "baseline"):
         signals.append("unreviewed")
@@ -5583,11 +5807,12 @@ SITE_TEMPLATE = """\
   <div class="wrap">
     <div class="secthead"><span class="tag eng">engine-generated</span></div>
     <p class="eyebrow">Layer model</p>
-    <h2>Bus, feature, need</h2>
+    <h2>Bus, feature, need, aggregate</h2>
     <div class="layers">
       <div class="layer bus"><div class="l">layer: bus</div><h3>Foundation</h3><p>High fan-in capabilities — config, parse, scan, drift. Change only behind the contract.</p><div class="ids">CORE-PARSE-001 · CORE-SCAN-002 · CORE-DRIFT-003</div></div>
       <div class="layer feat"><div class="l">layer: feature</div><h3>Composed</h3><p>Built on the bus via <code>depends_on</code>; each carries its own contract, acceptance, tests.</p><div class="ids">REQ-CHECK-006 · REQ-MAP-007 · REQ-INIT-012</div></div>
       <div class="layer need"><div class="l">layer: need</div><h3>Stakeholder need</h3><p>An upstream need, satisfied-by features via <code>satisfies:</code>; exempt from the code gate.</p><div class="ids">NEED-SSOT-001</div></div>
+      <div class="layer need"><div class="l">layer: aggregate</div><h3>Roof</h3><p>No code of its own: its implementation is its <code>depends_on</code> requirements'. Exempt from the code gate, like a need — downward instead of upward.</p><div class="ids">—</div></div>
     </div>
   </div>
 </section>
@@ -5887,6 +6112,171 @@ def render_html(data, reqs_dir):  # implements: REQ-VIEWER-007
     return out
 
 
+# A test function's own NAME — never its class, never its parameter list. Both mislead:
+# a class `TestCiUploadSiDosar` carries the tokens of TWO requirements, so every test
+# inside it looked like it belonged to both; and a fixture parameter
+# (`def test_export_ac2_x(self, ctx, campaign)`) made a test look like it belonged to
+# the requirement whose token happens to name the fixture.
+_FUNC_DEF_RE = re.compile(r"^[ \t]*(?:async\s+)?(?:def|function|func)\s+([A-Za-z_]\w*)\s*\(")
+_JS_CASE_RE = re.compile(r"""^[ \t]*(?:it|test)\s*\(\s*["'`]([^"'`]{3,120})["'`]""")
+_HASH_COMMENT_EXTS = (".py", ".sh", ".bash", ".rb", ".yaml", ".yml", ".tf", ".ex", ".exs", ".jl", ".pl", ".r")
+
+
+def _test_functions(path):  # implements: REQ-SUGGESTVERIFIES-047
+    """`[(line_no, name)]` for the test cases declared in a file: a `def`/`function`/
+    `func` whose own name says "test", plus the Jest/Mocha `it("…")` label. Names only
+    (see above). Returns [] for an unreadable file — a suggestion tool never raises."""
+    out = []
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+    except OSError:
+        return out
+    for i, line in enumerate(lines, 1):
+        m = _FUNC_DEF_RE.match(line)
+        if m and "test" in m.group(1).lower():
+            out.append((i, m.group(1)))
+            continue
+        m = _JS_CASE_RE.match(line)
+        if m:
+            out.append((i, m.group(1)))
+    return out
+
+
+def _ac_name_re(ac):  # implements: REQ-SUGGESTVERIFIES-047
+    """Match `AC-3` inside a test name as `ac3`, `ac_3`, `ac-3` or `ac 3` — and NOT as
+    a prefix of `ac30`, which is a different criterion."""
+    n = ac.split("-", 1)[1]
+    return re.compile(r"(?:^|[^a-z0-9])ac[ _-]?0*{}(?![0-9])".format(re.escape(n)), re.I)
+
+
+def _comment_prefix(path):
+    return "#" if path.lower().endswith(_HASH_COMMENT_EXTS) else "//"
+
+
+def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: REQ-SUGGESTVERIFIES-047
+    """`(proposals, ambiguous)` — the machine-checkable half of "this test already
+    verifies that criterion", recovered from naming.
+
+    A proposal is made only when ALL of these hold, each rule paid for by a WRONG link
+    it produced when it was missing:
+      1. the test's name carries the criterion (`test_ac3_…`);
+      2. the file belongs to exactly ONE requirement, OR the test name carries a token
+         unique to this requirement's id — a `tested-by` file shared by four
+         requirements holds four different `ac1` tests;
+      3. the name carries no OTHER requirement's number — `test_ac1_083_…` sits in one
+         requirement's file but verifies id 083;
+      4. exactly one test matches. Two candidates are reported as ambiguous and never
+         written: the tool proposes, the human confirms."""
+    counts = {}
+    for rid in reqs:
+        for part in rid.lower().split("-"):
+            counts[part] = counts.get(part, 0) + 1
+    numbers = {}
+    for rid in reqs:
+        m = re.search(r"(\d{2,})$", rid)
+        if m:
+            numbers[rid] = m.group(1)
+    owners = {}
+    for rid, hits in members.items():
+        for role, fp, _ln in hits:
+            if role == "tested-by":
+                owners.setdefault(fp, set()).add(rid)
+    proposals, ambiguous = [], []
+    for rid in sorted(reqs):
+        labels = _automatable_acs(reqs[rid]["body"])
+        covered = ac_cover.get(rid, {})
+        missing = [ac for ac in labels if ac not in covered]
+        if not missing:
+            continue
+        files = sorted({fp for role, fp, _ln in members.get(rid, []) if role == "tested-by"})
+        distinctive = [p for p in rid.lower().split("-") if counts.get(p) == 1]
+        foreign = {n for other, n in numbers.items() if other != rid}
+        mine = numbers.get(rid)
+        for ac in missing:
+            want = _ac_name_re(ac)
+            hits = []
+            for fp in files:
+                shared = len(owners.get(fp, ())) > 1
+                for ln, name in _test_functions(os.path.join(code_root, fp)):
+                    low = name.lower()
+                    if not want.search(low):
+                        continue
+                    if shared and not any(d in low for d in distinctive):
+                        continue
+                    nums = set(re.findall(r"\d{2,}", low)) - {ac.split("-", 1)[1]}
+                    if (nums & foreign) and mine not in nums:
+                        continue
+                    hits.append((fp, ln, name))
+            if len(hits) == 1:
+                proposals.append((rid, ac) + hits[0])
+            elif hits:
+                ambiguous.append((rid, ac, hits))
+    return proposals, ambiguous
+
+
+def _apply_verifies(proposals, code_root):  # implements: REQ-SUGGESTVERIFIES-047
+    """Append `# verifies: <id>#AC-N` to each proposed test's declaration line.
+    Returns the number of lines written. Idempotent: a line already carrying that
+    exact tag is left alone."""
+    by_file = {}
+    for rid, ac, fp, ln, _name in proposals:
+        by_file.setdefault(fp, []).append((ln, rid, ac))
+    written = 0
+    for fp, items in sorted(by_file.items()):
+        path = os.path.join(code_root, fp)
+        try:
+            with open(path, encoding="utf-8", newline="") as f:
+                lines = f.readlines()
+        except OSError:
+            print("  skipped {} (unreadable)".format(fp))
+            continue
+        changed = False
+        for ln, rid, ac in sorted(items):
+            if ln > len(lines):
+                continue
+            line = lines[ln - 1]
+            tag = "{} {}: {}#{}".format(_comment_prefix(fp), "verifies", rid, ac)
+            if tag in line:
+                continue
+            body, nl = line.rstrip("\r\n"), line[len(line.rstrip("\r\n")):]
+            lines[ln - 1] = "{}  {}{}".format(body, tag, nl)
+            changed = True
+            written += 1
+        if changed:
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                f.writelines(lines)
+            print("  wrote {}".format(fp))
+    return written
+
+
+def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, apply_tags=False):  # implements: REQ-SUGGESTVERIFIES-047
+    """Propose `# verifies: <id>#AC-N` tags for tests already NAMED after the criterion
+    they check, so a corpus can adopt per-criterion coverage without re-deriving the
+    matching rules (and their three traps) by hand. Read-only unless --apply."""
+    if ac_cover is None:
+        ac_cover = scan_ac_verifies(code_root, reqs_dir)
+    proposals, ambiguous = _verifies_proposals(reqs, members, code_root, ac_cover)
+    for rid, ac, fp, ln, name in proposals:
+        print("{} {}\n  {}:{}  {}  -> {} {}: {}#{}".format(
+            rid, ac, fp, ln, name, _comment_prefix(fp), "verifies", rid, ac))
+    for rid, ac, hits in ambiguous:
+        print("{} {}  AMBIGUOUS — {} candidates, none applied:".format(rid, ac, len(hits)))
+        for fp, ln, name in hits:
+            print("    {}:{}  {}".format(fp, ln, name))
+    if not proposals and not ambiguous:
+        print("no suggestions — every automatable criterion is tagged, or no test is "
+              "named after one.")
+        return 0
+    print("\n{} proposal(s), {} ambiguous.".format(len(proposals), len(ambiguous)))
+    if apply_tags and proposals:
+        n = _apply_verifies(proposals, code_root)
+        print("applied {} tag(s). Re-run `reqmap.py sync` to refresh the map.".format(n))
+    elif proposals:
+        print("re-run with --apply to write them (ambiguous ones are never written).")
+    return 0
+
+
 def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
     """Emit a DETERMINISTIC, read-only review PLAN as JSON for an out-of-band AI quality
     pass. The engine never calls an LLM and writes no file — it gathers each requirement's
@@ -6041,6 +6431,8 @@ def main():
                     help="site: print docs/ findings + the suggested command; writes nothing")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
+    ap.add_argument("--apply", dest="apply_tags", action="store_true",
+                    help="suggest-verifies: write the proposed `verifies:` tags into the test files")
     ap.add_argument("--to", dest="translate_to", default=None, choices=["ro", "en"],
                     help="translate: target locale (default: the other of ro/en from "
                          "the detected corpus majority)")
@@ -6108,7 +6500,14 @@ def main():
                        accept_drift=getattr(a, "accept_drift", False),
                        ac_cover=_ac_cover, level_cover=_level_cover)
         if rc == 0:
-            cmd_map(reqs, members, reqs_dir, code_root)
+            cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
+        else:
+            # The lock may still have advanced above (it is written unless CONFIRMED
+            # drift was refused), while the map was not regenerated — the two then
+            # disagree, `gate` passes locally, and CI fails on `map --check`. Say so
+            # where it happens instead of leaving the reader to infer it.
+            print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
+                  "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
         return rc
     if a.cmd == "check":
         # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
@@ -6120,16 +6519,16 @@ def main():
                        getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False),
                        ac_cover=_ac_cover, level_cover=_level_cover)
         if a.update_lock and rc == 0:        # mirror sync: don't regen the map on a failing gate
-            cmd_map(reqs, members, reqs_dir, code_root)
+            cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
         return rc
     if a.cmd == "map":
-        return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh)
+        return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh, ac_cover=_ac_cover)
     if a.cmd == "site":  # implements: REQ-SITE-026
         regions = [x.strip() for x in (a.regions or "").split(",") if x.strip()]
         return cmd_site(reqs, members, code_root,
                         attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
     if a.cmd == "export":
-        return cmd_export(reqs, members, reqs_dir, code_root, a.out)
+        return cmd_export(reqs, members, reqs_dir, code_root, a.out, ac_cover=_ac_cover)
     if a.cmd == "draft":
         return cmd_extract(reqs, members, code_root, reqs_dir)
     if a.cmd == "plan":
@@ -6141,6 +6540,9 @@ def main():
         return cmd_findings(reqs, reqs_dir, a.raw)
     if a.cmd == "review":
         return cmd_review(reqs, a.arg)
+    if a.cmd == "suggest-verifies":
+        return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
+                                    ac_cover=_ac_cover, apply_tags=a.apply_tags)
     if a.cmd == "translate":
         return cmd_translate(reqs, reqs_dir, target=a.translate_to)
     if a.cmd == "confirm":

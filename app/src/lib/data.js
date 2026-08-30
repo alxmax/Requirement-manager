@@ -1,4 +1,18 @@
-/* Requirement Manager dataset.
+/*[
+      "`confirm <ID>` sets the requirement's `status` to `confirmed`.",
+      "`confirm` edits only the value of the first `status:` line in the leading frontmatter.",
+      "`confirm` preserves that line's indentation and any trailing inline comment.",
+      "`confirm` leaves the body untouched.",
+      "`confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes nothing. A `confirmed` requirement with no code is a gate error.",
+      "`confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both are covered by an edge rather than by a tag.",
+      "`confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate with no dependency is an orphan.",
+      "A refusal prints the tag the caller needs to add.",
+      "`confirm` exits non-zero with a clear message for an unknown id, meaning no `requirements/<ID>.md` exists.",
+      "`confirm` warns, without failing, when no `tested-by:` member is linked.",
+      "That warning points at the test tag to add, or at the `test_exempt:` opt-out.",
+      "`confirm` reminds the caller to refresh the lock and regenerate the map afterwards.",
+      "`confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and exits zero.",
+    ]Requirement Manager dataset.
  *
  * The baked array below is the fallback — the 13 authored requirements lifted
  * from the real registry plus two in-flight states (a draft + a fresh orphan)
@@ -200,13 +214,14 @@ const BAKED = [
 
   { id:"REQ-MAP-007", area:"REQ", title:"Requirement map (HTML + MD)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
-    contract:[
+    contract:[[
       "`map` generates two files under `requirements/`: `_map.md` and `_map.json`.",
       "`_map.md` holds Mermaid diagrams for static GitHub/GitLab rendering.",
       "`_map.json` holds a `{engine_version, repo, nodes, edges, todos}` graph for an external front-end.",
       "Both files are derived views. They are regenerated, never edited.",
       "`_map.json` carries one node per requirement and one edge per `depends_on`.",
       "Each node carries its requirement's id, layer, status, area, title, intent, Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`, `used_by`, and risk signals.",
+      "A node's `acc` list carries one entry per acceptance criterion, whether the criterion is written as a labelled `AC-N` block or as a bullet.",
       "That is the same `{nodes, edges}` shape the diagrams are built from.",
       "`_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo directory name, else null.",
       "`repo` identifies the project the map describes, for display in the viewer header.",
@@ -230,8 +245,12 @@ const BAKED = [
       "The Risk diagram pairs each of them with a scripted recommendation.",
       "A `draft`'s open verify-intent question is suppressed, subsumed by its `unreviewed` signal, so a draft is not double-flagged.",
       "That dedup lives in `_risk_signals`, shared with the `next` worklist.",
+      "`map --check` fails when a committed generated file differs from a fresh render.",
+      "The gate reports the same staleness as a warning, so a commit prepared with `gate` alone cannot be surprised by that failure in CI.",
+      "The gate never regenerates the map. It only reports.",
       "All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any hostile id, title or body by construction. There is no markup context to break out of.",
-      "The self-contained HTML viewer ([[REQ-VIEWER-007]]) and the GitHub Pages publish+gate ([[REQ-PAGES-021]]) are separate capabilities. They consume this map's `_map.json` and `_map.html`." ],
+      "The self-contained HTML viewer ([[REQ-VIEWER-007]]) and the GitHub Pages publish+gate ([[REQ-PAGES-021]]) are separate capabilities. They consume this map's `_map.json` and `_map.html`.",
+    ]],
     acc:[
       "The generated files contain one node per requirement and one edge per `depends_on`.",
       "`_map.md` contains 4 Mermaid code blocks, each with a legend.",
@@ -260,18 +279,21 @@ const BAKED = [
 
   { id:"REQ-PROMOTE-011", area:"REQ", title:"Promote", layer:"feature", status:"confirmed",
     intent:"One command to perform the human-validation step — flip a reviewed requirement to confirmed.",
-    contract:[
+    contract:[[
       "`confirm <ID>` sets the requirement's `status` to `confirmed`.",
       "`confirm` edits only the value of the first `status:` line in the leading frontmatter.",
       "`confirm` preserves that line's indentation and any trailing inline comment.",
       "`confirm` leaves the body untouched.",
       "`confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes nothing. A `confirmed` requirement with no code is a gate error.",
+      "`confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both are covered by an edge rather than by a tag.",
+      "`confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate with no dependency is an orphan.",
       "A refusal prints the tag the caller needs to add.",
       "`confirm` exits non-zero with a clear message for an unknown id, meaning no `requirements/<ID>.md` exists.",
       "`confirm` warns, without failing, when no `tested-by:` member is linked.",
       "That warning points at the test tag to add, or at the `test_exempt:` opt-out.",
       "`confirm` reminds the caller to refresh the lock and regenerate the map afterwards.",
-      "`confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and exits zero." ],
+      "`confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and exits zero.",
+    ]],
     gwt:"AC-1\n  Given  a baseline requirement with an implements: member\n  When   promote <ID> runs\n  Then   its frontmatter status becomes confirmed, the body is byte-identical, and exit is 0",
     impl:["`cmd_promote`, `_set_frontmatter_status` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:446-461"},{role:"tested-by",loc:"scripts/test_reqmap.py:1114"}],
@@ -374,10 +396,11 @@ const BAKED = [
     deps:[], usedBy:[], risks:[], supersededBy:"REQ-PARSE-021" },
 ];
 
-/* the partial case from the brief: REQ-MAP-007's HTML-escaping clause is uncovered */
+/* The demo fixture's one partially-covered case. Real corpora get these three
+   fields from the engine (`_map.json`) or not at all — never from a heuristic. */
 function applyBakedCoverage(list) {
   const m = list.find(r => r.id === "REQ-MAP-007");
-  if (m) { m.clauses = 4; m.covered = 3; m.gap = "HTML-escaping clause has no acceptance test"; }
+  if (m) { m.clauses = 4; m.covered = 3; m.gap = "no `verifies:` tag for AC-4"; }
   return list;
 }
 
@@ -412,34 +435,45 @@ export function setTodos(list) {
   TODOS = Array.isArray(list) ? list : [];
 }
 
-/* ---- coverage + git-derived dates (computed, not stored) ----------------- */
-/* coverage falls out of the clause↔acceptance mapping; a stale tested-by ref demotes to untested */
+/* ---- coverage --------------------------------------------------------------
+   This is a TEST axis and nothing else. `status: draft` is a REVIEW state and is
+   shown by the status pill; folding it in here reported a draft with twenty tests
+   as "untested" — a whole corpus of 55 read untested until it was promoted, and
+   `health` jumped 0 → 96 without a single test being written.
+   `clauses`/`covered`/`gap` are emitted by the engine (per labelled criterion) or
+   not at all: absent means NOT MEASURED, and nothing here may substitute a number
+   of its own. The previous fallback took `clauses` from the CONTRACT line count and
+   `covered` from the tested-by badge, so a requirement with three real tests
+   displayed "0 / 8 clauses covered". */
 export function coverageOf(r) {
   if (r.status === "deprecated") return "exempt";
   if (r.test_exempt) return "exempt";
-  if (r.layer === "need") return "exempt";          // satisfied-by, not implemented/tested by code (REQ-TRACE-020)
+  if (r.layer === "need" || r.layer === "aggregate") return "exempt";  // covered by an edge, not by code
   const hasImpl = r.members.some(m => m.role === "implements");
   const hasTest = r.members.some(m => m.role === "tested-by");
   if (!hasImpl) return "untested";                 // orphan — nothing to cover
-  if (r.covered != null && r.clauses)              // explicit per-clause data
+  if (r.covered != null && r.clauses)              // engine-measured per-criterion data
     return r.covered >= r.clauses ? "tested" : (r.covered > 0 ? "partial" : "untested");
-  if (r.status === "draft") return "untested";
   return hasTest ? "tested" : "untested";
+}
+
+/* Why a requirement is exempt — three different reasons that used to render as one
+   ("test-exempt — skipped by the gate"), including for a `need` that carries real
+   tests and no `test_exempt` at all. */
+export function exemptReason(r) {
+  if (r.status === "deprecated") return "deprecated — skipped by the gate";
+  if (r.test_exempt) return "test-exempt — skipped by the gate";
+  if (r.layer === "need") return "satisfied by other requirements — no code of its own";
+  if (r.layer === "aggregate") return "covered by its dependencies — no code of its own";
+  return "";
 }
 
 export function coverageDetail(r) {
   const state = coverageOf(r);
-  const clauses = r.clauses || r.contract.length;
-  const covered = r.covered != null ? r.covered : (state === "tested" ? clauses : 0);
-  return { state, clauses, covered, gap: r.gap };
-}
-
-/* deterministic stand-in for `git log` dates (the real tool reads these live) */
-export function datesOf(r) {
-  if (r.status === "deprecated") return { deprecated: "2026-04-02" };
-  const s = r.id.length,
-    mm = String((s % 5) + 1).padStart(2, "0"),
-    dd = String((s * 7 % 26) + 1).padStart(2, "0"),
-    uu = String((s * 3 % 27) + 1).padStart(2, "0");
-  return { created: `2026-${mm}-${dd}`, updated: `2026-05-${uu}` };
+  const measured = r.covered != null && r.clauses != null;
+  return {
+    state, measured, gap: r.gap,
+    clauses: measured ? r.clauses : 0,
+    covered: measured ? r.covered : 0,
+  };
 }

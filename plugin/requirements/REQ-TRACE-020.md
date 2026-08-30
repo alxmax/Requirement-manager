@@ -36,6 +36,13 @@ Every line in this section is binding.
 - The gate warns when a confirmed `need` has no requirement satisfying it, so an unaddressed
   stakeholder need is visible.
 
+**How an aggregate differs**
+- The `aggregate` layer is exempt from the implements check. Its implementation is the
+  implementation of the requirements it depends on.
+- An aggregate declares at least one `depends_on` id. An aggregate with no dependency is an
+  orphan, not an aggregate.
+- An aggregate adds no behaviour of its own. It asserts that its dependencies work together.
+
 **How a need differs**
 - The `need` layer is exempt from the implements and tested-by checks. A need is satisfied by
   other requirements, not implemented or tested by code.
@@ -73,6 +80,10 @@ AC-4
   Given  a requirement that satisfies a need
   When   `show` runs on either the requirement or the need
   Then   the upstream/satisfied-by relationship is printed
+AC-5
+  Given  a confirmed `layer: aggregate` requirement with dependencies and no implements tag
+  When   the gate runs
+  Then   it raises no implements finding for that requirement
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

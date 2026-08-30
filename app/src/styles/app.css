@@ -176,9 +176,6 @@ button { font-family: inherit; cursor: pointer; }
 .cov-bar .cseg.on { background: var(--cov-tested); }
 .cov-bar .cseg.gap { background: transparent; border: 1.5px dashed var(--cov-partial); }
 .cov-gap { font: var(--text-small); font-size: 12px; color: var(--cov-partial); }
-.cov-dates { display: flex; gap: 18px; flex-wrap: wrap; font: var(--text-id); font-size: 11px; color: var(--fg-faint); padding-top: 8px; border-top: 1px solid var(--border-soft); }
-.cov-dates b { color: var(--fg-muted); font-weight: 500; }
-.cov-dates .gitc { color: var(--accent); opacity: .75; margin-left: 5px; }
 .spec .sec { margin-bottom: 22px; padding-top: 20px; border-top: 1px solid var(--border-soft); }
 .spec .sec:first-of-type { border-top: none; padding-top: 4px; }
 .spec .eyebrow { font: var(--text-caption); letter-spacing: var(--track-caps); text-transform: uppercase; color: var(--accent); font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; white-space: nowrap; }

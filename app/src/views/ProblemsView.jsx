@@ -24,8 +24,8 @@ export function computeProblems() {
     const flagged = (r.risks||[]).length > 0;
     if (cov === "partial") {
       out.push({ id:r.id, title:r.title, signal:"partial", sev:"WARN",
-        msg:`Partial coverage — ${r.covered}/${r.clauses} clauses. ${r.gap||""}`.trim(),
-        fix:"Add an acceptance test for the uncovered clause.",
+        msg:`Partial coverage — ${r.covered}/${r.clauses} criteria verified. ${r.gap||""}`.trim(),
+        fix:"Tag a test `# verifies: <id>#AC-N` for the uncovered criterion, or write one.",
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     } else if (cov === "untested" && r.status !== "draft" && !flagged) {
       out.push({ id:r.id, title:r.title, signal:"untested", sev:"WARN",

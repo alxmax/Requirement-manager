@@ -3664,9 +3664,37 @@ class AcVerify(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019
         files = self._req("AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d")
         files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n"   # only AC-1 covered
         code, out = self._check(files)
-        self.assertIn("AC-2 has no", out)
-        self.assertNotIn("AC-1 has no", out)
+        self.assertIn("1/2 automatable criteria", out)         # ONE aggregated line
+        self.assertIn("missing AC-2", out)
+        self.assertNotIn("missing AC-1", out)
         self.assertEqual(code, 0)                              # warn-only
+
+    def test_partial_coverage_is_one_warning_not_one_per_criterion(self):
+        # partial adoption must not cost more than adopting nothing (feedback 10b):
+        # four uncovered criteria produce ONE line, not four.
+        files = self._req("\n".join("AC-{0}\n  Given a{0}\n  Then b{0}".format(i)
+                                    for i in range(1, 6)))
+        files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n"
+        _, out = self._check(files)
+        self.assertEqual(out.count("automatable criteria"), 1)
+        self.assertIn("missing AC-2, AC-3, AC-4, AC-5", out)
+
+    def test_manual_criteria_excluded_from_per_ac_warning(self):  # verifies: REQ-ACVERIFY-019#AC-5
+        # `verifiable by: inspection` can never carry a `verifies:` tag — counting it
+        # produces a warning nobody can ever clear (feedback 10a).
+        files = self._req("AC-1  <!-- verifiable by: automated test -->\n  Given a\n  Then b\n"
+                          "AC-2  <!-- verifiable by: inspection -->\n  Given c\n  Then d")
+        files["mod.py"] += v_tag("A-FOO-001", "AC-1") + "\n"
+        _, out = self._check(files)
+        self.assertNotIn("automatable criteria", out)
+
+    def test_unedited_template_marker_is_not_manual(self):
+        # the template ships `automated test | manual | inspection | load test`; an
+        # author who never chose has not declared the criterion unautomatable.
+        body = _ac_body(acceptance="AC-1  <!-- verifiable by: automated test | manual | "
+                                   "inspection | load test -->\n  Given a\n  Then b")
+        self.assertEqual(R._automatable_acs(body), ["AC-1"])
+
 
     def test_full_coverage_silent(self):  # verifies: REQ-ACVERIFY-019#AC-2
         files = self._req("AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d")
@@ -3686,7 +3714,462 @@ class AcVerify(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019
         self.assertNotIn("criterion unverified", out)
 
 
+class AcParsing(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019  # tested-by: REQ-MAP-007
+    """The Gherkin AC BLOCK the template prescribes must reach `acc` — it never did:
+    `_bullets` collects only `- ` lines, so 50/50 nodes of this repo's own map
+    carried `acc: []` while the raw text sat in `accept`."""
+
+    GHERKIN = ("AC-1  <!-- verifiable by: automated test -->\n"
+               "  Given  a labelled criterion\n  When   the map is built\n"
+               "  Then   the criterion appears in `acc`\n"
+               "AC-2\n  Given  a second one\n  Then   it appears too\n")
+
+    def test_labelled_blocks_reach_acc(self):
+        items = R._acc_items(_ac_body(acceptance=self.GHERKIN))
+        self.assertEqual(len(items), 2)
+        self.assertTrue(items[0].startswith("AC-1 — Given"))
+        self.assertIn("the criterion appears in `acc`", items[0])
+        self.assertNotIn("verifiable by", items[0])       # marker comment stripped
+
+    def test_bullet_acs_still_parse(self):
+        items = R._acc_items(_ac_body(acceptance="- first criterion.\n- second criterion."))
+        self.assertEqual(items, ["first criterion.", "second criterion."])
+
+    def test_count_ac_agrees_with_the_parser(self):
+        for acceptance in (self.GHERKIN, "- one.\n- two.\n- three.", "AC-1\n  Given x"):
+            body = _ac_body(acceptance=acceptance)
+            self.assertEqual(R._count_ac(body), len(R._acc_blocks(body)))
+
+    def test_fenced_example_not_counted(self):
+        body = _ac_body(acceptance="AC-1\n  Given x\n```\n- not a criterion\nAC-9\n```\n")
+        self.assertEqual(R._labeled_acs(body), ["AC-1"])
+
+    def test_map_node_emits_acc(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                   + _ac_body(acceptance=self.GHERKIN))
+            reqs = R.load_requirements(d)
+            node = R._build_map_data(reqs, {})["nodes"][0]
+            self.assertEqual(len(node["acc"]), 2)
+            self.assertTrue(node["accept"])                # raw section still emitted
+
+
+class AcCoverageEmission(unittest.TestCase):  # tested-by: REQ-ACVERIFY-019
+    """`clauses`/`covered`/`gap` are emitted by the ENGINE or not at all. The viewer
+    used to invent them (clauses = contract-line count, covered = all-or-nothing),
+    so a requirement with three real tests rendered "0 / 8 clauses covered"."""
+
+    def _node(self, acceptance, cover):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n"
+                   + _ac_body(acceptance=acceptance))
+            reqs = R.load_requirements(d)
+            return R._build_map_data(reqs, {}, {"A-FOO-001": cover})["nodes"][0]
+
+    def test_absent_when_no_verifies_tag_adopted(self):
+        node = self._node("AC-1\n  Given a\nAC-2\n  Given b", {})
+        self.assertNotIn("clauses", node)
+        self.assertNotIn("covered", node)
+
+    def test_absent_for_unlabelled_bullet_acs(self):
+        node = self._node("- one.\n- two.", {"AC-1": [("t.py", 1)]})
+        self.assertNotIn("clauses", node)
+
+    def test_partial_coverage_emitted_with_gap(self):  # verifies: REQ-ACVERIFY-019#AC-6
+        node = self._node("AC-1\n  Given a\nAC-2\n  Given b", {"AC-1": [("t.py", 1)]})
+        self.assertEqual((node["clauses"], node["covered"]), (2, 1))
+        self.assertIn("AC-2", node["gap"])
+
+    def test_full_coverage_has_no_gap(self):
+        node = self._node("AC-1\n  Given a", {"AC-1": [("t.py", 1)]})
+        self.assertEqual((node["clauses"], node["covered"]), (1, 1))
+        self.assertNotIn("gap", node)
+
+    def test_manual_criteria_not_counted_as_clauses(self):  # verifies: REQ-ACVERIFY-019#AC-5
+        node = self._node("AC-1\n  Given a\nAC-2  <!-- verifiable by: inspection -->\n  Given b",
+                          {"AC-1": [("t.py", 1)]})
+        self.assertEqual((node["clauses"], node["covered"]), (1, 1))
+
+
+class ImplExemptLayers(unittest.TestCase):  # tested-by: REQ-TRACE-020  # tested-by: REQ-PROMOTE-011
+    """`confirm` refused a `layer: need` the gate, `health` and the risk map all
+    exempt — so this repo's own NEED-SSOT-001 could only become confirmed by editing
+    the file around the command. One predicate now answers for all four."""
+
+    def _promote(self, d, cap_id):
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_promote(reqs, members, cap_id)
+        return code, buf.getvalue()
+
+    def test_need_can_be_confirmed_without_implements(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "NEED-X-001.md"),
+                   REQ.format(id="NEED-X-001", status="baseline", layer="need", extra="", title="N"))
+            _write(os.path.join(d, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature",
+                              extra="satisfies: [NEED-X-001]\n", title="A"))
+            code, out = self._promote(d, "NEED-X-001")
+            self.assertEqual(code, 0, out)
+            self.assertIn("status: confirmed",
+                          open(os.path.join(d, "NEED-X-001.md"), encoding="utf-8").read())
+
+    def test_aggregate_with_dependencies_can_be_confirmed(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "REQ-AGG-001.md"),
+                   REQ.format(id="REQ-AGG-001", status="baseline", layer="aggregate",
+                              extra="depends_on: [REQ-A-001]\n", title="Agg"))
+            _write(os.path.join(d, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature", extra="", title="A"))
+            _write(os.path.join(d, "a.py"), tag("REQ-A-001") + "\n")
+            code, out = self._promote(d, "REQ-AGG-001")
+            self.assertEqual(code, 0, out)
+            self.assertIn("depends_on", out)
+
+    def test_aggregate_without_dependencies_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "REQ-AGG-002.md")
+            _write(p, REQ.format(id="REQ-AGG-002", status="baseline", layer="aggregate",
+                                 extra="depends_on: []\n", title="Agg"))
+            before = open(p, encoding="utf-8").read()
+            code, out = self._promote(d, "REQ-AGG-002")
+            self.assertNotEqual(code, 0)
+            self.assertIn("depends_on", out)
+            self.assertEqual(open(p, encoding="utf-8").read(), before)
+
+    def test_gate_does_not_error_on_confirmed_aggregate(self):  # verifies: REQ-TRACE-020#AC-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "REQ-AGG-003.md"),
+                   REQ.format(id="REQ-AGG-003", status="confirmed", layer="aggregate",
+                              extra="depends_on: [REQ-A-001]\n", title="Agg"))
+            _write(os.path.join(d, "REQ-A-001.md"),
+                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature", extra="", title="A"))
+            _write(os.path.join(d, "a.py"), tag("REQ-A-001") + "\n")
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            self.assertEqual(R._link_sync_errors(reqs, members), [])
+
+    def test_aggregate_is_not_flagged_unimplemented_by_risk(self):
+        node = {"status": "confirmed", "layer": "aggregate", "members": [],
+                "verify": [], "test_exempt": None}
+        self.assertNotIn("unimplemented", R._risk_signals(node))
+
+
+class ShellTestedBy(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
+    """Four real bash suites warned forever because no pattern matched shell."""
+
+    def test_bash_function_recognized(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "checks.sh")
+            _write(p, "#!/usr/bin/env bash\ntest_backup_runs() {\n  [ -f x ]\n}\n")
+            self.assertEqual(R._test_link_problem(p), "")
+
+    def test_bats_case_recognized(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "suite.bats")
+            _write(p, '@test "restore drill" {\n  run ./restore\n}\n')
+            self.assertEqual(R._test_link_problem(p), "")
+
+    def test_test_sh_naming_convention_accepted(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "backup-check.test.sh")
+            _write(p, "#!/bin/sh\n./backup-check --dry-run || exit 1\n")
+            self.assertEqual(R._test_link_problem(p), "")
+
+    def test_plain_shell_script_still_warns(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "deploy.sh")
+            _write(p, "#!/bin/sh\nrsync -a . server:/srv\n")
+            self.assertIn("no test function", R._test_link_problem(p))
+
+
+class TestLinkOnDraft(unittest.TestCase):  # tested-by: REQ-TESTLINK-018
+    """A tested-by pointing at a non-test file is wrong the day it is written; the
+    check ran only on `confirmed`, so a draft-only corpus audited nothing."""
+
+    def _check(self, status, strict=False):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "A-FOO-001.md"),
+                   "---\nid: A-FOO-001\nstatus: {}\nlayer: bus\n---\n\n".format(status)
+                   + _ac_body())
+            _write(os.path.join(d, "widget.py"), tag("A-FOO-001") + "\n" + tb_tag("A-FOO-001")
+                   + "\ndef render():\n    return 1\n")
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+                code = R.cmd_check(reqs, members, d, update_lock=False, code_root=d, strict=strict)
+            return code, buf.getvalue()
+
+    def test_draft_link_to_non_test_file_warns(self):
+        code, out = self._check("draft")
+        self.assertIn("contains no test function", out)
+        self.assertEqual(code, 0)                       # warn-only
+
+    def test_draft_link_problem_is_not_strict_promoted(self):
+        # a draft-heavy consumer running `gate --strict` must not start failing
+        code, out = self._check("draft", strict=True)
+        self.assertEqual(code, 0)
+        self.assertIn("WARN", out)
+
+    def test_confirmed_link_problem_still_fails_under_strict(self):
+        code, _ = self._check("confirmed", strict=True)
+        self.assertEqual(code, 1)
+
+
+class GateMapFreshness(unittest.TestCase):  # tested-by: REQ-MAP-007
+    """`gate` said nothing about a stale committed map, so a consumer running only
+    `gate` before committing found out from a red CI run (twice, in one repo)."""
+
+    def _gate(self, d):
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+        return buf.getvalue()
+
+    def _seed(self, d):
+        _write(os.path.join(d, "A-FOO-001.md"),
+               "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
+        _write(os.path.join(d, "a.py"), tag("A-FOO-001") + "\n")
+
+    def test_fresh_map_is_silent(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(reqs, members, d, d)
+            self.assertNotIn("committed map is stale", self._gate(d))
+
+    def test_stale_map_warns(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_map(reqs, members, d, d)
+            _write(os.path.join(d, "A-FOO-002.md"),      # registry changed, map not regenerated
+                   "---\nid: A-FOO-002\nstatus: draft\nlayer: bus\n---\n\n" + _ac_body())
+            out = self._gate(d)
+            self.assertIn("committed map is stale", out)
+            self.assertIn("_map.json", out)
+
+    def test_absent_map_is_not_stale(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            self.assertNotIn("committed map is stale", self._gate(d))
+
+
+class SuggestVerifies(unittest.TestCase):  # tested-by: REQ-SUGGESTVERIFIES-047
+    """110 of a consumer's 205 untagged criteria already had a test NAMED after them.
+    Each guard below exists because its absence produced a WRONG link."""
+
+    def _repo(self, d, reqs, tests):
+        for rid, acceptance in reqs.items():
+            _write(os.path.join(d, rid + ".md"),
+                   "---\nid: {}\nstatus: confirmed\nlayer: feature\n---\n\n".format(rid)
+                   + _ac_body(acceptance=acceptance))
+        for name, body in tests.items():
+            _write(os.path.join(d, name), body)
+
+    def _suggest(self, d, apply_tags=False):
+        reqs = R.load_requirements(d)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_suggest_verifies(reqs, members, d, d, apply_tags=apply_tags)
+        return buf.getvalue()
+
+    TWO_AC = "AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n  Then d"
+
+    def test_proposes_test_named_after_the_criterion(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac1_upload_jpeg_valid():\n    pass\n"
+                        "def test_ac2_tip_neacceptat():\n    pass\n"})
+            out = self._suggest(d)
+            self.assertIn("AREA-UPLOAD-037 AC-1", out)
+            self.assertIn("AREA-UPLOAD-037 AC-2", out)
+            self.assertIn("2 proposal(s)", out)
+
+    def test_already_tagged_criterion_is_not_proposed(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac1_x():  " + v_tag("AREA-UPLOAD-037", "AC-1") + "\n    pass\n"
+                        "def test_ac2_y():\n    pass\n"})
+            out = self._suggest(d)
+            self.assertIn("1 proposal(s)", out)
+            self.assertIn("AC-2", out)
+
+    def test_trap1_shared_file_needs_a_distinctive_token(self):
+        # one tested-by file serving two requirements holds two different `ac1` tests
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC, "AREA-SIGNING-046": self.TWO_AC},
+                       {"test_e2e.py": tb_tag("AREA-UPLOAD-037") + "\n" + tb_tag("AREA-SIGNING-046")
+                        + "\ndef test_ac1_generic():\n    pass\n"
+                        "def test_ac2_upload_dosar():\n    pass\n"})
+            out = self._suggest(d)
+            self.assertNotIn("AC-1", out)               # ambiguous owner -> no proposal
+            self.assertIn("AREA-UPLOAD-037 AC-2", out)  # name carries `upload`
+            self.assertNotIn("AREA-SIGNING-046 AC-2", out)
+
+    def test_trap2_class_name_does_not_qualify_a_test(self):
+        # `class TestUploadSiSigning:` carries the tokens of BOTH requirements
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC, "AREA-SIGNING-046": self.TWO_AC},
+                       {"test_e2e.py": tb_tag("AREA-UPLOAD-037") + "\n" + tb_tag("AREA-SIGNING-046")
+                        + "\nclass TestUploadSiSigning:\n"
+                        "    def test_ac1_runs(self):\n        pass\n"})
+            self.assertNotIn("AC-1", self._suggest(d))
+
+    def test_trap3_fixture_parameter_does_not_qualify_a_test(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-EXPORT-061": self.TWO_AC, "AREA-CAMPAIGN-056": self.TWO_AC},
+                       {"test_shared.py": tb_tag("AREA-EXPORT-061") + "\n" + tb_tag("AREA-CAMPAIGN-056")
+                        + "\ndef test_export_ac2_rows(self, ctx, campaign):\n    pass\n"})
+            out = self._suggest(d)
+            self.assertIn("AREA-EXPORT-061 AC-2", out)
+            self.assertNotIn("AREA-CAMPAIGN-056 AC-2", out)   # `campaign` is a parameter
+
+    def test_guard_foreign_requirement_number_wins(self):
+        # `test_ac1_083_...` sits in 040's file but verifies 083
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-VARENGINE-040": self.TWO_AC, "AREA-DOCFIELDS-083": self.TWO_AC},
+                       {"test_var.py": tb_tag("AREA-VARENGINE-040") + "\n"
+                        + "def test_ac1_083_placeholder():\n    pass\n"})
+            self.assertNotIn("AREA-VARENGINE-040 AC-1", self._suggest(d))
+
+    def test_two_candidates_are_ambiguous_not_applied(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac1_first():\n    pass\n"
+                        "def test_ac1_second():\n    pass\n"})
+            out = self._suggest(d, apply_tags=True)
+            self.assertIn("AMBIGUOUS", out)
+            src = open(os.path.join(d, "test_upload.py"), encoding="utf-8").read()
+            self.assertNotIn("#AC-1", src)
+
+    def test_ac_number_is_not_a_prefix_match(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": "AC-1\n  Given a\n  Then b"},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac12_other():\n    pass\n"})
+            self.assertIn("no suggestions", self._suggest(d))
+
+    def test_apply_writes_the_tag_and_is_idempotent(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": "AC-1\n  Given a\n  Then b"},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac1_upload_ok():\n    pass\n"})
+            self._suggest(d, apply_tags=True)
+            src = open(os.path.join(d, "test_upload.py"), encoding="utf-8").read()
+            self.assertIn("def test_ac1_upload_ok():  # {}: AREA-UPLOAD-037#AC-1".format("verifies"), src)
+            self.assertIn("no suggestions", self._suggest(d))     # now covered
+            self.assertEqual(open(os.path.join(d, "test_upload.py"), encoding="utf-8").read(), src)
+
+    def test_apply_makes_the_gate_stop_warning(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": self.TWO_AC},
+                       {"test_upload.py": tb_tag("AREA-UPLOAD-037") + "\n"
+                        "def test_ac1_a():  " + v_tag("AREA-UPLOAD-037", "AC-1") + "\n    pass\n"
+                        "def test_ac2_b():\n    pass\n"})
+            _write(os.path.join(d, "impl.py"), tag("AREA-UPLOAD-037") + "\n")
+            self._suggest(d, apply_tags=True)
+            reqs, members = R.load_requirements(d), R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+                R.cmd_check(reqs, members, d, update_lock=False, code_root=d)
+            self.assertNotIn("automatable criteria", buf.getvalue())
+
+    def test_js_it_label_is_matched(self):
+        with tempfile.TemporaryDirectory() as d:
+            self._repo(d, {"AREA-UPLOAD-037": "AC-1\n  Given a\n  Then b"},
+                       {"upload.spec.ts": "// {}: AREA-UPLOAD-037\n".format("tested" + "-by")
+                        + 'it("ac1 uploads a jpeg", () => {});\n'})
+            out = self._suggest(d)
+            self.assertIn("AREA-UPLOAD-037 AC-1", out)
+            self.assertIn("// {}:".format("verifies"), out)        # JS comment syntax
+
+
+class SyncMapNotRegenerated(unittest.TestCase):  # tested-by: REQ-CHECK-006
+    """`sync` writes the lock even when the gate errors, but skips the map — the two
+    then disagree, `gate` passes locally, and CI fails on `map --check`."""
+
+    def _sync(self, d):
+        old_argv, err = sys.argv, io.StringIO()
+        sys.argv = ["reqmap", "sync", "--root", d, "--code", d]
+        try:
+            with redirect_stdout(io.StringIO()), redirect_stderr(err):
+                rc = R.main()
+        finally:
+            sys.argv = old_argv
+        return rc, err.getvalue()
+
+    def _seed(self, d, reqs_dir):
+        _write(os.path.join(reqs_dir, "A-FOO-001.md"),
+               "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
+        _write(os.path.join(d, "a.py"), tag("A-FOO-001") + "\n")
+
+    def test_failing_sync_says_the_map_was_not_regenerated(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "requirements")
+            self._seed(d, reqs_dir)
+            _write(os.path.join(d, "b.py"), tag("GHOST-X-999") + "\n")   # dangling tag -> gate error
+            rc, err = self._sync(d)
+            self.assertEqual(rc, 1)
+            self.assertIn("map was NOT regenerated", err)
+            self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_map.json")))
+
+    def test_clean_sync_writes_the_map(self):
+        with tempfile.TemporaryDirectory() as d:
+            reqs_dir = os.path.join(d, "requirements")
+            self._seed(d, reqs_dir)
+            rc, err = self._sync(d)
+            self.assertEqual(rc, 0, err)
+            self.assertTrue(os.path.exists(os.path.join(reqs_dir, "_map.json")))
+
+
+class LayerMismatchLint(unittest.TestCase):  # tested-by: REQ-LINTCHECKS-025
+    """`bus` is defined by fan-in and nothing checked it: a requirement with 0
+    dependents and 12 dependencies was labelled bus and read as a foundation."""
+
+    def _req(self, layer, deps):
+        return {"meta": {"layer": layer, "depends_on": deps},
+                "body": _ac_body(acceptance="AC-1\n  Given a\n  Then b\nAC-2\n  Given c\n"
+                                            "  Then d\nAC-3\n  Given e\n  Then f")}
+
+    def _checks(self, findings):
+        return [f["check"] for f in findings]
+
+    def test_bus_with_no_dependents_and_many_deps_warns(self):
+        fs = R.lint_requirement("A-ROOF-001", self._req("bus", ["A-1", "B-2", "C-3"]), None, 0)
+        self.assertIn("layer-mismatch", self._checks(fs))
+
+    def test_bus_with_dependents_is_clean(self):
+        fs = R.lint_requirement("A-BUS-001", self._req("bus", ["A-1", "B-2", "C-3"]), None, 4)
+        self.assertNotIn("layer-mismatch", self._checks(fs))
+
+    def test_aggregate_layer_is_not_flagged(self):
+        fs = R.lint_requirement("A-AGG-001", self._req("aggregate", ["A-1", "B-2", "C-3"]), None, 0)
+        self.assertNotIn("layer-mismatch", self._checks(fs))
+
+    def test_skipped_when_fanin_unknown(self):
+        fs = R.lint_requirement("A-ROOF-002", self._req("bus", ["A-1", "B-2", "C-3"]))
+        self.assertNotIn("layer-mismatch", self._checks(fs))
+
+    def test_aggregate_is_a_valid_layer(self):
+        self.assertIn("aggregate", R.VALID_LAYER)
+
+
 class Traceability(unittest.TestCase):  # tested-by: REQ-TRACE-020
+
     def _check(self, files):
         with tempfile.TemporaryDirectory() as d:
             for name, body in files.items():

@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Fourteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
+Fifteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
 were previously findable only by reading every release note in order.
 
 An ADR here records a decision that is **expensive to reverse** or that a reader would
@@ -24,6 +24,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0012](0012-internal-consistency-lint-rejected.md) | No internal-consistency lint | Rejected |
 | [0013](0013-business-source-license.md) | Business Source License 1.1 | Accepted (revisit trigger open) |
 | [0014](0014-engine-stays-one-file.md) | The engine stays one file, and gets no size gate | Accepted |
+| [0015](0015-aggregate-layer-instead-of-implicit-dependency-coverage.md) | A requirement covered by its dependencies is a declared layer, not an inference | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
