@@ -28,6 +28,7 @@ python scripts/reqmap.py plan               # JSON capability-extraction plan, w
 python scripts/reqmap.py findings           # aggregate open verify-intent items
 python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
 python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
+python scripts/reqmap.py suggest-verifies    # propose `# verifies: <ID>#AC-N` tags for tests already named after the criterion; --apply writes them
 python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in only: cache a `claude -p` translation of the corpus's majority-language requirements into requirements/_i18n/<locale>.json. Never called by gate/sync/lint/map/the pre-commit hook.
 python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
@@ -99,9 +100,9 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Design decisions live in `docs/adr/`** (14 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and three rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+**Design decisions live in `docs/adr/`** (15 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and three rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — 5,895 lines measured 2026-08-25, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — 6,574 lines measured 2026-08-31, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `REQ-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
 
@@ -109,6 +110,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 - `layer: bus` — foundation capabilities (config, parsing, scanning, drift detection). High fan-in; change behind their contract.
 - `layer: feature` — compose the bus via `depends_on`. One per user-facing command (new, scan, gate, sync, map, draft, plan, findings, init, next, confirm, lint, show, dupes, search, health, coverage, site, review, …); `ls plugin/requirements/` is the live list.
 - `layer: need` — an upstream stakeholder need (`NEED-SSOT-001`), satisfied-by feature requirements via `satisfies:`, not implemented by code; exempt from the implements/tested-by gates (see `REQ-TRACE-020`).
+- `layer: aggregate` — the mirror image: no code of its own, covered *downward* by a non-empty `depends_on` (it asserts its dependencies work together). Exempt from the same gates via the one predicate `_impl_exempt`, which `gate`, `health`, the risk map and `confirm` all read — they disagreed before (`docs/adr/0015`).
 
 **Requirement schema** (`plugin/requirements/*.md`): YAML frontmatter (id, status, layer, owner, depends_on, acceptance criteria) + prose body (WHY / WHAT / WHERE / HOW sections). The frontmatter parser is hand-rolled (scalars + inline lists only — no full YAML library).
 

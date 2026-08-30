@@ -25,10 +25,9 @@ Every line in this section is binding.
      behavior-sync  keeping the tests a requirement claims in step with the tests that exist. -->
 
 **What it checks**
-- The gate checks every `tested-by` link on a confirmed requirement. This is the deterministic
+- The gate checks every `tested-by` link, at every status. This is the deterministic
   half of behavior-sync.
-- For each distinct `tested-by` file on a confirmed requirement, the gate verifies that the
-  file exists.
+- For each distinct `tested-by` file, the gate verifies that the file exists.
 - For each such file the gate also verifies that it holds at least one test function.
 
 **What counts as a test function**
@@ -40,6 +39,8 @@ Every line in this section is binding.
 - A Rust `#[test]` counts.
 - A `.py` file with no `def test...` also counts when it drives its checks from a
   `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
+- A shell `test_x()` function, a `function test_x` definition, or a bats `@test` counts.
+- A shell file named by a test convention, such as `x.test.sh`, counts on its name alone.
 
 **What it reports**
 - When a file is missing, unreadable, or holds no test function, the gate adds one warning.
@@ -47,6 +48,7 @@ Every line in this section is binding.
 
 **How loud it is**
 - The check is warn-only. It never adds an error, and never changes whether the gate passes.
+- Under `--strict` the warning becomes an error only for a confirmed requirement.
 - The check stays silent on a well-formed corpus, so a green gate run gains no noise.
 
 ## WHAT — Verify intent (open questions for the human)
@@ -85,6 +87,16 @@ AC-5
          `if __name__ == "__main__"` guard
   When   the gate runs
   Then   it adds no warning for that link
+
+AC-6
+  Given  a `tested-by` file that is a shell script holding a `test_x()` function
+  When   the gate runs
+  Then   it adds no warning for that link
+
+AC-7
+  Given  a draft requirement whose `tested-by` file holds no test function
+  When   the gate runs with `--strict`
+  Then   it adds a warning and the exit code stays 0
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

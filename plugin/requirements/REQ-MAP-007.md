@@ -40,6 +40,8 @@ Every line in this section is binding.
 - Each node carries its requirement's id, layer, status, area, title, intent,
   Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
   `used_by`, and risk signals.
+- A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
+  written as a labelled `AC-N` block or as a bullet.
 - That is the same `{nodes, edges}` shape the diagrams are built from.
 - `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
   repo directory name, else null.
@@ -83,6 +85,12 @@ Every line in this section is binding.
 - A `draft`'s open verify-intent question is suppressed, subsumed by its `unreviewed`
   signal, so a draft is not double-flagged.
 - That dedup lives in `_risk_signals`, shared with the `next` worklist.
+
+**Freshness**
+- `map --check` fails when a committed generated file differs from a fresh render.
+- The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
+  cannot be surprised by that failure in CI.
+- The gate never regenerates the map. It only reports.
 
 **Safety**
 - All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any

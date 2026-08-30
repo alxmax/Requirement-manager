@@ -31,6 +31,10 @@ Every line in this section is binding.
 **When it refuses**
 - `confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes
   nothing. A `confirmed` requirement with no code is a gate error.
+- `confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both are
+  covered by an edge rather than by a tag.
+- `confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate
+  with no dependency is an orphan.
 - A refusal prints the tag the caller needs to add.
 - `confirm` exits non-zero with a clear message for an unknown id, meaning no
   `requirements/<ID>.md` exists.
@@ -70,6 +74,16 @@ AC-4
   Given  a status line carrying a trailing `# comment`
   When   `confirm <ID>` runs
   Then   the comment is preserved and only the status value changed
+
+AC-5
+  Given  a `layer: need` requirement with no `implements:` member
+  When   `confirm <ID>` runs
+  Then   its status becomes `confirmed` and exit is 0
+
+AC-6
+  Given  a `layer: aggregate` requirement with an empty `depends_on`
+  When   `confirm <ID>` runs
+  Then   the file is unchanged and exit is non-zero
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

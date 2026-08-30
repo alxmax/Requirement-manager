@@ -516,5 +516,26 @@
         "required": []
       }
     }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_suggest_verifies",
+      "description": "Propose `# verifies: <id>#AC-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "apply": {
+            "type": "boolean",
+            "description": "Write the proposed tags into the test files (ambiguous matches are never written)."
+          }
+        },
+        "required": []
+      }
+    }
   }
 ]

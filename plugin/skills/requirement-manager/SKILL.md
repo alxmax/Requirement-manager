@@ -141,12 +141,22 @@ engine changes to the cache and any registered consumer repos in one command:
   frontmatter (machine-readable) + prose body (human-readable). Nothing else
   restates the contract — code and docs *reference* it by id, never re-describe it.
 - **Optional frontmatter fields**: `milestone: vX.Y` places a requirement on the Roadmap tab (e.g. `milestone: v1.04`). It must be a version of the shape `v<digits>[.<digits>…]` — start with `v`, digits and dots only; the gate WARNs on a malformed value (advisory metadata, never build-critical). Use zero-padded minor versions (`v1.04`, not `v1.4`) to avoid ambiguity.
-- **Two layers** (think Factorio main bus + cells):
+- **Two working layers** (think Factorio main bus + cells), plus two that carry no
+  code of their own:
   - `layer: bus` — foundation capabilities, defined once, shared (telemetry,
     config, logging, an invocation primitive). Crisp output → crisp boundary.
+    A bus is defined by **high fan-in**; `lint` warns on a `bus` nothing depends on.
   - `layer: feature` — capabilities that compose the bus. They `depends_on` bus ids.
+  - `layer: need` — an upstream stakeholder need, covered **upward** by the
+    `satisfies:` edges other requirements declare toward it.
+  - `layer: aggregate` — a requirement whose implementation IS its dependencies':
+    it adds no behaviour, it asserts that N capabilities work together (an MVP
+    acceptance criterion is the archetype). Covered **downward** by its own
+    `depends_on`, which must not be empty.
   - If you cannot tell where a requirement ends, factor the shared part onto the bus.
-  - **Both layers** require `## WHAT — Contract` and `## HOW — Acceptance` at
+  - `need` and `aggregate` are exempt from the `implements:` rule — they are covered
+    by an edge, not by a tag. Everything else about them is unchanged.
+  - **Every layer** requires `## WHAT — Contract` and `## HOW — Acceptance` at
     `confirmed` status. Bus capabilities are not exempt — unspecified bus
     contracts are the most expensive to discover late.
 - **The thread**: code declares membership with a tag, by role:
@@ -278,10 +288,11 @@ expected and acceptable.
 | Check | Level | Effect on exit code |
 |---|---|---|
 | link sync (dangling tag, enforced req with no member, bad `depends_on`) | **ERROR** | exit 1 |
-| test-link integrity (tested-by file missing or holds no test function) | **WARN** | exit 0 |
+| test-link integrity (tested-by file missing or holds no test function) — **at every status**; strict-promoted only for `confirmed` | **WARN** | exit 0 |
 | drift (confirmed contract changed vs lock, members not re-touched) | **WARN** | exit 0 |
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
-| AC-coverage gap (labelled AC-N with no `verifies:` tag) | **WARN** | exit 0 |
+| AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
+| committed map stale (`_map.*`, `_findings.md`, published `docs/map.html`) | **WARN** | exit 0 |
 | member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
 | untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
 | tag in a file type the scan never reads (not a member) | **WARN** | exit 0 |
@@ -293,9 +304,12 @@ for a corpus where all requirements are confirmed and lock is current).
 - **link sync** — every code tag points to a real requirement; every `confirmed`
   requirement has ≥1 `implements:` member; no dangling refs; `depends_on` targets exist.
 - **behavior sync** — deterministic half is **test-link integrity** (warn-only): a
-  confirmed requirement's `tested-by` file must exist and contain a test function
-  (`def test…(`, `function test…(`, `it(`/`test(`), else the link asserts coverage it
-  lacks. Silent on a well-formed corpus.
+  `tested-by` file must exist and contain a test function (`def test…(`,
+  `function test…(`, `it(`/`test(`, `func TestX(`, `#[test]`, a bash `test_x()` or
+  bats `@test`, or a `*.test.sh` name), else the link asserts coverage it lacks.
+  Checked at every status — a link pointing at a component instead of its spec is
+  wrong the day it is written — but promoted to an error under `--strict` only for a
+  `confirmed` requirement. Silent on a well-formed corpus.
 - **drift** — content hash of each `confirmed` requirement compared to `_reqlock.json`;
   a changed requirement whose members were not re-touched is flagged WARN (never ERROR by
   default — design decision from day 1; see REQ-CHECK-006). The warning also names the
@@ -396,6 +410,7 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py draft`             — draft one requirement per untagged file. Input: **existing untagged code** (and prose). Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
 - `python scripts/reqmap.py plan`              — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `draft`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
 - `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view. Once the file exists, `map`/`sync` keep it fresh and `map --check` flags it stale
+- `python scripts/reqmap.py suggest-verifies`  — propose `# verifies: <ID>#AC-N` tags for tests already NAMED after the criterion they check (`test_ac3_…`), the cheap way to adopt per-criterion coverage on an existing corpus. Searches only the requirement's own `tested-by` files, and refuses to guess: a file shared by several requirements needs a distinctive id token in the test's own name (never its class, never a fixture parameter), a name carrying another requirement's number belongs to that one, and two candidates for one criterion are reported as ambiguous and never written. Read-only; `--apply` writes the tags, idempotently.
 - `python scripts/reqmap.py coverage`          — per-directory membership-tag coverage report: scannable files tagged vs. total, grouped by top-level directory, to spot traceability gaps. `--json` for CI. Read-only, exit 0.
 
 **`check` is a deprecated alias for `gate`** (removed in the next major version). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.

@@ -31,3 +31,6 @@ diagrams/*.excalidraw
 diagrams/*.html
 # Guard: raw excalidraw scenes must never land in the published docs/ Pages site
 docs/*.excalidraw
+
+# Feedback local din consum real (Management_Dashboard) — nu se versionează
+TODO-feedback-*.md

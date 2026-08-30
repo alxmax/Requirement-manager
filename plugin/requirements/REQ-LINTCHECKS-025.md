@@ -58,6 +58,11 @@ Every line in this section is binding.
 - `file-spread` is an architectural-diffuseness signal and is skipped when no member data is
   supplied.
 
+**Layer check**
+- The `layer-mismatch` check warns on a `layer: bus` requirement that nothing depends on and
+  that itself depends on at least `LINT_BUS_FANOUT_MIN`, default 3, requirements.
+- `layer-mismatch` is skipped when no fan-in data is supplied.
+
 **Vague-term check**
 - The `vague-term` check warns on a Contract bullet using a word from the closed
   `LINT_VAGUE_TERMS` set — untestable quality words such as `appropriate`.

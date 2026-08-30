@@ -33,13 +33,23 @@ Every line in this section is binding.
 
 **When it warns**
 - For a confirmed requirement that labels its criteria and carries at least one `verifies`
-  tag, the gate warns for each labelled criterion that has no `verifies` tag.
+  tag, the gate warns once, naming every labelled criterion that has no tag.
+- That single warning also states how many labelled criteria are tagged, so partial adoption
+  reads as progress rather than as a growing pile of warnings.
 
 **When it stays silent**
 - A confirmed requirement with no `verifies` tag is exempt. Per-criterion tagging is opt-in,
   and the coarser `tested-by` check still applies to it.
 - A requirement whose criteria are unlabelled bullets is exempt, because there is no criterion
   label for a tag to address.
+- A criterion marked `<!-- verifiable by: inspection -->` or `manual` is excluded from the
+  warning and from the counts. No tag can ever cover it.
+
+**What it emits**
+- The map emits `clauses` and `covered` on a requirement that has adopted per-criterion
+  tagging, and omits both fields otherwise.
+- The map emits a `gap` naming the untagged criteria when coverage is partial.
+- An absent `clauses` means "not measured". No reader may substitute a number of its own.
 
 **Severity**
 - The check is warn-only. It never changes the gate's exit code.
@@ -68,6 +78,14 @@ AC-4
   Given  a confirmed requirement whose criteria are unlabelled bullets
   When   the gate runs
   Then   it adds no per-criterion warning
+AC-5
+  Given  a confirmed requirement with a criterion marked `verifiable by: inspection`
+  When   the gate runs
+  Then   that criterion appears in no warning and in no emitted count
+AC-6
+  Given  a requirement with two labelled criteria of which one carries a `verifies` tag
+  When   the map is generated
+  Then   its node carries `clauses: 2`, `covered: 1`, and a `gap` naming the untagged one
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
@@ -77,7 +95,7 @@ AC-4
   exactly which two criteria still need a test instead of a vague "needs tests".
 
 ## WHERE — Current implementation
-- `scan_ac_verifies`, `_labeled_acs`, `AC_VERIFY_RE` in `reqmap.py`, consumed by `cmd_check` — `scan_ac_verifies` collects `# verifies: <id>#AC-N` tags into `{cap: {AC-N: locations}}`, `_labeled_acs` lists a requirement's labelled criteria, and `cmd_check` warns for each labelled criterion missing from the coverage map (only when the requirement has at least one tag).
+- `scan_ac_verifies`, `_acc_blocks`, `_labeled_acs`, `_automatable_acs`, `AC_VERIFY_RE` in `reqmap.py`, consumed by `cmd_check` and by `_attach_ac_coverage` — `scan_ac_verifies` collects `# verifies: <id>#AC-N` tags into `{cap: {AC-N: locations}}`, `_acc_blocks` is the single parser of the Acceptance section (labels, folded prose, and the `verifiable by:` marker), `_automatable_acs` drops the criteria a machine can never verify, `cmd_check` emits one aggregated warning naming the untagged ones, and `_attach_ac_coverage` puts `clauses`/`covered`/`gap` on the map node only when the requirement has adopted tagging.
 
 ## Links
 - Used by: (auto)
