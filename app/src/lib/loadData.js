@@ -23,8 +23,12 @@ export function adaptNode(n) {
     intent: n.intent || "",
     contract: Array.isArray(n.contract) ? n.contract : [],
     acc,
-    // raw acceptance text (Given/When/Then blocks) when no bullet list exists
-    gwt: acc.length === 0 && n.accept ? n.accept : undefined,
+    // Raw acceptance text: the labelled Given/When/Then block as authored, rendered
+    // line for line. `acc` carries the SAME criteria folded to one line each (for
+    // search and counting), so gating this on `acc` being empty meant that the day
+    // the engine learned to parse the block form (v2.29.0) every criterion silently
+    // collapsed into a run-on line. Prefer the authored shape whenever it exists.
+    gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,
     members: Array.isArray(n.members) ? n.members : [],
     deps: Array.isArray(n.deps) ? n.deps : [],
     usedBy: Array.isArray(n.used_by) ? n.used_by : [],

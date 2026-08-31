@@ -104,7 +104,8 @@ full UI, this repo's data inlined, no server). It is optional — omit it and th
 engine still emits `_map.md` + `_map.json`.
 
 **Then run the one-shot bootstrap** — `python scripts/reqmap.py init` creates the
-`requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`),
+`requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`
+and the agent-worktree copies below),
 drafts requirements from the existing code, builds the lock + map, and prints guided
 next steps. It is idempotent (safe to re-run) and never clobbers an existing
 `.reqmapignore`. The manual steps below are what `init` automates — do them by hand
@@ -120,7 +121,15 @@ on the first run:
 
 ```
 scripts/reqmap.py
+.worktrees/**
+.claude/worktrees/**
 ```
+
+The two `worktrees` globs matter the first time you run an isolated subagent: each
+worktree is a **full second copy of the repo**, so without them the gate counts every
+member twice and reports the copies' tags as dangling refs — errors that do not exist
+in your code, in files a clean CI checkout never has. (`.claude/worktrees/` is what
+Claude Code creates today; `.worktrees/` is the older parallel-session location.)
 
 Add any other vendored or generated paths that should not be scanned (one fnmatch
 glob per line, `#` comments ok). The engine itself is always the first entry.

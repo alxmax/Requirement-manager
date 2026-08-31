@@ -6,6 +6,7 @@ owner: Alex
 depends_on: [REQ-MAP-007]
 superseded_by:
 milestone: v1.04
+lint_exempt: [ac-count-high]
 ---
 
 # Self-contained HTML map viewer
@@ -60,6 +61,12 @@ Every line in this section is binding.
 - The viewer excludes a cycle-closing edge from that ranking, and still draws it.
 - No node ranks higher than the number of nodes, whatever the registry's shape.
 
+**How it shows the acceptance criteria**
+- A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
+  block as the author wrote it, and `acc`, the same criteria folded to one line each.
+- The viewer renders `accept` — one line per line, as authored. `acc` is for search and
+  counting, never the thing a reader is shown when the authored block exists.
+
 **What language it shows**
 - The viewer renders its own UI chrome in English by default.
 - A locale control in the viewer's top bar switches that chrome to another bundled language.
@@ -75,6 +82,11 @@ Every line in this section is binding.
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- `lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one
+  artifact — data injection and its three escapes, node placement, UI language, and how
+  the acceptance block is rendered. Splitting them would produce requirements that all
+  point at the same single vendored file, which is the coupling the count is meant to
+  detect, not a fix for it.
 - The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as
   `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the
   marker for the inline data, so it ships a rich UI without itself depending on Node/npm.
@@ -124,6 +136,12 @@ AC-6
   Then   the section headers appear in that language while the requirement's own title,
          contract and acceptance text stay exactly as authored, and `status` / `layer`
          values stay literal
+
+AC-8
+  Given  a node carrying both a labelled `accept` block and the folded `acc` list
+  When   its spec is rendered
+  Then   the Given/When/Then lines appear as authored, one per line, and the folded
+         one-line form is not what the reader sees
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

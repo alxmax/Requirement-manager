@@ -31,6 +31,10 @@ Every line in this section is binding.
   that is already there.
 - The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look
   like they point at requirements that do not exist.
+- The starter file also lists `.worktrees/**` and `.claude/worktrees/**` — the two places an
+  isolated agent worktree is created. Each holds a full second copy of the repo, so without
+  those lines every member is counted twice and the copies' tags read as dangling refs:
+  errors that are not in the code, in files a clean CI checkout never has.
 - One exception: if the engine describes itself in this repo, `init` leaves the line out and
   writes a comment saying why. There the engine is ordinary tracked code, so the scan keeps
   reading it.
@@ -100,6 +104,12 @@ AC-6
   Given  a repo with no extractable code
   When   `init` runs
   Then   it prints the distinct "no requirements were extracted" message (not a tracked-count summary)
+
+AC-7
+  Given  a repo with no `.reqmapignore` and a tagged file copied into `.worktrees/` and
+         into `.claude/worktrees/` (what an isolated subagent leaves behind)
+  When   `init` runs and the repo is then scanned
+  Then   the seeded `.reqmapignore` lists both globs and neither copy is scanned as a member
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->

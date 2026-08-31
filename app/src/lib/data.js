@@ -322,6 +322,7 @@ const BAKED = [
       "`init` creates the requirements folder if it is missing.",
       "`init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites one that is already there.",
       "The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags look like they point at requirements that do not exist.",
+      "The starter file also lists `.worktrees/**` and `.claude/worktrees/**` — the two places an isolated agent worktree is created. Each holds a full second copy of the repo, so without those lines every member is counted twice and the copies' tags read as dangling refs: errors that are not in the code, in files a clean CI checkout never has.",
       "One exception: if the engine describes itself in this repo, `init` leaves the line out and writes a comment saying why. There the engine is ordinary tracked code, so the scan keeps reading it.",
       "\"Describes itself\" means `scripts/reqmap.py` carries tags whose ids match requirements already in the repo.",
       "`init` drafts requirements from untagged code, writes the lock, then builds the map, in that order. When it finishes, the repo passes the gate and has a map.",
