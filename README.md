@@ -98,6 +98,12 @@ python scripts/reqmap.py map      # build the visual map → open requirements/_
 `init` is the friendly starting point — it sets everything up and tells you the
 next step. You never edit the generated files (`_map.*`, `_reqlock.json`) by hand.
 
+It also writes a starter `.reqmapignore`, and never overwrites one you already have.
+Two of its lines matter the first time you run an AI subagent in an isolated worktree
+(`.worktrees/`, `.claude/worktrees/`): each worktree is a full second copy of your repo,
+so without them the gate counts every member twice and reports the copies' tags as
+errors that do not exist in your code — and CI, which checks out a clean tree, disagrees.
+
 ## What a requirement file looks like
 
 A requirement is just Markdown: a small YAML header plus prose. Trimmed example:
@@ -209,6 +215,8 @@ any assistant — or with no assistant at all.
 | `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors. |
 | `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
 | `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35. A requirement and its own test-suite requirement (linked by `tested-by`) are skipped and counted, not reported. |
+| `search "query"` | Rank requirements by lexical relevance — the same TF-IDF cosine `dupes` uses. `--top N`. |
+| `coverage` | List source files carrying no `implements:` tag, grouped by directory. `--json`. |
 | `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge. |
 | `export` | Emit just the graph JSON (for an external front-end) |
 | `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |
@@ -216,6 +224,9 @@ any assistant — or with no assistant at all.
 | `findings` | Collect open "needs human review" notes into `_findings.md` |
 | `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) — AI feed for advisory quality review. Read-only. |
 | `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
+| `suggest-verifies` | Propose `# verifies: <ID>#AC-N` tags for tests already named after the criterion they check. Read-only by default; `--apply` writes them. |
+| `translate [--to ro\|en]` | **Manual and opt-in.** Cache a `claude -p` translation of the corpus into `requirements/_i18n/<locale>.json`, for a reader who does not speak the authors' language. Never called by `gate`/`sync`/`lint`/`map` or any hook, and the viewer always marks translated text as machine-translated. |
+| `gen-integration` | Maintainer command: regenerate `tool_definition.json` and the SKILL command table from the engine's `COMMANDS` registry. |
 
 ## The Excalidraw diagram skill
 
