@@ -42,8 +42,13 @@ Every line in this section is binding.
   which reusing `binding_hash` would miss.
 - Before a translation is cached, `_translation_preserves_structure()` compares the
   source and translated text's backticked-span multiset, numeric-literal multiset,
-  and ordered heading/bullet markers. A mismatch skips the entry with a `WARN` and
+  ordered heading/bullet markers, ordered `AC-N` criterion labels, and Gherkin-keyword
+  multiset (Given/When/Then). A mismatch skips the entry with a `WARN` and
   writes nothing for it — it never partially caches a corrupted translation.
+- The `AC-N` labels and the Gherkin keywords are identifiers, not prose: a test names a
+  criterion (`# verifies: <ID>#AC-N`) and the viewer highlights the keywords, so a
+  translation that renames either is refused. The prompt states both rules, so a model
+  that translates them is answering a question nobody asked.
 - A missing/erroring `claude` CLI, a timeout, or a malformed (missing-marker)
   response also skips that entry with a `WARN`. `translate` always exits 0 and
   never aborts the batch on a single entry's failure — it is a report-and-cache
@@ -142,6 +147,13 @@ AC-8
          current content (source edited since the last `translate` run)
   When   `_load_translations` runs
   Then   that entry is absent from the result — never served stale
+
+AC-9
+  Given  a translation that renames a criterion label (`AC-1` to `CA-1`) or
+         translates a Gherkin keyword (`Given` to `Dat fiind`)
+  When   `_translation_preserves_structure` compares it with the source
+  Then   it returns false; the same text with labels and keywords intact and
+         only the prose translated returns true
 
 ## Example — in practice (optional, non-binding)
 - A consumer repo's corpus is 68 Romanian-authored requirements. An English-only

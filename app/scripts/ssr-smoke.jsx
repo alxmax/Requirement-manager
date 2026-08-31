@@ -159,6 +159,33 @@ for (const [label, ok] of i18nContentChecks) {
   console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
   if (!ok) failures++;
 }
+// ---- acceptance criteria keep their Given/When/Then lines ------------------
+// The engine emits BOTH `accept` (the raw labelled Gherkin block) and `acc` (the
+// same criteria folded to one line each, for search and counting). `gwt` used to be
+// set only when `acc` was empty — true for every requirement until the engine
+// learned to parse the block form (v2.29.0), and false for every one after, which
+// silently turned every criterion into a single run-on line.
+const GWT_ACCEPT = "AC-1\n  Given  a repo with no requirements/\n  When   `init` runs\n  Then   it creates the directory";
+setRegistry([adaptNode({
+  id: "GWT-TEST-001", title: "Acceptance block", area: "GWT", layer: "feature",
+  status: "confirmed", intent: "Reason.", contract: ["- A clause."],
+  acc: ["AC-1 — Given  a repo with no requirements/ When   `init` runs Then   it creates the directory"],
+  accept: GWT_ACCEPT, members: [], deps: [], used_by: [],
+})]);
+const gwtSpec = renderToString(<SpecView selId="GWT-TEST-001" setSelId={noop} />);
+const gwtChecks = [
+  ["acceptance: a labelled block renders as the multi-line gwt block, not a folded bullet",
+    gwtSpec.includes('class="gwt"')],
+  ["acceptance: the folded one-line form is not what the reader sees",
+    gwtSpec.includes("Given") && gwtSpec.includes("Then")
+    && !gwtSpec.includes("AC-1 — Given")],
+  ["acceptance: adaptNode still exposes acc for search and counting",
+    adaptNode({ id: "X", acc: ["AC-1 — a"], accept: GWT_ACCEPT }).acc.length === 1],
+];
+for (const [label, ok] of gwtChecks) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
 // ---- layout on a CYCLIC registry -------------------------------------------
 // A `depends_on` cycle is a modelling error the gate reports, but the viewer still
 // has to draw the registry. Longest-path ranking never converges on a cycle: it

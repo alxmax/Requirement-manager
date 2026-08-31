@@ -2459,6 +2459,30 @@ class Init(unittest.TestCase):  # tested-by: REQ-INIT-012
             members = R.scan_members(d, os.path.join(d, "requirements"))
             self.assertIn("CORE-X-001", members)
 
+    def test_seed_ignores_agent_worktree_copies(self):
+        # An isolated-subagent worktree holds a FULL second copy of the repo. Both the
+        # older `.worktrees/` and Claude Code's `.claude/worktrees/` must be seeded.
+        with tempfile.TemporaryDirectory() as d:
+            self._init(d)
+            ignore = open(os.path.join(d, ".reqmapignore"), encoding="utf-8").read()
+            globs = [ln.strip() for ln in ignore.splitlines()
+                     if ln.strip() and not ln.strip().startswith("#")]
+            self.assertIn(".worktrees/**", globs)
+            self.assertIn(".claude/worktrees/**", globs)
+
+    def test_seeded_ignore_prunes_a_worktree_copy(self):
+        # The copy's tags would otherwise be counted a second time as members.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "CORE-X-001.md"),
+                   "---\nid: CORE-X-001\nstatus: confirmed\n---\n\n# Cap\n")
+            _write(os.path.join(d, "app.py"), tag("CORE-X-001") + "\n")
+            self._init(d)
+            for wt in (".worktrees", os.path.join(".claude", "worktrees")):
+                _write(os.path.join(d, wt, "wt1", "app.py"), tag("CORE-X-001") + "\n")
+            hits = R.scan_members(d, os.path.join(d, "requirements"))["CORE-X-001"]
+            self.assertEqual([fp for _role, fp, _ln in hits], ["app.py"])
+
+
     def test_does_not_clobber_existing_reqmapignore(self):
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, ".reqmapignore"), "my-custom-glob/**\n")
@@ -2942,26 +2966,26 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
         self.addCleanup(shutil.rmtree, d, ignore_errors=True)
         return d
 
-    def test_detect_lang_diacritics(self):
+    def test_detect_lang_diacritics(self):  # verifies: REQ-TRANSLATE-044#AC-1
         self.assertEqual(R.detect_lang(self.RO_BODY), "ro")
 
-    def test_detect_lang_english(self):
+    def test_detect_lang_english(self):  # verifies: REQ-TRANSLATE-044#AC-1
         self.assertEqual(R.detect_lang(self.EN_BODY), "en")
 
-    def test_detect_lang_undetermined_on_code_only(self):
+    def test_detect_lang_undetermined_on_code_only(self):  # verifies: REQ-TRANSLATE-044#AC-1
         self.assertIsNone(R.detect_lang("`foo_bar()` `baz.qux` `1234`"))
 
-    def test_corpus_lang_is_majority_vote(self):
+    def test_corpus_lang_is_majority_vote(self):  # verifies: REQ-TRANSLATE-044#AC-2
         reqs = {"REQ-A-001": self._req(self.RO_BODY), "REQ-B-002": self._req(self.RO_BODY),
                 "REQ-C-003": self._req(self.EN_BODY)}
         self.assertEqual(R.corpus_lang(reqs), "ro")
 
-    def test_lang_frontmatter_override_wins_over_detection(self):
+    def test_lang_frontmatter_override_wins_over_detection(self):  # verifies: REQ-TRANSLATE-044#AC-2
         # Romanian prose, but explicitly tagged as English — override must win.
         reqs = {"REQ-A-001": self._req(self.RO_BODY, lang="en")}
         self.assertEqual(R.corpus_lang(reqs), "en")
 
-    def test_translation_hash_changes_on_title_edit(self):
+    def test_translation_hash_changes_on_title_edit(self):  # verifies: REQ-TRANSLATE-044#AC-3
         # binding_hash() (Contract+Acceptance only) would NOT change here — that is
         # exactly the gap this hash exists to close.
         body_a = self.RO_BODY
@@ -2973,16 +2997,35 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
         # stays THE SAME — proof that reusing it would have missed this edit.
         self.assertEqual(R.binding_hash(body_a), R.binding_hash(body_b))
 
-    def test_structural_signature_catches_dropped_backtick(self):
+    def test_structural_signature_catches_dropped_backtick(self):  # verifies: REQ-TRANSLATE-044#AC-4
         source = "The `TOTAL` sum uses 2 decimals."
         good = "Suma `TOTAL` folosește 2 zecimale."
         bad = "Suma TOTAL folosește 2 zecimale."   # backtick dropped
         self.assertTrue(R._translation_preserves_structure(source, good))
         self.assertFalse(R._translation_preserves_structure(source, bad))
 
-    def test_structural_signature_catches_dropped_number(self):
+    def test_structural_signature_catches_dropped_number(self):  # verifies: REQ-TRANSLATE-044#AC-4
         source = "Rounds to 2 decimals."
         bad = "Rounds to decimals."   # number dropped
+        self.assertFalse(R._translation_preserves_structure(source, bad))
+
+    def test_structural_signature_catches_renamed_ac_label(self):  # verifies: REQ-TRANSLATE-044#AC-9
+        # `AC-N` is an identifier a test points at with `# verifies: <ID>#AC-N`, not prose.
+        # Renaming it passes the backtick/number/marker checks: "AC-1" and "CA-1" carry the
+        # same digit and neither is a heading or a bullet.
+        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
+        good = "AC-1\n  Given  un depozit\n  When   ruleaza `init`\n  Then   creeaza directorul\n"
+        bad = good.replace("AC-1", "CA-1")
+        self.assertTrue(R._translation_preserves_structure(source, good))
+        self.assertFalse(R._translation_preserves_structure(source, bad))
+
+    def test_structural_signature_catches_translated_gherkin_keyword(self):  # verifies: REQ-TRANSLATE-044#AC-9
+        # Given/When/Then are engine vocabulary, like `confirmed` or `draft`: the viewer
+        # highlights them and the .md file is the artifact of record. A reader shown
+        # "Dat fiind" cannot match the criterion against the file.
+        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
+        bad = ("AC-1\n  Dat fiind  un depozit\n  Cand   ruleaza `init`\n"
+               "  Atunci   creeaza directorul\n")
         self.assertFalse(R._translation_preserves_structure(source, bad))
 
     def test_parse_translated_sections_well_formed(self):
@@ -2994,7 +3037,7 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
         text = "===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n"   # no ACCEPTANCE
         self.assertIsNone(R._parse_translated_sections(text))
 
-    def test_cmd_translate_fails_open_when_cli_missing(self):
+    def test_cmd_translate_fails_open_when_cli_missing(self):  # verifies: REQ-TRANSLATE-044#AC-5
         reqs_dir = self._tmp_reqs_dir()
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
         with mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
@@ -3005,7 +3048,7 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
         self.assertIn("skipped", buf.getvalue())
         self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_i18n", "en.json")))  # nothing cached
 
-    def test_cmd_translate_happy_path_writes_cache_and_hits_on_rerun(self):
+    def test_cmd_translate_happy_path_writes_cache_and_hits_on_rerun(self):  # verifies: REQ-TRANSLATE-044#AC-6
         reqs_dir = self._tmp_reqs_dir()
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
         fake_response = ("===TITLE===\nEnglish title\n"
@@ -3031,7 +3074,7 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
             R.cmd_translate(reqs, reqs_dir, target="en")
         self.assertEqual(m2.call_count, 0)
 
-    def test_map_never_invokes_claude(self):
+    def test_map_never_invokes_claude(self):  # verifies: REQ-TRANSLATE-044#AC-7
         # `map`/`export` must stay fully deterministic and claude-free — they only
         # ever read an already-committed cache file.
         reqs_dir = self._tmp_reqs_dir()
@@ -3050,7 +3093,7 @@ class Translate(unittest.TestCase):  # tested-by: REQ-TRANSLATE-044
         node = next(n for n in data["nodes"] if n["id"] == "REQ-A-001")
         self.assertEqual(node["i18n"]["en"]["title"], "English title")
 
-    def test_stale_cache_entry_is_dropped_not_served(self):
+    def test_stale_cache_entry_is_dropped_not_served(self):  # verifies: REQ-TRANSLATE-044#AC-8
         reqs_dir = self._tmp_reqs_dir()
         i18n_dir = os.path.join(reqs_dir, "_i18n")
         os.makedirs(i18n_dir)

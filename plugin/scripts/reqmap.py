@@ -166,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-31.1"
+MAP_ENGINE_VERSION = "2026-08-31.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -3542,14 +3542,23 @@ def corpus_lang(reqs):  # implements: REQ-TRANSLATE-044
 
 
 def _structural_signature(text):  # implements: REQ-TRANSLATE-044
-    """(backtick-span multiset, numeric-literal multiset, ordered structural markers)
-    — what a translation must preserve exactly. Used to gate a cache write: a
-    translation that drops a backticked identifier or a number is a mistranslation
-    of normative text, not a style choice."""
+    """(backtick-span multiset, numeric-literal multiset, ordered structural markers,
+    ordered `AC-N` labels, Gherkin-keyword multiset) — what a translation must preserve
+    exactly. Used to gate a cache write: a translation that drops a backticked identifier
+    or a number is a mistranslation of normative text, not a style choice.
+
+    The last two are identifiers, not prose, and the first three checks are blind to both:
+    `AC-1` -> `CA-1` keeps the same digit and is neither heading nor bullet, and
+    `Given` -> `Dat fiind` touches nothing at all. But `AC-N` is what a test points at
+    (`# verifies: <ID>#AC-N`), and Given/When/Then are engine vocabulary the viewer
+    highlights — the same reason `confirmed` and `draft` are left untranslated (i18n.jsx).
+    A reader given "Dat fiind" cannot match the criterion back to the .md file of record."""
     backticks = tuple(sorted(re.findall(r"`[^`]*`", text)))
     numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
     markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
-    return (backticks, numbers, markers)
+    labels = tuple(re.findall(r"^\s*(AC-\d+)\b", text, flags=re.MULTILINE))
+    keywords = tuple(sorted(re.findall(r"\b(?:Given|When|Then)\b", text)))
+    return (backticks, numbers, markers, labels, keywords)
 
 
 def _translation_preserves_structure(source, translated):  # implements: REQ-TRANSLATE-044
@@ -3562,7 +3571,11 @@ _TRANSLATE_PROMPT = (
     "Translate the following software requirement from {src} to {dst}. This is a "
     "technical, normative document - preserve meaning exactly. Keep all markdown "
     "formatting, every backticked `identifier` verbatim and unchanged, every number "
-    "unchanged, and the same list/heading structure line for line.\n\n"
+    "unchanged, and the same list/heading structure line for line.\n"
+    "Two more things are identifiers, not prose, and must appear verbatim: the "
+    "criterion labels `AC-1`, `AC-2`, ... (a test refers to one by name), and the "
+    "Gherkin keywords Given / When / Then. Translate the words after them, never "
+    "the keywords themselves.\n\n"
     "Return EXACTLY four sections, each starting on its own line with the literal "
     "marker shown below, and nothing else - no commentary, no code fence:\n"
     "===TITLE===\n<translated title>\n"
@@ -4868,7 +4881,14 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
     comment explains why) to avoid orphaning those requirements."""
     header = ("# Paths reqmap should not scan (one fnmatch glob per line, # comments ok).\n"
               "# The bundled single-file viewer is a generated artifact, never a member.\n"
-              "scripts/_map_viewer.html\n")
+              "scripts/_map_viewer.html\n"
+              "# Isolated agent worktrees. Each holds a FULL second copy of this repo, so a\n"
+              "# local scan counts every member twice and reads the copies' tags as dangling\n"
+              "# refs — errors that do not exist in the code, in files CI never checks out.\n"
+              "# Both spellings: Claude Code creates `.claude/worktrees/`, older\n"
+              "# parallel-session tooling `.worktrees/`.\n"
+              ".worktrees/**\n"
+              ".claude/worktrees/**\n")
     engine = os.path.join(code_root, "scripts", "reqmap.py")
     req_ids = set(load_requirements(reqs_dir))
     if req_ids and os.path.isfile(engine):
