@@ -3235,6 +3235,14 @@
       "satisfied_by": [],
       "members": [
         {
+          "role": "tested-by",
+          "loc": "app/scripts/ssr-smoke.jsx:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/search.js:1"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:4489"
         },
@@ -4047,6 +4055,7 @@
         "`translate` writes one aggregate `_i18n/<locale>.json`, not one file per requirement — same shape as the existing `_reqlock.json`/`_memberlock.json` per-id lock-file convention (CORE-DRIFT-003), not a new pattern.",
         "Decision (2026-08-25): the stopword lists stay small. They feed a majority vote across a whole corpus, not sentence-level precision, and a per-file `lang:` value overrides a misclassification. Grow them only when a real corpus is misclassified — and add that corpus as a test case when it happens.",
         "Decision (2026-08-25): the language set stays `ro`/`en` until a second real consumer language shapes the API. The cache is already per-locale (`_i18n/<locale>.json`), so adding a language later is additive; what a third language needs is its own detection signal (a stopword list) and a name in the prompt, and guessing those without a user would fix the wrong shape.",
+        "`file-spread` is exempted: the three files are the engine side plus the two viewer consumers named in WHERE (`i18n.jsx`, `SpecView.jsx`) — one feature, two runtimes.",
         "`ac-count-high` is exempted: each of the eight criteria pins exactly one module's behavior (detection, hashing, fidelity check, two fail-open paths, caching, and two map-read paths). Merging them to reach the ceiling would test several behaviors implicitly per AC — same reasoning as REQ-LINTCHECKS-025."
       ],
       "current_impl": [
@@ -4077,6 +4086,14 @@
       "satisfies": [],
       "satisfied_by": [],
       "members": [
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:2"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/SpecView.jsx:2"
+        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:3447"
@@ -4244,6 +4261,7 @@
         "None — authored from known intent, not reconstructed from code."
       ],
       "notes": [
+        "`lint_exempt: file-spread`: the members are one engine function plus the viewer's source tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files by construction; they are built into ONE artifact, so the spread is not diffuseness.",
         "`lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one artifact — data injection and its three escapes, node placement, UI language, and how the acceptance block is rendered. Splitting them would produce requirements that all point at the same single vendored file, which is the coupling the count is meant to detect, not a fix for it.",
         "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
         "`_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with `map`. `_map.json` (owned by [[REQ-MAP-007]]) is the committed source of its data.",
@@ -4258,7 +4276,7 @@
         "`ProblemsView.jsx` — gate errors, drift items, and open risk inbox",
         "`RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields",
         "`SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)",
-        "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views These files carry no `implements:` tags — app/ is deliberately excluded from the widened repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md) runs in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the committed copy differs; per-file tagging of app/src stays outside reqmap's gate — a known gap, tracked in TODO.md, not silently claimed as covered."
+        "`app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views Every file under `app/src/` carries an `implements:` tag (this requirement for the shell, views, styles and data loading; `REQ-SEARCH-036` for `lib/search.js`; `REQ-TRANSLATE-044` alongside on `lib/i18n.jsx` and `views/SpecView.jsx`), as do `app/scripts/install-viewer.mjs` and `app/vite.viewer.config.js` — the vendoring step and the single-file build are part of this contract. `app/scripts/ssr-smoke.jsx` is the `tested-by` member; `npm run smoke` (app/CLAUDE.md) runs it in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the committed copy differs. The build strips the comments, so the tags never reach `_map_viewer.html`; only `app/dist*`, `app/.vite` and the SSR bundle stay in `.reqmapignore`."
       ],
       "acc": [
         "AC-1 — Given  the vendored `_map_viewer.html` template is present When   `map` runs Then   it writes `_map.html` and the `` marker is replaced with a `window.__REQMAP_DATA__` assignment carrying one node per requirement",
@@ -4284,6 +4302,74 @@
       "satisfies": [],
       "satisfied_by": [],
       "members": [
+        {
+          "role": "implements",
+          "loc": "app/vite.viewer.config.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/scripts/install-viewer.mjs:1"
+        },
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/ssr-smoke.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/App.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/main.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/data.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/i18n.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/icons.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/layout.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/loadData.js:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/ui.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/styles/app.css:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/styles/colors_and_type.css:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/MapView.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/ProblemsView.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/RoadmapView.jsx:1"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/SpecView.jsx:1"
+        },
         {
           "role": "generated-from",
           "loc": "docs/full_architecture.html:4"
@@ -5030,7 +5116,7 @@
       "name": "Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx",
       "lane": "ops",
       "milestone": "v2.9",
-      "done": false
+      "done": true
     },
     {
       "name": "Fix check@v1: frozen at v2.1.0 while shipping v2.17.0 — re-point it or pull it from the README",

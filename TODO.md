@@ -228,10 +228,14 @@
              .txt/.adoc/.ipynb/.mdx outside the scan; "IDENTITY and PURPOSE" is the H1 title of
              151/255 patterns (path-aware ids still distinct).
            JSON convention: still no evidence for one — every JSON seen was config or lockfile. -->
-- [ ] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
+- [x] Bring app/src/ under the gate: real per-file `# implements:`/`generated-from:` tagging of app/src/**/*.jsx | lane: ops
       <!-- Deliberately deferred (2-1 majority in the same Trias deliberation): app/ stays in the
            repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is
-           real, not before. -->
+           real, not before.
+           Closed 2026-09-02: 18 files tagged (app/src/** + install-viewer.mjs,
+           vite.viewer.config.js -> REQ-VIEWER-007; search.js -> REQ-SEARCH-036; i18n.jsx +
+           SpecView.jsx also REQ-TRANSLATE-044; ssr-smoke.jsx tested-by both). `app/**` left the
+           root .reqmapignore; only app/dist*, app/.vite and the SSR bundle stay excluded. -->
 
 ## v3
 <!-- Tiers 2-5 of the same v2.9-v3 roadmap: survive a skeptic's ten minutes, the

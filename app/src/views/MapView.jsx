@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* MapView — the flagship interactive graph explorer (4 tabs + detail panel).
  * Layout is computed from the live registry (see ../lib/layout.js) — no
  * hand-tuned coordinates — so it renders any repo's requirements, not a fixture. */

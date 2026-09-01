@@ -1,3 +1,5 @@
+// tested-by: REQ-VIEWER-007
+// tested-by: REQ-SEARCH-036
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -31,6 +33,10 @@ const cases = {
 };
 
 let failures = 0;
+function test(label, ok) {
+  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
+  if (!ok) failures++;
+}
 for (const [name, el] of Object.entries(cases)) {
   try {
     const html = renderToString(el);
@@ -49,10 +55,7 @@ const checks = [
   ["renders the brand", appHtml.includes("Manager")],
   ["renders Problems nav", appHtml.includes("Problems")],
 ];
-for (const [label, ok] of checks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of checks) test(label, ok);
 
 // ranked-search parity (REQ-SEARCH-036): the viewer's search must rank by the
 // SAME TF-IDF model as the engine `search` CLI. This golden fixture is asserted
@@ -75,10 +78,7 @@ const searchChecks = [
   ["ranked search shows a score per hit", typeof ranked[0]?.score === "number"],
   ["ranked search floors out a no-overlap query", nomatch.length === 0],
 ];
-for (const [label, ok] of searchChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of searchChecks) test(label, ok);
 
 // XSS regression: untrusted requirement HTML must render ESCAPED in both
 // dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecView), never live.
@@ -94,10 +94,7 @@ const xssChecks = [
   ["MapView escapes injected contract HTML", xssMap.includes("&lt;img") && !xssMap.includes("<img src=x onerror")],
   ["SpecView escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
 ];
-for (const [label, ok] of xssChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of xssChecks) test(label, ok);
 
 // i18n: the toggle must translate UI CHROME and leave requirement content alone.
 // Rendered inside the provider with the locale forced, since the provider's own
@@ -121,10 +118,7 @@ const i18nChecks = [
   ["i18n: engine vocabulary stays literal (status value, not a translation)",
     specRo.includes(reqUnderTest.status)],
 ];
-for (const [label, ok] of i18nChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of i18nChecks) test(label, ok);
 
 // i18n content translation (opt-in, cached, always marked) — REQ-TRANSLATE-042.
 // A node with a cached en-locale translation renders the translated text WITH the
@@ -155,10 +149,7 @@ const i18nContentChecks = [
   ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],
   ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],
 ];
-for (const [label, ok] of i18nContentChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of i18nContentChecks) test(label, ok);
 // ---- acceptance criteria keep their Given/When/Then lines ------------------
 // The engine emits BOTH `accept` (the raw labelled Gherkin block) and `acc` (the
 // same criteria folded to one line each, for search and counting). `gwt` used to be
@@ -182,10 +173,7 @@ const gwtChecks = [
   ["acceptance: adaptNode still exposes acc for search and counting",
     adaptNode({ id: "X", acc: ["AC-1 — a"], accept: GWT_ACCEPT }).acc.length === 1],
 ];
-for (const [label, ok] of gwtChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of gwtChecks) test(label, ok);
 // ---- layout on a CYCLIC registry -------------------------------------------
 // A `depends_on` cycle is a modelling error the gate reports, but the viewer still
 // has to draw the registry. Longest-path ranking never converges on a cycle: it
@@ -210,10 +198,7 @@ const layoutChecks = [
   ["layout: cycle-closing edges are still drawn", cycLayout.edges.length === 4],
   ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],
 ];
-for (const [label, ok] of layoutChecks) {
-  console.log(`${ok ? "ok  " : "FAIL"} ${label}`);
-  if (!ok) failures++;
-}
+for (const [label, ok] of layoutChecks) test(label, ok);
 
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 

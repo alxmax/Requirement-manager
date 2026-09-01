@@ -6,7 +6,7 @@ owner: Alex
 depends_on: [CORE-PARSE-001, REQ-MAP-007, REQ-VIEWER-007]
 superseded_by:
 milestone:
-lint_exempt: [ac-count-high]
+lint_exempt: [ac-count-high, file-spread]
 ---
 
 # Opt-in requirement-content translation
@@ -93,6 +93,8 @@ Every line in this section is binding.
   adding a language later is additive; what a third language needs is its own detection
   signal (a stopword list) and a name in the prompt, and guessing those without a user
   would fix the wrong shape.
+- `file-spread` is exempted: the three files are the engine side plus the two viewer
+  consumers named in WHERE (`i18n.jsx`, `SpecView.jsx`) — one feature, two runtimes.
 - `ac-count-high` is exempted: each of the eight criteria pins exactly one
   module's behavior (detection, hashing, fidelity check, two fail-open paths,
   caching, and two map-read paths). Merging them to reach the ceiling would test

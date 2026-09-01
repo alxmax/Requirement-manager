@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* RoadmapView — Gantt-style chart: semver milestones on X, swim lanes on Y.
    Requirements with `milestone:` field + TODO.md items via TODOS. */
 import { useState, useRef } from "react";

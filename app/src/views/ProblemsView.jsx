@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* ProblemsView — a linter-style inbox of everything the gate + risk pass flags. */
 import { useState } from "react";
 import { REQUIREMENTS, coverageOf } from "../lib/data.js";
