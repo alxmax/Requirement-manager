@@ -1,3 +1,5 @@
+// implements: REQ-VIEWER-007
+// implements: REQ-TRANSLATE-044
 /* SpecView — a rendered requirement document (frontmatter → WHY → WHAT → HOW → WHERE). */
 import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, exemptReason } from "../lib/data.js";

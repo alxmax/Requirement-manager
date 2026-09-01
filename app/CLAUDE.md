@@ -27,5 +27,10 @@ update the vendored viewer. Only `build:viewer` does.
   to one model by a shared golden fixture asserted in the Python `Search` tests and
   in the SSR smoke — change one side and you must change both.
 
+`app/` is inside the widened reqmap scan (`--code ..`). Every file under `src/` starts with a
+`// implements: <ID>` line (`/* ... */` in CSS) — add one to any new file, or the gate
+warns once it passes 150 lines. `scripts/ssr-smoke.jsx` is the `tested-by` member; keep its
+`test(label, ok)` helper, it is the idiom the gate's test-link check recognizes.
+
 A vendored-viewer change is a shipped change: bump the plugin semver and add a
 CHANGELOG entry (see root `CLAUDE.md`).

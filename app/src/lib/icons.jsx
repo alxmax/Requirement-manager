@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* Lucide icon paths (ISC) traced to the brand's 1.75px stroke. Icon({name,size}). */
 const RM_ICON_PATHS = {
   search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',

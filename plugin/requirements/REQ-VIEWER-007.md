@@ -6,7 +6,7 @@ owner: Alex
 depends_on: [REQ-MAP-007]
 superseded_by:
 milestone: v1.04
-lint_exempt: [ac-count-high]
+lint_exempt: [ac-count-high, file-spread]
 ---
 
 # Self-contained HTML map viewer
@@ -82,6 +82,9 @@ Every line in this section is binding.
 - None — authored from known intent, not reconstructed from code.
 
 ## WHAT — Notes & known limitations (informative)
+- `lint_exempt: file-spread`: the members are one engine function plus the viewer's source
+  tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files
+  by construction; they are built into ONE artifact, so the spread is not diffuseness.
 - `lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one
   artifact — data injection and its three escapes, node placement, UI language, and how
   the acceptance block is rendered. Splitting them would produce requirements that all
@@ -168,12 +171,14 @@ AC-8
   - `RoadmapView.jsx` — milestone Gantt built from requirement `milestone:` fields
   - `SpecView.jsx` — full requirement dossier (contract, ACs, members, deps)
   - `app/src/lib/data.js` — loads `window.__REQMAP_DATA__` into the views
-  These files carry no `implements:` tags — app/ is deliberately excluded from the widened
-  repo-root scan (see the top-level `.reqmapignore`), because the requirement covers the
-  engine-side injection contract, not the compiled UX layer. `npm run smoke` (app/CLAUDE.md)
-  runs in CI's `artifacts` job, which also rebuilds the vendored viewer and fails when the
-  committed copy differs; per-file tagging of app/src stays outside reqmap's gate — a known
-  gap, tracked in TODO.md, not silently claimed as covered.
+  Every file under `app/src/` carries an `implements:` tag (this requirement for the shell,
+  views, styles and data loading; `REQ-SEARCH-036` for `lib/search.js`; `REQ-TRANSLATE-044`
+  alongside on `lib/i18n.jsx` and `views/SpecView.jsx`), as do `app/scripts/install-viewer.mjs`
+  and `app/vite.viewer.config.js` — the vendoring step and the single-file build are part of
+  this contract. `app/scripts/ssr-smoke.jsx` is the `tested-by` member; `npm run smoke`
+  (app/CLAUDE.md) runs it in CI's `artifacts` job, which also rebuilds the vendored viewer and
+  fails when the committed copy differs. The build strips the comments, so the tags never reach
+  `_map_viewer.html`; only `app/dist*`, `app/.vite` and the SSR bundle stay in `.reqmapignore`.
 
 ## Links
 - Used by: (auto)

@@ -1,5 +1,5 @@
 ---
-generated: 2026-08-31 19:33
+generated: 2026-09-02 00:16
 nodes: 51
 edges: 74
 ---
@@ -300,6 +300,10 @@ graph LR
   f_plugin_scripts_test_reqmap_py_4533["plugin/scripts/test_reqmap.py:4533"]
   REQ_SCANCACHE_023 -->|tested-by| f_plugin_scripts_test_reqmap_py_4533
   REQ_SEARCH_036["Free-text requirement search<br><small>REQ-SEARCH-036</small>"]
+  f_app_scripts_ssr_smoke_jsx_2["app/scripts/ssr-smoke.jsx:2"]
+  REQ_SEARCH_036 -->|tested-by| f_app_scripts_ssr_smoke_jsx_2
+  f_app_src_lib_search_js_1["app/src/lib/search.js:1"]
+  REQ_SEARCH_036 -->|implements| f_app_src_lib_search_js_1
   f_plugin_scripts_reqmap_py_4489["plugin/scripts/reqmap.py:4489"]
   REQ_SEARCH_036 -->|implements| f_plugin_scripts_reqmap_py_4489
   f_plugin_scripts_test_reqmap_py_3270["plugin/scripts/test_reqmap.py:3270"]
@@ -364,6 +368,10 @@ graph LR
   f_plugin_scripts_test_reqmap_py_5482["plugin/scripts/test_reqmap.py:5482"]
   REQ_TRACKED_042 -->|tested-by| f_plugin_scripts_test_reqmap_py_5482
   REQ_TRANSLATE_044["Opt-in requirement-content translation<br><small>REQ-TRANSLATE-044</small>"]
+  f_app_src_lib_i18n_jsx_2["app/src/lib/i18n.jsx:2"]
+  REQ_TRANSLATE_044 -->|implements| f_app_src_lib_i18n_jsx_2
+  f_app_src_views_SpecView_jsx_2["app/src/views/SpecView.jsx:2"]
+  REQ_TRANSLATE_044 -->|implements| f_app_src_views_SpecView_jsx_2
   f_plugin_scripts_reqmap_py_3447_3739["plugin/scripts/reqmap.py:3447-3739"]
   REQ_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_3447_3739
   f_plugin_scripts_test_reqmap_py_2944["plugin/scripts/test_reqmap.py:2944"]
@@ -374,6 +382,40 @@ graph LR
   f_plugin_scripts_test_reqmap_py_6423["plugin/scripts/test_reqmap.py:6423"]
   REQ_UNSCANNEDTAG_045 -->|tested-by| f_plugin_scripts_test_reqmap_py_6423
   REQ_VIEWER_007["Self-contained HTML map viewer<br><small>REQ-VIEWER-007</small>"]
+  f_app_vite_viewer_config_js_1["app/vite.viewer.config.js:1"]
+  REQ_VIEWER_007 -->|implements| f_app_vite_viewer_config_js_1
+  f_app_scripts_install_viewer_mjs_1["app/scripts/install-viewer.mjs:1"]
+  REQ_VIEWER_007 -->|implements| f_app_scripts_install_viewer_mjs_1
+  f_app_scripts_ssr_smoke_jsx_1["app/scripts/ssr-smoke.jsx:1"]
+  REQ_VIEWER_007 -->|tested-by| f_app_scripts_ssr_smoke_jsx_1
+  f_app_src_App_jsx_1["app/src/App.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_App_jsx_1
+  f_app_src_main_jsx_1["app/src/main.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_main_jsx_1
+  f_app_src_lib_data_js_1["app/src/lib/data.js:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_data_js_1
+  f_app_src_lib_i18n_jsx_1["app/src/lib/i18n.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_i18n_jsx_1
+  f_app_src_lib_icons_jsx_1["app/src/lib/icons.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_icons_jsx_1
+  f_app_src_lib_layout_js_1["app/src/lib/layout.js:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_layout_js_1
+  f_app_src_lib_loadData_js_1["app/src/lib/loadData.js:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_loadData_js_1
+  f_app_src_lib_ui_jsx_1["app/src/lib/ui.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_lib_ui_jsx_1
+  f_app_src_styles_app_css_1["app/src/styles/app.css:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_styles_app_css_1
+  f_app_src_styles_colors_and_type_css_1["app/src/styles/colors_and_type.css:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_styles_colors_and_type_css_1
+  f_app_src_views_MapView_jsx_1["app/src/views/MapView.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_views_MapView_jsx_1
+  f_app_src_views_ProblemsView_jsx_1["app/src/views/ProblemsView.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_views_ProblemsView_jsx_1
+  f_app_src_views_RoadmapView_jsx_1["app/src/views/RoadmapView.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_views_RoadmapView_jsx_1
+  f_app_src_views_SpecView_jsx_1["app/src/views/SpecView.jsx:1"]
+  REQ_VIEWER_007 -->|implements| f_app_src_views_SpecView_jsx_1
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   REQ_VIEWER_007 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1267_6172["plugin/scripts/reqmap.py:1267-6172"]

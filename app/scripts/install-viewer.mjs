@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* Copy the built single-file viewer into the plugin so the stdlib engine can
  * ship + inject it. Run by `npm run build:viewer` after the vite build. */
 import { copyFileSync, mkdirSync, statSync, readFileSync } from "node:fs";

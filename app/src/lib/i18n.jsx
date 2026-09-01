@@ -1,3 +1,5 @@
+// implements: REQ-VIEWER-007
+// implements: REQ-TRANSLATE-044
 /* i18n — UI chrome, plus opt-in, cached, always-marked requirement content.
  *
  * UI chrome (nav, tab labels, section headers, buttons, empty states) is

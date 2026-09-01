@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* Graph layout computed from the live registry — no hand-tuned coordinates.
  *
  * Produces a layered "main-bus" layout: nodes are ranked by dependency depth so

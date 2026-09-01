@@ -1,3 +1,4 @@
+// implements: REQ-VIEWER-007
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect, Component } from "react";
 import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";

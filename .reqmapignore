@@ -38,11 +38,15 @@ docs/superpowers/**
 # on tracked files.
 .consilium/**
 
-# app/ (Vite+React viewer source) stays outside the widened scan this round —
-# see REQ-VIEWER-007's WHERE section. CI's `artifacts` job runs `npm run smoke`
-# and rebuilds the vendored viewer to prove it matches app/; per-file tagging
-# of app/src is still open (TODO.md).
-app/**
+# app/ (Vite+React viewer source) IS scanned since 2026-09-02: app/src carries
+# per-file `implements:` tags (REQ-VIEWER-007, REQ-SEARCH-036, REQ-TRANSLATE-044)
+# and app/scripts/ssr-smoke.jsx a `tested-by:`. Only its build outputs and local
+# caches are excluded — all gitignored, so CI never sees them, and the bundles
+# would otherwise re-report every tag from the sources they were built from.
+app/dist/**
+app/dist-viewer/**
+app/.vite/**
+app/scripts/.ssr-smoke.bundle.*
 
 # Local-only caches and session artifacts (all gitignored). CI never sees them,
 # so leaving them scannable makes `next`/`coverage`/`health` report untagged
