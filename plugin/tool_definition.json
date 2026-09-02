@@ -228,7 +228,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_lint",
-      "description": "Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, missing Contract or Acceptance sections. Read-only; exit-neutral by default.",
+      "description": "Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -239,6 +239,10 @@
           "strict": {
             "type": "boolean",
             "description": "Exit non-zero on error-severity findings (warnings remain advisory)."
+          },
+          "decompose": {
+            "type": "boolean",
+            "description": "Scaffold one draft requirement per statement-size finding. Opt-in and never used by the gate, the hook or CI — the only lint mode that writes."
           }
         },
         "required": []

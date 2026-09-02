@@ -166,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-02.1"
+MAP_ENGINE_VERSION = "2026-09-02.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -430,8 +430,9 @@ COMMANDS = {
         "summary": (
             "Readability and structure check on non-draft requirements: long sentences "
             "(>25 words), stacked conditions (3+ and/or joins in one normative line), "
-            "contract clauses with an unnamed 'It' subject, missing Contract or Acceptance "
-            "sections. Read-only; exit-neutral by default."
+            "contract clauses with an unnamed 'It' subject, over-long contract clauses, "
+            "missing Contract or Acceptance sections. Read-only unless --decompose is "
+            "passed; exit-neutral by default."
         ),
         "arg": None,
         "params": [
@@ -440,6 +441,13 @@ COMMANDS = {
                 "flag": "--strict",
                 "type": "bool",
                 "help": "Exit non-zero on error-severity findings (warnings remain advisory).",
+            },
+            {
+                "name": "decompose",
+                "flag": "--decompose",
+                "type": "bool",
+                "help": ("Scaffold one draft requirement per statement-size finding. Opt-in and "
+                         "never used by the gate, the hook or CI \u2014 the only lint mode that writes."),
             },
         ],
     },
@@ -3975,6 +3983,10 @@ LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
 LINT_SENTENCE_WORDS = 25       # a single sentence longer than this is flagged (warn)
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
 LINT_CONTRACT_WORDS = 22       # a Contract bullet over this many words is flagged (warn)
+LINT_STATEMENT_WORDS = 75      # a Contract CLAUSE — continuation lines joined — over this
+                               # many words is reported by `statement-size`. Advisory only:
+                               # REQ-ATOMICITY-049 makes atomicity the normative rule and this
+                               # threshold an explicit heuristic, so a longer clause stays valid.
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
@@ -4044,6 +4056,64 @@ def _sentences(text):  # implements: REQ-LINTCHECKS-025
 def _clip(s, n=60):  # implements: REQ-LINT-014
     """Shorten a snippet for one-line finding output."""
     return s if len(s) <= n else s[:n - 1] + "…"
+
+
+def _clause_words(text):  # implements: REQ-ATOMICITY-049
+    """Word count for a Contract clause, counting each backticked span as one word.
+    A clause carrying a long code sample is short prose, not a long statement. The span
+    collapses to a bare token with no padding spaces: " x " would split trailing punctuation
+    (`code`. -> "x" ".") into a second word and inflate every such clause by one."""
+    return len(re.sub(r"`[^`]*`", "x", text).split())
+
+
+def _contract_clauses(body):  # implements: REQ-ATOMICITY-049
+    """Yield (n, text) per clause of the Contract section, n 1-based.
+
+    A clause is one bullet at ANY indent — a nested sub-bullet is its own clause because
+    it states its own obligation — with its wrapped continuation lines joined back on.
+    This is deliberately not `_lint_prose`, which yields physical LINES: these files are
+    hard-wrapped near 95 columns, so a 90-word clause reaches `_lint_prose` as six ~15-word
+    lines and no per-line ceiling can ever see it. Bold group labels, table rows, block
+    quotes, fenced code and HTML comments are not clauses and are skipped."""
+    out, cur, grab, seen, fenced, in_comment = [], None, False, False, False, False
+
+    def flush():
+        if cur is not None:
+            out.append(cur)
+
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("```"):              # fence first: an in-fence `## ` is code
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        if in_comment:                       # glossary comments are guidance, not clauses
+            if "-->" in s:
+                in_comment = False
+            continue
+        if s.startswith("<!--"):
+            if "-->" not in s:
+                in_comment = True
+            continue
+        if s.startswith("## "):
+            flush(); cur = None
+            grab = (not seen) and _heading_label_is(s, "contract")
+            if grab:
+                seen = True
+            continue
+        if not grab:
+            continue
+        if not s or s.startswith(("|", ">", "#")) or (s.startswith("**") and s.endswith("**")):
+            flush(); cur = None
+            continue
+        if s == "-" or s.startswith("- "):
+            flush()
+            cur = s[1:].strip()
+        elif cur is not None:
+            cur += " " + s
+    flush()
+    return list(enumerate([c for c in out if c], 1))
 
 
 def _count_ac(body):
@@ -4123,6 +4193,20 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
                 "severity": "warn", "check": "statement-too-long",
                 "detail": "{}-word statement across {} sentences (>{}): {}".format(
                     words, len(sents), LINT_CONTRACT_WORDS, _clip(ln))})
+    # statement-size (warn, advisory): a Contract clause well past the length a single
+    # obligation normally needs. Measured per CLAUSE, not per line — see _contract_clauses.
+    # Advisory by contract: exceeding the threshold never makes a clause invalid and never
+    # asserts that it holds two obligations, which the engine cannot observe
+    # (REQ-ATOMICITY-049). The finding carries clause_n/clause_text so `--decompose` can
+    # scaffold from the same clause without re-parsing.
+    for _n, _clause in _contract_clauses(body):
+        _cw = _clause_words(_clause)
+        if _cw > LINT_STATEMENT_WORDS:
+            findings.append({
+                "severity": "warn", "check": "statement-size",
+                "clause_n": _n, "clause_text": _clause,
+                "detail": "clause {} is {} words (>{}) \u2014 re-read it for decomposition: {}".format(
+                    _n, _cw, LINT_STATEMENT_WORDS, _clip(_clause))})
     # ac count (warn): too few = under-specified; too many = over-scoped
     if _has_section(body, "acceptan"):
         ac_n = _count_ac(body)
@@ -4225,7 +4309,124 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
     return findings
 
 
-def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
+DECOMPOSED_TEMPLATE = """---
+id: {new_id}
+status: draft
+layer: {layer}
+owner: {owner}
+depends_on: [{parent}]
+superseded_by:
+---
+
+# Split from {parent} clause {n}
+
+<!-- decomposed-from: {parent}#{n} -->
+
+> Scaffolded by `lint --decompose` from a clause that ran past
+> LINT_STATEMENT_WORDS words. Rewrite this WHY before confirming: say what this
+> capability is and what breaks without it.
+
+## WHAT — Contract (normative)
+Every line in this section is binding.
+- {clause}
+
+## WHAT — Verify intent (open questions for the human)
+- Does this clause state one obligation, or several? The split point was chosen by
+  word count, so this file may hold a clause that was atomic all along.
+
+## HOW — Acceptance (= tests)
+AC-1
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Context (non-binding)
+**Notes**
+- SCAFFOLD, NOT A DECISION. `lint --decompose` copied clause {n} of {parent} here
+  verbatim. The split point was chosen by WORD COUNT, never by obligation — the engine
+  cannot observe how many obligations a clause holds (REQ-ATOMICITY-049). Read the clause
+  and decide for yourself whether it should have been split at all.
+- The clause is still over the threshold here, because only a human can divide it. Confirming
+  this file unedited re-raises the same `statement-size` finding, which is the intended
+  reminder.
+- {parent} was not modified. Deleting this file restores the corpus exactly.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)
+"""
+
+
+def _next_free_number(reqs_dir):  # implements: REQ-DECOMPOSE-050
+    """Highest NNN across the corpus, plus one. Ids stay in AREA-NAME-NNN shape rather
+    than taking a derived suffix such as REQ-AUTH-012-B: the suffix form passes _ID_PAT,
+    but _warn_number_collision reads parts[-1] as the number and would compare "B"."""
+    best = 0
+    try:
+        names = os.listdir(reqs_dir)
+    except OSError:
+        return 1
+    for fn in names:
+        if not fn.endswith(".md") or fn.startswith("_"):
+            continue
+        parts = fn[:-3].split("-")
+        if len(parts) >= 3 and parts[-1].isdigit():
+            best = max(best, int(parts[-1]))
+    return best + 1
+
+
+def _already_decomposed(reqs_dir, parent_id, n):  # implements: REQ-DECOMPOSE-050
+    """True when some requirement already carries the `decomposed-from: <parent>#<n>` marker.
+
+    Re-running must be a no-op, and the allocated file NAME cannot detect that: the id comes
+    from the next free number, so a second run picks a fresh name and `os.path.exists` never
+    fires. Provenance is the only stable key. The marker is an HTML comment rather than a
+    frontmatter field so it stays invisible to `binding_hash`, and `decomposed-from` is not
+    a member role, so TAG_LIST_RE never reads it as a link."""
+    needle = "decomposed-from: {}#{}".format(parent_id, n)
+    try:
+        names = os.listdir(reqs_dir)
+    except OSError:
+        return False
+    for fn in names:
+        if not fn.endswith(".md") or fn.startswith("_"):
+            continue
+        try:
+            with open(os.path.join(reqs_dir, fn), encoding="utf-8") as f:
+                if needle in f.read():
+                    return True
+        except OSError:
+            continue
+    return False
+
+
+def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: REQ-DECOMPOSE-050
+    """Scaffold one draft requirement from an over-threshold Contract clause.
+
+    Creates exactly one file and never touches the parent, so a confirmed contract cannot
+    drift and deleting the new file undoes the whole operation. Returns the created id, or
+    None when this clause was already scaffolded (re-running is a no-op, reported by the
+    caller)."""
+    if _already_decomposed(reqs_dir, parent_id, n):
+        return None
+    parts = parent_id.split("-")
+    stem = "-".join(parts[:-1]) if len(parts) >= 3 and parts[-1].isdigit() else parent_id
+    new_id = "{}-{:03d}".format(stem, _next_free_number(reqs_dir))
+    dest = os.path.join(reqs_dir, new_id + ".md")
+    if os.path.exists(dest):
+        return None
+    meta = parent["meta"]
+    text = DECOMPOSED_TEMPLATE.format(
+        new_id=new_id, parent=parent_id, n=n, clause=clause,
+        layer=meta.get("layer", "feature") or "feature",
+        owner=meta.get("owner", "") or "")
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write(text)
+    return new_id
+
+
+def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: REQ-LINT-014  # implements: REQ-DECOMPOSE-050
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error), long-sentence (warn),
@@ -4234,7 +4435,12 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
     --strict it exits non-zero on any error-severity finding AND promotes structural
     checks (ac-count-high) to error severity.
     Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
-    active exemptions are printed after the requirement header."""
+    active exemptions are printed after the requirement header.
+    The default run writes nothing. With `decompose` (the opt-in `--decompose` flag) each
+    `statement-size` finding also scaffolds one draft requirement from its clause. The gate,
+    the pre-commit hook and CI never pass it: .githooks/pre-commit runs gate -> lint --strict
+    -> map --check, so a file written during the lint step would fail the map --check step of
+    the same hook run (REQ-DECOMPOSE-050)."""
     # Checks promoted from warn→error in --strict mode (structural, not style).
     STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
@@ -4245,6 +4451,7 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
             if _dep in fanin:
                 fanin[_dep] += 1
     errors = warns = 0
+    created = []
     for rid, r in targets:
         fs = lint_requirement(rid, r, (members or {}).get(rid), fanin.get(rid))
         exempt = set(_as_list(r["meta"].get("lint_exempt")))
@@ -4262,8 +4469,23 @@ def cmd_lint(reqs, strict=False, members=None):  # implements: REQ-LINT-014
             else:
                 warns += 1; mark = "warn "
             print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
+        if decompose and reqs_dir:
+            for f in fs:
+                if f["check"] != "statement-size":
+                    continue
+                made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
+                if made:
+                    created.append(made)
+                    print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
+                        made, f["clause_n"]))
+                else:
+                    print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
     print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
         len(targets), errors, warns))
+    if created:
+        print("{} draft(s) scaffolded: {}".format(len(created), ", ".join(created)))
+        print("note: each split point was chosen by word count, not by obligation \u2014 "
+              "read each draft before confirming it.")
     if errors == 0 and warns == 0:
         print("All clean — every linted requirement is well-formed and readable.")
     if strict and errors:
@@ -6539,6 +6761,9 @@ def main():
     ap.add_argument("--strict", action="store_true",
                     help="lint: exit non-zero on errors. check: promote drift and "
                          "test-link integrity from warn to error.")
+    ap.add_argument("--decompose", action="store_true",
+                    help="lint: scaffold one draft requirement per statement-size finding "
+                         "(opt-in; the only lint mode that writes files)")
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--top", type=int, default=None,
@@ -6619,7 +6844,7 @@ def main():
     if a.cmd == "next":
         return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
     if a.cmd == "lint":
-        return cmd_lint(reqs, a.strict, members)
+        return cmd_lint(reqs, a.strict, members, decompose=a.decompose, reqs_dir=reqs_dir)
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2

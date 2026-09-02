@@ -6648,6 +6648,162 @@ class ClosedPipe(unittest.TestCase):  # tested-by: REQ-PIPE-046
         self.assertEqual(R._run_cli(lambda: None), 0)
 
 
+class StatementSize(unittest.TestCase):  # tested-by: REQ-ATOMICITY-049
+    """The `statement-size` heuristic: measured per CLAUSE, advisory, and deliberately
+    blind to atomicity. The blindness is asserted, not just documented — see AC-6."""
+    CONTRACT = "## WHAT — Contract (normative)"
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def _body(self, contract):
+        return "# T\n\n{}\n{}\n{}\n- ok.\n- ok.\n- ok.\n".format(
+            self.CONTRACT, contract, self.ACCEPT)
+
+    def _findings(self, contract, exempt=None):
+        meta = {"status": "confirmed"}
+        if exempt:
+            meta["lint_exempt"] = exempt
+        r = {"meta": meta, "body": self._body(contract)}
+        return R.lint_requirement("REQ-X-001", r)
+
+    @staticmethod
+    def _words(n, word="alpha"):
+        return " ".join([word] * n)
+
+    def test_clause_over_the_threshold_is_reported_once(self):  # verifies: REQ-ATOMICITY-049#AC-1
+        fs = self._findings("- {}.\n".format(self._words(80)))
+        hits = [f for f in fs if f["check"] == "statement-size"]
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0]["severity"], "warn")          # advisory: never an error
+        self.assertEqual(hits[0]["clause_n"], 1)
+        self.assertIn("80 words", hits[0]["detail"])
+
+    def test_clause_under_the_threshold_is_silent(self):  # verifies: REQ-ATOMICITY-049#AC-2
+        fs = self._findings("- {}.\n".format(self._words(70)))
+        self.assertNotIn("statement-size", [f["check"] for f in fs])
+
+    def test_a_backticked_span_counts_as_one_word(self):  # verifies: REQ-ATOMICITY-049#AC-3
+        # 20 plain words + one 60-word code span = 21 counted words, well under the ceiling.
+        clause = "- {} `{}`.\n".format(self._words(20), self._words(60, "code"))
+        self.assertEqual(len(clause.split()), 81)              # raw split would trip the ceiling
+        self.assertEqual(R._clause_words(clause[2:]), 21)      # collapsed count does not
+        self.assertNotIn("statement-size", [f["check"] for f in self._findings(clause)])
+
+    def test_a_nested_sub_bullet_is_its_own_clause(self):  # verifies: REQ-ATOMICITY-049#AC-4
+        contract = "- {}.\n  - {}.\n".format(self._words(40), self._words(80))
+        hits = [f for f in self._findings(contract) if f["check"] == "statement-size"]
+        self.assertEqual(len(hits), 1)                         # the parent is not flagged
+        self.assertEqual(hits[0]["clause_n"], 2)               # the sub-bullet is
+
+    def test_lint_exempt_silences_the_check(self):  # verifies: REQ-ATOMICITY-049#AC-5
+        contract = "- {}.\n".format(self._words(80))
+        self.assertIn("statement-size", [f["check"] for f in self._findings(contract)])
+        fs = self._findings(contract, exempt=["statement-size"])   # frontmatter yields a real list
+        self.assertNotIn("statement-size", [f["check"] for f in fs])
+
+    def test_a_short_clause_with_two_obligations_passes(self):  # verifies: REQ-ATOMICITY-049#AC-6
+        # The epistemic limit, asserted as behaviour: this clause is NOT atomic, and the
+        # check passes it anyway. Passing proves nothing about atomicity — a future change
+        # that made this fail would be claiming a determination the engine cannot make.
+        contract = ("- The service issues a token on valid credentials, and the service "
+                    "revokes it on logout.\n")
+        self.assertLess(R._clause_words(contract[2:]), R.LINT_STATEMENT_WORDS)
+        self.assertNotIn("statement-size", [f["check"] for f in self._findings(contract)])
+
+    def test_a_glossary_comment_is_not_a_clause(self):
+        # _lint_prose does not skip HTML comments; _contract_clauses must, or the template's
+        # own glossary block would be measured as a clause.
+        contract = "<!-- {} -->\n- short.\n".format(self._words(90))
+        self.assertEqual([n for n, _ in R._contract_clauses(self._body(contract))], [1])
+        self.assertNotIn("statement-size", [f["check"] for f in self._findings(contract)])
+
+    def test_wrapped_clause_is_joined_before_counting(self):
+        # The reason this check cannot reuse _lint_prose: these files wrap near 95 columns,
+        # so an 80-word clause reaches the per-line checks as six ~13-word lines.
+        words = self._words(80).split()
+        wrapped = "- " + "\n  ".join(" ".join(words[i:i + 13]) for i in range(0, 80, 13)) + ".\n"
+        self.assertTrue(max(len(l.split()) for l in wrapped.splitlines()) < R.LINT_CONTRACT_WORDS)
+        hits = [f for f in self._findings(wrapped) if f["check"] == "statement-size"]
+        self.assertEqual(len(hits), 1)
+
+
+class Decompose(unittest.TestCase):  # tested-by: REQ-DECOMPOSE-050
+    """`lint --decompose`: opt-in, writes one draft per statement-size finding, never
+    touches the parent, and is a no-op on re-run."""
+    CONTRACT = "## WHAT — Contract (normative)"
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.reqs_dir = os.path.join(self.tmp, "requirements")
+        os.makedirs(self.reqs_dir)
+        self.long = " ".join(["alpha"] * 80)
+        self.body = "# T\n\n{}\n- {}.\n{}\n- ok.\n- ok.\n- ok.\n".format(
+            self.CONTRACT, self.long, self.ACCEPT)
+        self.parent = os.path.join(self.reqs_dir, "REQ-AUTH-012.md")
+        _write(self.parent, "---\nid: REQ-AUTH-012\nstatus: confirmed\n---\n" + self.body)
+        self.reqs = {"REQ-AUTH-012": {
+            "meta": {"status": "confirmed", "layer": "feature", "owner": "Ana"},
+            "body": self.body}}
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _lint(self, **kw):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_lint(self.reqs, **kw)
+        return code, buf.getvalue()
+
+    def _created(self):
+        return sorted(f for f in os.listdir(self.reqs_dir) if f != "REQ-AUTH-012.md")
+
+    def test_default_run_reports_but_writes_nothing(self):  # verifies: REQ-DECOMPOSE-050#AC-1
+        code, out = self._lint()
+        self.assertIn("statement-size", out)
+        self.assertEqual(self._created(), [])          # the hook and CI run this path
+        self.assertEqual(code, 0)
+
+    def test_decompose_creates_one_draft_depending_on_the_parent(self):  # verifies: REQ-DECOMPOSE-050#AC-2
+        self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        made = self._created()
+        self.assertEqual(len(made), 1)
+        text = open(os.path.join(self.reqs_dir, made[0]), encoding="utf-8").read()
+        self.assertIn("status: draft", text)
+        self.assertIn("depends_on: [REQ-AUTH-012]", text)
+        self.assertIn(self.long, text)                 # the clause is carried over verbatim
+
+    def test_the_parent_is_never_modified(self):  # verifies: REQ-DECOMPOSE-050#AC-3
+        before = open(self.parent, "rb").read()
+        self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        self.assertEqual(open(self.parent, "rb").read(), before)
+
+    def test_the_draft_records_that_the_split_was_by_word_count(self):  # verifies: REQ-DECOMPOSE-050#AC-4
+        _, out = self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        text = open(os.path.join(self.reqs_dir, self._created()[0]), encoding="utf-8").read()
+        self.assertIn("WORD COUNT, never by obligation", text)
+        self.assertIn("word count, not by obligation", out)   # and on stdout
+
+    def test_the_id_takes_the_next_free_corpus_number(self):  # verifies: REQ-DECOMPOSE-050#AC-5
+        _write(os.path.join(self.reqs_dir, "REQ-ZZ-049.md"), "---\nid: REQ-ZZ-049\n---\n")
+        self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        self.assertIn("REQ-AUTH-050.md", self._created())
+
+    def test_rerunning_skips_the_same_clause(self):  # verifies: REQ-DECOMPOSE-050#AC-6
+        self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        made = self._created()
+        stamp = open(os.path.join(self.reqs_dir, made[0]), "rb").read()
+        _, out = self._lint(decompose=True, reqs_dir=self.reqs_dir)
+        self.assertIn("skipped", out)
+        self.assertEqual(self._created(), made)        # no second file under a fresh number
+        self.assertEqual(open(os.path.join(self.reqs_dir, made[0]), "rb").read(), stamp)
+
+    def test_decompose_without_reqs_dir_writes_nothing(self):
+        code, out = self._lint(decompose=True)         # defensive: no directory, no write
+        self.assertIn("statement-size", out)
+        self.assertEqual(self._created(), [])
+        self.assertEqual(code, 0)
+
+
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.

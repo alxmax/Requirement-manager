@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v2.31.0` — 2026-09-02
+
+**A word-count heuristic for over-long Contract clauses, plus an opt-in scaffold that splits one out — with the atomicity rule they serve kept explicitly separate from the number that approximates it.**
+
+- **New `statement-size` lint check (warn-only).** A Contract clause over `LINT_STATEMENT_WORDS` (75) words is reported for re-reading. `REQ-ATOMICITY-049` states the normative rule — a clause describes a single independently verifiable obligation — and marks the 75 words an explicit *heuristic*: exceeding it never makes a clause invalid, never changes the exit code, and is never a determination of atomicity, which the engine cannot observe. AC-6 asserts that blindness as behaviour rather than leaving it as prose: a 20-word clause holding two obligations passes the check, and that is the correct result.
+- **Measured per clause, not per line.** `_lint_prose` yields physical LINES, and these files are hard-wrapped near 95 columns — the longest line it produces for `REQ-CHECK-006` is 15 words. `long-sentence` (25) and `statement-too-long` (22) therefore report **0** across the corpus, not because the prose is short but because no clause is ever seen whole. New `_contract_clauses` joins continuation lines, treats a nested sub-bullet as its own clause, and skips glossary comments; `_clause_words` counts a backticked span as one token. The two per-line checks are deliberately left unchanged — widening their unit would flip the corpus from 0 warnings to many, on confirmed requirements, which is a separate decision. Pre-ship dry run: **0 of 599 clauses** over 75 words (max 62), so the check ships as a line already held rather than as a defect hunt.
+- **New opt-in `lint --decompose`.** Scaffolds one draft requirement per `statement-size` finding, seeded with the clause verbatim and depending on its parent. `REQ-DECOMPOSE-050`. The default `lint` run still writes nothing, for a mechanical reason: `.githooks/pre-commit` runs `gate` -> `lint --strict` -> `map --check`, so a file written during the lint step would fail the `map --check` step of the same hook run, and in CI the checkout is ephemeral. The parent is never modified, so no confirmed contract drifts and deleting the created file undoes the whole operation. Re-running is a no-op, keyed off a `<!-- decomposed-from: <parent>#<n> -->` marker rather than the target filename — the id comes from the next free corpus number, so a second run would otherwise pick a fresh name and create a duplicate.
+- `MAP_ENGINE_VERSION` -> `2026-09-02.2`.
+
 ## plugin `v2.30.0` — 2026-09-02
 
 **A nine-senator Senate audit on "make requirements simpler, more objective, clearer" split into two decisions — one shipped, one rejected.** `runs/senate/2026-09-02_191837-reqmap-schema-simplify-context-merge-and-traceability.json`, two rounds, verdict MODIFY (8 blocking / 1).
