@@ -1,5 +1,9 @@
 # Changelog
 
+## plugin `v3.0.1` — 2026-09-03
+
+**The architecture poster describes the `v3.0.0` corpus again.** `docs/full_architecture.html` still said "36 specs", `check@v1`, a `layer:` enum without `aggregate`, `satisfies: [ NEED-... ]` and `WHY / WHAT / WHERE / HOW`. Every one of those changed in a requirement the poster was not tagged with, so the deterministic drift check stayed silent and only the advisory doc-sync pass caught them. Regenerated from the maintained `make_full_architecture.py`; its `generated-from:` lineage now also names `ARCH-DESCRIPTION-057`, `ARCH-LEVEL-051` and `ARCH-TRACE-020`, so the next rename of a section, level or layer flags the poster without anyone reading it. Engine unchanged.
+
 ## plugin `v3.0.0` — 2026-09-03
 
 **How a requirement is written changed shape.** Three specification levels, one `## Description` section in place of a `> WHY:` quote plus `## WHAT — Contract`, `## Cases`/`CASE-N` in place of `## HOW — Acceptance`/`AC-N`, many requirements per file, and the first advisory that points at covering the code with *fewer* requirements rather than more.
@@ -8,7 +12,7 @@
 
 **`check` survives the major it was scheduled to die in.** The deprecated alias for `gate` arrived in `v2.0.0` (2026-06-15) saying "removed in the next major version", in five places. `v3.0.0` is that major and the alias is still here: nothing else in this release breaks a caller, and removing a command consumer hooks may still invoke would have been the only thing that did. All five references now name **`v4.0.0`** instead — "the next major" was a moving target by construction, and a promise that slips once slips silently.
 
-This release folds what was developed as `v2.31.0`–`v2.34.0`; none of those were tagged.
+This release folds what was developed as `v2.32.0`–`v2.34.0`; none of those three were tagged. `v2.31.0` was released and keeps its own entry below.
 
 ### Covering the code with fewer requirements
 
@@ -53,7 +57,7 @@ This release folds what was developed as `v2.31.0`–`v2.34.0`; none of those we
 - `reqmap.py new`'s scaffold now offers `level:` and `satisfies:` as commented optional fields, so a consumer can discover the levels without reading the source.
 - `MAP_ENGINE_VERSION` → `2026-09-03`. 668 tests.
 
-### A size heuristic for over-long clauses
+## plugin `v2.31.0` — 2026-09-02
 
 **A word-count heuristic for over-long Contract clauses, plus an opt-in scaffold that splits one out — with the atomicity rule they serve kept explicitly separate from the number that approximates it.**
 

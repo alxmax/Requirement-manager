@@ -5067,6 +5067,10 @@
       "satisfied_by": [],
       "members": [
         {
+          "role": "generated-from",
+          "loc": "docs/full_architecture.html:4"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1750"
         },
@@ -10093,6 +10097,10 @@
         "REQ-LEVEL-443"
       ],
       "members": [
+        {
+          "role": "generated-from",
+          "loc": "docs/full_architecture.html:4"
+        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:148"
@@ -26185,6 +26193,10 @@
         "REQ-TRACE-759"
       ],
       "members": [
+        {
+          "role": "generated-from",
+          "loc": "docs/full_architecture.html:4"
+        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:2130"

@@ -1,5 +1,5 @@
 ---
-generated: 2026-09-03 01:35
+generated: 2026-09-03 01:53
 nodes: 691
 edges: 97
 ---
@@ -1165,6 +1165,8 @@ graph LR
   REQ_DECOMPOSE_338["Lint --decompose skips a clause whose target file<br><small>REQ-DECOMPOSE-338</small>"]
   style REQ_DECOMPOSE_338 fill:#eee,stroke:#bbb,color:#888
   ARCH_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>ARCH-DESCRIPTION-057</small>"]
+  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
+  ARCH_DESCRIPTION_057 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1750_2030["plugin/scripts/reqmap.py:1750-2030"]
   ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1750_2030
   f_plugin_scripts_test_reqmap_py_7102["plugin/scripts/test_reqmap.py:7102"]
@@ -1437,6 +1439,8 @@ graph LR
   REQ_INIT_435["A second run never deletes a requirement someone<br><small>REQ-INIT-435</small>"]
   style REQ_INIT_435 fill:#eee,stroke:#bbb,color:#888
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
+  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
+  ARCH_LEVEL_051 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_148_3545["plugin/scripts/reqmap.py:148-3545"]
   ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_148_3545
   f_plugin_scripts_test_reqmap_py_6815["plugin/scripts/test_reqmap.py:6815"]
@@ -2308,6 +2312,8 @@ graph LR
   REQ_TESTLINK_749["The check stays silent on a well-formed corpus<br><small>REQ-TESTLINK-749</small>"]
   style REQ_TESTLINK_749 fill:#eee,stroke:#bbb,color:#888
   ARCH_TRACE_020["Upstream traceability<br><small>ARCH-TRACE-020</small>"]
+  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
+  ARCH_TRACE_020 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_2130_4778["plugin/scripts/reqmap.py:2130-4778"]
   ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2130_4778
   f_plugin_scripts_test_reqmap_py_3891_4333["plugin/scripts/test_reqmap.py:3891-4333"]
