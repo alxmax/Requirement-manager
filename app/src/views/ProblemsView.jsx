@@ -8,10 +8,10 @@ import { useI18n } from "../lib/i18n.jsx";
 /* derive a flat problem list from the registry (exported so App can count it) */
 export function computeProblems() {
   const SEV = {
-    unimplemented: { sev:"ERROR",  msg:"No implementing member — orphan. The gate blocks the build.", fix:"Add an `implements:` tag, or author the requirement." },
-    drift:         { sev:"WARN",   msg:"Contract drift — lock hash no longer matches the code.", fix:"Re-check the named members, then run `req check --update-lock`." },
-    untested:      { sev:"WARN",   msg:"Confirmed, but no `tested-by:` member is linked.", fix:"Add a test tag, or set `test_exempt:` to silence." },
-    unreviewed:    { sev:"REVIEW", msg:"Drafted from code by extract — intent not yet validated.", fix:"Review, then `req promote <ID>`." },
+    unimplemented:      { sev:"ERROR",  msg:"No implementing member — orphan. The gate blocks the build.", fix:"Add an `implements:` tag, or author the requirement." },
+    untested:           { sev:"WARN",   msg:"Confirmed, but no `tested-by:` member is linked.", fix:"Add a test tag, or set `test_exempt:` to silence." },
+    "unverified-intent":{ sev:"WARN",   msg:"Has open `## WHAT — Verify intent` question(s).", fix:"Run `reqmap.py findings`, resolve each one, then fold the answer into the Contract or delete the bullet." },
+    unreviewed:         { sev:"REVIEW", msg:"Drafted from code by extract — intent not yet validated.", fix:"Review, then `req promote <ID>`." },
   };
   const out = [];
   REQUIREMENTS.forEach(r => (r.risks||[]).forEach(rk => {

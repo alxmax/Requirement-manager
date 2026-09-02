@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v2.29.3` — 2026-09-02
+
+**A full-repo code review turned up ten latent bugs and inefficiencies, none yet reported by a consumer.** All ten are fixed here — three correctness bugs in the gate/viewer, two on-disk drift/staleness false positives, two redundant tree walks, and two small maintainability cleanups.
+
+- **`gate`/`sync` exempted `layer: need` from the implements-tag check by hand instead of via the shared `_impl_exempt` predicate**, so a confirmed `layer: aggregate` requirement (exempt everywhere else — `confirm`, `health`, the risk map) still ERRORed on the very next `gate`. All four sites now agree. `REQ-TRACE-020`.
+- **`confirm` and `new --from-todo --mark-done` silently converted CRLF requirement/TODO files to LF** on any POSIX host (Linux/macOS/CI): both read with universal-newline translation and wrote back with `os.linesep`, so a one-line frontmatter or checkbox edit turned into a whole-file line-ending diff. Both now read and write with `newline=""`, preserving whatever line ending was already on disk. `REQ-PROMOTE-011`, `REQ-PROMOTE-TODO-001`.
+- **The viewer's Problems tab silently dropped every `unverified-intent` signal.** Its local severity map was written against an earlier, since-renamed set of risk signals — it still had a `drift` entry the engine never emits, and was missing `unverified-intent`, a real signal the CLI (`next`, `show`) surfaces. `REQ-VIEWER-007`.
+- **The sidebar's orphan count disagreed with the Problems tab** for a `layer: aggregate` requirement: the shared `coverageOf()` helper exempts both `need` and `aggregate`, but the Rail's own inline orphan calculation only excluded `need`. `REQ-VIEWER-007`.
+- **A routine `MAP_ENGINE_VERSION` bump could flag a previously-committed site page as stale.** `site`'s STATS region embeds the live engine version, and `map --check`'s freshness diff compared it byte-for-byte with no exclusion — unlike the `repo`/`engine_version` fields already stripped from `_map.md`/`_map.json` for exactly this reason. `map --check` now ignores the STATS region's `engine` cell too. `REQ-SITE-026`.
+- **`show <ID>` walked the whole tree twice** — once via `scan_members`, once more via `scan_test_levels` for the same invocation — even though `gate`/`sync` were already consolidated onto one walk (`scan_all`) for this exact cost. `show` now takes the same one-walk path.
+- **A full `sync`/`init` run hashed every dedicated member file twice** to compute `_memberlock.json`'s baseline: once inside `member_drift`, once again to save it. `member_drift` now accepts a precomputed hash map so the full-scan case (the common one) pays for the hash pass once. `REQ-MEMBERDRIFT-027`.
+- **`AC_VERIFY_RE` hand-wrote the requirement-id grammar** instead of reusing the already-named `_ID_PAT` constant every other tag pattern in the file shares.
+- **`MapView`'s `Canvas` and `RoadmapView` each carried their own copy of the same grab-to-pan mouse-handler logic** (drag threshold, document listeners, click-suppression). Extracted to a shared `useDragPan` hook so a future fix to one doesn't silently miss the other. `REQ-VIEWER-007`.
+- `MAP_ENGINE_VERSION` → `2026-09-02`; vendored viewer rebuilt.
+
 ## plugin `v2.29.2` — 2026-08-31
 
 **A consumer ran two subagents and the gate reported 1,829 members and 43 errors in a repo that has 493 members and none.** Every error came from a worktree copy of their own code.
