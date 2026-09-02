@@ -1,0 +1,640 @@
+---
+id: ARCH-MAP-007
+status: confirmed
+level: architecture
+layer: feature
+owner: Alex
+depends_on: [ARCH-PARSE-001, ARCH-SCAN-002]
+satisfies: [SYS-VISUAL-106]
+superseded_by:
+milestone: v1.04
+---
+
+# Requirement graph (_map.json)
+
+> A list of requirement files tells you what exists but not how it all connects. This builds
+> the graph: one node per requirement, one edge per dependency, each node carrying what the
+> requirement says, what code backs it and what is at risk. Everything that draws or
+> publishes a picture reads this file; nothing draws from the corpus directly.
+
+## WHAT — Contract (normative)
+Every line in this section is binding.
+<!-- Words used below, in plain terms:
+     a node          one requirement, as listed in the graph.
+     an edge         one `depends_on` link between two requirements.
+     an area         the group a requirement belongs to: its `area:` field, or the
+                     first part of its id when that field is absent.
+     a risk signal   a warning the engine derives about a requirement, such as
+                     "confirmed but no code links to it". -->
+
+**What it generates**
+- `map` generates `_map.json` under `requirements/`, and `export` writes the same file alone.
+- `_map.json` is a derived view. It is regenerated, never edited.
+
+**What `_map.json` carries**
+- `_map.json` carries one node per requirement and one edge per `depends_on`.
+- Each node carries its requirement's id, layer, status, area, title, intent,
+  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
+  `used_by`, and risk signals.
+- A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
+  written as a labelled `AC-N` block or as a bullet.
+- `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
+  repo directory name, else null.
+- `repo` identifies the project the map describes, for display in the viewer header.
+- `repo` is derived from the git remote, so it differs across forks and clones. It is
+  therefore excluded from the `map --check` freshness diff.
+- Resolving `repo` never raises and never blocks map generation, because git may be
+  absent or the tree may not be a checkout.
+- `engine_version` is likewise excluded from the `map --check` freshness diff. Updating the
+  vendored engine alone never makes a committed map stale; the next `sync` refreshes it.
+- `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
+  `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
+  requirements.
+
+**How a contract is read**
+- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
+  multi-line clause is never truncated to its first physical line.
+- A clause-group label groups the clauses below it: a bold-only line written flush left.
+  A label is a heading, not a clause, and never folds into the clause above.
+- Position decides a label, not the bold markers alone. An indented wrapped line folds
+  even when it opens and closes on bold spans, so a two-part clause keeps both halves.
+
+**Freshness**
+- `map --check` fails when a committed generated file differs from a fresh render.
+- The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
+  cannot be surprised by that failure in CI.
+- The gate never regenerates the map. It only reports.
+
+**Safety**
+- All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
+  hostile id, title or body by construction. There is no markup context to break out of.
+
+## WHAT — Verify intent (open questions for the human)
+- None — authored from known intent, not reconstructed from code.
+
+## HOW — Acceptance (= tests)
+AC-1
+  Given  the corpus
+  When   `map` runs
+  Then   the generated graph contains one node per requirement and one edge per `depends_on`
+
+AC-2
+  Given  the generated `_map.json`
+  When   it is parsed
+  Then   it yields `{engine_version, repo, nodes, edges, todos}` with one node per requirement carrying
+         its members and risk signals. The `repo` field is the project's `owner/repo` (or
+         directory name, or null) and is omitted from the freshness comparison.
+
+AC-3
+  Given  a requirement id/title containing a quote, `</script>`, or a lone surrogate
+  When   `map` runs
+  Then   it round-trips through `_map.json` as data (no injection), a lone surrogate is
+         written as U+FFFD rather than failing the write, and a node with no members
+         reports an empty member list
+
+## Context (non-binding)
+**Notes**
+- `export` is a thin alias that writes only `_map.json` (or to stdout / `--out PATH`) for
+  ad-hoc piping; `map` writes `_map.json` plus the diagrams ([[ARCH-MAPDIAGRAMS-055]]) and,
+  via [[ARCH-VIEWER-007]], `_map.html` when the viewer template is present.
+- `_map.json` is the committed source of the map's data; the diagrams in `_map.md` and the
+  inlined viewer are derived from it and regenerated by `map`.
+- `map` writes `_map.json` even when the corpus carries a character that has no UTF-8
+  encoding, replacing that character with U+FFFD.
+- Split out of this requirement on 2026-09-02: the four Mermaid diagrams, which are a
+  rendering of this graph rather than a property of it ([[ARCH-MAPDIAGRAMS-055]]). The HTML
+  viewer ([[ARCH-VIEWER-007]]) and the Pages publish/gate ([[ARCH-PAGES-021]]) were already
+  separate and consume `_map.json` and `_map.html`.
+
+**Example**
+- Ana pipes `_map.json` into a spreadsheet to list every confirmed requirement with no
+  members. She never opens a diagram; the graph is the data, and the picture is optional.
+
+**Current implementation**
+- `cmd_map`, `cmd_export`, `_assemble_map_data`, `_build_map_data`, `render_json`,
+  `_build_json_text`, `_repo_name`, `_utf8_safe`, `_map_check`, `_stale_artifacts` and the
+  body readers (`_title`, `_first_quote`, `_section`, `_bullets`, `_acc_items`) in `reqmap.py`.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-476
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Map generates _map.json under requirements/, and export writes
+
+> `map` generates `_map.json` under `requirements/`, and `export` writes the same file
+> alone.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-477
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# _map.json is a derived view. It is regenerated
+
+> `_map.json` is a derived view. It is regenerated, never edited.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-478
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# _map.json carries one node per requirement and one
+
+> `_map.json` carries one node per requirement and one edge per `depends_on`.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-479
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Each node carries its requirement's id, layer, status
+
+> Each node carries its requirement's id, layer, status, area, title, intent,
+> Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
+> `used_by`, and risk signals.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-480
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# A node's acc list carries one entry per
+
+> A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
+> written as a labelled `AC-N` block or as a bullet.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-481
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# _map.json carries a top-level repo field: a best-effort
+
+> `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo
+> directory name, else null.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-482
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Repo identifies the project the map describes, for
+
+> `repo` identifies the project the map describes, for display in the viewer header.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-483
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Repo is derived from the git remote, so
+
+> `repo` is derived from the git remote, so it differs across forks and clones. It is
+> therefore excluded from the `map --check` freshness diff.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-484
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Resolving repo never raises and never blocks map
+
+> Resolving `repo` never raises and never blocks map generation, because git may be absent
+> or the tree may not be a checkout.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-485
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Engine_version is likewise excluded from the map --check
+
+> `engine_version` is likewise excluded from the `map --check` freshness diff. Updating
+> the vendored engine alone never makes a committed map stale; the next `sync` refreshes
+> it.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-486
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# _map.json carries a top-level todos array, derived from
+
+> `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
+> `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
+> requirements.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-487
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Reading a requirement's clauses folds a wrapped line
+
+> Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
+> multi-line clause is never truncated to its first physical line.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-488
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# A clause-group label groups the clauses below it
+
+> A clause-group label groups the clauses below it: a bold-only line written flush left. A
+> label is a heading, not a clause, and never folds into the clause above.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-489
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Position decides a label, not the bold markers
+
+> Position decides a label, not the bold markers alone. An indented wrapped line folds
+> even when it opens and closes on bold spans, so a two-part clause keeps both halves.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-490
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# Map --check fails when a committed generated file
+
+> `map --check` fails when a committed generated file differs from a fresh render.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-491
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# The gate reports the same staleness as a
+
+> The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
+> cannot be surprised by that failure in CI.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-492
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# The gate never regenerates the map. It only
+
+> The gate never regenerates the map. It only reports.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-MAP-493
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+superseded_by:
+---
+
+# All requirement-derived text is JSON-encoded in _map.json, which
+
+> All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
+> hostile id, title or body by construction. There is no markup context to break out of.
+
+Scenario: TODO — state the observable that proves this
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Members in code (auto)

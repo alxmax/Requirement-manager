@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* Bridge between the reqmap engine and the app.
  *
  * The engine's `export` command writes `requirements/_map.json` in a
@@ -20,6 +20,24 @@ export function adaptNode(n) {
     area: n.area || (id.includes("-") ? id.split("-")[0] : id),
     title: n.title || id,
     layer: n.layer || "feature",
+    // Specification LEVEL — the V-model rung this requirement sits on
+    // ("system" | "architecture" | "code"). It is what the module explorer
+    // builds its outline from. The baked fallback dataset (data.js) predates
+    // the field entirely, so it defaults to "architecture": the middle rung,
+    // where a flat pre-level corpus honestly belongs — defaulting to "code"
+    // would hide every fallback row behind a collapsed parent, and to "system"
+    // would promote 15 feature requirements to top-level systems.
+    level: n.level || "architecture",
+    // Upstream/downstream trace edges. `satisfies` is the parent list (in the
+    // current corpus always 0 or 1 entry — a strict tree), `satisfiedBy` the
+    // children. Both are carried per node, so the tree needs no separate
+    // edge list plumbed through setRegistry().
+    satisfies: Array.isArray(n.satisfies) ? n.satisfies : [],
+    satisfiedBy: Array.isArray(n.satisfied_by) ? n.satisfied_by : [],
+    // Open "verify intent" questions, verbatim. Every bullet the engine emits
+    // here is a candidate; the placeholder filter lives in lib/tree.js
+    // (openQuestions) so the viewer and `collect_findings` agree on what counts.
+    verify: Array.isArray(n.verify) ? n.verify : [],
     status: n.status || "draft",
     intent: n.intent || "",
     contract: Array.isArray(n.contract) ? n.contract : [],

@@ -6,7 +6,7 @@ No untestable-contract or why-restates-title findings — contracts are precise 
 
 ---
 
-## REQ-PROMOTE-011 — confirm
+## ARCH-PROMOTE-011 — confirm
 
 **acceptance-doesnt-cover-contract** (2 gaps) — 5 contract clauses, 4 ACs. AC-1–AC-4 cover: status flip, refuses-without-member, idempotency, and comment preservation. Clause 4 (warn when no `tested-by:`) and Clause 5 (unknown id → exit non-zero) have no acceptance criterion.
 
@@ -33,7 +33,7 @@ AC-6
 
 ---
 
-## REQ-SHOW-015 — Single-requirement dossier
+## ARCH-SHOW-015 — Single-requirement dossier
 
 **acceptance-doesnt-cover-contract** (2 gaps) — 11 contract clauses, 6 ACs.
 
@@ -61,7 +61,7 @@ AC-8
 
 ---
 
-## REQ-HEALTH-017 — Corpus health snapshot
+## ARCH-HEALTH-017 — Corpus health snapshot
 
 **acceptance-doesnt-cover-contract** (1 gap) — 11 contract clauses, 7 ACs. Clause 5 states the test axis is satisfied by "a `tested-by` member **or** a `test_exempt` reason." No AC exercises the `test_exempt` path: AC-1–AC-7 cover all-green, all-draft, JSON output, no-implements orphan, empty corpus, satisfied need, and unsatisfied need.
 
@@ -79,7 +79,7 @@ AC-8
 
 ---
 
-## REQ-PROSE-024 — Prose capability classification & drafting
+## ARCH-PROSE-024 — Prose capability classification & drafting
 
 **acceptance-doesnt-cover-contract** (1 gap) — 8 contract clauses, 4 ACs. Clause 7 states a prose draft "shall be scaffolded from the file's title … plus its `##` section headings, recorded as an authoring hint." AC-1 verifies a draft is written; AC-2 verifies sync-only files are skipped; AC-3 verifies tagged files are skipped; AC-4 verifies the scanner picks up `generated-from:` tags. None verifies the draft's content uses the source title or section headings.
 

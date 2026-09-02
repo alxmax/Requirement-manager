@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* RoadmapView — Gantt-style chart: semver milestones on X, swim lanes on Y.
    Requirements with `milestone:` field + TODO.md items via TODOS. */
 import { useState } from "react";
@@ -71,7 +71,11 @@ export function RoadmapView({ openSpec }) {
     milestones.find(ms => REQUIREMENTS.some(r => r.milestone === ms && r.status === "in-progress")) ||
     [...milestones].reverse().find(ms => REQUIREMENTS.some(r => r.milestone === ms && r.status === "confirmed"));
 
-  const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated");
+  // Unscheduled is a planning bucket, so it holds only what is planned AT the
+  // planning levels. A `level: code` requirement is a decomposed clause of an
+  // architecture requirement and inherits that parent's milestone; listing all
+  // 618 of them here produced a wall of chips that said nothing about the plan.
+  const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated" && r.level !== "code");
 
   if (!milestones.length && !unscheduled.length) {
     return (

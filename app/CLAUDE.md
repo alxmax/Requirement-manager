@@ -23,7 +23,7 @@ update the vendored viewer. Only `build:viewer` does.
   `vite.viewer.config.js`) — an external asset reference makes `_map.html`
   unopenable by double-click.
 - **`src/lib/search.js` is a faithful port of the engine's TF-IDF/cosine search**
-  (`REQ-SEARCH-036`), so CLI and viewer rank identically. Both runtimes are pinned
+  (`ARCH-SEARCH-036`), so CLI and viewer rank identically. Both runtimes are pinned
   to one model by a shared golden fixture asserted in the Python `Search` tests and
   in the SSR smoke — change one side and you must change both.
 

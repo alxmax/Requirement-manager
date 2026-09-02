@@ -1,5 +1,5 @@
-// tested-by: REQ-VIEWER-007
-// tested-by: REQ-SEARCH-036
+// tested-by: ARCH-VIEWER-007
+// tested-by: ARCH-SEARCH-036
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -15,8 +15,14 @@ import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
+import { ExplorerView } from "../src/views/ExplorerView.jsx";
+import { FindingsView, computeFindings } from "../src/views/FindingsView.jsx";
 import { I18nProvider, translate } from "../src/lib/i18n.jsx";
 import { computeLayout } from "../src/lib/layout.js";
+import {
+  buildHierarchy, defaultExpanded, allExpanded, flattenTree, ancestorsOf,
+  keepSetFor, openQuestions, levelOf,
+} from "../src/lib/tree.js";
 
 // feed the real engine export through the adapter, exactly as the browser would
 // (run from the app/ directory: `node scripts/run-ssr-smoke.mjs`)
@@ -26,10 +32,12 @@ setRegistry(json.nodes.map(adaptNode));
 const noop = () => {};
 const cases = {
   App: <App />,
-  MapView: <MapView selId="CORE-PARSE-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />,
+  MapView: <MapView selId="ARCH-PARSE-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />,
   ProblemsView: <ProblemsView openSpec={noop} />,
   RoadmapView: <RoadmapView openSpec={noop} />,
-  SpecView: <SpecView selId="REQ-MAP-007" setSelId={noop} />,
+  SpecView: <SpecView selId="ARCH-MAP-007" setSelId={noop} />,
+  ExplorerView: <ExplorerView selId="ARCH-MAP-007" setSelId={noop} />,
+  FindingsView: <FindingsView openSpec={noop} />,
 };
 
 let failures = 0;
@@ -51,13 +59,13 @@ for (const [name, el] of Object.entries(cases)) {
 const appHtml = renderToString(<App />);
 const checks = [
   ["registry loaded from engine", REQUIREMENTS.length >= 13],
-  ["renders a real capability id", appHtml.includes("CORE-PARSE-001")],
+  ["renders a real capability id", appHtml.includes("ARCH-PARSE-001")],
   ["renders the brand", appHtml.includes("Manager")],
   ["renders Problems nav", appHtml.includes("Problems")],
 ];
 for (const [label, ok] of checks) test(label, ok);
 
-// ranked-search parity (REQ-SEARCH-036): the viewer's search must rank by the
+// ranked-search parity (ARCH-SEARCH-036): the viewer's search must rank by the
 // SAME TF-IDF model as the engine `search` CLI. This golden fixture is asserted
 // identically in the Python `Search` tests (class SearchParity) — the query
 // scores 0.4112 on REQ-DRIFT-001 in BOTH runtimes, and a no-overlap query floors
@@ -102,10 +110,10 @@ for (const [label, ok] of xssChecks) test(label, ok);
 setRegistry(json.nodes.map(adaptNode));
 const spec = (locale) => renderToString(
   <I18nProvider initialLocale={locale}>
-    <SpecView selId="REQ-MAP-007" setSelId={noop} />
+    <SpecView selId="ARCH-MAP-007" setSelId={noop} />
   </I18nProvider>);
 const specEn = spec("en"), specRo = spec("ro");
-const reqUnderTest = REQUIREMENTS.find(r => r.id === "REQ-MAP-007");
+const reqUnderTest = REQUIREMENTS.find(r => r.id === "ARCH-MAP-007");
 const i18nChecks = [
   ["i18n: English is the default rendering", specEn.includes("Where — Members in code")],
   ["i18n: Romanian translates a section header",
@@ -199,6 +207,73 @@ const layoutChecks = [
   ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],
 ];
 for (const [label, ok] of layoutChecks) test(label, ok);
+
+// ---- hierarchy / module explorer -------------------------------------------
+// The corpus this view exists for is a strict tree (one parent, one root,
+// depth == level). These assert the SHAPE the outline depends on, plus the two
+// degradations that must not throw: a registry with no `satisfies` at all (the
+// baked fallback) and a `satisfies` cycle.
+setRegistry(json.nodes.map(adaptNode));
+const H = buildHierarchy(REQUIREMENTS);
+const exp0 = defaultExpanded(H);
+const rows0 = flattenTree(H, { expanded: exp0, keep: null });
+const rowsAll = flattenTree(H, { expanded: allExpanded(H), keep: null });
+const codeRows = REQUIREMENTS.filter((r) => levelOf(r) === "code");
+const deepId = (codeRows[0] || {}).id;
+const flatH = buildHierarchy([
+  { id: "A-1", title: "a", level: "architecture", satisfies: [], satisfiedBy: [], deps: [] },
+  { id: "A-2", title: "b", level: "architecture", satisfies: [], satisfiedBy: [], deps: [] },
+]);
+const cycH = buildHierarchy([
+  { id: "C-1", title: "c1", level: "architecture", satisfies: ["C-2"], satisfiedBy: [] },
+  { id: "C-2", title: "c2", level: "architecture", satisfies: ["C-1"], satisfiedBy: [] },
+]);
+const treeChecks = [
+  ["tree: every requirement appears exactly once when fully expanded",
+    rowsAll.length === REQUIREMENTS.length],
+  ["tree: the default expansion collapses the code level to its parents",
+    rows0.length < REQUIREMENTS.length && rows0.every((row) => levelOf(row.r) !== "code")],
+  ["tree: adaptNode carries level/satisfies/satisfied_by through",
+    REQUIREMENTS.some((r) => r.level === "code") && REQUIREMENTS.some((r) => r.satisfies.length)],
+  ["tree: a code requirement has an ancestor chain to open",
+    !!deepId && ancestorsOf(H, deepId).length > 0],
+  ["tree: a filter keeps the ancestors of a match as context rows",
+    (() => {
+      if (!deepId) return false;
+      const keep = keepSetFor(H, [deepId]);
+      const rows = flattenTree(H, { expanded: exp0, keep });
+      return rows.some((row) => row.id === deepId) && rows.length === ancestorsOf(H, deepId).length + 1;
+    })()],
+  ["tree: no `satisfies` anywhere degrades to a flat list",
+    flatH.flat === true && flattenTree(flatH, { expanded: allExpanded(flatH), keep: null }).length === 2],
+  ["tree: a satisfies cycle still renders every row exactly once",
+    flattenTree(cycH, { expanded: { "C-1": true, "C-2": true }, keep: null }).length === 2],
+  // 0 real findings today: every `verify` bullet in the export is the
+  // "None — …" placeholder that `collect_findings` filters out.
+  ["findings: the placeholder verify bullet is not a finding",
+    openQuestions({ verify: ["None — authored from known intent, not reconstructed from code."] }).length === 0],
+  ["findings: a real verify bullet IS a finding",
+    openQuestions({ verify: ["Is a stale tested-by range an error or a warning?"] }).length === 1],
+  ["findings: the live corpus reports zero open questions",
+    computeFindings().length === 0],
+];
+for (const [label, ok] of treeChecks) test(label, ok);
+
+// The baked fallback has no `level` at all — adaptNode must default it so the
+// outline still renders, and the Explorer must not throw on that registry.
+const fallbackLevel = adaptNode({ id: "NOLEVEL-001", title: "t" }).level;
+const explorerHtml = renderToString(<ExplorerView selId="ARCH-MAP-007" setSelId={noop} />);
+const findingsHtml = renderToString(<FindingsView openSpec={noop} />);
+const explorerChecks = [
+  ["explorer: a node with no level defaults to architecture", fallbackLevel === "architecture"],
+  ["explorer: the outline renders the root of the trace", explorerHtml.includes("SYS-SSOT-001")],
+  ["explorer: the selected requirement's document renders beside it",
+    explorerHtml.includes("ARCH-MAP-007") && explorerHtml.includes("Links — traceability")],
+  ["explorer: a collapsed parent advertises its clause count", explorerHtml.includes("clauses")],
+  ["findings: zero findings renders the named empty state, not a badge",
+    findingsHtml.includes("No open questions.")],
+];
+for (const [label, ok] of explorerChecks) test(label, ok);
 
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 

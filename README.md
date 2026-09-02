@@ -134,6 +134,28 @@ The header carries the machine-readable bits (`id`, `status`, what it
 `depends_on`); the prose explains intent and lists the acceptance criteria that
 become your tests.
 
+### Optional: the three specification levels
+
+A requirement may also declare where it sits on the V-model's left arm, with
+`level: system | architecture | code`, and name the level above it with
+`satisfies:`. Neither field is required — a corpus that sets neither behaves
+exactly as it did before these fields existed. Adopt them and two extra
+checks switch on: `lint` reports a level whose fan-out leaves the 5–20 band, and
+the gate reports a level whose tests sit at the wrong depth (a `code`
+requirement is verified `@unit`, an `architecture` one `@integration`, a
+`system` one `@system`).
+
+Both fields are prose about *this* corpus, so nothing forces an id to advertise
+its level. This repo chooses to, because a reader meets an id long before its
+file: `SYS-` for a system requirement, `ARCH-` for an architecture one, `REQ-`
+for a detailed-design one. Your ids can say anything you like.
+
+A single `.md` may hold **several** requirements — one frontmatter block each,
+a block starting at a `---` line immediately followed by `id:`. That is how an
+architecture requirement keeps its own detailed design in one document instead
+of scattering it across dozens of files. A file with one block is read exactly
+as before.
+
 ## AI assistant integrations
 
 ### Plain CLI (any tool, or no tool)

@@ -1,9 +1,10 @@
-// implements: REQ-VIEWER-007
-// implements: REQ-TRANSLATE-044
+// implements: ARCH-VIEWER-007
+// implements: ARCH-TRANSLATE-044
 /* SpecView — a rendered requirement document (frontmatter → WHY → WHAT → HOW → WHERE). */
 import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, exemptReason } from "../lib/data.js";
 import { Pill, statusKind } from "../lib/ui.jsx";
+import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
 
 // A cached translation is opt-in and unreviewed — this badge is the one thing
@@ -49,6 +50,11 @@ function CovStrip({ r }) {
   );
 }
 
+/* The statuses at which the gate enforces the implements-tag rule. Anything
+ * else (draft, deprecated) is tracked, not enforced — see the gate's link-sync
+ * check. Kept here rather than inlined so the two readers of it agree. */
+export const ENFORCED = { confirmed: true, "in-progress": true, implemented: true };
+
 const PRIORITY_COLOR = {
   "must-have":    { bg: "#F38BA8", color: "#5c0011" },
   "should-have":  { bg: "#F9E2AF", color: "#5c3d00" },
@@ -70,9 +76,14 @@ function PriorityBadge({ priority }) {
   );
 }
 
-function SpecDoc({ r, onNav }) {
+/* The requirement document itself. `head` and `after` are optional slots the
+ * module explorer fills with its breadcrumb and its traceability Links block —
+ * they render INSIDE the sheet so the whole thing reads as one document, and
+ * both default to nothing so SpecView is unchanged. */
+export function SpecDoc({ r, onNav, head = null, after = null }) {
   const { t, locale } = useI18n();
   if (!r) return null;
+  const questions = openQuestions(r);
   const title = translatedText(r, locale, "title", r.title);
   const intent = translatedText(r, locale, "intent", r.intent);
   const contract = translatedText(r, locale, "contract");
@@ -80,6 +91,7 @@ function SpecDoc({ r, onNav }) {
   return (
     <div className="spec">
       <div className="spec-sheet">
+      {head}
       <div className="spec-fm">
         <span className="fk">id:</span><span>{r.id}</span>
         <span className="fk">status:</span><span>{r.status}</span>
@@ -126,9 +138,28 @@ function SpecDoc({ r, onNav }) {
             ? r.members.map((m,i)=><div className="member" key={i}><span className="role">{m.role}:</span> {m.loc}</div>)
             : (r.layer === "need" || r.layer === "aggregate")
               ? <div className="member" style={{color:"var(--fg-muted)"}}>{t("(satisfied-by other requirements — no direct code)")}</div>
-              : <div className="member" style={{color:"var(--status-error)"}}>{t("(no members found — orphan)")}</div>}
+              /* "orphan" is the GATE's word for an ENFORCED requirement with no
+                 implementing tag — an exit-1 error. A `draft` with no members is
+                 not that; it is a requirement not yet wired, which is the normal
+                 state of all 618 decomposed code-level clauses. Printing the red
+                 error on them made the default view claim 618 build failures
+                 that the gate does not report. */
+              : ENFORCED[r.status]
+                ? <div className="member" style={{color:"var(--status-error)"}}>{t("(no members found — orphan)")}</div>
+                : <div className="member" style={{color:"var(--fg-muted)"}}>{t("(not linked to code yet — not enforced at this status)")}</div>}
         </div>
       </div>
+
+      {/* Open questions — the author's own `## WHAT — Verify intent` bullets,
+          minus the "None — …" placeholder the engine also filters out. A
+          requirement with nothing but placeholders renders NO section here,
+          which is why the Findings rail badge can honestly read zero. */}
+      {questions.length > 0 && (
+        <div className="sec">
+          <div className="eyebrow warn">{t("Open questions — verify intent")}</div>
+          <ul>{questions.map((q,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(q)}} />)}</ul>
+        </div>
+      )}
 
       {r.risks && r.risks.length>0 && (
         <div className="sec">
@@ -139,13 +170,14 @@ function SpecDoc({ r, onNav }) {
           ))}
         </div>
       )}
+      {after}
       </div>
     </div>
   );
 }
 
 export function SpecView({ selId, setSelId }) {
-  const cur = selId && REQ_BY_ID[selId] ? selId : "CORE-PARSE-001";
+  const cur = selId && REQ_BY_ID[selId] ? selId : "ARCH-PARSE-001";
   const r = REQ_BY_ID[cur] || REQUIREMENTS[0];
   const core = REQUIREMENTS.filter(x=>x.area==="CORE");
   const req = REQUIREMENTS.filter(x=>x.area!=="CORE");

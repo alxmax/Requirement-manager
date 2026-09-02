@@ -258,8 +258,11 @@ honored by the scanner.
 
 ## Audience & writing level
 
-Write every requirement so a developer with basic programming experience but NO prior
-knowledge of this project can understand it without asking questions. Rules:
+Write every requirement so a FIRST-YEAR ENGINEERING STUDENT can understand it without
+asking questions: someone who reads technical prose comfortably, but who may not program,
+and who knows nothing about this project. That is a lower baseline than "a developer new
+to the project", and it is deliberate — a requirement only anyone-who-already-knows can
+read is not a specification, it is a reminder. Rules:
 
 1. Define each project-specific term briefly, inline, on first use — e.g.
    "veto cascade (a fixed series of checks that can block or reroute the result)".
@@ -269,8 +272,10 @@ knowledge of this project can understand it without asking questions. Rules:
 3. Write contract lines in plain present tense with a named subject — "`init` creates
    the folder", never "It shall create the folder". The Contract section opens with
    "Every line in this section is binding.", so no "shall" or "must" is needed on each
-   line. Keep sentences under 25 words and bullets under 22; `lint` enforces both, and
-   warns (`anonymous-subject`) on a clause that opens with a bare "It".
+   line. A clause may hold two or three sentences, as long as the extra ones state the
+   first's consequence and never a second obligation. Keep sentences under 25 words and
+   clauses to at most three sentences; `lint` enforces both, and warns
+   (`anonymous-subject`) on a clause that opens with a bare "It".
 4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
    One clause, not a paragraph.
 5. Keep all file and function references (e.g. `strip_context.py`,
@@ -360,7 +365,7 @@ Creation verbs (pick by input, not by outcome):
 | `map` | Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine. | `--check` |
 | `export` | Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html. | `--out` |
 | `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
-| `lint` | Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default. | `--strict`, `--decompose` |
+| `lint` | Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default. | `--strict`, `--decompose` |
 | `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
 | `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
 | `search` | Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware. | `--top` |

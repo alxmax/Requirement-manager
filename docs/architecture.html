@@ -721,13 +721,13 @@ has not been re-touched.</pre></div>
         <div class="layer-lbl">layer: bus</div>
         <h3>Foundation</h3>
         <p>Shared capabilities with high fan-in: config loading, parsing, scanning, drift detection. Define the contract precisely — an underspecified bus is the most expensive thing to discover late. Change only behind the contract.</p>
-        <div class="layer-ids">CORE-PARSE-001 · CORE-SCAN-002 · CORE-DRIFT-003</div>
+        <div class="layer-ids">ARCH-PARSE-001 · ARCH-SCAN-002 · ARCH-DRIFT-003</div>
       </div>
       <div class="layer feat">
         <div class="layer-lbl">layer: feature</div>
         <h3>Composed capability</h3>
         <p>Built on top of the bus via <code>depends_on</code>. Each feature has its own contract, acceptance criteria, and test coverage. Features can depend on each other but ultimately trace back to bus capabilities.</p>
-        <div class="layer-ids">REQ-CHECK-006 · REQ-MAP-007 · REQ-INIT-012</div>
+        <div class="layer-ids">ARCH-CHECK-006 · ARCH-MAP-007 · ARCH-INIT-012</div>
       </div>
     </div>
 

@@ -39,7 +39,7 @@ docs/superpowers/**
 .consilium/**
 
 # app/ (Vite+React viewer source) IS scanned since 2026-09-02: app/src carries
-# per-file `implements:` tags (REQ-VIEWER-007, REQ-SEARCH-036, REQ-TRANSLATE-044)
+# per-file `implements:` tags (ARCH-VIEWER-007, ARCH-SEARCH-036, ARCH-TRANSLATE-044)
 # and app/scripts/ssr-smoke.jsx a `tested-by:`. Only its build outputs and local
 # caches are excluded — all gitignored, so CI never sees them, and the bundles
 # would otherwise re-report every tag from the sources they were built from.
@@ -60,7 +60,7 @@ diagrams/**
 
 # docs/map.html is the published render of the SAME generated viewer template
 # excluded above (plugin/scripts/_map_viewer.html) — it inlines this repo's own
-# _map.json, which embeds CORE-SCAN-002's prose (its own "implements: LOGIN-001"
+# _map.json, which embeds ARCH-SCAN-002's prose (its own "implements: LOGIN-001"
 # illustration and its "AC-1" acceptance-criterion label) as plain JS/JSON text.
 # Once code_root reaches docs/, that inlined text matches TAG_RE and reads as a
 # dangling tag pointing at a requirement that doesn't exist. Never a hand-authored

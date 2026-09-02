@@ -1,7 +1,7 @@
 name: ci
-# implements: REQ-SELFGATE-039
-# implements: REQ-PYFLOOR-040
-# implements: REQ-REPRO-041
+# implements: ARCH-SELFGATE-039
+# implements: ARCH-PYFLOOR-040
+# implements: ARCH-REPRO-041
 
 on:
   push:
@@ -104,7 +104,7 @@ jobs:
   # and until now one job on ubuntu + `python-version: 3.x` was the whole evidence for
   # it — so the floor was accidental (3.7, untested) and the `-X utf8` convention that
   # exists specifically FOR Windows had never run on Windows in CI. This job is the
-  # proof: the oldest entry equals reqmap.py's MIN_PYTHON (REQ-PYFLOOR-040 AC-3 asserts
+  # proof: the oldest entry equals reqmap.py's MIN_PYTHON (ARCH-PYFLOOR-040 AC-3 asserts
   # they stay equal), and both OSes run every suite. Deliberately separate from
   # gate-and-tests: the gate is a single authoritative verdict about THIS repo's
   # requirement corpus, not a per-interpreter one, and running it six times would

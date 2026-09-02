@@ -6,7 +6,7 @@ description: Use on-demand to AI-review the SEMANTIC quality of requirement file
 <!-- Universal variant: Claude Code-specific wording replaced with generic
      "AI assistant" language. Works with any AI assistant. -->
 
-<!-- implements: REQ-REVIEW-022 -->
+<!-- implements: ARCH-REVIEW-022 -->
 
 # Requirement quality review (AI — advisory)
 
@@ -42,7 +42,7 @@ frontmatter to silence a lint check that is intentionally violated (e.g.
      what breaks without the capability. The `intent_terse` anchor is a hint, not a verdict.
    - **acceptance-doesnt-cover-contract** — a contract clause with no acceptance criterion
      exercising it. ("Cover" here is your semantic judgement; it is distinct from
-     REQ-ACVERIFY-019's deterministic `# verifies: <id>#AC-N` test-to-AC tags.)
+     ARCH-ACVERIFY-019's deterministic `# verifies: <id>#AC-N` test-to-AC tags.)
 
 3. **Near-zero-false-positive discipline** (the project's prime directive):
    - Emit a finding **only when you are confident** it is a real defect. When unsure, stay silent.

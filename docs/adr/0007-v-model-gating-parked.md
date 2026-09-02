@@ -1,6 +1,8 @@
 # ADR-0007 — The V-model's right side is levelled; correspondence gating is parked
 
-- **Status:** Accepted (parked, with a stated unpark trigger)
+- **Status:** Superseded by [ADR-0019](0019-v-model-left-arm-adopted.md) (2026-09-03). The
+  reasoning below is left exactly as decided on 2026-08-17; note that 0019 adopts the left arm
+  **without** this record's unpark trigger having fired.
 - **Decided:** 2026-08-17 (`REQ-VLEVEL-037`), parking recorded in `TODO.md` v3
 - **Evidence:** `CHANGELOG.md` `v2.16.0`; `REQ-VLEVEL-037`; `REQ-TRACE-020`
 

@@ -79,7 +79,7 @@ AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*(" + _ID_PAT + r")#(AC-\d+)
 # The level applies to the whole tag, so a comma-separated id list shares it — the only
 # unambiguous reading, and it matches how TAG_LIST_RE already groups ids. The suffix is
 # invisible to TAG_RE/TAG_LIST_RE, so an older vendored engine reads a levelled tag,
-# resolves the id, and ignores the level (REQ-VLEVEL-037).
+# resolves the id, and ignores the level (ARCH-VLEVEL-037).
 TEST_LEVELS = ("unit", "integration", "system")
 TEST_LEVEL_RE = re.compile(
     r"(?<![\w-])tested-by\s*:\s*(" + _ID_PAT + r"(?:\s*,\s*" + _ID_PAT + r")*)"
@@ -116,7 +116,7 @@ if _extra_exts:
     CODE_EXTS = CODE_EXTS + _extra_exts
 
 
-def _is_code_file(fn):  # implements: CORE-SCAN-002
+def _is_code_file(fn):  # implements: ARCH-SCAN-002
     """True if fn should be scanned as code: matches CODE_EXTS, an extensionless
     basename like Dockerfile/Makefile, or a Dockerfile variant (`Dockerfile.dev`,
     `Dockerfile.converter` — a consumer tagged one and nothing read it)."""
@@ -137,6 +137,25 @@ VALID_STATUS = {"draft", "baseline", "in-progress", "implemented", "confirmed", 
 #               (an MVP acceptance requirement is the archetype). Covered by its
 #               depends_on edges, the mirror of how a need is covered by satisfies.
 VALID_LAYER = {"bus", "feature", "need", "aggregate"}
+# The V-model specification level, an axis ORTHOGONAL to `layer:` and deliberately not a
+# rename of it. `layer:` says how a requirement sits in the dependency graph (a `bus` is
+# defined by fan-in; a `need`/`aggregate` is covered by an edge instead of a tag, which is
+# what IMPL_EXEMPT_LAYERS keys on). `level:` says how abstract it is. They are independent:
+# an `architecture` requirement OWNS code, so it must stay gate-checked, whereas `aggregate`
+# is exempt precisely because it owns none — which is why `architecture` cannot be an alias
+# of `aggregate`. Optional and absent by default: a corpus that never adopts it behaves
+# exactly as before.
+VALID_LEVEL = {"system", "architecture", "code"}   # implements: ARCH-LEVEL-051
+# The rungs of the V: the verification level that discharges each specification level.
+# Left arm `level:` <-> right arm `tested-by: <ID> @<level>`. Read only when the author has
+# declared BOTH sides — a requirement with no `level:`, or with no levelled test link, is
+# never judged, so the rule is silent on arrival in every existing corpus.
+LEVEL_TEST_PAIR = {"system": "system", "architecture": "integration", "code": "unit"}
+# Hierarchy breadth on the `satisfies:` graph: a parent normally carries between these many
+# children. Warn-only, and silent on a leaf — a requirement nothing satisfies is not a
+# malformed parent, it is simply not a parent.
+LINT_FANOUT_MIN = 5
+LINT_FANOUT_MAX = 20
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
@@ -166,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-02.2"
+MAP_ENGINE_VERSION = "2026-09-03"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -177,7 +196,7 @@ MAP_ENGINE_VERSION = "2026-09-02.2"
 MIN_PYTHON = (3, 9)
 
 
-def _python_floor_error(version_info=None):  # implements: REQ-PYFLOOR-040
+def _python_floor_error(version_info=None):  # implements: ARCH-PYFLOOR-040
     """Return a message when the interpreter is below MIN_PYTHON, else None.
 
     A pure predicate rather than an inline exit, so a test can pin the floor on any
@@ -203,7 +222,7 @@ def _python_floor_error(version_info=None):  # implements: REQ-PYFLOOR-040
 # Later tasks will derive argparse choices, tool_definition.json, and a
 # markdown command table from this registry — do NOT add behaviour here.
 # ---------------------------------------------------------------------------
-# implements: REQ-CMDREGISTRY-033
+# implements: ARCH-CMDREGISTRY-033
 COMMANDS = {
     "init": {
         "summary": (
@@ -428,8 +447,7 @@ COMMANDS = {
     },
     "lint": {
         "summary": (
-            "Readability and structure check on non-draft requirements: long sentences "
-            "(>25 words), stacked conditions (3+ and/or joins in one normative line), "
+            "Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), "
             "contract clauses with an unnamed 'It' subject, over-long contract clauses, "
             "missing Contract or Acceptance sections. Read-only unless --decompose is "
             "passed; exit-neutral by default."
@@ -696,7 +714,7 @@ def _cli_choices():
     return list(COMMANDS)
 
 
-def _generate_schema():  # implements: REQ-CMDREGISTRY-033
+def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
     """Function-calling schema (OpenAI tool format) generated from COMMANDS.
     Returns a JSON string (indent=2, trailing newline) — byte-stable for the gate
     drift-compare. Internal commands are excluded from the AI-facing schema."""
@@ -779,7 +797,7 @@ def _check_integration_fresh(plugin_root):
 
 
 # ---------- parsing ----------
-def _as_list(v):  # implements: CORE-PARSE-001
+def _as_list(v):  # implements: ARCH-PARSE-001
     """Coerce a frontmatter value to a list: lists pass through, a bare scalar
     becomes a one-element list, empty/None becomes []. Guards callers that
     iterate list-valued keys (e.g. depends_on) against a string written without
@@ -789,7 +807,7 @@ def _as_list(v):  # implements: CORE-PARSE-001
     return [v] if v else []
 
 
-def _scalar_value(v):  # implements: CORE-PARSE-001
+def _scalar_value(v):  # implements: ARCH-PARSE-001
     """One frontmatter scalar value. If it opens with a matching quote, take the
     quoted span verbatim — a '#' inside is DATA, and any text after the closing
     quote (e.g. an inline comment) is dropped. Otherwise drop a ' #' / leading '#'
@@ -802,7 +820,7 @@ def _scalar_value(v):  # implements: CORE-PARSE-001
     return re.split(r'(?:^|\s)#', v, 1)[0].strip()
 
 
-def _clean_item(s):  # implements: CORE-PARSE-001
+def _clean_item(s):  # implements: ARCH-PARSE-001
     """One list element: unquote a quoted item verbatim, else drop a trailing
     `# comment` and trim. A '#' is a comment only at the token start or after
     whitespace, so an embedded '#' (e.g. issue#123) is preserved — matching the
@@ -810,7 +828,7 @@ def _clean_item(s):  # implements: CORE-PARSE-001
     return _scalar_value(s)
 
 
-def parse_frontmatter(text):  # implements: CORE-PARSE-001
+def parse_frontmatter(text):  # implements: ARCH-PARSE-001
     """Return (meta_dict, body). Minimal YAML: scalars, inline [a, b] lists, and the
     block form (`key:` then indented `- item` lines). An inline list missing its
     closing `]` is parsed leniently rather than silently kept as a literal string."""
@@ -850,7 +868,31 @@ def parse_frontmatter(text):  # implements: CORE-PARSE-001
     return meta, body
 
 
-def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
+# A requirement file may hold SEVERAL requirements, one per frontmatter block — a module
+# in the DOORS sense: the architecture requirement, then the code requirements beneath it.
+# A block begins at a `---` line immediately followed by `id:`. That lookahead is what makes
+# the split unambiguous: a bare `---` is a markdown horizontal rule and a frontmatter close,
+# both of which appear inside a body, and neither is followed by an id line.
+_REQ_BLOCK_RE = re.compile(r"(?m)^---[ \t]*\r?\n(?=id:)")   # implements: ARCH-MODULEFILE-056
+
+
+def split_requirement_blocks(text):  # implements: ARCH-MODULEFILE-056
+    """Split one file's text into its requirement blocks, each ready for
+    `parse_frontmatter`. A single-requirement file yields exactly one block, byte-identical
+    to the whole text, so nothing about the existing corpus changes."""
+    text = text.lstrip("\ufeff")
+    parts = _REQ_BLOCK_RE.split(text)
+    if len(parts) <= 1:
+        return [text]
+    out = []
+    if parts[0].strip():                 # anything before the first block is a file preamble
+        out.append(parts[0])
+    for chunk in parts[1:]:
+        out.append("---\n" + chunk)
+    return out or [text]
+
+
+def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: ARCH-MODULEFILE-056
     reqs = {}
     if not os.path.isdir(reqs_dir):
         return reqs
@@ -860,23 +902,28 @@ def load_requirements(reqs_dir):  # implements: CORE-PARSE-001
         path = os.path.join(reqs_dir, name)
         with open(path, encoding="utf-8-sig") as f:  # tolerate a UTF-8 BOM
             text = f.read()
-        meta, body = parse_frontmatter(text)
-        rid = meta.get("id") or os.path.splitext(name)[0]
-        if rid in reqs:
-            # two files claim the same id: keep the first (sorted) and warn, rather
-            # than let the later file silently shadow it (the gate can't catch this —
-            # the id still resolves, just to the wrong file).
-            print("WARNING: duplicate requirement id {!r} in {!r} — keeping {!r}".format(
-                rid, name, os.path.basename(reqs[rid]["path"])), file=sys.stderr)
-            continue
-        reqs[rid] = {"meta": meta, "body": body, "path": path}
+        for _i, _blk in enumerate(split_requirement_blocks(text)):
+            meta, body = parse_frontmatter(_blk)
+            # only the FIRST block may fall back to the filename; a later block without an
+            # explicit id is a malformed block, not a second requirement named after the file.
+            rid = meta.get("id") or (os.path.splitext(name)[0] if _i == 0 else None)
+            if not rid:
+                continue
+            if rid in reqs:
+                # two blocks claim the same id: keep the first (sorted) and warn, rather
+                # than let the later one silently shadow it (the gate can't catch this —
+                # the id still resolves, just to the wrong block).
+                print("WARNING: duplicate requirement id {!r} in {!r} — keeping {!r}".format(
+                    rid, name, os.path.basename(reqs[rid]["path"])), file=sys.stderr)
+                continue
+            reqs[rid] = {"meta": meta, "body": body, "path": path, "block": _i}
     return reqs
 
 
 _REQS_REAL_CACHE = {}   # reqs_dir -> realpath, resolved once per process
 
 
-def _prune_dirs(dirpath, dirs, reqs_dir, code_root=None, ignore=()):  # implements: CORE-SCAN-002
+def _prune_dirs(dirpath, dirs, reqs_dir, code_root=None, ignore=()):  # implements: ARCH-SCAN-002
     """Drop noise dirs and the SSOT output dir from an os.walk in place.
 
     Excludes ONLY the actual requirements dir (by realpath), not every folder
@@ -909,7 +956,7 @@ def _prune_dirs(dirpath, dirs, reqs_dir, code_root=None, ignore=()):  # implemen
     dirs[:] = keep
 
 
-def load_ignore(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+def load_ignore(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
     """Read optional `.reqmapignore` (fnmatch globs over POSIX rel paths, one per
     line, blanks and # comments skipped). Looked up in `requirements/` first (the
     consolidated home for reqmap files) then at the scan root; first found wins.
@@ -978,7 +1025,7 @@ def _strip_py_strings(s):
     return ''.join(out), None
 
 
-def _scan_file_tags(fp, lines=None):  # implements: CORE-SCAN-002
+def _scan_file_tags(fp, lines=None):  # implements: ARCH-SCAN-002
     """Membership tags in one file as [[role, cap, line], ...], or None on read error.
 
     `lines` lets a caller that has already read the file hand the content over, so the
@@ -1070,11 +1117,11 @@ def _scan_file_tags(fp, lines=None):  # implements: CORE-SCAN-002
     return out
 
 
-def _scancache_path(reqs_dir):  # implements: REQ-SCANCACHE-023
+def _scancache_path(reqs_dir):  # implements: ARCH-SCANCACHE-023
     return os.path.join(reqs_dir, "_scancache.json")
 
 
-def _load_scancache(reqs_dir):  # implements: REQ-SCANCACHE-023
+def _load_scancache(reqs_dir):  # implements: ARCH-SCANCACHE-023
     """Read the opt-in scan-cache sidecar; {} when absent/corrupt (fails open)."""
     try:
         with open(_scancache_path(reqs_dir), encoding="utf-8") as f:
@@ -1084,7 +1131,7 @@ def _load_scancache(reqs_dir):  # implements: REQ-SCANCACHE-023
         return {}
 
 
-def _save_scancache(reqs_dir, cache):  # implements: REQ-SCANCACHE-023
+def _save_scancache(reqs_dir, cache):  # implements: ARCH-SCANCACHE-023
     """Write the scan cache, best-effort — an unwritable cache must never fail the scan."""
     try:
         with open(_scancache_path(reqs_dir), "w", encoding="utf-8") as f:
@@ -1093,7 +1140,7 @@ def _save_scancache(reqs_dir, cache):  # implements: REQ-SCANCACHE-023
         pass
 
 
-def _walk_code(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+def _walk_code(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
     """Yield (abs_path, posix_rel_path) for every scannable file under `code_root`.
 
     The one place the walk discipline lives: prune noise dirs and the SSOT output dir,
@@ -1115,7 +1162,7 @@ def _walk_code(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
             yield fp, rel
 
 
-def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: REQ-ACVERIFY-019
+def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: ARCH-ACVERIFY-019
     """Accumulate `verifies:` and levelled `tested-by:` hits from one file's lines.
 
     One masking pass feeding both regexes, because the two scanners this replaces did
@@ -1143,7 +1190,7 @@ def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: REQ-ACV
                 level_out.setdefault(cap, {}).setdefault(level, []).append((rel, i))
 
 
-def scan_all(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
+def scan_all(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
     """(members, ac_cover, level_cover) from ONE walk that reads each file once.
 
     The gate used to call three scanners that each walked the whole tree and opened
@@ -1170,7 +1217,7 @@ def scan_all(code_root, reqs_dir=None):  # implements: CORE-SCAN-002
 
 
 
-def scan_members(code_root, reqs_dir=None, cache=False):  # implements: CORE-SCAN-002
+def scan_members(code_root, reqs_dir=None, cache=False):  # implements: ARCH-SCAN-002
     """Walk the code root for `implements:`/`tested-by:` tags → {cap_id: [(role, file, line)]}.
 
     Opt-in (cache=True with reqs_dir set): a sidecar keyed by (mtime_ns, size) lets an
@@ -1272,7 +1319,7 @@ def _vds_parse_baked(text):
     return out
 
 
-def check_viewer_data_sync(data_js_path, map_nodes):  # implements: REQ-VIEWER-007
+def check_viewer_data_sync(data_js_path, map_nodes):  # implements: ARCH-VIEWER-007
     """Compare app/src/lib/data.js's hand-authored BAKED requirement fixture
     against the live registry (map_nodes: [{"id":..., "contract":[...]}, ...]).
     Returns a sorted list of requirement IDs where the two disagree — a baked id
@@ -1300,7 +1347,7 @@ def check_viewer_data_sync(data_js_path, map_nodes):  # implements: REQ-VIEWER-0
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
 
 
-def untracked_members(code_root, members):  # implements: REQ-TRACKED-042
+def untracked_members(code_root, members):  # implements: ARCH-TRACKED-042
     """Sorted rel-paths of member files git does not track, or None when unknowable.
 
     The invariant: a committed generated artifact must depend only on TRACKED files.
@@ -1343,7 +1390,7 @@ _BINARY_EXTS = (".png", ".jpg", ".jpeg", ".gif", ".ico", ".pdf", ".zip", ".gz", 
 _UNSCANNED_MAX_BYTES = 1_000_000
 
 
-def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: REQ-UNSCANNEDTAG-045
+def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: ARCH-UNSCANNEDTAG-045
     """Sorted rel-paths of TRACKED files the scan never reads (extension/basename
     outside CODE_EXTS/BASENAME_CODE_FILES) that nonetheless carry a membership tag,
     or None when git cannot answer. A tag in such a file is silently not a member:
@@ -1394,11 +1441,11 @@ def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: REQ-UNSCANN
     return sorted(out)
 
 
-def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-DOCBUNDLE-026
+def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: ARCH-DOCBUNDLE-026
     """Sorted rel-paths of large `docs/` HTML docs that carry no `generated-from:`
     tag — the doc-sync blind spot: a whole-system doc (built from many requirements)
     that drifts from them with nothing linking the two. A bare `generated-from:` only
-    pins ONE id, but the multi-id list (CORE-SCAN-002) lets one doc name all its
+    pins ONE id, but the multi-id list (ARCH-SCAN-002) lets one doc name all its
     sources. Walk discipline matches scan_members: honors `.reqmapignore`, prunes
     noise. Skips engine-generated outputs (`_`-prefixed, the published `map.html`
     viewer). Threshold-only + warn-only by design, so it nudges without false alarms."""
@@ -1425,7 +1472,7 @@ def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: REQ-
     return sorted(out)
 
 
-def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
+def _scan_untagged(code_root, reqs_dir=None):  # implements: ARCH-NEXT-013
     """Return sorted relative paths of scannable files that carry no membership tags.
     Same walk discipline as scan_members: honors .reqmapignore, prunes .git/node_modules."""
     ignore = load_ignore(code_root, reqs_dir)
@@ -1441,7 +1488,7 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
             if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
-                continue   # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by contract (REQ-PROSE-024)
+                continue   # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by contract (ARCH-PROSE-024)
             tags = _scan_file_tags(fp)
             if tags is not None and not tags:
                 untagged.append(rel)
@@ -1449,20 +1496,20 @@ def _scan_untagged(code_root, reqs_dir=None):  # implements: REQ-NEXT-013
 
 
 ORPHAN_CODE_MIN_LOC = 150   # a program file this big with no tag is a coverage hole, not a stub
-# program-logic extensions only: prose/config/styling coverage is REQ-DOCBUNDLE-026's concern
+# program-logic extensions only: prose/config/styling coverage is ARCH-DOCBUNDLE-026's concern
 ORPHAN_CODE_EXTS = (".py", ".js", ".ts", ".tsx", ".jsx", ".c", ".cc", ".cpp",
                     ".h", ".hpp", ".java", ".go", ".rs",
                     ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
                     ".cs", ".php", ".rb", ".kt", ".kts", ".swift", ".scala", ".ex", ".exs", ".dart")
 
 
-def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: REQ-ORPHANCODE-034
+def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: ARCH-ORPHANCODE-034
     """Sorted rel-paths of program-logic files >= ORPHAN_CODE_MIN_LOC lines that
     carry no requirement link — code implementing behavior no requirement describes.
     `covered` is the rel-path set already linked (membership tags + `verifies:`
     coverage), derived from the caller's existing scans so this adds no second tag
     scan. Walk discipline matches scan_members: honors `.reqmapignore`, prunes noise.
-    Warn-only at ANY flag combination (the REQ-COVERAGE-029 Senate audit capped
+    Warn-only at ANY flag combination (the ARCH-COVERAGE-029 Senate audit capped
     coverage signals at advisory — a hard gate makes hollow tags the way to pass CI)."""
     ignore = load_ignore(code_root, reqs_dir)
     out = []
@@ -1485,7 +1532,7 @@ def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: REQ-ORP
     return sorted(out)
 
 
-def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
+def scan_ac_verifies(code_root, reqs_dir=None):  # implements: ARCH-ACVERIFY-019
     """Walk the code for `# verifies: REQ-X#AC-N` tags and return
     `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
     covers. Same walk discipline as `scan_members` (respects .reqmapignore, prunes
@@ -1528,7 +1575,7 @@ def scan_ac_verifies(code_root, reqs_dir=None):  # implements: REQ-ACVERIFY-019
     return cover
 
 
-def scan_test_levels(code_root, reqs_dir=None):  # implements: REQ-VLEVEL-037
+def scan_test_levels(code_root, reqs_dir=None):  # implements: ARCH-VLEVEL-037
     """Walk the code for `# tested-by: REQ-X @level` tags and return
     `{cap_id: {level: [(file, line)]}}` — at which V-model level each requirement is
     verified. Kept separate from `scan_members` on purpose: folding the level into the
@@ -1588,7 +1635,7 @@ _AC_VERIFIABLE_RE = re.compile(r"verifiable\s+by\s*:([^>]*)", re.I)
 _AC_MANUAL_WORDS = ("manual", "inspection", "review", "demo", "walkthrough", "sign-off")
 
 
-def _acc_blocks(body):  # implements: REQ-ACVERIFY-019
+def _acc_blocks(body):  # implements: ARCH-ACVERIFY-019  # implements: ARCH-ATOMICFORM-053
     """Parse the HOW — Acceptance section into one record per criterion:
     `{"label": "AC-1" or "", "text": <folded prose>, "manual": bool}`.
 
@@ -1598,9 +1645,18 @@ def _acc_blocks(body):  # implements: REQ-ACVERIFY-019
     `acc` list was empty for every requirement written the prescribed way — the map,
     the viewer, and any downstream count had nothing to read (50/50 nodes here).
 
+    An atomic body has no Acceptance heading: its single `Scenario:` block is the one
+    criterion, returned unlabelled so `# verifies: <ID>#AC-N` has nothing to point at —
+    at one criterion per requirement, `tested-by:` is already per-criterion precision.
+
     One parser, three callers (`_acc_items`, `_labeled_acs`, `_count_ac`) so a
     criterion cannot be counted by one and missed by another. The block-start test
     is `_count_ac`'s verbatim, keeping `len(_acc_blocks(b)) == _count_ac(b)`."""
+    _sp = _atomic_spans(body)
+    if _sp:                                        # atomic: the Scenario is the one criterion
+        _txt = " ".join(l.strip() for l in _sp[1])
+        return [{"label": "", "text": _txt, "manual": bool(_AC_VERIFIABLE_RE.search(_txt))
+                 and any(w in _txt.lower() for w in _AC_MANUAL_WORDS)}]
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -1641,7 +1697,7 @@ def _acc_blocks(body):  # implements: REQ-ACVERIFY-019
     return blocks
 
 
-def _acc_items(body):  # implements: REQ-MAP-007
+def _acc_items(body):  # implements: ARCH-MAP-007
     """Acceptance criteria as display strings, for the emitted `acc` list: an
     `AC-1 — Given … When … Then …` line per labelled block, or the bullet text."""
     out = []
@@ -1653,7 +1709,7 @@ def _acc_items(body):  # implements: REQ-MAP-007
     return out
 
 
-def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
+def _labeled_acs(body):  # implements: ARCH-ACVERIFY-019
     """Ordered list of `AC-N` labels declared in the HOW — Acceptance section.
     Empty when the requirement writes bullet ACs without labels — per-AC coverage
     only applies to requirements that label their criteria, so unlabelled ones are
@@ -1665,7 +1721,7 @@ def _labeled_acs(body):  # implements: REQ-ACVERIFY-019
     return out
 
 
-def _automatable_acs(body):  # implements: REQ-ACVERIFY-019
+def _automatable_acs(body):  # implements: ARCH-ACVERIFY-019
     """`_labeled_acs` minus the criteria marked `verifiable by: inspection|manual`.
     A criterion a human checks by reading can never carry a `# verifies:` tag, so
     counting it as unverified is a warning no one can ever clear — the marker the
@@ -1686,7 +1742,7 @@ _NORMATIVE_HEADING_RE = re.compile(
     r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
 
 
-def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
+def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
     """True if a `## ` heading's LABEL is `name` (case-insensitive), allowing an
     optional `WHAT`/`HOW` prefix whose dash is optional — so `## WHAT — Contract`,
     `## WHAT Contract`, and bare `## Contract` all match name='contract'. Anchored
@@ -1699,7 +1755,46 @@ def _heading_label_is(heading, name):  # implements: REQ-CHECK-006
         heading.strip().lower()))
 
 
-def binding_hash(body):  # implements: CORE-DRIFT-003
+_ATOMIC_SCENARIO_RE = re.compile(r"^\s*Scenario\s*:", re.I)
+VALID_FORM = {"atomic"}                            # implements: ARCH-ATOMICFORM-053
+
+
+def _atomic_spans(body):  # implements: ARCH-ATOMICFORM-053
+    """`(statement_lines, scenario_lines)` for a body in the atomic form, else None.
+
+    The atomic form carries no normative `## ` heading at all: a `>` blockquote states the
+    single obligation and an unlabelled `Scenario:` block states its acceptance, both sitting
+    between the `# ` title and the first `## ` (which begins the auto sections). Both parts
+    are required, so a classic body — whose `>` WHY sits above `## WHAT — Contract` and whose
+    Given/When/Then lives under a heading — returns None and every existing code path is
+    unchanged.
+
+    Detected from the BODY, not from `form: atomic` in the frontmatter, because every
+    consumer of these spans (binding_hash, _has_section, _acc_blocks, _bullets) is handed a
+    body and no meta. The frontmatter key is validated separately, as documentation."""
+    story, scen, in_scen = [], [], False
+    for line in body.splitlines():
+        st = line.strip()
+        if st.startswith("## "):
+            break                                  # auto sections end the normative span
+        if st.startswith("# "):
+            continue                               # the title is not normative
+        if _ATOMIC_SCENARIO_RE.match(line):
+            in_scen = True
+            scen.append(line.rstrip())
+            continue
+        if in_scen:
+            if st:
+                scen.append(line.rstrip())
+            continue
+        if st.startswith(">"):
+            story.append(line.rstrip())
+    if not story or not scen:
+        return None
+    return story, scen
+
+
+def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
     commentary and may drift freely without tripping the gate. (Legacy docs used
@@ -1719,14 +1814,22 @@ def binding_hash(body):  # implements: CORE-DRIFT-003
             # rstrip (not strip): leading indent is structure — unnesting a sub-clause
             # is a real change and must drift.
             keep.append(line.rstrip())
+    if not keep:
+        # No normative heading: either the atomic form, whose obligation and Scenario ARE the
+        # normative span, or a malformed body. Hashing the atomic span is what keeps drift
+        # alive — without it every heading-less requirement hashes the empty string and
+        # collides with every other, so no content change could ever be detected.
+        _sp = _atomic_spans(body)
+        if _sp:
+            keep = _sp[0] + ["\x1e"] + _sp[1]
     return hashlib.sha256("\n".join(keep).encode()).hexdigest()[:12]
 
 
-def lock_path(reqs_dir):  # implements: CORE-DRIFT-003
+def lock_path(reqs_dir):  # implements: ARCH-DRIFT-003
     return os.path.join(reqs_dir, "_reqlock.json")
 
 
-def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
+def load_lock(reqs_dir):  # implements: ARCH-DRIFT-003
     p = lock_path(reqs_dir)
     if os.path.exists(p):
         try:
@@ -1743,7 +1846,7 @@ def load_lock(reqs_dir):  # implements: CORE-DRIFT-003
     return {}
 
 
-def save_lock(reqs_dir, lock):  # implements: CORE-DRIFT-003
+def save_lock(reqs_dir, lock):  # implements: ARCH-DRIFT-003
     os.makedirs(reqs_dir, exist_ok=True)
     with open(lock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(lock, f, indent=2, sort_keys=True)
@@ -1759,11 +1862,11 @@ MEMBERLOCK_SCHEMA = 1
 MEMBER_ROLES = ("implements", "generated-from")   # roles that bind code/doc content to a contract
 
 
-def _memberlock_path(reqs_dir):  # implements: REQ-MEMBERDRIFT-027
+def _memberlock_path(reqs_dir):  # implements: ARCH-MEMBERDRIFT-027
     return os.path.join(reqs_dir, "_memberlock.json")
 
 
-def load_memberlock(reqs_dir):  # implements: REQ-MEMBERDRIFT-027
+def load_memberlock(reqs_dir):  # implements: ARCH-MEMBERDRIFT-027
     """Return {rid: {relfile: sha}} from the sidecar, or {} when absent/corrupt or
     written by a NEWER schema than this engine knows — fail open (no false drift) the
     same way load_lock and the scan cache do, so a forward-incompatible sidecar degrades
@@ -1779,14 +1882,14 @@ def load_memberlock(reqs_dir):  # implements: REQ-MEMBERDRIFT-027
     return members if isinstance(members, dict) else {}
 
 
-def save_memberlock(reqs_dir, member_hashes):  # implements: REQ-MEMBERDRIFT-027
+def save_memberlock(reqs_dir, member_hashes):  # implements: ARCH-MEMBERDRIFT-027
     os.makedirs(reqs_dir, exist_ok=True)
     payload = {"_schema": MEMBERLOCK_SCHEMA, "members": member_hashes}
     with open(_memberlock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, sort_keys=True)
 
 
-def untracked_locks(reqs_dir):  # implements: REQ-CHECK-006
+def untracked_locks(reqs_dir):  # implements: ARCH-CHECK-006
     """Lock sidecars (`_reqlock.json`, `_memberlock.json`) are committed-by-design: an
     uncommitted one silently disables drift detection on a fresh CI checkout (no baseline
     to compare against). Return the paths of any that exist on disk but are NOT git-tracked.
@@ -1813,7 +1916,7 @@ def untracked_locks(reqs_dir):  # implements: REQ-CHECK-006
         return []
 
 
-def _file_sha(path):  # implements: REQ-MEMBERDRIFT-027
+def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
     """SHA-256 of a member file with line endings normalized to LF, so the hash is identical
     whether the tree was checked out LF (Linux/CI) or CRLF (Windows core.autocrlf=true).
     Without this, a lock generated on one platform shows spurious whole-repo member drift on
@@ -1828,7 +1931,7 @@ def _file_sha(path):  # implements: REQ-MEMBERDRIFT-027
     return hashlib.sha256(data).hexdigest()
 
 
-def compute_member_hashes(code_root, members):  # implements: REQ-MEMBERDRIFT-027
+def compute_member_hashes(code_root, members):  # implements: ARCH-MEMBERDRIFT-027
     """{rid: {relfile: sha}} for member files dedicated to ONE requirement. A file that
     is an implements/generated-from member of several requirements (e.g. a single engine
     file) is excluded: a change there cannot be attributed to one contract without noise."""
@@ -1846,7 +1949,7 @@ def compute_member_hashes(code_root, members):  # implements: REQ-MEMBERDRIFT-02
     return out
 
 
-def member_drift(reqs, members, lock, memberlock, code_root, current=None):  # implements: REQ-MEMBERDRIFT-027
+def member_drift(reqs, members, lock, memberlock, code_root, current=None):  # implements: ARCH-MEMBERDRIFT-027
     """Sorted (rid, relfile) where a confirmed requirement's dedicated member changed
     since the member-lock while the requirement's OWN contract did not. A requirement
     whose contract also drifted is skipped — that is forward drift (the spec WAS
@@ -1873,14 +1976,18 @@ def member_drift(reqs, members, lock, memberlock, code_root, current=None):  # i
 
 
 # ---------- commands ----------
-def _has_section(body, name):  # implements: REQ-CHECK-006
+def _has_section(body, name):  # implements: ARCH-CHECK-006
     """True if the body has a normative `## ` heading whose LABEL is `name`
     (case-insensitive), e.g. `## WHAT — Verify intent` for name='verify intent'.
     Anchored to the label (see `_heading_label_is`) so a commentary heading that
     merely mentions the word — `## Notes — contract caveats` — does not count as a
     Contract section, and a dash-less `## WHAT Contract` does. This keeps the gate's
     section-presence check in agreement with the drift hash, closing the
-    silent-drift gap where a heading passed the gate but produced an empty hash."""
+    silent-drift gap where a heading passed the gate but produced an empty hash.
+    The atomic form (ARCH-ATOMICFORM-053) has no normative headings by design; its statement
+    and Scenario stand in for both, so it answers True for those two names."""
+    if name in ("contract", "acceptan") and _atomic_spans(body):
+        return True
     for line in body.splitlines():
         s = line.strip()
         if s.startswith("## ") and _heading_label_is(s, name):
@@ -1888,7 +1995,7 @@ def _has_section(body, name):  # implements: REQ-CHECK-006
     return False
 
 
-def cmd_scan(reqs, members):  # implements: REQ-SCAN-005
+def cmd_scan(reqs, members):  # implements: ARCH-SCAN-005
     for cap in sorted(set(list(reqs) + list(members))):
         print(cap)
         for role, fp, ln in members.get(cap, []):
@@ -1910,7 +2017,7 @@ def _engine_version_at(path):
         return None
 
 
-def _ver_key(v):  # implements: REQ-CHECK-006
+def _ver_key(v):  # implements: ARCH-CHECK-006
     """Sortable key for a MAP_ENGINE_VERSION (`YYYY-MM-DD` + optional `.N` suffix).
     Compares the numeric suffix as an int so `.10` sorts after `.9` (lexicographic
     string compare gets that wrong)."""
@@ -1918,7 +2025,7 @@ def _ver_key(v):  # implements: REQ-CHECK-006
     return (date, int(n) if n.isdigit() else 0)
 
 
-def warn_if_stale():  # implements: REQ-CHECK-006
+def warn_if_stale():  # implements: ARCH-CHECK-006
     """Print a non-fatal notice when this vendored copy is older than the installed
     plugin's. Silent in CI: only runs when CLAUDE_PLUGIN_ROOT is set. Never raises,
     never affects the exit code."""
@@ -1978,18 +2085,18 @@ _SH_TEST_RE = re.compile(
 IMPL_EXEMPT_LAYERS = ("need", "aggregate")
 
 
-def _impl_exempt(meta):  # implements: REQ-TRACE-020
+def _impl_exempt(meta):  # implements: ARCH-TRACE-020
     """True when a requirement is exempt from the "confirmed code must exist" rule.
 
     One predicate, four callers (gate link-sync, `health`, the risk signals, and
     `confirm`). They disagreed before: three exempted `layer: need` and `confirm` did
     not, so the layer's own reference case could not be promoted by the command that
-    exists to promote it — `NEED-SSOT-001` is `confirmed` here only because the file
+    exists to promote it — `SYS-SSOT-001` is `confirmed` here only because the file
     was hand-edited around `confirm`."""
     return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
 
 
-def _test_link_problem(path):  # implements: REQ-TESTLINK-018
+def _test_link_problem(path):  # implements: ARCH-TESTLINK-018
     """Return a short reason a `tested-by` file fails the behavior-sync check, or ''
     when it is fine. A file that is missing, unreadable, or holds no recognizable
     test function means the link asserts coverage it does not have. Deterministic
@@ -2009,7 +2116,7 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
     if (path.lower().endswith(".py")
             and _PY_TEST_ENTRY_RE.search(src) and _PY_MAIN_GUARD_RE.search(src)):
         return ""
-    if path.lower().endswith(_SH_TEST_EXTS):  # implements: REQ-TESTLINK-018
+    if path.lower().endswith(_SH_TEST_EXTS):  # implements: ARCH-TESTLINK-018
         stem = os.path.splitext(os.path.basename(path))[0]
         if _SH_TEST_NAME_RE.search(stem) or _SH_TEST_RE.search(src):
             return ""
@@ -2018,7 +2125,7 @@ def _test_link_problem(path):  # implements: REQ-TESTLINK-018
 
 
 def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,
-              ac_cover=None, level_cover=None):  # implements: REQ-CHECK-006
+              ac_cover=None, level_cover=None):  # implements: ARCH-CHECK-006
     errors, warns = [], []
     strict_warns = []   # warns promoted to errors under --strict
     warn_if_stale()
@@ -2055,7 +2162,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
     # V-model opt-in triggers, computed once. Neither this rule nor the level-fit rule can
     # fire until the repo has deliberately adopted the vocabulary, so installing this engine
-    # adds no warnings to a repo that never annotates a tag (REQ-VLEVEL-037).
+    # adds no warnings to a repo that never annotates a tag (ARCH-VLEVEL-037).
     any_validation = any(x[0] == "validated-against"
                          for hits in members.values() for x in hits)
     if level_cover is None:
@@ -2074,6 +2181,15 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         m = r["meta"]
         if m.get("status") not in VALID_STATUS:
             errors.append(f"{rid}: invalid status {m.get('status')!r}")
+        _frm = m.get("form")                              # implements: ARCH-ATOMICFORM-053
+        if _frm and _frm not in VALID_FORM:
+            errors.append(f"{rid}: invalid form {_frm!r} (expected one of {sorted(VALID_FORM)})")
+        if _frm == "atomic" and not _atomic_spans(r["body"]):
+            errors.append(f"{rid}: form: atomic but the body has no `>` statement plus "
+                          f"`Scenario:` block before the first `## ` heading")
+        _lvl = m.get("level")                             # implements: ARCH-LEVEL-051
+        if _lvl and _lvl not in VALID_LEVEL:
+            errors.append(f"{rid}: invalid level {_lvl!r} (expected one of {sorted(VALID_LEVEL)})")
         if m.get("layer") not in VALID_LAYER:
             errors.append(f"{rid}: invalid layer {m.get('layer')!r}")
         # milestone (warn): an optional, roadmap-only field. A malformed value silently fails
@@ -2087,12 +2203,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 errors.append(f"{rid}: depends_on missing {dep}")
         # upstream traceability (warn-only): a `satisfies` id should resolve to a real
         # requirement, but a dangling one is a WARN not an ERROR — an upstream need may
-        # be authored later or live in an external tracker.  # implements: REQ-TRACE-020
+        # be authored later or live in an external tracker.  # implements: ARCH-TRACE-020
         for up in _as_list(m.get("satisfies")):
             if up not in cap_ids:
                 warns.append(f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)")
         # a `need`/`aggregate` is covered by edges (satisfies:/depends_on), not code — so
-        # it is exempt from the code-coverage gates. # implements: REQ-TRACE-020
+        # it is exempt from the code-coverage gates. # implements: ARCH-TRACE-020
         is_need = m.get("layer") == "need"
         impl_exempt = _impl_exempt(m)
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
@@ -2125,6 +2241,20 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             if levels == {"system"}:
                 warns.append(f"{rid}: bus capability verified only at @system level — "
                              "add a @unit or @integration `tested-by:` link")
+        # V-model rungs (warn): a requirement that declares its specification level and
+        # carries levelled test links should carry at least one at the paired verification
+        # level — system requirements answered by system tests, architecture by integration,
+        # detailed design by unit. Deliberately narrow: it judges nothing without BOTH
+        # declarations, so it cannot fire on a corpus that has adopted neither, and it does
+        # not infer a level from `layer:` — that inference is what ADR-0007 measured at
+        # 36-of-40 and rejected. # implements: ARCH-VRUNGS-054
+        _want = LEVEL_TEST_PAIR.get(m.get("level"))
+        if m.get("status") == "confirmed" and _want:
+            _have = set(level_cover.get(rid, {}))
+            if _have and _want not in _have:
+                warns.append(f"{rid}: level: {m['level']} is verified at "
+                             f"{'/'.join('@' + x for x in sorted(_have))} but not @{_want} — "
+                             f"add a @{_want} `tested-by:` link, or change the level")
         # owner accountability (warn): a confirmed requirement with owner: auto was never
         # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
         if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
@@ -2137,7 +2267,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         # A non-confirmed requirement warns but is never strict-promoted, so a
         # draft-heavy consumer's `--strict` CI cannot start failing on this.
         if tests:
-            for fp in sorted({t[1] for t in tests}):  # implements: REQ-TESTLINK-018
+            for fp in sorted({t[1] for t in tests}):  # implements: ARCH-TESTLINK-018
                 problem = _test_link_problem(os.path.join(code_root, fp))
                 if problem:
                     bucket = strict_warns if m.get("status") == "confirmed" else warns
@@ -2151,7 +2281,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         # requirement that entered the regime lit up a warning per criterion still to
         # do. Partial adoption is the step being asked for; it must not cost more than
         # tagging nothing. Machine-unverifiable criteria are excluded (_automatable_acs).
-        if m.get("status") == "confirmed":  # implements: REQ-ACVERIFY-019
+        if m.get("status") == "confirmed":  # implements: ARCH-ACVERIFY-019
             labels = _automatable_acs(r["body"])
             covered = ac_cover.get(rid, {})
             if labels and covered:
@@ -2173,7 +2303,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 )
         # reverse upstream traceability (warn-only): a stakeholder `need` that nothing
         # satisfies is unaddressed — surface it so a need does not silently lack a
-        # requirement that fulfils it.  # implements: REQ-TRACE-020
+        # requirement that fulfils it.  # implements: ARCH-TRACE-020
         if is_need and m.get("status") in ENFORCED and not satisfied_by.get(rid):
             warns.append(f"{rid}: need has no requirement that satisfies it (upstream trace unaddressed)")
 
@@ -2211,7 +2341,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
 
     # Reverse depends_on index: a contract drift's blast radius is its direct
     # dependents (one edge, not the transitive closure — a reviewer follows the
-    # chain one hop at a time).  # implements: REQ-DRIFTIMPACT-035
+    # chain one hop at a time).  # implements: ARCH-DRIFTIMPACT-035
     dependents = {}
     for _rid, _r in reqs.items():
         for _dep in _as_list(_r["meta"].get("depends_on")):
@@ -2231,7 +2361,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                                f"re-check {len(locs)} member(s): {where}{fanout}")
 
     # Reverse-direction drift: a dedicated member changed while the contract stayed put
-    # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (REQ-MEMBERDRIFT-027).
+    # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (ARCH-MEMBERDRIFT-027).
     memberlock = load_memberlock(reqs_dir)
     # sync/init on a full scan (no --since) needs this same full-member hash set again
     # below to re-baseline _memberlock.json — compute it once and hand it to member_drift
@@ -2250,7 +2380,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                      "drift detection works in CI (an uncommitted lock is invisible to a fresh checkout)")
 
     # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
-    # no generated-from: lineage drifts from them unnoticed (warn-only — see REQ-DOCBUNDLE-026).
+    # no generated-from: lineage drifts from them unnoticed (warn-only — see ARCH-DOCBUNDLE-026).
     for rel in untagged_doc_bundles(code_root, full_members, reqs_dir):  # full set: a doc's generated-from membership is independent of the --since diff
         warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
@@ -2260,7 +2390,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # has none, so the map cannot be reproduced and `map --check` fails in CI for a file
     # that is not in the repo. Warn-only and fail-open (silent outside a work tree), so a
     # consumer who deliberately tags an ignored file is nudged, not blocked.
-    _untracked = untracked_members(code_root, full_members)   # implements: REQ-TRACKED-042
+    _untracked = untracked_members(code_root, full_members)   # implements: ARCH-TRACKED-042
     if _untracked:
         warns.append(
             "{} member(s) are not tracked by git: {} — the committed map records them, but a "
@@ -2271,7 +2401,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
 
     # Tags the scan cannot see: a tag in a file type outside CODE_EXTS is not a member,
     # and until now nothing said so. Warn-only, fail-open outside a work tree.
-    _unscanned = tagged_unscanned_files(code_root, reqs_dir)   # implements: REQ-UNSCANNEDTAG-045
+    _unscanned = tagged_unscanned_files(code_root, reqs_dir)   # implements: ARCH-UNSCANNEDTAG-045
     if _unscanned:
         warns.append(
             "{} tag(s) in file type(s) the scan never reads: {} — those files are not members. "
@@ -2281,7 +2411,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
 
     # Coverage erosion: a sizeable program file with no requirement link implements
     # behavior no requirement describes. Plain warn — NEVER strict-promoted (the
-    # REQ-COVERAGE-029 Senate audit capped coverage at advisory).  # implements: REQ-ORPHANCODE-034
+    # ARCH-COVERAGE-029 Senate audit capped coverage at advisory).  # implements: ARCH-ORPHANCODE-034
     covered = {fp for hits in full_members.values() for (_role, fp, _ln) in hits}
     covered.update(fp for acs in ac_cover.values()
                    for locs in acs.values() for (fp, _ln) in locs)
@@ -2295,8 +2425,9 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # (drift fires only on `confirmed`, so the gate enforces nothing yet) and a
     # silently-inactive `findings` cannot be mistaken for a clean, enforcing SSOT.
     n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
-    legacy = [rid for rid in sorted(reqs)
-              if not _has_section(reqs[rid]["body"], "verify intent")]
+    legacy = [rid for rid in sorted(reqs)                       # implements: ARCH-ATOMICFORM-053
+              if not _has_section(reqs[rid]["body"], "verify intent")
+              and not _atomic_spans(reqs[rid]["body"])]           # atomic form has none by design
     if legacy:
         warns.append("{}/{} requirement(s) use the legacy schema (no '## WHAT — Verify "
                      "intent' section) — `findings` is inactive for them: {}"
@@ -2306,7 +2437,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # Warn and not error, deliberately: a dangling `depends_on` target is a typo with
     # one fix, while a cycle is a modelling call across several requirements — turning
     # it into an error would fail a build that was green yesterday, on an upgrade, with
-    # no line of the consumer's own changed (ADR-0002).  # implements: REQ-CHECK-006
+    # no line of the consumer's own changed (ADR-0002).  # implements: ARCH-CHECK-006
     for _cyc in _dependency_cycles(reqs):
         warns.append("depends_on cycle: " + " -> ".join(_cyc)
                      + " — no requirement in a cycle can be built before the others; "
@@ -2317,7 +2448,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # runs only `gate` before committing (what this repo's own docs tell them to do)
     # learns it from a red CI run. Reported here; still enforced by `map --check`.
     # Skipped under update_lock: `sync` regenerates the map moments later.
-    if not update_lock:  # implements: REQ-MAP-007
+    if not update_lock:  # implements: ARCH-MAP-007
         try:
             stale_map = _stale_artifacts(
                 # full_members, not the --since-filtered view: a scoped gate must not
@@ -2347,7 +2478,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print(f"  lock update: {rid} removed from lock")
         # sync drift guard: refuse to silently re-baseline an EDITED confirmed/implemented
         # contract unless the caller explicitly accepts it (accept_drift). A brand-new
-        # requirement (old hash None) is not drift.  # implements: REQ-CHECK-006
+        # requirement (old hash None) is not drift.  # implements: ARCH-CHECK-006
         confirmed_drift = [rid for (rid, old_h, _h) in changed
                            if old_h is not None
                            and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
@@ -2372,7 +2503,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # in SKILL.universal.md means someone edited COMMANDS without running gen-integration.
     # Skipped silently when the artifacts don't exist (consumer/vendored repos).
     # Must run BEFORE the as_json early-return so --json (the CI/badge path) also
-    # exits non-zero on a stale artifact.  # implements: REQ-CMDREGISTRY-033
+    # exits non-zero on a stale artifact.  # implements: ARCH-CMDREGISTRY-033
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     _stale = _check_integration_fresh(plugin_root)
     if _stale:
@@ -2412,6 +2543,10 @@ owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
 depends_on: []       # ids of bus/other capabilities this builds on
 superseded_by:       # <ID>, if replaced
+# level:             # optional: system | architecture | code — the V-model left arm.
+#                    #   Adopting it turns on the level-fit and rung checks; a corpus
+#                    #   that never sets it keeps the pre-V-model behaviour exactly.
+# satisfies: []      # optional: the level above this one (system <- architecture <- code)
 # area:              # optional: System Map grouping label (else the id prefix is used)
 ---
 
@@ -2422,14 +2557,14 @@ superseded_by:       # <ID>, if replaced
 
 ## WHAT — Contract (normative)
 Every line in this section is binding.
-<!-- Audience: a developer new to THIS project. Six rules:
+<!-- Audience: a first-year engineering student, new to this project. Six rules:
      1. Name the subject: "`init` creates the folder", never "It creates the folder".
      2. Present tense — no "shall", no "must". The line above already binds every clause.
-     3. One binding statement per bullet; a second sentence only states the first's
-        consequence, never a second obligation.
+     3. One binding statement per bullet, in at most three sentences; the extra
+        sentences state the first's consequence, never a second obligation.
      4. Define project terms. Two or more: open with a glossary comment like this one.
      5. Group clauses past five, with bold labels (see below).
-     6. Keep under 25 words/sentence, 22 words/bullet — `lint` enforces both.
+     6. Keep a clause to at most 3 sentences and 150 words — `lint` enforces both.
      Scope: one capability = one behavior that fails independently. Many clauses AND
      many acceptance criteria together mean several capabilities — split them
      (`lint` flags this as 'over-scoped'). -->
@@ -2476,10 +2611,10 @@ AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
 """
 
 
-def _warn_number_collision(reqs_dir, cap_id):  # implements: REQ-NEW-004
+def _warn_number_collision(reqs_dir, cap_id):  # implements: ARCH-NEW-004
     """Advisory: another requirement in the same area already uses this NNN. Ids are
-    unique by their full text, so nothing breaks — but REQ-MAP-007 beside
-    REQ-VIEWER-007 is the kind of pair people talk past each other about."""
+    unique by their full text, so nothing breaks — but ARCH-MAP-007 beside
+    ARCH-VIEWER-007 is the kind of pair people talk past each other about."""
     parts = cap_id.split("-")
     if len(parts) < 3:
         return
@@ -2498,7 +2633,7 @@ def _warn_number_collision(reqs_dir, cap_id):  # implements: REQ-NEW-004
                   "text, but a distinct NNN keeps the two from being confused.".format(other, num, area))
 
 
-def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
+def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: ARCH-NEW-004
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
         print(f"exists: {dest}"); return 1
@@ -2520,7 +2655,7 @@ def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: REQ-NEW-004
     return 0
 
 
-def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root="."):  # implements: REQ-PROMOTE-TODO-001
+def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root="."):  # implements: ARCH-PROMOTE-TODO-001
     """Scaffold a requirement draft from an unfinished TODO.md item (matched by name),
     seeding title / layer / milestone from the item. Requires an explicit cap_id — the
     engine runs headless (CI, pre-commit hook), so there is no interactive prompt. With
@@ -2577,7 +2712,7 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     return 0
 
 
-def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
+def _mark_todo_done(root, name):  # implements: ARCH-PROMOTE-TODO-001
     """Flip the first unfinished TODO.md line whose name matches to [x]. Best-effort:
     returns 1 if a line was rewritten, 0 if TODO.md is absent/unwritable or no line matched."""
     key = name.strip().casefold()
@@ -2609,7 +2744,7 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
     return 0
 
 
-def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
+def _set_frontmatter_status(text, value):  # implements: ARCH-PROMOTE-011
     """Replace the value of the first `status:` line inside the leading frontmatter
     block, preserving its indentation and any trailing inline comment. Returns
     (new_text, n_replaced); n=0 when there is no frontmatter or no status line."""
@@ -2635,7 +2770,7 @@ def _set_frontmatter_status(text, value):  # implements: REQ-PROMOTE-011
     return new_head + rest, n
 
 
-def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
+def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
     """Flip a requirement's status to `confirmed` (the human-validation step) by a
     single frontmatter edit. Refuses if the requirement has no `implements:` member
     (a confirmed requirement must point to code — else the gate would error), and
@@ -2670,7 +2805,15 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
         raw = f.read()
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
-    new_text, n = _set_frontmatter_status(text, "confirmed")
+    # A module file holds several requirements; flip the status of THIS one, not of the
+    # first block in the file. # implements: ARCH-MODULEFILE-056
+    blocks = split_requirement_blocks(text)
+    if len(blocks) > 1:
+        idx = r.get("block", 0)
+        blocks[idx], n = _set_frontmatter_status(blocks[idx], "confirmed")
+        new_text = "".join(blocks)
+    else:
+        new_text, n = _set_frontmatter_status(text, "confirmed")
     if n == 0:
         print(f"could not find a `status:` line in {r['path']}")
         return 1
@@ -2692,7 +2835,7 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
     return 0
 
 
-def _draft_id(rel):  # implements: REQ-EXTRACT-008
+def _draft_id(rel):  # implements: ARCH-EXTRACT-008
     """Mint a draft capability id from a file's relative path. Path-aware so
     same-basename files in different dirs don't collide; falls back to FILE when
     the name has no usable A-Z0-9 token (e.g. `_.py`, non-ASCII stems)."""
@@ -2700,7 +2843,7 @@ def _draft_id(rel):  # implements: REQ-EXTRACT-008
     return "DRAFT-" + (slug or "FILE")
 
 
-def classify_prose(rel):  # implements: REQ-PROSE-024
+def classify_prose(rel):  # implements: ARCH-PROSE-024
     """Bucket a POSIX-relative .md/.html path for the auto-draft path. Returns
     'ignore' (meta/boilerplate, invisible), 'sync_only' (README/docs/*.html — never
     drafted, but a drift- and semantic-checked member when explicitly tagged), or
@@ -2725,7 +2868,7 @@ def classify_prose(rel):  # implements: REQ-PROSE-024
     return "capability"
 
 
-def _prose_facts(src):  # implements: REQ-PROSE-024
+def _prose_facts(src):  # implements: ARCH-PROSE-024
     """(title, [headings]) from markdown/HTML prose, for a draft scaffold.
     Title: markdown frontmatter `title:`, else first `# ` H1, else <title>/<h1>.
     Headings: markdown `## ` H2 lines, else <h2>. Returns (None, []) when absent.
@@ -2759,7 +2902,7 @@ def _prose_facts(src):  # implements: REQ-PROSE-024
     return title, (headings or h1_sections)
 
 
-def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-008  # implements: REQ-PROSE-024
+def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024
     """Propose DRAFT requirements for code files that have no member tag yet."""
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
@@ -2851,7 +2994,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
     return 0
 
 
-def _observed_surface(facts, limit=12):  # implements: REQ-EXTRACT-008
+def _observed_surface(facts, limit=12):  # implements: ARCH-EXTRACT-008
     """Authoring hint for a code draft's Context/Current-implementation group: the
     module docstring's first line and the top-level signatures `plan` already knows
     how to read. Empty string when the language has no parser. Non-binding by
@@ -2870,7 +3013,7 @@ def _observed_surface(facts, limit=12):  # implements: REQ-EXTRACT-008
     return "\n".join(lines) + "\n"
 
 
-def _risk(src):  # implements: REQ-EXTRACT-008
+def _risk(src):  # implements: ARCH-EXTRACT-008
     score = 0
     if re.search(r"\b(TODO|FIXME|HACK|XXX)\b", src): score += 1
     if "# noqa" in src or "eslint-disable" in src: score += 1
@@ -2892,7 +3035,7 @@ _TEST_FILE_SUFFIXES = ("_test.py", "_test.go", "_test.rs", "_spec.rb", ".test.ts
                        ".test.js", ".test.jsx", ".spec.ts", ".spec.tsx", ".spec.js", ".e2e.ts")
 
 
-def _is_test_path(rel):  # implements: REQ-CANDIDATES-009
+def _is_test_path(rel):  # implements: ARCH-CANDIDATES-009
     """Test code by convention (a `tests/` segment, `test_*.py`, `*_test.go`, `*.spec.ts`)."""
     parts = rel.replace(os.sep, "/").split("/")
     base = parts[-1]
@@ -2902,7 +3045,7 @@ BUS_FANIN_THRESHOLD = 5      # a module this many capabilities depend on is bus-
 SPLIT_LOC_THRESHOLD = 300    # oversize file -> flag for human split, do not auto-split
 
 
-def _py_facts(src):  # implements: REQ-CANDIDATES-009
+def _py_facts(src):  # implements: ARCH-CANDIDATES-009
     """Module/symbol docstrings, top-level signatures and import targets via the
     stdlib `ast`. A SyntaxError/ValueError yields empty facts so one unparseable
     file (incl. a source with an embedded NUL byte, which ast.parse rejects with
@@ -2943,7 +3086,7 @@ def _py_facts(src):  # implements: REQ-CANDIDATES-009
     return facts
 
 
-def _js_facts(src):  # implements: REQ-CANDIDATES-009
+def _js_facts(src):  # implements: ARCH-CANDIDATES-009
     """Best-effort JS/TS facts via regex (no stdlib JS parser): the leading block
     comment as the module doc, and top-level function/binding names. Imports are
     not resolved for JS in v1 (the agent and _capmap.json fill that gap)."""
@@ -2966,7 +3109,7 @@ def _js_facts(src):  # implements: REQ-CANDIDATES-009
     return facts
 
 
-def _md_facts(src):  # implements: REQ-CANDIDATES-009
+def _md_facts(src):  # implements: ARCH-CANDIDATES-009
     """Best-effort capability facts from a Markdown prompt/spec file (no parser):
     the first H1 (`# `) is the title, the first blockquote (`>`) AFTER that H1 is the
     intent, and each `## ` H2 heading is a structural-signature line. Free prose is
@@ -2989,7 +3132,7 @@ def _md_facts(src):  # implements: REQ-CANDIDATES-009
     return facts
 
 
-def _file_facts(path, rel):  # implements: REQ-CANDIDATES-009
+def _file_facts(path, rel):  # implements: ARCH-CANDIDATES-009
     try:
         with open(path, encoding="utf-8", errors="ignore") as f:
             src = f.read()
@@ -3008,7 +3151,7 @@ def _file_facts(path, rel):  # implements: REQ-CANDIDATES-009
     return facts
 
 
-def _load_capmap(reqs_dir):  # implements: REQ-CANDIDATES-009
+def _load_capmap(reqs_dir):  # implements: ARCH-CANDIDATES-009
     """Optional `requirements/_capmap.json`: a hand-authored capability grouping,
     authoritative when present. Shape: {"capabilities": [{id, layer, files:[...]}]}
     (a bare list is also accepted). Returns []; fail-open on absent/unreadable."""
@@ -3027,13 +3170,13 @@ def _load_capmap(reqs_dir):  # implements: REQ-CANDIDATES-009
     return out
 
 
-def _mint_cap_id(rel):  # implements: REQ-CANDIDATES-009
+def _mint_cap_id(rel):  # implements: ARCH-CANDIDATES-009
     """A TAG_RE-valid suggested id from a path stem (Stage 2 may rename it)."""
     slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
     return (slug or "MOD") + "-001"
 
 
-def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: REQ-CANDIDATES-009
+def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: ARCH-CANDIDATES-009
     """Sorted rel paths of candidate source files, honoring _prune_dirs (noise +
     the SSOT dir) and .reqmapignore — the same exclusions scan_members uses.
 
@@ -3058,7 +3201,7 @@ def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: REQ-CANDI
     return out
 
 
-def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # implements: REQ-CANDIDATES-009
+def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # implements: ARCH-CANDIDATES-009
     """Emit a deterministic JSON capability-extraction plan and write NO .md.
     Grouping: authoritative `requirements/_capmap.json` when present, else one
     candidate per file (the Stage-2 agent merges/splits using judgment).
@@ -3180,7 +3323,7 @@ def _req_title(body, rid):
     return rid
 
 
-def collect_findings(reqs):  # implements: REQ-FINDINGS-010
+def collect_findings(reqs):  # implements: ARCH-FINDINGS-010
     """Per requirement, the open '## WHAT — Verify intent' bullets minus the
     'None - ...' placeholder. Returns [(rid, title, [item, ...]), ...] for reqs
     that have >=1 real finding, in id order. Deterministic; reads only the md."""
@@ -3267,7 +3410,7 @@ def _render_findings_triaged(triage, raw_total):
     return "\n".join(L) + "\n", n, len(bugs)
 
 
-def _render_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
+def _render_findings(reqs, reqs_dir, raw=False):  # implements: ARCH-FINDINGS-010
     """The `_findings.md` text and its counts, without writing anything. Shared by
     `findings` (which writes it) and `map --check` (which compares the committed
     copy against it). Returns (md, total, n_groups, used_triage, n_tri, n_bugs)."""
@@ -3293,7 +3436,7 @@ def _render_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
     return md, total, len(groups), used_triage, n_tri, n_bugs
 
 
-def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
+def cmd_findings(reqs, reqs_dir, raw=False):  # implements: ARCH-FINDINGS-010
     """Aggregate every requirement's open verify-intent items into
     requirements/_findings.md. If a `_findings_triage.json` sidecar exists (and
     --raw is off), render the verified, classified view from it instead; else the
@@ -3314,7 +3457,7 @@ def cmd_findings(reqs, reqs_dir, raw=False):  # implements: REQ-FINDINGS-010
 
 
 # ---------- map (HTML) ----------
-def _attach_ac_coverage(node, body, covered):  # implements: REQ-ACVERIFY-019
+def _attach_ac_coverage(node, body, covered):  # implements: ARCH-ACVERIFY-019
     """Add `clauses` / `covered` / `gap` to a node, but ONLY when the requirement has
     adopted per-AC tagging: it labels criteria AND at least one carries a `verifies:`
     tag. Absent means "not measured", and every reader must render it as such.
@@ -3333,7 +3476,7 @@ def _attach_ac_coverage(node, body, covered):  # implements: REQ-ACVERIFY-019
         node["gap"] = "no `verifies:` tag for " + ", ".join(missing)
 
 
-def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
+def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007
     """Assemble the {nodes, edges} registry graph that drives every rendered
     surface (HTML map, Mermaid blocks, and the JSON export). Pure: no IO.
 
@@ -3345,7 +3488,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
         for dep in _as_list(r["meta"].get("depends_on")):
             if dep in used_by:
                 used_by[dep].append(rid)
-    satisfied_by = {rid: [] for rid in reqs}  # reverse upstream edges  # implements: REQ-TRACE-020
+    satisfied_by = {rid: [] for rid in reqs}  # reverse upstream edges  # implements: ARCH-TRACE-020
     for rid, r in reqs.items():
         for up in _as_list(r["meta"].get("satisfies")):
             if up in satisfied_by:
@@ -3355,6 +3498,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
         m = r["meta"]
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
+            "level": m.get("level"),                       # implements: ARCH-LEVEL-051
             "status": m.get("status", "draft"),
             "area": (m.get("area") or "").strip() or _area_of(rid),
             "title": _title(r["body"]),
@@ -3392,13 +3536,13 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
         for dep in _as_list(r["meta"].get("depends_on")):
             if dep in reqs:                    # skip dangling targets — no phantom node
                 data["edges"].append([rid, dep])
-        for up in _as_list(r["meta"].get("satisfies")):  # implements: REQ-TRACE-020
+        for up in _as_list(r["meta"].get("satisfies")):  # implements: ARCH-TRACE-020
             if up in reqs:
                 data["upstream_edges"].append([rid, up])
     return data
 
 
-def _roadmap_signals(root):  # implements: REQ-ROADMAP-038
+def _roadmap_signals(root):  # implements: ARCH-ROADMAP-038
     """Read TODO.md and report two read-only roadmap signals, or None when the file
     is absent (most repos have no TODO.md, and they must see nothing).
 
@@ -3432,7 +3576,7 @@ def _roadmap_signals(root):  # implements: REQ-ROADMAP-038
     return None
 
 
-def _version_key(v):  # implements: REQ-ROADMAP-038
+def _version_key(v):  # implements: ARCH-ROADMAP-038
     """Sort key for a `vX.Y.Z` string: compare numerically per segment, so v2.10
     sorts above v2.9 where a string compare would not."""
     return tuple(int(p) for p in v.lstrip("v").split(".") if p.isdigit())
@@ -3479,7 +3623,7 @@ def _parse_todos(root):
 
 
 # ---------------------------------------------------------------------------
-# Content translation (`translate`) — implements: REQ-TRANSLATE-044
+# Content translation (`translate`) — implements: ARCH-TRANSLATE-044
 #
 # Manual and opt-in only. NOTHING in this block is called from gate/sync/lint/
 # map/the pre-commit hook — `translate` is reached exclusively by typing
@@ -3507,14 +3651,14 @@ _EN_STOPWORDS = frozenset({
 })
 
 
-def _strip_code(text):  # implements: REQ-TRANSLATE-044
+def _strip_code(text):  # implements: ARCH-TRANSLATE-044
     """Drop fenced code blocks and inline `backticked` spans before a prose scan —
     an identifier's language must never sway a language-detection heuristic."""
     text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
     return re.sub(r"`[^`]*`", " ", text)
 
 
-def detect_lang(text):  # implements: REQ-TRANSLATE-044
+def detect_lang(text):  # implements: ARCH-TRANSLATE-044
     """RO/EN classifier over prose stripped of code spans. Romanian diacritics are a
     near-certain signal; below that, whichever stopword list scores more hits wins.
     Returns 'ro', 'en', or None when neither signal fires (too little prose, or a
@@ -3531,7 +3675,7 @@ def detect_lang(text):  # implements: REQ-TRANSLATE-044
     return "ro" if ro_hits > en_hits else "en"
 
 
-def _translation_source_text(body, title):  # implements: REQ-TRANSLATE-044
+def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
     """The exact span that gets translated and hashed: title + WHY + Contract +
     Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance only) —
     a title-only edit must also invalidate a cached translation."""
@@ -3541,7 +3685,7 @@ def _translation_source_text(body, title):  # implements: REQ-TRANSLATE-044
     ])
 
 
-def translation_hash(body, title):  # implements: REQ-TRANSLATE-044
+def translation_hash(body, title):  # implements: ARCH-TRANSLATE-044
     """Cache-invalidation key for one requirement's translation. NOT binding_hash() —
     see _translation_source_text. Includes TRANSLATOR_VERSION so bumping the prompt
     or the model invalidates every cached entry in one step, not file-by-file."""
@@ -3551,7 +3695,7 @@ def translation_hash(body, title):  # implements: REQ-TRANSLATE-044
     return h.hexdigest()[:12]
 
 
-def _effective_lang(r):  # implements: REQ-TRANSLATE-044
+def _effective_lang(r):  # implements: ARCH-TRANSLATE-044
     """A requirement's language: an explicit `lang: ro|en` frontmatter override wins;
     otherwise it is detected from the translated span. The override is the escape
     hatch for the rare file the heuristic gets wrong (e.g. a Romanian requirement
@@ -3562,7 +3706,7 @@ def _effective_lang(r):  # implements: REQ-TRANSLATE-044
     return detect_lang(_translation_source_text(r["body"], _title(r["body"])))
 
 
-def corpus_lang(reqs):  # implements: REQ-TRANSLATE-044
+def corpus_lang(reqs):  # implements: ARCH-TRANSLATE-044
     """Majority language across the whole corpus (per-file lang: override honored
     first). Returns 'ro' or 'en'; None only when every file is undetermined (e.g.
     an empty registry) — never guessed."""
@@ -3576,7 +3720,7 @@ def corpus_lang(reqs):  # implements: REQ-TRANSLATE-044
     return "ro" if counts["ro"] >= counts["en"] else "en"
 
 
-def _structural_signature(text):  # implements: REQ-TRANSLATE-044
+def _structural_signature(text):  # implements: ARCH-TRANSLATE-044
     """(backtick-span multiset, numeric-literal multiset, ordered structural markers,
     ordered `AC-N` labels, Gherkin-keyword multiset) — what a translation must preserve
     exactly. Used to gate a cache write: a translation that drops a backticked identifier
@@ -3596,7 +3740,7 @@ def _structural_signature(text):  # implements: REQ-TRANSLATE-044
     return (backticks, numbers, markers, labels, keywords)
 
 
-def _translation_preserves_structure(source, translated):  # implements: REQ-TRANSLATE-044
+def _translation_preserves_structure(source, translated):  # implements: ARCH-TRANSLATE-044
     return _structural_signature(source) == _structural_signature(translated)
 
 
@@ -3625,7 +3769,7 @@ _TRANSLATE_PROMPT = (
 )
 
 
-def _parse_translated_sections(text):  # implements: REQ-TRANSLATE-044
+def _parse_translated_sections(text):  # implements: ARCH-TRANSLATE-044
     """Split the model's marker-delimited response into {title, intent, contract,
     acceptance}. Returns None on any malformed response (a missing marker) — a
     partial parse is never used, only all four fields or none."""
@@ -3645,7 +3789,7 @@ def _parse_translated_sections(text):  # implements: REQ-TRANSLATE-044
     return {k.lower(): parts[k] for k in _TRANSLATE_MARKERS}
 
 
-def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lang):  # implements: REQ-TRANSLATE-044
+def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lang):  # implements: ARCH-TRANSLATE-044
     """Invoke `claude -p` once per requirement and parse its four-section response.
     Returns {title, intent, contract, acceptance} on success, or None on ANY
     failure — CLI missing, non-zero exit, timeout, or a malformed response. The
@@ -3669,7 +3813,7 @@ def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lan
     return _parse_translated_sections(proc.stdout)
 
 
-def cmd_translate(reqs, reqs_dir, target=None):  # implements: REQ-TRANSLATE-044
+def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-044
     """Translate every requirement written in the corpus's detected majority
     language into `target` (default: the other of {ro, en}), caching results in
     requirements/_i18n/<target>.json. Manual and opt-in — see the module-level
@@ -3737,7 +3881,7 @@ def cmd_translate(reqs, reqs_dir, target=None):  # implements: REQ-TRANSLATE-044
     return 0
 
 
-def _load_translations(reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
+def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044
     """Read every requirements/_i18n/<locale>.json cache file and return
     {rid: {locale: {title, intent, contract, acceptance}}} for entries whose
     stored hash still matches the requirement's CURRENT content. A stale entry
@@ -3771,7 +3915,7 @@ def _load_translations(reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
     return out
 
 
-def _attach_translations(data, reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
+def _attach_translations(data, reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044
     """Mutate data['nodes'] in place, adding node['i18n'] = {locale: {...}} for
     any node with a fresh cached translation. Shared by cmd_map and cmd_export
     so both emit the same graph — no `claude` call here, file reads only."""
@@ -3782,7 +3926,7 @@ def _attach_translations(data, reqs, reqs_dir):  # implements: REQ-TRANSLATE-044
     return data
 
 
-def cmd_map(reqs, members, reqs_dir, root=".", check=False, ac_cover=None):  # implements: REQ-MAP-007
+def cmd_map(reqs, members, reqs_dir, root=".", check=False, ac_cover=None):  # implements: ARCH-MAP-007
     data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
 
     if check:
@@ -3795,18 +3939,18 @@ def cmd_map(reqs, members, reqs_dir, root=".", check=False, ac_cover=None):  # i
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
-        docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
+        docs_out = _docs_publish_path(root)  # implements: ARCH-PAGES-021
         if docs_out:
             with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
                 dst.write(src.read())
             print("wrote {}".format(docs_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
-    if os.path.exists(os.path.join(reqs_dir, "_findings.md")):  # implements: REQ-FINDINGS-010
+    if os.path.exists(os.path.join(reqs_dir, "_findings.md")):  # implements: ARCH-FINDINGS-010
         cmd_findings(reqs, reqs_dir)   # a committed report follows the requirements it summarizes
     return 0
 
 
-def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # implements: REQ-MAP-007
+def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # implements: ARCH-MAP-007
     """The graph plus the three fields every rendered surface needs on top of it
     (repo, todos, translations). One assembler, so `map`, `export` and the gate's
     freshness probe cannot build three subtly different documents and disagree about
@@ -3824,7 +3968,7 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
     return data
 
 
-def cmd_export(reqs, members, reqs_dir, root=".", out=None, ac_cover=None):  # implements: REQ-MAP-007
+def cmd_export(reqs, members, reqs_dir, root=".", out=None, ac_cover=None):  # implements: ARCH-MAP-007
     """Emit the registry graph as JSON for an external front-end to consume.
     Same {nodes, edges} shape that drives the map; '-' = stdout, --out PATH, or
     requirements/_map.json by default."""
@@ -3841,7 +3985,7 @@ def cmd_export(reqs, members, reqs_dir, root=".", out=None, ac_cover=None):  # i
     return 0
 
 
-def _risk_score(meta):  # implements: REQ-NEXT-013
+def _risk_score(meta):  # implements: ARCH-NEXT-013
     """Extract's per-file risk hint (0-3) from frontmatter, or 0 when absent /
     unparseable. Used only to float REVIEW-flagged drafts to the top of a bucket —
     never to gate. Hand-authored requirements have no `risk:` field -> 0."""
@@ -3854,7 +3998,7 @@ def _risk_score(meta):  # implements: REQ-NEXT-013
 _PRIORITY_ORDER = {"must-have": 0, "should-have": 1, "could-have": 2, "wont-have": 3}
 
 
-def _recorded_members(reqs_dir, ids):  # implements: REQ-NEXT-013
+def _recorded_members(reqs_dir, ids):  # implements: ARCH-NEXT-013
     """{id: first member loc} from the committed `_map.json`, for those of `ids` whose
     node records a member there. The narrow default scan (no --code) cannot see a
     member outside its root, so a requirement lands in Orphans while the committed
@@ -3873,7 +4017,7 @@ def _recorded_members(reqs_dir, ids):  # implements: REQ-NEXT-013
     return out
 
 
-def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: REQ-NEXT-013
+def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: ARCH-NEXT-013
     """Terminal 'what should I do next': a focused, counted worklist over the same
     `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
     header, leads with the most-urgent bucket, shows the top few per bucket (the
@@ -3980,12 +4124,17 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
 # NOT checked in v1 — without a term dictionary it is too false-positive-prone on
 # prose that carries code references.
 LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
-LINT_SENTENCE_WORDS = 25       # a single sentence longer than this is flagged (warn)
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
-LINT_CONTRACT_WORDS = 22       # a Contract bullet over this many words is flagged (warn)
-LINT_STATEMENT_WORDS = 75      # a Contract CLAUSE — continuation lines joined — over this
+LINT_CLAUSE_SENTENCES = 3      # a Contract bullet spanning MORE sentences than this is
+                               # flagged by `statement-too-long` (warn). Sentence count is
+                               # the only dimension this check measures; words per clause
+                               # belong to `statement-size`. A clause may hold two or three
+                               # sentences — the extra ones state the first's consequence.
+                               # A per-SENTENCE word ceiling was dropped on 2026-09-03: see
+                               # ARCH-LINTCHECKS-025's notes for what that gave up.
+LINT_STATEMENT_WORDS = 150     # a Contract CLAUSE — continuation lines joined — over this
                                # many words is reported by `statement-size`. Advisory only:
-                               # REQ-ATOMICITY-049 makes atomicity the normative rule and this
+                               # ARCH-ATOMICITY-049 makes atomicity the normative rule and this
                                # threshold an explicit heuristic, so a longer clause stays valid.
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
@@ -4018,7 +4167,7 @@ LINT_MODAL_WORDS = frozenset({"shall", "must"})
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z-]*")
 
 
-def _lint_prose(body, name):  # implements: REQ-LINT-014
+def _lint_prose(body, name):  # implements: ARCH-LINT-014
     """Yield the prose text lines under the FIRST `## ` heading whose text contains
     `name`, up to the next `## `. A bullet's leading `- ` is stripped so its text is
     linted as a sentence. Non-prose lines — headings, table rows, blockquotes, and
@@ -4047,18 +4196,18 @@ def _lint_prose(body, name):  # implements: REQ-LINT-014
     return out
 
 
-def _sentences(text):  # implements: REQ-LINTCHECKS-025
+def _sentences(text):  # implements: ARCH-LINTCHECKS-025
     """Split a prose line into sentences on '.', '!', '?' boundaries. Crude but
     deterministic — enough to count words per sentence for the length check."""
     return [p.strip() for p in re.split(r"(?<=[.!?])\s+", text) if p.strip()]
 
 
-def _clip(s, n=60):  # implements: REQ-LINT-014
+def _clip(s, n=60):  # implements: ARCH-LINT-014
     """Shorten a snippet for one-line finding output."""
     return s if len(s) <= n else s[:n - 1] + "…"
 
 
-def _clause_words(text):  # implements: REQ-ATOMICITY-049
+def _clause_words(text):  # implements: ARCH-ATOMICITY-049
     """Word count for a Contract clause, counting each backticked span as one word.
     A clause carrying a long code sample is short prose, not a long statement. The span
     collapses to a bare token with no padding spaces: " x " would split trailing punctuation
@@ -4066,7 +4215,7 @@ def _clause_words(text):  # implements: REQ-ATOMICITY-049
     return len(re.sub(r"`[^`]*`", "x", text).split())
 
 
-def _contract_clauses(body):  # implements: REQ-ATOMICITY-049
+def _contract_clauses(body):  # implements: ARCH-ATOMICITY-049
     """Yield (n, text) per clause of the Contract section, n 1-based.
 
     A clause is one bullet at ANY indent — a nested sub-bullet is its own clause because
@@ -4124,13 +4273,15 @@ def _count_ac(body):
     return len(_acc_blocks(body))
 
 
-def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-LINT-014  # implements: REQ-LINTCHECKS-025
+def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # implements: ARCH-LINT-014  # implements: ARCH-LINTCHECKS-025  # implements: ARCH-FANOUT-052
     """Return a list of {severity, check, detail} findings for one requirement;
     an empty list means clean. Checks the Contract + Acceptance sections only.
     `member_list` (optional [(role, file, line), ...]) enables the member-based
     file-spread check; when omitted, that check is skipped.
     `fanin` (optional int — how many requirements depend on this one) enables the
     layer-mismatch check; when omitted, that check is skipped.
+    `children` (optional int — how many requirements declare `satisfies:` this one) enables
+    the fan-out check; when omitted, or when it is zero, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are silently
     skipped and not counted against the requirement."""
     exempt = set(_as_list(r["meta"].get("lint_exempt")))
@@ -4155,13 +4306,6 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
     # prose readability (warn): only on the Contract + Acceptance sections
     for name in ("contract", "acceptan"):
         for ln in _lint_prose(body, name):
-            for sent in _sentences(ln):
-                words = len(sent.split())
-                if words > LINT_SENTENCE_WORDS:
-                    findings.append({
-                        "severity": "warn", "check": "long-sentence",
-                        "detail": "{}-word sentence (>{}): {}".format(
-                            words, LINT_SENTENCE_WORDS, _clip(sent))})
             low = ln.lower()
             # Every line in a Contract/Acceptance section is normative by virtue of the
             # section it sits in, so the join count applies to all of them. This used to be
@@ -4181,23 +4325,28 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
                     "severity": "warn", "check": "anonymous-subject",
                     "detail": "clause opens with an unnamed 'It' — name the subject: {}".format(
                         _clip(ln))})
-    # statement atomicity (warn): a Contract bullet that packs >N words across MULTIPLE
-    # sentences is a stacked statement (split it). A single long sentence is already
-    # `long-sentence`'s job — gating on len(sents) > 1 keeps the two checks orthogonal
-    # so the same line is never flagged twice.
-    for ln in _lint_prose(body, "contract"):
+    # statement atomicity (warn): a Contract bullet spanning more than
+    # LINT_CLAUSE_SENTENCES sentences packs several statements into one clause (split it).
+    # Sentence COUNT is the only dimension here — `long-sentence` owns words per sentence
+    # and `statement-size` owns words per clause — so the three checks never flag the same
+    # line for the same reason, and a correct two- or three-sentence clause stays silent.
+    # Read whole CLAUSES, not the physical lines `_lint_prose` yields. These files wrap
+    # near 95 columns, so a line-based count can never see a clause that spans several
+    # lines — which is why this check reported 0 corpus-wide while measuring the wrong
+    # unit. Measured before the switch: 0 of 625 non-draft clauses hold more than three
+    # sentences, so widening the unit changes nothing the check says today.
+    for _cn, ln in _contract_clauses(body):
         sents = _sentences(ln)
-        words = len(ln.split())
-        if len(sents) > 1 and words > LINT_CONTRACT_WORDS:
+        if len(sents) > LINT_CLAUSE_SENTENCES:
             findings.append({
                 "severity": "warn", "check": "statement-too-long",
-                "detail": "{}-word statement across {} sentences (>{}): {}".format(
-                    words, len(sents), LINT_CONTRACT_WORDS, _clip(ln))})
+                "detail": "statement spans {} sentences (>{}): {}".format(
+                    len(sents), LINT_CLAUSE_SENTENCES, _clip(ln))})
     # statement-size (warn, advisory): a Contract clause well past the length a single
     # obligation normally needs. Measured per CLAUSE, not per line — see _contract_clauses.
     # Advisory by contract: exceeding the threshold never makes a clause invalid and never
     # asserts that it holds two obligations, which the engine cannot observe
-    # (REQ-ATOMICITY-049). The finding carries clause_n/clause_text so `--decompose` can
+    # (ARCH-ATOMICITY-049). The finding carries clause_n/clause_text so `--decompose` can
     # scaffold from the same clause without re-parsing.
     for _n, _clause in _contract_clauses(body):
         _cw = _clause_words(_clause)
@@ -4210,7 +4359,9 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
     # ac count (warn): too few = under-specified; too many = over-scoped
     if _has_section(body, "acceptan"):
         ac_n = _count_ac(body)
-        if 0 < ac_n < LINT_AC_MIN:
+        # An atomic requirement holds ONE obligation, so one criterion is the correct
+        # number, not an under-specified one. LINT_AC_MIN guards a dossier.
+        if 0 < ac_n < LINT_AC_MIN and not _atomic_spans(body):
             findings.append({
                 "severity": "warn", "check": "ac-count-low",
                 "detail": "{} AC (< {}): requirement may be under-specified".format(
@@ -4248,6 +4399,20 @@ def lint_requirement(rid, r, member_list=None, fanin=None):  # implements: REQ-L
                           "capabilities — consider splitting".format(
                               contract_n, "groups" if groups else "clauses",
                               ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
+    # fan-out (warn): a parent in the `satisfies:` hierarchy normally carries 5-20 children.
+    # Too few and the level buys no grouping; too many and it is a bucket, not a level.
+    # Counted on the satisfies graph, NOT on `depends_on` — the two are different axes, and
+    # `depends_on` depth here maxes out at 3, so a band of 5-20 read against it would flag
+    # every requirement in the corpus. A leaf (zero children) is skipped: it is not a
+    # malformed parent, it is not a parent at all.
+    if children:
+        if not (LINT_FANOUT_MIN <= children <= LINT_FANOUT_MAX):
+            findings.append({
+                "severity": "warn", "check": "fan-out",
+                "detail": "{} requirement(s) satisfy this one (outside {}-{}): {}".format(
+                    children, LINT_FANOUT_MIN, LINT_FANOUT_MAX,
+                    "too few to be a level" if children < LINT_FANOUT_MIN
+                    else "too many — split it")})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
@@ -4344,7 +4509,7 @@ AC-1
 **Notes**
 - SCAFFOLD, NOT A DECISION. `lint --decompose` copied clause {n} of {parent} here
   verbatim. The split point was chosen by WORD COUNT, never by obligation — the engine
-  cannot observe how many obligations a clause holds (REQ-ATOMICITY-049). Read the clause
+  cannot observe how many obligations a clause holds (ARCH-ATOMICITY-049). Read the clause
   and decide for yourself whether it should have been split at all.
 - The clause is still over the threshold here, because only a human can divide it. Confirming
   this file unedited re-raises the same `statement-size` finding, which is the intended
@@ -4357,7 +4522,7 @@ AC-1
 """
 
 
-def _next_free_number(reqs_dir):  # implements: REQ-DECOMPOSE-050
+def _next_free_number(reqs_dir):  # implements: ARCH-DECOMPOSE-050
     """Highest NNN across the corpus, plus one. Ids stay in AREA-NAME-NNN shape rather
     than taking a derived suffix such as REQ-AUTH-012-B: the suffix form passes _ID_PAT,
     but _warn_number_collision reads parts[-1] as the number and would compare "B"."""
@@ -4375,7 +4540,7 @@ def _next_free_number(reqs_dir):  # implements: REQ-DECOMPOSE-050
     return best + 1
 
 
-def _already_decomposed(reqs_dir, parent_id, n):  # implements: REQ-DECOMPOSE-050
+def _already_decomposed(reqs_dir, parent_id, n):  # implements: ARCH-DECOMPOSE-050
     """True when some requirement already carries the `decomposed-from: <parent>#<n>` marker.
 
     Re-running must be a no-op, and the allocated file NAME cannot detect that: the id comes
@@ -4400,7 +4565,7 @@ def _already_decomposed(reqs_dir, parent_id, n):  # implements: REQ-DECOMPOSE-05
     return False
 
 
-def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: REQ-DECOMPOSE-050
+def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: ARCH-DECOMPOSE-050
     """Scaffold one draft requirement from an over-threshold Contract clause.
 
     Creates exactly one file and never touches the parent, so a confirmed contract cannot
@@ -4426,10 +4591,10 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: RE
     return new_id
 
 
-def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: REQ-LINT-014  # implements: REQ-DECOMPOSE-050
+def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
-    mechanical. Checks: missing-section (error), long-sentence (warn),
+    mechanical. Checks: missing-section (error),
     stacked-conditions (warn), statement-too-long (warn), ac-count-low (warn),
     ac-count-high (warn), vague-term (warn), redundant-modal (warn). Read-only. Exit-neutral by default; with
     --strict it exits non-zero on any error-severity finding AND promotes structural
@@ -4440,12 +4605,17 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     `statement-size` finding also scaffolds one draft requirement from its clause. The gate,
     the pre-commit hook and CI never pass it: .githooks/pre-commit runs gate -> lint --strict
     -> map --check, so a file written during the lint step would fail the map --check step of
-    the same hook run (REQ-DECOMPOSE-050)."""
+    the same hook run (ARCH-DECOMPOSE-050)."""
     # Checks promoted from warn→error in --strict mode (structural, not style).
     STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
-    fanin = {rid: 0 for rid in reqs}                      # implements: REQ-LINTCHECKS-025
+    fanin = {rid: 0 for rid in reqs}                      # implements: ARCH-LINTCHECKS-025
+    kids = {rid: 0 for rid in reqs}                        # implements: ARCH-FANOUT-052
+    for _rid, _r in reqs.items():                          # satisfies edges, child side
+        for _up in _as_list(_r["meta"].get("satisfies")):
+            if _up in kids:
+                kids[_up] += 1
     for _rid, _r in reqs.items():
         for _dep in _as_list(_r["meta"].get("depends_on")):
             if _dep in fanin:
@@ -4453,7 +4623,7 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     errors = warns = 0
     created = []
     for rid, r in targets:
-        fs = lint_requirement(rid, r, (members or {}).get(rid), fanin.get(rid))
+        fs = lint_requirement(rid, r, (members or {}).get(rid), fanin.get(rid), kids.get(rid))
         exempt = set(_as_list(r["meta"].get("lint_exempt")))
         if not fs and not exempt:
             continue
@@ -4494,7 +4664,7 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     return 0
 
 
-def cmd_show(reqs, members, cap_id, levels=None):  # implements: REQ-SHOW-015  # implements: REQ-VLEVEL-037
+def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  # implements: ARCH-VLEVEL-037
     """Print one consolidated, human-readable dossier for a single requirement: its
     status/layer/intent, contract, dependencies (both directions), members grouped
     by role, open verify-intent questions, and risk signals — the 'what does this do
@@ -4529,7 +4699,7 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: REQ-SHOW-015  #
     print("\nDepends on: " + (", ".join(deps) if deps else "(none)"))
     print("Depended on by: " + (", ".join(dependents) if dependents else "(none)"))
 
-    # upstream traceability: only shown when the requirement participates in it,  # implements: REQ-TRACE-020
+    # upstream traceability: only shown when the requirement participates in it,  # implements: ARCH-TRACE-020
     # so requirements that don't use `satisfies` get no extra noise.
     upstream = _as_list(m.get("satisfies"))
     satisfiers = sorted(rid for rid, rr in reqs.items()
@@ -4583,14 +4753,14 @@ _SIMILAR_STOP = frozenset((
 ))
 
 
-def _sim_tokens(text):  # implements: REQ-SIMILAR-016
+def _sim_tokens(text):  # implements: ARCH-SIMILAR-016
     """Lowercase alphanumeric tokens of length >= 3, minus stopwords and pure
     numbers — the bag of words a requirement is compared on. Deterministic."""
     return [t for t in re.findall(r"[a-z0-9]+", text.lower())
             if len(t) >= 3 and not t.isdigit() and t not in _SIMILAR_STOP]
 
 
-def _placeholder_contract(body):  # implements: REQ-SIMILAR-016
+def _placeholder_contract(body):  # implements: ARCH-SIMILAR-016
     """True when every Contract bullet is still a `TODO:` scaffold line. Five evidence
     runs scored thousands of freshly-drafted stubs as near-duplicates of each other on
     template text alone (fabric: 6,340 pairs for 638 drafts) — nothing authored, nothing
@@ -4599,7 +4769,7 @@ def _placeholder_contract(body):  # implements: REQ-SIMILAR-016
     return bool(bullets) and all(b.strip().upper().startswith("TODO") for b in bullets)
 
 
-def _sim_text(body):  # implements: REQ-SIMILAR-016
+def _sim_text(body):  # implements: ARCH-SIMILAR-016
     """The text similarity is computed on: title, intent line, and Contract bullets.
     Notes & limitations is left out — it is dense and would only add noise."""
     parts = [_req_title(body, "")]
@@ -4611,7 +4781,7 @@ def _sim_text(body):  # implements: REQ-SIMILAR-016
     return " ".join(parts)
 
 
-def _tfidf(docs):  # implements: REQ-SIMILAR-016
+def _tfidf(docs):  # implements: ARCH-SIMILAR-016
     """docs: {id: token_list}. Returns {id: {term: weight}} with smoothed idf =
     log((1 + N) / (1 + df)) + 1 — always positive (so a 2-doc corpus does not
     collapse to zero), while still down-weighting terms common across requirements."""
@@ -4629,7 +4799,7 @@ def _tfidf(docs):  # implements: REQ-SIMILAR-016
     return vecs
 
 
-def _cosine(a, b):  # implements: REQ-SIMILAR-016
+def _cosine(a, b):  # implements: ARCH-SIMILAR-016
     """Cosine similarity of two {term: weight} vectors, in [0, 1]. The result is
     clamped to 1.0 because floating-point rounding can push parallel vectors a hair
     over 1.0 (e.g. 1.0000000000000002), which would break the documented range."""
@@ -4641,7 +4811,7 @@ def _cosine(a, b):  # implements: REQ-SIMILAR-016
     return min(1.0, dot / (na * nb)) if na and nb else 0.0
 
 
-def _threshold_arg(v):  # implements: REQ-SIMILAR-016
+def _threshold_arg(v):  # implements: ARCH-SIMILAR-016
     """argparse type for `--threshold`: a finite number in (0, 1]. Rejects nan/inf
     (which silently swallow or admit every pair under `>=`) and out-of-range cutoffs."""
     try:
@@ -4672,7 +4842,7 @@ def _test_suite_pairs(members):
     return linked
 
 
-def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements: REQ-SIMILAR-016
+def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements: ARCH-SIMILAR-016
     """Report requirement pairs whose contracts overlap at or above `threshold`
     (cosine over TF-IDF of title + intent + Contract), most-similar-first, so a human
     can spot a probable duplicate or a capability that should be merged. Read-only and
@@ -4735,7 +4905,7 @@ SEARCH_FLOOR = 0.05
 SEARCH_TOP = 5
 
 
-def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR):  # implements: REQ-SEARCH-036
+def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR):  # implements: ARCH-SEARCH-036
     """Rank requirements by lexical relevance to `query` (cosine over TF-IDF of the
     same title + intent + Contract text `dupes` compares on). Read-only, always exit
     zero. Prints each hit's cosine score so a weak match is visible as weak, and emits
@@ -4856,7 +5026,7 @@ def _link_sync_errors(reqs, members):
     return errs
 
 
-def _dependency_cycles(reqs):  # implements: REQ-CHECK-006
+def _dependency_cycles(reqs):  # implements: ARCH-CHECK-006
     """Every `depends_on` cycle in the registry, as a list of id lists, each ending
     where it began (`A, B, C, A`). Deterministic: nodes and edges are walked in
     sorted order, so the same corpus always reports the same cycles in the same
@@ -4899,7 +5069,7 @@ def _dependency_cycles(reqs):  # implements: REQ-CHECK-006
     return cycles
 
 
-def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: REQ-REGISTRYLAG-035
+def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRYLAG-035
     """Count commits on HEAD since the last commit that touched `reqs_dir`.
 
     The advisory "registry lag" signal: a large number means the registry has
@@ -4925,7 +5095,7 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: REQ-REGISTRYL
         return None
 
 
-def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: REQ-HEALTH-017
+def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: ARCH-HEALTH-017
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
@@ -4944,7 +5114,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     scope for this signal."""
     total = len(reqs)
     lock = load_lock(reqs_dir)
-    satisfied = set()  # need ids with >=1 `satisfies:` edge (REQ-TRACE-020)
+    satisfied = set()  # need ids with >=1 `satisfies:` edge (ARCH-TRACE-020)
     for r in reqs.values():
         satisfied.update(_as_list(r["meta"].get("satisfies")))
     confirmed = implemented = tested = orphans = untested = open_intent = drifted = drafts = healthy = 0
@@ -4989,22 +5159,22 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
             "gate_errors": len(gate_errors), "gate_link_sync_clean": not gate_errors}
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
-    # _scan_untagged (REQ-NEXT-013). Informational only: it counts FILES, not
+    # _scan_untagged (ARCH-NEXT-013). Informational only: it counts FILES, not
     # requirements, so it never enters the per-requirement score, and it is
     # absent (not zero) when no code root is available, e.g. a unit-test caller.
-    # implements: REQ-COVERAGE-029
+    # implements: ARCH-COVERAGE-029
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
     if untagged is not None:
         data["untagged"] = len(untagged)
     # Registry-lag signal (read-only): commits since requirements/ was last
     # touched — a frozen registry while code moves ahead. Absent (not 0) when
-    # unmeasurable (no git / no code root), like `untagged`. implements: REQ-REGISTRYLAG-035
+    # unmeasurable (no git / no code root), like `untagged`. implements: ARCH-REGISTRYLAG-035
     lag = _commits_since_reqs_touch(code_root, reqs_dir) if code_root else None
     if lag is not None:
         data["commits_since_req_touch"] = lag
     # Roadmap signals (read-only): does TODO.md still track what shipped, and does every
     # section heading actually parse as a milestone. Absent (not empty) when the repo has
-    # no TODO.md, so a repo that does not keep one sees nothing. implements: REQ-ROADMAP-038
+    # no TODO.md, so a repo that does not keep one sees nothing. implements: ARCH-ROADMAP-038
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap is not None:
         newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
@@ -5121,7 +5291,7 @@ def _wipe(reqs_dir, code_root):
         deleted, stripped_files))
 
 
-def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
+def _reqmapignore_seed(code_root, reqs_dir):  # implements: ARCH-INIT-012
     """Content for a freshly-seeded `.reqmapignore`. Normally ignores the vendored
     engine at `scripts/reqmap.py` — its `implements:` self-tags would otherwise read
     as dangling refs in a consumer repo. EXCEPTION — a self-hosting repo: when that
@@ -5157,7 +5327,7 @@ def _reqmapignore_seed(code_root, reqs_dir):  # implements: REQ-INIT-012
             "scripts/reqmap.py\n")
 
 
-def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ-INIT-012
+def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARCH-INIT-012
     """First-use bootstrap for a fresh repo: create requirements/, seed a minimal
     .reqmapignore (idempotent — never clobbers an existing one), draft requirements
     from existing code, build the lock + map, then print guided next steps.
@@ -5183,7 +5353,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: REQ
     members = scan_members(code_root, reqs_dir)
     cmd_check(reqs, members, reqs_dir, update_lock=True, code_root=code_root)
     cmd_map(reqs, members, reqs_dir, code_root)
-    # implements: REQ-SITE-026 — best-effort project site. Never aborts init.
+    # implements: ARCH-SITE-026 — best-effort project site. Never aborts init.
     if not no_site:
         target = _site_default_target(code_root)
         if target:
@@ -5224,7 +5394,7 @@ def _strip_generated(text):
 _ENGINE_STAT_RE = re.compile(r'<div class="stat"><b>[^<]*</b><span>engine</span></div>')
 
 
-def _strip_engine_stat(html):  # implements: REQ-SITE-026
+def _strip_engine_stat(html):  # implements: ARCH-SITE-026
     """Drop the `engine` stat cell before a site STATS-region freshness diff — it
     embeds the live MAP_ENGINE_VERSION, which changes on every engine change
     independent of requirement content, mirroring the `repo`/`engine_version`
@@ -5233,7 +5403,7 @@ def _strip_engine_stat(html):  # implements: REQ-SITE-026
     return _ENGINE_STAT_RE.sub("", html)
 
 
-def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
+def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: ARCH-MAP-007
     """Names of the committed generated artifacts that no longer match a fresh
     render of `data` — the whole of the freshness verdict, with no printing and no
     exit code, so `map --check` (which fails) and `gate` (which warns) read the same
@@ -5251,7 +5421,7 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MA
     # Committed findings report: derived from the requirements' verify-intent bullets,
     # so a committed copy goes stale exactly like _map.* does (this repo's sat stale
     # for eleven weeks). Absent = never generated = not stale, same convention.
-    findings_out = os.path.join(reqs_dir, "_findings.md")  # implements: REQ-FINDINGS-010
+    findings_out = os.path.join(reqs_dir, "_findings.md")  # implements: ARCH-FINDINGS-010
     if reqs is not None and os.path.exists(findings_out):
         with open(findings_out, encoding="utf-8") as f:
             on_disk = f.read()
@@ -5263,7 +5433,7 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MA
     # through _strip_generated for the same reason _map.json does: the injected blob
     # embeds the git-derived `repo` field, which differs across forks/clones — left
     # in, it would make `map --check` spuriously fail on any fork.
-    docs_out = _docs_publish_path(root)  # implements: REQ-PAGES-021
+    docs_out = _docs_publish_path(root)  # implements: ARCH-PAGES-021
     tpl = _viewer_template_path()
     if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
         with open(tpl, encoding="utf-8") as f:
@@ -5274,7 +5444,7 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MA
             stale.append(os.path.basename(docs_out))
     # Site presentation page: gate the deterministic STATS region only. NAV embeds
     # the git-derived repo URL (fork-specific) and is excluded, mirroring the
-    # `repo`-field exclusion in _strip_generated.  # implements: REQ-SITE-026
+    # `repo`-field exclusion in _strip_generated.  # implements: ARCH-SITE-026
     site_target = _site_default_target(root)
     if site_target and os.path.exists(site_target):
         with open(site_target, encoding="utf-8") as f:
@@ -5288,7 +5458,7 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MA
     return stale
 
 
-def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
+def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: ARCH-MAP-007
     """Freshness gate: regenerate the map in memory and compare to the committed
     files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
     that shifts the map can't be committed without regenerating it. A map that was
@@ -5303,7 +5473,7 @@ def _map_check(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
     return 0
 
 
-def _title(body):  # implements: REQ-MAP-007
+def _title(body):  # implements: ARCH-MAP-007
     """The human title from the requirement's first `# ` heading."""
     for line in body.splitlines():
         if line.strip().startswith("# "):
@@ -5311,7 +5481,7 @@ def _title(body):  # implements: REQ-MAP-007
     return ""
 
 
-def _first_quote(body):  # implements: REQ-MAP-007
+def _first_quote(body):  # implements: ARCH-MAP-007
     """The requirement's intent: the FIRST contiguous blockquote (the WHY), joined into
     one line. A multi-line `>` WHY (a richer plain-language summary) is gathered whole,
     not truncated to its first line. Fenced code is skipped so a `>` inside a fence
@@ -5334,7 +5504,7 @@ def _first_quote(body):  # implements: REQ-MAP-007
     return " ".join(out)
 
 
-def _section(body, name):  # implements: REQ-MAP-007
+def _section(body, name):  # implements: ARCH-MAP-007
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -5353,7 +5523,7 @@ def _section(body, name):  # implements: REQ-MAP-007
     return " ".join(out)
 
 
-def _section_raw(body, name):  # implements: REQ-MAP-007
+def _section_raw(body, name):  # implements: ARCH-MAP-007
     """Like _section but preserves line breaks + indentation — used for the
     multi-line Given/When/Then acceptance blocks so they read as written."""
     out, grab, seen, fenced = [], False, False, False
@@ -5374,7 +5544,7 @@ def _section_raw(body, name):  # implements: REQ-MAP-007
     return "\n".join(out).strip()
 
 
-def _is_label_line(line):  # implements: REQ-MAP-007
+def _is_label_line(line):  # implements: ARCH-MAP-007
     """True when `line` is a clause-group label: a bold-only line at column 0.
 
     The authoring voice groups clauses under bold labels once a contract passes
@@ -5390,7 +5560,11 @@ def _is_label_line(line):  # implements: REQ-MAP-007
     return not line[:1].isspace() and re.fullmatch(r"\*\*.+\*\*", line.strip()) is not None
 
 
-def _bullets(body, name):  # implements: REQ-MAP-007
+def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMICFORM-053
+    if name == "contract":
+        _sp = _atomic_spans(body)
+        if _sp:                                    # the atomic statement is the one clause
+            return [" ".join(l.lstrip("> ").strip() for l in _sp[0]).strip()]
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -5424,7 +5598,7 @@ def _bullets(body, name):  # implements: REQ-MAP-007
     return out
 
 
-def _context_group(body, label):  # implements: REQ-CONTEXT-048
+def _context_group(body, label):  # implements: ARCH-CONTEXT-048
     """Bullets under a bold `**<label>**` sub-group inside the consolidated
     `## Context (non-binding)` section — the form `new`'s template scaffolds since
     ADR-0017, replacing the legacy per-topic `## WHAT — Notes` / `## WHERE — Current
@@ -5491,20 +5665,20 @@ def _node_label(n):
     return "{}<br><small>{}</small>".format(title, _mlabel(n["id"]))
 
 
-def _area_of(rid):  # implements: REQ-MAP-007
+def _area_of(rid):  # implements: ARCH-MAP-007
     """Capability 'area' = the first id segment (BUS-PATHS-001 -> BUS). Used to
     cluster a large System Map into per-area subgraphs so 40+ nodes stay legible."""
     return rid.split("-", 1)[0] or rid
 
 
-def _node_area(n):  # implements: REQ-MAP-007
+def _node_area(n):  # implements: ARCH-MAP-007
     """Grouping key for a node: an explicit `area:` frontmatter field wins (lets a
     repo group e.g. several standalone capabilities under one ANALYSIS box without
     renaming ids); otherwise fall back to the id prefix."""
     return (n.get("area") or "").strip() or _area_of(n["id"])
 
 
-def _grouped_areas(nodes):  # implements: REQ-MAP-007
+def _grouped_areas(nodes):  # implements: ARCH-MAPDIAGRAMS-055
     """Order nodes into [(area_label, [node,...]), ...]: multi-node areas first
     (sorted), then one 'misc' bucket of every single-node area. Shared by the
     System / Dependency / Risk diagrams so a 40+ node map stays navigable
@@ -5556,7 +5730,7 @@ def _hub_targets(data, bus_ids):
     return set(bus_ids) | {nid for nid, c in fanin.items() if c >= SYSTEM_HUB_FANIN}
 
 
-def _mermaid_system(data):  # implements: REQ-MAP-007
+def _mermaid_system(data):  # implements: ARCH-MAPDIAGRAMS-055
     # Per-area subgraphs + hide edges into bus/hubs (the hairball); the full graph
     # is in the Dependency Map. Bus nodes keep a thick stroke.
     lines = ["graph LR"]   # left-right fills a wide/landscape area better than top-down
@@ -5571,7 +5745,38 @@ def _mermaid_system(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
-def _mermaid_deps(data):  # implements: REQ-MAP-007
+def _mermaid_hierarchy(data):  # implements: ARCH-MAPDIAGRAMS-055
+    """The specification hierarchy: system -> architecture, over `satisfies:` edges.
+
+    Drawn from `upstream_edges`, not `depends_on` — those are different axes, and only this
+    one forms a hierarchy. The `code` level is counted, never drawn: a corpus that has split
+    its clauses carries hundreds of them, and past a few hundred nodes Mermaid stops being
+    something a reader can take in (or GitHub renders at all). Each architecture box shows
+    how many code requirements sit under it, which is the fan-out the band judges."""
+    levels = {n["id"]: n.get("level") for n in data["nodes"]}
+    drawn = [n for n in data["nodes"] if levels.get(n["id"]) in ("system", "architecture")]
+    if not drawn:
+        return ""
+    kids = {}
+    for child, parent in data.get("upstream_edges", []):
+        if levels.get(child) == "code":
+            kids[parent] = kids.get(parent, 0) + 1
+    lines = ["graph TD"]
+    for n in drawn:
+        rid = n["id"]
+        label = rid if levels[rid] == "system" else "{}<br/>{} code".format(rid, kids.get(rid, 0))
+        shape = "[[{}]]" if levels[rid] == "system" else "[{}]"
+        lines.append("  {}{}".format(_safe_id(rid), shape.format(label)))
+    for child, parent in data.get("upstream_edges", []):
+        if levels.get(child) in ("system", "architecture") and parent in levels:
+            lines.append("  {} --> {}".format(_safe_id(parent), _safe_id(child)))
+    for n in drawn:
+        if levels[n["id"]] == "system":
+            lines.append("  style {} stroke-width:3px".format(_safe_id(n["id"])))
+    return "\n".join(lines)
+
+
+def _mermaid_deps(data):  # implements: ARCH-MAPDIAGRAMS-055
     # Area-level coupling overview (C4 'container' zoom-out): one box per area, an
     # edge A->B when ANY capability in A depends on one in B. Aggregating the
     # per-capability edges here kills the bus hub hairball; the System Map keeps
@@ -5602,7 +5807,7 @@ def _mermaid_deps(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
-def _mermaid_req_to_code(data):  # implements: REQ-MAP-007
+def _mermaid_req_to_code(data):  # implements: ARCH-MAPDIAGRAMS-055
     lines = ["graph LR"]
     loc_sid, sid_used = {}, {}        # distinct file:line locs must get distinct node ids
     for n in data["nodes"]:
@@ -5665,7 +5870,7 @@ def _risk_signals(node):
     # has no `implements:` member (a `tested-by`-only member must not satisfy it).
     # Keying on the implements ROLE (not raw member-list emptiness) keeps next/show/
     # the Risk map agreeing with `check`. A `layer: need` is satisfied-by other
-    # requirements, not implemented by code, so the gate exempts it (REQ-TRACE-020) —
+    # requirements, not implemented by code, so the gate exempts it (ARCH-TRACE-020) —
     # mirror that here, else the Risk/Problems views flag a passing gate as failing.
     roles = _member_roles(node.get("members"))
     if node["status"] in ENFORCED and "implements" not in roles and not _impl_exempt(node):
@@ -5690,7 +5895,7 @@ def _risk_signals(node):
     return signals
 
 
-def _mermaid_risk(data):  # implements: REQ-MAP-007
+def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055
     dep_count = {n["id"]: 0 for n in data["nodes"]}
     for _, b in data["edges"]:
         dep_count[b] = dep_count.get(b, 0) + 1
@@ -5729,7 +5934,7 @@ _LEGEND_MD = [
 ]
 
 
-def _build_md_text(data):  # implements: REQ-MAP-007
+def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055
     from datetime import datetime
     ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -5738,6 +5943,7 @@ def _build_md_text(data):  # implements: REQ-MAP-007
         dep_count[b] = dep_count.get(b, 0) + 1
 
     diagrams = [
+        ("Specification Hierarchy", _mermaid_hierarchy(data)),
         ("System Map",          _mermaid_system(data)),
         ("Requirement-to-Code", _mermaid_req_to_code(data)),
         ("Dependency Map",      _mermaid_deps(data)),
@@ -5780,7 +5986,7 @@ def _build_md_text(data):  # implements: REQ-MAP-007
     return "\n".join(lines)
 
 
-def render_md(data, reqs_dir):  # implements: REQ-MAP-007
+def render_md(data, reqs_dir):  # implements: ARCH-MAPDIAGRAMS-055
     out = os.path.join(reqs_dir, "_map.md")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -5788,7 +5994,7 @@ def render_md(data, reqs_dir):  # implements: REQ-MAP-007
     return out
 
 
-def _repo_name(root):  # implements: REQ-MAP-007
+def _repo_name(root):  # implements: ARCH-MAP-007
     """Best-effort `owner/repo` (else the repo directory name) identifying the
     project this map describes, for display in the viewer header. Tries the git
     `remote.origin.url`, then the directory name; returns None when nothing
@@ -5819,7 +6025,7 @@ def _repo_name(root):  # implements: REQ-MAP-007
     return os.path.basename(os.path.abspath(root)) or None
 
 
-def _normalise_remote(url):  # implements: REQ-SITE-026
+def _normalise_remote(url):  # implements: ARCH-SITE-026
     """Normalise a git remote URL to a https web URL (https://host/owner/repo),
     or None when empty/unparseable. Handles scp-style (git@host:owner/repo.git),
     ssh:// and https:// forms; strips a trailing `.git`. Pure string work."""
@@ -5839,7 +6045,7 @@ def _normalise_remote(url):  # implements: REQ-SITE-026
     return url if "://" in url else None
 
 
-def _git_remote_web_url(root):  # implements: REQ-SITE-026
+def _git_remote_web_url(root):  # implements: ARCH-SITE-026
     """The project's web URL from git `remote.origin.url`, or None when git is
     absent / no remote / not a checkout. Honours the REQMAP_REPO override (a
     bare slug becomes https://github.com/<slug>; empty disables). Never raises."""
@@ -5859,15 +6065,15 @@ def _git_remote_web_url(root):  # implements: REQ-SITE-026
     return _normalise_remote(url)
 
 
-SITE_REGIONS = ("nav", "stats")  # implements: REQ-SITE-026  (commands/layers deferred to a follow-up)
+SITE_REGIONS = ("nav", "stats")  # implements: ARCH-SITE-026  (commands/layers deferred to a follow-up)
 
 
-def _region_markers(name):  # implements: REQ-SITE-026
+def _region_markers(name):  # implements: ARCH-SITE-026
     key = name.upper()
     return "<!--##REQMAP:{}##-->".format(key), "<!--##/REQMAP:{}##-->".format(key)
 
 
-def _inject_region(html, name, inner, anchor="<body>"):  # implements: REQ-SITE-026
+def _inject_region(html, name, inner, anchor="<body>"):  # implements: ARCH-SITE-026
     """Replace the content between the paired markers for `name` with `inner`
     (idempotent). Markers absent -> insert a fresh marked block right after the
     first `anchor`; anchor absent too -> append. Only the marked block is
@@ -5888,7 +6094,7 @@ def _inject_region(html, name, inner, anchor="<body>"):  # implements: REQ-SITE-
     return html + "\n" + block
 
 
-def _extract_region(html, name):  # implements: REQ-SITE-026
+def _extract_region(html, name):  # implements: ARCH-SITE-026
     """Inner text between the paired markers for `name`, or None when absent.
     Lets the freshness gate diff only engine-owned regions (prose is exempt)."""
     open_m, close_m = _region_markers(name)
@@ -5900,12 +6106,12 @@ def _extract_region(html, name):  # implements: REQ-SITE-026
     return html[i:j].strip("\n") if j != -1 else None
 
 
-def _html_escape(s):  # implements: REQ-SITE-026
+def _html_escape(s):  # implements: ARCH-SITE-026
     return (str(s).replace("&", "&amp;").replace("<", "&lt;")
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def _site_context_from_data(data, repo_url, map_ok, diagram_rel):  # implements: REQ-SITE-026
+def _site_context_from_data(data, repo_url, map_ok, diagram_rel):  # implements: ARCH-SITE-026
     """Deterministic region inputs derived from the map graph + already-resolved
     link facts. No wall-clock, no filesystem here — callers resolve repo_url /
     map_ok / diagram_rel, so a re-run with no change reproduces byte-identically."""
@@ -5924,7 +6130,7 @@ def _site_context_from_data(data, repo_url, map_ok, diagram_rel):  # implements:
     }
 
 
-def _render_region(name, ctx):  # implements: REQ-SITE-026
+def _render_region(name, ctx):  # implements: ARCH-SITE-026
     """Inner HTML for an engine-owned region. NAV: plain target=_blank anchors,
     each emitted only when its target resolves (graceful degradation). STATS:
     deterministic stat cards from the graph counts + engine version."""
@@ -6179,9 +6385,9 @@ SITE_TEMPLATE = """\
     <p class="eyebrow">Layer model</p>
     <h2>Bus, feature, need, aggregate</h2>
     <div class="layers">
-      <div class="layer bus"><div class="l">layer: bus</div><h3>Foundation</h3><p>High fan-in capabilities — config, parse, scan, drift. Change only behind the contract.</p><div class="ids">CORE-PARSE-001 · CORE-SCAN-002 · CORE-DRIFT-003</div></div>
-      <div class="layer feat"><div class="l">layer: feature</div><h3>Composed</h3><p>Built on the bus via <code>depends_on</code>; each carries its own contract, acceptance, tests.</p><div class="ids">REQ-CHECK-006 · REQ-MAP-007 · REQ-INIT-012</div></div>
-      <div class="layer need"><div class="l">layer: need</div><h3>Stakeholder need</h3><p>An upstream need, satisfied-by features via <code>satisfies:</code>; exempt from the code gate.</p><div class="ids">NEED-SSOT-001</div></div>
+      <div class="layer bus"><div class="l">layer: bus</div><h3>Foundation</h3><p>High fan-in capabilities — config, parse, scan, drift. Change only behind the contract.</p><div class="ids">ARCH-PARSE-001 · ARCH-SCAN-002 · ARCH-DRIFT-003</div></div>
+      <div class="layer feat"><div class="l">layer: feature</div><h3>Composed</h3><p>Built on the bus via <code>depends_on</code>; each carries its own contract, acceptance, tests.</p><div class="ids">ARCH-CHECK-006 · ARCH-MAP-007 · ARCH-INIT-012</div></div>
+      <div class="layer need"><div class="l">layer: need</div><h3>Stakeholder need</h3><p>An upstream need, satisfied-by features via <code>satisfies:</code>; exempt from the code gate.</p><div class="ids">SYS-SSOT-001</div></div>
       <div class="layer need"><div class="l">layer: aggregate</div><h3>Roof</h3><p>No code of its own: its implementation is its <code>depends_on</code> requirements'. Exempt from the code gate, like a need — downward instead of upward.</p><div class="ids">—</div></div>
     </div>
   </div>
@@ -6215,10 +6421,10 @@ SITE_TEMPLATE = """\
 
 </body>
 </html>
-"""  # implements: REQ-SITE-026
+"""  # implements: ARCH-SITE-026
 
 
-def _path_key(path):  # implements: REQ-CHECK-006
+def _path_key(path):  # implements: ARCH-CHECK-006
     """Comparison key for a filesystem path: fully resolved, then case-folded.
 
     `abspath` is not enough where a git-derived path meets a caller-derived one.
@@ -6228,7 +6434,7 @@ def _path_key(path):  # implements: REQ-CHECK-006
     form) are the same directory and compare unequal. In `--since` that made every
     member fall out of the changed-set, so the gate reported a clean tree with a
     dangling tag still in it - a gate failing OPEN, silently, on Windows only.
-    Found by the CI portability matrix on its first run (REQ-PYFLOOR-040).
+    Found by the CI portability matrix on its first run (ARCH-PYFLOOR-040).
 
     realpath resolves the short form, and symlinks with it - a repo reached through
     a symlinked path hit the same mismatch on POSIX. Both sides of every comparison
@@ -6278,7 +6484,7 @@ def _since_changed_files(ref, code_root):
         return None
 
 
-def _utf8_safe(text):  # implements: REQ-MAP-007
+def _utf8_safe(text):  # implements: ARCH-MAP-007
     """Text with any lone surrogate replaced by U+FFFD, so the write cannot fail.
 
     A lone surrogate has no UTF-8 encoding, so `open(..., encoding="utf-8").write()`
@@ -6297,17 +6503,22 @@ def _utf8_safe(text):  # implements: REQ-MAP-007
         return "".join("\uFFFD" if 0xD800 <= ord(c) <= 0xDFFF else c for c in text)
 
 
-def _build_json_text(data):  # implements: REQ-MAP-007
-    """The registry graph as a JSON string: {engine_version, repo, nodes, edges}.
+def _build_json_text(data):  # implements: ARCH-MAP-007
+    """The registry graph as a JSON string:
+    {engine_version, repo, nodes, edges, upstream_edges, todos}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
     no markup context to break out of — so no extra escaping is needed."""
     payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
                "nodes": data["nodes"], "edges": data["edges"],
+               # `satisfies:` edges — the specification hierarchy. Computed since
+               # ARCH-TRACE-020 and, until now, discarded here: the graph carried the
+               # dependency axis and dropped the level axis on the floor.
+               "upstream_edges": data.get("upstream_edges", []),
                "todos": data.get("todos", [])}
     return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
-def render_json(data, reqs_dir):  # implements: REQ-MAP-007
+def render_json(data, reqs_dir):  # implements: ARCH-MAP-007
     out = os.path.join(reqs_dir, "_map.json")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -6323,7 +6534,7 @@ VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
 
 
-def _docs_publish_path(root):  # implements: REQ-PAGES-021
+def _docs_publish_path(root):  # implements: ARCH-PAGES-021
     """Return docs/map.html path when docs/ carries a GitHub Pages signal
     (.nojekyll or index.html present), else None. Opt-in by folder contents —
     repos without the signal are unaffected.
@@ -6347,8 +6558,8 @@ def _docs_publish_path(root):  # implements: REQ-PAGES-021
     return None
 
 
-def _site_pages_bootstrap(docs_dir):  # implements: REQ-SITE-026
-    """Ensure docs/ carries a GitHub Pages signal so REQ-PAGES-021 publishes and
+def _site_pages_bootstrap(docs_dir):  # implements: ARCH-SITE-026
+    """Ensure docs/ carries a GitHub Pages signal so ARCH-PAGES-021 publishes and
     the page is servable: write .nojekyll and an index.html redirect when absent.
     Idempotent — never clobbers an existing index.html."""
     os.makedirs(docs_dir, exist_ok=True)
@@ -6365,7 +6576,7 @@ def _site_pages_bootstrap(docs_dir):  # implements: REQ-SITE-026
                     '<p>Redirecting to <a href="./architecture.html">the project site</a>…</p>\n')
 
 
-def _site_diagram_ok(target_path, diagram_rel):  # implements: REQ-SITE-026
+def _site_diagram_ok(target_path, diagram_rel):  # implements: ARCH-SITE-026
     """True when `diagram_rel` (relative to the page's directory) names an existing
     file — so the Diagram link is emitted only when the artifact is actually there."""
     if not diagram_rel:
@@ -6373,7 +6584,7 @@ def _site_diagram_ok(target_path, diagram_rel):  # implements: REQ-SITE-026
     return os.path.isfile(os.path.join(os.path.dirname(target_path) or ".", diagram_rel))
 
 
-def _site_default_target(root):  # implements: REQ-SITE-026
+def _site_default_target(root):  # implements: ARCH-SITE-026
     """docs/architecture.html at the git root (so running from plugin/ still finds
     the project-root docs/), or None when there is no docs/. Mirrors
     _docs_publish_path's git-root resolution."""
@@ -6388,7 +6599,7 @@ def _site_default_target(root):  # implements: REQ-SITE-026
 
 
 def cmd_site(reqs, members, root=".", attach=None,
-             regions=None, diagram=None, detect=False):  # implements: REQ-SITE-026
+             regions=None, diagram=None, detect=False):  # implements: ARCH-SITE-026
     """Inject engine-owned regions into a presentation page (attach mode) or write
     a default page when the target is absent (scaffold mode). Deterministic and
     headless-safe: never prompts, never raises on missing git/files. `detect`
@@ -6437,11 +6648,11 @@ def cmd_site(reqs, members, root=".", attach=None,
     return 0
 
 
-def _viewer_template_path():  # implements: REQ-VIEWER-007
+def _viewer_template_path():  # implements: ARCH-VIEWER-007
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), VIEWER_TEMPLATE)
 
 
-def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
+def _inject_viewer(template_text, data):  # implements: ARCH-VIEWER-007
     """Replace the data marker with an inline <script> assigning the graph to
     window.__REQMAP_DATA__. Three sequences are escaped so the HTML5 parser
     never changes state mid-blob:
@@ -6466,7 +6677,7 @@ def _inject_viewer(template_text, data):  # implements: REQ-VIEWER-007
     return template_text.replace(_REQMAP_DATA_MARKER, script, 1)
 
 
-def render_html(data, reqs_dir):  # implements: REQ-VIEWER-007
+def render_html(data, reqs_dir):  # implements: ARCH-VIEWER-007
     """Write the self-contained viewer `_map.html` by injecting `data` into the
     vendored template. Returns the path, or None when no template is present
     (the engine still emits _map.md + _map.json — the viewer is optional)."""
@@ -6492,7 +6703,7 @@ _JS_CASE_RE = re.compile(r"""^[ \t]*(?:it|test)\s*\(\s*["'`]([^"'`]{3,120})["'`]
 _HASH_COMMENT_EXTS = (".py", ".sh", ".bash", ".rb", ".yaml", ".yml", ".tf", ".ex", ".exs", ".jl", ".pl", ".r")
 
 
-def _test_functions(path):  # implements: REQ-SUGGESTVERIFIES-047
+def _test_functions(path):  # implements: ARCH-SUGGESTVERIFIES-047
     """`[(line_no, name)]` for the test cases declared in a file: a `def`/`function`/
     `func` whose own name says "test", plus the Jest/Mocha `it("…")` label. Names only
     (see above). Returns [] for an unreadable file — a suggestion tool never raises."""
@@ -6513,7 +6724,7 @@ def _test_functions(path):  # implements: REQ-SUGGESTVERIFIES-047
     return out
 
 
-def _ac_name_re(ac):  # implements: REQ-SUGGESTVERIFIES-047
+def _ac_name_re(ac):  # implements: ARCH-SUGGESTVERIFIES-047
     """Match `AC-3` inside a test name as `ac3`, `ac_3`, `ac-3` or `ac 3` — and NOT as
     a prefix of `ac30`, which is a different criterion."""
     n = ac.split("-", 1)[1]
@@ -6524,7 +6735,7 @@ def _comment_prefix(path):
     return "#" if path.lower().endswith(_HASH_COMMENT_EXTS) else "//"
 
 
-def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: REQ-SUGGESTVERIFIES-047
+def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: ARCH-SUGGESTVERIFIES-047
     """`(proposals, ambiguous)` — the machine-checkable half of "this test already
     verifies that criterion", recovered from naming.
 
@@ -6585,7 +6796,7 @@ def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: REQ-
     return proposals, ambiguous
 
 
-def _apply_verifies(proposals, code_root):  # implements: REQ-SUGGESTVERIFIES-047
+def _apply_verifies(proposals, code_root):  # implements: ARCH-SUGGESTVERIFIES-047
     """Append `# verifies: <id>#AC-N` to each proposed test's declaration line.
     Returns the number of lines written. Idempotent: a line already carrying that
     exact tag is left alone."""
@@ -6620,7 +6831,7 @@ def _apply_verifies(proposals, code_root):  # implements: REQ-SUGGESTVERIFIES-04
     return written
 
 
-def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, apply_tags=False):  # implements: REQ-SUGGESTVERIFIES-047
+def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, apply_tags=False):  # implements: ARCH-SUGGESTVERIFIES-047
     """Propose `# verifies: <id>#AC-N` tags for tests already NAMED after the criterion
     they check, so a corpus can adopt per-criterion coverage without re-deriving the
     matching rules (and their three traps) by hand. Read-only unless --apply."""
@@ -6647,7 +6858,7 @@ def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, appl
     return 0
 
 
-def cmd_review(reqs, one_id=None):  # implements: REQ-REVIEW-022
+def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022
     """Emit a DETERMINISTIC, read-only review PLAN as JSON for an out-of-band AI quality
     pass. The engine never calls an LLM and writes no file — it gathers each requirement's
     prose (WHY/contract/acceptance/verify-intent) plus cheap STRUCTURAL anchors the AI
@@ -6900,7 +7111,7 @@ def main():
         return rc
     if a.cmd == "map":
         return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh, ac_cover=_ac_cover)
-    if a.cmd == "site":  # implements: REQ-SITE-026
+    if a.cmd == "site":  # implements: ARCH-SITE-026
         regions = [x.strip() for x in (a.regions or "").split(",") if x.strip()]
         return cmd_site(reqs, members, code_root,
                         attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
@@ -6928,7 +7139,7 @@ def main():
         return cmd_promote(reqs, members, a.arg)
 
 
-def _pipe_closed():  # implements: REQ-PIPE-046
+def _pipe_closed():  # implements: ARCH-PIPE-046
     """The reader (`| head`) stopped listening: point stdout at the null device so the
     interpreter's shutdown flush cannot raise a second time, and exit clean."""
     try:
@@ -6939,7 +7150,7 @@ def _pipe_closed():  # implements: REQ-PIPE-046
     return 0
 
 
-def _run_cli(entry=None):  # implements: REQ-PIPE-046
+def _run_cli(entry=None):  # implements: ARCH-PIPE-046
     """Run `main` (or `entry`), turning a closed output pipe into a quiet exit 0.
     Windows has no SIGPIPE: a reader that closes early surfaces as OSError EINVAL (22),
     on POSIX as BrokenPipeError/EPIPE — `dupes | head` on a 1,141-requirement corpus

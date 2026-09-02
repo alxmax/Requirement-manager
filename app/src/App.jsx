@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect, Component } from "react";
 import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
@@ -8,22 +8,39 @@ import { Btn } from "./lib/ui.jsx";
 import { useI18n, LOCALES } from "./lib/i18n.jsx";
 import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
-import { SpecView } from "./views/SpecView.jsx";
+import { SpecView, ENFORCED } from "./views/SpecView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
+import { ExplorerView } from "./views/ExplorerView.jsx";
+import { FindingsView, computeFindings } from "./views/FindingsView.jsx";
 
-/* `label` is the English source string, also the i18n dictionary key — see lib/i18n.jsx. */
+/* `label` is the English source string, also the i18n dictionary key — see lib/i18n.jsx.
+ * Explorer leads: at 685 requirements on three levels the outline is the only
+ * surface that shows the whole registry. Map is kept but demoted — a 685-node
+ * canvas is a picture of a haystack — and is scoped to the non-code levels. */
 const NAV = [
-  { key:"map",     label:"Map",      icon:"network" },
+  { key:"explorer",label:"Explorer", icon:"list-checks" },
+  { key:"findings",label:"Findings", icon:"circle-dot" },
   { key:"problems",label:"Problems", icon:"triangle-alert" },
+  { key:"map",     label:"Map",      icon:"network" },
   { key:"spec",    label:"Spec",     icon:"file-text" },
   { key:"roadmap", label:"Roadmap",  icon:"list-checks" },
 ];
+
+/* Deep link: `#/req/<ID>` opens that requirement in the Explorer. Parsed and
+ * written defensively — the viewer also runs from file:// and under SSR. */
+const HASH_RE = /^#\/req\/([A-Za-z0-9][A-Za-z0-9_-]*)$/;
+function readHashId() {
+  try {
+    const m = HASH_RE.exec(window.location.hash || "");
+    return m ? m[1] : null;
+  } catch { return null; }
+}
 
 function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   const { t, locale, setLocale } = useI18n();
   const q = query.trim();
   // Ranked relevance — the SAME TF-IDF model as the engine `search` command
-  // (REQ-SEARCH-036), not a substring filter, so the viewer and CLI agree on
+  // (ARCH-SEARCH-036), not a substring filter, so the viewer and CLI agree on
   // what "matches" and in what order. Below the relevance floor -> no hits.
   const hits = q ? rankRequirements(REQUIREMENTS, q, { top: 8 }) : [];
   return (
@@ -67,14 +84,28 @@ function Rail({ view, setView }) {
   const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
   const todoCount = TODOS.filter(t => !t.done).length;
-  const counts = { map:REQUIREMENTS.length, problems:problems.length, spec:REQUIREMENTS.length, roadmap:todoCount };
+  // A findings badge of `0` is a lie dressed as a metric — every `verify`
+  // bullet in the corpus today is the authored placeholder, which the engine
+  // does not count either. Hidden at zero (see the `!= null` guard below).
+  const findingCount = computeFindings().length;
+  const counts = {
+    explorer: REQUIREMENTS.length,
+    findings: findingCount || null,
+    map: REQUIREMENTS.filter(r=>r.level!=="code").length,
+    problems: problems.length,
+    spec: REQUIREMENTS.length,
+    roadmap: todoCount,
+  };
 
   // registry stats derived from whatever data is loaded
   const by = (pred) => REQUIREMENTS.filter(pred).length;
   const confirmed = by(r=>r.status==="confirmed");
   const inProgress = by(r=>r.status==="in-progress");
   const draft = by(r=>r.status==="draft");
-  const orphan = by(r=>r.status!=="deprecated" && r.layer!=="need" && r.layer!=="aggregate" && !r.members.some(m=>m.role==="implements"));
+  // Orphan = the gate's ERROR condition, so it must use the gate's scope: an
+  // ENFORCED requirement with no `implements:` member. Counting drafts here
+  // reported 618 orphans against a gate that reports 0 errors.
+  const orphan = by(r=>ENFORCED[r.status] && r.layer!=="need" && r.layer!=="aggregate" && !r.members.some(m=>m.role==="implements"));
   const deprecated = by(r=>r.status==="deprecated");
   const bound = REQUIREMENTS.reduce((a,r)=>a+r.members.length,0);
 
@@ -87,7 +118,9 @@ function Rail({ view, setView }) {
           {t(n.label)}
           {n.key==="problems" && errCount>0
             ? <span className="count" style={{color:"#fff",background:"var(--coral-600)",borderRadius:"var(--radius-pill)",padding:"1px 7px"}}>{counts[n.key]}</span>
-            : <span className="count">{counts[n.key]}</span>}
+            : n.key==="findings"
+              ? (counts.findings != null && <span className="count" style={{color:"#fff",background:"var(--amber-600)",borderRadius:"var(--radius-pill)",padding:"1px 7px"}}>{counts.findings}</span>)
+              : <span className="count">{counts[n.key]}</span>}
         </div>
       ))}
       <div className="rail-stat">
@@ -136,16 +169,37 @@ class ErrorBoundary extends Component {
 }
 
 export default function App() {
-  const [view, setView] = useState("map");
-  const [selId, setSelId] = useState("REQ-CHECK-006");
+  const [view, setView] = useState("explorer");
+  const [selId, setSelId] = useState(() => readHashId() || "ARCH-CHECK-006");
   const [highlightId, setHighlightId] = useState(null);
   const [query, setQuery] = useState("");
   const [theme, setTheme] = useState("light");
 
   useEffect(()=>{ document.documentElement.setAttribute("data-theme", theme); }, [theme]);
 
-  function openSpec(id){ setSelId(id); setView("spec"); }
-  function searchPick(id){ setSelId(id); setView("spec"); setQuery(""); }
+  // `#/req/<ID>` is the shareable address of one requirement. Following it (on
+  // load or on a later hashchange) opens the Explorer, which then expands the
+  // ancestor chain and scrolls the row into view.
+  useEffect(()=>{
+    const apply = () => { const id = readHashId(); if (id) { setSelId(id); setView("explorer"); } };
+    apply();
+    try { window.addEventListener("hashchange", apply); } catch { return undefined; }
+    return () => { try { window.removeEventListener("hashchange", apply); } catch { /* SSR */ } };
+  }, []);
+
+  // Keep the address bar in step with the selection, without a history entry
+  // per click — the back button should leave the viewer, not replay a tree walk.
+  useEffect(()=>{
+    if (!selId) return;
+    try {
+      const next = "#/req/" + selId;
+      if (window.location.hash !== next)
+        window.history.replaceState(null, "", window.location.pathname + window.location.search + next);
+    } catch { /* file:// or SSR — the deep link is a convenience, never required */ }
+  }, [selId]);
+
+  function openSpec(id){ setSelId(id); setView("explorer"); }
+  function searchPick(id){ setSelId(id); setView("explorer"); setQuery(""); }
 
   return (
     <div className="app">
@@ -154,6 +208,8 @@ export default function App() {
       <div className="body">
         <Rail view={view} setView={setView} />
         <ErrorBoundary key={view}>
+          {view==="explorer" && <ExplorerView selId={selId} setSelId={setSelId} />}
+          {view==="findings" && <FindingsView openSpec={openSpec} />}
           {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
             highlightId={highlightId} setHighlightId={setHighlightId} />}
           {view==="problems" && <ProblemsView openSpec={openSpec} />}

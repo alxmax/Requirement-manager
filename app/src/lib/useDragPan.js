@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* useDragPan — shared grab-to-pan behavior for a scrollable container: drag
  * anywhere to scroll; a real click (no drag) still falls through to whatever
  * the container renders (node/edge/bar selection). A drag past a small
