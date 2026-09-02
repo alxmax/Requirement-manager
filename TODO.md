@@ -118,60 +118,59 @@
 - [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link | lane: feature
       <!-- REQ-VLEVEL-037 -->
 
-## v2.32 — DE VERIFICAT
-<!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided; each
-     is recorded to be checked before it is actioned. Audited the same day:
-     runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
+## v2.32 — TO VERIFY
+<!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided.
+     Audited the same day: runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
 
-- [ ] DE VERIFICAT: decide a system grouping — 5-8 needs instead of one | lane: ops
-      <!-- NEED-SSOT-001 is the only `layer: need` today and every `satisfies:` edge points at
-           it. `area:` is 0/54, so no grouping can be derived automatically. Blocks the next
-           item. Cost: a decision, no code. -->
+- [ ] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
+      <!-- NEED-SSOT-001 alone cannot be the apex: 54 architectures under one need violates any
+           fan-out (54/20 = 2.7, 54/5 = 10.8). `area:` is at 0, so the grouping cannot be
+           derived automatically. Blocks everything that follows.
+           Cost: a decision, no code. -->
 
-- [ ] DE VERIFICAT: satisfies from 11/54 to full coverage | lane: ops
-      <!-- 43 of 54 requirements carry no upward link. `depends_on` cannot substitute — it is
-           a composition axis, not a level axis. Depends on the grouping decision above. -->
+- [ ] TO VERIFY: satisfies from 11 to 54 | lane: ops
+      <!-- Depends on the item above. This is the real gain: 80% of requirements trace to
+           nothing, and `depends_on` cannot substitute — it is a composition axis, not a level
+           axis. Without it there is no pyramid, whatever the layers are called.
+           Cost: 43 files, one line each. -->
 
-- [ ] DE VERIFICAT: verifiable by: from 2/54 | lane: ops
-      <!-- Independent of the two items above. The marker has been at 2 files since it was
-           introduced on 2026-08-17, while the corpus grew from 44 to 54. Raising it is easy;
-           keeping it raised is the unproven part. Re-check at 90 days. -->
+- [ ] TO VERIFY: verifiable by: from 2 to 54 | lane: ops
+      <!-- Independent of the two items above; can be done any time. Honest warning: ADR-0016
+           used this very marker's 4% adoption as its reason to reject a similar marker.
+           Raising it is easy; keeping it raised is the unproven part. If it has decayed at 90
+           days, the correct conclusion is to delete it, not to refill it. -->
 
-- [ ] DE VERIFICAT: rename layers by alias — need->system, aggregate->architecture | lane: feature
-      <!-- Both old names stay valid in VALID_LAYER. `bus` and `feature` untouched: they are a
-           fan-in axis, not a level axis (reqmap.py:4208 — "`bus` is DEFINED by fan-in"). -->
+- [ ] TO VERIFY: rename by alias — need->system, aggregate->architecture | lane: feature
+      <!-- Both old names stay valid in VALID_LAYER. need->system costs 1 file,
+           aggregate->architecture costs 0 (unused). `bus` and `feature` stay untouched — they
+           are a fan-in axis, not a level axis. Zero consumers broken, no semver major.
+           ~20 lines + tests. -->
 
-- [ ] DE VERIFICAT: decide the fate of the aggregate layer | lane: ops
-      <!-- `layer: aggregate` shipped 2026-08-31 (v2.29.0, ADR-0015) and is used by 0 of the 54
-           requirements here; ADR-0015 records its motivating case as living in a consumer
-           corpus. It is exempt from the implements/tested-by gates via IMPL_EXEMPT_LAYERS and
-           has acceptance criteria written about it in REQ-PROMOTE-011 and REQ-TRACE-020. -->
+- [ ] TO VERIFY: decide the fate of the architecture layer — populate it or delete it | lane: ops
+      <!-- `aggregate` is built, tested (it has acceptance criteria in REQ-PROMOTE-011 and
+           REQ-TRACE-020) and used by zero requirements. By this repo's own standard — ADR-0016
+           rejected a mechanism at 4% adoption — a layer at 0% should be deleted, not kept
+           "for later". -->
 
-- [ ] DE VERIFICAT: fan-out check 5-20, warn-only | lane: feature
-      <!-- Flag a requirement whose child count falls outside 5-20. Name the counted set before
-           measuring: `depends_on`, `satisfied_by` and Contract clauses give very different
-           answers, and `LINT_BUS_FANOUT_MIN` (reqmap.py:3997) already uses "fan-out" for the
-           depends_on count. -->
+- [ ] TO VERIFY: fan-out check 5-20, warn-only | lane: feature
+      <!-- It would fire today on 9 of 54 (17%) — inside the 5-40% band ADR-0016 requires,
+           unlike the 75-word ceiling which catches nothing. And retroactively validated: 3 of
+           the 4 requirements over 20 clauses already carry a hand-written `lint_exempt:`. -->
 
-- [ ] DE VERIFICAT: split REQ-MAP-007 into two requirements | lane: ops
-      <!-- 35 Contract clauses, and the only requirement over 20 carrying no `lint_exempt:` —
-           the only one whose size has never been judged acceptable in writing. It carries no
-           `# verifies:` tags, so a split orphans no per-criterion link. -->
+- [ ] TO VERIFY: split REQ-MAP-007 (35 clauses) | lane: ops
+      <!-- The only one over 20 without an exemption — so the only one whose size has never
+           been judged in writing. -->
 
-- [ ] DE VERIFICAT: decide the unit for long-sentence / statement-too-long | lane: bus
-      <!-- Both read `_lint_prose` (reqmap.py:4021), which yields physical LINES; the files wrap
-           near 95 columns, so both report 0 across the corpus — not because the prose is short
-           but because no clause is ever seen whole. `statement-size` (v2.31.0) already reads
-           `_contract_clauses` (4202), so two checks in the same function disagree about their
-           unit. Neither is in STRICT_PROMOTE (4445), so both stay warn-only whatever is
-           decided. -->
+- [ ] TO VERIFY: decide the unit for long-sentence / statement-too-long | lane: bus
+      <!-- The finding from the implementation: they measure physical lines, and the files are
+           wrapped at ~95 columns, so they report 0 across the corpus — not because the prose
+           is short. Switching to clauses would make them flag 107 and 154 clauses.
+           A decision, not a bug — left alone deliberately. -->
 
-- [ ] DE VERIFICAT: form: atomic — 54 -> ~665 nodes | lane: feature
-      <!-- NOT NOW. Depends on the items above. The cost is not the file count but the
-           acceptance work: 610 Contract clauses against 303 criteria, with 50 of 54
-           requirements holding more clauses than criteria. Blocking mechanical fact: a
-           heading-less body makes `binding_hash` return e3b0c44298fc, the SHA-256 of the empty
-           string — drift detection would silently measure nothing. -->
+- [ ] TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now | lane: feature
+      <!-- Depends on items 1-5 and requires ~305 new scenarios, each with a test. The number
+           that matters is not the file explosion (2x text, not 7x) but the acceptance work.
+           Parked until 1-5 are closed. -->
 
 ## v2.8 (deferred — demand-gated)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that

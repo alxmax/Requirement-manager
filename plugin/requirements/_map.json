@@ -5299,55 +5299,55 @@
       "done": true
     },
     {
-      "name": "DE VERIFICAT: decide a system grouping — 5-8 needs instead of one",
+      "name": "TO VERIFY: decide the system grouping — 5-8 needs instead of one",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: satisfies from 11/54 to full coverage",
+      "name": "TO VERIFY: satisfies from 11 to 54",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: verifiable by: from 2/54",
+      "name": "TO VERIFY: verifiable by: from 2 to 54",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: rename layers by alias — need->system, aggregate->architecture",
+      "name": "TO VERIFY: rename by alias — need->system, aggregate->architecture",
       "lane": "feature",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: decide the fate of the aggregate layer",
+      "name": "TO VERIFY: decide the fate of the architecture layer — populate it or delete it",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: fan-out check 5-20, warn-only",
+      "name": "TO VERIFY: fan-out check 5-20, warn-only",
       "lane": "feature",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: split REQ-MAP-007 into two requirements",
+      "name": "TO VERIFY: split REQ-MAP-007 (35 clauses)",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: decide the unit for long-sentence / statement-too-long",
+      "name": "TO VERIFY: decide the unit for long-sentence / statement-too-long",
       "lane": "bus",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "DE VERIFICAT: form: atomic — 54 -> ~665 nodes",
+      "name": "TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now",
       "lane": "feature",
       "milestone": "v2.32",
       "done": false
