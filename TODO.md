@@ -118,32 +118,59 @@
 - [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link | lane: feature
       <!-- REQ-VLEVEL-037 -->
 
-## v2.32
-<!-- Two gaps measured 2026-09-02 while reviewing the corpus against the V-model/ASPICE
-     shape. Both are worth closing on their own merits, independent of any standard:
-     they are the links the corpus asserts it has and does not. NOT a move toward
-     conformance — the ADR-0007 unpark trigger has NOT fired (no regulated user, no
-     assessor); this is dogfooding the tool's own traceability claim. -->
-- [ ] Bidirectional traceability: raise `satisfies:` coverage from 11/54 to 54/54 | lane: ops
-      <!-- Measured: 43 of 54 confirmed requirements carry no `satisfies:`, so 80% trace to
-           nothing above them. NEED-SSOT-001 is the sole apex, `satisfied_by` 11.
-           Consequence, measured on the depends_on graph: the corpus is a lozenge
-           (6 / 17 / 24 / 7 nodes by depth), not a pyramid, and the single `need` sits at
-           depth 0 beside the bus foundations rather than at the apex — `depends_on` is a
-           composition axis, `satisfies` is the level axis, and only the latter builds a
-           hierarchy. Blocked on a prior decision: 54 architectures under one need violates
-           any sane fan-out; 3-11 system-level needs are needed first (54/20 = 2.7,
-           54/5 = 10.8). Check `area:` adoption before inventing them — the grouping may
-           already be latent there. -->
-- [ ] Verification criteria: raise `verifiable by:` from 2/54 toward full coverage | lane: ops
-      <!-- Measured 2/51 in ADR-0016, unchanged at 2/54. The marker already exists in the
-           `new` template on each AC line, and `_labeled_acs` already reads it. The value is
-           not conformance: it tells an agent which criteria are machine-verifiable and which
-           need a human — exactly the decision a coding agent has to make. NOTE the standing
-           counter-evidence: ADR-0016 used this marker's own 4% adoption as the reason to
-           REJECT a comparable in-file marker, against 27% for `# verifies:`, which lives in
-           the test file the author is already editing. Raising it by hand is easy; keeping
-           it raised is the unproven part. -->
+## v2.32 — TO VERIFY
+<!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided.
+     Audited the same day: runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
+
+- [ ] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
+      <!-- NEED-SSOT-001 alone cannot be the apex: 54 architectures under one need violates any
+           fan-out (54/20 = 2.7, 54/5 = 10.8). `area:` is at 0, so the grouping cannot be
+           derived automatically. Blocks everything that follows.
+           Cost: a decision, no code. -->
+
+- [ ] TO VERIFY: satisfies from 11 to 54 | lane: ops
+      <!-- Depends on the item above. This is the real gain: 80% of requirements trace to
+           nothing, and `depends_on` cannot substitute — it is a composition axis, not a level
+           axis. Without it there is no pyramid, whatever the layers are called.
+           Cost: 43 files, one line each. -->
+
+- [ ] TO VERIFY: verifiable by: from 2 to 54 | lane: ops
+      <!-- Independent of the two items above; can be done any time. Honest warning: ADR-0016
+           used this very marker's 4% adoption as its reason to reject a similar marker.
+           Raising it is easy; keeping it raised is the unproven part. If it has decayed at 90
+           days, the correct conclusion is to delete it, not to refill it. -->
+
+- [ ] TO VERIFY: rename by alias — need->system, aggregate->architecture | lane: feature
+      <!-- Both old names stay valid in VALID_LAYER. need->system costs 1 file,
+           aggregate->architecture costs 0 (unused). `bus` and `feature` stay untouched — they
+           are a fan-in axis, not a level axis. Zero consumers broken, no semver major.
+           ~20 lines + tests. -->
+
+- [ ] TO VERIFY: decide the fate of the architecture layer — populate it or delete it | lane: ops
+      <!-- `aggregate` is built, tested (it has acceptance criteria in REQ-PROMOTE-011 and
+           REQ-TRACE-020) and used by zero requirements. By this repo's own standard — ADR-0016
+           rejected a mechanism at 4% adoption — a layer at 0% should be deleted, not kept
+           "for later". -->
+
+- [ ] TO VERIFY: fan-out check 5-20, warn-only | lane: feature
+      <!-- It would fire today on 9 of 54 (17%) — inside the 5-40% band ADR-0016 requires,
+           unlike the 75-word ceiling which catches nothing. And retroactively validated: 3 of
+           the 4 requirements over 20 clauses already carry a hand-written `lint_exempt:`. -->
+
+- [ ] TO VERIFY: split REQ-MAP-007 (35 clauses) | lane: ops
+      <!-- The only one over 20 without an exemption — so the only one whose size has never
+           been judged in writing. -->
+
+- [ ] TO VERIFY: decide the unit for long-sentence / statement-too-long | lane: bus
+      <!-- The finding from the implementation: they measure physical lines, and the files are
+           wrapped at ~95 columns, so they report 0 across the corpus — not because the prose
+           is short. Switching to clauses would make them flag 107 and 154 clauses.
+           A decision, not a bug — left alone deliberately. -->
+
+- [ ] TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now | lane: feature
+      <!-- Depends on items 1-5 and requires ~305 new scenarios, each with a test. The number
+           that matters is not the file explosion (2x text, not 7x) but the acceptance work.
+           Parked until 1-5 are closed. -->
 
 ## v2.8 (deferred — demand-gated)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that

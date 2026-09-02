@@ -5299,14 +5299,56 @@
       "done": true
     },
     {
-      "name": "Bidirectional traceability: raise `satisfies:` coverage from 11/54 to 54/54",
+      "name": "TO VERIFY: decide the system grouping — 5-8 needs instead of one",
       "lane": "ops",
       "milestone": "v2.32",
       "done": false
     },
     {
-      "name": "Verification criteria: raise `verifiable by:` from 2/54 toward full coverage",
+      "name": "TO VERIFY: satisfies from 11 to 54",
       "lane": "ops",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: verifiable by: from 2 to 54",
+      "lane": "ops",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: rename by alias — need->system, aggregate->architecture",
+      "lane": "feature",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: decide the fate of the architecture layer — populate it or delete it",
+      "lane": "ops",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: fan-out check 5-20, warn-only",
+      "lane": "feature",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: split REQ-MAP-007 (35 clauses)",
+      "lane": "ops",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: decide the unit for long-sentence / statement-too-long",
+      "lane": "bus",
+      "milestone": "v2.32",
+      "done": false
+    },
+    {
+      "name": "TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now",
+      "lane": "feature",
       "milestone": "v2.32",
       "done": false
     },
