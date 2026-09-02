@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* ProblemsView — a linter-style inbox of everything the gate + risk pass flags. */
 import { useState } from "react";
 import { REQUIREMENTS, coverageOf } from "../lib/data.js";
@@ -10,7 +10,7 @@ export function computeProblems() {
   const SEV = {
     unimplemented:      { sev:"ERROR",  msg:"No implementing member — orphan. The gate blocks the build.", fix:"Add an `implements:` tag, or author the requirement." },
     untested:           { sev:"WARN",   msg:"Confirmed, but no `tested-by:` member is linked.", fix:"Add a test tag, or set `test_exempt:` to silence." },
-    "unverified-intent":{ sev:"WARN",   msg:"Has open `## WHAT — Verify intent` question(s).", fix:"Run `reqmap.py findings`, resolve each one, then fold the answer into the Contract or delete the bullet." },
+    "unverified-intent":{ sev:"WARN",   msg:"Has open `## Verify intent` question(s).", fix:"Run `reqmap.py findings`, resolve each one, then fold the answer into the Description or delete the bullet." },
     unreviewed:         { sev:"REVIEW", msg:"Drafted from code by extract — intent not yet validated.", fix:"Review, then `req promote <ID>`." },
   };
   const out = [];
@@ -26,7 +26,7 @@ export function computeProblems() {
     if (cov === "partial") {
       out.push({ id:r.id, title:r.title, signal:"partial", sev:"WARN",
         msg:`Partial coverage — ${r.covered}/${r.clauses} criteria verified. ${r.gap||""}`.trim(),
-        fix:"Tag a test `# verifies: <id>#AC-N` for the uncovered criterion, or write one.",
+        fix:"Tag a test `# verifies: <id>#CASE-N` for the uncovered criterion, or write one.",
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     } else if (cov === "untested" && r.status !== "draft" && !flagged) {
       out.push({ id:r.id, title:r.title, signal:"untested", sev:"WARN",
@@ -39,12 +39,23 @@ export function computeProblems() {
   return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
 }
 
+/* The `unreviewed` signal on a `draft` is not a defect report — it is the
+ * normal state of a requirement drafted from code and not yet promoted. With a
+ * decomposed corpus that is ~618 identical rows, and every real ERROR and WARN
+ * is buried under them. They are counted, named and one click away; they are
+ * not the default reading. */
+const isDraftReview = (p) => p.sev === "REVIEW" && p.signal === "unreviewed";
+
 export function ProblemsView({ openSpec }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState("ALL");
+  const [showDrafts, setShowDrafts] = useState(false);
   const all = computeProblems();
   const counts = all.reduce((a,p)=>{ a[p.sev]=(a[p.sev]||0)+1; return a; }, {});
-  const shown = filter==="ALL" ? all : all.filter(p=>p.sev===filter);
+  const draftReviews = all.filter(isDraftReview).length;
+  const byTab = filter==="ALL" ? all : all.filter(p=>p.sev===filter);
+  const shown = showDrafts ? byTab : byTab.filter(p => !isDraftReview(p));
+  const hidden = byTab.length - shown.length;
 
   const Tab = ({k,label,n}) => (
     <button className={"tab"+(filter===k?" on":"")} onClick={()=>setFilter(k)}>
@@ -67,6 +78,13 @@ export function ProblemsView({ openSpec }) {
       </div>
 
       <div className="problems">
+        {(hidden > 0 || (showDrafts && draftReviews > 0)) && (
+          <button type="button" className="prob-chip" onClick={()=>setShowDrafts(s=>!s)}>
+            {showDrafts
+              ? t("hide {n} draft review rows", { n: draftReviews })
+              : t("{n} draft review rows hidden — show", { n: hidden })}
+          </button>
+        )}
         {shown.map((p,i)=>(
           <div className="prob-row" key={i} onClick={()=>p.id!=="—" && openSpec(p.id)}>
             <span className={"prob-sev sev-"+p.sev}>{p.sev}</span>

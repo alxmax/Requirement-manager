@@ -132,7 +132,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_check",
-      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in the next major version — use 'gate' or 'sync' instead.",
+      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in v4.0.0 — use 'gate' or 'sync' instead.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -228,7 +228,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_lint",
-      "description": "Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default.",
+      "description": "Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -525,7 +525,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_suggest_verifies",
-      "description": "Propose `# verifies: <id>#AC-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags.",
+      "description": "Propose `# verifies: <id>#CASE-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags.",
       "parameters": {
         "type": "object",
         "properties": {

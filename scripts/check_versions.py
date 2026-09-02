@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# implements: REQ-SELFGATE-039
+# implements: ARCH-SELFGATE-039
 """Repo-local version-coherence gate (dev/CI tooling — NOT part of the seeded engine).
 
 The same version string lives in several static manifests that no single process

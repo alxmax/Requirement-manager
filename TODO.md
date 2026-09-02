@@ -19,13 +19,13 @@
 
 ## v1.15
 - [x] Test-link integrity gate check (testlink) | lane: ops
-- [x] Scan cache (opt-in `--cache` flag — REQ-SCANCACHE-023) | lane: ops
+- [x] Scan cache (opt-in `--cache` flag — ARCH-SCANCACHE-023) | lane: ops
 
 ## v1.16
 <!-- Senate fix plan 2026-06-12 (runs/senate/2026-06-12_091906-requirement-manager-fix-plan.json, verdict MODIFY).
      Detail spec: docs/PLAN-senate-fix-2026-06-12.md -->
 - [x] Phantom-member fix: context-aware tag scan (fence/backtick/indent + .py string state) | lane: bus
-- [x] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, NEED-SSOT-001 AC-1 split + severity table | lane: ops
+- [x] Drift doc reconciliation (direction B): SKILL.md, CLAUDE.md, SYS-SSOT-001 AC-1 split + severity table | lane: ops
 - [x] check --strict (promotes test-link integrity + confirmed-drift to error) | lane: feature
 - [x] check --json (structured gate output, exit-code aligned) | lane: feature
 - [x] Frontmatter '#' scalar truncation fix | lane: bus
@@ -59,10 +59,10 @@
      already been updated to the new model (TRIAS -> skeptic_on_chosen edge) while the
      prose contract still described the old one — an internal contradiction. -->
 - [x] Member-hash drift (reverse direction): record member content hashes in `_reqlock.json` and WARN when a `confirmed` requirement's member changed since lock but the requirement was not re-touched/re-confirmed — catches "behavior shipped, spec not updated". Default WARN (likely `--strict`-promotable) to bound the noise of every code edit nagging its requirement. | lane: feature
-      <!-- Done as REQ-MEMBERDRIFT-027: stored in a versioned sidecar `_memberlock.json` (not _reqlock.json) so the cross-repo contract stays byte-stable; scoped to mono-requirement files to avoid alarm fatigue. Both Senate blocking conditions addressed. -->
+      <!-- Done as ARCH-MEMBERDRIFT-027: stored in a versioned sidecar `_memberlock.json` (not _reqlock.json) so the cross-repo contract stays byte-stable; scoped to mono-requirement files to avoid alarm fatigue. Both Senate blocking conditions addressed. -->
 
 - [x] ~~Internal-consistency lint: flag a requirement whose structured fields moved to a new model while its prose Contract/AC still assert the superseded model.~~ **DROPPED** | lane: feature
-      <!-- DROPPED (not implemented). Senate 2026-06-19 (runs/senate/2026-06-19_224727-reqmap-item4-internal-consistency-lint.json) + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by REQ-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
+      <!-- DROPPED (not implemented). Senate 2026-06-19 (runs/senate/2026-06-19_224727-reqmap-item4-internal-consistency-lint.json) + closed tracking issue #120. Decision: do not build. The naive 'depends_on id absent from prose' check is empirically refuted (78.6% false-positive on this corpus, and would have missed the motivating TRIAS case — an added edge, not an absent id). The only viable detector (baseline-aware depends_on diff) needs a persisted baseline ~= ITEM 3's machinery for a warn-only, n=1 signal — disproportionate. The residual gap (a requirement's own frontmatter vs its prose) is narrow and caught by human PR review; the member-changed half is covered by ARCH-MEMBERDRIFT-027. Revisit only if a second real frontmatter-vs-prose contradiction recurs. -->
 
 ## v1.35
 <!-- Backfilled 2026-06-21 (TODO/roadmap hygiene): shipped capabilities whose milestone
@@ -70,19 +70,19 @@
      chose manual TODO hygiene over building a TODO<->requirement coherence-check feature
      (demand n=1; the only stale TODO observed was this repo's own). -->
 - [x] Project presentation page (`site`): inject/refresh engine-owned nav + stats regions into docs/architecture.html (scaffold if absent) | lane: feature
-      <!-- REQ-SITE-026 -->
+      <!-- ARCH-SITE-026 -->
 
 ## v2.4
 - [x] Excalidraw scene builder — core stdlib API (.excalidraw scene + self-contained HTML viewer) | lane: feature
-      <!-- REQ-EXCALIDRAW-030 -->
+      <!-- ARCH-EXCALIDRAW-030 -->
 - [x] Excalidraw quality gates at save() (overlap, crossing, legend, text-overflow, text-overlap; later: short-arrow, label-fit) | lane: feature
-      <!-- REQ-EXCALIDRAW-031 -->
+      <!-- ARCH-EXCALIDRAW-031 -->
 - [x] Excalidraw builder CLI verbs (`render` a scene → viewer; `discover` a repo → generator stub) | lane: feature
-      <!-- REQ-EXCALIDRAW-032 -->
+      <!-- ARCH-EXCALIDRAW-032 -->
 
 ## v2.6
 - [x] Untagged-code coverage signal: read-only `untagged` count in `health` (code traced to no requirement) | lane: feature
-      <!-- REQ-COVERAGE-029. Senate 2026-06-21 (enforce-all-code DEEPLY_SPLIT): a hard coverage gate was rejected; only this read-only signal shipped. -->
+      <!-- ARCH-COVERAGE-029. Senate 2026-06-21 (enforce-all-code DEEPLY_SPLIT): a hard coverage gate was rejected; only this read-only signal shipped. -->
 
 ## v2.7
 <!-- Multi-platform Phase 1 — SHIPPED (PR #127). Senate 2026-06-21 (runs/senate/2026-06-21_110220-reqmap-multiplatform-mcp.json, verdict MODIFY).
@@ -91,7 +91,7 @@
      mirrors of the CLI with no sync mechanism — already drifting. Fix: one declarative command registry as
      the single source of truth, generate the artifacts from it, drift-guard them in the gate. -->
 - [x] Command registry: one declarative `COMMANDS` structure in reqmap.py; argparse choices derived from it (hand-written `choices=[...]` literal removed). Dispatch ladder left intact (de-risked); CLI behaviour byte-identical (TestCli unchanged). | lane: bus
-      <!-- REQ-CMDREGISTRY-033 -->
+      <!-- ARCH-CMDREGISTRY-033 -->
 - [x] Generate `tool_definition.json` (function-calling schema) + the command-reference TABLE inside SKILL.universal.md (delimited region; curated WHY/WHEN prose stays hand-authored) from the registry. | lane: feature
 - [x] Drift-guard: `gate` (incl. `--json`) regenerates the artifacts in-memory and byte-compares vs committed → error (exit 1), mirroring `map --check`. | lane: ops
 
@@ -102,11 +102,11 @@
      that demand was n=1 — this repo's own stale TODO. It is now n=2, same repo, same
      failure mode. -->
 - [x] Registry lag in `health`: commits since the requirements dir was last touched | lane: ops
-      <!-- REQ-REGISTRYLAG-035 -->
+      <!-- ARCH-REGISTRYLAG-035 -->
 
 ## v2.13
 - [x] Ranked free-text requirement search (`search`), shared scoring model with the viewer | lane: feature
-      <!-- REQ-SEARCH-036 -->
+      <!-- ARCH-SEARCH-036 -->
 
 ## v2.14
 - [x] Requirement clarity lint enforced in CI, the dev hook and the published action | lane: ops
@@ -116,14 +116,14 @@
 
 ## v2.16
 - [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link | lane: feature
-      <!-- REQ-VLEVEL-037 -->
+      <!-- ARCH-VLEVEL-037 -->
 
 ## v2.32 — TO VERIFY
 <!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided.
      Audited the same day: runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
 
 - [ ] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
-      <!-- NEED-SSOT-001 alone cannot be the apex: 54 architectures under one need violates any
+      <!-- SYS-SSOT-001 alone cannot be the apex: 54 architectures under one need violates any
            fan-out (54/20 = 2.7, 54/5 = 10.8). `area:` is at 0, so the grouping cannot be
            derived automatically. Blocks everything that follows.
            Cost: a decision, no code. -->
@@ -147,8 +147,8 @@
            ~20 lines + tests. -->
 
 - [ ] TO VERIFY: decide the fate of the architecture layer — populate it or delete it | lane: ops
-      <!-- `aggregate` is built, tested (it has acceptance criteria in REQ-PROMOTE-011 and
-           REQ-TRACE-020) and used by zero requirements. By this repo's own standard — ADR-0016
+      <!-- `aggregate` is built, tested (it has acceptance criteria in ARCH-PROMOTE-011 and
+           ARCH-TRACE-020) and used by zero requirements. By this repo's own standard — ADR-0016
            rejected a mechanism at 4% adoption — a layer at 0% should be deleted, not kept
            "for later". -->
 
@@ -157,7 +157,7 @@
            unlike the 75-word ceiling which catches nothing. And retroactively validated: 3 of
            the 4 requirements over 20 clauses already carry a hand-written `lint_exempt:`. -->
 
-- [ ] TO VERIFY: split REQ-MAP-007 (35 clauses) | lane: ops
+- [ ] TO VERIFY: split ARCH-MAP-007 (35 clauses) | lane: ops
       <!-- The only one over 20 without an exemption — so the only one whose size has never
            been judged in writing. -->
 
@@ -190,10 +190,10 @@
      Known breaks behind the data.js and scan-reach items below:
      - app/src/lib/data.js carries 286 lines of BAKED requirement data (13 reqs,
        manually copied from the registry: contract, acceptance, members) — a second,
-       unsynced source of truth in a tool whose pitch is "one". If CORE-PARSE-001
+       unsynced source of truth in a tool whose pitch is "one". If ARCH-PARSE-001
        changes, the viewer shows the stale version and no gate notices — the worst
        possible position for a counter-example.
-     - docs/ sits outside the scan root (CI runs from plugin/), so REQ-DOCBUNDLE-026
+     - docs/ sits outside the scan root (CI runs from plugin/), so ARCH-DOCBUNDLE-026
        — built to catch generated HTML bundles with no lineage tag, 50KB threshold —
        never sees its own docs/full_architecture.html (99KB). The rule exists and is
        structurally excluded from the one place it should apply.
@@ -207,15 +207,15 @@
 - [ ] Decide the beachhead domain (4 named candidates) — tie-break on which gets one external user in 30 days; pipelines currently leads since this repo is already its own demo | lane: ops
 - [x] Rewrite the README lead around agent drift, not stale specs; fix the ~3700-vs-5,199 line-count claim; add TODO.md and test_reqmap.py to the layout tree | lane: ops
       <!-- Real count was 5,307, not 5,199 — TODO's own estimate was stale too; README now says ~5300. -->
-- [x] Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so REQ-DOCBUNDLE-026 finally sees its own bundle | lane: bus
+- [x] Extend scan reach: add .sh/.tf to CODE_EXTS, extensionless basename matching for Dockerfile/Makefile, let the scan root reach the repo root instead of stopping at plugin/ — and cover docs/, not just .github/, so ARCH-DOCBUNDLE-026 finally sees its own bundle | lane: bus
       <!-- Shipped as `--code ..`/`--code .` for THIS repo's CI/hook only (Trias deliberation
            .consilium/runs/2026-08-18_1640_v29-scan-root-codeexts-viewer-trias.json rejected
            auto-widening the shared engine default as a silent-failure risk to consumer repos
            scoped to a subdirectory on purpose). Also widened Dockerfile/Makefile basename
            matching to the standard git hook names (pre-commit, pre-push, ...) — needed for the
-           next item below. REQ-DOCBUNDLE-026 now WARNs on docs/full_architecture.html, confirmed live. -->
+           next item below. ARCH-DOCBUNDLE-026 now WARNs on docs/full_architecture.html, confirmed live. -->
 - [x] Tag this repo's own pipeline (ci.yml, check/action.yml, .githooks/, sync_reqmap.sh) — currently zero tags across all of them | lane: ops
-      <!-- REQ-SELFGATE-039. A confirmed requirement whose members are all outside plugin/
+      <!-- ARCH-SELFGATE-039. A confirmed requirement whose members are all outside plugin/
            genuinely ERRORs under the narrow gate invocation (not just a coverage miss) —
            documented in CLAUDE.md as an accepted, loud-not-silent consequence. -->
 - [x] Ship one worked example end-to-end: one requirement, one agent session, one drift the gate caught, real terminal output — every claim on the README is currently architectural, none demonstrated | lane: ops
@@ -229,12 +229,12 @@
            bugs in its own first implementation during code review (bracket-truncating regex,
            uncaught UnicodeDecodeError) — both fixed before shipping. -->
 - [x] Fix the .reqmapignore comment claiming the viewer is "tested via npm build" — there is no npm step in CI | lane: ops
-- [x] `lint` check for redundant "shall"/"must" on a Contract clause (REQ-LINTCHECKS-025 AC-10) | lane: feature
+- [x] `lint` check for redundant "shall"/"must" on a Contract clause (ARCH-LINTCHECKS-025 AC-10) | lane: feature
       <!-- PR #186. The Contract section already opens with "Every line in this section is
            binding.", so the modal is dead weight — and in a non-English requirement corpus
            `shall` is also a stray anglicism, caught in a consumer repo's 29 files / 261 places
            before this check existed. -->
-- [x] Opt-in requirement-content translation: `reqmap.py translate` + viewer badge (REQ-TRANSLATE-044) | lane: feature
+- [x] Opt-in requirement-content translation: `reqmap.py translate` + viewer badge (ARCH-TRANSLATE-044) | lane: feature
       <!-- PR #187. The v2.23.0 EN/RO toggle (line below) covers UI chrome only, which fails a
            reader who does not read the corpus's language AT ALL. `translate` is manual/opt-in,
            the only subcommand that shells out to `claude -p`, never called by gate/sync/lint/
@@ -245,7 +245,7 @@
            instead of mandatory per-file `lang:` tagging. -->
 - [x] Scan-evidence run 6 — Management_Dashboard (TS/TSX, SQL, shell, Dockerfile, Caddyfile, Prisma, YAML, JSON, Markdown): four engine defects found and fixed in v2.27.0 | lane: ops
       <!-- 2026-08-25, PR #191. Findings: (1) tags in Caddyfile / schema.prisma / Dockerfile.converter
-           were invisible — types added + REQ-UNSCANNEDTAG-045 gate warning for the next case;
+           were invisible — types added + ARCH-UNSCANNEDTAG-045 gate warning for the next case;
            (2) realpath on every walked dir = 62% of gate time (4,900 upload folders) — name-gated,
            plus .reqmapignore `/**` patterns prune the walk: 11.2 s -> 4.1 s -> 0.6 s;
            (3) _map.json "stale" on engine_version alone — excluded from the freshness diff;
@@ -263,7 +263,7 @@
            Per run:
            1 C/C++ (zlib 271 files, curl 4,449): scanner 16/16 probes OK, 0 false tags; `plan` gave
              0 candidates for zlib and only tests/*.py for curl (CANDIDATE_EXTS); `dupes | head`
-             OSError 22 on Windows. Fixed: plan reach, REQ-PIPE-046. Left: curl's 2,066 extensionless
+             OSError 22 on Windows. Fixed: plan reach, ARCH-PIPE-046. Left: curl's 2,066 extensionless
              tests/data/test### fixtures are outside any extension-based scan.
            2 frontend (excalidraw): .scss = 82 files = the only stylesheet format, invisible;
              plan 663 vs draft 687; draft ignored 15 signatures plan had read; dupes 1,748 pairs.
@@ -287,8 +287,8 @@
            repo-root .reqmapignore's `app/**` exclusion this round. Revisit once the demand is
            real, not before.
            Closed 2026-09-02: 18 files tagged (app/src/** + install-viewer.mjs,
-           vite.viewer.config.js -> REQ-VIEWER-007; search.js -> REQ-SEARCH-036; i18n.jsx +
-           SpecView.jsx also REQ-TRANSLATE-044; ssr-smoke.jsx tested-by both). `app/**` left the
+           vite.viewer.config.js -> ARCH-VIEWER-007; search.js -> ARCH-SEARCH-036; i18n.jsx +
+           SpecView.jsx also ARCH-TRANSLATE-044; ssr-smoke.jsx tested-by both). `app/**` left the
            root .reqmapignore; only app/dist*, app/.vite and the SSR bundle stay excluded. -->
 
 ## v3
@@ -304,9 +304,9 @@
            fix: ci.yml's release job force-moves the alias onto every released commit,
            and check_versions.py asserts action.yml/README/CLAUDE.md name the same major
            (the documented `uses:` line is the SSOT — no separate version file).
-           REQ-SELFGATE-039 AC-6/AC-7. Shipped in v2.18.1. -->
+           ARCH-SELFGATE-039 AC-6/AC-7. Shipped in v2.18.1. -->
 - [x] Scan vs `.gitignore`: a gitignored-but-tagged file silently changes committed generated artifacts — make the scan skip gitignored paths, or WARN when a member resolves to one | lane: bus
-      <!-- Shipped as REQ-TRACKED-042, the WARN half the item's own note argued for. Built
+      <!-- Shipped as ARCH-TRACKED-042, the WARN half the item's own note argued for. Built
            on UNTRACKED rather than gitignored: it is the property that actually matters
            (a merely-uncommitted file breaks reproducibility identically), one `git ls-files`
            answers both, and it avoids hand-parsing gitignore semantics or one check-ignore
@@ -337,7 +337,7 @@
            overwrites the committed file in place); the diagram half builds into a temp dir
            and compares, because the generator drops a sibling .excalidraw and
            `docs/*.excalidraw` is hard-blocked by .gitignore. `release` now needs this job. Filed as
-           REQ-REPRO-041, split out of REQ-SELFGATE-039 after the clarity lint flagged
+           ARCH-REPRO-041, split out of ARCH-SELFGATE-039 after the clarity lint flagged
            the merged requirement at 8 acceptance criteria.
            NOT covered: docs/architecture.html, which is hand-authored — its engine-owned
            regions are already checked by `map --check`. -->
@@ -370,13 +370,13 @@
            first, argue about a threshold once there is a series. Not in `release`'s
            needs — it is the one job that installs from PyPI (both tools pinned). -->
 - [x] Declare and assert the Python floor (3.7 today, accidental) | lane: bus
-      <!-- REQ-PYFLOOR-040, v2.19.0. Floor = 3.9, chosen as the oldest version CI can
+      <!-- ARCH-PYFLOOR-040, v2.19.0. Floor = 3.9, chosen as the oldest version CI can
            actually run rather than the oldest the code tolerates (3.7): 3.7/3.8 are not
            installable on current GitHub runners, so supporting them would be untested.
            A test asserts MIN_PYTHON == the oldest python in the CI matrix, so the two
            cannot drift apart. Cannot catch <3.6 (f-strings fail at compile time). -->
 - [x] Fix the upgrade path: warn_if_stale is silent in CI, exactly where it matters | lane: bus
-      <!-- Shipped in v2.22.0 as REQ-STALEENGINE-043, in the ACTION rather than the engine:
+      <!-- Shipped in v2.22.0 as ARCH-STALEENGINE-043, in the ACTION rather than the engine:
            a stale vendored reqmap.py does not contain the check that would report it stale,
            so the detector has to run from something the consumer does not vendor.
            check/engine_staleness.py compares the vendored MAP_ENGINE_VERSION against the
@@ -403,7 +403,7 @@
            tests written first. Benchmark: scripts/benchmark_scan.py, numbers published in
            the README. -->
 - [x] One tree walk instead of three: `gate` calls scan_members + scan_ac_verifies + scan_test_levels, each opening every file — 3.06s + 2.76s + 2.81s of its 8.49s on a 10k-file tree | lane: bus
-      <!-- Shipped as `scan_all` (CORE-SCAN-002 AC-7). Not a merge of three loops: the walk
+      <!-- Shipped as `scan_all` (ARCH-SCAN-002 AC-7). Not a merge of three loops: the walk
            moved into one `_walk_code` generator, `_scan_file_tags` gained an optional
            `lines` argument so a caller that already read the file can hand the content
            over, and the two coverage scanners' identical masking loops became one pass
@@ -474,4 +474,4 @@
            in the .md files and in gate output). The dictionary is keyed by the English
            source string, so a missing entry degrades to English. Locale is remembered in
            localStorage and never written into _map.html, which stays byte-identical.
-           Six SSR-smoke assertions cover both directions; REQ-VIEWER-007 +AC-6. -->
+           Six SSR-smoke assertions cover both directions; ARCH-VIEWER-007 +AC-6. -->

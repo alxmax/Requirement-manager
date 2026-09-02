@@ -10,7 +10,7 @@ scripts/_map_viewer.html
 
 # --- excalidraw-diagram skill ---
 # SKILL.md and its cross-platform SKILL.universal.md variant: classified as the
-# 'ignore' bucket by REQ-PROSE-024 (user contract, not a capability
+# 'ignore' bucket by ARCH-PROSE-024 (user contract, not a capability
 # implementation). The .universal.md is the same contract adapted for other
 # platforms — same class, not its own capability.
 skills/excalidraw-diagram/SKILL.md
@@ -30,7 +30,7 @@ skills/requirement-manager/SKILL.universal.md
 
 # --- working docs / specs ---
 # Design specs and superpowers working notes under docs/ are sync_only prose
-# (REQ-PROSE-024 bucket), not capability implementations.
+# (ARCH-PROSE-024 bucket), not capability implementations.
 docs/superpowers/specs/*.md
 
 # --- app/ and repo-root scripts/ ---
@@ -42,4 +42,4 @@ docs/superpowers/specs/*.md
 # excluded from the widened repo-root scan via the top-level .reqmapignore
 # (app/**), so this comment documents intent for the narrow invocation too.
 # The version-gate script is dev-CI tooling described in CLAUDE.md and
-# cross-referenced in REQ-CHECK-006.
+# cross-referenced in ARCH-CHECK-006.

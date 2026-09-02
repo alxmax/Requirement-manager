@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* Shared primitives: Pill (status/layer), Btn, statusKind. */
 import { Icon } from "./icons.jsx";
 

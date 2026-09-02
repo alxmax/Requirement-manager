@@ -70,7 +70,7 @@ intent triage before any other action.
 
 **Process:**
 
-1. Read each requirement's `## WHAT — Contract` to the user in one sentence.
+1. Read each requirement's `## Description` to the user in one sentence.
 2. User says C, E, or A.
 3. After classifying all: apply decisions in bulk.
    - Core → leave for human review + confirm path (`reqmap.py confirm <ID>`).
@@ -174,7 +174,7 @@ engine changes to the cache and any registered consumer repos in one command:
   - If you cannot tell where a requirement ends, factor the shared part onto the bus.
   - `need` and `aggregate` are exempt from the `implements:` rule — they are covered
     by an edge, not by a tag. Everything else about them is unchanged.
-  - **Every layer** requires `## WHAT — Contract` and `## HOW — Acceptance` at
+  - **Every layer** requires `## Description` and `## Cases` at
     `confirmed` status. Bus capabilities are not exempt — unspecified bus
     contracts are the most expensive to discover late.
 - **The thread**: code declares membership with a tag, by role:
@@ -208,10 +208,10 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
-2. **A requirement is its contract.** Fill `WHAT — Contract` (the normative,
+2. **A requirement is its contract.** Fill `Description` (the normative,
    testable behavior) first; the boundary follows from the contract. (Legacy
    requirements may still use `Input → Description → Output`; the engine reads both.)
-2a. **`confirmed` requires both `## WHAT — Contract` and `## HOW — Acceptance`.**
+2a. **`confirmed` requires both `## Description` and `## Cases`.**
     A contract-only requirement has unspecified acceptance tests. An acceptance-only
     requirement has an unspecified normative contract. The gate warns on either
     omission. Both `bus` and `feature` layers are subject to this rule.
@@ -224,13 +224,23 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     `reqmap.py next` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
+
+3b. **Merge heuristic — the same smell from the other side.** A corpus only ever
+    grows unless something says so. If two requirements state the same obligation,
+    the code is covered twice and a later edit will change one of them. `reqmap.py
+    next` reports a **Redundancy** bucket for contracts that are identical word for
+    word (exact match, no threshold — a group there is a duplicate, not a guess),
+    and `reqmap.py dupes` scores the near-matches. Fold a group into one
+    requirement and re-point the tags, or make the contracts say different things.
+    Both are advisory and neither ever rewrites a file: which of two ids survives,
+    and what the merged contract says, is a judgement call.
 4. **One fact, one home.** Reference ids; never copy a contract into a README.
 5. **Authority is one-directional**: requirement → code. If they disagree, the
    requirement wins (fix the code, or fix the requirement — never let code be the
    silent truth).
 6. **Authoring is bidirectional**: you may start in code (explore), but the change
    is not "done" until the requirement is updated in the *same* commit.
-7. **`## WHAT — Verify intent` asks the user, not the AI.** This section is for
+7. **`## Verify intent` asks the user, not the AI.** This section is for
    open questions that only a human reviewer can answer — contract gaps, edge cases
    not covered, design decisions left implicit, or behaviors that may be AI accidents
    (swallowed error, magic constant, unreachable branch). Write 1–3 specific, answerable
@@ -264,8 +274,11 @@ honored by the scanner.
 
 ## Audience & writing level
 
-Write every requirement so a developer with basic programming experience but NO prior
-knowledge of this project can understand it without asking questions. Rules:
+Write every requirement so a FIRST-YEAR ENGINEERING STUDENT can understand it without
+asking questions: someone who reads technical prose comfortably, but who may not program,
+and who knows nothing about this project. That is a lower baseline than "a developer new
+to the project", and it is deliberate — a requirement only anyone-who-already-knows can
+read is not a specification, it is a reminder. Rules:
 
 1. Define each project-specific term briefly, inline, on first use — e.g.
    "veto cascade (a fixed series of checks that can block or reroute the result)".
@@ -275,8 +288,10 @@ knowledge of this project can understand it without asking questions. Rules:
 3. Write contract lines in plain present tense with a named subject — "`init` creates
    the folder", never "It shall create the folder". The Contract section opens with
    "Every line in this section is binding.", so no "shall" or "must" is needed on each
-   line. Keep sentences under 25 words and bullets under 22; `lint` enforces both, and
-   warns (`anonymous-subject`) on a clause that opens with a bare "It".
+   line. A clause may hold two or three sentences, as long as the extra ones state the
+   first's consequence and never a second obligation. Keep sentences under 25 words and
+   clauses to at most three sentences; `lint` enforces both, and warns
+   (`anonymous-subject`) on a clause that opens with a bare "It".
 4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
    One clause, not a paragraph.
 5. Keep all file and function references (e.g. `strip_context.py`,
@@ -331,9 +346,9 @@ for a corpus where all requirements are confirmed and lock is current).
   `confirmed` requirement. Silent on a well-formed corpus.
 - **drift** — content hash of each `confirmed` requirement compared to `_reqlock.json`;
   a changed requirement whose members were not re-touched is flagged WARN (never ERROR by
-  default — design decision from day 1; see REQ-CHECK-006). The warning also names the
+  default — design decision from day 1; see ARCH-CHECK-006). The warning also names the
   drifted requirement's direct `depends_on` dependents — its review blast radius
-  (REQ-DRIFTIMPACT-035). Advance the lock with `sync`
+  (ARCH-DRIFTIMPACT-035). Advance the lock with `sync`
   (use `--accept-drift` when the edited requirement is `confirmed` or `implemented`).
 
 Intent sync is *not* automatable — it surfaces at human review (promote
@@ -417,22 +432,22 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py sync`              — rescan + advance the drift baseline + regenerate the map (and a committed `_findings.md`) in one step. Use after editing requirement files or tagging new code members. **Drift guard:** if a `confirmed` or `implemented` contract changed, `sync` refuses and exits non-zero unless you pass `--accept-drift` (which explicitly advances the baseline for that contract).
 - `python scripts/reqmap.py gate`              — run the commit/CI gate (report-only): link sync + drift + test-link integrity. **Never** touches `_reqlock.json`. Use `gate --strict` to promote drift + test-link warnings to errors.
-- `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (draft `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list.
-- `python scripts/reqmap.py lint`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks span structure (`missing-section` [error], `empty-section`), prose readability (`long-sentence`, `stacked-conditions`, `statement-too-long`), scope/cohesion (`ac-count-low`, `ac-count-high`, `over-scoped`, `file-spread`), and testability (`vague-term`) — full contract in `REQ-LINTCHECKS-025`. Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings **and** promotes the structural `ac-count-high` and `over-scoped` checks to errors, so those two can fail CI under `--strict`.
-- `python scripts/reqmap.py show <ID>`         — print a consolidated, human-readable dossier for one requirement: header (id · status · layer · milestone), intent, Contract bullets, dependencies both directions (`depends_on` + reverse `Depended on by`), code members grouped by role with `file:line`, open `## WHAT — Verify intent` questions (the `findings` "None" filter applied), and risk signals with advice (same `_risk_signals` source as `next`). Answers "what does this do / where is X" in one command. Read-only; returns non-zero on an unknown id so a typo is visible to CI.
+- `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (draft `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list. Two further advisories close the list, and they point in opposite directions: **Granularity** names a requirement with >=5 acceptance criteria (a split candidate), and **Redundancy** groups requirements whose Description clauses are identical once case and whitespace are normalised — an exact match, no threshold, so a group is a duplicate by construction rather than a judgement call. `sync` prints a one-line count of the same thing; `gate` deliberately says nothing, because corpus shape is not a commit-time concern. Both report only and never rewrite a requirement. Run `dupes` for the near-matches an exact match cannot see.
+- `python scripts/reqmap.py lint`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks span structure (`missing-section` [error], `empty-section`), prose readability (`stacked-conditions`, `statement-too-long`), scope/cohesion (`ac-count-low`, `ac-count-high`, `over-scoped`, `file-spread`), and testability (`vague-term`) — full contract in `ARCH-LINTCHECKS-025`. Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings **and** promotes the structural `ac-count-high` and `over-scoped` checks to errors, so those two can fail CI under `--strict`.
+- `python scripts/reqmap.py show <ID>`         — print a consolidated, human-readable dossier for one requirement: header (id · status · layer · milestone), intent, Contract bullets, dependencies both directions (`depends_on` + reverse `Depended on by`), code members grouped by role with `file:line`, open `## Verify intent` questions (the `findings` "None" filter applied), and risk signals with advice (same `_risk_signals` source as `next`). Answers "what does this do / where is X" in one command. Read-only; returns non-zero on an unknown id so a typo is visible to CI.
 - `python scripts/reqmap.py dupes`             — flag requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. Stdlib TF-IDF (smoothed idf) + cosine over each requirement's title + intent + Contract bullets (Notes excluded as noise); prints pairs most-similar-first with their score and top shared terms. `--threshold T` overrides the default `0.35`. Read-only, always exit 0 (advisory — a human decides if a flagged pair is a real duplicate). Lexical, not semantic: it surfaces likely duplicates, it does not prove duplication. Requirement-to-requirement only; untagged-code-to-requirement matching stays with `plan`.
 - `python scripts/reqmap.py health`            — print a corpus coherence snapshot: a headline score (the percentage of requirements green on EVERY axis — `confirmed` + an `implements` member + tested-or-`test_exempt` + no open verify-intent + not drifted) plus the component counts (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift). `--json` emits the same numbers as a parseable object for a CI badge. Read-only, always exit 0 (a report, not a gate). The score is strict by design: one open question or one drifted contract drops a requirement out of the green count.
-- `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## WHAT — Verify intent` item).
+- `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## Verify intent` item).
 - `python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats` — inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. `init` runs this best-effort.
 - `python scripts/reqmap.py export`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
 - `python scripts/reqmap.py translate [--to ro|en]` — **manual, opt-in only** — the one subcommand that shells out to `claude -p`. Detects the corpus's majority language (a per-file `lang: ro|en` frontmatter overrides detection), then caches a translation of every requirement written in that language into `requirements/_i18n/<target>.json`, keyed by a content hash over title+WHY+Contract+Acceptance (deliberately not `binding_hash`, which excludes the title). A structural-fidelity check (backticked spans, numbers, heading/bullet markers must match) gates every cache write; a missing/erroring `claude` CLI or a failed check skips that entry with a `WARN` instead of aborting the batch. `map`/`export` inline the cache into the graph **read-only** — no `claude` call — so `gate`/`sync`/`lint`/`map --check`/the pre-commit hook and CI stay exactly as `claude`-free as before this command existed. Re-run after editing a translated requirement or bumping the translation prompt (`TRANSLATOR_VERSION`).
 - `python scripts/reqmap.py draft`             — draft one requirement per untagged file. Input: **existing untagged code** (and prose). Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
 - `python scripts/reqmap.py plan`              — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `draft`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
 - `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view. Once the file exists, `map`/`sync` keep it fresh and `map --check` flags it stale
-- `python scripts/reqmap.py suggest-verifies`  — propose `# verifies: <ID>#AC-N` tags for tests already NAMED after the criterion they check (`test_ac3_…`), the cheap way to adopt per-criterion coverage on an existing corpus. Searches only the requirement's own `tested-by` files, and refuses to guess: a file shared by several requirements needs a distinctive id token in the test's own name (never its class, never a fixture parameter), a name carrying another requirement's number belongs to that one, and two candidates for one criterion are reported as ambiguous and never written. Read-only; `--apply` writes the tags, idempotently.
+- `python scripts/reqmap.py suggest-verifies`  — propose `# verifies: <ID>#CASE-N` tags for tests already NAMED after the criterion they check (`test_ac3_…`), the cheap way to adopt per-criterion coverage on an existing corpus. Searches only the requirement's own `tested-by` files, and refuses to guess: a file shared by several requirements needs a distinctive id token in the test's own name (never its class, never a fixture parameter), a name carrying another requirement's number belongs to that one, and two candidates for one criterion are reported as ambiguous and never written. Read-only; `--apply` writes the tags, idempotently.
 - `python scripts/reqmap.py coverage`          — per-directory membership-tag coverage report: scannable files tagged vs. total, grouped by top-level directory, to spot traceability gaps. `--json` for CI. Read-only, exit 0.
 
-**`check` is a deprecated alias for `gate`** (removed in the next major version). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
+**`check` is a deprecated alias for `gate`** (removed in `v4.0.0`; it survived `v3.0.0`). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
 
 **Workflow order** — after modifying requirement files, run `sync` as a unit
 so the lock and map stay in sync:

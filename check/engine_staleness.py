@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# implements: REQ-STALEENGINE-043
+# implements: ARCH-STALEENGINE-043
 """Report a vendored reqmap.py that is older than the engine this action ships.
 
 Why it lives HERE and not in reqmap.py: the engine already has this check

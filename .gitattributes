@@ -7,7 +7,7 @@ plugin/hooks/pre-commit text eol=lf
 # viewer template checks out CRLF and Vite copies those bytes straight into the bundle,
 # and Python's default newline translation did the same to the diagram. `core.autocrlf`
 # then hid it locally (it normalizes on the way in), so the mismatch only appeared in
-# CI, on Linux, as a whole-file diff of visually identical lines. REQ-REPRO-041's job
+# CI, on Linux, as a whole-file diff of visually identical lines. ARCH-REPRO-041's job
 # compares these byte for byte, so their line endings have to be a property of the repo
 # rather than of the machine that last built them.
 app/viewer.html text eol=lf

@@ -69,7 +69,7 @@ is not a verification — the whole project is an argument against that.
 ## Adding or changing a capability
 
 1. Write or edit the requirement in `plugin/requirements/` (copy the shape of a recent one,
-   e.g. `REQ-TRACKED-042.md`). Contract clauses are binding and testable; the WHY explains
+   e.g. `ARCH-TRACKED-042.md`). Contract clauses are binding and testable; the WHY explains
    intent, not mechanics.
 2. Tag the code that implements it:
    ```python

@@ -73,7 +73,7 @@ intent triage before any other action.
 
 **Process:**
 
-1. Read each requirement's `## WHAT — Contract` to the user in one sentence.
+1. Read each requirement's `## Description` to the user in one sentence.
 2. User says C, E, or A.
 3. After classifying all: apply decisions in bulk.
    - Core → leave for human review + confirm path (`reqmap.py confirm <ID>`).
@@ -168,7 +168,7 @@ plugin present.
   - If you cannot tell where a requirement ends, factor the shared part onto the bus.
   - `need` and `aggregate` are exempt from the `implements:` rule — they are covered
     by an edge, not by a tag. Everything else about them is unchanged.
-  - **Every layer** requires `## WHAT — Contract` and `## HOW — Acceptance` at
+  - **Every layer** requires `## Description` and `## Cases` at
     `confirmed` status. Bus capabilities are not exempt — unspecified bus
     contracts are the most expensive to discover late.
 - **The thread**: code declares membership with a tag, by role:
@@ -202,10 +202,10 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
-2. **A requirement is its contract.** Fill `WHAT — Contract` (the normative,
+2. **A requirement is its contract.** Fill `Description` (the normative,
    testable behavior) first; the boundary follows from the contract. (Legacy
    requirements may still use `Input → Description → Output`; the engine reads both.)
-2a. **`confirmed` requires both `## WHAT — Contract` and `## HOW — Acceptance`.**
+2a. **`confirmed` requires both `## Description` and `## Cases`.**
     A contract-only requirement has unspecified acceptance tests. An acceptance-only
     requirement has an unspecified normative contract. The gate warns on either
     omission. Both `bus` and `feature` layers are subject to this rule.
@@ -218,13 +218,23 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     `reqmap.py next` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
+
+3b. **Merge heuristic — the same smell from the other side.** A corpus only ever
+    grows unless something says so. If two requirements state the same obligation,
+    the code is covered twice and a later edit will change one of them. `reqmap.py
+    next` reports a **Redundancy** bucket for contracts that are identical word for
+    word (exact match, no threshold — a group there is a duplicate, not a guess),
+    and `reqmap.py dupes` scores the near-matches. Fold a group into one
+    requirement and re-point the tags, or make the contracts say different things.
+    Both are advisory and neither ever rewrites a file: which of two ids survives,
+    and what the merged contract says, is a judgement call.
 4. **One fact, one home.** Reference ids; never copy a contract into a README.
 5. **Authority is one-directional**: requirement → code. If they disagree, the
    requirement wins (fix the code, or fix the requirement — never let code be the
    silent truth).
 6. **Authoring is bidirectional**: you may start in code (explore), but the change
    is not "done" until the requirement is updated in the *same* commit.
-7. **`## WHAT — Verify intent` asks the user, not the AI.** This section is for
+7. **`## Verify intent` asks the user, not the AI.** This section is for
    open questions that only a human reviewer can answer — contract gaps, edge cases
    not covered, design decisions left implicit, or behaviors that may be AI accidents
    (swallowed error, magic constant, unreachable branch). Write 1–3 specific, answerable
@@ -258,8 +268,11 @@ honored by the scanner.
 
 ## Audience & writing level
 
-Write every requirement so a developer with basic programming experience but NO prior
-knowledge of this project can understand it without asking questions. Rules:
+Write every requirement so a FIRST-YEAR ENGINEERING STUDENT can understand it without
+asking questions: someone who reads technical prose comfortably, but who may not program,
+and who knows nothing about this project. That is a lower baseline than "a developer new
+to the project", and it is deliberate — a requirement only anyone-who-already-knows can
+read is not a specification, it is a reminder. Rules:
 
 1. Define each project-specific term briefly, inline, on first use — e.g.
    "veto cascade (a fixed series of checks that can block or reroute the result)".
@@ -269,8 +282,10 @@ knowledge of this project can understand it without asking questions. Rules:
 3. Write contract lines in plain present tense with a named subject — "`init` creates
    the folder", never "It shall create the folder". The Contract section opens with
    "Every line in this section is binding.", so no "shall" or "must" is needed on each
-   line. Keep sentences under 25 words and bullets under 22; `lint` enforces both, and
-   warns (`anonymous-subject`) on a clause that opens with a bare "It".
+   line. A clause may hold two or three sentences, as long as the extra ones state the
+   first's consequence and never a second obligation. Keep sentences under 25 words and
+   clauses to at most three sentences; `lint` enforces both, and warns
+   (`anonymous-subject`) on a clause that opens with a bare "It".
 4. Add a short "why" clause to a contract rule ONLY when the reason isn't self-evident.
    One clause, not a paragraph.
 5. Keep all file and function references (e.g. `strip_context.py`,
@@ -356,11 +371,11 @@ Creation verbs (pick by input, not by outcome):
 | `scan` | List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo. | — |
 | `gate` | Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI. | `--strict`, `--json`, `--since` |
 | `sync` | Rescan code members, advance the drift baseline, and regenerate the map in one step (a committed _findings.md is refreshed too). Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed. | `--accept-drift`, `--strict` |
-| `check` | Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in the next major version — use 'gate' or 'sync' instead. | `--strict`, `--json`, `--since`, `--update-lock` |
+| `check` | Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in v4.0.0 — use 'gate' or 'sync' instead. | `--strict`, `--json`, `--since`, `--update-lock` |
 | `map` | Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine. | `--check` |
 | `export` | Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html. | `--out` |
 | `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
-| `lint` | Readability and structure check on non-draft requirements: long sentences (>25 words), stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default. | `--strict`, `--decompose` |
+| `lint` | Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default. | `--strict`, `--decompose` |
 | `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
 | `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
 | `search` | Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware. | `--top` |
@@ -373,7 +388,7 @@ Creation verbs (pick by input, not by outcome):
 | `translate` | Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook. | `--to` |
 | `site` | Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current. | `--attach`, `--regions`, `--diagram`, `--detect` |
 | `coverage` | Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability. | `--json` |
-| `suggest-verifies` | Propose `# verifies: <id>#AC-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags. | `--apply` |
+| `suggest-verifies` | Propose `# verifies: <id>#CASE-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags. | `--apply` |
 <!--##/REQMAP:COMMANDS##-->
 
 **`check` is a deprecated alias for `gate`** — kept for backward compat.

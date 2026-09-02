@@ -1,38 +1,41 @@
 {
   "_schema": 1,
   "members": {
-    "REQ-REVIEW-022": {
-      "plugin/skills/requirement-quality-review/SKILL.md": "ac0eebecc69ff0b77c3954b58cd4f1142c6a565fc250528eb18aab9f7ac86451",
-      "plugin/skills/requirement-quality-review/SKILL.universal.md": "a494a8d63fbd3d7dba6f3f25b6787383d87cac83f8a4800a84e614f0dbb8e07e"
+    "ARCH-REVIEW-022": {
+      "plugin/skills/requirement-quality-review/SKILL.md": "68509936088aabbd08449f2d8c42ce8b0a728ef0df2d1fc0065b588f06155b08",
+      "plugin/skills/requirement-quality-review/SKILL.universal.md": "c740226f119562077d936c74cae21d9f40551c8cad9db52dde7e2d3660041159"
     },
-    "REQ-SEARCH-036": {
-      "app/src/lib/search.js": "02e8fe496d09580694199c5329668413231d24c41ba13f161a60bfdf05897832"
+    "ARCH-SEARCH-036": {
+      "app/src/lib/search.js": "28b1c596c1bc3a4f0b7628776b3781b2434148fbf962d7a8068c6c33c8117463"
     },
-    "REQ-SELFGATE-039": {
-      ".githooks/pre-commit": "14855c4cd9fbe5bfecf8f5f4a966bab6a24e351cbc21c938ac772f724ac7e52c",
-      ".githooks/pre-push": "3824b141fa44ac6bb0afa5625cbd68f5705498c84fefe925848b422946bae9ad",
-      "scripts/check_versions.py": "c1a27f6264332bacef21a79bd524346738e2e3978fe48106acc4c5ea20778736",
-      "sync_reqmap.sh": "4a0c10a01b101e65788feeab06b5fd30d82c1538fc5ad8d6d151a88d9dc9a573"
+    "ARCH-SELFGATE-039": {
+      ".githooks/pre-commit": "88d4a0dbcc83180dea424b95741c9704a80fe376f41f60e48c945c419e601ae2",
+      ".githooks/pre-push": "317144b44ab2d5b9f8923981677fd8a732a8a4518c0958b94428a73552588951",
+      "scripts/check_versions.py": "2076898b47be69f1f9f2d0360fbd683b64f2e37d64fe96f09e27891a165ec202",
+      "sync_reqmap.sh": "1f3286cfe79c481f16f211b56268cca5a2038ca00ce8cde4dbe025b596c51cb1"
     },
-    "REQ-STALEENGINE-043": {
-      "check/engine_staleness.py": "6dd46f9ce1c815bc3a707bd0ce801a152b4cde1a90e63e6bb1eca56fdc34e71f"
+    "ARCH-STALEENGINE-043": {
+      "check/engine_staleness.py": "b1ae1f33501991a1463c8e0f71a7695ad3b15eec2451cdcca758a67fbbe8df05"
     },
-    "REQ-VIEWER-007": {
-      "app/scripts/install-viewer.mjs": "777e2f2432606dabc4b513192323674fc95c7a717b77331ce05d6815b1b79867",
-      "app/src/App.jsx": "c75c8554ecedadd0f91a06ac5853113884d1dd1b5718a1abe0532f382fbfbec9",
-      "app/src/lib/data.js": "fc86c260ec1decfe2c6b4d096ada5343510b41b09bb272b7378e3448c270ee57",
-      "app/src/lib/icons.jsx": "1398603808167de86964c2c48c1cf454c53a09171df4a4ff11e65599a3e2de0d",
-      "app/src/lib/layout.js": "506ebe22e94c960b23efeff2fe6bc6773b0dd4547eaf18eccf84147b3050f7e9",
-      "app/src/lib/loadData.js": "61601143bed67988e4f901f529a994e9c60b7bbb011c40353cf47546f1d531c0",
-      "app/src/lib/ui.jsx": "b1932f06b3c3d3d4c45eb8614630ad46185cc1ee22e42ab847a0c136d154966f",
-      "app/src/lib/useDragPan.js": "d13e77de728c13b595b204ae5c9e6c9b6e67e67f75ada4a0cd6db91bd8415edb",
-      "app/src/main.jsx": "66f77a82969575bdcc216e54b99428610b130613b7202fbecbf76ef6b7c07209",
-      "app/src/styles/app.css": "52fa8c0d8eb1ddb37dfd2b5c1d3ff6ffd418ca16f2323b650712b4b35b618b54",
-      "app/src/styles/colors_and_type.css": "72833adde88d3a8f31c244cf0ec9fdd35dac759e57f4becb1664a10a55420b00",
-      "app/src/views/MapView.jsx": "55a6efbc2ac5b0ccdbb08d76265f86426f9bfe7762b5bdf5a7e7250388912c56",
-      "app/src/views/ProblemsView.jsx": "e0d9ca92c3457e4535e5a4652d052b3e2cf3cc5469a5b22d0228a3d0a64368f0",
-      "app/src/views/RoadmapView.jsx": "03a38ac4842368657b72c875659d0d47285c7aed1c688f9edf19453bdfe34c62",
-      "app/vite.viewer.config.js": "bc893f99c8e11ee596101966703de3189dde3378cc51b93545ca600dd28ee338"
+    "ARCH-VIEWER-007": {
+      "app/scripts/install-viewer.mjs": "87088a30e7653b152155ea32d146f8f34f3542e949b22c9a2654317f5dbdda69",
+      "app/src/App.jsx": "696b41461c83f808e56ea949753252daa714bf243b313e5602784f3036e2c6b0",
+      "app/src/lib/data.js": "c5908655c2334f804e1f4b15193885a11648d04e4ff72649d70f310a1f5be7e3",
+      "app/src/lib/icons.jsx": "6b4eb4b3b97949401faf5859d20593fac59f5951111307469c1844e127671b4d",
+      "app/src/lib/layout.js": "277ea332c2c50a5ca328b65119a95216069de62d6318e79d5f02c951c227bca6",
+      "app/src/lib/loadData.js": "f74c509fbaaf3fc5c80c7d9fe2f85059fdc61465e744fa3c2e8a4949ca61e8f1",
+      "app/src/lib/tree.js": "2e2cf87a4c2bc1f2ea63e45c8458d9d81b06203158ed7c9fbd0fb5c5ff01e676",
+      "app/src/lib/ui.jsx": "90fa575fa35638b09b5dd5f342a24a9950d9737fa62f8dc0c47f470876b3fa5c",
+      "app/src/lib/useDragPan.js": "067a9371a97063eb0a5a38b4a257e8522cbd0fa6e85d2d487175868f3260d6b1",
+      "app/src/main.jsx": "8885b344ea6e788cbe6b42620ce7162acd016f5cd412ca01f5d7ef48ee7e4062",
+      "app/src/styles/app.css": "be034906589319ca3f9ea9b3a54b1951ce7e15ca0ceb2fd7a39fd0ac482c4cd6",
+      "app/src/styles/colors_and_type.css": "3cbe4baad40046b946283376e20a41d43ee77cd7ebd9b138e31e4c7ea3342a04",
+      "app/src/views/ExplorerView.jsx": "2e0b24c2822ddfa6f4cc01b732d87302e3c9769abea4619ffd75c90969b72bc9",
+      "app/src/views/FindingsView.jsx": "10d407a2bcf242236db5d5502e87c4776d9c79491947e21e1a6030c08e15f67e",
+      "app/src/views/MapView.jsx": "78a59f0267e5f1f0a73009e35974b24c657493ba350c82adaf119afd1e4d0d85",
+      "app/src/views/ProblemsView.jsx": "0db01cc7f7c398ea6f8fd14f4c4cdcf639bacfe95cc0907c6f00df66f0459ab2",
+      "app/src/views/RoadmapView.jsx": "b6458cdc828ffdfd13eb39fe581f902ec96b5366b257aa215fc6eef71339884b",
+      "app/vite.viewer.config.js": "0cdcb9953b91d24d45dc42ea5d3ab06dcacf40a12309ef1c2bdbc4dd9eb1b5f9"
     }
   }
 }

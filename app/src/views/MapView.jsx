@@ -1,4 +1,4 @@
-// implements: REQ-VIEWER-007
+// implements: ARCH-VIEWER-007
 /* MapView — the flagship interactive graph explorer (4 tabs + detail panel).
  * Layout is computed from the live registry (see ../lib/layout.js) — no
  * hand-tuned coordinates — so it renders any repo's requirements, not a fixture. */
@@ -104,10 +104,10 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
       <div className="lbl">{t("Why — Intent")}</div>
       <p className="why">{r.intent}</p>
 
-      <div className="lbl">{t("What — Contract")}</div>
+      <div className="lbl">{t("Description")}</div>
       <ul>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>
 
-      <div className="lbl">{t("How — Acceptance")}</div>
+      <div className="lbl">{t("Cases")}</div>
       {r.gwt
         ? <div className="gwt-mini members" style={{ whiteSpace: "pre-wrap" }}>{r.gwt}</div>
         : <ul>{(r.acc || []).map((a, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(a) }} />)}</ul>}
@@ -152,24 +152,31 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
   const selKey = selEdge ? selEdge[0] + "|" + selEdge[1] : null;
   const edgeEnds = selEdge ? new Set(selEdge) : null;
 
-  // computed layouts (recomputed only when the registry reference changes)
-  const sys = useMemo(() => computeLayout(REQUIREMENTS), [REQUIREMENTS]);
+  // SCOPE: this graph draws the system and architecture levels only. The code
+  // level is 618 of the corpus's 685 requirements and carries no `depends_on`
+  // of its own — drawn, it is 618 unconnected cards on a canvas the size of a
+  // city block, and it buries the 92 real dependency edges. The module
+  // Explorer is where the code level is read; here it would be noise.
+  const NODES = useMemo(() => REQUIREMENTS.filter(r => r.level !== "code"), [REQUIREMENTS]);
 
-  const flagged = useMemo(() => REQUIREMENTS.filter(r => (r.risks || []).length > 0), [REQUIREMENTS]);
+  // computed layouts (recomputed only when the registry reference changes)
+  const sys = useMemo(() => computeLayout(NODES), [NODES]);
+
+  const flagged = useMemo(() => NODES.filter(r => (r.risks || []).length > 0), [NODES]);
   const riskLayout = useMemo(() => computeLayout(flagged, { colW: 300, rowH: 150 }), [flagged]);
 
   const depsGraph = useMemo(() => {
     const idArea = {}, byArea = {};
-    REQUIREMENTS.forEach(r => { const a = r.area || "?"; idArea[r.id] = a; (byArea[a] = byArea[a] || []).push(r.id); });
+    NODES.forEach(r => { const a = r.area || "?"; idArea[r.id] = a; (byArea[a] = byArea[a] || []).push(r.id); });
     const ae = new Set();
-    REQUIREMENTS.forEach(r => (r.deps || []).forEach(d => {
+    NODES.forEach(r => (r.deps || []).forEach(d => {
       const x = idArea[r.id], y = idArea[d]; if (x && y && x !== y && idArea[d]) ae.add(x + "\u0001" + y);
     }));
     const pseudo = Object.keys(byArea).map(a => ({
       id: a, deps: [...ae].filter(e => e.startsWith(a + "\u0001")).map(e => e.split("\u0001")[1]),
     }));
     return { layout: computeLayout(pseudo, { colW: 320, rowH: 150 }), count: byArea };
-  }, [REQUIREMENTS]);
+  }, [NODES]);
 
   const legend = {
     system: <><span className="pdot" style={{ width: 9, height: 9, borderRadius: 0, border: "3px solid var(--ink-0)", display: "inline-block" }} /> bus · arrows = depends_on · edge colour = source</>,
@@ -177,6 +184,7 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
     deps: <>area-level coupling · arrow A→B = A depends on B</>,
     risk: <>only requirements with ≥1 open risk signal</>,
   }[tab];
+  const hiddenCode = REQUIREMENTS.length - NODES.length;
 
   function locate() {
     if (!selId) return;
@@ -194,7 +202,14 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
         {MAP_TABS.map(mt => (
           <button key={mt.key} className={"tab" + (tab === mt.key ? " on" : "")} onClick={() => { setTab(mt.key); setSelEdge(null); }}>{t(mt.label)}</button>
         ))}
-        <div className="tab-legend">{legend}</div>
+        <div className="tab-legend">
+          {hiddenCode > 0 && (
+            <span className="map-scope" title="the code level is read in the Explorer, not drawn here">
+              {t("system + architecture · {n} code-level hidden", { n: hiddenCode })}
+            </span>
+          )}
+          {legend}
+        </div>
       </div>
 
       <div className={"map-wrap" + (sel ? " with-panel" : "")}>
@@ -247,9 +262,14 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
 }
 
 function ReqCodeView({ selId, setSelId }) {
+  // Same scope as the graph tabs. A `level: code` requirement has no members of
+  // its own by construction (it decomposes an architecture clause, the code tag
+  // sits on the parent), so listing all 618 here prints 618 identical
+  // "(no members — orphan)" lines that are not orphans at all.
+  const rows = REQUIREMENTS.filter(r => r.level !== "code");
   return (
     <div style={{ padding: "18px 22px", overflow: "auto" }}>
-      {REQUIREMENTS.map(r => (
+      {rows.map(r => (
         <div key={r.id} onClick={() => setSelId(r.id)} style={{
           display: "grid", gridTemplateColumns: "240px 1fr", gap: 18, padding: "11px 12px",
           borderBottom: "1px solid var(--border-soft)", cursor: "pointer",

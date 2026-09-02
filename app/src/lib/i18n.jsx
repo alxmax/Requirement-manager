@@ -1,5 +1,5 @@
-// implements: REQ-VIEWER-007
-// implements: REQ-TRANSLATE-044
+// implements: ARCH-VIEWER-007
+// implements: ARCH-TRANSLATE-044
 /* i18n — UI chrome, plus opt-in, cached, always-marked requirement content.
  *
  * UI chrome (nav, tab labels, section headers, buttons, empty states) is
@@ -55,7 +55,42 @@ const RO = {
   "Problems": "Probleme",
   "Spec": "Specificații",
   "Roadmap": "Plan",
+  "Explorer": "Explorator",
+  "Findings": "Constatări",
   "{n} members bound": "{n} membri legați",
+  // module explorer
+  "Level": "Nivel",
+  "Status": "Stare",
+  "has open question": "are întrebare deschisă",
+  "expand all": "extinde tot",
+  "collapse all": "restrânge tot",
+  "{shown} of {total} shown": "{shown} din {total} afișate",
+  "· no hierarchy in this map — flat list": "· fără ierarhie în această hartă — listă plată",
+  "No requirement matches these filters.": "Nicio cerință nu corespunde acestor filtre.",
+  "No requirement selected.": "Nicio cerință selectată.",
+  "Links — traceability": "Legături — trasabilitate",
+  "satisfies (up)": "satisface (în sus)",
+  "satisfied by (down)": "satisfăcut de (în jos)",
+  "depends on (out)": "depinde de (ieșire)",
+  "used by (in)": "folosit de (intrare)",
+  "— top of the trace": "— vârful trasabilității",
+  "— nothing decomposes this": "— nimic nu descompune asta",
+  "— no outgoing dependency": "— nicio dependență ieșită",
+  "— nothing depends on this": "— nimic nu depinde de asta",
+  "Open questions — verify intent": "Întrebări deschise — verifică intenția",
+  "system + architecture · {n} code-level hidden":
+    "sistem + arhitectură · {n} de nivel cod ascunse",
+  // findings
+  "open `## WHAT — Verify intent` questions": "întrebări `## WHAT — Verify intent` deschise",
+  "No open questions.": "Nicio întrebare deschisă.",
+  "Every requirement's Verify-intent section is either empty or still carries the authored placeholder, which the engine does not count as a finding either.":
+    "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
+  "{n} open question(s) across {m} requirement(s)":
+    "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
+  "Answer it, fold the answer into the Description, then delete the bullet.":
+    "Răspunde, integrează răspunsul în Descriere, apoi șterge punctul.",
+  "hide {n} draft review rows": "ascunde {n} rânduri de revizuire draft",
+  "{n} draft review rows hidden — show": "{n} rânduri de revizuire draft ascunse — arată",
   // map tabs
   "System Map": "Harta sistemului",
   "Req→Code": "Cerință→Cod",
@@ -63,8 +98,8 @@ const RO = {
   "Risk": "Risc",
   // detail panel + spec sections
   "Why — Intent": "De ce — Intenție",
-  "What — Contract": "Ce — Contract",
-  "How — Acceptance": "Cum — Acceptanță",
+  "Description": "Descriere",
+  "Cases": "Cazuri",
   "Where — Members in code": "Unde — Membri în cod",
   "Depends on": "Depinde de",
   "Used by": "Folosit de",
@@ -79,6 +114,8 @@ const RO = {
   "(satisfied-by other requirements — no direct code)":
     "(satisfăcut de alte cerințe — fără cod direct)",
   "(no members found — orphan)": "(niciun membru găsit — orfan)",
+  "(not linked to code yet — not enforced at this status)":
+    "(încă nelegat de cod — neimpus la această stare)",
   // problems
   "All": "Toate",
   "Errors": "Erori",

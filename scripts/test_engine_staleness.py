@@ -46,7 +46,7 @@ class StalenessProbe(unittest.TestCase):
         return (_engine(Path(d) / "vendored.py", vendored_ver),
                 _engine(Path(d) / "reference.py", reference_ver))
 
-    def test_stale_warns_and_exits_zero(self):  # tested-by: REQ-STALEENGINE-043
+    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043
         """AC-1: the motivating case — an old vendored engine, named, without failing."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")

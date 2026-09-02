@@ -2,7 +2,7 @@
 """Fail when plugin/scripts/reqmap.py changed but MAP_ENGINE_VERSION did not.
 
 Why this exists: `MAP_ENGINE_VERSION` is the only thing a seeded copy of the engine
-(and `check/engine_staleness.py`, REQ-STALEENGINE-043) can compare to learn it is
+(and `check/engine_staleness.py`, ARCH-STALEENGINE-043) can compare to learn it is
 behind. Two engine releases in a row (v2.24.0, v2.25.0) shipped without touching
 it, so every consumer on the previous copy was told it was current. The rule is
 deliberately blunt — ANY diff to the engine file requires a new version, comments
@@ -60,7 +60,7 @@ def main(argv=None, cwd=None) -> int:
             ENGINE, removed.group(1), added.group(1)))
         return 0
     print("FAIL  {} changed but MAP_ENGINE_VERSION did not.\n"
-          "      A seeded copy compares this version to learn it is behind (REQ-STALEENGINE-043);\n"
+          "      A seeded copy compares this version to learn it is behind (ARCH-STALEENGINE-043);\n"
           "      without a bump every consumer is told it is current. Set it to today's date\n"
           "      (YYYY-MM-DD, or YYYY-MM-DD.N for a second bump the same day) in this same change."
           .format(ENGINE))

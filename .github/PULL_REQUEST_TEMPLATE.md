@@ -8,7 +8,7 @@
 
 ## Requirement
 
-<!-- The id this implements or changes, e.g. REQ-TRACKED-042. New behaviour ships with the
+<!-- The id this implements or changes, e.g. ARCH-TRACKED-042. New behaviour ships with the
      requirement that describes it; if this genuinely changes none, say so and why
      (docs-only, CI wiring, a fix inside an existing contract). -->
 
