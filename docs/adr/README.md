@@ -25,6 +25,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0013](0013-business-source-license.md) | Business Source License 1.1 | Accepted (revisit trigger open) |
 | [0014](0014-engine-stays-one-file.md) | The engine stays one file, and gets no size gate | Accepted |
 | [0015](0015-aggregate-layer-instead-of-implicit-dependency-coverage.md) | A requirement covered by its dependencies is a declared layer, not an inference | Accepted |
+| [0016](0016-no-edge-case-marker.md) | No first-class edge-case marker, section, or heuristic | Rejected |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

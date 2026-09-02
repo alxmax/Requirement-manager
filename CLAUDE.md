@@ -100,7 +100,7 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Design decisions live in `docs/adr/`** (15 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and three rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+**Design decisions live in `docs/adr/`** (16 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the parked V-model gating, and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
 **Single engine file:** `plugin/scripts/reqmap.py` — 6,654 lines measured 2026-08-31, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
