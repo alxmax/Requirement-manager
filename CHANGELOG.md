@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v2.30.0` — 2026-09-02
+
+**A nine-senator Senate audit on "make requirements simpler, more objective, clearer" split into two decisions — one shipped, one rejected.** `runs/senate/2026-09-02_191837-reqmap-schema-simplify-context-merge-and-traceability.json`, two rounds, verdict MODIFY (8 blocking / 1).
+
+- **New consolidated `## Context (non-binding)` section**, replacing `## WHAT — Notes & known limitations`, `## Example — in practice`, and `## WHERE — Current implementation` as three near-synonymous informative buckets with one, grouped by bold `**Notes**`/`**Example**`/`**Current implementation**` sub-labels (the same clause-group convention the Contract section already uses). `reqmap.py new`'s template scaffolds it for every new requirement. **Purely additive, not a migration**: the Senate found the originally-audited proposal's "no enforcement change" premise false — `_build_map_data` reads the legacy headings by label to populate `_map.json`'s `notes`/`current_impl` fields, so renaming them without a fallback would have silently emptied those fields corpus-wide. The legacy three-heading form stays fully valid forever; new `_context_group` is tried only when the legacy heading is absent, and no existing requirement file (in this repo or any consumer) needs to change. `git diff --stat` on this repo's 51 pre-existing requirement files for this release: zero lines. [ADR-0017](docs/adr/0017-consolidated-context-section.md), `REQ-CONTEXT-048`.
+- **Rejected: a Contract-clause-to-Acceptance-criterion traceability marker** (`{#C<n>}` anchors + `covers: C<n>` tags, a new opt-in `uncovered-clause` lint check). This is the third attempt at a mechanism this repo has already rejected twice — [ADR-0012](docs/adr/0012-internal-consistency-lint-rejected.md) (78.6% false-positive rate measured) and [ADR-0016](docs/adr/0016-no-edge-case-marker.md) (decided one day earlier; comparable opt-in in-file markers measured at 2/51 adoption vs. 12/51 for test-file-based `# verifies:` tags) — and the proposed `{#C<n>}` syntax was independently found to leak into `acc`/the viewer, reproducing the `REQ-VIEWER-007` AC-8 regression class already fixed once. [ADR-0018](docs/adr/0018-no-contract-acceptance-traceability-marker-yet.md) records the numeric revisit bar for a future attempt.
+- `MAP_ENGINE_VERSION` → `2026-09-02.1`.
+
 ## plugin `v2.29.3` — 2026-09-02
 
 **A full-repo code review turned up ten latent bugs and inefficiencies, none yet reported by a consumer.** All ten are fixed here — three correctness bugs in the gate/viewer, two on-disk drift/staleness false positives, two redundant tree walks, and two small maintainability cleanups.

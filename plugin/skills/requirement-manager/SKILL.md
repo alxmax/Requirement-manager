@@ -149,6 +149,15 @@ engine changes to the cache and any registered consumer repos in one command:
 - **Source of truth**: one `.md` per capability in `requirements/`, with YAML
   frontmatter (machine-readable) + prose body (human-readable). Nothing else
   restates the contract — code and docs *reference* it by id, never re-describe it.
+- **Non-binding commentary has one home**: `reqmap.py new`'s template scaffolds a single
+  `## Context (non-binding)` section with bold `**Notes**` / `**Example**` / `**Current
+  implementation**` sub-groups, replacing the older three separate headings (`## WHAT —
+  Notes & known limitations`, `## Example — in practice`, `## WHERE — Current
+  implementation`) for newly-authored requirements ([ADR-0017](../../../docs/adr/0017-consolidated-context-section.md)).
+  The three-heading form remains fully valid — nothing in the gate, lint, or drift hash
+  reads either form by name over the other, so existing requirement files never need to
+  change. `map`'s emitted `notes`/`current_impl` fields try the legacy heading first and
+  fall back to the matching `## Context` sub-group.
 - **Optional frontmatter fields**: `milestone: vX.Y` places a requirement on the Roadmap tab (e.g. `milestone: v1.04`). It must be a version of the shape `v<digits>[.<digits>…]` — start with `v`, digits and dots only; the gate WARNs on a malformed value (advisory metadata, never build-critical). Use zero-padded minor versions (`v1.04`, not `v1.4`) to avoid ambiguity.
 - **Two working layers** (think Factorio main bus + cells), plus two that carry no
   code of their own:
