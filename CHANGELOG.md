@@ -1,6 +1,16 @@
 # Changelog
 
-## plugin `v2.34.0` — 2026-09-03
+## plugin `v3.0.0` — 2026-09-03
+
+**How a requirement is written changed shape.** Three specification levels, one `## Description` section in place of a `> WHY:` quote plus `## WHAT — Contract`, `## Cases`/`CASE-N` in place of `## HOW — Acceptance`/`AC-N`, many requirements per file, and the first advisory that points at covering the code with *fewer* requirements rather than more.
+
+**Nothing in an existing corpus has to change.** Every old section name and both criterion-label spellings parse unchanged, `level:`/`satisfies:` are optional, and a repo that adopts none of this behaves exactly as it did on `v2.30.0`. The major is about the shape this tool now asks for in new work, not about anything it stopped accepting.
+
+**`check` survives the major it was scheduled to die in.** The deprecated alias for `gate` arrived in `v2.0.0` (2026-06-15) saying "removed in the next major version", in five places. `v3.0.0` is that major and the alias is still here: nothing else in this release breaks a caller, and removing a command consumer hooks may still invoke would have been the only thing that did. All five references now name **`v4.0.0`** instead — "the next major" was a moving target by construction, and a promise that slips once slips silently.
+
+This release folds what was developed as `v2.31.0`–`v2.34.0`; none of those were tagged.
+
+### Covering the code with fewer requirements
 
 **The tool gets an opinion about covering the code with FEWER requirements.** `next` has advised in one direction for a year — *Granularity*, "this requirement does too much". Nothing ever said the opposite.
 
@@ -13,7 +23,7 @@
 - **Viewer:** the Spec panel's Description eyebrow no longer claims `normative`. The section holds the intent quote *and* the binding clauses since `v2.33.0`, so the label was true of only part of what sits under it.
 - `MAP_ENGINE_VERSION` → `2026-09-03.2`. 683 tests.
 
-## plugin `v2.33.0` — 2026-09-03
+### One `## Description` section, and `## Cases`
 
 **`## Description` and `## Cases` replace `WHY` + `## WHAT — Contract` and `## HOW — Acceptance`.** Every old spelling still parses, forever.
 
@@ -26,7 +36,7 @@
 - **Viewer:** the Spec and Map panels label the sections `Description` and `Cases` (Romanian `Descriere` / `Cazuri`); Problems' per-criterion fix names `#CASE-N`. Vendored viewer rebuilt; the baked `data.js` fixture re-synced.
 - `MAP_ENGINE_VERSION` → `2026-09-03.1`. 675 tests.
 
-## plugin `v2.32.0` — 2026-09-03
+### The V-model's left arm
 
 **The V-model's left arm, adopted.** 52 requirement files become 689 requirements on three specification levels, held in 68 files. Every engine change is opt-in: a corpus that sets no `level:` behaves exactly as it did in `v2.31.0`.
 
@@ -43,7 +53,7 @@
 - `reqmap.py new`'s scaffold now offers `level:` and `satisfies:` as commented optional fields, so a consumer can discover the levels without reading the source.
 - `MAP_ENGINE_VERSION` → `2026-09-03`. 668 tests.
 
-## plugin `v2.31.0` — 2026-09-02
+### A size heuristic for over-long clauses
 
 **A word-count heuristic for over-long Contract clauses, plus an opt-in scaffold that splits one out — with the atomicity rule they serve kept explicitly separate from the number that approximates it.**
 

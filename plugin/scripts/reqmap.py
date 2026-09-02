@@ -24,7 +24,7 @@ Subcommands:
   translate [--to ro|en]  manual, opt-in: cache a `claude -p` translation of the corpus's
                     majority-language requirements into requirements/_i18n/<locale>.json.
                     Never called by gate/sync/lint/map/the pre-commit hook.
-  check             DEPRECATED alias for `gate` (report) / `sync` (with --update-lock); removed next major
+  check             DEPRECATED alias for `gate` (report) / `sync` (with --update-lock); removed in v4.0.0
 
 Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.2"
+MAP_ENGINE_VERSION = "2026-09-03.3"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -362,7 +362,7 @@ COMMANDS = {
         "summary": (
             "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). "
             "Preserved for backward compatibility with consumer hooks, CI, and the "
-            "GitHub Action. Will be removed in the next major version — use 'gate' or "
+            "GitHub Action. Will be removed in v4.0.0 — use 'gate' or "
             "'sync' instead."
         ),
         "arg": None,
@@ -7053,7 +7053,7 @@ def main():
             "  dupes                flag requirement pairs with overlapping contracts\n"
             "  scan / map / export / site / findings / lint / review / health\n"
             "\nDeprecated:\n"
-            "  check                alias for 'gate' (removed next major)\n"
+            "  check                alias for 'gate' (removed in v4.0.0)\n"
         ),
     )
     ap.add_argument("cmd", choices=_cli_choices())
@@ -7211,7 +7211,7 @@ def main():
         # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
         # legacy behavior verbatim so consumer hooks/CI/Action keep working.
         print("reqmap: 'check' is deprecated — use 'gate' (report) or 'sync' (regenerate "
-              "lock+map). Forwarding to legacy behavior; the alias is removed in the next major.",
+              "lock+map). Forwarding to legacy behavior; the alias is removed in v4.0.0.",
               file=sys.stderr)
         rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
                        getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False),

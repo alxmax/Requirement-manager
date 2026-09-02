@@ -132,7 +132,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_check",
-      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in the next major version — use 'gate' or 'sync' instead.",
+      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in v4.0.0 — use 'gate' or 'sync' instead.",
       "parameters": {
         "type": "object",
         "properties": {

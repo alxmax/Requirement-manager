@@ -447,7 +447,7 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py suggest-verifies`  — propose `# verifies: <ID>#CASE-N` tags for tests already NAMED after the criterion they check (`test_ac3_…`), the cheap way to adopt per-criterion coverage on an existing corpus. Searches only the requirement's own `tested-by` files, and refuses to guess: a file shared by several requirements needs a distinctive id token in the test's own name (never its class, never a fixture parameter), a name carrying another requirement's number belongs to that one, and two candidates for one criterion are reported as ambiguous and never written. Read-only; `--apply` writes the tags, idempotently.
 - `python scripts/reqmap.py coverage`          — per-directory membership-tag coverage report: scannable files tagged vs. total, grouped by top-level directory, to spot traceability gaps. `--json` for CI. Read-only, exit 0.
 
-**`check` is a deprecated alias for `gate`** (removed in the next major version). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
+**`check` is a deprecated alias for `gate`** (removed in `v4.0.0`; it survived `v3.0.0`). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
 
 **Workflow order** — after modifying requirement files, run `sync` as a unit
 so the lock and map stay in sync:
