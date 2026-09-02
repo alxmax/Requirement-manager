@@ -8,7 +8,7 @@
 
 **`check` survives the major it was scheduled to die in.** The deprecated alias for `gate` arrived in `v2.0.0` (2026-06-15) saying "removed in the next major version", in five places. `v3.0.0` is that major and the alias is still here: nothing else in this release breaks a caller, and removing a command consumer hooks may still invoke would have been the only thing that did. All five references now name **`v4.0.0`** instead — "the next major" was a moving target by construction, and a promise that slips once slips silently.
 
-This release folds what was developed as `v2.31.0`–`v2.34.0`; none of those were tagged.
+This release folds what was developed as `v2.32.0`–`v2.34.0`; none of those three were tagged. `v2.31.0` was released and keeps its own entry below.
 
 ### Covering the code with fewer requirements
 
@@ -53,7 +53,7 @@ This release folds what was developed as `v2.31.0`–`v2.34.0`; none of those we
 - `reqmap.py new`'s scaffold now offers `level:` and `satisfies:` as commented optional fields, so a consumer can discover the levels without reading the source.
 - `MAP_ENGINE_VERSION` → `2026-09-03`. 668 tests.
 
-### A size heuristic for over-long clauses
+## plugin `v2.31.0` — 2026-09-02
 
 **A word-count heuristic for over-long Contract clauses, plus an opt-in scaffold that splits one out — with the atomicity rule they serve kept explicitly separate from the number that approximates it.**
 
