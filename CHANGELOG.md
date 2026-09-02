@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v2.34.0` — 2026-09-03
+
+**The tool gets an opinion about covering the code with FEWER requirements.** `next` has advised in one direction for a year — *Granularity*, "this requirement does too much". Nothing ever said the opposite.
+
+- **New `Redundancy` bucket in `next`, and a one-line count from `sync`.** Requirements whose `## Description` clauses are identical once case and whitespace are normalised, grouped, with how many could be folded away. Exact match, no threshold — a group is a duplicate by construction, never a judgement call. It reports; it never merges, because which id survives and what the merged contract says are decisions with judgement in them. `ARCH-REDUNDANCY-058`.
+- **It fires 6 times on this repo, and those 6 are left standing.** All real. One example, whole: "`show` prints the verification level beside a member whose `tested-by:` tag carries one" — authored in both `ARCH-SHOW-015` and `ARCH-VLEVEL-037`, so decomposition minted `REQ-SHOW-683` and `REQ-VLEVEL-819` for one obligation. Shipping a check and silencing its output in the same commit would make it decorative.
+- **It ships below ADR-0016's 5% fire-rate floor on purpose.** 6 groups, 12 requirements, 1.7% of the corpus. [ADR-0020](docs/adr/0020-redundancy-signal-below-the-fire-rate-bar.md) records why rather than quietly widening the check until it cleared a number — which is exactly how [ADR-0012](docs/adr/0012-internal-consistency-lint-rejected.md)'s 78.6% false-positive rate happened. The floor rejects checks that are noisy or dead; this one has zero false positives by construction. **Four other candidate signals were measured and NOT shipped**: identical member sets (0 findings), subset member sets (1), and cosine ≥ 0.50/0.70 — the last two are `dupes`, which already exists and is unchanged.
+- **In `sync` and `next`, deliberately not in `gate`.** The pre-commit hook runs `gate` on every commit, and corpus shape is not a commit-time concern. `sync` is the moment the corpus was just rewritten — which is when a new duplicate appears.
+- **Draft placeholders are excluded**, or every scaffolded `TODO:` line would match every other and bury the six real findings under hundreds.
+- **Bug: `next` told you to open a file that does not exist.** It rebuilt `requirements/<id>.md` from the id, which stopped being true in `v2.32.0` when one file began holding many requirements — `REQ-COVERAGE-327` lives inside `ARCH-COVERAGE-029.md`. All three buckets now name the real path from the requirement record. `ARCH-MODULEFILE-056`.
+- **Viewer:** the Spec panel's Description eyebrow no longer claims `normative`. The section holds the intent quote *and* the binding clauses since `v2.33.0`, so the label was true of only part of what sits under it.
+- `MAP_ENGINE_VERSION` → `2026-09-03.2`. 683 tests.
+
 ## plugin `v2.33.0` — 2026-09-03
 
 **`## Description` and `## Cases` replace `WHY` + `## WHAT — Contract` and `## HOW — Acceptance`.** Every old spelling still parses, forever.

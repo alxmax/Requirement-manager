@@ -16,7 +16,7 @@ python scripts/reqmap.py export             # emit requirements/_map.json for an
 python scripts/reqmap.py scan               # list code members per capability
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
 python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
-python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets
+python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets (incl. Granularity/Redundancy)
 python scripts/reqmap.py lint --code ..     # readability/structure check on non-draft requirements (--strict fails on errors)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
 python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
@@ -29,7 +29,7 @@ python scripts/reqmap.py findings           # aggregate open verify-intent items
 python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
 python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
 python scripts/reqmap.py suggest-verifies    # propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion; --apply writes them
-python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in only: cache a `claude -p` translation of the corpus's majority-language requirements into requirements/_i18n/<locale>.json. Never called by gate/sync/lint/map/the pre-commit hook. A structural-fidelity check refuses to cache a translation that alters backticks, numbers, markdown markers, `AC-N` labels or the Gherkin keywords (the last two are identifiers a `verifies:` tag points at, not prose).
+python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in only: cache a `claude -p` translation of the corpus's majority-language requirements into requirements/_i18n/<locale>.json. Never called by gate/sync/lint/map/the pre-commit hook. A structural-fidelity check refuses to cache a translation that alters backticks, numbers, markdown markers, `CASE-N` labels or the Gherkin keywords (the last two are identifiers a `verifies:` tag points at, not prose).
 python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
 ```
 
@@ -100,7 +100,7 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Design decisions live in `docs/adr/`** (19 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+**Design decisions live in `docs/adr/`** (20 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
 **Single engine file:** `plugin/scripts/reqmap.py` — 7,169 lines measured 2026-09-03, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
@@ -136,6 +136,8 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 `TAG_RE` in the engine enforces a left-boundary guard so `reimplements:` or `x-implements:` are not picked up as real tags. The member list is discovered by scanning — never hand-maintained.
 
 **Gate logic** (`gate`): link sync (every tag points to a real requirement; every `confirmed`/`implemented`/`in-progress` requirement has ≥1 member) and `depends_on` target existence are **error-level** (exit 1). Drift (content hash vs `_reqlock.json`) and **test-link integrity** are **warn-only** (exit 0). `gate` is report-only and never touches `_reqlock.json`; use `sync` (with `--accept-drift` for confirmed/implemented contracts) to advance the baseline. The test-link integrity check: a confirmed requirement's `tested-by` file must exist and contain a test function, else the link asserts coverage it lacks (`_test_link_problem`). It is the deterministic half of behavior-sync. Per-criterion coverage (`ARCH-ACVERIFY-019`) is the finer-grained sibling: a `# verifies: <id>#CASE-N` tag links one test to one labelled criterion, and the gate warns (warn-only, opt-in) for each labelled `CASE-N` left untagged once a requirement carries at least one `verifies` tag.
+
+**Corpus shape is advised on in BOTH directions, read-only** (`ARCH-REDUNDANCY-058`, `docs/adr/0020`). `next`'s *Granularity* bucket says one requirement does too much (>=5 criteria); its *Redundancy* bucket says several say the same thing — requirements whose Description clauses are byte-identical once case and whitespace are normalised. `_redundant_groups` is the exact-match floor under `dupes`, not a rival: no threshold, so a group is a duplicate by construction. Draft placeholders are excluded or every scaffolded `TODO:` would match every other. It is surfaced by `sync` and `next` and deliberately NOT by `gate` — the hook runs `gate` on every commit and corpus shape is not a commit-time concern. It reports; it never merges. **It ships below ADR-0016's 5% fire-rate floor on purpose** (6 groups, 1.7% of the corpus, zero false positives by construction) — `docs/adr/0020` records why, so the number is not quietly widened later.
 
 **Generated outputs** (under `plugin/requirements/`):
 - `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*

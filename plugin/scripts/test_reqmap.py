@@ -7154,6 +7154,83 @@ class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
         self.assertEqual(node["contract"], ["`x` does the thing."])
 
 
+class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
+    """`_redundant_groups` is the exact-match floor under `dupes`: no threshold, so a
+    group is a duplicate by construction rather than a judgement call."""
+
+    def _req(self, clause, status="confirmed"):
+        return {"meta": {"status": status},
+                "body": "# T\n\n## Description\n- " + clause + "\n\n"
+                        "## Cases (= tests)\nCASE-1\n  Then it holds\n"}
+
+    def test_identical_contracts_group_together(self):
+        reqs = {"A-X-001": self._req("`x` does the thing."),
+                "A-Y-002": self._req("`x` does the thing."),
+                "A-Z-003": self._req("`y` does something else.")}
+        self.assertEqual(R._redundant_groups(reqs), [["A-X-001", "A-Y-002"]])
+
+    def test_case_and_whitespace_do_not_hide_a_duplicate(self):
+        reqs = {"A-X-001": self._req("`x` does   the thing."),
+                "A-Y-002": self._req("`X` DOES the thing.")}
+        self.assertEqual(R._redundant_groups(reqs), [["A-X-001", "A-Y-002"]])
+
+    def test_a_different_clause_is_not_a_duplicate(self):
+        reqs = {"A-X-001": self._req("`x` does the thing."),
+                "A-Y-002": self._req("`x` does the thing, twice.")}
+        self.assertEqual(R._redundant_groups(reqs), [])
+
+    def test_draft_placeholders_are_not_duplicates_of_each_other(self):
+        # every scaffolded draft carries the same TODO line; counting those would report
+        # the scaffold as a duplicate of itself once per draft and bury the real finding.
+        reqs = {"A-X-001": self._req("TODO: the observed behavior.", status="draft"),
+                "A-Y-002": self._req("TODO: the observed behavior.", status="draft")}
+        self.assertEqual(R._redundant_groups(reqs), [])
+
+    def test_a_requirement_with_no_clauses_is_skipped(self):
+        reqs = {"A-X-001": {"meta": {"status": "confirmed"}, "body": "# T\n\nno sections\n"},
+                "A-Y-002": {"meta": {"status": "confirmed"}, "body": "# T\n\nnothing here\n"}}
+        self.assertEqual(R._redundant_groups(reqs), [])
+
+    def test_three_way_group_is_one_finding(self):
+        reqs = {i: self._req("`x` does the thing.") for i in ("A-A-001", "A-B-002", "A-C-003")}
+        groups = R._redundant_groups(reqs)
+        self.assertEqual(groups, [["A-A-001", "A-B-002", "A-C-003"]])
+        self.assertEqual(sum(len(g) - 1 for g in groups), 2)   # two could be folded away
+
+    def test_next_reports_the_group_and_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            for rid in ("AREA-A-001", "AREA-B-002"):
+                _write(os.path.join(d, rid + ".md"),
+                       REQ.format(id=rid, status="confirmed", layer="bus", extra="", title=rid)
+                       + "\n## Description\n- `x` does the thing.\n\n"
+                         "## Cases (= tests)\nCASE-1\n  Then it holds\n")
+            before = sorted(os.listdir(d))
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_next(reqs, R.scan_members(d, d))
+            out = buf.getvalue()
+            self.assertIn("Redundancy (1)", out)
+            self.assertIn("AREA-A-001, AREA-B-002", out)
+            self.assertIn("identical contract", out)
+            self.assertEqual(sorted(os.listdir(d)), before)     # read-only
+
+    def test_gate_stays_silent_about_redundancy(self):
+        # the hook runs `gate` on every commit; a corpus-shape advisory there is noise
+        with tempfile.TemporaryDirectory() as d:
+            for rid in ("AREA-A-001", "AREA-B-002"):
+                _write(os.path.join(d, rid + ".md"),
+                       REQ.format(id=rid, status="draft", layer="bus", extra="", title=rid)
+                       + "\n## Description\n- `x` does the thing.\n\n"
+                         "## Cases (= tests)\nCASE-1\n  Then it holds\n")
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs, R.scan_members(d, d), d, False, d)
+            self.assertNotIn("identical contract", buf.getvalue())
+            self.assertNotIn("Redundancy", buf.getvalue())
+
+
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.

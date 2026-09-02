@@ -218,6 +218,16 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     `reqmap.py next` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
+
+3b. **Merge heuristic — the same smell from the other side.** A corpus only ever
+    grows unless something says so. If two requirements state the same obligation,
+    the code is covered twice and a later edit will change one of them. `reqmap.py
+    next` reports a **Redundancy** bucket for contracts that are identical word for
+    word (exact match, no threshold — a group there is a duplicate, not a guess),
+    and `reqmap.py dupes` scores the near-matches. Fold a group into one
+    requirement and re-point the tags, or make the contracts say different things.
+    Both are advisory and neither ever rewrites a file: which of two ids survives,
+    and what the merged contract says, is a judgement call.
 4. **One fact, one home.** Reference ids; never copy a contract into a README.
 5. **Authority is one-directional**: requirement → code. If they disagree, the
    requirement wins (fix the code, or fix the requirement — never let code be the

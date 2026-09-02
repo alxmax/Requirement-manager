@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.1"
+MAP_ENGINE_VERSION = "2026-09-03.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4065,6 +4065,15 @@ def _recorded_members(reqs_dir, ids):  # implements: ARCH-NEXT-013
     return out
 
 
+def _req_file(reqs, rid):  # implements: ARCH-MODULEFILE-056
+    """Where to open `rid`, as `requirements/<file>`. One file may hold many requirements,
+    so the id is NOT the filename: `load_requirements` records the real path per block and
+    that is the only thing worth printing at a reader."""
+    r = reqs.get(rid) or {}
+    p = r.get("path")
+    return "requirements/" + (os.path.basename(p) if p else str(rid) + ".md")
+
+
 def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: ARCH-NEXT-013
     """Terminal 'what should I do next': a focused, counted worklist over the same
     `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
@@ -4124,7 +4133,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         shown = ids if show_all else ids[:top_n]
         for rid, score in shown:
             flag = "  [REVIEW]" if score >= 2 else ""
-            print("  {}{}   requirements/{}.md".format(rid, flag, rid))
+            print("  {}{}   {}".format(rid, flag, _req_file(reqs, rid)))
         if not show_all and len(ids) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
@@ -4155,11 +4164,29 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     if oversize:
         print("Granularity ({})".format(len(oversize)))
         for rid, n in oversize:
-            print("  {}   ({} ACs) — consider splitting   requirements/{}.md".format(rid, n, rid))
+            print("  {}   ({} ACs) — consider splitting   {}".format(
+                rid, n, _req_file(reqs, rid)))
         print(
             "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
             "is a split candidate. Author two requirements, each with its own contract.\n"
             .format(AC_SPLIT_THRESHOLD)
+        )
+    # The other direction of the same concern: covering the code with FEWER requirements.
+    # Granularity above says "this one does too much"; this says "these say the same thing".
+    redundant = _redundant_groups(reqs)
+    if redundant:
+        spare = sum(len(g) - 1 for g in redundant)
+        print("Redundancy ({})".format(len(redundant)))
+        shown_r = redundant if show_all else redundant[:top_n]
+        for g in shown_r:
+            print("  {}   identical contract   {}".format(", ".join(g), _req_file(reqs, g[0])))
+        if not show_all and len(redundant) > top_n:
+            print("  ... {} more — run `reqmap.py next --all`".format(len(redundant) - top_n))
+        print(
+            "  -> {} requirement(s) state an obligation another already states, word for "
+            "word. Fold each group into one and re-point the tags, or make the contracts "
+            "say different things. Exact matches only — run `reqmap.py dupes` for the "
+            "near-matches this cannot see.\n".format(spare)
         )
     return 0
 
@@ -4816,6 +4843,31 @@ def _placeholder_contract(body):  # implements: ARCH-SIMILAR-016
     to compare."""
     bullets = _from_any(_bullets, body, CONTRACT_LABELS)
     return bool(bullets) and all(b.strip().upper().startswith("TODO") for b in bullets)
+
+
+def _redundant_groups(reqs):  # implements: ARCH-REDUNDANCY-058
+    """Requirements whose Description clauses are IDENTICAL once case and whitespace are
+    normalised, grouped, each group sorted and the groups ordered by their first id.
+
+    This is the exact-match floor under `dupes`, not a second opinion on it: no threshold,
+    no scoring, so a group is a duplicate by construction and never a judgement call. It
+    exists because decomposing several architecture requirements can mint the same
+    obligation twice — the same clause authored in two parents becomes two detailed-design
+    requirements — and nothing else in the engine notices. `dupes` finds the near-matches
+    this cannot; neither replaces the other.
+
+    Draft placeholders are skipped: every freshly scaffolded requirement carries the same
+    `TODO:` line, so counting those would report the scaffold as a duplicate of itself
+    hundreds of times and drown the real finding."""
+    groups = {}
+    for rid, r in sorted(reqs.items()):
+        body = r["body"]
+        if _placeholder_contract(body):
+            continue
+        key = re.sub(r"\s+", " ", " ".join(_from_any(_bullets, body, CONTRACT_LABELS))).strip().lower()
+        if key:
+            groups.setdefault(key, []).append(rid)
+    return sorted((sorted(v) for v in groups.values() if len(v) > 1), key=lambda g: g[0])
 
 
 def _sim_text(body):  # implements: ARCH-SIMILAR-016
@@ -7138,6 +7190,15 @@ def main():
                        ac_cover=_ac_cover, level_cover=_level_cover)
         if rc == 0:
             cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
+            # Deliberately here and not in cmd_check: `gate` runs on every commit via the
+            # hook, and a corpus-shape advisory there is noise on work that is already
+            # correct. `sync` is the moment the corpus was just rewritten, which is when
+            # a newly-minted duplicate appears.  # implements: ARCH-REDUNDANCY-058
+            _dups = _redundant_groups(reqs)
+            if _dups:
+                print("info  {} group(s) of requirements share an identical contract "
+                      "({} could be folded away) — run `reqmap.py next` to see them"
+                      .format(len(_dups), sum(len(g) - 1 for g in _dups)))
         else:
             # The lock may still have advanced above (it is written unless CONFIRMED
             # drift was refused), while the map was not regenerated — the two then
