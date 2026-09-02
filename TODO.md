@@ -118,6 +118,33 @@
 - [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link | lane: feature
       <!-- REQ-VLEVEL-037 -->
 
+## v2.32
+<!-- Two gaps measured 2026-09-02 while reviewing the corpus against the V-model/ASPICE
+     shape. Both are worth closing on their own merits, independent of any standard:
+     they are the links the corpus asserts it has and does not. NOT a move toward
+     conformance — the ADR-0007 unpark trigger has NOT fired (no regulated user, no
+     assessor); this is dogfooding the tool's own traceability claim. -->
+- [ ] Bidirectional traceability: raise `satisfies:` coverage from 11/54 to 54/54 | lane: ops
+      <!-- Measured: 43 of 54 confirmed requirements carry no `satisfies:`, so 80% trace to
+           nothing above them. NEED-SSOT-001 is the sole apex, `satisfied_by` 11.
+           Consequence, measured on the depends_on graph: the corpus is a lozenge
+           (6 / 17 / 24 / 7 nodes by depth), not a pyramid, and the single `need` sits at
+           depth 0 beside the bus foundations rather than at the apex — `depends_on` is a
+           composition axis, `satisfies` is the level axis, and only the latter builds a
+           hierarchy. Blocked on a prior decision: 54 architectures under one need violates
+           any sane fan-out; 3-11 system-level needs are needed first (54/20 = 2.7,
+           54/5 = 10.8). Check `area:` adoption before inventing them — the grouping may
+           already be latent there. -->
+- [ ] Verification criteria: raise `verifiable by:` from 2/54 toward full coverage | lane: ops
+      <!-- Measured 2/51 in ADR-0016, unchanged at 2/54. The marker already exists in the
+           `new` template on each AC line, and `_labeled_acs` already reads it. The value is
+           not conformance: it tells an agent which criteria are machine-verifiable and which
+           need a human — exactly the decision a coding agent has to make. NOTE the standing
+           counter-evidence: ADR-0016 used this marker's own 4% adoption as the reason to
+           REJECT a comparable in-file marker, against 27% for `# verifies:`, which lives in
+           the test file the author is already editing. Raising it by hand is easy; keeping
+           it raised is the unproven part. -->
+
 ## v2.8 (deferred — demand-gated)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
      direct-CLI already covers every current shell-capable assistant (Claude Code, Copilot CLI, Gemini CLI,
