@@ -70,7 +70,7 @@ _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip befo
 # Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
 # `#AC-N` suffix is what distinguishes it from a plain requirement reference.
-AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)+)#(AC-\d+)")
+AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*(" + _ID_PAT + r")#(AC-\d+)")
 # Verification level on a `tested-by:` tag, written `# tested-by: <ID> @integration`.
 # The id is spelled `<ID>` here on purpose: a real-looking id in a PLAIN COMMENT would be
 # scanned as an actual tag. `_scan_file_tags` strips backticked spans only on the .md/.html
@@ -166,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-08-31.2"
+MAP_ENGINE_VERSION = "2026-09-02"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1838,13 +1838,18 @@ def compute_member_hashes(code_root, members):  # implements: REQ-MEMBERDRIFT-02
     return out
 
 
-def member_drift(reqs, members, lock, memberlock, code_root):  # implements: REQ-MEMBERDRIFT-027
+def member_drift(reqs, members, lock, memberlock, code_root, current=None):  # implements: REQ-MEMBERDRIFT-027
     """Sorted (rid, relfile) where a confirmed requirement's dedicated member changed
     since the member-lock while the requirement's OWN contract did not. A requirement
     whose contract also drifted is skipped — that is forward drift (the spec WAS
     re-touched) and the contract-drift warning already owns it. A member with no recorded
-    baseline is skipped, so a freshly-tagged file is baselined on the next sync, not nagged."""
-    current = compute_member_hashes(code_root, members)
+    baseline is skipped, so a freshly-tagged file is baselined on the next sync, not nagged.
+
+    `current` lets a caller that already computed `compute_member_hashes(code_root, members)`
+    (e.g. to also rebaseline `_memberlock.json` from the same member set) pass it in instead
+    of paying for a second identical hash pass; omit it to compute it here as before."""
+    if current is None:
+        current = compute_member_hashes(code_root, members)
     out = []
     for rid, r in reqs.items():
         if r["meta"].get("status") != "confirmed":
@@ -2078,12 +2083,13 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         for up in _as_list(m.get("satisfies")):
             if up not in cap_ids:
                 warns.append(f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)")
-        # a `need` is a stakeholder requirement: satisfied-by other requirements, not
-        # implemented or tested by code directly — so it is exempt from the code-coverage gates.
+        # a `need`/`aggregate` is covered by edges (satisfies:/depends_on), not code — so
+        # it is exempt from the code-coverage gates. # implements: REQ-TRACE-020
         is_need = m.get("layer") == "need"
+        impl_exempt = _impl_exempt(m)
         impls = [x for x in members.get(rid, []) if x[0] == "implements"]
         # When --since filters members, skip code-coverage checks for reqs with no members in the diff
-        if m.get("status") in ENFORCED and not impls and not is_need:
+        if m.get("status") in ENFORCED and not impls and not impl_exempt:
             if rid in members:
                 # Requirement is in the filtered scope but has no implements tag
                 errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
@@ -2091,7 +2097,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 # Full scan and requirement is enforced but has no impl tag
                 errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
         tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
-        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not is_need:
+        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not impl_exempt:
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
                 warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
@@ -2219,7 +2225,12 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
     # Reverse-direction drift: a dedicated member changed while the contract stayed put
     # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (REQ-MEMBERDRIFT-027).
     memberlock = load_memberlock(reqs_dir)
-    for rid, rel in member_drift(reqs, members, lock, memberlock, code_root):
+    # sync/init on a full scan (no --since) needs this same full-member hash set again
+    # below to re-baseline _memberlock.json — compute it once and hand it to member_drift
+    # instead of hashing every dedicated member file twice in one invocation.
+    _reuse_full_hashes = update_lock and members is full_members
+    _full_member_hashes = compute_member_hashes(code_root, full_members) if _reuse_full_hashes else None
+    for rid, rel in member_drift(reqs, members, lock, memberlock, code_root, current=_full_member_hashes):
         strict_warns.append(f"{rid}: MEMBER DRIFT — {rel} changed since lock but the contract "
                             "was not re-touched; re-check the requirement, or run sync to re-baseline")
 
@@ -2343,7 +2354,10 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # re-baseline reverse drift over the FULL member set — using the
             # --since-filtered `members` here would drop every unchanged member's
             # baseline and silently disable reverse-drift detection for them.
-            save_memberlock(reqs_dir, compute_member_hashes(code_root, full_members))
+            # Reuse the hashes computed above when they cover the same full set.
+            save_memberlock(reqs_dir, _full_member_hashes
+                             if _full_member_hashes is not None
+                             else compute_member_hashes(code_root, full_members))
             print("lock updated.")
 
     # Integration-artifact freshness: stale tool_definition.json or command-table region
@@ -2563,7 +2577,7 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
         if not os.path.exists(path):
             continue
         try:
-            with open(path, encoding="utf-8") as f:
+            with open(path, encoding="utf-8", newline="") as f:
                 lines = f.readlines()
         except OSError:
             continue          # unreadable here -> try the next candidate (parent), like _parse_todos
@@ -2578,7 +2592,7 @@ def _mark_todo_done(root, name):  # implements: REQ-PROMOTE-TODO-001
                 break
         if changed:
             try:
-                with open(path, "w", encoding="utf-8") as f:
+                with open(path, "w", encoding="utf-8", newline="") as f:
                     f.writelines(lines)
             except OSError:
                 return 0
@@ -2640,13 +2654,20 @@ def cmd_promote(reqs, members, cap_id):  # implements: REQ-PROMOTE-011
         print(f"refusing: {cap_id} has no `implements:` member — a confirmed requirement "
               f"must point to code. Tag the implementing code `# implements: {cap_id}` first.")
         return 1
-    with open(r["path"], encoding="utf-8-sig") as f:
-        text = f.read()
+    # newline="" on both ends: read/write the file's own line endings verbatim so a
+    # CRLF-committed requirement file isn't silently flipped to LF on a POSIX host
+    # (universal-newline translation on read + os.linesep on write would do exactly that).
+    with open(r["path"], encoding="utf-8-sig", newline="") as f:
+        raw = f.read()
+    eol = "\r\n" if "\r\n" in raw else "\n"
+    text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
     new_text, n = _set_frontmatter_status(text, "confirmed")
     if n == 0:
         print(f"could not find a `status:` line in {r['path']}")
         return 1
-    with open(r["path"], "w", encoding="utf-8") as f:
+    if eol == "\r\n":
+        new_text = new_text.replace("\n", "\r\n")
+    with open(r["path"], "w", encoding="utf-8", newline="") as f:
         f.write(new_text)
     print(f"promoted {cap_id}: {cur or '(unset)'} -> confirmed")
     if _impl_exempt(meta):
@@ -4972,6 +4993,18 @@ def _strip_generated(text):
                      and not l.lstrip().startswith('"engine_version":'))
 
 
+_ENGINE_STAT_RE = re.compile(r'<div class="stat"><b>[^<]*</b><span>engine</span></div>')
+
+
+def _strip_engine_stat(html):  # implements: REQ-SITE-026
+    """Drop the `engine` stat cell before a site STATS-region freshness diff — it
+    embeds the live MAP_ENGINE_VERSION, which changes on every engine change
+    independent of requirement content, mirroring the `repo`/`engine_version`
+    exclusions `_strip_generated` already applies to `_map.md`/`_map.json` for the
+    same reason (a routine engine bump must not flag a committed site page stale)."""
+    return _ENGINE_STAT_RE.sub("", html)
+
+
 def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MAP-007
     """Names of the committed generated artifacts that no longer match a fresh
     render of `data` — the whole of the freshness verdict, with no printing and no
@@ -5021,7 +5054,8 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: REQ-MA
         disk_stats = _extract_region(on_disk, "stats")
         if disk_stats is not None:
             ctx = _site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
-            if disk_stats != _render_region("stats", ctx):
+            fresh_stats = _render_region("stats", ctx)
+            if _strip_engine_stat(disk_stats) != _strip_engine_stat(fresh_stats):
                 stale.append(os.path.basename(site_target))
     return stale
 
@@ -6535,7 +6569,7 @@ def main():
     # ever asked for members. --cache stays on scan_members, the only scanner that
     # implements it — see scan_all's docstring for why it is not duplicated there.
     _ac_cover = _level_cover = None
-    if a.cmd in ("gate", "check", "sync") and not a.cache:
+    if a.cmd in ("gate", "check", "sync", "show") and not a.cache:
         members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir)
     else:
         members = scan_members(code_root, reqs_dir, cache=a.cache)
@@ -6548,7 +6582,11 @@ def main():
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
-        return cmd_show(reqs, members, a.arg, scan_test_levels(code_root, reqs_dir))
+        # scan_all above (the non-cache path) already produced level_cover in the same
+        # walk; only re-walk via scan_test_levels when --cache forced the
+        # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
+        levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
+        return cmd_show(reqs, members, a.arg, levels)
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members)
     if a.cmd == "search":

@@ -19,18 +19,19 @@
     },
     "REQ-VIEWER-007": {
       "app/scripts/install-viewer.mjs": "777e2f2432606dabc4b513192323674fc95c7a717b77331ce05d6815b1b79867",
-      "app/src/App.jsx": "c4160892d316353365e97495eba474e94187a5d51b69134a4a746e558d93c471",
+      "app/src/App.jsx": "c75c8554ecedadd0f91a06ac5853113884d1dd1b5718a1abe0532f382fbfbec9",
       "app/src/lib/data.js": "fc86c260ec1decfe2c6b4d096ada5343510b41b09bb272b7378e3448c270ee57",
       "app/src/lib/icons.jsx": "1398603808167de86964c2c48c1cf454c53a09171df4a4ff11e65599a3e2de0d",
       "app/src/lib/layout.js": "506ebe22e94c960b23efeff2fe6bc6773b0dd4547eaf18eccf84147b3050f7e9",
       "app/src/lib/loadData.js": "61601143bed67988e4f901f529a994e9c60b7bbb011c40353cf47546f1d531c0",
       "app/src/lib/ui.jsx": "b1932f06b3c3d3d4c45eb8614630ad46185cc1ee22e42ab847a0c136d154966f",
+      "app/src/lib/useDragPan.js": "d13e77de728c13b595b204ae5c9e6c9b6e67e67f75ada4a0cd6db91bd8415edb",
       "app/src/main.jsx": "66f77a82969575bdcc216e54b99428610b130613b7202fbecbf76ef6b7c07209",
       "app/src/styles/app.css": "52fa8c0d8eb1ddb37dfd2b5c1d3ff6ffd418ca16f2323b650712b4b35b618b54",
       "app/src/styles/colors_and_type.css": "72833adde88d3a8f31c244cf0ec9fdd35dac759e57f4becb1664a10a55420b00",
-      "app/src/views/MapView.jsx": "7e9f2040357e928399b9dd6edd9a1c1165e10fc1bc2e4631e518ae49183dafb5",
-      "app/src/views/ProblemsView.jsx": "a982bdc364e52b8bc70a5d1330c9862df3f9d5d288f7c450b4f79074b5e906f6",
-      "app/src/views/RoadmapView.jsx": "7e53a75172e6df69d248c445559e480bb3e54deb445a9db1a33910220aef483b",
+      "app/src/views/MapView.jsx": "55a6efbc2ac5b0ccdbb08d76265f86426f9bfe7762b5bdf5a7e7250388912c56",
+      "app/src/views/ProblemsView.jsx": "e0d9ca92c3457e4535e5a4652d052b3e2cf3cc5469a5b22d0228a3d0a64368f0",
+      "app/src/views/RoadmapView.jsx": "03a38ac4842368657b72c875659d0d47285c7aed1c688f9edf19453bdfe34c62",
       "app/vite.viewer.config.js": "bc893f99c8e11ee596101966703de3189dde3378cc51b93545ca600dd28ee338"
     }
   }

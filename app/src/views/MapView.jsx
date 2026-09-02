@@ -2,12 +2,13 @@
 /* MapView — the flagship interactive graph explorer (4 tabs + detail panel).
  * Layout is computed from the live registry (see ../lib/layout.js) — no
  * hand-tuned coordinates — so it renders any repo's requirements, not a fixture. */
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo } from "react";
 import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
 import { Pill, Btn, statusKind } from "../lib/ui.jsx";
 import { Icon, LocateGlyph } from "../lib/icons.jsx";
 import { computeLayout, colorFor, buildEdgePath, NODE_W, NODE_CY } from "../lib/layout.js";
 import { useI18n } from "../lib/i18n.jsx";
+import { useDragPan } from "../lib/useDragPan.js";
 
 function NodeBox({ r, pos, selected, highlighted, edgeEnd, riskClass, onClick }) {
   const p = pos[r.id]; if (!p) return null;
@@ -68,30 +69,7 @@ function Edges({ meta, selKey, onSelect }) {
  * click (no drag) still falls through to node/edge selection. A drag past a small
  * threshold is swallowed in the capture phase so it never triggers a selection. */
 function Canvas({ width, height, minHeight, onClear, children }) {
-  const ref = useRef(null);
-  const drag = useRef(null);
-  function onMouseDown(e) {
-    if (e.button !== 0) return;
-    const el = ref.current; if (!el) return;
-    const d = { x: e.clientX, y: e.clientY, sl: el.scrollLeft, st: el.scrollTop, moved: false };
-    drag.current = d;
-    const move = (ev) => {
-      const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
-      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) { d.moved = true; el.classList.add("grabbing"); }
-      if (d.moved) { el.scrollLeft = d.sl - dx; el.scrollTop = d.st - dy; }
-    };
-    const up = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-      el.classList.remove("grabbing");
-      setTimeout(() => { drag.current = null; }, 0);
-    };
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  }
-  function onClickCapture(e) {
-    if (drag.current && drag.current.moved) { e.stopPropagation(); e.preventDefault(); }
-  }
+  const { ref, onMouseDown, onClickCapture } = useDragPan();
   return (
     <div className="canvas pan" ref={ref} onMouseDown={onMouseDown} onClickCapture={onClickCapture}>
       <div className="canvas-inner" style={{ width, height, minHeight }} onClick={onClear}>

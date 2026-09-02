@@ -1,8 +1,9 @@
 // implements: REQ-VIEWER-007
 /* RoadmapView — Gantt-style chart: semver milestones on X, swim lanes on Y.
    Requirements with `milestone:` field + TODO.md items via TODOS. */
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { REQUIREMENTS, TODOS } from "../lib/data.js";
+import { useDragPan } from "../lib/useDragPan.js";
 
 function semverCmp(a, b) {
   const num = v => v.replace(/^v/i, "").split(".").map(n => parseInt(n, 10) || 0);
@@ -59,30 +60,7 @@ function Bar({ variant, id, label, onClick }) {
 
 export function RoadmapView({ openSpec }) {
   const [showUnscheduled, setShowUnscheduled] = useState(false);
-  const ref = useRef(null);
-  const drag = useRef(null);
-  function onMouseDown(e) {
-    if (e.button !== 0) return;
-    const el = ref.current; if (!el) return;
-    const d = { x: e.clientX, y: e.clientY, sl: el.scrollLeft, st: el.scrollTop, moved: false };
-    drag.current = d;
-    const move = (ev) => {
-      const dx = ev.clientX - d.x, dy = ev.clientY - d.y;
-      if (!d.moved && Math.abs(dx) + Math.abs(dy) > 4) { d.moved = true; el.classList.add("grabbing"); }
-      if (d.moved) { el.scrollLeft = d.sl - dx; el.scrollTop = d.st - dy; }
-    };
-    const up = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-      el.classList.remove("grabbing");
-      setTimeout(() => { drag.current = null; }, 0);
-    };
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  }
-  function onClickCapture(e) {
-    if (drag.current && drag.current.moved) { e.stopPropagation(); e.preventDefault(); }
-  }
+  const { ref, onMouseDown, onClickCapture } = useDragPan();
 
   const msSet = new Set();
   REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
