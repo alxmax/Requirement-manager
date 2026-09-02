@@ -13,15 +13,14 @@ superseded_by:       # <ID>, if replaced
 
 # Stale vendored engine, reported in CI
 
+## Description
 > Every consumer repo runs its own vendored copy of `reqmap.py`, and that copy only
 > improves when someone re-seeds it. The engine's own staleness notice (`warn_if_stale`)
 > is gated on `CLAUDE_PLUGIN_ROOT`, which exists in a Claude Code session and nowhere
 > else — so it is silent in CI, the one place that runs on every push and the one place a
 > months-old engine actually costs something: checks that shipped since are simply absent,
 > and nothing says so.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 
 **Glossary** — *vendored engine*: the consumer repo's own `scripts/reqmap.py`, the file the
 action executes; *reference engine*: `plugin/scripts/reqmap.py` inside the action's own
@@ -49,11 +48,11 @@ checkout, i.e. the engine the referenced `check@vN` ships.
 - An unexpected internal failure of the probe is reported the same way: a skipped probe,
   exit 0. The probe is never itself the reason a gate run goes red.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — the gap is stated in the engine's own comment (`warn_if_stale` is "silent in CI")
   and in `check/action.yml`'s scope note.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Why this cannot live in the engine, next to [[ARCH-CHECK-006]]'s `warn_if_stale`: a stale
   vendored engine does not contain the check that would report it stale. The detector has to
   run from something the consumer does not vendor — the action, which is always current for
@@ -64,34 +63,34 @@ checkout, i.e. the engine the referenced `check@vN` ships.
 - Default `warn`, not `error`: adding a step that can newly fail a green build is a breaking
   change for an existing `@v2` pin. A repo that wants the hard stop opts in.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a vendored engine older than the reference engine
   When   the probe runs in `warn` mode
   Then   it prints one message naming both versions and exits 0
 
-AC-2
+CASE-2
   Given  the same pair of engines
   When   the probe runs in `error` mode
   Then   it exits 1
 
-AC-3
+CASE-3
   Given  any pair of engines
   When   the probe runs in `off` mode
   Then   it prints nothing and exits 0
 
-AC-4
+CASE-4
   Given  a vendored engine at or ahead of the reference version
   When   the probe runs in `warn` or `error` mode
   Then   no staleness message appears and it exits 0
 
-AC-5
+CASE-5
   Given  a vendored or reference file that is missing or carries no readable
          `MAP_ENGINE_VERSION`, or a probe that raises unexpectedly
   When   the probe runs in `error` mode
   Then   it reports the probe as skipped and exits 0
 
-AC-6
+CASE-6
   Given  `GITHUB_ACTIONS` is set in the environment
   When   the probe reports a stale engine
   Then   the message is a `::warning::` annotation; without that variable it is a plain

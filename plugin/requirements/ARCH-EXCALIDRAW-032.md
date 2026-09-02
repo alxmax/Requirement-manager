@@ -12,13 +12,12 @@ satisfies: [SYS-VISUAL-106]
 
 # Excalidraw builder CLI verbs
 
+## Description
 > Diagrams need to be rebuilt when source changes: either from a generator
 > script (the main authoring path), from a hand-edited `.excalidraw` file
 > (viewer rebuild only), or from an existing repo that needs a scaffolded
 > starting point (discover). The CLI exposes these as three distinct verbs so
 > each use-case has a single, unambiguous entry point.
-
-## WHAT — Contract (normative)
 - Invoking `python excalidraw_builder.py` with **no arguments** runs the
   builder smoke test, prints a human-readable summary, and exits 0 on success.
   This is the CI health-check entry point and is never shadowed by a new
@@ -33,34 +32,34 @@ satisfies: [SYS-VISUAL-106]
   commented as scaffolds) to `out.py` (default: `make_diagram.py`).
 - Any unrecognised verb exits with code 2 and prints a usage message.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent.
 
-## WHAT — Notes (informative)
+## Notes (informative)
 - `discover` only scaffolds the *components* it can see; inferring real data
   flow and grouping remains the author's responsibility.
 - The smoke test (no-arg invocation) is what CI depends on — do not change the
   no-arg behaviour.
 
-## HOW — Acceptance (= tests)
+## Cases (= tests)
 
-AC-1
+CASE-1
   Given  no arguments
   When   `python excalidraw_builder.py` is run
   Then   it exits 0 and stdout contains a success/summary line (not an error)
 
-AC-2
+CASE-2
   Given  a valid `.excalidraw` file at `<path>`
   When   `render <path>` is run
   Then   a `<basename>.html` is written; the source `.excalidraw` is unchanged
 
-AC-3
+CASE-3
   Given  a directory containing at least one `.py` source file
   When   `discover <dir>` is run
   Then   a runnable Python stub is emitted that imports `excalidraw_builder`
          and calls `.save()`
 
-AC-4
+CASE-4
   Given  an unknown verb such as `frobnicate`
   When   `python excalidraw_builder.py frobnicate`
   Then   the process exits with code 2 and prints usage

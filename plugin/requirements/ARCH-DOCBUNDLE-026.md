@@ -13,6 +13,7 @@ milestone: v1.17
 
 # Untagged doc-bundle warning
 
+## Description
 > A whole-system doc — an architecture or explainer page generated from many
 > requirements — can drift from those requirements for days with nothing linking
 > the two, because a `generated-from:` tag was never added. Drift detection only
@@ -21,9 +22,7 @@ milestone: v1.17
 > lineage tag, so the author either links it (one tag, possibly a multi-id list)
 > or marks it intentionally out of scope. Without it, "the docs are in sync" is an
 > assumption the gate can neither confirm nor deny.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a doc bundle       a whole-system page written out of many requirements at once,
                         such as an architecture or explainer page.
@@ -50,38 +49,38 @@ Every line in this section is binding.
 **Severity**
 - The check is warn-only and never changes the gate's exit code.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - A byte-size threshold is a deterministic proxy for "generated bundle", not a
   semantic one: a large hand-authored doc that legitimately has no requirement
   lineage is silenced via `.reqmapignore`, not by the check guessing intent.
 - It asserts a lineage tag is *present*, not that the doc's content actually matches
   the requirements it names — the same lexical-trust limitation as `tested-by`.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a `docs/` HTML file at or above the size threshold with no `generated-from:` tag
   When   the scan runs
   Then   the file is reported as an untagged doc bundle
-AC-2
+CASE-2
   Given  a `docs/` HTML file below the size threshold
   When   the scan runs
   Then   it is not reported
-AC-3
+CASE-3
   Given  a large `docs/` HTML file that carries a `generated-from:` tag
   When   the scan runs
   Then   it is not reported
-AC-4
+CASE-4
   Given  a large engine output (`_`-prefixed or `map.html`) or a large `.html` outside `docs/`
   When   the scan runs
   Then   none of them are reported
-AC-5
+CASE-5
   Given  a large untagged `docs/` HTML file matched by a `.reqmapignore` pattern
   When   the scan runs
   Then   it is not reported
-AC-6
+CASE-6
   Given  a large untagged `docs/` HTML file
   When   the gate runs
   Then   its output names the file and the missing `generated-from:` tag

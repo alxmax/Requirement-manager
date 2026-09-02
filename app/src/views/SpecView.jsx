@@ -115,14 +115,14 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
       <CovStrip r={r} />
 
       <div className="sec">
-        <div className="eyebrow">{t("What — Contract")} <span className="rule" /> {t("normative")}{contract.isTranslated && <TranslatedBadge />}</div>
+        <div className="eyebrow">{t("Description")} <span className="rule" /> {t("normative")}{contract.isTranslated && <TranslatedBadge />}</div>
         {contract.isTranslated
           ? <div className="gwt">{contract.text.split("\n").map((ln,i)=><div key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(ln)}} />)}</div>
           : <ul>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(c)}} />)}</ul>}
       </div>
 
       <div className="sec">
-        <div className="eyebrow">{t("How — Acceptance")} <span className="rule" /> {t("= tests")}{acceptance.isTranslated && <TranslatedBadge />}</div>
+        <div className="eyebrow">{t("Cases")} <span className="rule" /> {t("= tests")}{acceptance.isTranslated && <TranslatedBadge />}</div>
         {acceptance.isTranslated
           ? <div className="gwt">{acceptance.text.split("\n").map((ln,i)=><div key={i}>{ln}</div>)}</div>
           : (r.gwt

@@ -12,13 +12,12 @@ satisfies: [SYS-SHIP-108]
 
 # CLI command registry + generated integration artifacts
 
+## Description
 > `tool_definition.json` and the `SKILL.universal.md` command table were
 > hand-maintained mirrors of the CLI and silently drifted whenever a command
 > was added or renamed. A single declarative `COMMANDS` registry — with
 > generation and a gate drift-guard — makes those mirrors impossible to diverge
 > undetected.
-
-## WHAT — Contract (normative)
 - A `COMMANDS` dict is the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.
 - Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal is permitted.
 - `tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the `gen-integration` command.
@@ -27,36 +26,36 @@ satisfies: [SYS-SHIP-108]
 - The gate fails (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.
 - All generators and the gate check are stdlib-only; no third-party imports are permitted.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — intent and scope confirmed by implementation.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `gen-integration` is the only command that writes generated artifacts; running it is required after any `COMMANDS` change before committing.
 - The gate check (`_check_integration_fresh`) re-generates in a temp dir and compares byte-for-byte; it is deterministic because `_generate_schema` sorts JSON object keys and `_generate_command_table` iterates `COMMANDS` in insertion order (which is also the order exposed by `_cli_choices()` and `--help`).
 
-## HOW — Acceptance (= tests)
+## Cases (= tests)
 
-AC-1
+CASE-1
   Given  the `COMMANDS` registry and the live argparse parser
   When   `_cli_choices()` is called
   Then   its return value equals `list(COMMANDS)` (insertion order) — no literal choices exist
 
-AC-2
+CASE-2
   Given  a committed `tool_definition.json` whose content differs from a fresh generation
   When   `gate` runs
   Then   the gate exits non-zero (stale artifact is a hard error)
 
-AC-3
+CASE-3
   Given  `gen-integration` is run
   When   `tool_definition.json` and the `SKILL.universal.md` command table are written
   Then   their content is byte-for-byte reproducible on a second run with the same `COMMANDS`
 
-AC-4
+CASE-4
   Given  any existing CLI command (e.g. `init`, `gate`, `sync`)
   When   it is invoked via the standard CLI entry point
   Then   it executes without error — no regression from the registry migration
 
-AC-5
+CASE-5
   Given  the generated artifacts are inspected for imports
   When   the generator code runs
   Then   only stdlib modules are imported; no third-party dependency is present

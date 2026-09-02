@@ -13,6 +13,7 @@ milestone: v2.10
 
 # Drift blast-radius: name dependents
 
+## Description
 > When a confirmed requirement's contract drifts, the gate names the
 > requirement and its code members — but not the requirements built on top of
 > it via `depends_on`. An upstream contract change can invalidate a downstream
@@ -20,8 +21,6 @@ milestone: v2.10
 > reconstruct the blast radius by hand from the map. The dependency graph is
 > already in memory at gate time; naming the dependents turns one drift
 > warning into an actionable review list.
-
-## WHAT — Contract (normative)
 - When the gate reports a contract drift for a requirement, and at least one
   other requirement lists the drifted one in `depends_on`, the same warning
   line also names those dependent requirement ids.
@@ -35,27 +34,27 @@ milestone: v2.10
 - The addition does not change the drift warning's severity: it stays
   warn-only by default and promotable by `--strict`, exactly as before.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Naming a dependent asserts topology, not impact: the dependent may be
   unaffected by the specific clause that changed. The reviewer decides; the
   gate only stops the radius from being invisible.
 - Member drift (ARCH-MEMBERDRIFT-027) is not fanned out: a code-ahead-of-spec
   change has no changed contract for dependents to have relied on.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a confirmed requirement whose contract hash differs from the lock and
          a second requirement that lists it in `depends_on`
   When   the gate runs
   Then   the drift warning names the dependent requirement's id
-AC-2
+CASE-2
   Given  a confirmed drifted requirement that no other requirement depends on
   When   the gate runs
   Then   the drift warning appears without any dependent clause
-AC-3
+CASE-3
   Given  a drifted requirement with two dependents
   When   the gate runs
   Then   both ids appear in sorted order on the drift line

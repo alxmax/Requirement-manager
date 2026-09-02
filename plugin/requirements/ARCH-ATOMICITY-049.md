@@ -12,14 +12,13 @@ superseded_by:
 
 # Statement atomicity
 
+## Description
 > A requirement file here is a capability dossier, not one sentence — its Contract holds
 > many clauses, and each clause is the real unit a test answers to. This says what makes
 > a clause well-formed: one obligation, verifiable on its own. It also ships a word-count
 > heuristic that points a reader at clauses worth re-reading. The two are deliberately
 > not the same thing, and the second never decides the first.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a clause          one bullet in a requirement's Contract section — the unit a test
                        answers to.
@@ -51,31 +50,31 @@ Every line in this section is binding.
 - A nested sub-bullet is counted as its own clause, because it states its own obligation.
 - The check reads the Contract section only. Acceptance prose carries no size ceiling.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from stated intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a Contract clause of 80 plain words
   When   `lint` runs
   Then   exactly one `statement-size` finding names that clause, and the exit code is unchanged
-AC-2
+CASE-2
   Given  a Contract clause of 70 plain words
   When   `lint` runs
   Then   no `statement-size` finding is reported for it
-AC-3
+CASE-3
   Given  a Contract clause of 80 words, 60 of them inside one backticked span
   When   `lint` runs
   Then   the span counts as one word, the clause counts 21, and nothing is reported
-AC-4
+CASE-4
   Given  a parent clause of 40 words carrying a nested sub-bullet of 80 words
   When   `lint` runs
   Then   the sub-bullet alone is reported, and the parent is not
-AC-5
+CASE-5
   Given  a requirement carrying `lint_exempt: [statement-size]` and an over-threshold clause
   When   `lint` runs
   Then   no `statement-size` finding is reported for that requirement
-AC-6
+CASE-6
   Given  a 20-word Contract clause stating two independent obligations
   When   `lint` runs
   Then   no `statement-size` finding is reported, because the check reads size and not
@@ -97,7 +96,7 @@ AC-6
   section header already binds every clause and `redundant-modal` flags the modal
   (ARCH-LINTCHECKS-025).
 - The epistemic limit is stated in the Contract rather than left here, so no later reader
-  or tool can promote the heuristic into the rule. AC-6 pins it as behaviour: a short
+  or tool can promote the heuristic into the rule. CASE-6 pins it as behaviour: a short
   clause with two obligations passes, and that is correct, not a gap to close.
 - Measured on this corpus before the check was specified: 586 Contract clauses across 52
   requirements, mean 18.4 words, median 16, p90 31, **max 62**. At the 150-word threshold

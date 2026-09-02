@@ -12,15 +12,14 @@ milestone: v1.06
 
 # Capability candidates (extraction plan)
 
+## Description
 > When you point this tool at an old codebase that has no requirements written down yet,
 > this is the first, look-but-don't-touch step. It reads the code and produces a tidy
 > machine-readable plan that guesses what each capability is — which files belong together,
 > what they depend on, how central each one is — without writing or changing a single
 > requirement file. An author (or an AI assistant) then uses that plan to decide what to
 > actually write up. Without it, you would face a wall of untagged code with no starting map.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a candidate    one proposed capability in the plan: a guess that these files
                     belong together and deserve one requirement.
@@ -60,46 +59,46 @@ Every line in this section is binding.
   treats it as authoritative.
 - Absent `_capmap.json`, `plan` falls back to one candidate per file.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Read-only by design — merge/split judgment is left to the Stage-2 authoring agent.
 - Import→candidate resolution matches on file stem, so a stdlib-shadowing or same-basename
   import can produce a false `depends_on` edge for the author to prune.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  any corpus
   When   `plan` runs
   Then   it writes zero `.md` files and emits valid JSON
 
-AC-2
+CASE-2
   Given  a file listed in `.reqmapignore` (including one placed in `requirements/`)
   When   `plan` runs
   Then   that file is absent from every candidate's `files`
 
-AC-3
+CASE-3
   Given  an import of a local module
   When   `plan` runs
   Then   a `depends_on` edge points at that module's candidate
 
-AC-4
+CASE-4
   Given  a `requirements/_capmap.json` grouping two files under one id
   When   `plan` runs
   Then   they appear as a single candidate carrying both files with the declared layer
 
-AC-5
+CASE-5
   Given  a file already carrying an `implements:` tag
   When   `plan` runs
   Then   it is reported via `existing_req`
 
-AC-6
+CASE-6
   Given  a module imported by `BUS_FANIN_THRESHOLD` or more candidates
   When   `plan` runs
   Then   it is suggested as `bus`
 
-AC-7
+CASE-7
   Given  a `.go` file and a `tests/test_x.py` file, and no `_capmap.json`
   When   `plan` runs
   Then   both are candidates; the `.go` one carries empty signatures and the test one carries `is_test: true`

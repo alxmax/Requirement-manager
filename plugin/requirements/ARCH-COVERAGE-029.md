@@ -12,6 +12,7 @@ satisfies: [SYS-REPORT-105]
 
 # Untagged-code coverage signal
 
+## Description
 > reqmap links code to requirements by tags, but nothing reported how much code is
 > linked to nothing — code traceable to no requirement was only visible by running
 > `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at
@@ -19,9 +20,7 @@ satisfies: [SYS-REPORT-105]
 > rejected enforcing coverage as a hard gate — it is gameable with hollow tags and
 > conflicts with the model where a requirement is a behavior, not a file — and
 > approved only this non-blocking visibility signal.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      membership tag  a comment in code naming a requirement: `implements`, `tested-by`,
                      `generated-from` or `validated-against`.
@@ -52,26 +51,26 @@ Every line in this section is binding.
 - A file is silenced from the count either by tagging it, or by adding it to `.reqmapignore`.
 - There is no separate exemption mechanism.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent; the Senate audit settled scope and severity.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - This is the read-only half of coverage; the matching list of which files is the "Untagged files" bucket in `next` ([[ARCH-NEXT-013]]). Same denominator, two surfaces.
 - It measures tag PRESENCE, not tag QUALITY: a hollow `# implements:` tag counts as covered. This is accepted — the Senate flagged that a hard gate would make hollow tags the rational way to pass CI, which is why this stays advisory.
 - Granularity is per file, not per member; the engine does not parse members.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a code root with one tagged and one untagged scannable file
   When   `health --json` runs with that code root
   Then   the `untagged` key equals 1 and the score is unchanged by it
 
-AC-2
+CASE-2
   Given  no code root (a unit-test caller)
   When   `health --json` runs
   Then   the output carries no `untagged` key
 
-AC-3
+CASE-3
   Given  an untagged scannable file that is then tagged or added to `.reqmapignore`
   When   `health --json` runs again with the code root
   Then   the `untagged` count drops by one (the file is silenced from the signal)

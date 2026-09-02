@@ -12,14 +12,13 @@ superseded_by:
 
 # Verification levels
 
+## Description
 > A `tested-by:` link says a test exists, not how close that test sits to the code — a
 > whole-system run and a single-function check look identical to the tool. This lets a tag
 > name its level, and lets a stakeholder need point at the evidence it was met. Without it
 > the engine models only the left side of the V: you can ask what a requirement depends on,
 > but not "has anyone ever shown this need was actually satisfied?".
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a verification level  how close a test sits to the code: `@unit`, `@integration`
                            or `@system`.
@@ -60,45 +59,45 @@ Every line in this section is binding.
 - `show` prints the verification level beside a member whose `tested-by:` tag carries one.
 - `show` prints a member whose tag carries no level with no level marker.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The level suffix is invisible to the ordinary tag parser, so an older vendored engine reads a levelled tag, resolves the id, and ignores the level — the annotation is backwards compatible.
 - The level is author-declared, not measured: nothing checks that a test tagged `@unit` really isolates one unit. Same lexical-trust limitation as `tested-by` itself (ARCH-TESTLINK-018).
 - `validated-against:` had sat unused in the role list since the beginning; this requirement is the first consumer of it.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  tags declaring two levels for one id, a two-id list at `@integration`, one tag
          with no level and one carrying `@wrong`
   When   the level scan runs
   Then   the first id reports both levels with their `file:line`, both listed ids report
          `integration`, and the unlevelled and unrecognised ones are absent
-AC-2
+CASE-2
   Given  a `tested-by:` tag carrying a level suffix
   When   the ordinary tag scan reads it
   Then   it resolves to the same member as an unlevelled tag, so an engine that predates
          levels reads the id and ignores the suffix
-AC-3
+CASE-3
   Given  levelled tags that are not real claims — one inside backticks, one in a Python
          docstring, one in a string literal — alongside one real tag in a comment
   When   the level scan runs
   Then   only the real tag produces a level entry
-AC-4
+CASE-4
   Given  two confirmed needs, one carrying a `validated-against:` tag and one carrying none
   When   the gate runs
   Then   it warns about the unvalidated need only
-AC-5
+CASE-5
   Given  a confirmed need in a repo with no `validated-against:` tag anywhere
   When   the gate runs
   Then   it says nothing about validation
-AC-6
+CASE-6
   Given  a confirmed `bus` requirement whose only levelled link is `@system`
   When   the gate runs
   Then   it warns; adding a `@unit` link, dropping to an unlevelled link, or moving to the
          `feature` layer each silences it
-AC-7
+CASE-7
   Given  a member whose `tested-by:` tag carries `@integration`
   When   `show` runs
   Then   `@integration` appears beside that member; with no level data the output is unchanged

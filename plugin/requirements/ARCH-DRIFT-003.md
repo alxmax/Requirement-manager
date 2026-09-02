@@ -12,14 +12,13 @@ milestone: v1.00
 
 # Contract hashing & lock
 
+## Description
 > A requirement file has a "binding" part — the precise promise of what the code must do.
 > This takes a tiny fingerprint of just that part and remembers it. The next time anyone
 > runs the tool, it can tell whether that promise changed since the code was last checked.
 > Without it, someone could quietly rewrite what a capability is supposed to do and no one
 > would be told the existing code may no longer match.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the normative sections  the parts of a requirement that promise something, as
                              opposed to the parts that explain it.
@@ -47,10 +46,10 @@ Every line in this section is binding.
 - `save_lock` creates the requirements directory if it is absent.
 - `save_lock` writes sorted, indented JSON, so the lock file is diff-stable.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - A heading is matched by its label (anchored): only a `## …` heading whose label —
   optionally after a `WHAT`/`HOW` prefix — starts with "Contract", "Acceptance",
   "Input" or "Output" contributes to the hash; a commentary heading such as
@@ -59,23 +58,23 @@ Every line in this section is binding.
   present-but-unreadable lock); `load_lock` itself fails open to `{}`.
   (The `gate` command surfaces this warning; `check` is its deprecated alias.)
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a requirement body
   When   only its Description/Notes section is edited
   Then   the binding hash does not change
 
-AC-2
+CASE-2
   Given  a requirement body
   When   its Output (or Contract) section is edited
   Then   the binding hash changes
 
-AC-3
+CASE-3
   Given  a missing or corrupt lock file
   When   `load_lock` runs
   Then   it returns an empty dict (no crash)
 
-AC-4
+CASE-4
   Given  a hash mapping
   When   `save_lock` then `load_lock` run
   Then   the same mapping round-trips

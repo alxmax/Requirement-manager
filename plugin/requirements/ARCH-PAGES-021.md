@@ -12,12 +12,11 @@ milestone: v1.04
 
 # Publish & gate the GitHub Pages map copy
 
+## Description
 > The map viewer is most useful when it is published — a URL anyone can open, no
 > checkout required. This capability copies the freshly-built viewer into a repo's
 > GitHub Pages folder and then guards that published copy, so the page people actually
 > read can never quietly fall behind the registry it claims to show.
-
-## WHAT — Contract (normative)
 - When `_map.html` is generated AND a `docs/` directory at the git root carries a GitHub
   Pages signal (a `.nojekyll` or `index.html` file present), `map` also copies `_map.html`
   to `docs/map.html`. When no signal is present, or git is absent, `docs/map.html` is not
@@ -34,39 +33,39 @@ milestone: v1.04
   is not spuriously flagged; the rest of the injected data carries no wall-clock value, so
   the comparison is deterministic.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The Pages signal is detected at the git root (so the engine running from a sub-directory
   such as `plugin/` still finds a project-root `docs/`); it falls back to the engine's own
   root when git is absent or the tree is not a checkout.
 - This depends on ARCH-MAP-007: the published copy and its freshness check both operate on the
   `_map.html` that the map capability renders. It adds no new rendering — only publish + gate.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a `docs/` at the git root carrying `.nojekyll` or `index.html`
   When   `map` runs
   Then   it also writes `docs/map.html` (same content as `_map.html`); absent the signal,
          `docs/map.html` is not written
 
-AC-2
+CASE-2
   Given  no Pages signal in `docs/` (or git absent)
   When   `map` runs
   Then   it still succeeds and writes only the standard outputs
 
-AC-3
+CASE-3
   Given  a completed `map`
   When   `docs/map.html` is edited to differ from a fresh render
   Then   `map --check` exits non-zero and names `map.html` (it exits 0 before the edit)
 
-AC-4
+CASE-4
   Given  the Pages signal present but no `docs/map.html` (never generated, or removed)
   When   `map --check` runs
   Then   it does not flag the file stale
 
-AC-5
+CASE-5
   Given  a change to only the git-derived `repo` value inside `docs/map.html`
   When   `map --check` runs
   Then   it stays fresh (the field is excluded from the diff)

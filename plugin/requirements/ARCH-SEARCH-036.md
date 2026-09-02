@@ -12,6 +12,7 @@ milestone: v2.13
 
 # Free-text requirement search
 
+## Description
 > To find the requirement about a topic today you grep the requirements folder or open the
 > map — grep needs the exact word the author used, and neither ranks results. This ranks
 > every requirement by how well its wording matches a free-text query, most-relevant-first,
@@ -20,9 +21,7 @@ milestone: v2.13
 > Because the match is lexical it can miss a synonym; when nothing matches well it says so
 > plainly, so a near-miss is never mistaken for the answer — the drift this whole tool exists
 > to prevent.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      bag of words  the words a requirement is reduced to: its title, its intent line and
                    its Contract bullets.
@@ -71,34 +70,34 @@ Every line in this section is binding.
 - A shared golden fixture pins the port to the engine: one fixed query scores identically in
   `app/scripts/ssr-smoke.jsx` and in the Python `Search` tests.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The match is purely lexical (token overlap). A query worded in synonyms of the requirement's text will score low or miss; this is why the floor and the "not synonym-aware" label exist, rather than a silent empty or spurious result.
 - One relevance model, two surfaces: the CLI for headless/agent/CI callers, the viewer for a human browsing the map. The golden fixture is what keeps them from diverging.
 - The `0.05` default was chosen because a short query is a sparse vector whose cosine against a full requirement runs far below the `dupes` pair threshold; on this corpus a correct top hit scores well above it while a no-lexical-overlap query stays below.
 - The floor is a module constant, not a flag. It was calibrated on this corpus; a very different corpus could warrant a different value, which is a code change, not configuration — keeping the surface minimal.
 - The query is folded into the corpus for the idf computation, so its terms participate in the document-frequency statistics exactly as the benchmark that validated the ranking did.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a query whose terms clearly match one requirement's contract
   When   `search` runs
   Then   that requirement appears in the results with its cosine score, ranked first
 
-AC-2
+CASE-2
   Given  a query with no lexical overlap with any requirement
   When   `search` runs
   Then   it prints the explicit no-strong-match line (best score below the floor) and
          does not print a ranked result
 
-AC-3
+CASE-3
   Given  a query that is empty after tokenizing (only stopwords / short words)
   When   `search` runs
   Then   it prints the "no searchable terms" line, distinct from the no-strong-match case
 
-AC-4
+CASE-4
   Given  more matching requirements than `--top`
   When   `search` runs with that `--top`
   Then   at most `--top` matches are printed

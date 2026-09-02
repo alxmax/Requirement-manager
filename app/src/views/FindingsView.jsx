@@ -71,7 +71,7 @@ export function FindingsView({ openSpec }) {
               </ul>
               <div className="prob-fix">
                 <Icon name="arrow-right" size={13} />
-                {t("Answer it, fold the answer into the Contract, then delete the bullet.")}
+                {t("Answer it, fold the answer into the Description, then delete the bullet.")}
               </div>
             </div>
           </div>

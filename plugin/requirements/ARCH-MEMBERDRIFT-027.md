@@ -14,6 +14,7 @@ milestone: v1.18
 
 # Reverse-direction member drift
 
+## Description
 > Drift detection has one eye open. `_reqlock.json` stores one hash per requirement —
 > the contract — so it fires when the *prose* moves ahead of the code. The reverse is
 > invisible: a member (the code or doc that realises a requirement) can change while the
@@ -21,8 +22,6 @@ milestone: v1.18
 > mechanical half of intent-sync: hash the dedicated members too, and warn when one moves
 > while its requirement does not. Without it, "confirmed" can silently mean "confirmed six
 > versions ago", and only a human re-reading both sides would ever notice.
-
-## WHAT — Contract (normative)
 - Member content hashes live in a separate, versioned sidecar `_memberlock.json`
   (`{"_schema": N, "members": {id: {relfile: sha}}}`), so `_reqlock.json` stays a
   byte-stable cross-repo contract that an older seeded engine reads unchanged.
@@ -46,13 +45,13 @@ milestone: v1.18
   `--strict` (it joins the same strict set as contract drift).
 - `--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Why `ac-count-high` is exempt: the eight criteria are the branch table of one decision —
   which (requirement, file) pair is reported as member drift — not eight behaviours that can
-  break apart. Six of them (AC-2 through AC-6, AC-8) are the suppression rules of that same
+  break apart. Six of them (CASE-2 through CASE-6, CASE-8) are the suppression rules of that same
   decision. A split would produce two requirements sharing one contract.
 - File-level granularity with a mono-requirement filter trades reach for silence: drift in
   a file shared by many requirements (e.g. a single engine file) is not attributed, by
@@ -60,36 +59,36 @@ milestone: v1.18
 - It asserts a member's bytes changed, not that the change is behaviourally meaningful —
   a reformat re-baselines like any edit. Re-running sync acknowledges and clears it.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a file that is a member of one requirement and a file shared by two
   When   member hashes are computed
   Then   only the dedicated file is recorded
-AC-2
+CASE-2
   Given  a sidecar that is absent, corrupt, or of a newer schema
   When   it is loaded
   Then   it reads as empty (fail open)
-AC-3
+CASE-3
   Given  a confirmed requirement whose dedicated member changed but whose contract did not
   When   member drift is computed
   Then   that (requirement, file) pair is reported
-AC-4
+CASE-4
   Given  a requirement whose contract also drifted since the lock
   When   member drift is computed
   Then   it is not reported (forward drift owns it)
-AC-5
+CASE-5
   Given  a non-confirmed requirement whose member changed
   When   member drift is computed
   Then   it is not reported
-AC-6
+CASE-6
   Given  a member file with no recorded baseline in the sidecar
   When   member drift is computed
   Then   it is not reported
-AC-7
+CASE-7
   Given  a baselined dedicated member that is then edited
   When   the gate runs
   Then   it warns (exit 0) and, under `--strict`, exits non-zero
-AC-8
+CASE-8
   Given  the same member content saved once with LF and once with CRLF line endings
   When   the member hash is computed for each
   Then   the two hashes are identical (line endings are normalized before hashing)

@@ -119,15 +119,16 @@ milestone: v1.4          # optional — shows this requirement in the Roadmap ta
 
 # User login
 
-> WHY: users need to reach their own data securely.
+## Description
+> Users need to reach their own data securely.
 
-## WHAT — Contract (normative)
-- It shall accept an email + password and return a session token.
-- It shall reject an unknown email with a generic error (no user enumeration).
+Every bullet below is binding.
+- `login` accepts an email + password and returns a session token.
+- `login` rejects an unknown email with a generic error (no user enumeration).
 
-## HOW — Acceptance (= tests)
-- A valid email/password returns a token.
-- A wrong password returns the generic error.
+## Cases (= tests)
+CASE-1  A valid email/password returns a token.
+CASE-2  A wrong password returns the generic error.
 ```
 
 The header carries the machine-readable bits (`id`, `status`, what it
@@ -246,7 +247,7 @@ any assistant — or with no assistant at all.
 | `findings` | Collect open "needs human review" notes into `_findings.md` |
 | `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) — AI feed for advisory quality review. Read-only. |
 | `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
-| `suggest-verifies` | Propose `# verifies: <ID>#AC-N` tags for tests already named after the criterion they check. Read-only by default; `--apply` writes them. |
+| `suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. Read-only by default; `--apply` writes them. |
 | `translate [--to ro\|en]` | **Manual and opt-in.** Cache a `claude -p` translation of the corpus into `requirements/_i18n/<locale>.json`, for a reader who does not speak the authors' language. Never called by `gate`/`sync`/`lint`/`map` or any hook, and the viewer always marks translated text as machine-translated. |
 | `gen-integration` | Maintainer command: regenerate `tool_definition.json` and the SKILL command table from the engine's `COMMANDS` registry. |
 

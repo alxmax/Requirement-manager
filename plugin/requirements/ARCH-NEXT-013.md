@@ -13,14 +13,13 @@ lint_exempt: [ac-count-high]
 
 # What-should-I-do-next report
 
+## Description
 > Faced with a whole project of requirements, it's hard to know what to work on first. This command
 > looks at every requirement, spots the gaps — ones with no code, no tests, or unanswered questions —
 > and prints them as a short, prioritised to-do list right in the terminal. It puts the most urgent
 > work at the top so you can just start. Without it, you'd have to open the visual map and eyeball the
 > risk yourself to figure out where to begin.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      risk signal     one open gap the engine spots on a requirement: no code, no test,
                      an unanswered question, an unreviewed draft.
@@ -76,10 +75,10 @@ Every line in this section is binding.
 - `next` is deterministic and writes no file.
 - `next` always exits zero. The report is advice, not a gate.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
 - The dedup of a draft's intent question lives inside the shared `_risk_signals` source, which is why `next` and the Risk tab report the same signals for the same requirement.
 - The untagged-files scan is skipped when no `code_root` is supplied — the usual case for unit-test callers.
@@ -87,54 +86,54 @@ Every line in this section is binding.
 - `next` is the prioritized worklist; `findings` remains the exhaustive raw list of every open verify-intent bullet (including drafts). The two answer different questions — this divergence is intentional and documented, not drift.
 - `risk:` ordering only discriminates extract-authored drafts (hand-authored requirements have no `risk:` field → score 0, ordered by id).
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  any corpus
   When   `next` runs
   Then   the output starts with a progress header carrying the confirmed/tested/draft counts
 
-AC-2
+CASE-2
   Given  a confirmed requirement with implementing code but no `tested-by`
   When   `next` runs
   Then   it is listed under "Needs tests" with `requirements/<ID>.md`
 
-AC-3
+CASE-3
   Given  a draft requirement with an open verify bullet
   When   `next` runs
   Then   it is listed under "Drafts to review" and NOT under "Needs intent review" (source dedup)
 
-AC-4
+CASE-4
   Given  a confirmed requirement with an open Verify-intent bullet
   When   `next` runs
   Then   it is listed under "Needs intent review"
 
-AC-5
+CASE-5
   Given  a bucket with more items than the top-N
   When   `next` runs
   Then   the default view truncates and prints a `... N more` line; `--all` lists every item
 
-AC-6
+CASE-6
   Given  a draft with `risk: 2` (REVIEW) and a `risk: 0` draft in one bucket
   When   `next` runs
   Then   the REVIEW draft is ordered first and tagged `[REVIEW]`
 
-AC-7
+CASE-7
   Given  a `must-have`, a `should-have`, and a no-`priority` requirement in one bucket
   When   `next` runs
   Then   they are ordered must-have, should-have, then no-priority
 
-AC-8
+CASE-8
   Given  an empty registry, or one with no open signals
   When   `next` runs
   Then   it prints the "no requirements yet" message or the all-clear line respectively,
          writes no files, and returns 0
 
-AC-9
+CASE-9
   Given  scannable files in the repo with no membership tag
   When   `next` runs with a code_root
   Then   they are listed under "Untagged files" with a `reqmap.py draft` suggestion
 
-AC-10
+CASE-10
   Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one
   When   `next` runs with a `reqs_dir`
   Then   the Orphans bucket carries a note naming that member and `--code`

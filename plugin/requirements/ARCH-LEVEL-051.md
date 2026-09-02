@@ -12,15 +12,14 @@ superseded_by:
 
 # Specification level
 
+## Description
 > `layer:` says where a requirement sits in the dependency graph — a `bus` is defined by
 > high fan-in, a `need` is covered by an edge instead of a code tag. It says nothing about
 > how abstract the requirement is. This adds that second axis, so a corpus can record
 > whether a requirement describes a whole system, one architectural piece, or one unit of
 > code. Without it the two questions are answered by one field that can only answer the
 > first.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a level        how abstract a requirement is: `system`, `architecture` or `code`.
      a layer        the existing graph-position field: `bus`, `feature`, `need`,
@@ -41,23 +40,23 @@ Every line in this section is binding.
 - The gate reports an error for a `level:` value outside the three named ones.
 - The gate says nothing about a requirement that carries no `level:` at all.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from stated intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a requirement carrying `level: architecture`
   When   the gate runs
   Then   it reports no error about the level
-AC-2
+CASE-2
   Given  a requirement carrying `level: detailed`
   When   the gate runs
   Then   it reports one error naming the invalid level, and the exit code is 1
-AC-3
+CASE-3
   Given  a corpus in which no requirement carries a `level:` field
   When   the gate runs
   Then   its output is unchanged from a run before the field existed
-AC-4
+CASE-4
   Given  a confirmed requirement carrying `level: architecture` and no `implements:` member
   When   the gate runs
   Then   it still reports the missing-member error, because the level grants no exemption

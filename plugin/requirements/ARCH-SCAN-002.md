@@ -12,14 +12,13 @@ milestone: v1.00
 
 # Member discovery
 
+## Description
 > Developers mark a piece of code as belonging to a capability by writing a short note in a
 > comment, like "implements: LOGIN-001." This reads through all the project's source files
 > and collects every one of those notes, so the tool always knows which code answers to
 > which requirement. Without it, the link between a written requirement and the real code
 > behind it would have to be tracked by hand, and would quickly fall out of date.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a tag             an inline comment of the form `role: <ID>` marking a piece of
                        code as belonging to a capability.
@@ -58,10 +57,10 @@ Every line in this section is binding.
 - `scan_all` returns the members, the per-criterion coverage and the verification levels
   from a single walk, and each result equals what the three separate scanners return.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The member list is discovered, never hand-maintained — that is the first thing to rot.
 - The realpath comparison for the SSOT directory runs only for a directory whose name
   matches it; resolving every directory was 62% of one consumer's gate time (4,900 upload
@@ -74,38 +73,38 @@ Every line in this section is binding.
   and `.toml`. A
   tag in any other type is reported by [[ARCH-UNSCANNEDTAG-045]] rather than lost.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a file containing `# implements: <ID>`
   When   the scan runs
   Then   a member `(implements, file, line)` is recorded under `<ID>`
 
-AC-2
+CASE-2
   Given  tags using each of the four roles and one unknown role string
   When   the scan runs
   Then   all four roles are recognized and the unknown role produces no member
 
-AC-3
+CASE-3
   Given  files under `.git`, `node_modules`, `__pycache__` or the SSOT `requirements/`
   When   the scan runs
   Then   those directories are not scanned
 
-AC-4
+CASE-4
   Given  a duplicate tag on a single line
   When   the scan runs
   Then   it is deduplicated and member paths are POSIX-relative
 
-AC-5
+CASE-5
   Given  an unreadable file in the tree
   When   the scan runs
   Then   the file is skipped without aborting the scan
 
-AC-6
+CASE-6
   Given  a tag `generated-from: <ID-A>, <ID-B>` listing several ids
   When   the scan runs
   Then   the file is recorded as a member of both <ID-A> and <ID-B>
 
-AC-7
+CASE-7
   Given  any code tree
   When   `scan_all` runs
   Then   its three results equal those of `scan_members`, `scan_ac_verifies` and

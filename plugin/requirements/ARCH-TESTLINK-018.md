@@ -12,14 +12,13 @@ milestone: v1.15
 
 # Test-link integrity check
 
+## Description
 > A requirement can claim it is tested by pointing at a test file — but if that file is gone
 > or has no real test in it, the link is a lie and the safety net exists only on paper. This
 > makes the gate check those links: it warns when a `tested-by` file is missing or holds no
 > test, so a broken link cannot pose as coverage. Without it, a project can look fully tested
 > while its tests have quietly disappeared.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      tested-by      a tag in code naming the file that tests a requirement.
      the gate       the `gate` command, run before every commit.
@@ -53,49 +52,49 @@ Every line in this section is binding.
 - Under `--strict` the warning becomes an error only for a confirmed requirement.
 - The check stays silent on a well-formed corpus, so a green gate run gains no noise.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The `run`/`main` entry-point form is accepted because stdlib-only suites commonly take that shape rather than a `def test...` per case, and a `tested-by` tag already declares the file a test.
 - This does not prove that each acceptance criterion is tested. It proves only that real tests exist at the link target. Per-criterion mapping needs a per-criterion tag and is deferred.
 - Detection is lexical, not a parse. A file that mentions a test-shaped call in a string could pass without real tests. The check targets the common failure: a renamed, deleted, or placeholder file, not a deliberate fake.
 - Only confirmed requirements are checked. A draft or baseline requirement is exempt, matching the rest of the gate's enforcement scope.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a confirmed requirement whose `tested-by` file is missing
   When   the gate runs
   Then   it adds a warning that names the requirement and the file
 
-AC-2
+CASE-2
   Given  a confirmed requirement whose `tested-by` file exists and contains a `def test...(`
   When   the gate runs
   Then   it adds no warning for that link
 
-AC-3
+CASE-3
   Given  a confirmed requirement whose `tested-by` file exists but contains no test function
   When   the gate runs
   Then   it adds a warning
 
-AC-4
+CASE-4
   Given  any of the above
   When   the gate runs
   Then   the error count is unchanged (the check is warn-only)
 
-AC-5
+CASE-5
   Given  a confirmed requirement whose `tested-by` is a `.py` file with no `def test...`,
          but which defines a `run()`/`main()` entry point under an
          `if __name__ == "__main__"` guard
   When   the gate runs
   Then   it adds no warning for that link
 
-AC-6
+CASE-6
   Given  a `tested-by` file that is a shell script holding a `test_x()` function
   When   the gate runs
   Then   it adds no warning for that link
 
-AC-7
+CASE-7
   Given  a draft requirement whose `tested-by` file holds no test function
   When   the gate runs with `--strict`
   Then   it adds a warning and the exit code stays 0

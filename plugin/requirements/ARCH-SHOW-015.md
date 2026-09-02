@@ -12,14 +12,13 @@ milestone: v1.14
 
 # Single-requirement dossier
 
+## Description
 > To understand one requirement today you open its file, then hunt through other files to
 > see what depends on it and which code carries it out. This gathers all of that onto one
 > screen: the title and intent, what it promises, what it depends on and what depends on it,
 > where it lives in the code, any open questions, and any risk signals. Without it, answering
 > "what does this do and where is it?" means cross-referencing several files by hand.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the intent    the first blockquote in a requirement's body — its WHY.
      a member      a place in the code tagged as belonging to this requirement.
@@ -37,7 +36,7 @@ Every line in this section is binding.
 - An absent optional field adds no empty segment to the header.
 - `show` prints the title and the intent. A WHY spanning several `>` lines is gathered whole,
   never truncated to its first line.
-- `show` lists the Contract bullets. When the requirement has no `## WHAT — Contract` section,
+- `show` lists the Contract bullets. When the requirement has no `## Description` section,
   `show` says so instead.
 
 **What it links**
@@ -47,7 +46,7 @@ Every line in this section is binding.
 - `show` prints the verification level beside a member whose `tested-by:` tag carries one.
 
 **What it surfaces**
-- `show` lists the open `## WHAT — Verify intent` questions, using the same filter as
+- `show` lists the open `## Verify intent` questions, using the same filter as
   `findings`, so the "None" placeholder is skipped.
 - `show` lists the risk signals with their advice, reusing the same `_risk_signals` source as
   `next` and the Risk tab, so the three never disagree.
@@ -56,41 +55,41 @@ Every line in this section is binding.
 - `show` returns zero for a known id and a non-zero code for an unknown one, so a typo is
   visible to a caller or to CI.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The view is read-only and never edits the requirement. To change a status, use `confirm`; to change the contract, edit the file.
 - The reverse-dependency list is computed by scanning every requirement's `depends_on` on each call. The corpus is small, so this is not cached.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a known id
   When   `show` runs
   Then   it prints the id, status, and layer on the header line and returns zero
 
-AC-2
+CASE-2
   Given  a requirement with a `priority` field
   When   `show` runs
   Then   the priority value appears on the header line; given none, the header carries no
          empty priority segment
 
-AC-3
+CASE-3
   Given  an unknown id
   When   `show` runs
   Then   it prints a "no requirement with id" message and returns a non-zero code
 
-AC-4
+CASE-4
   Given  a requirement that another requirement depends on
   When   `show` runs
   Then   the depender's id appears under "Depended on by"
 
-AC-5
+CASE-5
   Given  a requirement with a tagged member
   When   `show` runs
   Then   the member's role and `file:line` appear under members
 
-AC-6
+CASE-6
   Given  a requirement with an open verify-intent bullet
   When   `show` runs
   Then   that bullet appears and a "None" placeholder bullet does not
@@ -299,7 +298,7 @@ superseded_by:
 
 # Show lists the Contract bullets. When the requirement
 
-> `show` lists the Contract bullets. When the requirement has no `## WHAT — Contract`
+> `show` lists the Contract bullets. When the requirement has no `## Description`
 > section, `show` says so instead.
 
 Scenario: TODO — state the observable that proves this
@@ -414,7 +413,7 @@ superseded_by:
 
 # Show lists the open ## WHAT — Verify
 
-> `show` lists the open `## WHAT — Verify intent` questions, using the same filter as
+> `show` lists the open `## Verify intent` questions, using the same filter as
 > `findings`, so the "None" placeholder is skipped.
 
 Scenario: TODO — state the observable that proves this

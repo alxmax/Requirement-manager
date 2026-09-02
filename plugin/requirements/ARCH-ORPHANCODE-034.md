@@ -13,6 +13,7 @@ milestone: v2.10
 
 # Orphan-code warning
 
+## Description
 > A substantial new source file with no membership tag is invisible to every
 > drift signal: it implements behavior no requirement describes, so "the spec
 > covers the code" quietly stops being true as the repo grows. `health` counts
@@ -21,9 +22,7 @@ milestone: v2.10
 > program file that carries no tag, so the author links it, drafts a
 > requirement for it, or marks it out of scope — the same nudge-not-block
 > pattern as the untagged doc-bundle warning ([[ARCH-DOCBUNDLE-026]]).
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a membership tag   a comment naming a requirement this file belongs to.
      a `verifies:` tag  a comment linking one test to one labelled acceptance
@@ -60,11 +59,11 @@ Every line in this section is binding.
 - An author silences a file by tagging it or by adding it to `.reqmapignore`.
 - There is no separate exemption mechanism.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent; severity ceiling settled by the
   ARCH-COVERAGE-029 Senate audit.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The LOC threshold is a deterministic proxy for "substantial", not a semantic
   one: a 149-line untagged file stays silent. Tune `ORPHAN_CODE_MIN_LOC` in
   the engine, not per repo.
@@ -74,29 +73,29 @@ Every line in this section is binding.
 - Granularity is per file: a tagged file with three untagged capabilities
   inside it is silent. `dupes`/`draft` remain the tools for that.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  an untagged program file at or above the LOC threshold
   When   the scan runs
   Then   the file is reported as orphan code
-AC-2
+CASE-2
   Given  an untagged program file below the LOC threshold
   When   the scan runs
   Then   it is not reported
-AC-3
+CASE-3
   Given  a program file at or above the threshold that carries a membership
          tag or a `verifies:` tag
   When   the scan runs
   Then   it is not reported
-AC-4
+CASE-4
   Given  a large untagged non-program file (e.g. `.md`, `.html`)
   When   the scan runs
   Then   it is not reported
-AC-5
+CASE-5
   Given  a large untagged program file matched by a `.reqmapignore` pattern
   When   the scan runs
   Then   it is not reported
-AC-6
+CASE-6
   Given  a large untagged program file
   When   the gate runs (with and without `--strict`)
   Then   its output names the file with a warn line and the exit code is

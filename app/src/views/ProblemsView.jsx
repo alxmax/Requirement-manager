@@ -10,7 +10,7 @@ export function computeProblems() {
   const SEV = {
     unimplemented:      { sev:"ERROR",  msg:"No implementing member — orphan. The gate blocks the build.", fix:"Add an `implements:` tag, or author the requirement." },
     untested:           { sev:"WARN",   msg:"Confirmed, but no `tested-by:` member is linked.", fix:"Add a test tag, or set `test_exempt:` to silence." },
-    "unverified-intent":{ sev:"WARN",   msg:"Has open `## WHAT — Verify intent` question(s).", fix:"Run `reqmap.py findings`, resolve each one, then fold the answer into the Contract or delete the bullet." },
+    "unverified-intent":{ sev:"WARN",   msg:"Has open `## Verify intent` question(s).", fix:"Run `reqmap.py findings`, resolve each one, then fold the answer into the Description or delete the bullet." },
     unreviewed:         { sev:"REVIEW", msg:"Drafted from code by extract — intent not yet validated.", fix:"Review, then `req promote <ID>`." },
   };
   const out = [];
@@ -26,7 +26,7 @@ export function computeProblems() {
     if (cov === "partial") {
       out.push({ id:r.id, title:r.title, signal:"partial", sev:"WARN",
         msg:`Partial coverage — ${r.covered}/${r.clauses} criteria verified. ${r.gap||""}`.trim(),
-        fix:"Tag a test `# verifies: <id>#AC-N` for the uncovered criterion, or write one.",
+        fix:"Tag a test `# verifies: <id>#CASE-N` for the uncovered criterion, or write one.",
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     } else if (cov === "untested" && r.status !== "draft" && !flagged) {
       out.push({ id:r.id, title:r.title, signal:"untested", sev:"WARN",

@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v2.33.0` — 2026-09-03
+
+**`## Description` and `## Cases` replace `WHY` + `## WHAT — Contract` and `## HOW — Acceptance`.** Every old spelling still parses, forever.
+
+- **`## Description` merges the intent quote and the Contract section.** A reader met the same capability twice — once as rationale under a `> WHY:` quote, once as obligation under `## WHAT — Contract (normative)` — beneath two headings that both said WHAT. The quote now opens `## Description` and the binding clauses follow it. `## Verify intent` and `## Notes` simply dropped a `WHAT —` prefix that no longer named a section. `ARCH-DESCRIPTION-057`.
+- **The intent quote sits inside the normative section but outside the drift hash.** `binding_hash` now skips `>` lines within a normative span, so improving an explanation never reports DRIFT on a confirmed contract, and `_contract_clauses` never treated a blockquote as a clause, so the linter never sees rationale either. The atomic form draws the same line by keeping `rationale:` in the frontmatter. **No requirement carried a blockquote inside a normative section when this was added, so no existing hash changed** — the loosening is free.
+- **`## Cases` and `CASE-N` replace `## HOW — Acceptance (= tests)` and `AC-N`.** A criterion is a test case; the old name described a sign-off step rather than the cases a reader can run. 117 `# verifies:` tags in this repo were re-pointed.
+- **Both spellings are honoured, and that is not optional.** `AC-N` is an **identifier a `# verifies: <ID>#AC-N` tag points at**, so dropping it would break every consumer tag already written. `CONTRACT_LABELS`/`ACCEPTANCE_LABELS` are the SSOT (current name first) and `_has_any`/`_from_any` are the only way a call site asks for either section — 34 lookups now route through them, instead of each hard-coding a heading. Most `test_reqmap.py` fixtures are deliberately left in the legacy form: that is the back-compat suite, and rewriting it would have deleted the only coverage of the older shape.
+- **The legacy `desc` field no longer swallows the new section.** `_build_map_data` emitted `desc: _section(body, "description")` for the old Input/Description/Output triad; with `## Description` now the contract, it would have re-emitted every clause into a second viewer field. It is gated on the triad actually being present.
+- **Two stale things the migration surfaced.** `draft`'s scaffold still told authors to keep sentences "under 25 words" — a limit retired with `long-sentence` in `v2.32.0`, so it taught a rule the linter no longer has; it now names the live per-clause limits (3 sentences, 150 words). And `ARCH-MODULEFILE-056` shipped `confirmed` in `v2.32.0` with no test behind it, caught by this repo's own test-link gate.
+- **Viewer:** the Spec and Map panels label the sections `Description` and `Cases` (Romanian `Descriere` / `Cazuri`); Problems' per-criterion fix names `#CASE-N`. Vendored viewer rebuilt; the baked `data.js` fixture re-synced.
+- `MAP_ENGINE_VERSION` → `2026-09-03.1`. 675 tests.
+
 ## plugin `v2.32.0` — 2026-09-03
 
 **The V-model's left arm, adopted.** 52 requirement files become 689 requirements on three specification levels, held in 68 files. Every engine change is opt-in: a corpus that sets no `level:` behaves exactly as it did in `v2.31.0`.

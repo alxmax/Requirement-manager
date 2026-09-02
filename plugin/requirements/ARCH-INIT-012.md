@@ -12,14 +12,13 @@ milestone: v1.10
 
 # First-use bootstrap
 
+## Description
 > Setting up requirement tracking on a fresh project means doing five fiddly steps in the right order.
 > This is the single "get started" command that does all of them for you: it makes the folder, reads
 > your existing code and drafts requirements from it, records a baseline, builds the navigable map, and
 > tells you the one next thing to do. Without it, a newcomer has to learn and chain those steps by hand,
 > and most give up before the project is in a usable state.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      .reqmapignore  the list of files the scan skips.
      the lock       requirements/_reqlock.json — the saved fingerprint of every contract.
@@ -59,10 +58,10 @@ Every line in this section is binding.
 - A second run never deletes a requirement someone wrote, and never edits an existing
   `.reqmapignore`.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The starter `.reqmapignore` assumes the engine sits at `scripts/reqmap.py` — the documented
   place to vendor it. The self-hosting exception looks at that same path.
 - Self-hosting can only be detected if requirements already exist when `.reqmapignore` is first
@@ -74,40 +73,40 @@ Every line in this section is binding.
 - `init` performs no analysis of its own. It only calls capabilities that already exist
   (draft, gate, map) in a fixed order.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a repo with no `requirements/`
   When   `init` runs
   Then   it creates the directory and a `.reqmapignore` containing `scripts/reqmap.py`
 
-AC-2
+CASE-2
   Given  a self-hosting repo (an existing requirement whose id is tagged inside `scripts/reqmap.py`)
   When   `init` runs
   Then   the written `.reqmapignore` does **not** ignore `scripts/reqmap.py`, so the engine
          stays scanned and its members are not orphaned
 
-AC-3
+CASE-3
   Given  a repo that already has a `.reqmapignore`
   When   `init` runs
   Then   that file is left unchanged
 
-AC-4
+CASE-4
   Given  a completed `init`
   When   the requirements directory is inspected
   Then   `requirements/_map.html`, `requirements/_map.md` and the drift lock exist
 
-AC-5
+CASE-5
   Given  existing untagged code
   When   `init` runs
   Then   it drafts at least one requirement, reports the tracked count, and its summary
          points at `reqmap.py next`
 
-AC-6
+CASE-6
   Given  a repo with no extractable code
   When   `init` runs
   Then   it prints the distinct "no requirements were extracted" message (not a tracked-count summary)
 
-AC-7
+CASE-7
   Given  a repo with no `.reqmapignore` and a tagged file copied into `.worktrees/` and
          into `.claude/worktrees/` (what an isolated subagent leaves behind)
   When   `init` runs and the repo is then scanned

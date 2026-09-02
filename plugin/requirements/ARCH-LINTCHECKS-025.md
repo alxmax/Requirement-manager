@@ -13,14 +13,13 @@ milestone: v1.14
 
 # Readability & scope checks
 
+## Description
 > The linter's rulebook: the individual checks that catch hard-to-read or overloaded
 > requirement prose — sentences that run long, lines that stack conditions, bloated or
 > skimpy acceptance lists, contracts that bundle several capabilities, vague quality
 > words, and code spread across too many files. The framework that runs them, scopes
 > them and decides exit codes is [[ARCH-LINT-014]]; this is what each check flags.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a normative line  any line inside the Contract or Acceptance section. The section
                        it sits in is what makes it binding.
@@ -76,10 +75,10 @@ Every line in this section is binding.
   `vague-term`.
 - `redundant-modal` emits one finding per distinct term.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — split out of [[ARCH-LINT-014]] with intent carried over unchanged.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `statement-too-long` counts sentences and nothing else; words per clause belong to
   `statement-size`, so neither check reports the same clause for the same reason. It used
   to count words as well, which flagged a correct two-sentence clause.
@@ -105,58 +104,58 @@ Every line in this section is binding.
   would leave checks tested only implicitly, which is the outcome the count exists to
   prevent. Same reasoning as [[ARCH-CHECK-006]]'s severity table.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a confirmed requirement whose Contract bullet uses the word "appropriate"
   When   `lint` runs
   Then   it reports a `vague-term` warning naming that term
 
-AC-2
+CASE-2
   Given  a normative line joining four clauses with conjunctions, carrying no modal verb
   When   `lint` runs
   Then   it reports a `stacked-conditions` warning
 
-AC-3
+CASE-3
   Given  a Contract bullet spanning four sentences
   When   `lint` runs
   Then   it reports `statement-too-long`; the same bullet cut to three sentences reports
          none, and a single 40-word sentence reports nothing, however long it runs
 
-AC-4
+CASE-4
   Given  an Acceptance section with one criterion
   When   `lint` runs
   Then   it reports `ac-count-low`; with eight criteria, `ac-count-high`; with four, neither
 
-AC-5
+CASE-5
   Given  a requirement over both ceilings (more than ten contract scope units and more
          than seven acceptance criteria)
   When   `lint` runs
   Then   it reports `over-scoped`; over only one ceiling, none
 
-AC-6
+CASE-6
   Given  a Contract holding thirty clauses under three bold group labels, plus eight
          acceptance criteria
   When   `lint` runs
   Then   it reports no `over-scoped`, because three groups is under the ceiling; the same
          thirty clauses ungrouped do report it
 
-AC-7
+CASE-7
   Given  a requirement whose `implements` members span three or more distinct files
   When   `lint` runs with member data
   Then   it reports `file-spread`; a single file or no member data produce none
 
-AC-8
+CASE-8
   Given  a Contract bullet containing "appropriate" and "user-friendly"
   When   `lint` runs
   Then   it reports two `vague-term` warnings; a backticked span and a precise bullet report none
 
-AC-9
+CASE-9
   Given  a Contract bullet reading "It creates the folder."
   When   `lint` runs
   Then   it reports an `anonymous-subject` warning; "`init` creates the folder." reports
          none, and the same bare "It" in an Acceptance criterion reports none
 
-AC-10
+CASE-10
   Given  a Contract bullet reading "The system shall log the event and must retry once."
   When   `lint` runs
   Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked

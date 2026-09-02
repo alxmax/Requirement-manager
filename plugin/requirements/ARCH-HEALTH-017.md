@@ -12,14 +12,13 @@ milestone: v1.14
 
 # Corpus health snapshot
 
+## Description
 > A project can have dozens of requirements slowly rotting — some never coded, some
 > untested, some out of sync with the code — and nobody notices until it is a mess. This
 > boils the whole registry down to a single health score plus a few counts, so a CI badge
 > or a reviewer sees at a glance whether things are in good shape. Without it, corpus decay
 > stays invisible until it is expensive to fix.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      an axis     one pass/fail question asked of a requirement.
      green       a requirement that passes every axis at once.
@@ -52,47 +51,47 @@ Every line in this section is binding.
 **Exit code**
 - `health` always returns zero. The snapshot is a report, not a gate.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The score is deliberately strict: one open question or one drifted contract drops a requirement out of the green count. This makes the number move when real work remains.
 - The "tested" line counts actual `tested-by` members, while the green test counts a `test_exempt` reason as covered. The two can differ by the number of exempted requirements.
 - Drift reuses the lock that `sync` maintains. A stale or missing lock yields zero drift, the same fail-open behavior the gate uses.
 - The `implemented` and `tested` counts stay code-member counts, so a corpus with a satisfied need shows `implemented < total` while still scoring 100.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted
   When   `health` runs
   Then   the score is 100
 
-AC-2
+CASE-2
   Given  an all-draft corpus
   When   `health` runs
   Then   the score is zero
 
-AC-3
+CASE-3
   Given  `--json`
   When   `health` runs
   Then   the output parses as JSON and carries the `score` and `total` keys
 
-AC-4
+CASE-4
   Given  a confirmed requirement with no `implements` member
   When   `health` runs
   Then   it is counted under orphans and not under green
 
-AC-5
+CASE-5
   Given  an empty corpus
   When   `health` runs
   Then   the score is zero and the exit code is zero
 
-AC-6
+CASE-6
   Given  a confirmed `need` satisfied by at least one requirement in an otherwise green corpus
   When   `health` runs
   Then   the score is 100 and the orphan count is zero
 
-AC-7
+CASE-7
   Given  a confirmed `need` that no requirement satisfies
   When   `health` runs
   Then   it is counted under orphans and not under green

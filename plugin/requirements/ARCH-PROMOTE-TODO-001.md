@@ -12,14 +12,13 @@ milestone: v1.14
 
 # Promote a TODO item into a requirement draft
 
+## Description
 > You plan features as checkbox items in `TODO.md`, grouped by milestone. When you decide to
 > build one, you have to turn that line into a real requirement file with a contract and
 > acceptance criteria. This command does the scaffolding step: it finds the TODO item, creates
 > a requirement seeded with its name, milestone and lane, and (optionally) checks the item off —
 > so the roadmap item and its requirement stay connected instead of being retyped by hand.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      an open item  a `TODO.md` line still checkboxed `[ ]`.
      a lane        the `lane:` label a TODO item carries, e.g. `ops`. It is a TODO
@@ -55,33 +54,33 @@ Every line in this section is binding.
 - With `--mark-done` it flips the matched item's checkbox `[ ]` → `[x]`.
 - That flip is best-effort: a write failure warns and does not fail the command.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Selection is by exact name within the unfinished items; rename a TODO to disambiguate rather
   than adding index syntax. Batch promotion and an undo command are intentionally out of scope.
 - This is orthogonal to [[ARCH-PROMOTE-011]] (`confirm`, which lifts a baseline requirement to
   confirmed): this one creates a *new draft* from a TODO line.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  an unfinished TODO item
   When   `new --from-todo "<name>" --id REQ-X-001` runs
   Then   `requirements/REQ-X-001.md` is created as a `draft` seeded with the item's title,
          milestone and layer, and `TODO.md` is left unchanged
 
-AC-2
+CASE-2
   Given  a TODO `lane: ops`
   When   the requirement is scaffolded
   Then   its `layer:` is `feature`
 
-AC-3
+CASE-3
   Given  `--mark-done`
   When   the command runs
   Then   the matched `TODO.md` line becomes `- [x] <name>` and no other line changes
 
-AC-4
+CASE-4
   Given  a missing `--id`, an already-taken id, a name with no open match, or an ambiguous name
   When   the command runs
   Then   it exits non-zero and writes no requirement file

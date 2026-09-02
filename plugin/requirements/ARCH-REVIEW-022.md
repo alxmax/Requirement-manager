@@ -13,14 +13,13 @@ lint_exempt: [file-spread]
 
 # AI requirement-quality review (deterministic plan + advisory pass)
 
+## Description
 > Deterministic lint catches the SHAPE of a requirement (long sentences, vague words, size).
 > It cannot judge MEANING — whether a contract clause is actually testable, whether the WHY
 > explains intent or just restates the title, whether the acceptance criteria really exercise
 > the contract. This emits a deterministic, machine-readable plan of each requirement's prose
 > so an AI can make that semantic judgement out of band — advisory only, never the gate, never
 > auto-applied. A human always decides; the engine never calls an LLM.
-
-## WHAT — Contract (normative)
 - The `review` command emits a DETERMINISTIC, read-only JSON plan to stdout and writes no
   file; it never invokes an LLM. `review` (no arg) covers the whole corpus; `review <ID>`
   covers one requirement.
@@ -47,10 +46,10 @@ lint_exempt: [file-spread]
   machine corpus plan with structural anchors, a coverage summary and category guidance for an
   out-of-band AI consumer — a different audience and shape, so they are not merged.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from a Senate design audit (runs/senate/2026-06-09_161036-ai-quality-checker-design.json).
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The `untestable-contract` / `acceptance-doesnt-cover-contract` categories are deliberately
   judged by the AI, not the engine: a deterministic clause↔acceptance mapping is ARCH-ACVERIFY-019's
   job (`# verifies: <id>#AC-N`), and a reliable semantic "cover" check has no deterministic form.
@@ -63,25 +62,25 @@ lint_exempt: [file-spread]
   advisory skill contract and its AI-agnostic variant: one capability whose deterministic half and
   advisory half deliberately live in different files, not a diffuse one.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  the corpus
   When   `review` runs with no argument (or as `review <ID>`)
   Then   it emits JSON for every requirement (or that one); neither form writes a file nor
          invokes an LLM
 
-AC-2
+CASE-2
   Given  the emitted plan
   When   it is inspected
   Then   it carries a `coverage_summary` with `total_requirements` and `requirements_in_plan`,
          and names the three categories with the suggested_rewrite-required finding contract
 
-AC-3
+CASE-3
   Given  the same corpus
   When   `review` runs twice
   Then   the two outputs are byte-identical (deterministic)
 
-AC-4
+CASE-4
   Given  a `requirements/_ai_review.md` present or absent
   When   `gate` runs
   Then   its exit code and printed output are byte-identical — the gate never reads the AI sidecar

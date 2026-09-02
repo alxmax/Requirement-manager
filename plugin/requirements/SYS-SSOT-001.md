@@ -13,24 +13,23 @@ lint_exempt: [ac-count-low]
 
 # Stakeholder need — specs and code stay in sync
 
+## Description
 > On most projects the "spec" lives in someone's head, a stale wiki, or a ticket nobody
 > reads, so over time the code says one thing and the docs say another. The people who own
 > this project need the opposite: a single written source of truth for each capability that
 > the build itself keeps honest. This is the underlying need the whole tool exists to serve —
 > every feature below is here because it fulfils part of it.
-
-## WHAT — Contract (normative)
 - The project keeps a single written source of truth for each capability, living next to the code.
 - Drift between a capability's description and its code is caught before it ships, not after.
 - A reader can navigate from any capability to the code that implements it and the tests that verify it.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
 
-## HOW — Acceptance (= tests)
+## Cases (= tests)
 AC-1a
   Given  a repo where a tag points to a non-existent requirement (dangling ref)
          or an enforced requirement (in-progress, implemented, or confirmed) has
@@ -44,12 +43,12 @@ AC-1b
   Then   the drift is surfaced (WARN: "DRIFT — contract changed since lock") and
          the gate exits 0 — drift is reported, not blocking, by design
 
-AC-2
+CASE-2
   Given  a confirmed capability
   When   the gate runs
   Then   it has linked, existing code and tests
 
-AC-3
+CASE-3
   Given  any capability
   When   a reader runs `show`
   Then   they see its code locations and what depends on it

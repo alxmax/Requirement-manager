@@ -12,12 +12,11 @@ superseded_by:
 
 # Mermaid diagrams (_map.md)
 
+## Description
 > The graph is data; this is the picture. Four Mermaid diagrams that render on GitHub with
 > no tooling, so someone reviewing a pull request can see the shape of the system without
 > cloning anything or running the engine.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a node       one requirement, as drawn in a diagram.
      an area      the group a requirement belongs to: its `area:` field, or the first
@@ -60,34 +59,34 @@ Every line in this section is binding.
 - A `draft`'s open verify-intent question is suppressed, subsumed by its `unreviewed`
   signal, so a draft is not double-flagged.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — split out of [[ARCH-MAP-007]] with intent carried over unchanged.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  the generated `_map.md`
   When   it is inspected
   Then   it contains exactly 5 Mermaid code blocks, each with a legend
 
-AC-2
+CASE-2
   Given  a corpus carrying system, architecture and code requirements
   When   the Specification Hierarchy is rendered
   Then   it draws the system and architecture nodes joined by their `satisfies:` edges,
          draws no code node, and shows each architecture's code count on its box
 
-AC-3
+CASE-3
   Given  the System Map diagram
   When   it is rendered
   Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges
          whose target is a bus node are omitted
 
-AC-4
+CASE-4
   Given  the Dependency Map diagram
   When   it is rendered
   Then   it is area-level: one node per area (with a count), an edge A→B when some capability
          in A depends on one in B; per-capability hub edges are not drawn
 
-AC-5
+CASE-5
   Given  the Risk diagram
   When   it is rendered
   Then   it shows only requirements with at least one risk signal, each with a scripted

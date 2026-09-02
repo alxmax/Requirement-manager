@@ -12,13 +12,12 @@ milestone: v1.14
 
 # Duplicate-capability detector
 
+## Description
 > When two requirements quietly describe the same capability, you do not notice until each
 > has grown its own divergent implementation — and now there is a mess to untangle. This
 > compares requirement pairs by their wording and flags the ones that overlap, so a reviewer
 > can merge or sharpen them early. Without it, duplication stays invisible until it is expensive.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a bag of words  the list of words taken from one requirement, used to compare it
                      with another.
@@ -63,46 +62,46 @@ Every line in this section is binding.
 - `dupes` always returns zero. The report is advisory: a human decides whether a
   flagged pair is a real duplicate.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The default threshold is a starting point, not a proven value. A reviewer tunes it with `--threshold` for the corpus at hand.
 - Detection is lexical, not semantic. Two contracts that mean the same thing in different words may score low. The command surfaces likely duplicates; it does not prove duplication.
 - Comparison is requirement-to-requirement only. Matching untagged code to an existing requirement is a separate, fuzzier problem left to `plan`.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  two requirements with near-identical Contract text
   When   `dupes` runs
   Then   the pair is reported with a high score
 
-AC-2
+CASE-2
   Given  two requirements about unrelated topics
   When   `dupes` runs at the default threshold
   Then   the pair is not reported
 
-AC-3
+CASE-3
   Given  a corpus with fewer than two requirements that have contract text
   When   `dupes` runs
   Then   it prints a "need at least two" message and returns zero
 
-AC-4
+CASE-4
   Given  a custom `--threshold` above a pair's score
   When   `dupes` runs
   Then   that pair is not reported
 
-AC-5
+CASE-5
   Given  any corpus
   When   `dupes` runs
   Then   it returns zero
 
-AC-6
+CASE-6
   Given  two fresh drafts whose Contract is the placeholder, and two authored requirements
   When   `dupes` runs
   Then   the drafts are skipped with a count line, and only the authored pair can be reported
 
-AC-7
+CASE-7
   Given  a requirement A whose `tested-by` file implements requirement B, with overlapping contracts
   When   `dupes` runs with the member map
   Then   the pair A–B is not reported and a "linked by tested-by" count line is printed; without the member map it is reported as before

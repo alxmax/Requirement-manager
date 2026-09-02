@@ -13,14 +13,13 @@ milestone: v1.17
 
 # Upstream traceability
 
+## Description
 > A requirement file tells you what a capability does and which code builds it, but not *why
 > it exists* — which stakeholder need it serves. This lets a requirement point upward with a
 > `satisfies:` field, so you can trace from a stakeholder need down to every requirement that
 > fulfils it, and back up from any requirement to the need behind it. Without it, requirements
 > float free of the needs that justify them, and a need can quietly go unaddressed.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a need       a `layer: need` requirement: something a stakeholder wants, fulfilled by
                   other requirements rather than by code.
@@ -57,31 +56,31 @@ Every line in this section is binding.
 - The map data carries `satisfies` and `satisfied_by` on each node, plus a list of upstream
   edges, so a front-end can draw the trace.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - A dangling `satisfies:` is a warning, not an error, so the field can hold an external reference (a ticket id) that the engine cannot resolve — at the cost of not catching a typo in an internal id.
 - Traceability is opt-in: a requirement with no `satisfies:` is never flagged, matching the tool's subtle-guidance philosophy.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a requirement with `satisfies: [GHOST-X-999]` and no such requirement
   When   the gate runs
   Then   it warns about the dangling upstream trace and does NOT raise an error
-AC-2
+CASE-2
   Given  a confirmed `need` that no requirement satisfies
   When   the gate runs
   Then   it warns that the need is unaddressed
-AC-3
+CASE-3
   Given  a confirmed `layer: need` requirement with no implements or tested-by tag
   When   the gate runs
   Then   it raises no implements/tested-by finding for that need
-AC-4
+CASE-4
   Given  a requirement that satisfies a need
   When   `show` runs on either the requirement or the need
   Then   the upstream/satisfied-by relationship is printed
-AC-5
+CASE-5
   Given  a confirmed `layer: aggregate` requirement with dependencies and no implements tag
   When   the gate runs
   Then   it raises no implements finding for that requirement

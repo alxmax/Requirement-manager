@@ -13,12 +13,11 @@ lint_exempt: [ac-count-high, over-scoped]
 
 # The gate
 
+## Description
 > Specs rot when the code moves on and nobody updates the file that describes it.
 > This is the guard that catches that: run before every commit, it fails the build when
 > code and requirements no longer match. The whole tool exists so this check can run.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the binding hash  the fingerprint of a requirement's normative sections; when it
                        stops matching the lock, the contract has changed.
@@ -48,9 +47,9 @@ Every line in this section is binding.
 - A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt
   from that test warning.
 - A `layer: need` requirement is exempt from it too.
-- A `confirmed` requirement missing a `## WHAT — Contract` section is a `WARN`, in both
+- A `confirmed` requirement missing a `## Description` section is a `WARN`, in both
   the `bus` and `feature` layers. It does not affect the exit code.
-- A `confirmed` requirement missing a `## HOW — Acceptance` section is a `WARN`, in both
+- A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both
   the `bus` and `feature` layers. It does not affect the exit code.
 - The requirement `milestone:` field is optional. When present it matches the version
   shape `v<digits>[.<digits>…]`, for example `v1.14`.
@@ -65,7 +64,7 @@ Every line in this section is binding.
   has no baseline to compare against.
 - That git-tracking check is fail-open: `gate` stays silent when git is unavailable or
   the tree is not a work tree.
-- `gate` names every requirement whose body lacks a `## WHAT — Verify intent` section in
+- `gate` names every requirement whose body lacks a `## Verify intent` section in
   one aggregated legacy-schema `WARN`.
 - `gate` counts those legacy-schema requirements in the summary.
 - The legacy-schema warning does not affect the exit code.
@@ -88,10 +87,10 @@ Every line in this section is binding.
 - `sync` and the deprecated `check` alias pass `--update-lock`.
 - The `gate` verb itself is report-only.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Why `ac-count-high` and `over-scoped` are exempt: this requirement is the gate's severity
   table, not a bundle of checks. Each individual check the gate runs already has its own
   requirement ([[ARCH-TESTLINK-018]], [[ARCH-ACVERIFY-019]], [[ARCH-MEMBERDRIFT-027]],
@@ -113,74 +112,74 @@ Every line in this section is binding.
   outside the plugin scan root and has no requirement of its own; its invariant (semver
   consistency across `plugin.json` + `marketplace.json`) is documented in `CLAUDE.md`.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a tag referencing a non-existent capability
   When   `gate` runs
   Then   it produces an `ERROR` and exit 1
 
-AC-2
+CASE-2
   Given  a `confirmed` requirement with no `implements` member
   When   `gate` runs
   Then   it produces an `ERROR`
 
-AC-3
+CASE-3
   Given  an invalid status or layer, or a `depends_on` pointing at a missing id
   When   `gate` runs
   Then   each produces an `ERROR`
 
-AC-4
+CASE-4
   Given  a `confirmed` requirement whose binding hash differs from the lock
   When   `gate` runs
   Then   it produces a `WARN` (not an error) naming the member `file:line` locations
 
-AC-5
+CASE-5
   Given  a present-but-corrupt lock file
   When   `gate` runs
   Then   it produces a `WARN` and does not change the exit code
 
-AC-6
+CASE-6
   Given  a requirement with a malformed `milestone:` (e.g. `next` or `1.14`)
   When   `gate` runs
   Then   it produces a `WARN`; a valid `v1.14`, an absent milestone, or a `deprecated`
          requirement produces none
 
-AC-7
-  Given  a `confirmed` requirement with no `## WHAT — Contract` section
+CASE-7
+  Given  a `confirmed` requirement with no `## Description` section
   When   `gate` runs
   Then   it produces a `WARN` and does not affect the exit code
 
-AC-8
-  Given  a `confirmed` requirement with no `## HOW — Acceptance` section
+CASE-8
+  Given  a `confirmed` requirement with no `## Cases` section
   When   `gate` runs
   Then   it produces a `WARN` and does not affect the exit code
 
-AC-9
+CASE-9
   Given  a `confirmed` requirement with both sections present
   When   `gate` runs
   Then   it produces no section-lint warning
 
-AC-10
+CASE-10
   Given  a `confirmed` requirement with a `test_exempt: <reason>` and no `tested-by` member
   When   `gate` runs
   Then   it produces no test warning
 
-AC-11
-  Given  a requirement without a `## WHAT — Verify intent` section
+CASE-11
+  Given  a requirement without a `## Verify intent` section
   When   `gate` runs
   Then   it is counted as legacy-schema in the summary
 
-AC-12
+CASE-12
   Given  an advancing run (`sync`, or the deprecated `check --update-lock`)
   When   it runs
   Then   the current hashes are written to `requirements/_reqlock.json`
 
-AC-13
+CASE-13
   Given  a `_reqlock.json` (or `_memberlock.json`) present on disk but not git-tracked, inside a git work tree
   When   `gate` runs
   Then   it produces a `WARN` naming the file; once the file is tracked, or when run outside a git work tree, it produces none
 
-AC-14
+CASE-14
   Given  two requirements whose `depends_on` fields point at each other
   When   the gate runs
   Then   it warns once, naming the chain, and the exit code stays 0
@@ -560,7 +559,7 @@ superseded_by:
 
 # A confirmed requirement missing a ## WHAT —
 
-> A `confirmed` requirement missing a `## WHAT — Contract` section is a `WARN`, in both
+> A `confirmed` requirement missing a `## Description` section is a `WARN`, in both
 > the `bus` and `feature` layers. It does not affect the exit code.
 
 Scenario: TODO — state the observable that proves this
@@ -589,7 +588,7 @@ superseded_by:
 
 # A confirmed requirement missing a ## HOW —
 
-> A `confirmed` requirement missing a `## HOW — Acceptance` section is a `WARN`, in both
+> A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both
 > the `bus` and `feature` layers. It does not affect the exit code.
 
 Scenario: TODO — state the observable that proves this
@@ -820,7 +819,7 @@ superseded_by:
 
 # Gate names every requirement whose body lacks a
 
-> `gate` names every requirement whose body lacks a `## WHAT — Verify intent` section in
+> `gate` names every requirement whose body lacks a `## Verify intent` section in
 > one aggregated legacy-schema `WARN`.
 
 Scenario: TODO — state the observable that proves this

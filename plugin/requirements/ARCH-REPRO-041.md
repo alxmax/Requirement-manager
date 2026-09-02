@@ -14,13 +14,12 @@ test_exempt: pipeline wiring (a CI job that rebuilds and compares) — the behav
 
 # Committed build artifacts stay re-derivable
 
+## Description
 > Two files here are build output that is committed anyway, because the whole promise is
 > that a consumer gets them without installing a toolchain. Nothing checked either one
 > against the source it came from, so an edit to the viewer app or to a diagram generator
 > could ship an artifact that no longer matched its own code, with the repo still green.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 
 **Glossary** — *committed build artifact*: a file tracked in git that a build step produces
 from source also tracked in git.
@@ -38,10 +37,10 @@ from source also tracked in git.
 - The `release` job runs only after `artifacts` passes, so a stale artifact never reaches a
   published tag.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — both builds were measured as byte-reproducible before this check was written.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `docs/architecture.html` stays out of scope: a human authored it, and `map --check`
   already covers the regions the engine owns inside it.
 - Byte-for-byte comparison requires the artifacts' line endings to be a property of the
@@ -55,18 +54,18 @@ from source also tracked in git.
   because the generator writes a sibling `.excalidraw` and `.gitignore` blocks
   `docs/*.excalidraw`.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a commit that changes `app/` without re-committing the built viewer
   When   the `artifacts` job runs
   Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command
 
-AC-2
+CASE-2
   Given  a commit that changes the architecture generator without re-committing its output
   When   the `artifacts` job runs
   Then   it fails and names `docs/full_architecture.html` and the rebuild command
 
-AC-3
+CASE-3
   Given  a tree whose committed artifacts match their sources
   When   the `artifacts` job runs
   Then   it passes and `release` becomes eligible to run

@@ -13,13 +13,12 @@ superseded_by:       # <ID>, if replaced
 
 # Declared Python support floor
 
+## Description
 > The engine's only promise to a new repo is "copy one file, run it with Python" — but
 > which Python was never stated. It happened to work on 3.7 by accident, nothing tested
 > that, and a user on an older interpreter met a stdlib AttributeError from deep inside
 > a command instead of a sentence telling them what to do.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 
 **What it declares**
 - `MIN_PYTHON` names the oldest interpreter version the engine supports.
@@ -34,10 +33,10 @@ Every line in this section is binding.
 - `_python_floor_error` reports the refusal message for a caller-supplied version, so a
   test pins the floor without spawning an old interpreter.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — the floor is a stated decision, not an inference from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The check cannot catch an interpreter below 3.6: the module uses f-strings, so such an
   interpreter fails at compile time and never reaches the guard. The covered range is
   3.6 through the version below `MIN_PYTHON`.
@@ -46,18 +45,18 @@ Every line in this section is binding.
 - Raising the floor is a breaking change for a consumer repo and moves with the matrix,
   never ahead of it.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  an interpreter older than `MIN_PYTHON`
   When   any `reqmap.py` command runs
   Then   it prints the required version, the running version and the fix, and exits 2
 
-AC-2
+CASE-2
   Given  an interpreter at or above `MIN_PYTHON`
   When   any `reqmap.py` command runs
   Then   the floor check reports nothing and the command runs normally
 
-AC-3
+CASE-3
   Given  the CI test matrix
   When   the `tests` job runs
   Then   its oldest Python entry equals `MIN_PYTHON`, on both Linux and Windows

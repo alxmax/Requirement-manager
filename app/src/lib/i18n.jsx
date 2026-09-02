@@ -87,8 +87,8 @@ const RO = {
     "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
   "{n} open question(s) across {m} requirement(s)":
     "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
-  "Answer it, fold the answer into the Contract, then delete the bullet.":
-    "Răspunde, integrează răspunsul în Contract, apoi șterge punctul.",
+  "Answer it, fold the answer into the Description, then delete the bullet.":
+    "Răspunde, integrează răspunsul în Descriere, apoi șterge punctul.",
   "hide {n} draft review rows": "ascunde {n} rânduri de revizuire draft",
   "{n} draft review rows hidden — show": "{n} rânduri de revizuire draft ascunse — arată",
   // map tabs
@@ -98,8 +98,8 @@ const RO = {
   "Risk": "Risc",
   // detail panel + spec sections
   "Why — Intent": "De ce — Intenție",
-  "What — Contract": "Ce — Contract",
-  "How — Acceptance": "Cum — Acceptanță",
+  "Description": "Descriere",
+  "Cases": "Cazuri",
   "Where — Members in code": "Unde — Membri în cod",
   "Depends on": "Depinde de",
   "Used by": "Folosit de",

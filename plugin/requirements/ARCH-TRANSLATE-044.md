@@ -13,6 +13,7 @@ lint_exempt: [ac-count-high, file-spread]
 
 # Opt-in requirement-content translation
 
+## Description
 > `i18n.jsx` (ARCH-VIEWER-007) draws a hard line: the locale toggle translates UI
 > chrome only, never requirement content — a requirement's title, intent, contract
 > and acceptance criteria stay in the author's language, because they are the
@@ -23,9 +24,7 @@ lint_exempt: [ac-count-high, file-spread]
 > requirement, gated by a structural check, always rendered with a visible
 > "machine-translated, unreviewed" marker — never presented as the authored source,
 > and never reachable from anything that gates a commit or a CI run.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 - `translate` is reached ONLY by typing `reqmap.py translate` — it is never called
   by `gate`, `sync`, `lint`, `map`, `export`, or the pre-commit hook. It is the
   only subcommand that invokes an external `claude` CLI subprocess.
@@ -69,10 +68,10 @@ Every line in this section is binding.
   it. Absent a cache entry, content renders in the author's own language exactly
   as before this capability existed.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — both open questions answered 2026-08-25; the decisions are recorded in Notes.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - One `claude -p` call per requirement, not four — the prompt asks for all four
   fields back in one marker-delimited response (`_TRANSLATE_MARKERS`), which is
   what keeps a cold-cache run at N calls instead of 4N.
@@ -102,58 +101,58 @@ Every line in this section is binding.
   caching, and two map-read paths). Merging them to reach the ceiling would test
   several behaviors implicitly per AC — same reasoning as ARCH-LINTCHECKS-025.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  Romanian text with diacritics, English text, and a code-only string
   When   `detect_lang` runs on each
   Then   it returns `ro`, `en`, and `None` respectively
 
-AC-2
+CASE-2
   Given  a corpus of 2 Romanian requirements and 1 English requirement
   When   `corpus_lang` runs
   Then   it returns `ro` (majority); a `lang: en` frontmatter override on a
          Romanian-text file flips that file's effective language to `en`
 
-AC-3
+CASE-3
   Given  two requirement bodies identical except for the `# ` title line
   When   `translation_hash` runs on each
   Then   the hashes differ, while `binding_hash` (Contract+Acceptance only) on
          the same two bodies stays equal — proof the wider span is necessary
 
-AC-4
+CASE-4
   Given  a translated string that drops a backticked identifier or a number
          present in the source
   When   `_translation_preserves_structure` compares them
   Then   it returns false; an unrelated wording change with the same
          backticks/numbers/markers returns true
 
-AC-5
+CASE-5
   Given  `subprocess.run` raises (the `claude` CLI is absent)
   When   `cmd_translate` runs
   Then   it prints a WARN naming the requirement, writes no cache file, and
          exits 0
 
-AC-6
+CASE-6
   Given  a mocked `claude -p` call returning a well-formed four-marker response
   When   `cmd_translate` runs once, then runs again with the source unchanged
   Then   the first run writes a cache entry and calls the CLI once; the second
          run is a cache hit and does not call the CLI at all
 
-AC-7
+CASE-7
   Given  a `requirements/_i18n/en.json` cache file with an entry whose hash
          matches a requirement's current content
   When   `_build_map_data` + `_attach_translations` run with `subprocess.run`
          mocked to raise on any call
   Then   the matching node carries `node.i18n.en` and no `claude` call was made
 
-AC-8
+CASE-8
   Given  a cache entry whose stored hash does NOT match the requirement's
          current content (source edited since the last `translate` run)
   When   `_load_translations` runs
   Then   that entry is absent from the result — never served stale
 
-AC-9
-  Given  a translation that renames a criterion label (`AC-1` to `CA-1`) or
+CASE-9
+  Given  a translation that renames a criterion label (`CASE-1` to `CA-1`) or
          translates a Gherkin keyword (`Given` to `Dat fiind`)
   When   `_translation_preserves_structure` compares it with the source
   Then   it returns false; the same text with labels and keywords intact and

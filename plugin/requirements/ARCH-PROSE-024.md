@@ -12,13 +12,12 @@ milestone: v1.06
 
 # Prose capability classification & drafting
 
+## Description
 > Specs and prompts written as text documents can be capabilities too, not just code.
 > When `draft` runs, this part decides which text files deserve a draft requirement,
 > which are only kept in sync, and which are ignored as boilerplate — then writes the
 > drafts. Without it, prompt and spec files would stay invisible to the registry, or
 > every README would pollute it with junk drafts.
-
-## WHAT — Contract (normative)
 - `draft` also produces `draft`-status requirements from untagged **prose** files
   (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source code.
 - Each prose file is classified into one of three buckets before drafting:
@@ -41,30 +40,30 @@ milestone: v1.06
 - The source prose is never the contract: the drift hash anchors on the authored
   Contract + Acceptance, so the prose may later drift freely from the authored requirement.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — split out of [[ARCH-EXTRACT-008]] with intent carried over unchanged.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The bucket lists are fixed in the engine, not configurable; `.reqmapignore` remains the
   per-repo escape hatch for anything the buckets misjudge.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a `prompts/foo.md` with no member tag
   When   `draft` runs
   Then   a `draft`-status requirement is written for it
 
-AC-2
+CASE-2
   Given  `README.md`, a file under `docs/`, a `*.html` file, `CLAUDE.md`, or `CHANGELOG.md`
   When   `draft` runs
   Then   no draft is written for it
 
-AC-3
+CASE-3
   Given  a capability-bucket prose file already tagged `# implements: <ID>`
   When   `draft` runs
   Then   it is skipped (no duplicate draft)
 
-AC-4
+CASE-4
   Given  a file tagged `generated-from: <ID>` inside an HTML comment (`<!-- generated-from: <ID> -->`)
   When   the scanner runs
   Then   that file is a member of `<ID>`

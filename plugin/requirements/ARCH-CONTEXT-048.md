@@ -12,14 +12,13 @@ milestone: v2.30
 
 # Consolidated Context section
 
+## Description
 > A requirement author choosing between `## WHAT — Notes`, `## Example — in practice` and
 > `## WHERE — Current implementation` was picking between three near-synonymous informative
 > buckets, not making a decision about the contract. This narrows that choice to one
 > section — `## Context` — while keeping every existing requirement file that still uses the
 > three separate headings working exactly as it does today.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the legacy form   a requirement body using the separate `## WHAT — Notes`,
                        `## Example — in practice` and `## WHERE — Current implementation`
@@ -49,34 +48,34 @@ Every line in this section is binding.
 - `## Context` and its sub-groups are commentary: not hashed by `binding_hash`, not read by
   `_has_section`, and not linted. Neither form can trip drift or `missing-section`.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a requirement body with `## Context (non-binding)` holding `**Notes**` and
          `**Current implementation**` sub-groups
   When   `_context_group(body, "notes")` and `_context_group(body, "current implementation")` run
   Then   each returns exactly the bullets under its own sub-group
 
-AC-2
+CASE-2
   Given  a requirement body with no `## Context` section at all (a legacy-form or
          Contract-only body)
   When   `_context_group` runs for any label
   Then   it returns an empty list
 
-AC-3
+CASE-3
   Given  a `## Context` section that has an `**Example**` sub-group but no `**Notes**` sub-group
   When   `_context_group(body, "notes")` runs
   Then   it returns an empty list rather than the Example bullets
 
-AC-4
+CASE-4
   Given  a confirmed requirement using only the Context form
   When   `map` regenerates `_map.json`
   Then   the node's `notes` and `current_impl` fields are populated from the matching
          Context sub-groups
 
-AC-5
+CASE-5
   Given  a confirmed requirement using the legacy `## WHAT — Notes` heading
   When   `map` regenerates `_map.json`
   Then   the node's `notes` field is populated from that legacy heading, unchanged from

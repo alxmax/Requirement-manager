@@ -12,15 +12,14 @@ milestone: v1.06
 
 # Legacy extraction
 
+## Description
 > When an existing project has lots of code but no requirements written down, this gives you
 > a running start: it reads each untagged file and writes a rough draft requirement for it,
 > clearly marked as a draft so no one mistakes a guess for a settled decision. Without it,
 > someone would have to sit down and describe every existing capability from scratch before
 > the tool was useful on an older project. Spec and prompt documents get the same treatment
 > from the companion capability [[ARCH-PROSE-024]].
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a member tag  a comment naming the requirement a piece of code belongs to.
      a draft       a `requirements/DRAFT-*.md` file: a guess at what a file does,
@@ -40,7 +39,7 @@ Every line in this section is binding.
 - `draft` proposes one `requirements/DRAFT-*.md` per remaining file.
 - Every proposal carries `status: draft` and a TODO body. It captures observed
   behavior, and never canonizes intent or correctness.
-- A proposal's Contract section opens with "Every line in this section is binding.",
+- A proposal's Contract section opens with "Every bullet below is binding.",
   matching what `new` scaffolds, so promoting a draft needs no reshaping.
 - `draft` creates the requirements directory if it is absent.
 - Draft ids are path-aware, so two files sharing a basename do not collide.
@@ -60,10 +59,10 @@ Every line in this section is binding.
 - That surface is an authoring hint under WHERE, never a Contract line. The Contract
   stays a TODO until a human writes it.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `draft` cannot recover intent; prefer `plan` (read-only plan) before authoring.
   The draft body uses the same Contract/Acceptance section names as a real requirement so a
   promoted draft needs no reshaping.
@@ -73,33 +72,33 @@ Every line in this section is binding.
   gate's full scan set (which also enforces tags in `.go`/`.rs`/`.tsx` and more): drafting
   targets mainstream source, while the gate enforces tags wherever they appear.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  an untagged `.py`/`.js`/`.ts`/`.c`/`.cpp` file
   When   `draft` runs
   Then   it yields one `DRAFT-*` draft
 
-AC-2
+CASE-2
   Given  a file already carrying a member tag
   When   `draft` runs
   Then   the file is skipped
 
-AC-3
+CASE-3
   Given  a file matching a `.reqmapignore` pattern
   When   `draft` runs
   Then   the file is skipped (no draft proposed for it)
 
-AC-4
+CASE-4
   Given  a file containing `TODO`/`FIXME`
   When   `draft` runs
   Then   it scores higher risk and is flagged `REVIEW`
 
-AC-5
+CASE-5
   Given  an existing draft and same-basename files in different dirs
   When   `draft` re-runs
   Then   the draft is not overwritten and the basenames do not collide
 
-AC-6
+CASE-6
   Given  an untagged `.py` file with a module docstring and two top-level functions
   When   `draft` runs
   Then   its proposal's WHERE section names both signatures, and its Contract is still the TODO placeholder
@@ -309,7 +308,7 @@ superseded_by:
 
 # A proposal's Contract section opens with "Every line
 
-> A proposal's Contract section opens with "Every line in this section is binding.",
+> A proposal's Contract section opens with "Every bullet below is binding.",
 > matching what `new` scaffolds, so promoting a draft needs no reshaping.
 
 Scenario: TODO — state the observable that proves this

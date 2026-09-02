@@ -12,12 +12,11 @@ satisfies: [SYS-VISUAL-106]
 
 # Generate & maintain a project presentation page
 
+## Description
 > A project is easier to grasp from one presentation page than from a folder of
 > files. This capability lets the engine keep that page's links and key numbers
 > current — injecting engine-owned regions into a page the author still controls,
 > and scaffolding one when none exists — so the page never drifts from the registry.
-
-## WHAT — Contract (normative)
 - `site --attach <page.html>` injects the requested marker-delimited regions
   (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each
   region's paired markers and preserving all other (authored) content. A re-run with no
@@ -37,37 +36,37 @@ satisfies: [SYS-VISUAL-106]
   fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A page
   that was never generated, or that lacks a `stats` region, is not stale.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - v1 engine-owns `nav` + `stats`; `commands`/`layers` render as authored content in the
   scaffold and may be promoted to engine-owned regions later.
 - The interactive "scan docs/ and ask which target + regions" flow lives in the
   requirement-manager skill, not the engine (the engine is headless-safe).
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a page with `nav`/`stats` markers
   When   `site --attach` runs twice
   Then   the second run leaves the file byte-identical and authored prose intact
 
-AC-2
+CASE-2
   Given  a repo with no git remote
   When   `site --attach` injects `nav`
   Then   it exits 0 and emits no GitHub link
 
-AC-3
+CASE-3
   Given  an absent `--attach` target
   When   `site` runs
   Then   it scaffolds a full page with the regions + the placeholder-hero marker
 
-AC-4
+CASE-4
   Given  a generated site page
   When   its `stats` region is edited to differ from a fresh render
   Then   `map --check` exits non-zero and names the page (it exits 0 before the edit)
 
-AC-5
+CASE-5
   Given  `docs/` present and no `--no-site`
   When   `init` runs
   Then   `docs/architecture.html` exists with engine regions; `--no-site` skips it

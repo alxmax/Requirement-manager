@@ -14,13 +14,12 @@ milestone: v2.9
 
 # A closed output pipe ends a command quietly
 
+## Description
 > `reqmap.py dupes | head` is the natural way to look at a long report. On Windows there
 > is no SIGPIPE, so when `head` stops reading, the next `print` raises `OSError` and the
 > command dies with a traceback the reader had nothing to do with. The first C/C++
 > evidence run hit it on `curl` (2,055 pairs). A closed reader is not an error.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 
 **Glossary** — *closed pipe*: the process reading the command's output has stopped
 reading (`head`, `less`, a closed terminal).
@@ -34,27 +33,27 @@ reading (`head`, `less`, a closed terminal).
 - The rule lives in the command-line entry point (`_run_cli`), so every subcommand gets
   it and none re-implements it.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — the rule comes from an observed failure on a real corpus, not from inference.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Exit 0 on purpose: `dupes | head -12` ended early because the reader had seen enough,
   and a non-zero code there would fail a shell pipeline that did exactly what was asked.
 - After the pipe closes, standard output is pointed at the null device so the interpreter
   does not print a second complaint while shutting down.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a command whose `print` raises `BrokenPipeError`, or `OSError` with `EPIPE`/`EINVAL`
   When   `_run_cli` runs it
   Then   it returns 0 and raises nothing
 
-AC-2
+CASE-2
   Given  a command whose `print` raises any other `OSError`
   When   `_run_cli` runs it
   Then   that error propagates unchanged
 
-AC-3
+CASE-3
   Given  a command that completes normally
   When   `_run_cli` runs it
   Then   the command's own exit code is returned

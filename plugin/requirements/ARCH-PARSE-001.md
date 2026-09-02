@@ -12,13 +12,12 @@ milestone: v1.00
 
 # Requirement reading
 
+## Description
 > Every command in the tool — the gate, the map, the next-steps list — needs the
 > requirement files as structured data, not raw text. This is the part that reads each
 > Markdown file and hands the rest of the tool clean records to work with. If it breaks,
 > nothing downstream can run.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the frontmatter  the `---` header block at the top of a requirement file.
      a scalar         a single-value field, such as `status: confirmed`.
@@ -45,35 +44,35 @@ Every line in this section is binding.
 - A file whose name starts with `_` (a lock, the generated map) is excluded.
 - A leading UTF-8 BOM is tolerated.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Deliberately minimal (no YAML library) to keep the engine stdlib-only: nested mappings
   and multi-line scalars are not supported.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a file with valid frontmatter
   When   it is parsed
   Then   its scalar and list fields appear in `meta`
 
-AC-2
+CASE-2
   Given  a frontmatter line carrying a trailing `# comment`
   When   it is parsed
   Then   the comment is stripped from the value
 
-AC-3
+CASE-3
   Given  a file without a leading `---` block
   When   it is parsed
   Then   `meta` is empty and the whole text is the body
 
-AC-4
+CASE-4
   Given  a requirements directory containing files starting with `_`
   When   requirements are loaded
   Then   those files are excluded from the result
 
-AC-5
+CASE-5
   Given  a block-style list and an unclosed inline list
   When   they are parsed
   Then   both yield the intended list

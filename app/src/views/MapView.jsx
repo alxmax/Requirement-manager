@@ -104,10 +104,10 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
       <div className="lbl">{t("Why — Intent")}</div>
       <p className="why">{r.intent}</p>
 
-      <div className="lbl">{t("What — Contract")}</div>
+      <div className="lbl">{t("Description")}</div>
       <ul>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>
 
-      <div className="lbl">{t("How — Acceptance")}</div>
+      <div className="lbl">{t("Cases")}</div>
       {r.gwt
         ? <div className="gwt-mini members" style={{ whiteSpace: "pre-wrap" }}>{r.gwt}</div>
         : <ul>{(r.acc || []).map((a, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(a) }} />)}</ul>}

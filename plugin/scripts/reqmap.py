@@ -70,7 +70,7 @@ _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip befo
 # Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
 # `#AC-N` suffix is what distinguishes it from a plain requirement reference.
-AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*(" + _ID_PAT + r")#(AC-\d+)")
+AC_VERIFY_RE = re.compile(r"(?<![\w-])verifies\s*:\s*(" + _ID_PAT + r")#((?:CASE|AC)-\d+)")
 # Verification level on a `tested-by:` tag, written `# tested-by: <ID> @integration`.
 # The id is spelled `<ID>` here on purpose: a real-looking id in a PLAIN COMMENT would be
 # scanned as an actual tag. `_scan_file_tags` strips backticked spans only on the .md/.html
@@ -176,7 +176,7 @@ RISK_ADVICE = {
     "untested": "Implemented but no `tested-by` member: write an acceptance test and tag "
                 "it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter "
                 "to acknowledge it intentionally and silence this signal.",
-    "unverified-intent": "Has open `## WHAT — Verify intent` question(s): run "
+    "unverified-intent": "Has open `## Verify intent` question(s): run "
                          "`reqmap.py findings`, resolve each in `requirements/_findings.md`, "
                          "then fold the answer into the Contract or delete the bullet.",
 }
@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03"
+MAP_ENGINE_VERSION = "2026-09-03.1"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -683,7 +683,7 @@ COMMANDS = {
     },
     "suggest-verifies": {
         "summary": (
-            "Propose `# verifies: <id>#AC-N` tags for tests already named after the "
+            "Propose `# verifies: <id>#CASE-N` tags for tests already named after the "
             "criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can "
             "be adopted on an existing corpus. Read-only; --apply writes the tags."
         ),
@@ -1625,7 +1625,7 @@ def scan_test_levels(code_root, reqs_dir=None):  # implements: ARCH-VLEVEL-037
     return cover
 
 
-_AC_LABEL_RE = re.compile(r"^(AC-\d+)\b")
+_AC_LABEL_RE = re.compile(r"^((?:CASE|AC)-\d+)\b")   # CASE-N is current, AC-N legacy
 _HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 # The template records how a criterion is checked as an HTML comment on its label:
 # `AC-1  <!-- verifiable by: automated test -->`. Only this vocabulary marks a
@@ -1666,7 +1666,7 @@ def _acc_blocks(body):  # implements: ARCH-ACVERIFY-019  # implements: ARCH-ATOM
         if fenced:
             continue
         if s.lower().startswith("## "):
-            grab = (not seen) and _heading_label_is(s, "acceptan")   # anchored, like _count_ac
+            grab = (not seen) and any(_heading_label_is(s, n) for n in ACCEPTANCE_LABELS)
             if grab:
                 seen = True
             continue
@@ -1739,7 +1739,23 @@ def _automatable_acs(body):  # implements: ARCH-ACVERIFY-019
 # prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
 # section detection agree on which heading is a normative section (see its docstring)
 _NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?(?:contract|acceptan|input|output)", re.I)
+    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
+    r"(?:description|contract|acceptan|input|output)", re.I)
+
+# The binding-clause section, current name first. `## Description` merged the standalone
+# `> WHY:` blockquote and `## WHAT — Contract (normative)` into one section: a reader met
+# the same capability described twice, once as rationale and once as obligation, under two
+# headings that both said WHAT. The legacy name keeps working forever — a consumer repo's
+# existing files are not a migration this tool gets to demand.
+CONTRACT_LABELS = ("description", "contract")   # implements: ARCH-DESCRIPTION-057
+
+# The acceptance-criteria section, current name first. `## Cases` and its `CASE-N` labels
+# replaced `## HOW — Acceptance (= tests)` and `AC-N`: a criterion IS a test case, and the
+# old name made the section sound like a sign-off step rather than the cases a reader can
+# run. Both names are honoured, and `# verifies: <ID>#AC-N` keeps working — the label is an
+# identifier a tag points at, so dropping the old spelling would break every consumer tag
+# already written against it.
+ACCEPTANCE_LABELS = ("cases", "acceptan")       # implements: ARCH-DESCRIPTION-057
 
 
 def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
@@ -1811,6 +1827,15 @@ def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMIC
             grab = new_grab
             continue
         if grab and line.strip():
+            if line.strip().startswith(">"):
+                # `## Description` opens with the intent blockquote — rationale, not an
+                # obligation. Hashing it would report DRIFT on a confirmed contract every
+                # time someone improved the explanation, which is the opposite of what
+                # drift is for. The atomic form draws the same line, keeping `rationale:`
+                # in the frontmatter and out of the span. No requirement carried a
+                # blockquote inside a normative section when this was added, so no
+                # existing hash changes.
+                continue
             # rstrip (not strip): leading indent is structure — unnesting a sub-clause
             # is a real change and must drift.
             keep.append(line.rstrip())
@@ -1986,13 +2011,30 @@ def _has_section(body, name):  # implements: ARCH-CHECK-006
     silent-drift gap where a heading passed the gate but produced an empty hash.
     The atomic form (ARCH-ATOMICFORM-053) has no normative headings by design; its statement
     and Scenario stand in for both, so it answers True for those two names."""
-    if name in ("contract", "acceptan") and _atomic_spans(body):
+    if name in CONTRACT_LABELS + ACCEPTANCE_LABELS and _atomic_spans(body):
         return True
     for line in body.splitlines():
         s = line.strip()
         if s.startswith("## ") and _heading_label_is(s, name):
             return True
     return False
+
+
+def _has_any(body, names):  # implements: ARCH-DESCRIPTION-057
+    """True if the body carries any of `names` as a section. One requirement never uses two
+    spellings of the same section at once, so 'any' is not a merge — it is 'whichever name
+    this file happens to use'."""
+    return any(_has_section(body, n) for n in names)
+
+
+def _from_any(fn, body, names):  # implements: ARCH-DESCRIPTION-057
+    """`fn(body, name)` for the first of `names` that yields content, else the empty value
+    `fn` returns for the first name — so the caller's type (list, str) is preserved."""
+    for n in names:
+        got = fn(body, n)
+        if got:
+            return got
+    return fn(body, names[0])
 
 
 def cmd_scan(reqs, members):  # implements: ARCH-SCAN-005
@@ -2291,14 +2333,14 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                         f"{rid}: {len(labels) - len(missing)}/{len(labels)} automatable criteria "
                         f"carry a `# verifies:` tag — missing " + ", ".join(missing))
         if m.get("status") == "confirmed":
-            if not _has_section(r["body"], "contract"):
+            if not _has_any(r["body"], CONTRACT_LABELS):
                 warns.append(
-                    f"{rid}: confirmed but missing '## WHAT — Contract' section — "
+                    f"{rid}: confirmed but missing '## Description' section — "
                     "add the normative contract or drop status back to in-progress"
                 )
-            if not _has_section(r["body"], "acceptan"):
+            if not _has_any(r["body"], ACCEPTANCE_LABELS):
                 warns.append(
-                    f"{rid}: confirmed but missing '## HOW — Acceptance' section — "
+                    f"{rid}: confirmed but missing '## Cases' section — "
                     "add acceptance criteria or drop status back to in-progress"
                 )
         # reverse upstream traceability (warn-only): a stakeholder `need` that nothing
@@ -2329,7 +2371,8 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             # Built here (not via _build_map_data) since only id+contract is
             # needed — avoids computing used_by/satisfied_by for a check that
             # discards them.
-            _viewer_nodes = [{"id": rid, "contract": _bullets(r["body"], "contract")}
+            _viewer_nodes = [{"id": rid,
+                              "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS)}
                               for rid, r in reqs.items()]
             _drifted = check_viewer_data_sync(_candidate, _viewer_nodes)
             if _drifted:
@@ -2429,7 +2472,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
               if not _has_section(reqs[rid]["body"], "verify intent")
               and not _atomic_spans(reqs[rid]["body"])]           # atomic form has none by design
     if legacy:
-        warns.append("{}/{} requirement(s) use the legacy schema (no '## WHAT — Verify "
+        warns.append("{}/{} requirement(s) use the legacy schema (no '## Verify "
                      "intent' section) — `findings` is inactive for them: {}"
                      .format(len(legacy), len(reqs), ", ".join(legacy)))
 
@@ -2552,11 +2595,12 @@ superseded_by:       # <ID>, if replaced
 
 # Short name
 
-> WHY: 1–3 plain sentences anyone can follow — what this is, why it exists, and
-> what breaks without it. No jargon; this is the angle a non-expert reads first.
+## Description
+> 1–3 plain sentences anyone can follow — what this is, why it exists, and what
+> breaks without it. No jargon; this is the angle a non-expert reads first. The
+> quote is rationale, not an obligation: it is not hashed and never trips drift.
 
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Audience: a first-year engineering student, new to this project. Six rules:
      1. Name the subject: "`init` creates the folder", never "It creates the folder".
      2. Present tense — no "shall", no "must". The line above already binds every clause.
@@ -2578,23 +2622,23 @@ Every line in this section is binding.
 - `<subject>` returns <output shape and allowed values>.
 - `<subject>` handles a missing or invalid optional input by <behavior>.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - Observed: <a behavior that may be an AI accident — swallowed error, empty-string
   fallback, magic constant, unreachable branch>. Intended, or a bug to fix?
 
-## HOW — Acceptance (= tests)
+## Cases (= tests)
 <!-- Keep Given/When/Then concrete and self-explanatory; spell out any term the
-     Contract introduced. -->
-AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
+     Description introduced. -->
+CASE-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
   When   <action>
-  Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
+  Then   <observable, pass/fail result>   (one test per case; each maps to tested-by)
 
 ## Context (non-binding)
 <!-- Everything here is commentary: not hashed, not linted, never trips drift. On
-     any conflict with the Contract + Acceptance above, they win. Bold sub-labels
-     are the same clause-group convention the Contract uses (ADR-0017) — keep only
-     the ones you need. -->
+     any conflict with the Description + Cases above, they win. Bold sub-labels
+     are the same clause-group convention the Description uses (ADR-0017) — keep
+     only the ones you need. -->
 **Notes**
 - A known fragility/footgun the implementer should know but which is NOT enforced.
 
@@ -2949,17 +2993,17 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: ARCH-EXTRACT
                             "prose is NOT the contract — author the normative behavior "
                             "below, then tag the source `# generated-from: {cap}` "
                             "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
-                            "## WHAT — Contract (normative)\n"
-                            "Every line in this section is binding.\n"
+                            "## Description\n"
+                            "Every bullet below is binding.\n"
                             "<!-- Name the subject, write in present tense, one statement per "
-                            "bullet, under 25 words per sentence. -->\n"
+                            "bullet, at most 3 sentences and 150 words. -->\n"
                             "- TODO: the capability this prose defines (author from "
                             "intent, do not copy the prose).\n\n"
-                            "## WHAT — Verify intent (open questions for the human)\n"
+                            "## Verify intent (open questions for the human)\n"
                             "- TODO: which source sections are normative vs illustrative?\n\n"
                             "Source sections detected (authoring hint, not the contract):\n"
                             "{hint}\n\n"
-                            "## HOW — Acceptance (= tests)\n"
+                            "## Cases (= tests)\n"
                             "- TODO: Given/When/Then checks for the contract above.\n\n"
                             "## Context (non-binding)\n**Current implementation**\n- {rel}\n".format(
                                 cap=cap, title=(title or os.path.splitext(fn)[0]),
@@ -2977,15 +3021,15 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: ARCH-EXTRACT
                             f"# {os.path.splitext(fn)[0]}\n\n"
                             f"> DRAFT extracted from {rel}. Describes observed behavior, "
                             f"not validated intent.\n\n"
-                            f"## WHAT — Contract (normative)\n"
-                            f"Every line in this section is binding.\n"
+                            f"## Description\n"
+                            f"Every bullet below is binding.\n"
                             f"<!-- Name the subject, write in present tense, one statement per "
-                            f"bullet, under 25 words per sentence. -->\n"
+                            f"bullet, at most 3 sentences and 150 words. -->\n"
                             f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
-                            f"## WHAT — Verify intent (open questions for the human)\n"
+                            f"## Verify intent (open questions for the human)\n"
                             f"- TODO: anything that looks like an accident (swallowed error, magic "
                             f"constant, dead branch) — intended, or a bug to fix?\n\n"
-                            f"## HOW — Acceptance (= tests)\n"
+                            f"## Cases (= tests)\n"
                             f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
                             f"## Context (non-binding)\n**Current implementation**\n- {rel}\n{surface}")
             proposed += 1
@@ -3504,7 +3548,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007
             "title": _title(r["body"]),
             "intent": _first_quote(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
-            "contract": _bullets(r["body"], "contract"),
+            "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS),
             "verify": _bullets(r["body"], "verify intent"),
             # legacy per-topic heading first; ADR-0017's consolidated Context section
             # (bold **Notes**/**Current implementation** sub-groups) is the fallback,
@@ -3513,11 +3557,14 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007
             "current_impl": (_bullets(r["body"], "current implementation")
                               or _context_group(r["body"], "current implementation")),
             "acc": _acc_items(r["body"]),                    # AC blocks AND bullets
-            "accept": _section_raw(r["body"], "acceptan"),    # raw acceptance (AC blocks, line breaks kept)
+            "accept": _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS),  # raw, line breaks kept
             # legacy schema (Input / Description / Output) — kept so old docs still render
             "input": _section(r["body"], "input"),
             "output": _section(r["body"], "output"),
-            "desc": _section(r["body"], "description"),
+            # Only the legacy Input/Description/Output triad, never the current
+            # `## Description` — which is the Contract and is emitted above.
+            "desc": (_section(r["body"], "description")
+                     if _has_any(r["body"], ("input", "output")) else ""),
             "deps": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "satisfies": _as_list(m.get("satisfies")),       # upstream needs this fulfils
@@ -3681,7 +3728,8 @@ def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
     a title-only edit must also invalidate a cached translation."""
     return "\n".join([
         title, _first_quote(body),
-        _section_raw(body, "contract"), _section_raw(body, "acceptan"),
+        _from_any(_section_raw, body, CONTRACT_LABELS),
+        _from_any(_section_raw, body, ACCEPTANCE_LABELS),
     ])
 
 
@@ -3735,7 +3783,7 @@ def _structural_signature(text):  # implements: ARCH-TRANSLATE-044
     backticks = tuple(sorted(re.findall(r"`[^`]*`", text)))
     numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
     markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
-    labels = tuple(re.findall(r"^\s*(AC-\d+)\b", text, flags=re.MULTILINE))
+    labels = tuple(re.findall(r"^\s*((?:CASE|AC)-\d+)\b", text, flags=re.MULTILINE))
     keywords = tuple(sorted(re.findall(r"\b(?:Given|When|Then)\b", text)))
     return (backticks, numbers, markers, labels, keywords)
 
@@ -3752,7 +3800,7 @@ _TRANSLATE_PROMPT = (
     "formatting, every backticked `identifier` verbatim and unchanged, every number "
     "unchanged, and the same list/heading structure line for line.\n"
     "Two more things are identifiers, not prose, and must appear verbatim: the "
-    "criterion labels `AC-1`, `AC-2`, ... (a test refers to one by name), and the "
+    "criterion labels `CASE-1`, `CASE-2`, ... (a test refers to one by name), and the "
     "Gherkin keywords Given / When / Then. Translate the words after them, never "
     "the keywords themselves.\n\n"
     "Return EXACTLY four sections, each starting on its own line with the literal "
@@ -3847,8 +3895,8 @@ def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-04
             continue   # already in the target language (or undetermined) - leave it
         title = _title(r["body"])
         intent = _first_quote(r["body"])
-        contract = _section_raw(r["body"], "contract")
-        acceptance = _section_raw(r["body"], "acceptan")
+        contract = _from_any(_section_raw, r["body"], CONTRACT_LABELS)
+        acceptance = _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS)
         h = translation_hash(r["body"], title)
         entry = cache.get(rid)
         if entry and entry.get("hash") == h:
@@ -4247,7 +4295,7 @@ def _contract_clauses(body):  # implements: ARCH-ATOMICITY-049
             continue
         if s.startswith("## "):
             flush(); cur = None
-            grab = (not seen) and _heading_label_is(s, "contract")
+            grab = (not seen) and any(_heading_label_is(s, n) for n in CONTRACT_LABELS)
             if grab:
                 seen = True
             continue
@@ -4288,23 +4336,24 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     findings = []
     body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
-    if not _has_section(body, "contract"):
+    if not _has_any(body, CONTRACT_LABELS):
         findings.append({"severity": "error", "check": "missing-section",
-                         "detail": "no '## WHAT — Contract' section"})
-    if not _has_section(body, "acceptan"):
+                         "detail": "no '## Description' section"})
+    if not _has_any(body, ACCEPTANCE_LABELS):
         findings.append({"severity": "error", "check": "missing-section",
-                         "detail": "no '## HOW — Acceptance' section"})
+                         "detail": "no '## Cases' section"})
     # empty-section (warn): the heading is present but carries no clauses/criteria — it
     # passes `missing-section` yet documents nothing (and `ac-count-low` skips the zero
     # case). Precise zero/non-zero test, so near-zero false positive.
-    if _has_section(body, "contract") and not _bullets(body, "contract"):
+    if _has_any(body, CONTRACT_LABELS) and not _from_any(_bullets, body, CONTRACT_LABELS):
         findings.append({"severity": "warn", "check": "empty-section",
-                         "detail": "'## WHAT — Contract' section present but has no clauses"})
-    if _has_section(body, "acceptan") and _count_ac(body) == 0:
+                         "detail": "'## Description' section present but has no clauses"})
+    if _has_any(body, ACCEPTANCE_LABELS) and _count_ac(body) == 0:
         findings.append({"severity": "warn", "check": "empty-section",
-                         "detail": "'## HOW — Acceptance' section present but has no criteria"})
+                         "detail": "'## Cases' section present but has no criteria"})
     # prose readability (warn): only on the Contract + Acceptance sections
-    for name in ("contract", "acceptan"):
+    for name in (CONTRACT_LABELS[0], CONTRACT_LABELS[1],
+                 ACCEPTANCE_LABELS[0], ACCEPTANCE_LABELS[1]):
         for ln in _lint_prose(body, name):
             low = ln.lower()
             # Every line in a Contract/Acceptance section is normative by virtue of the
@@ -4320,7 +4369,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
             # Contract only: a clause whose subject is a bare "It" forces the reader to hold
             # the requirement's title in their head to know what is being promised. Name it.
             # Acceptance prose is exempt — a Then clause saying "it returns …" reads fine.
-            if name == "contract" and re.match(r"^It\s+[a-z]", ln):
+            if name in CONTRACT_LABELS and re.match(r"^It\s+[a-z]", ln):
                 findings.append({
                     "severity": "warn", "check": "anonymous-subject",
                     "detail": "clause opens with an unnamed 'It' — name the subject: {}".format(
@@ -4357,7 +4406,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "detail": "clause {} is {} words (>{}) \u2014 re-read it for decomposition: {}".format(
                     _n, _cw, LINT_STATEMENT_WORDS, _clip(_clause))})
     # ac count (warn): too few = under-specified; too many = over-scoped
-    if _has_section(body, "acceptan"):
+    if _has_any(body, ACCEPTANCE_LABELS):
         ac_n = _count_ac(body)
         # An atomic requirement holds ONE obligation, so one criterion is the correct
         # number, not an under-specified one. LINT_AC_MIN guards a dossier.
@@ -4376,7 +4425,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
     # false positives near zero: a large-but-cohesive capability rarely maxes both. Advisory
     # only — it surfaces split candidates; the split decision stays with the human.
-    if _has_section(body, "contract") and _has_section(body, "acceptan"):
+    if _has_any(body, CONTRACT_LABELS) and _has_any(body, ACCEPTANCE_LABELS):
         # Scope units, not sentences. A contract that groups its clauses under bold labels
         # states one facet per group, so the group count is what says how much the
         # requirement promises; the clause count only says how finely the prose was split.
@@ -4388,9 +4437,9 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
         # input every wrapped clause that opens and closes on bold spans counts as a
         # group, inflating contract_n — and `over-scoped` is an ERROR under --strict, so
         # that miscount fails CI on a requirement that is not over-scoped.
-        groups = sum(1 for ln in _section_raw(body, "contract").split("\n")
+        groups = sum(1 for ln in _from_any(_section_raw, body, CONTRACT_LABELS).split("\n")
                      if _is_label_line(ln))
-        contract_n = groups or len(_bullets(body, "contract"))
+        contract_n = groups or len(_from_any(_bullets, body, CONTRACT_LABELS))
         ac_count = _count_ac(body)
         if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
             findings.append({
@@ -4487,20 +4536,20 @@ superseded_by:
 
 <!-- decomposed-from: {parent}#{n} -->
 
+## Description
 > Scaffolded by `lint --decompose` from a clause that ran past
-> LINT_STATEMENT_WORDS words. Rewrite this WHY before confirming: say what this
+> LINT_STATEMENT_WORDS words. Rewrite this quote before confirming: say what this
 > capability is and what breaks without it.
 
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 - {clause}
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - Does this clause state one obligation, or several? The split point was chosen by
   word count, so this file may hold a clause that was atomic all along.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  <precondition>
   When   <action>
   Then   <observable, pass/fail result>
@@ -4686,12 +4735,12 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  
     if intent:
         print("  " + intent)
 
-    contract = _bullets(body, "contract")
+    contract = _from_any(_bullets, body, CONTRACT_LABELS)
     print("\nContract:")
     for b in contract:
         print("  - " + b)
     if not contract:
-        print("  (none — no '## WHAT — Contract' section)")
+        print("  (none — no '## Description' section)")
 
     deps = _as_list(m.get("depends_on"))
     dependents = sorted(rid for rid, rr in reqs.items()
@@ -4765,7 +4814,7 @@ def _placeholder_contract(body):  # implements: ARCH-SIMILAR-016
     runs scored thousands of freshly-drafted stubs as near-duplicates of each other on
     template text alone (fabric: 6,340 pairs for 638 drafts) — nothing authored, nothing
     to compare."""
-    bullets = _bullets(body, "contract")
+    bullets = _from_any(_bullets, body, CONTRACT_LABELS)
     return bool(bullets) and all(b.strip().upper().startswith("TODO") for b in bullets)
 
 
@@ -4777,7 +4826,7 @@ def _sim_text(body):  # implements: ARCH-SIMILAR-016
         if line.strip().startswith(">"):
             parts.append(line.strip().lstrip(">").strip())
             break
-    parts += _bullets(body, "contract")
+    parts += _from_any(_bullets, body, CONTRACT_LABELS)
     return " ".join(parts)
 
 
@@ -5561,7 +5610,7 @@ def _is_label_line(line):  # implements: ARCH-MAP-007
 
 
 def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMICFORM-053
-    if name == "contract":
+    if name in CONTRACT_LABELS:
         _sp = _atomic_spans(body)
         if _sp:                                    # the atomic statement is the one clause
             return [" ".join(l.lstrip("> ").strip() for l in _sp[0]).strip()]
@@ -6875,7 +6924,7 @@ def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022
         if not r:
             continue
         body = r["body"]
-        contract = _bullets(body, "contract")
+        contract = _from_any(_bullets, body, CONTRACT_LABELS)
         intent = _first_quote(body)
         ac_n = _count_ac(body)
         intent_words = len(intent.split())
@@ -6886,7 +6935,7 @@ def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022
             "status": r["meta"].get("status", "draft"),
             "intent": intent,
             "contract": contract,
-            "acceptance": _bullets(body, "acceptan"),
+            "acceptance": _from_any(_bullets, body, ACCEPTANCE_LABELS),
             "verify_intent": _bullets(body, "verify"),
             # cheap STRUCTURAL anchors (deterministic facts, NOT judgments) the AI examines:
             "anchors": {

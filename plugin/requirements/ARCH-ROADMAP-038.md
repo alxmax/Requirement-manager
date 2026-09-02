@@ -13,15 +13,14 @@ superseded_by:       # <ID>, if replaced
 
 # Roadmap coherence signals
 
+## Description
 > `TODO.md` is this project's roadmap and decision log, and nothing checks that it still
 > matches reality. Twice it has fallen behind — once by seven milestones — and once a
 > cosmetic heading rename silently re-filed the only open item under the wrong version,
 > because a heading that is not a version leaves the previous one in force. These two
 > read-only signals surface both, so the roadmap stops drifting unnoticed between manual
 > clean-ups.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the roadmap      TODO.md — milestone sections holding checklist items.
      a milestone      a `## vX.Y` heading. Items below it belong to that version.
@@ -48,38 +47,38 @@ Every line in this section is binding.
 - Both signals are read-only. Neither changes an exit code, and neither lowers the
   health score.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — built from a failure this repo experienced twice.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - The behind-signal compares against requirement `milestone:` fields, not against a
   package version. The engine owns the former in every repo; the latter is
   project-specific. A repo that leaves `milestone:` unset gets no behind-signal.
 - Neither signal is a gate. The v1.35 roadmap-hygiene note chose manual upkeep over
   automation when demand was n=1; this is the read-only middle ground after n=2.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a roadmap whose newest milestone is older than the newest requirement milestone
   When   `health --json` runs
   Then   it reports both versions as the behind-signal
 
-AC-2
+CASE-2
   Given  a roadmap at or ahead of the newest requirement milestone
   When   `health --json` runs
   Then   it reports no behind-signal
 
-AC-3
+CASE-3
   Given  a roadmap holding a `## ` heading that does not start with a version
   When   `health --json` runs
   Then   that heading is listed, because items below it are filed under the section above
 
-AC-4
+CASE-4
   Given  a repo with no `TODO.md`
   When   `health --json` runs
   Then   it reports neither roadmap signal
 
-AC-5
+CASE-5
   Given  milestones `v2.9` and `v2.10`
   When   the versions are compared
   Then   `v2.10` ranks above `v2.9`, which a string compare would reverse

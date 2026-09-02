@@ -12,13 +12,12 @@ satisfies: [SYS-VISUAL-106]
 
 # Excalidraw quality gates
 
+## Description
 > A diagram that ships with overlapping shapes, arrows that cut through
 > unrelated boxes, unlegended colours, text that spills outside its box, an
 > arrow too short to draw a visible line, or a label wider than the arrow it
 > sits on is unreadable to an outsider. Hard-fail gates at `.save()` time make
 > these defects impossible to ship silently.
-
-## WHAT — Contract (normative)
 - `.save()` supports five named gates, each accepting `"warn"` (default,
   prints) or `"error"` (raises `ValueError`): `crossing_check`, `legend_check`,
   `overflow_check`, `text_overlap_check`, `label_fit_check`.
@@ -48,53 +47,53 @@ satisfies: [SYS-VISUAL-106]
   `"error"` modes, and the two hard gates, for each maintained example
   generator.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent.
 
-## WHAT — Notes (informative)
+## Notes (informative)
 - The canonical pattern for a ship-quality diagram is all five named gates set
   to `"error"` (the two hard gates already raise by default): `save(...,
   crossing_check="error", legend_check="error", overflow_check="error",
   text_overlap_check="error", label_fit_check="error")`.
 
-## HOW — Acceptance (= tests)
+## Cases (= tests)
 
-AC-1
+CASE-1
   Given  a scene where a bound arrow's path passes through an unrelated box
   When   `save(crossing_check="error")` is called
   Then   a `ValueError` is raised; `save(crossing_check="warn")` emits a
          warning and exits normally
 
-AC-2
+CASE-2
   Given  a scene with `fill="blue"` on a box and no `legend()` rendered
   When   `save(legend_check="error")` is called
   Then   a `ValueError` is raised naming the unlegended colour
 
-AC-3
+CASE-3
   Given  a box whose bound text is wider than the box width
   When   `save(overflow_check="error")` is called
   Then   a `ValueError` is raised; `check_text_overflow()` returns the
          offending shape id
 
-AC-4
+CASE-4
   Given  two `label()` elements placed at overlapping coordinates
   When   `save(text_overlap_check="error")` is called
   Then   a `ValueError` is raised naming the overlapping pair
 
-AC-5
+CASE-5
   Given  each maintained example generator in `examples/`
   When   `test_excalidraw.py` runs it
   Then   the generator produces zero violations on every gate (the five named
          gates and both hard gates)
 
-AC-6
+CASE-6
   Given  two boxes placed close but not overlapping, joined by a bound arrow
   When   `save()` is called with defaults
   Then   a `ValueError` is raised (the connector is too short to render);
          `save(allow_short_arrows=True)` writes the files, and
          `check_short_arrows()` returns the offending pair
 
-AC-7
+CASE-7
   Given  a bound arrow whose label is wider than the arrow's visible line
   When   `save(label_fit_check="error")` is called
   Then   a `ValueError` is raised; `check_arrow_label_fit()` returns the

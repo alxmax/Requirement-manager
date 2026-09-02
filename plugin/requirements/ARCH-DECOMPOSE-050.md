@@ -12,14 +12,13 @@ superseded_by:
 
 # Clause decomposition scaffold
 
+## Description
 > When `statement-size` reports an over-long clause, the remedy is to split it into its own
 > requirement — and that means retyping the clause, inventing an id, and wiring the
 > dependency by hand. This does the mechanical half on request. It never runs on its own,
 > because `lint` also runs inside the pre-commit hook and CI, where writing a new file
 > would break the very commit it was helping.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a reported clause   a Contract clause that `statement-size` named, per
                          [[ARCH-ATOMICITY-049]].
@@ -46,31 +45,31 @@ Every line in this section is binding.
 - Deleting a created draft restores the corpus exactly, because the parent was never edited.
 - `lint --decompose` skips a clause whose target file already exists, and reports the skip.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from stated intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a corpus with one clause above the `statement-size` threshold
   When   `lint` runs without `--decompose`
   Then   the finding is reported and the requirements directory holds no new file
-AC-2
+CASE-2
   Given  the same corpus
   When   `lint --decompose` runs
   Then   one draft is created, carrying `status: draft` and `depends_on` naming the parent
-AC-3
+CASE-3
   Given  the same corpus
   When   `lint --decompose` runs
   Then   the parent file is byte-identical to what it was before the run
-AC-4
+CASE-4
   Given  a created draft
   When   its text is read
   Then   it states that the split point was chosen by word count, not by obligation
-AC-5
+CASE-5
   Given  a parent `REQ-AUTH-012` in a corpus whose highest number is 049
   When   `lint --decompose` runs
   Then   the created id is `REQ-AUTH-050`
-AC-6
+CASE-6
   Given  a corpus where a previous `lint --decompose` already created the target file
   When   `lint --decompose` runs again
   Then   the clause is skipped, the skip is reported, and the existing file is unchanged
@@ -112,7 +111,7 @@ AC-6
   `--decompose` flag is passed. The skip keys off a `<!-- decomposed-from: <parent>#<n> -->`
   marker in the created file, not off the target filename: the id comes from the next free
   number, so a second run picks a fresh name and an existence check never fires. That was a
-  real defect — the first implementation created a second file on every re-run, and AC-6
+  real defect — the first implementation created a second file on every re-run, and CASE-6
   caught it.
 
 ## Links

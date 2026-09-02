@@ -12,13 +12,12 @@ superseded_by:
 
 # Hierarchy breadth
 
+## Description
 > A level is only useful if it groups. One requirement holding fifty children is a bucket
 > wearing a level's name; one holding two is a level that saves nobody any reading. This
 > reports a parent whose child count leaves the useful band, so a hierarchy that has
 > quietly flattened out gets looked at again.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a child        a requirement that names this one in its `satisfies:` list.
      a parent       a requirement that has at least one child.
@@ -35,27 +34,27 @@ Every line in this section is binding.
 - The `fan-out` check is warn-only and never changes the gate's exit code.
 - `lint_exempt: [fan-out]` silences the check for one requirement.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from stated intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a requirement satisfied by three others
   When   `lint` runs
   Then   one `fan-out` finding names it as below the band, and the exit code is unchanged
-AC-2
+CASE-2
   Given  a requirement satisfied by eight others
   When   `lint` runs
   Then   no `fan-out` finding is reported for it
-AC-3
+CASE-3
   Given  a requirement satisfied by twenty-five others
   When   `lint` runs
   Then   one `fan-out` finding names it as above the band
-AC-4
+CASE-4
   Given  a requirement that nothing satisfies
   When   `lint` runs
   Then   no `fan-out` finding is reported for it
-AC-5
+CASE-5
   Given  a corpus whose requirements all depend on one another but declare no `satisfies:`
   When   `lint` runs
   Then   no `fan-out` finding is reported at all

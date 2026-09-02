@@ -12,13 +12,12 @@ milestone: v1.04
 
 # Requirement graph (_map.json)
 
+## Description
 > A list of requirement files tells you what exists but not how it all connects. This builds
 > the graph: one node per requirement, one edge per dependency, each node carrying what the
 > requirement says, what code backs it and what is at risk. Everything that draws or
 > publishes a picture reads this file; nothing draws from the corpus directly.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a node          one requirement, as listed in the graph.
      an edge         one `depends_on` link between two requirements.
@@ -69,23 +68,23 @@ Every line in this section is binding.
 - All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
   hostile id, title or body by construction. There is no markup context to break out of.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  the corpus
   When   `map` runs
   Then   the generated graph contains one node per requirement and one edge per `depends_on`
 
-AC-2
+CASE-2
   Given  the generated `_map.json`
   When   it is parsed
   Then   it yields `{engine_version, repo, nodes, edges, todos}` with one node per requirement carrying
          its members and risk signals. The `repo` field is the project's `owner/repo` (or
          directory name, or null) and is omitted from the freshness comparison.
 
-AC-3
+CASE-3
   Given  a requirement id/title containing a quote, `</script>`, or a lone surrogate
   When   `map` runs
   Then   it round-trips through `_map.json` as data (no injection), a lone surrogate is

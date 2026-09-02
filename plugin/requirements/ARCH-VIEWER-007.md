@@ -13,13 +13,12 @@ lint_exempt: [ac-count-high, file-spread]
 
 # Self-contained HTML map viewer
 
+## Description
 > The Mermaid diagrams render on GitHub, but a richer interactive view needs a browser app.
 > This inlines the map's JSON graph into a single self-contained HTML file you open by
 > double-click — no server, no install. It is optional: absent the vendored template, the
 > engine still emits the diagrams and the JSON.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      the template   scripts/_map_viewer.html — the pre-built React viewer vendored
                     beside the engine, carrying a `<!--REQMAP_DATA-->` marker.
@@ -80,10 +79,10 @@ Every line in this section is binding.
 - The reader's chosen locale is remembered on their machine and is never written into the
   generated file, so `_map.html` stays byte-identical whatever anyone last selected.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — authored from known intent, not reconstructed from code.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `lint_exempt: file-spread`: the members are one engine function plus the viewer's source
   tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files
   by construction; they are built into ONE artifact, so the spread is not diffuseness.
@@ -100,49 +99,49 @@ Every line in this section is binding.
 - Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate
   capability — see [[ARCH-PAGES-021]].
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  the vendored `_map_viewer.html` template is present
   When   `map` runs
   Then   it writes `_map.html` and the `<!--REQMAP_DATA-->` marker is replaced with a
          `window.__REQMAP_DATA__` assignment carrying one node per requirement
 
-AC-2
+CASE-2
   Given  a requirement field containing `</script>`
   When   the viewer is rendered
   Then   the sequence is escaped (`<\/`) so it cannot close the inline-data script early
 
-AC-7
+CASE-7
   Given  a registry whose `depends_on` edges form a cycle
   When   the layout is computed
   Then   every node is placed, no rank exceeds the node count, and the closing edge is drawn
 
-AC-4
+CASE-4
   Given  a requirement field containing `<!--` (e.g. a body that documents HTML injection)
   When   the viewer is rendered
   Then   `<!--` is escaped to `<\!--` in the inlined blob so the HTML5 parser never
          enters "script data escaped" state, and `window.__REQMAP_DATA__` is always
          accessible from the deferred bundle (verified: file:// opens without error)
 
-AC-3
+CASE-3
   Given  no template is vendored
   When   `map` runs
   Then   `render_html` returns None and only `_map.md` + `_map.json` are written (no crash)
 
-AC-5
+CASE-5
   Given  a requirement whose title or contract contains U+2028 or U+2029
   When   `map` writes `_map.html`
   Then   neither character appears raw in the file, and the inlined graph still parses to
          the original text
 
-AC-6
+CASE-6
   Given  the viewer rendered with a non-English locale selected
   When   a requirement's spec is shown
   Then   the section headers appear in that language while the requirement's own title,
          contract and acceptance text stay exactly as authored, and `status` / `layer`
          values stay literal
 
-AC-8
+CASE-8
   Given  a node carrying both a labelled `accept` block and the folded `acc` list
   When   its spec is rendered
   Then   the Given/When/Then lines appear as authored, one per line, and the folded

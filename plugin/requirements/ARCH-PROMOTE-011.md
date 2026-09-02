@@ -12,13 +12,12 @@ milestone: v1.08
 
 # confirm
 
+## Description
 > A requirement starts life as a draft and only becomes official once a human has reviewed it. This
 > command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks
 > that it actually points at real code and warns if no test is linked. Doing this by hand means editing
 > the file's header directly, which is easy to get subtly wrong; this command does it safely every time.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 <!-- Words used below, in plain terms:
      frontmatter  the YAML block between the two `---` lines at the top of the file.
      a member     a place in the code tagged as belonging to this requirement.
@@ -50,39 +49,39 @@ Every line in this section is binding.
 - `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and
   exits zero.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — behavior is fully specified by the acceptance criteria below.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - `confirm` does not itself run `sync`; the drift lock must be refreshed afterward so the newly-enforced contract is baselined (the command prints this reminder).
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a baseline requirement with an `implements:` member
   When   `confirm <ID>` runs
   Then   its frontmatter `status` becomes `confirmed`, the body is byte-identical, and exit is 0
 
-AC-2
+CASE-2
   Given  a requirement with no `implements:` member
   When   `confirm <ID>` runs
   Then   the file is unchanged, a "must point to code" message is printed, and exit is non-zero
 
-AC-3
+CASE-3
   Given  an already-`confirmed` requirement
   When   `confirm <ID>` runs
   Then   the file is unchanged and exit is 0
 
-AC-4
+CASE-4
   Given  a status line carrying a trailing `# comment`
   When   `confirm <ID>` runs
   Then   the comment is preserved and only the status value changed
 
-AC-5
+CASE-5
   Given  a `layer: need` requirement with no `implements:` member
   When   `confirm <ID>` runs
   Then   its status becomes `confirmed` and exit is 0
 
-AC-6
+CASE-6
   Given  a `layer: aggregate` requirement with an empty `depends_on`
   When   `confirm <ID>` runs
   Then   the file is unchanged and exit is non-zero

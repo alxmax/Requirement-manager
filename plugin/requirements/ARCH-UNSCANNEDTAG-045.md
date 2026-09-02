@@ -14,14 +14,13 @@ milestone: v2.9
 
 # Tags in unscanned file types reported
 
+## Description
 > A membership tag only counts when the scan reads the file it sits in. The scan reads a
 > fixed list of extensions and basenames, so a tag in any other kind of file is silently
 > invisible: the author believes the requirement has a member, the map says it has none,
 > and nothing points at the gap. The first consumer run found two such files on the first
 > try — a `Caddyfile` and a Prisma schema, both tagged, neither ever read.
-
-## WHAT — Contract (normative)
-Every line in this section is binding.
+Every bullet below is binding.
 
 **Glossary** — *scannable*: a file whose extension or basename the scan reads
 (`CODE_EXTS`, `BASENAME_CODE_FILES`); *tracked*: git has the file in its index.
@@ -45,10 +44,10 @@ Every line in this section is binding.
   tree, or git is unavailable.
 - The warning never changes the exit code.
 
-## WHAT — Verify intent (open questions for the human)
+## Verify intent (open questions for the human)
 - None — the rule comes from an observed consumer failure, not from inference.
 
-## WHAT — Notes & known limitations (informative)
+## Notes & known limitations (informative)
 - Tracked, not "every file on disk": the walk that discovers members is bounded by the
   extension list on purpose (a 135 MB checkout with 40k `node_modules` files must stay
   fast). One `git ls-files` call bounds this check the same way `ARCH-TRACKED-042` is
@@ -60,19 +59,19 @@ Every line in this section is binding.
   produced this requirement also added `.prisma`, `.graphql`, `.proto`, `Caddyfile`,
   `Jenkinsfile`, `Procfile` and `Vagrantfile` to the scan.
 
-## HOW — Acceptance (= tests)
-AC-1
+## Cases (= tests)
+CASE-1
   Given  a tracked file of a type the scan never reads, carrying `# implements: <ID>`
   When   `gate` runs inside a git work tree
   Then   it warns, naming that file and the count, and exits 0
 
-AC-2
+CASE-2
   Given  a tracked non-scannable file with no tag, a binary file, and a `_`-prefixed file
          whose text mentions a tag
   When   `tagged_unscanned_files` runs
   Then   none of them is listed
 
-AC-3
+CASE-3
   Given  a scan root that is not a git work tree
   When   `tagged_unscanned_files` runs
   Then   it returns None and `gate` prints no such warning
