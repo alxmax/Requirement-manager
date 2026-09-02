@@ -1636,7 +1636,7 @@ class ParserBlockLists(unittest.TestCase):  # tested-by: CORE-PARSE-001
         self.assertEqual(meta["tags"], ["issue#123", "clean"])
 
 
-class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
+class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007, REQ-CONTEXT-048
     def _node(self, members):
         return {"id": "A-FOO-001", "layer": "feature", "status": "confirmed", "title": "T",
                 "members": members}
@@ -1696,6 +1696,50 @@ class MapInternals(unittest.TestCase):  # tested-by: REQ-MAP-007
         # the Current-implementation section after switching off substring matching
         body = "## WHERE — Current implementation\n- impl detail\n"
         self.assertEqual(R._bullets(body, "current implementation"), ["impl detail"])
+
+    def test_context_group_extracts_bold_subgroup(self):
+        body = ("## Context (non-binding)\n"
+                "**Notes**\n- a footgun\n- a second footgun\n"
+                "**Current implementation**\n- lives in foo.py\n")
+        self.assertEqual(R._context_group(body, "notes"), ["a footgun", "a second footgun"])
+        self.assertEqual(R._context_group(body, "current implementation"), ["lives in foo.py"])
+
+    def test_context_group_empty_when_no_context_section(self):
+        # a legacy-schema file (no Context section at all) must not spuriously match
+        body = "## WHAT — Notes & known limitations (informative)\n- old-style note\n"
+        self.assertEqual(R._context_group(body, "notes"), [])
+
+    def test_context_group_ignores_unrelated_subgroup(self):
+        body = "## Context (non-binding)\n**Example**\n- a story\n"
+        self.assertEqual(R._context_group(body, "notes"), [])
+
+    def test_map_data_notes_falls_back_to_context_group(self):
+        # a requirement using ONLY the new consolidated Context section must still
+        # populate _map.json's notes/current_impl fields — the fallback this ADR-0017
+        # migration exists to guarantee, so the fields never go silently empty.
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-B-001.md"),
+                   "---\nid: A-B-001\nstatus: confirmed\nlayer: feature\n---\n\n"
+                   "# T\n\n## Context (non-binding)\n"
+                   "**Notes**\n- a footgun\n"
+                   "**Current implementation**\n- lives in foo.py\n")
+            data = R._build_map_data(R.load_requirements(rd), {})
+            node = data["nodes"][0]
+            self.assertEqual(node["notes"], ["a footgun"])
+            self.assertEqual(node["current_impl"], ["lives in foo.py"])
+
+    def test_map_data_notes_prefers_legacy_heading_over_context(self):
+        # an old-schema file must keep working completely unchanged — the fallback
+        # only fires when the legacy heading is absent.
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-B-001.md"),
+                   "---\nid: A-B-001\nstatus: confirmed\nlayer: feature\n---\n\n"
+                   "# T\n\n## WHAT — Notes & known limitations (informative)\n"
+                   "- legacy note\n")
+            data = R._build_map_data(R.load_requirements(rd), {})
+            self.assertEqual(data["nodes"][0]["notes"], ["legacy note"])
 
     def test_section_detection_and_drift_hash_agree_on_prefixes(self):  # bug: heading-re-out-of-sync
         # _has_section (gate, via _heading_label_is) and binding_hash (drift, via
@@ -6549,7 +6593,7 @@ class DraftObservedSurface(unittest.TestCase):  # tested-by: REQ-EXTRACT-008
                 R.cmd_extract({}, {}, code, rd)
             with open(os.path.join(rd, "DRAFT-SVC.md"), encoding="utf-8") as f:
                 svc = f.read()
-            where = svc.split("## WHERE")[1]
+            where = svc.split("## Context")[1]
             self.assertIn("`def fetch(url)`", where)
             self.assertIn("`def parse(text, strict)`", where)
             self.assertIn("module: Talks to the API.", where)

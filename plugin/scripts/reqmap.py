@@ -166,7 +166,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-02"
+MAP_ENGINE_VERSION = "2026-09-02.1"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2439,9 +2439,6 @@ Every line in this section is binding.
 - Observed: <a behavior that may be an AI accident — swallowed error, empty-string
   fallback, magic constant, unreachable branch>. Intended, or a bug to fix?
 
-## WHAT — Notes & known limitations (informative)
-- A known fragility/footgun the implementer should know but which is NOT enforced.
-
 ## HOW — Acceptance (= tests)
 <!-- Keep Given/When/Then concrete and self-explanatory; spell out any term the
      Contract introduced. -->
@@ -2450,15 +2447,19 @@ AC-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   When   <action>
   Then   <observable, pass/fail result>   (one test per AC; each maps to tested-by)
 
-## Example — in practice (optional, non-binding)
-<!-- A short plain-language story of the feature in use — the angle anyone reads
-     to "get it" fast. NON-BINDING illustration: the Given/When/Then above is the
-     precise version; on any conflict the Contract + Acceptance win. This section is
-     not hashed and not linted, so it never trips drift. -->
+## Context (non-binding)
+<!-- Everything here is commentary: not hashed, not linted, never trips drift. On
+     any conflict with the Contract + Acceptance above, they win. Bold sub-labels
+     are the same clause-group convention the Contract uses (ADR-0017) — keep only
+     the ones you need. -->
+**Notes**
+- A known fragility/footgun the implementer should know but which is NOT enforced.
+
+**Example**
 - e.g. Ana marks AUTH-001 confirmed, later edits its contract text; at commit
   `check` tells her "DRIFT — contract changed since lock" so she re-reviews.
 
-## WHERE — Current implementation
+**Current implementation**
 - How the code does it today (the volatile narrative — may drift from the contract).
 
 ## Links
@@ -2809,7 +2810,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             "{hint}\n\n"
                             "## HOW — Acceptance (= tests)\n"
                             "- TODO: Given/When/Then checks for the contract above.\n\n"
-                            "## WHERE — Current implementation\n- {rel}\n".format(
+                            "## Context (non-binding)\n**Current implementation**\n- {rel}\n".format(
                                 cap=cap, title=(title or os.path.splitext(fn)[0]),
                                 rel=rel, hint=hint))
             else:
@@ -2835,7 +2836,7 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
                             f"constant, dead branch) — intended, or a bug to fix?\n\n"
                             f"## HOW — Acceptance (= tests)\n"
                             f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
-                            f"## WHERE — Current implementation\n- {rel}\n{surface}")
+                            f"## Context (non-binding)\n**Current implementation**\n- {rel}\n{surface}")
             proposed += 1
             print(f"{review:14} {cap}  <- {rel}")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")
@@ -2843,10 +2844,11 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: REQ-EXTRACT-
 
 
 def _observed_surface(facts, limit=12):  # implements: REQ-EXTRACT-008
-    """Authoring hint for a code draft's WHERE section: the module docstring's first
-    line and the top-level signatures `plan` already knows how to read. Empty string
-    when the language has no parser. Non-binding by construction — it lives under
-    WHERE, never in the Contract, so a promoted draft still needs an authored contract."""
+    """Authoring hint for a code draft's Context/Current-implementation group: the
+    module docstring's first line and the top-level signatures `plan` already knows
+    how to read. Empty string when the language has no parser. Non-binding by
+    construction — it lives under Context, never in the Contract, so a promoted
+    draft still needs an authored contract."""
     sigs = list(facts.get("signatures") or [])
     doc = (facts.get("docstrings") or {}).get("module")
     if not sigs and not doc:
@@ -3352,8 +3354,12 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: REQ-MAP-007
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _bullets(r["body"], "contract"),
             "verify": _bullets(r["body"], "verify intent"),
-            "notes": _bullets(r["body"], "notes"),
-            "current_impl": _bullets(r["body"], "current implementation"),
+            # legacy per-topic heading first; ADR-0017's consolidated Context section
+            # (bold **Notes**/**Current implementation** sub-groups) is the fallback,
+            # never both at once in one file, so this never masks real content.
+            "notes": _bullets(r["body"], "notes") or _context_group(r["body"], "notes"),
+            "current_impl": (_bullets(r["body"], "current implementation")
+                              or _context_group(r["body"], "current implementation")),
             "acc": _acc_items(r["body"]),                    # AC blocks AND bullets
             "accept": _section_raw(r["body"], "acceptan"),    # raw acceptance (AC blocks, line breaks kept)
             # legacy schema (Input / Description / Output) — kept so old docs still render
@@ -5192,6 +5198,41 @@ def _bullets(body, name):  # implements: REQ-MAP-007
         elif s and not s.startswith("<!--") and out:
             # hanging-indent continuation of the current bullet — fold it back in
             # so multi-line clauses are not truncated to their first physical line.
+            out[-1] = (out[-1] + " " + s).strip()
+    return out
+
+
+def _context_group(body, label):  # implements: REQ-CONTEXT-048
+    """Bullets under a bold `**<label>**` sub-group inside the consolidated
+    `## Context (non-binding)` section — the form `new`'s template scaffolds since
+    ADR-0017, replacing the legacy per-topic `## WHAT — Notes` / `## WHERE — Current
+    implementation` headings for newly-authored requirements. Reuses the existing
+    bold-label grouping convention (`_is_label_line`, already used by Contract
+    clause-groups) rather than inventing a second syntax. Callers try the legacy
+    heading via `_bullets()` first — this is the fallback for files that never had
+    one, so an old-schema requirement is completely unaffected."""
+    out, in_context, in_label, fenced = [], False, False, False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        if s.lower().startswith("## "):
+            in_context = _heading_label_is(s, "context")
+            in_label = False
+            continue
+        if not in_context:
+            continue
+        if _is_label_line(line):
+            in_label = s.strip("*").strip().lower() == label.lower()
+            continue
+        if not in_label:
+            continue
+        if s.startswith("-"):
+            out.append(s[1:].strip())
+        elif s and not s.startswith("<!--") and out:
             out[-1] = (out[-1] + " " + s).strip()
     return out
 

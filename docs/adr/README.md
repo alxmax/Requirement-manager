@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Fifteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
+Eighteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
 were previously findable only by reading every release note in order.
 
 An ADR here records a decision that is **expensive to reverse** or that a reader would
@@ -26,6 +26,8 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0014](0014-engine-stays-one-file.md) | The engine stays one file, and gets no size gate | Accepted |
 | [0015](0015-aggregate-layer-instead-of-implicit-dependency-coverage.md) | A requirement covered by its dependencies is a declared layer, not an inference | Accepted |
 | [0016](0016-no-edge-case-marker.md) | No first-class edge-case marker, section, or heuristic | Rejected |
+| [0017](0017-consolidated-context-section.md) | Consolidate Notes/Example/Current-implementation into one Context section | Accepted |
+| [0018](0018-no-contract-acceptance-traceability-marker-yet.md) | No Contract-to-Acceptance traceability marker, yet | Rejected |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
