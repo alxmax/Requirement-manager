@@ -118,32 +118,60 @@
 - [x] V-model verification levels: `@unit`/`@integration`/`@system` on `tested-by:`, `validated-against:` activated as the validation link | lane: feature
       <!-- REQ-VLEVEL-037 -->
 
-## v2.32
-<!-- Two gaps measured 2026-09-02 while reviewing the corpus against the V-model/ASPICE
-     shape. Both are worth closing on their own merits, independent of any standard:
-     they are the links the corpus asserts it has and does not. NOT a move toward
-     conformance — the ADR-0007 unpark trigger has NOT fired (no regulated user, no
-     assessor); this is dogfooding the tool's own traceability claim. -->
-- [ ] Bidirectional traceability: raise `satisfies:` coverage from 11/54 to 54/54 | lane: ops
-      <!-- Measured: 43 of 54 confirmed requirements carry no `satisfies:`, so 80% trace to
-           nothing above them. NEED-SSOT-001 is the sole apex, `satisfied_by` 11.
-           Consequence, measured on the depends_on graph: the corpus is a lozenge
-           (6 / 17 / 24 / 7 nodes by depth), not a pyramid, and the single `need` sits at
-           depth 0 beside the bus foundations rather than at the apex — `depends_on` is a
-           composition axis, `satisfies` is the level axis, and only the latter builds a
-           hierarchy. Blocked on a prior decision: 54 architectures under one need violates
-           any sane fan-out; 3-11 system-level needs are needed first (54/20 = 2.7,
-           54/5 = 10.8). Check `area:` adoption before inventing them — the grouping may
-           already be latent there. -->
-- [ ] Verification criteria: raise `verifiable by:` from 2/54 toward full coverage | lane: ops
-      <!-- Measured 2/51 in ADR-0016, unchanged at 2/54. The marker already exists in the
-           `new` template on each AC line, and `_labeled_acs` already reads it. The value is
-           not conformance: it tells an agent which criteria are machine-verifiable and which
-           need a human — exactly the decision a coding agent has to make. NOTE the standing
-           counter-evidence: ADR-0016 used this marker's own 4% adoption as the reason to
-           REJECT a comparable in-file marker, against 27% for `# verifies:`, which lives in
-           the test file the author is already editing. Raising it by hand is easy; keeping
-           it raised is the unproven part. -->
+## v2.32 — DE VERIFICAT
+<!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided; each
+     is recorded to be checked before it is actioned. Audited the same day:
+     runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
+
+- [ ] DE VERIFICAT: decide a system grouping — 5-8 needs instead of one | lane: ops
+      <!-- NEED-SSOT-001 is the only `layer: need` today and every `satisfies:` edge points at
+           it. `area:` is 0/54, so no grouping can be derived automatically. Blocks the next
+           item. Cost: a decision, no code. -->
+
+- [ ] DE VERIFICAT: satisfies from 11/54 to full coverage | lane: ops
+      <!-- 43 of 54 requirements carry no upward link. `depends_on` cannot substitute — it is
+           a composition axis, not a level axis. Depends on the grouping decision above. -->
+
+- [ ] DE VERIFICAT: verifiable by: from 2/54 | lane: ops
+      <!-- Independent of the two items above. The marker has been at 2 files since it was
+           introduced on 2026-08-17, while the corpus grew from 44 to 54. Raising it is easy;
+           keeping it raised is the unproven part. Re-check at 90 days. -->
+
+- [ ] DE VERIFICAT: rename layers by alias — need->system, aggregate->architecture | lane: feature
+      <!-- Both old names stay valid in VALID_LAYER. `bus` and `feature` untouched: they are a
+           fan-in axis, not a level axis (reqmap.py:4208 — "`bus` is DEFINED by fan-in"). -->
+
+- [ ] DE VERIFICAT: decide the fate of the aggregate layer | lane: ops
+      <!-- `layer: aggregate` shipped 2026-08-31 (v2.29.0, ADR-0015) and is used by 0 of the 54
+           requirements here; ADR-0015 records its motivating case as living in a consumer
+           corpus. It is exempt from the implements/tested-by gates via IMPL_EXEMPT_LAYERS and
+           has acceptance criteria written about it in REQ-PROMOTE-011 and REQ-TRACE-020. -->
+
+- [ ] DE VERIFICAT: fan-out check 5-20, warn-only | lane: feature
+      <!-- Flag a requirement whose child count falls outside 5-20. Name the counted set before
+           measuring: `depends_on`, `satisfied_by` and Contract clauses give very different
+           answers, and `LINT_BUS_FANOUT_MIN` (reqmap.py:3997) already uses "fan-out" for the
+           depends_on count. -->
+
+- [ ] DE VERIFICAT: split REQ-MAP-007 into two requirements | lane: ops
+      <!-- 35 Contract clauses, and the only requirement over 20 carrying no `lint_exempt:` —
+           the only one whose size has never been judged acceptable in writing. It carries no
+           `# verifies:` tags, so a split orphans no per-criterion link. -->
+
+- [ ] DE VERIFICAT: decide the unit for long-sentence / statement-too-long | lane: bus
+      <!-- Both read `_lint_prose` (reqmap.py:4021), which yields physical LINES; the files wrap
+           near 95 columns, so both report 0 across the corpus — not because the prose is short
+           but because no clause is ever seen whole. `statement-size` (v2.31.0) already reads
+           `_contract_clauses` (4202), so two checks in the same function disagree about their
+           unit. Neither is in STRICT_PROMOTE (4445), so both stay warn-only whatever is
+           decided. -->
+
+- [ ] DE VERIFICAT: form: atomic — 54 -> ~665 nodes | lane: feature
+      <!-- NOT NOW. Depends on the items above. The cost is not the file count but the
+           acceptance work: 610 Contract clauses against 303 criteria, with 50 of 54
+           requirements holding more clauses than criteria. Blocking mechanical fact: a
+           heading-less body makes `binding_hash` return e3b0c44298fc, the SHA-256 of the empty
+           string — drift detection would silently measure nothing. -->
 
 ## v2.8 (deferred — demand-gated)
 <!-- Multi-platform Phase 2: the MCP server. Senate 2026-06-21 deferred it: all 9 senators converged that
