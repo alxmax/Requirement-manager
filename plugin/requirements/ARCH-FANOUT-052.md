@@ -22,7 +22,7 @@ Every bullet below is binding.
      a child        a requirement that names this one in its `satisfies:` list.
      a parent       a requirement that has at least one child.
      the ceiling    the largest child count a parent may carry before the check reports.
-                    It depends on the parent's `level:` — see the contract below. -->
+                    The ceiling depends on the parent's `level:` — see the contract below. -->
 
 **What is counted**
 - The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it.
