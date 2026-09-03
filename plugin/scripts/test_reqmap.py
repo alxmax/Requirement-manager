@@ -938,6 +938,15 @@ class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055
         out = R._mermaid_system({"nodes": [a, b], "edges": []})
         self.assertIn('subgraph sg_ANALYSIS["ANALYSIS"]', out)   # grouped by area:, not id prefix
 
+    def test_area_subgraph_label_is_mermaid_escaped(self):  # bug: area-subgraph-unescaped-label
+        # a `"` in an area: frontmatter value must not break the generated Mermaid
+        # subgraph line -- route it through _mlabel like _mermaid_deps already does.
+        a = self._node("A-X-001"); a['area'] = 'Foo"Bar'
+        b = self._node("A-Y-002"); b['area'] = 'Foo"Bar'
+        out = R._mermaid_system({"nodes": [a, b], "edges": []})
+        self.assertNotIn('"Foo"Bar"', out)
+        self.assertIn(R._mlabel('Foo"Bar'), out)
+
     def test_render_md_carries_legends(self):
         with tempfile.TemporaryDirectory() as d:
             R.render_md(self._data("T"), d)
@@ -954,6 +963,27 @@ class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055
         self.assertIn('a_AI["AI', out)
         self.assertEqual(out.count("a_AI --> a_BUS"), 1)  # two AI->bus edges aggregate to one
         self.assertNotIn("BUS_PATHS_001", out)           # no per-capability hub hairball
+
+    def test_deps_area_ids_distinct_on_safeid_collision(self):  # bug: deps-safeid-collision
+        # reuses the exact fixture test_area_subgraphs_distinct_ids_for_safeid_collision uses:
+        # two area labels ("my-area" / "my_area") that both sanitize to the same _safe_id
+        # must still get distinct node ids in _mermaid_deps, with a real edge (not a self-loop).
+        data = {"nodes": [
+            self._node("X-1"), self._node("X-2"),
+            self._node("Y-1"), self._node("Y-2"),
+        ], "edges": [["X-1", "Y-1"]]}
+        for n in data["nodes"]:
+            n["area"] = "my-area" if n["id"].startswith("X") else "my_area"
+        out = R._mermaid_deps(data)
+        import re as _re
+        node_ids = _re.findall(r"^  (a_\w+)\[", out, _re.M)
+        self.assertEqual(len(node_ids), len(set(node_ids)), "colliding area node ids:\n" + out)
+        self.assertEqual(len(node_ids), 2)
+        self.assertRegex(out, r"  a_\w+ --> a_\w+")
+        # a real edge between the two DISTINCT ids, not a node looping to itself
+        edge_line = next(l for l in out.splitlines() if "-->" in l)
+        src, dst = edge_line.strip().split(" --> ")
+        self.assertNotEqual(src, dst, "collapsed distinct areas into a self-loop:\n" + out)
 
     def test_risk_grouped_no_edges_flags_baseline(self):
         data = {"nodes": [self._node("AI-X-001", status="baseline"),
@@ -1700,6 +1730,12 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
         # the Current-implementation section after switching off substring matching
         body = "## WHERE — Current implementation\n- impl detail\n"
         self.assertEqual(R._bullets(body, "current implementation"), ["impl detail"])
+
+    def test_section_keeps_real_leading_dash_content(self):  # bug: section-lstrip-char-class
+        # lstrip("- ") strips a CHARACTER CLASS, not the literal two-char "- " bullet
+        # marker -- it must not also eat a real leading "-1" that follows the marker.
+        body = "## WHAT — Contract\n- -1 means error\n"
+        self.assertEqual(R._section(body, "contract"), "-1 means error")
 
     def test_context_group_extracts_bold_subgroup(self):
         body = ("## Context (non-binding)\n"
@@ -7215,6 +7251,19 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
         self.assertIsNone(R._atomic_spans(classic))
         self.assertEqual(R._bullets(classic, "contract"), ["`x` does one thing."])
 
+    def test_atomic_bullets_keeps_real_leading_quote_char(self):  # bug: bullets-lstrip-char-class
+        # lstrip("> ") strips a CHARACTER CLASS ({">", " "}), not the single literal ">"
+        # quote marker -- it must not also eat a real leading ">" that follows the marker
+        # (e.g. ">100 requests/sec" must keep its ">100", not become "100 requests/sec").
+        body = ("# T\n\n"
+                "> >100 requests/sec triggers throttling.\n\n"
+                "Scenario: over the limit\n"
+                "  Given  heavy load\n"
+                "  When   the limiter runs\n"
+                "  Then   requests are throttled\n\n"
+                "## Members in code (auto)\n")
+        self.assertEqual(R._bullets(body, "contract"), [">100 requests/sec triggers throttling."])
+
 
 class VRungs(unittest.TestCase):  # tested-by: ARCH-VRUNGS-054
     """Each specification level answered by the verification level that discharges it."""
@@ -7298,6 +7347,17 @@ class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055
         md = R._build_md_text(dict(self.DATA, todos=[]))
         self.assertEqual(md.count("```mermaid"), 5)
         self.assertIn("Specification Hierarchy", md)
+
+    def test_the_legend_matches_the_diagram_order(self):  # bug: legend-md-missing-hierarchy-entry
+        # _LEGEND_MD must carry one entry per diagram _build_md_text emits, in the same
+        # order -- a missing entry shifts every caption by one and leaves the LAST
+        # diagram (Risk & Unknowns) with an empty legend.
+        self.assertEqual(len(R._LEGEND_MD), 5)
+        md = R._build_md_text(dict(self.DATA, todos=[]))
+        idx = md.index("## Specification Hierarchy")
+        self.assertIn("satisfies", md[idx:idx + 400])
+        idx = md.index("## Risk & Unknowns")
+        self.assertIn("unimplemented", md[idx:idx + 400])
 
     def test_the_graph_carries_the_satisfies_edges(self):
         # They were computed since ARCH-TRACE-020 and dropped by _build_json_text until now.

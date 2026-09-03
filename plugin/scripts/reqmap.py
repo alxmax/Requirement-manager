@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.7"
+MAP_ENGINE_VERSION = "2026-09-03.8"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -5687,7 +5687,10 @@ def _section(body, name):  # implements: ARCH-MAP-007
                 seen = True
             continue
         if grab and s and not s.startswith("<!--"):
-            out.append(s.lstrip("- "))
+            # strip only a literal one-time "- " bullet marker, not a lstrip() char
+            # class -- a class-lstrip also eats real leading "-"/">" content
+            # (e.g. "- -1 means error" must keep its "-1", not become "1 means error")
+            out.append(s[2:] if s.startswith("- ") else s)
     return " ".join(out)
 
 
@@ -5732,7 +5735,10 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
     if name in CONTRACT_LABELS:
         _sp = _atomic_spans(body)
         if _sp:                                    # the atomic statement is the one clause
-            return [" ".join(l.lstrip("> ").strip() for l in _sp[0]).strip()]
+            # strip whitespace, then only the literal ">" quote-marker chars (never a
+            # "> " char class -- that would also eat a real leading ">" in the content,
+            # e.g. ">100 requests/sec" losing its ">100"). Mirrors _first_quote.
+            return [" ".join(l.strip().lstrip(">").strip() for l in _sp[0]).strip()]
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -5880,7 +5886,7 @@ def _emit_area_subgraphs(lines, nodes, label_fn=None):
         # suffix on collision so two areas that sanitize to the same id (my-area /
         # my_area) don't emit duplicate `subgraph` ids and break the Mermaid render
         sg = base if k == 1 else "{}_{}".format(base, k)
-        lines.append('  subgraph sg_{}["{}"]'.format(sg, area))
+        lines.append('  subgraph sg_{}["{}"]'.format(sg, _mlabel(area)))
         for n in ns:
             lines.append('    {}["{}"]'.format(_safe_id(n["id"]), label_fn(n)))
         lines.append("  end")
@@ -5964,14 +5970,24 @@ def _mermaid_deps(data):  # implements: ARCH-MAPDIAGRAMS-055
         la, lb = label_of.get(a), label_of.get(b)
         if la and lb and la != lb:
             edges.add((la, lb))
+    # suffix on collision so two areas that sanitize to the same id (my-area /
+    # my_area) don't collapse into one Mermaid node -- mirrors _emit_area_subgraphs,
+    # which already guards its own sg_ ids the same way.
+    id_used, id_of = {}, {}
+    for label in sorted(counts):
+        base = _safe_id(label)
+        k = id_used.get(base, 0) + 1
+        id_used[base] = k
+        id_of[label] = "a_" + (base if k == 1 else "{}_{}".format(base, k))
+
     lines = ["graph LR"]
     for label in sorted(counts):
-        lines.append('  a_{}["{}<br><small>{} caps</small>"]'.format(
-            _safe_id(label), _mlabel(label), counts[label]))
+        lines.append('  {}["{}<br><small>{} caps</small>"]'.format(
+            id_of[label], _mlabel(label), counts[label]))
     for la, lb in sorted(edges):
-        lines.append("  a_{} --> a_{}".format(_safe_id(la), _safe_id(lb)))
+        lines.append("  {} --> {}".format(id_of[la], id_of[lb]))
     for label in sorted(bus_areas):
-        lines.append("  style a_{} stroke-width:3px".format(_safe_id(label)))
+        lines.append("  style {} stroke-width:3px".format(id_of[label]))
     return "\n".join(lines)
 
 
@@ -6092,9 +6108,11 @@ def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055
     return "\n".join(lines)
 
 
-# Per-tab legends (parallel to the 4 diagrams, same order) so each view is
-# self-explanatory. HTML uses colored swatches; markdown uses words.
+# Per-tab legends (parallel to the 5 diagrams emitted by _build_md_text, same
+# order) so each view is self-explanatory. HTML uses colored swatches; markdown
+# uses words.
 _LEGEND_MD = [
+    "The spec hierarchy: system needs -> architecture requirements (`satisfies:`), each box showing how many code-level requirements sit under it. The code level itself is counted, not drawn.",
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
