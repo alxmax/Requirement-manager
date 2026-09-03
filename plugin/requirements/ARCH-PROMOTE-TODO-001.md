@@ -1,7 +1,7 @@
 ---
 id: ARCH-PROMOTE-TODO-001
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-NEW-004]

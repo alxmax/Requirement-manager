@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v3.1.1` — 2026-09-03
+
+**The `architecture` level is promoted into `system`** ([ADR-0024](docs/adr/0024-architecture-level-promoted-into-system.md), superseding [ADR-0023](docs/adr/0023-fan-out-per-level-ceilings-no-floor.md)'s `system` ceiling). A `/senate` audit rejected an earlier, literal 2-level proposal that froze the `system` tier at 9 requirements: flattening 573 `level: code` requirements onto 9 parents averages ~64 children each (one node hits 107), 2–3.5x over any proposed ceiling. The revised design that survived promotes the 62 `level: architecture` requirements into `level: system` instead of deleting them — the middle rung's grouping is unchanged, only its label moves, so no `satisfies:` edge is repointed and no confirmed contract's fan-out changes.
+
+- `fan-out`'s `system` ceiling moves from 10 to 50 (`LINT_FANOUT_BANDS` in `plugin/scripts/reqmap.py`); the `architecture` ceiling (30) is unchanged for a consumer repo that still uses a real 3-tier split.
+- This corpus now has 71 `level: system` requirements (9 original `layer: need` stakeholder requirements, fan-out 5–10, plus the 62 promoted `layer: bus`/`feature` requirements, fan-out up to 32), 0 at `level: architecture`, 573 at `level: code`. `level: system` now spans two populations distinguished by `layer:`, not `level:` — see CLAUDE.md's "Ids carry their level" section.
+- **`ARCH-FANOUT-052`'s own Contract stated the old ceiling relationship as a binding clause** ("a `system` parent's ceiling is ten … lower than an architecture requirement's"), and a coupled test (`test_system_ceiling_is_lower_than_architecture`) asserted it. Both are corrected to the new ceiling; the test is renamed `test_system_ceiling_is_fifty`. Caught by a Consilium Dialectic deliberation before any file changed, not discovered by a broken CI run.
+- `_mermaid_hierarchy`'s diagram label logic decided "show this node's `<N> code` fan-out annotation" by testing `level: architecture` literally — after the promotion every drawn node reads `level: system`, so the 62 promoted nodes would have silently lost their annotation. It now keys on "has counted code-level children" instead, which produces identical output on a corpus that still uses a real 3-tier split and correct output on this one. New test: `test_a_promoted_system_node_still_shows_its_code_count`.
+- `VALID_LEVEL` and `LINT_FANOUT_BANDS["architecture"]` are unchanged — `architecture` stays a valid, generic level for any repo (including this one, later) that wants a real 3-tier split; this corpus having zero members there today is a fact of its current shape, not something the engine forgot how to support.
+
 ## plugin `v3.1.0` — 2026-09-03
 
 **`next` and `lint` could report a different set of oversize requirements for the same corpus, and `lint --decompose` only ever acted on `statement-size`.** `next`'s Granularity bucket iterated every status with no `lint_exempt` check and its own hardcoded 5-AC threshold; `lint`'s `ac-count-high` check used `LINT_AC_MAX` (7), scoped to non-draft statuses, and honored `lint_exempt: [ac-count-high]`. Two commands, two answers to the same question.

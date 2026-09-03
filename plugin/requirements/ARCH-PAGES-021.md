@@ -1,7 +1,7 @@
 ---
 id: ARCH-PAGES-021
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-MAP-007]

@@ -1,7 +1,7 @@
 ---
 id: ARCH-LINT-014
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]

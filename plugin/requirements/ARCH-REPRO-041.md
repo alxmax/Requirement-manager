@@ -1,7 +1,7 @@
 ---
 id: ARCH-REPRO-041
 status: confirmed        # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: architecture
+level: system
 layer: feature       # bus | feature | need
 owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)

@@ -1,7 +1,7 @@
 ---
 id: ARCH-REVIEWEDSCORE-109
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-HEALTH-017]

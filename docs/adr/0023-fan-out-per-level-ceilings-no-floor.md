@@ -4,7 +4,11 @@
 Decision ("A 5–20 fan-out band on each level, reported at both edges") and its Consequence
 ("The fan-out band fires 7 times on this repo and those 7 are left standing … they are
 real"). ADR-0019 is otherwise unchanged and remains Accepted: the V-model's left arm, its
-warn-only posture, and the `satisfies:`/`depends_on:` split all stand.
+warn-only posture, and the `satisfies:`/`depends_on:` split all stand. **This record's own
+Decision line 1 is itself superseded for the `system` half** by
+[ADR-0024](0024-architecture-level-promoted-into-system.md) (2026-09-03), which raises the
+`system` ceiling from ten to fifty after promoting the `architecture` level's requirements
+into `system`. The `architecture` ceiling (thirty) and everything else here stand.
 
 **Date.** 2026-09-03.
 

@@ -186,7 +186,15 @@ LINT_FANOUT_MAX = 20
 # A parent with no `level:` keeps the uniform 5-20 band — the level axis stays doubly
 # opt-in (ADR-0019), so a repo that never declares it sees exactly what it saw before, and
 # this corpus's evidence is not silently imposed on a corpus shaped differently.
-LINT_FANOUT_BANDS = {"system": (None, 10), "architecture": (None, 30)}
+#
+# `system`'s ceiling moved 10 -> 50 (ADR-0024): this corpus's architecture-level
+# requirements were promoted to `level: system` (the 3-level pyramid collapsed to
+# system/code, `architecture` left declared but currently unpopulated here), so the
+# `system` band now also covers what the `architecture` band covered — its ceiling
+# must be at least as high. 50 keeps headroom above the highest observed promoted
+# parent (32, ARCH-CHECK-006) without loosening the band for a corpus that still
+# uses a real 3-tier split, where `architecture`'s own (None, 30) is unchanged.
+LINT_FANOUT_BANDS = {"system": (None, 50), "architecture": (None, 30)}
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
@@ -216,7 +224,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.15"
+MAP_ENGINE_VERSION = "2026-09-03.16"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -6108,8 +6116,17 @@ def _mermaid_hierarchy(data):  # implements: ARCH-MAPDIAGRAMS-055
     Drawn from `upstream_edges`, not `depends_on` — those are different axes, and only this
     one forms a hierarchy. The `code` level is counted, never drawn: a corpus that has split
     its clauses carries hundreds of them, and past a few hundred nodes Mermaid stops being
-    something a reader can take in (or GitHub renders at all). Each architecture box shows
-    how many code requirements sit under it, which is the fan-out the band judges."""
+    something a reader can take in (or GitHub renders at all). Each grouping box shows how
+    many code requirements sit under it, which is the fan-out the band judges.
+
+    The bold-double-boxed root style keys on having no counted code children, not on the
+    literal `level:` string — a corpus that collapsed `architecture` into `system` (ADR-0024)
+    can carry two populations under `level: system`: root stakeholder-need nodes (no code
+    children of their own; their children are other `system`-level nodes) and promoted
+    grouping nodes (real code children). Levelled on `level:` alone, both would draw as
+    identical bare-labelled roots and the promoted nodes would silently lose their fan-out
+    annotation — this counts children instead, which reads correctly whether or not a
+    consumer repo still uses a real 3-tier split."""
     levels = {n["id"]: n.get("level") for n in data["nodes"]}
     drawn = [n for n in data["nodes"] if levels.get(n["id"]) in ("system", "architecture")]
     if not drawn:
@@ -6121,14 +6138,15 @@ def _mermaid_hierarchy(data):  # implements: ARCH-MAPDIAGRAMS-055
     lines = ["graph TD"]
     for n in drawn:
         rid = n["id"]
-        label = rid if levels[rid] == "system" else "{}<br/>{} code".format(rid, kids.get(rid, 0))
-        shape = "[[{}]]" if levels[rid] == "system" else "[{}]"
+        is_root = kids.get(rid, 0) == 0
+        label = rid if is_root else "{}<br/>{} code".format(rid, kids.get(rid, 0))
+        shape = "[[{}]]" if is_root else "[{}]"
         lines.append("  {}{}".format(_safe_id(rid), shape.format(label)))
     for child, parent in data.get("upstream_edges", []):
         if levels.get(child) in ("system", "architecture") and parent in levels:
             lines.append("  {} --> {}".format(_safe_id(parent), _safe_id(child)))
     for n in drawn:
-        if levels[n["id"]] == "system":
+        if kids.get(n["id"], 0) == 0:
             lines.append("  style {} stroke-width:3px".format(_safe_id(n["id"])))
     return "\n".join(lines)
 

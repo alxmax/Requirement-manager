@@ -2,7 +2,7 @@
 id: ARCH-ATOMICFORM-053
 status: confirmed
 form: atomic
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have

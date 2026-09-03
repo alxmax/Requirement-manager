@@ -1,7 +1,7 @@
 ---
 id: ARCH-INIT-012
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-EXTRACT-008, ARCH-CHECK-006, ARCH-MAP-007]

@@ -1,7 +1,7 @@
 ---
 id: ARCH-LEVEL-051
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have

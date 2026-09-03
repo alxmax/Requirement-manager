@@ -1,7 +1,7 @@
 ---
 id: ARCH-NEXT-013
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-MAP-007]

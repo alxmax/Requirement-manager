@@ -2,7 +2,7 @@
 id: ARCH-VRUNGS-054
 status: confirmed
 form: atomic
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: could-have

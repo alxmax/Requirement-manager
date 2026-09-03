@@ -1,7 +1,7 @@
 ---
 id: ARCH-SHOW-015
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-SCAN-002]

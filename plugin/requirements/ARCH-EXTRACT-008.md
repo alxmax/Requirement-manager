@@ -1,7 +1,7 @@
 ---
 id: ARCH-EXTRACT-008
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-SCAN-002]

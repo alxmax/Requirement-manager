@@ -1,7 +1,7 @@
 ---
 id: ARCH-DECOMPOSE-050
 status: confirmed    # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: architecture
+level: system
 layer: feature       # bus | feature | need | aggregate
 owner: Alex
 priority: could-have

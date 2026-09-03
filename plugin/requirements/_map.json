@@ -1,11 +1,11 @@
 {
-  "engine_version": "2026-09-03.15",
+  "engine_version": "2026-09-03.16",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
       "id": "ARCH-ACVERIFY-019",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Per-criterion test coverage",
@@ -70,31 +70,31 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1218"
+          "loc": "plugin/scripts/reqmap.py:1226"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1588"
+          "loc": "plugin/scripts/reqmap.py:1596"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1691"
+          "loc": "plugin/scripts/reqmap.py:1699"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1765"
+          "loc": "plugin/scripts/reqmap.py:1773"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1777"
+          "loc": "plugin/scripts/reqmap.py:1785"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2438"
+          "loc": "plugin/scripts/reqmap.py:2446"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3627"
+          "loc": "plugin/scripts/reqmap.py:3635"
         },
         {
           "role": "tested-by",
@@ -503,7 +503,7 @@
     {
       "id": "ARCH-ATOMICFORM-053",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "The atomic requirement form",
@@ -534,43 +534,43 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1691"
+          "loc": "plugin/scripts/reqmap.py:1699"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1835"
+          "loc": "plugin/scripts/reqmap.py:1843"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1838"
+          "loc": "plugin/scripts/reqmap.py:1846"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1876"
+          "loc": "plugin/scripts/reqmap.py:1884"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1893"
+          "loc": "plugin/scripts/reqmap.py:1901"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1900"
+          "loc": "plugin/scripts/reqmap.py:1908"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2337"
+          "loc": "plugin/scripts/reqmap.py:2345"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2583"
+          "loc": "plugin/scripts/reqmap.py:2591"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5917"
+          "loc": "plugin/scripts/reqmap.py:5925"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7465"
+          "loc": "plugin/scripts/test_reqmap.py:7463"
         }
       ],
       "test_exempt": null,
@@ -581,7 +581,7 @@
     {
       "id": "ARCH-ATOMICITY-049",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Statement atomicity",
@@ -653,11 +653,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4425"
+          "loc": "plugin/scripts/reqmap.py:4433"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4433"
+          "loc": "plugin/scripts/reqmap.py:4441"
         },
         {
           "role": "tested-by",
@@ -1092,7 +1092,7 @@
     {
       "id": "ARCH-CANDIDATES-009",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Capability candidates (extraction plan)",
@@ -1162,39 +1162,39 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3205"
+          "loc": "plugin/scripts/reqmap.py:3213"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3215"
+          "loc": "plugin/scripts/reqmap.py:3223"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3256"
+          "loc": "plugin/scripts/reqmap.py:3264"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3279"
+          "loc": "plugin/scripts/reqmap.py:3287"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3302"
+          "loc": "plugin/scripts/reqmap.py:3310"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3321"
+          "loc": "plugin/scripts/reqmap.py:3329"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3340"
+          "loc": "plugin/scripts/reqmap.py:3348"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3346"
+          "loc": "plugin/scripts/reqmap.py:3354"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3371"
+          "loc": "plugin/scripts/reqmap.py:3379"
         },
         {
           "role": "tested-by",
@@ -1765,7 +1765,7 @@
     {
       "id": "ARCH-CHECK-006",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "The gate",
@@ -1906,19 +1906,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1821"
+          "loc": "plugin/scripts/reqmap.py:1829"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2004"
+          "loc": "plugin/scripts/reqmap.py:2012"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2091"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2149"
+          "loc": "plugin/scripts/reqmap.py:2099"
         },
         {
           "role": "implements",
@@ -1926,23 +1922,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2281"
+          "loc": "plugin/scripts/reqmap.py:2165"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2595"
+          "loc": "plugin/scripts/reqmap.py:2289"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2636"
+          "loc": "plugin/scripts/reqmap.py:2603"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5318"
+          "loc": "plugin/scripts/reqmap.py:2644"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6796"
+          "loc": "plugin/scripts/reqmap.py:5326"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:6814"
         },
         {
           "role": "tested-by",
@@ -3239,7 +3239,7 @@
     {
       "id": "ARCH-CMDREGISTRY-033",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "CLI command registry + generated integration artifacts",
@@ -3297,15 +3297,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:256"
+          "loc": "plugin/scripts/reqmap.py:264"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:748"
+          "loc": "plugin/scripts/reqmap.py:756"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2661"
+          "loc": "plugin/scripts/reqmap.py:2669"
         },
         {
           "role": "tested-by",
@@ -3548,7 +3548,7 @@
     {
       "id": "ARCH-CONTEXT-048",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Consolidated Context section",
@@ -3599,7 +3599,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5958"
+          "loc": "plugin/scripts/reqmap.py:5966"
         },
         {
           "role": "tested-by",
@@ -3804,7 +3804,7 @@
     {
       "id": "ARCH-COVERAGE-029",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Untagged-code coverage signal",
@@ -3861,7 +3861,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5486"
+          "loc": "plugin/scripts/reqmap.py:5494"
         },
         {
           "role": "tested-by",
@@ -4142,7 +4142,7 @@
     {
       "id": "ARCH-DECOMPOSE-050",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Clause decomposition scaffold",
@@ -4213,23 +4213,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2228"
+          "loc": "plugin/scripts/reqmap.py:2236"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4777"
+          "loc": "plugin/scripts/reqmap.py:4785"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4795"
+          "loc": "plugin/scripts/reqmap.py:4803"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4820"
+          "loc": "plugin/scripts/reqmap.py:4828"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4856"
+          "loc": "plugin/scripts/reqmap.py:4864"
         },
         {
           "role": "tested-by",
@@ -4245,7 +4245,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7885"
+          "loc": "plugin/scripts/test_reqmap.py:7906"
         }
       ],
       "test_exempt": null,
@@ -4638,7 +4638,7 @@
     {
       "id": "ARCH-DESCRIPTION-057",
       "layer": "bus",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "One Description section, and Cases instead of Acceptance",
@@ -4672,23 +4672,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1792"
-        },
-        {
-          "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1800"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2110"
+          "loc": "plugin/scripts/reqmap.py:1808"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2117"
+          "loc": "plugin/scripts/reqmap.py:2118"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:2125"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7744"
+          "loc": "plugin/scripts/test_reqmap.py:7765"
         }
       ],
       "test_exempt": null,
@@ -4699,7 +4699,7 @@
     {
       "id": "ARCH-DOCBUNDLE-026",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Untagged doc-bundle warning",
@@ -4752,7 +4752,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1497"
+          "loc": "plugin/scripts/reqmap.py:1505"
         },
         {
           "role": "tested-by",
@@ -4921,7 +4921,7 @@
     {
       "id": "ARCH-DRIFT-003",
       "layer": "bus",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Contract hashing & lock",
@@ -4985,19 +4985,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1900"
+          "loc": "plugin/scripts/reqmap.py:1908"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1940"
+          "loc": "plugin/scripts/reqmap.py:1948"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1944"
+          "loc": "plugin/scripts/reqmap.py:1952"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1961"
+          "loc": "plugin/scripts/reqmap.py:1969"
         },
         {
           "role": "tested-by",
@@ -5330,7 +5330,7 @@
     {
       "id": "ARCH-DRIFTIMPACT-035",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Drift blast-radius: name dependents",
@@ -5378,7 +5378,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2499"
+          "loc": "plugin/scripts/reqmap.py:2507"
         },
         {
           "role": "tested-by",
@@ -5547,7 +5547,7 @@
     {
       "id": "ARCH-EXCALIDRAW-030",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Excalidraw scene builder — core API",
@@ -5963,7 +5963,7 @@
     {
       "id": "ARCH-EXCALIDRAW-031",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Excalidraw quality gates",
@@ -6341,7 +6341,7 @@
     {
       "id": "ARCH-EXCALIDRAW-032",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Excalidraw builder CLI verbs",
@@ -6556,7 +6556,7 @@
     {
       "id": "ARCH-EXTRACT-008",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Legacy extraction",
@@ -6628,19 +6628,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3005"
+          "loc": "plugin/scripts/reqmap.py:3013"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3072"
+          "loc": "plugin/scripts/reqmap.py:3080"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3164"
+          "loc": "plugin/scripts/reqmap.py:3172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3183"
+          "loc": "plugin/scripts/reqmap.py:3191"
         },
         {
           "role": "tested-by",
@@ -7157,7 +7157,7 @@
     {
       "id": "ARCH-FANOUT-052",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Hierarchy breadth",
@@ -7167,7 +7167,7 @@
         "The count reads the `satisfies:` graph only, never `depends_on`.",
         "A requirement with no children is skipped, because it is not a parent.",
         "The `fan-out` check warns when a parent carries more children than its ceiling.",
-        "A `system` parent's ceiling is ten; an `architecture` parent's is thirty.",
+        "A `system` parent's ceiling is fifty; an `architecture` parent's is thirty.",
         "A parent declaring no `level:` keeps the older uniform band, five to twenty, so a repo that never adopts the level axis sees what it saw before.",
         "The check reports no floor at either declared level.",
         "The `fan-out` check is warn-only and never changes the gate's exit code.",
@@ -7191,9 +7191,9 @@
         "CASE-3 — Given  an `architecture` requirement satisfied by thirty-two others When   `lint` runs Then   one `fan-out` finding names it as over its ceiling, and the exit code is unchanged",
         "CASE-4 — Given  a requirement that nothing satisfies When   `lint` runs Then   no `fan-out` finding is reported for it",
         "CASE-5 — Given  a corpus whose requirements all depend on one another but declare no `satisfies:` When   `lint` runs Then   no `fan-out` finding is reported at all",
-        "CASE-6 — Given  a `system` requirement satisfied by twelve others When   `lint` runs Then   one `fan-out` finding names it as over its ceiling, which is lower than an architecture requirement's"
+        "CASE-6 — Given  a `system` requirement satisfied by fifty-one others When   `lint` runs Then   one `fan-out` finding names it as over its ceiling of fifty"
       ],
-      "accept": "CASE-1\n  Given  an `architecture` requirement satisfied by three others\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it, because that level carries no floor\nCASE-2\n  Given  a requirement satisfied by eight others\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it\nCASE-3\n  Given  an `architecture` requirement satisfied by thirty-two others\n  When   `lint` runs\n  Then   one `fan-out` finding names it as over its ceiling, and the exit code is unchanged\nCASE-4\n  Given  a requirement that nothing satisfies\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it\nCASE-5\n  Given  a corpus whose requirements all depend on one another but declare no `satisfies:`\n  When   `lint` runs\n  Then   no `fan-out` finding is reported at all\nCASE-6\n  Given  a `system` requirement satisfied by twelve others\n  When   `lint` runs\n  Then   one `fan-out` finding names it as over its ceiling, which is lower than an\n         architecture requirement's",
+      "accept": "CASE-1\n  Given  an `architecture` requirement satisfied by three others\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it, because that level carries no floor\nCASE-2\n  Given  a requirement satisfied by eight others\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it\nCASE-3\n  Given  an `architecture` requirement satisfied by thirty-two others\n  When   `lint` runs\n  Then   one `fan-out` finding names it as over its ceiling, and the exit code is unchanged\nCASE-4\n  Given  a requirement that nothing satisfies\n  When   `lint` runs\n  Then   no `fan-out` finding is reported for it\nCASE-5\n  Given  a corpus whose requirements all depend on one another but declare no `satisfies:`\n  When   `lint` runs\n  Then   no `fan-out` finding is reported at all\nCASE-6\n  Given  a `system` requirement satisfied by fifty-one others\n  When   `lint` runs\n  Then   one `fan-out` finding names it as over its ceiling of fifty",
       "input": "",
       "output": "",
       "desc": "",
@@ -7218,11 +7218,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4491"
+          "loc": "plugin/scripts/reqmap.py:4499"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4879"
+          "loc": "plugin/scripts/reqmap.py:4887"
         },
         {
           "role": "tested-by",
@@ -7505,7 +7505,7 @@
     {
       "id": "ARCH-FINDINGS-010",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Open-findings report",
@@ -7581,23 +7581,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3493"
+          "loc": "plugin/scripts/reqmap.py:3501"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3580"
+          "loc": "plugin/scripts/reqmap.py:3588"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3606"
+          "loc": "plugin/scripts/reqmap.py:3614"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4123"
+          "loc": "plugin/scripts/reqmap.py:4131"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5755"
+          "loc": "plugin/scripts/reqmap.py:5763"
         },
         {
           "role": "tested-by",
@@ -8190,7 +8190,7 @@
     {
       "id": "ARCH-HEALTH-017",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Corpus health snapshot",
@@ -8265,7 +8265,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5393"
+          "loc": "plugin/scripts/reqmap.py:5401"
         },
         {
           "role": "tested-by",
@@ -8740,7 +8740,7 @@
     {
       "id": "ARCH-INIT-012",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "First-use bootstrap",
@@ -8808,11 +8808,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5625"
+          "loc": "plugin/scripts/reqmap.py:5633"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5661"
+          "loc": "plugin/scripts/reqmap.py:5669"
         },
         {
           "role": "tested-by",
@@ -9253,7 +9253,7 @@
     {
       "id": "ARCH-LEVEL-051",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Specification level",
@@ -9319,11 +9319,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2343"
+          "loc": "plugin/scripts/reqmap.py:2351"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3668"
+          "loc": "plugin/scripts/reqmap.py:3676"
         },
         {
           "role": "tested-by",
@@ -9568,7 +9568,7 @@
     {
       "id": "ARCH-LINT-014",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Requirement readability linter",
@@ -9639,19 +9639,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4385"
+          "loc": "plugin/scripts/reqmap.py:4393"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4420"
+          "loc": "plugin/scripts/reqmap.py:4428"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4491"
+          "loc": "plugin/scripts/reqmap.py:4499"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4856"
+          "loc": "plugin/scripts/reqmap.py:4864"
         },
         {
           "role": "tested-by",
@@ -10122,7 +10122,7 @@
     {
       "id": "ARCH-LINTCHECKS-025",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Readability & scope checks",
@@ -10219,15 +10219,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4414"
+          "loc": "plugin/scripts/reqmap.py:4422"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4491"
+          "loc": "plugin/scripts/reqmap.py:4499"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4878"
+          "loc": "plugin/scripts/reqmap.py:4886"
         },
         {
           "role": "tested-by",
@@ -11051,7 +11051,7 @@
     {
       "id": "ARCH-MAP-007",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Requirement graph (_map.json)",
@@ -11144,39 +11144,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1753"
+          "loc": "plugin/scripts/reqmap.py:1761"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2606"
+          "loc": "plugin/scripts/reqmap.py:2614"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3646"
+          "loc": "plugin/scripts/reqmap.py:3654"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4104"
+          "loc": "plugin/scripts/reqmap.py:4112"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4128"
+          "loc": "plugin/scripts/reqmap.py:4136"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4146"
+          "loc": "plugin/scripts/reqmap.py:4154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5737"
+          "loc": "plugin/scripts/reqmap.py:5745"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5792"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5807"
+          "loc": "plugin/scripts/reqmap.py:5800"
         },
         {
           "role": "implements",
@@ -11184,47 +11180,51 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5835"
+          "loc": "plugin/scripts/reqmap.py:5823"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5858"
+          "loc": "plugin/scripts/reqmap.py:5843"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5880"
+          "loc": "plugin/scripts/reqmap.py:5866"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5901"
+          "loc": "plugin/scripts/reqmap.py:5888"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5917"
+          "loc": "plugin/scripts/reqmap.py:5909"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6025"
+          "loc": "plugin/scripts/reqmap.py:5925"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6031"
+          "loc": "plugin/scripts/reqmap.py:6033"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6366"
+          "loc": "plugin/scripts/reqmap.py:6039"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6856"
+          "loc": "plugin/scripts/reqmap.py:6384"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6875"
+          "loc": "plugin/scripts/reqmap.py:6874"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6890"
+          "loc": "plugin/scripts/reqmap.py:6893"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:6908"
         },
         {
           "role": "tested-by",
@@ -11852,7 +11852,7 @@
     {
       "id": "ARCH-MAPDIAGRAMS-055",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Mermaid diagrams (_map.md)",
@@ -11925,35 +11925,35 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6038"
+          "loc": "plugin/scripts/reqmap.py:6046"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6090"
+          "loc": "plugin/scripts/reqmap.py:6098"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6105"
+          "loc": "plugin/scripts/reqmap.py:6113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6136"
+          "loc": "plugin/scripts/reqmap.py:6154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6177"
+          "loc": "plugin/scripts/reqmap.py:6195"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6265"
+          "loc": "plugin/scripts/reqmap.py:6283"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6306"
+          "loc": "plugin/scripts/reqmap.py:6324"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6358"
+          "loc": "plugin/scripts/reqmap.py:6376"
         },
         {
           "role": "tested-by",
@@ -11961,7 +11961,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7598"
+          "loc": "plugin/scripts/test_reqmap.py:7596"
         }
       ],
       "test_exempt": null,
@@ -12583,7 +12583,7 @@
     {
       "id": "ARCH-MEMBERDRIFT-027",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Reverse-direction member drift",
@@ -12645,27 +12645,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1977"
+          "loc": "plugin/scripts/reqmap.py:1985"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1981"
+          "loc": "plugin/scripts/reqmap.py:1989"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1997"
+          "loc": "plugin/scripts/reqmap.py:2005"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2031"
+          "loc": "plugin/scripts/reqmap.py:2039"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2046"
+          "loc": "plugin/scripts/reqmap.py:2054"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2064"
+          "loc": "plugin/scripts/reqmap.py:2072"
         },
         {
           "role": "tested-by",
@@ -12986,7 +12986,7 @@
     {
       "id": "ARCH-MODULEFILE-056",
       "layer": "bus",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Several requirements in one file",
@@ -13015,27 +13015,27 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:923"
+          "loc": "plugin/scripts/reqmap.py:931"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:926"
+          "loc": "plugin/scripts/reqmap.py:934"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:942"
+          "loc": "plugin/scripts/reqmap.py:950"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2973"
+          "loc": "plugin/scripts/reqmap.py:2981"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4195"
+          "loc": "plugin/scripts/reqmap.py:4203"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7655"
+          "loc": "plugin/scripts/test_reqmap.py:7676"
         }
       ],
       "test_exempt": null,
@@ -13046,7 +13046,7 @@
     {
       "id": "ARCH-NEW-004",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Scaffold a requirement",
@@ -13104,11 +13104,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2770"
+          "loc": "plugin/scripts/reqmap.py:2778"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2792"
+          "loc": "plugin/scripts/reqmap.py:2800"
         },
         {
           "role": "tested-by",
@@ -13431,7 +13431,7 @@
     {
       "id": "ARCH-NEXT-013",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "What-should-I-do-next report",
@@ -13536,23 +13536,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1528"
+          "loc": "plugin/scripts/reqmap.py:1536"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2228"
+          "loc": "plugin/scripts/reqmap.py:2236"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4163"
+          "loc": "plugin/scripts/reqmap.py:4171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4176"
+          "loc": "plugin/scripts/reqmap.py:4184"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4204"
+          "loc": "plugin/scripts/reqmap.py:4212"
         },
         {
           "role": "tested-by",
@@ -14469,7 +14469,7 @@
     {
       "id": "ARCH-ORPHANCODE-034",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Orphan-code warning",
@@ -14526,11 +14526,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1559"
+          "loc": "plugin/scripts/reqmap.py:1567"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2569"
+          "loc": "plugin/scripts/reqmap.py:2577"
         },
         {
           "role": "tested-by",
@@ -14737,7 +14737,7 @@
     {
       "id": "ARCH-PAGES-021",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Publish & gate the GitHub Pages map copy",
@@ -14785,15 +14785,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4117"
+          "loc": "plugin/scripts/reqmap.py:4125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5767"
+          "loc": "plugin/scripts/reqmap.py:5775"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6906"
+          "loc": "plugin/scripts/reqmap.py:6924"
         },
         {
           "role": "tested-by",
@@ -14926,7 +14926,7 @@
     {
       "id": "ARCH-PARSE-001",
       "layer": "bus",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Requirement reading",
@@ -15010,15 +15010,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:847"
+          "loc": "plugin/scripts/reqmap.py:855"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:857"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:870"
+          "loc": "plugin/scripts/reqmap.py:865"
         },
         {
           "role": "implements",
@@ -15026,7 +15022,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:942"
+          "loc": "plugin/scripts/reqmap.py:886"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:950"
         },
         {
           "role": "tested-by",
@@ -15431,7 +15431,7 @@
     {
       "id": "ARCH-PIPE-046",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "A closed output pipe ends a command quietly",
@@ -15477,11 +15477,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7523"
+          "loc": "plugin/scripts/reqmap.py:7541"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7534"
+          "loc": "plugin/scripts/reqmap.py:7552"
         },
         {
           "role": "tested-by",
@@ -15648,7 +15648,7 @@
     {
       "id": "ARCH-PROMOTE-011",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "confirm",
@@ -15714,11 +15714,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2905"
+          "loc": "plugin/scripts/reqmap.py:2913"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2931"
+          "loc": "plugin/scripts/reqmap.py:2939"
         },
         {
           "role": "tested-by",
@@ -15772,7 +15772,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2931"
+          "loc": "plugin/scripts/reqmap.py:2939"
         },
         {
           "role": "tested-by",
@@ -16243,7 +16243,7 @@
     {
       "id": "ARCH-PROMOTE-TODO-001",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Promote a TODO item into a requirement draft",
@@ -16309,11 +16309,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2814"
+          "loc": "plugin/scripts/reqmap.py:2822"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2873"
+          "loc": "plugin/scripts/reqmap.py:2881"
         },
         {
           "role": "tested-by",
@@ -16826,7 +16826,7 @@
     {
       "id": "ARCH-PROSE-024",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Prose capability classification & drafting",
@@ -16882,15 +16882,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3013"
+          "loc": "plugin/scripts/reqmap.py:3021"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3038"
+          "loc": "plugin/scripts/reqmap.py:3046"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3072"
+          "loc": "plugin/scripts/reqmap.py:3080"
         },
         {
           "role": "tested-by",
@@ -17225,7 +17225,7 @@
     {
       "id": "ARCH-PYFLOOR-040",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Declared Python support floor",
@@ -17277,7 +17277,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:230"
+          "loc": "plugin/scripts/reqmap.py:238"
         },
         {
           "role": "tested-by",
@@ -17482,7 +17482,7 @@
     {
       "id": "ARCH-REDUNDANCY-058",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Requirements that say the same thing",
@@ -17512,15 +17512,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5036"
+          "loc": "plugin/scripts/reqmap.py:5044"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7467"
+          "loc": "plugin/scripts/reqmap.py:7485"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7808"
+          "loc": "plugin/scripts/test_reqmap.py:7829"
         }
       ],
       "test_exempt": null,
@@ -17531,7 +17531,7 @@
     {
       "id": "ARCH-REGISTRYLAG-035",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Registry-lag signal — commits since the requirements dir was last touched",
@@ -17588,11 +17588,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5361"
+          "loc": "plugin/scripts/reqmap.py:5369"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5492"
+          "loc": "plugin/scripts/reqmap.py:5500"
         },
         {
           "role": "tested-by",
@@ -17911,7 +17911,7 @@
     {
       "id": "ARCH-REPRO-041",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Committed build artifacts stay re-derivable",
@@ -18202,7 +18202,7 @@
     {
       "id": "ARCH-REVIEW-022",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "AI requirement-quality review (deterministic plan + advisory pass)",
@@ -18257,7 +18257,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7233"
+          "loc": "plugin/scripts/reqmap.py:7251"
         },
         {
           "role": "tested-by",
@@ -18508,7 +18508,7 @@
     {
       "id": "ARCH-REVIEWEDSCORE-109",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Reviewed-only health score",
@@ -18557,7 +18557,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5459"
+          "loc": "plugin/scripts/reqmap.py:5467"
         },
         {
           "role": "tested-by",
@@ -18575,7 +18575,7 @@
     {
       "id": "ARCH-ROADMAP-038",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Roadmap coherence signals",
@@ -18630,15 +18630,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3715"
+          "loc": "plugin/scripts/reqmap.py:3723"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3749"
+          "loc": "plugin/scripts/reqmap.py:3757"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5498"
+          "loc": "plugin/scripts/reqmap.py:5506"
         },
         {
           "role": "tested-by",
@@ -18921,7 +18921,7 @@
     {
       "id": "ARCH-SCAN-002",
       "layer": "bus",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Member discovery",
@@ -19018,27 +19018,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:979"
+          "loc": "plugin/scripts/reqmap.py:987"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1012"
+          "loc": "plugin/scripts/reqmap.py:1020"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1081"
+          "loc": "plugin/scripts/reqmap.py:1089"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1196"
+          "loc": "plugin/scripts/reqmap.py:1204"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1246"
+          "loc": "plugin/scripts/reqmap.py:1254"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1273"
+          "loc": "plugin/scripts/reqmap.py:1281"
         },
         {
           "role": "tested-by",
@@ -19603,7 +19603,7 @@
     {
       "id": "ARCH-SCAN-005",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "List members per capability",
@@ -19649,7 +19649,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2127"
+          "loc": "plugin/scripts/reqmap.py:2135"
         },
         {
           "role": "tested-by",
@@ -19816,7 +19816,7 @@
     {
       "id": "ARCH-SCANCACHE-023",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Opt-in scan cache",
@@ -19865,15 +19865,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1173"
+          "loc": "plugin/scripts/reqmap.py:1181"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1177"
+          "loc": "plugin/scripts/reqmap.py:1185"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1187"
+          "loc": "plugin/scripts/reqmap.py:1195"
         },
         {
           "role": "tested-by",
@@ -20078,7 +20078,7 @@
     {
       "id": "ARCH-SEARCH-036",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Free-text requirement search",
@@ -20166,7 +20166,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5197"
+          "loc": "plugin/scripts/reqmap.py:5205"
         },
         {
           "role": "tested-by",
@@ -20865,7 +20865,7 @@
     {
       "id": "ARCH-SELFGATE-039",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "This repo's own gate wiring",
@@ -21194,7 +21194,7 @@
     {
       "id": "ARCH-SHOW-015",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Single-requirement dossier",
@@ -21262,7 +21262,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4931"
+          "loc": "plugin/scripts/reqmap.py:4939"
         },
         {
           "role": "tested-by",
@@ -21771,7 +21771,7 @@
     {
       "id": "ARCH-SIMILAR-016",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Duplicate-capability detector",
@@ -21849,31 +21849,31 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5020"
+          "loc": "plugin/scripts/reqmap.py:5028"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5027"
+          "loc": "plugin/scripts/reqmap.py:5035"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5061"
+          "loc": "plugin/scripts/reqmap.py:5069"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5073"
+          "loc": "plugin/scripts/reqmap.py:5081"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5091"
+          "loc": "plugin/scripts/reqmap.py:5099"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5103"
+          "loc": "plugin/scripts/reqmap.py:5111"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5134"
+          "loc": "plugin/scripts/reqmap.py:5142"
         },
         {
           "role": "tested-by",
@@ -22500,7 +22500,7 @@
     {
       "id": "ARCH-SITE-026",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Generate & maintain a project presentation page",
@@ -22554,59 +22554,55 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5687"
+          "loc": "plugin/scripts/reqmap.py:5695"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5728"
+          "loc": "plugin/scripts/reqmap.py:5736"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:5778"
+          "loc": "plugin/scripts/reqmap.py:5786"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6397"
+          "loc": "plugin/scripts/reqmap.py:6415"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6417"
+          "loc": "plugin/scripts/reqmap.py:6435"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6437"
+          "loc": "plugin/scripts/reqmap.py:6455"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6440"
+          "loc": "plugin/scripts/reqmap.py:6458"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6445"
+          "loc": "plugin/scripts/reqmap.py:6463"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6466"
+          "loc": "plugin/scripts/reqmap.py:6484"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6478"
+          "loc": "plugin/scripts/reqmap.py:6496"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6483"
+          "loc": "plugin/scripts/reqmap.py:6501"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6502"
+          "loc": "plugin/scripts/reqmap.py:6520"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6793"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6930"
+          "loc": "plugin/scripts/reqmap.py:6811"
         },
         {
           "role": "implements",
@@ -22614,15 +22610,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6956"
+          "loc": "plugin/scripts/reqmap.py:6966"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:6971"
+          "loc": "plugin/scripts/reqmap.py:6974"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7495"
+          "loc": "plugin/scripts/reqmap.py:6989"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:7513"
         },
         {
           "role": "tested-by",
@@ -22865,7 +22865,7 @@
     {
       "id": "ARCH-STALEENGINE-043",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Stale vendored engine, reported in CI",
@@ -23368,7 +23368,7 @@
     {
       "id": "ARCH-SUGGESTVERIFIES-047",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Suggest per-criterion `verifies:` tags",
@@ -23433,23 +23433,23 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7075"
+          "loc": "plugin/scripts/reqmap.py:7093"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7096"
+          "loc": "plugin/scripts/reqmap.py:7114"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7107"
+          "loc": "plugin/scripts/reqmap.py:7125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7168"
+          "loc": "plugin/scripts/reqmap.py:7186"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7206"
+          "loc": "plugin/scripts/reqmap.py:7224"
         },
         {
           "role": "tested-by",
@@ -23920,7 +23920,7 @@
     {
       "id": "ARCH-TESTLINK-018",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Test-link integrity check",
@@ -23997,15 +23997,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2252"
+          "loc": "plugin/scripts/reqmap.py:2260"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2272"
+          "loc": "plugin/scripts/reqmap.py:2280"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2424"
+          "loc": "plugin/scripts/reqmap.py:2432"
         },
         {
           "role": "tested-by",
@@ -24636,7 +24636,7 @@
     {
       "id": "ARCH-TRACE-020",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Upstream traceability",
@@ -24700,31 +24700,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2217"
+          "loc": "plugin/scripts/reqmap.py:2225"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2359"
+          "loc": "plugin/scripts/reqmap.py:2367"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2364"
+          "loc": "plugin/scripts/reqmap.py:2372"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2460"
+          "loc": "plugin/scripts/reqmap.py:2468"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3658"
+          "loc": "plugin/scripts/reqmap.py:3666"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3709"
+          "loc": "plugin/scripts/reqmap.py:3717"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4966"
+          "loc": "plugin/scripts/reqmap.py:4974"
         },
         {
           "role": "tested-by",
@@ -25087,7 +25087,7 @@
     {
       "id": "ARCH-TRACKED-042",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Untracked members reported",
@@ -25136,11 +25136,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1403"
+          "loc": "plugin/scripts/reqmap.py:1411"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2548"
+          "loc": "plugin/scripts/reqmap.py:2556"
         },
         {
           "role": "tested-by",
@@ -25307,7 +25307,7 @@
     {
       "id": "ARCH-TRANSLATE-044",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Opt-in requirement-content translation",
@@ -25388,59 +25388,59 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3796"
+          "loc": "plugin/scripts/reqmap.py:3804"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3824"
+          "loc": "plugin/scripts/reqmap.py:3832"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3831"
+          "loc": "plugin/scripts/reqmap.py:3839"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3848"
+          "loc": "plugin/scripts/reqmap.py:3856"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3859"
+          "loc": "plugin/scripts/reqmap.py:3867"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3869"
+          "loc": "plugin/scripts/reqmap.py:3877"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3880"
+          "loc": "plugin/scripts/reqmap.py:3888"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3894"
+          "loc": "plugin/scripts/reqmap.py:3902"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3914"
+          "loc": "plugin/scripts/reqmap.py:3922"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3943"
+          "loc": "plugin/scripts/reqmap.py:3951"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3963"
+          "loc": "plugin/scripts/reqmap.py:3971"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:3987"
+          "loc": "plugin/scripts/reqmap.py:3995"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4057"
+          "loc": "plugin/scripts/reqmap.py:4065"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4093"
+          "loc": "plugin/scripts/reqmap.py:4101"
         },
         {
           "role": "tested-by",
@@ -25837,7 +25837,7 @@
     {
       "id": "ARCH-UNSCANNEDTAG-045",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Tags in unscanned file types reported",
@@ -25890,11 +25890,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1446"
+          "loc": "plugin/scripts/reqmap.py:1454"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2559"
+          "loc": "plugin/scripts/reqmap.py:2567"
         },
         {
           "role": "tested-by",
@@ -26137,7 +26137,7 @@
     {
       "id": "ARCH-VIEWER-007",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Self-contained HTML map viewer",
@@ -26328,19 +26328,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1375"
+          "loc": "plugin/scripts/reqmap.py:1383"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7020"
+          "loc": "plugin/scripts/reqmap.py:7038"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7024"
+          "loc": "plugin/scripts/reqmap.py:7042"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7049"
+          "loc": "plugin/scripts/reqmap.py:7067"
         },
         {
           "role": "tested-by",
@@ -27199,7 +27199,7 @@
     {
       "id": "ARCH-VLEVEL-037",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Verification levels",
@@ -27274,11 +27274,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:1631"
+          "loc": "plugin/scripts/reqmap.py:1639"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:4931"
+          "loc": "plugin/scripts/reqmap.py:4939"
         },
         {
           "role": "tested-by",
@@ -27873,7 +27873,7 @@
     {
       "id": "ARCH-VRUNGS-054",
       "layer": "feature",
-      "level": "architecture",
+      "level": "system",
       "status": "confirmed",
       "area": "ARCH",
       "title": "Level-to-verification correspondence",
@@ -27904,11 +27904,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:2404"
+          "loc": "plugin/scripts/reqmap.py:2412"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7555"
+          "loc": "plugin/scripts/test_reqmap.py:7553"
         }
       ],
       "test_exempt": null,

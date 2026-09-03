@@ -1,7 +1,7 @@
 ---
 id: ARCH-TRANSLATE-044
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-MAP-007, ARCH-VIEWER-007]

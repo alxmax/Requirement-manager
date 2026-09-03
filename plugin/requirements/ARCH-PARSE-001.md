@@ -1,7 +1,7 @@
 ---
 id: ARCH-PARSE-001
 status: confirmed
-level: architecture
+level: system
 layer: bus
 owner: Alex
 depends_on: []

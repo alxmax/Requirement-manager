@@ -1,7 +1,7 @@
 ---
 id: ARCH-LINTCHECKS-025
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014]

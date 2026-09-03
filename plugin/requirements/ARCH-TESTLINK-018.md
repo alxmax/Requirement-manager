@@ -1,7 +1,7 @@
 ---
 id: ARCH-TESTLINK-018
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-CHECK-006]

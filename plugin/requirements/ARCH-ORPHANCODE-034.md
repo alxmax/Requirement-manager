@@ -1,7 +1,7 @@
 ---
 id: ARCH-ORPHANCODE-034
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have

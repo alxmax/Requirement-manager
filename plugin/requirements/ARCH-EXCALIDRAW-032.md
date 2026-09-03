@@ -1,7 +1,7 @@
 ---
 id: ARCH-EXCALIDRAW-032
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-EXCALIDRAW-030]
