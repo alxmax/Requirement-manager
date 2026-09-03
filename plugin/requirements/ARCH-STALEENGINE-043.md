@@ -1,7 +1,7 @@
 ---
 id: ARCH-STALEENGINE-043
 status: confirmed        # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: architecture
+level: system
 layer: feature       # bus | feature | need
 owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
@@ -43,8 +43,9 @@ checkout, i.e. the engine the referenced `check@vN` ships.
 - `off` produces no output and exit 0.
 - A vendored engine at or ahead of the reference version produces no warning.
 - A version that cannot be read from either file — absent file, unparseable value — is
-  reported as a skipped probe with exit 0, in every mode, because an unreadable version is
-  not evidence of staleness.
+  reported as a skipped probe with exit 0, in `warn` and `error` mode, because an
+  unreadable version is not evidence of staleness. `off` mode never reaches this check —
+  it returns before the probe runs, so it reports nothing at all, skipped or otherwise.
 - An unexpected internal failure of the probe is reported the same way: a skipped probe,
   exit 0. The probe is never itself the reason a gate run goes red.
 
@@ -117,7 +118,7 @@ CASE-6
 
 ---
 id: REQ-STALEENGINE-709
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -146,7 +147,7 @@ Scenario: a vendored engine older than the reference one is named
 
 ---
 id: REQ-STALEENGINE-710
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -174,7 +175,7 @@ Scenario: the gate action wires the staleness probe as its own step
 
 ---
 id: REQ-STALEENGINE-712
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -202,7 +203,7 @@ Scenario: the stale-engine input defaults to warn
 
 ---
 id: REQ-STALEENGINE-713
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -231,7 +232,7 @@ Scenario: the stale message names the re-seed remedy
 
 ---
 id: REQ-STALEENGINE-714
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -259,7 +260,7 @@ Scenario: warn mode reports and stays green
 
 ---
 id: REQ-STALEENGINE-715
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -287,7 +288,7 @@ Scenario: error mode turns the same staleness into a failure
 
 ---
 id: REQ-STALEENGINE-716
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -316,7 +317,7 @@ Scenario: GitHub Actions gets an annotation, elsewhere a plain line
 
 ---
 id: REQ-STALEENGINE-717
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -344,7 +345,7 @@ Scenario: off mode is silent
 
 ---
 id: REQ-STALEENGINE-718
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -372,7 +373,7 @@ Scenario: an up-to-date or newer engine never warns
 
 ---
 id: REQ-STALEENGINE-719
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -384,8 +385,10 @@ superseded_by:
 # A version that cannot be read from either
 
 > A version that cannot be read from either file — absent file, unparseable value — is
-> reported as a skipped probe with exit 0, in every mode, because an unreadable version is
-> not evidence of staleness.
+> reported as a skipped probe with exit 0, in `warn` and `error` mode, because an
+> unreadable version is not evidence of staleness. `off` mode never reaches this check
+> at all — it returns 0 before the probe runs, so it reports nothing, skipped or
+> otherwise.
 
 Scenario: an unreadable version is skipped, not treated as stale
   Given  a vendored `reqmap.py` missing `MAP_ENGINE_VERSION`
@@ -402,7 +405,7 @@ Scenario: an unreadable version is skipped, not treated as stale
 
 ---
 id: REQ-STALEENGINE-720
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

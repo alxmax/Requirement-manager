@@ -1,7 +1,7 @@
 ---
 id: ARCH-INIT-012
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-EXTRACT-008, ARCH-CHECK-006, ARCH-MAP-007]
@@ -131,7 +131,7 @@ CASE-7
 
 ---
 id: REQ-INIT-425
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -159,7 +159,7 @@ Scenario: init creates a missing requirements directory
 
 ---
 id: REQ-INIT-426
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -188,7 +188,7 @@ Scenario: an existing .reqmapignore is left byte-for-byte
 
 ---
 id: REQ-INIT-427
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: the seeded ignore lists scripts/reqmap.py in a non-self-hosting repo
 
 ---
 id: REQ-INIT-428
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -248,7 +248,7 @@ Scenario: the seeded ignore prunes both worktree-copy locations
 
 ---
 id: REQ-INIT-429
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -278,7 +278,7 @@ Scenario: a self-hosting repo's seeded ignore does not ignore the engine
 
 ---
 id: REQ-INIT-430
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -307,7 +307,7 @@ Scenario: a tag pointing at no local requirement is not self-hosting
 
 ---
 id: REQ-INIT-431
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -336,7 +336,7 @@ Scenario: the lock and map cover the requirements init just drafted
 
 ---
 id: REQ-INIT-432
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -365,7 +365,7 @@ Scenario: the summary names next, not the full command list
 
 ---
 id: REQ-INIT-433
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -394,7 +394,7 @@ Scenario: an extraction-free repo gets a distinct empty-result message
 
 ---
 id: REQ-INIT-434
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -423,7 +423,7 @@ Scenario: a second init run exits clean and reprints the summary
 
 ---
 id: REQ-INIT-435
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

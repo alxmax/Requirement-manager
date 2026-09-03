@@ -1,7 +1,7 @@
 ---
 id: ARCH-PROMOTE-TODO-001
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-NEW-004]
@@ -102,7 +102,7 @@ CASE-4
 
 ---
 id: REQ-PROMOTE-TODO-580
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -130,7 +130,7 @@ Scenario: new --from-todo scaffolds a requirement from an unfinished item
 
 ---
 id: REQ-PROMOTE-TODO-581
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -158,7 +158,7 @@ Scenario: matching is case-insensitive and trims whitespace
 
 ---
 id: REQ-PROMOTE-TODO-583
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -189,7 +189,7 @@ Scenario: the scaffolded requirement is seeded from the matched item
 
 ---
 id: REQ-PROMOTE-TODO-584
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: a lane of ops maps to layer feature
 
 ---
 id: REQ-PROMOTE-TODO-585
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -245,7 +245,7 @@ Scenario: a scaffolded requirement starts as draft
 
 ---
 id: REQ-PROMOTE-TODO-586
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -275,7 +275,7 @@ Scenario: a missing --id refuses the command
 
 ---
 id: REQ-PROMOTE-TODO-587
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -303,7 +303,7 @@ Scenario: an already-taken id refuses the command
 
 ---
 id: REQ-PROMOTE-TODO-588
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -331,7 +331,7 @@ Scenario: an unmatched name refuses the command
 
 ---
 id: REQ-PROMOTE-TODO-589
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -359,7 +359,7 @@ Scenario: an ambiguous name refuses the command
 
 ---
 id: REQ-PROMOTE-TODO-590
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -388,7 +388,7 @@ Scenario: a no-match refusal lists the open items
 
 ---
 id: REQ-PROMOTE-TODO-591
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -416,7 +416,7 @@ Scenario: scaffolding leaves TODO.md untouched by default
 
 ---
 id: REQ-PROMOTE-TODO-592
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -444,7 +444,7 @@ Scenario: --mark-done checks off the matched item
 
 ---
 id: REQ-PROMOTE-TODO-593
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

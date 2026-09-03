@@ -7430,13 +7430,11 @@ class FanOut(unittest.TestCase):  # tested-by: ARCH-FANOUT-052
         self.assertIn("too many", fs[0]["detail"])
         self.assertIn("over 30", fs[0]["detail"])
 
-    def test_system_ceiling_is_lower_than_architecture(self):  # verifies: ARCH-FANOUT-052#CASE-6
-        self.assertEqual(self._level_checks("system", 10), [])
-        fs = self._level_checks("system", 12)
+    def test_system_ceiling_is_fifty(self):  # verifies: ARCH-FANOUT-052#CASE-6
+        self.assertEqual(self._level_checks("system", 50), [])
+        fs = self._level_checks("system", 51)
         self.assertEqual(len(fs), 1)
-        self.assertIn("over 10", fs[0]["detail"])
-        # the same count is silent one level down — that is the point of per-level bands
-        self.assertEqual(self._level_checks("architecture", 12), [])
+        self.assertIn("over 50", fs[0]["detail"])
 
     def test_a_count_inside_the_band_is_silent(self):  # verifies: ARCH-FANOUT-052#CASE-2
         self.assertNotIn("fan-out", self._checks(8))
@@ -7629,6 +7627,29 @@ class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055
 
     def test_an_empty_corpus_draws_nothing(self):
         self.assertEqual(R._mermaid_hierarchy({"nodes": [], "edges": [], "upstream_edges": []}), "")
+
+    def test_a_promoted_system_node_still_shows_its_code_count(self):
+        # ADR-0024: a corpus that collapsed `architecture` into `system` carries two
+        # populations under `level: system` — a root need with no code children of its
+        # own, and a promoted grouping node whose code children are counted same as an
+        # `architecture` parent's always were. Both must render correctly from `level:`
+        # alone no longer being able to tell them apart.
+        d = {
+            "nodes": [
+                {"id": "SYS-A-101", "level": "system", "layer": "need", "status": "confirmed",
+                 "area": "SYS", "members": [], "deps": [], "risks": []},
+                {"id": "SYS-B-001", "level": "system", "layer": "feature", "status": "confirmed",
+                 "area": "SYS", "members": [], "deps": [], "risks": []},
+                {"id": "REQ-B-200", "level": "code", "layer": "feature", "status": "draft",
+                 "area": "REQ", "members": [], "deps": [], "risks": []},
+            ],
+            "edges": [],
+            "upstream_edges": [["SYS-B-001", "SYS-A-101"], ["REQ-B-200", "SYS-B-001"]],
+        }
+        out = R._mermaid_hierarchy(d)
+        self.assertIn("1 code", out)                 # SYS-B-001's promoted fan-out is counted
+        self.assertIn("SYS_A_101[[SYS-A-101]]", out)  # the true root stays bare + double-boxed
+        self.assertIn("SYS_A_101 --> SYS_B_001", out)
 
     def test_the_document_carries_five_blocks(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-1
         md = R._build_md_text(dict(self.DATA, todos=[]))

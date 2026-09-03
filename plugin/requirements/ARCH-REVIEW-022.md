@@ -1,7 +1,7 @@
 ---
 id: ARCH-REVIEW-022
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]
@@ -101,7 +101,7 @@ CASE-4
 
 ---
 id: REQ-REVIEW-624
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -131,7 +131,7 @@ Scenario: review is deterministic, read-only and LLM-free
 
 ---
 id: REQ-REVIEW-625
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -163,7 +163,7 @@ Scenario: the plan carries prose, structural anchors and a coverage summary
 
 ---
 id: REQ-REVIEW-626
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -197,7 +197,7 @@ Scenario: the plan names the three AI categories and the finding contract
 
 ---
 id: REQ-REVIEW-627
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -227,7 +227,7 @@ Scenario: the plan is byte-identical across runs and gate never reads it
 
 ---
 id: REQ-REVIEW-628
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -256,7 +256,7 @@ Scenario: gate ignores the AI sidecar file entirely
 
 ---
 id: REQ-REVIEW-630
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

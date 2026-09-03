@@ -1,7 +1,7 @@
 ---
 id: ARCH-SEARCH-036
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-SIMILAR-016]
@@ -126,7 +126,7 @@ CASE-4
 
 ---
 id: REQ-SEARCH-650
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -154,7 +154,7 @@ Scenario: search runs without creating or modifying any file
 
 ---
 id: REQ-SEARCH-651
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -183,7 +183,7 @@ Scenario: search scores a pair the same way dupes does
 
 ---
 id: REQ-SEARCH-652
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -212,7 +212,7 @@ Scenario: only title, intent line and Contract bullets feed the match
 
 ---
 id: REQ-SEARCH-653
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -241,7 +241,7 @@ Scenario: a rarer shared term outweighs a common one
 
 ---
 id: REQ-SEARCH-654
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -270,7 +270,7 @@ Scenario: each printed result carries its cosine score
 
 ---
 id: REQ-SEARCH-655
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -298,7 +298,7 @@ Scenario: search defaults to five results
 
 ---
 id: REQ-SEARCH-656
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -326,7 +326,7 @@ Scenario: a non-positive --top still prints one match
 
 ---
 id: REQ-SEARCH-657
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -355,7 +355,7 @@ Scenario: below-floor results never appear as a ranked list
 
 ---
 id: REQ-SEARCH-658
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -384,7 +384,7 @@ Scenario: the no-strong-match line names the best score and the floor
 
 ---
 id: REQ-SEARCH-659
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -412,7 +412,7 @@ Scenario: the floor is 0.05 absent an override
 
 ---
 id: REQ-SEARCH-660
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -441,7 +441,7 @@ Scenario: an all-stopword query says so, not "no strong match"
 
 ---
 id: REQ-SEARCH-661
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -470,7 +470,7 @@ Scenario: short words and numbers never seed a match
 
 ---
 id: REQ-SEARCH-662
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -499,7 +499,7 @@ Scenario: the no-strong-match line names the search as lexical
 
 ---
 id: REQ-SEARCH-663
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -527,7 +527,7 @@ Scenario: a well-formed search always exits zero
 
 ---
 id: REQ-SEARCH-664
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -555,7 +555,7 @@ Scenario: a missing query argument fails with a nonzero exit
 
 ---
 id: REQ-SEARCH-665
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -583,7 +583,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-SEARCH-666
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -612,7 +612,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-SEARCH-667
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

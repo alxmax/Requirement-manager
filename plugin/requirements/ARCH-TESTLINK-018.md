@@ -1,7 +1,7 @@
 ---
 id: ARCH-TESTLINK-018
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-CHECK-006]
@@ -120,7 +120,7 @@ CASE-7
 
 ---
 id: REQ-TESTLINK-733
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -149,7 +149,7 @@ Scenario: a non-confirmed requirement's test link is still checked
 
 ---
 id: REQ-TESTLINK-734
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -177,7 +177,7 @@ Scenario: a missing tested-by target is reported as broken
 
 ---
 id: REQ-TESTLINK-735
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -205,7 +205,7 @@ Scenario: a file with only a helper function fails the check
 
 ---
 id: REQ-TESTLINK-736
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -233,7 +233,7 @@ Scenario: a test-shaped string inside a docstring still passes
 
 ---
 id: REQ-TESTLINK-737
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -261,7 +261,7 @@ Scenario: a file with def test_ passes the check
 
 ---
 id: REQ-TESTLINK-738
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -289,7 +289,7 @@ Scenario: a def-style JS test function passes the check
 
 ---
 id: REQ-TESTLINK-739
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -317,7 +317,7 @@ Scenario: a Jest-style it() call passes the check
 
 ---
 id: REQ-TESTLINK-740
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -345,7 +345,7 @@ Scenario: a Go func TestX passes the check
 
 ---
 id: REQ-TESTLINK-741
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -373,7 +373,7 @@ Scenario: a Rust #[test] attribute passes the check
 
 ---
 id: REQ-TESTLINK-742
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -402,7 +402,7 @@ Scenario: a run()-under-__main__ Python file passes the check
 
 ---
 id: REQ-TESTLINK-743
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -430,7 +430,7 @@ Scenario: a bash test_x() function and a bats @test case both pass
 
 ---
 id: REQ-TESTLINK-744
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -458,7 +458,7 @@ Scenario: a *.test.sh file with no test-shaped body still passes
 
 ---
 id: REQ-TESTLINK-745
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -488,7 +488,7 @@ Scenario: a broken tested-by link produces exactly one gate warning
 
 ---
 id: REQ-TESTLINK-746
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -516,7 +516,7 @@ Scenario: the warning text names both the requirement id and the file
 
 ---
 id: REQ-TESTLINK-748
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -544,7 +544,7 @@ Scenario: strict promotion applies to confirmed, not to draft
 
 ---
 id: REQ-TESTLINK-749
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

@@ -1,7 +1,7 @@
 ---
 id: ARCH-COVERAGE-029
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-SCAN-002, ARCH-NEXT-013]
@@ -90,7 +90,7 @@ CASE-3
 
 ---
 id: REQ-COVERAGE-318
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -119,7 +119,7 @@ Scenario: the untagged count reflects untagged files
 
 ---
 id: REQ-COVERAGE-319
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -148,7 +148,7 @@ Scenario: the untagged count shares its denominator with _scan_untagged
 
 ---
 id: REQ-COVERAGE-320
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -177,7 +177,7 @@ Scenario: a tested-by tag alone covers a file
 
 ---
 id: REQ-COVERAGE-321
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -206,7 +206,7 @@ Scenario: health --json exposes the untagged integer key
 
 ---
 id: REQ-COVERAGE-322
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -234,7 +234,7 @@ Scenario: health's text output labels the untagged count
 
 ---
 id: REQ-COVERAGE-323
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -263,7 +263,7 @@ Scenario: the untagged key is absent without a code root
 
 ---
 id: REQ-COVERAGE-326
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

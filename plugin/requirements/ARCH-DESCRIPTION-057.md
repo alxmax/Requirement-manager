@@ -2,7 +2,7 @@
 id: ARCH-DESCRIPTION-057
 status: confirmed
 form: atomic
-level: architecture
+level: system
 layer: bus
 owner: Alex
 priority: should-have

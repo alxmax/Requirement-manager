@@ -1,7 +1,7 @@
 ---
 id: ARCH-FANOUT-052
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: could-have
@@ -31,7 +31,7 @@ Every bullet below is binding.
 
 **When it reports**
 - The `fan-out` check warns when a parent carries more children than its ceiling.
-- A `system` parent's ceiling is ten; an `architecture` parent's is thirty.
+- A `system` parent's ceiling is fifty; an `architecture` parent's is thirty.
 - A parent declaring no `level:` keeps the older uniform band, five to twenty, so a
   repo that never adopts the level axis sees what it saw before.
 - The check reports no floor at either declared level.
@@ -63,10 +63,9 @@ CASE-5
   When   `lint` runs
   Then   no `fan-out` finding is reported at all
 CASE-6
-  Given  a `system` requirement satisfied by twelve others
+  Given  a `system` requirement satisfied by fifty-one others
   When   `lint` runs
-  Then   one `fan-out` finding names it as over its ceiling, which is lower than an
-         architecture requirement's
+  Then   one `fan-out` finding names it as over its ceiling of fifty
 
 ## Context (non-binding)
 **Notes**
@@ -103,7 +102,7 @@ CASE-6
 
 ---
 id: REQ-FANOUT-388
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -132,7 +131,7 @@ Scenario: the finding names the exact child count
 
 ---
 id: REQ-FANOUT-389
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -160,7 +159,7 @@ Scenario: depends_on edges never feed the fan-out count
 
 ---
 id: REQ-FANOUT-390
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -188,7 +187,7 @@ Scenario: a leaf with zero children is never a fan-out finding
 
 ---
 id: REQ-FANOUT-391
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +216,7 @@ Scenario: crossing the ceiling flips the finding on
 
 ---
 id: REQ-FANOUT-392
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -245,7 +244,7 @@ Scenario: a thin parent at a declared level is not reported
 
 ---
 id: REQ-FANOUT-393
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -273,7 +272,7 @@ Scenario: a fan-out finding does not fail the run
 
 ---
 id: REQ-FANOUT-394
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

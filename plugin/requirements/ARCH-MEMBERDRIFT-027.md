@@ -1,7 +1,7 @@
 ---
 id: ARCH-MEMBERDRIFT-027
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -119,7 +119,7 @@ CASE-8
 
 ---
 id: REQ-MEMBERDRIFT-511
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -150,7 +150,7 @@ Scenario: member hashes live in a separate versioned sidecar
 
 ---
 id: REQ-MEMBERDRIFT-512
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -181,7 +181,7 @@ Scenario: an absent, corrupt or newer-schema sidecar loads as empty
 
 ---
 id: REQ-MEMBERDRIFT-513
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -212,7 +212,7 @@ Scenario: only single-requirement member files get a hash
 
 ---
 id: REQ-MEMBERDRIFT-514
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -244,7 +244,7 @@ Scenario: member hashes are stable across line-ending styles
 
 ---
 id: REQ-MEMBERDRIFT-515
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -275,7 +275,7 @@ Scenario: the gate warns only when the member drifted and the contract did not
 
 ---
 id: REQ-MEMBERDRIFT-516
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -304,7 +304,7 @@ Scenario: a member with no sidecar baseline is silent
 
 ---
 id: REQ-MEMBERDRIFT-517
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -333,7 +333,7 @@ Scenario: member drift is a warning by default and an error under --strict
 
 ---
 id: REQ-MEMBERDRIFT-518
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

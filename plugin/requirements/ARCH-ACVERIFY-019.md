@@ -1,7 +1,7 @@
 ---
 id: ARCH-ACVERIFY-019
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -110,7 +110,7 @@ CASE-6
 
 ---
 id: REQ-ACVERIFY-233
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -139,7 +139,7 @@ Scenario: a verifies tag is mapped to its labelled criterion
 
 ---
 id: REQ-ACVERIFY-234
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -168,7 +168,7 @@ Scenario: a verifies tag with no #AC-N suffix is not per-criterion coverage
 
 ---
 id: REQ-ACVERIFY-235
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -199,7 +199,7 @@ Scenario: partial verifies coverage produces one warning naming every gap
 
 ---
 id: REQ-ACVERIFY-236
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -228,7 +228,7 @@ Scenario: the warning states the tagged-of-total count
 
 ---
 id: REQ-ACVERIFY-237
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -258,7 +258,7 @@ Scenario: zero verifies tags is silent, not a violation
 
 ---
 id: REQ-ACVERIFY-238
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -288,7 +288,7 @@ Scenario: unlabelled bullet criteria never trigger the per-criterion warning
 
 ---
 id: REQ-ACVERIFY-239
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -318,7 +318,7 @@ Scenario: an inspection-only criterion never triggers the automatable-criteria w
 
 ---
 id: REQ-ACVERIFY-240
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -349,7 +349,7 @@ Scenario: clauses/covered appear only once tagging is adopted
 
 ---
 id: REQ-ACVERIFY-241
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -379,7 +379,7 @@ Scenario: gap names the untagged criteria only when coverage is partial
 
 ---
 id: REQ-ACVERIFY-243
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

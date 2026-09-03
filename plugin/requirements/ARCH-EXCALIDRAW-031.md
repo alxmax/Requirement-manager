@@ -1,7 +1,7 @@
 ---
 id: ARCH-EXCALIDRAW-031
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-EXCALIDRAW-030]
@@ -118,7 +118,7 @@ CASE-7
 
 ---
 id: REQ-EXCALIDRAW-361
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -148,7 +148,7 @@ Scenario: each named gate accepts warn or error mode
 
 ---
 id: REQ-EXCALIDRAW-362
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -178,7 +178,7 @@ Scenario: crossing_check fires when an arrow's path crosses an unrelated box
 
 ---
 id: REQ-EXCALIDRAW-363
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -209,7 +209,7 @@ Scenario: legend_check fires for an unlegended colour, exempt with no legend
 
 ---
 id: REQ-EXCALIDRAW-364
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -238,7 +238,7 @@ Scenario: overflow_check fires when bound text exceeds the shape bounds
 
 ---
 id: REQ-EXCALIDRAW-365
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -267,7 +267,7 @@ Scenario: text_overlap_check fires when two labels geometrically overlap
 
 ---
 id: REQ-EXCALIDRAW-366
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -298,7 +298,7 @@ Scenario: label_fit_check fires when a label crowds a short arrow
 
 ---
 id: REQ-EXCALIDRAW-367
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -333,7 +333,7 @@ Scenario: the two hard gates raise by default and respect their opt-out flags
 
 ---
 id: REQ-EXCALIDRAW-368
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

@@ -1,7 +1,7 @@
 ---
 id: ARCH-TRACKED-042
 status: confirmed        # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: architecture
+level: system
 layer: feature       # bus | feature | need
 owner: Alex
 priority:            # must-have | should-have | could-have | wont-have (optional)
@@ -80,7 +80,7 @@ CASE-3
 
 ---
 id: REQ-TRACKED-760
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -108,7 +108,7 @@ Scenario: untracked_members names a git-untracked member file
 
 ---
 id: REQ-TRACKED-761
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -137,7 +137,7 @@ Scenario: the gate warning caps the named files and reports the total
 
 ---
 id: REQ-TRACKED-762
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -166,7 +166,7 @@ Scenario: the untracked warning names both fixes
 
 ---
 id: REQ-TRACKED-763
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

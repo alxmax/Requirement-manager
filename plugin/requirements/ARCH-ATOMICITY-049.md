@@ -1,7 +1,7 @@
 ---
 id: ARCH-ATOMICITY-049
 status: confirmed    # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: architecture
+level: system
 layer: feature       # bus | feature | need | aggregate
 owner: Alex
 priority: should-have
@@ -206,7 +206,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-ATOMICITY-247
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -234,7 +234,7 @@ Scenario: the default statement-size threshold is 150 words
 
 ---
 id: REQ-ATOMICITY-248
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -262,7 +262,7 @@ Scenario: a 155-word clause produces exactly one statement-size finding
 
 ---
 id: REQ-ATOMICITY-249
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -291,7 +291,7 @@ Scenario: an over-threshold clause's finding carries warn severity, not error
 
 ---
 id: REQ-ATOMICITY-250
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -319,7 +319,7 @@ Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding
 
 ---
 id: REQ-ATOMICITY-252
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -347,7 +347,7 @@ Scenario: a short two-obligation clause produces no statement-size finding
 
 ---
 id: REQ-ATOMICITY-253
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -376,7 +376,7 @@ Scenario: the finding's detail text asks for a re-read, not a defect claim
 
 ---
 id: REQ-ATOMICITY-254
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -404,7 +404,7 @@ Scenario: a backticked span collapses to one token before counting
 
 ---
 id: REQ-ATOMICITY-255
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -432,7 +432,7 @@ Scenario: a nested sub-bullet is flagged on its own, the parent is not
 
 ---
 id: REQ-ATOMICITY-256
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

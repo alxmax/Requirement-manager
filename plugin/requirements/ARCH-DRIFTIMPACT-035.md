@@ -1,7 +1,7 @@
 ---
 id: ARCH-DRIFTIMPACT-035
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -83,7 +83,7 @@ CASE-3
 
 ---
 id: REQ-DRIFTIMPACT-347
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -114,7 +114,7 @@ Scenario: drift warning names a requirement that depends on the drifted one
 
 ---
 id: REQ-DRIFTIMPACT-348
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -143,7 +143,7 @@ Scenario: two dependents are named in sorted order on the drift line
 
 ---
 id: REQ-DRIFTIMPACT-349
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -173,7 +173,7 @@ Scenario: a dependent-of-a-dependent is not named on the drift line
 
 ---
 id: REQ-DRIFTIMPACT-350
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

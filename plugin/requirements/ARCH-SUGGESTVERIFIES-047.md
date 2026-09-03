@@ -1,7 +1,7 @@
 ---
 id: ARCH-SUGGESTVERIFIES-047
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -108,7 +108,7 @@ CASE-5  <!-- verifiable by: automated test -->
 
 ---
 id: REQ-SUGGESTVERIFIES-721
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -137,7 +137,7 @@ Scenario: an untagged criterion with a matching test yields a proposal
 
 ---
 id: REQ-SUGGESTVERIFIES-722
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -167,7 +167,7 @@ Scenario: matching is restricted to the owning requirement's tested-by files
 
 ---
 id: REQ-SUGGESTVERIFIES-723
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -197,7 +197,7 @@ Scenario: a test name is read from a def, function, func or it/test label
 
 ---
 id: REQ-SUGGESTVERIFIES-724
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -225,7 +225,7 @@ Scenario: an already-tagged criterion is never re-proposed
 
 ---
 id: REQ-SUGGESTVERIFIES-725
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -253,7 +253,7 @@ Scenario: a criterion marked not machine-verifiable is skipped
 
 ---
 id: REQ-SUGGESTVERIFIES-726
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -281,7 +281,7 @@ Scenario: matching requires a whole token, not a substring
 
 ---
 id: REQ-SUGGESTVERIFIES-727
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -311,7 +311,7 @@ Scenario: a shared tested-by file needs a distinctive id token to match
 
 ---
 id: REQ-SUGGESTVERIFIES-728
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -341,7 +341,7 @@ Scenario: a test carrying another requirement's number belongs to that requireme
 
 ---
 id: REQ-SUGGESTVERIFIES-729
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -370,7 +370,7 @@ Scenario: two matching tests report the criterion as ambiguous
 
 ---
 id: REQ-SUGGESTVERIFIES-730
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -399,7 +399,7 @@ Scenario: a dry run prints proposals without writing
 
 ---
 id: REQ-SUGGESTVERIFIES-731
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -428,7 +428,7 @@ Scenario: --apply appends the tag using the file's comment syntax
 
 ---
 id: REQ-SUGGESTVERIFIES-732
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

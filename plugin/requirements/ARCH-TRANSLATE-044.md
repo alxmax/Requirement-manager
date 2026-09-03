@@ -1,7 +1,7 @@
 ---
 id: ARCH-TRANSLATE-044
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-MAP-007, ARCH-VIEWER-007]
@@ -188,7 +188,7 @@ CASE-9
 
 ---
 id: REQ-TRANSLATE-765
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -218,7 +218,7 @@ Scenario: translate never runs from any other command
 
 ---
 id: REQ-TRANSLATE-766
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -249,7 +249,7 @@ Scenario: corpus_lang picks the majority language, override wins per file
 
 ---
 id: REQ-TRANSLATE-767
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -280,7 +280,7 @@ Scenario: translate caches one entry per requirement in the target locale file
 
 ---
 id: REQ-TRANSLATE-768
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -311,7 +311,7 @@ Scenario: a title-only edit invalidates the cached translation
 
 ---
 id: REQ-TRANSLATE-769
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -343,7 +343,7 @@ Scenario: a dropped backtick or number blocks the cache write
 
 ---
 id: REQ-TRANSLATE-770
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -374,7 +374,7 @@ Scenario: renaming a criterion label or a Gherkin keyword blocks the cache write
 
 ---
 id: REQ-TRANSLATE-771
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -404,7 +404,7 @@ Scenario: a missing claude CLI skips one entry without aborting the run
 
 ---
 id: REQ-TRANSLATE-772
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -433,7 +433,7 @@ Scenario: an unchanged requirement is a cache hit on the second run
 
 ---
 id: REQ-TRANSLATE-773
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -466,7 +466,7 @@ Scenario: map attaches a fresh cache entry without ever calling claude
 
 ---
 id: REQ-TRANSLATE-774
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

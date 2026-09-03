@@ -1,7 +1,7 @@
 ---
 id: ARCH-SIMILAR-016
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]
@@ -127,7 +127,7 @@ CASE-7
 
 ---
 id: REQ-SIMILAR-687
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -155,7 +155,7 @@ Scenario: overlapping contracts are reported as a pair
 
 ---
 id: REQ-SIMILAR-688
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -183,7 +183,7 @@ Scenario: dupes runs without writing any file
 
 ---
 id: REQ-SIMILAR-689
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -212,7 +212,7 @@ Scenario: the bag of words comes from title, intent and Contract only
 
 ---
 id: REQ-SIMILAR-690
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -241,7 +241,7 @@ Scenario: text unique to the Notes section is left out of the bag
 
 ---
 id: REQ-SIMILAR-691
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -269,7 +269,7 @@ Scenario: tokens shorter than three characters are dropped
 
 ---
 id: REQ-SIMILAR-692
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -297,7 +297,7 @@ Scenario: stopwords and pure numbers never count as shared terms
 
 ---
 id: REQ-SIMILAR-693
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -327,7 +327,7 @@ Scenario: an unauthored draft is skipped and counted
 
 ---
 id: REQ-SIMILAR-694
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -358,7 +358,7 @@ Scenario: a tested-by-linked pair is skipped and counted
 
 ---
 id: REQ-SIMILAR-695
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -386,7 +386,7 @@ Scenario: a rarer term is weighted higher than a common one
 
 ---
 id: REQ-SIMILAR-696
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -415,7 +415,7 @@ Scenario: a two-requirement corpus still scores a shared term
 
 ---
 id: REQ-SIMILAR-697
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -443,7 +443,7 @@ Scenario: cosine score stays bounded between zero and one
 
 ---
 id: REQ-SIMILAR-698
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -471,7 +471,7 @@ Scenario: a below-threshold pair is left out of the report
 
 ---
 id: REQ-SIMILAR-699
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -499,7 +499,7 @@ Scenario: the default threshold is 0.35
 
 ---
 id: REQ-SIMILAR-700
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -527,7 +527,7 @@ Scenario: --threshold replaces the default cutoff
 
 ---
 id: REQ-SIMILAR-701
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -556,7 +556,7 @@ Scenario: reported pairs are sorted and show their shared terms
 
 ---
 id: REQ-SIMILAR-702
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

@@ -1,7 +1,7 @@
 ---
 id: ARCH-PROMOTE-011
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]
@@ -133,7 +133,7 @@ Scenario: confirm rewrites the status field
 
 ---
 id: REQ-PROMOTE-568
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -161,7 +161,7 @@ Scenario: confirm rewrites the first status line only
 
 ---
 id: REQ-PROMOTE-569
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -189,7 +189,7 @@ Scenario: confirm preserves the status line's formatting
 
 ---
 id: REQ-PROMOTE-570
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: confirm never touches the body
 
 ---
 id: REQ-PROMOTE-571
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -246,7 +246,7 @@ Scenario: confirm refuses a requirement with no code
 
 ---
 id: REQ-PROMOTE-572
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -275,7 +275,7 @@ Scenario: confirm exempts a need requirement from the implements rule
 
 ---
 id: REQ-PROMOTE-573
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -304,7 +304,7 @@ Scenario: confirm refuses an orphan aggregate
 
 ---
 id: REQ-PROMOTE-574
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -332,7 +332,7 @@ Scenario: a refusal names the missing tag
 
 ---
 id: REQ-PROMOTE-575
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -361,7 +361,7 @@ Scenario: confirm rejects an id with no requirement file
 
 ---
 id: REQ-PROMOTE-576
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -389,7 +389,7 @@ Scenario: confirm warns but still succeeds without a test link
 
 ---
 id: REQ-PROMOTE-577
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -417,7 +417,7 @@ Scenario: the missing-test warning names the fix
 
 ---
 id: REQ-PROMOTE-578
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -445,7 +445,7 @@ Scenario: confirm reminds the caller to resync afterward
 
 ---
 id: REQ-PROMOTE-579
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

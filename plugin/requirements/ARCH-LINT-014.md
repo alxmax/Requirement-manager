@@ -1,7 +1,7 @@
 ---
 id: ARCH-LINT-014
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]
@@ -123,7 +123,7 @@ CASE-6
 
 ---
 id: REQ-LINT-444
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -151,7 +151,7 @@ Scenario: one run surfaces both a structural and a readability finding
 
 ---
 id: REQ-LINT-445
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -179,7 +179,7 @@ Scenario: a default lint run leaves the requirements directory untouched
 
 ---
 id: REQ-LINT-446
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -209,7 +209,7 @@ Scenario: a draft with a bad clause is silently skipped
 
 ---
 id: REQ-LINT-447
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -238,7 +238,7 @@ Scenario: structural findings are error, prose findings are warn
 
 ---
 id: REQ-LINT-448
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -250,10 +250,13 @@ superseded_by:
 # The missing-section check reports an error when a
 
 > The `missing-section` check reports an `error` when a non-draft requirement has no `##
-> WHAT — Contract` section, or no `## Cases` section.
+> Description` section, or no `## Cases` section. (The legacy headings `## WHAT —
+> Contract (normative)` and `## HOW — Acceptance` still parse for older requirement
+> files — see this repo's CLAUDE.md — but `## Description`/`## Cases` are the current
+> names this check reports against.)
 
 Scenario: a confirmed requirement with no Acceptance heading gets a missing-section error
-  Given  a `confirmed` requirement body carrying a Contract section but no `## Cases`/`## HOW — Acceptance` heading
+  Given  a `confirmed` requirement body carrying a Description section but no `## Cases` heading
   When   `lint_requirement` runs on it
   Then   its findings include `("error", "missing-section")`
 
@@ -267,7 +270,7 @@ Scenario: a confirmed requirement with no Acceptance heading gets a missing-sect
 
 ---
 id: REQ-LINT-449
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -297,7 +300,7 @@ Scenario: a heading with no content beneath it gets an empty-section warning
 
 ---
 id: REQ-LINT-450
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -325,7 +328,7 @@ Scenario: only the first matching Contract heading's text is linted
 
 ---
 id: REQ-LINT-451
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -354,7 +357,7 @@ Scenario: a stacked-conditions line under Notes never fires
 
 ---
 id: REQ-LINT-452
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -383,7 +386,7 @@ Scenario: a blockquote line with four joins is never linted as prose
 
 ---
 id: REQ-LINT-453
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -411,7 +414,7 @@ Scenario: a bulleted "It" clause still triggers anonymous-subject
 
 ---
 id: REQ-LINT-454
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -439,7 +442,7 @@ Scenario: a missing-section error does not fail a non-strict run
 
 ---
 id: REQ-LINT-455
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

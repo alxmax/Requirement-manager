@@ -2,7 +2,7 @@
 id: ARCH-REDUNDANCY-058
 status: confirmed
 form: atomic
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have

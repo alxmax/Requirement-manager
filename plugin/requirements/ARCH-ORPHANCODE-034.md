@@ -1,7 +1,7 @@
 ---
 id: ARCH-ORPHANCODE-034
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -129,7 +129,7 @@ CASE-6
 
 ---
 id: REQ-ORPHANCODE-550
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -163,7 +163,7 @@ Scenario: an untagged file at the LOC threshold triggers the warning
 
 ---
 id: REQ-ORPHANCODE-551
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -197,7 +197,7 @@ Scenario: only files on the program-extension list are considered
 
 ---
 id: REQ-ORPHANCODE-552
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -232,7 +232,7 @@ Scenario: any of the four membership tags silences the warning
 
 ---
 id: REQ-ORPHANCODE-553
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -266,7 +266,7 @@ Scenario: prose and config extensions are never checked for orphan code
 
 ---
 id: REQ-ORPHANCODE-554
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

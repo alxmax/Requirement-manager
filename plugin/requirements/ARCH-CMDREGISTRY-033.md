@@ -1,7 +1,7 @@
 ---
 id: ARCH-CMDREGISTRY-033
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001]
@@ -78,7 +78,7 @@ CASE-5
 
 ---
 id: REQ-CMDREGISTRY-306
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -107,7 +107,7 @@ Scenario: argparse choices trace back to COMMANDS with no hardcoded list
 
 ---
 id: REQ-CMDREGISTRY-307
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -136,7 +136,7 @@ Scenario: gen-integration derives tool_definition.json from COMMANDS
 
 ---
 id: REQ-CMDREGISTRY-308
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -166,7 +166,7 @@ Scenario: gen-integration rewrites only the marked command-table region
 
 ---
 id: REQ-CMDREGISTRY-309
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -195,7 +195,7 @@ Scenario: gen-integration omits internal commands from AI-facing output
 
 ---
 id: REQ-CMDREGISTRY-310
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -224,7 +224,7 @@ Scenario: gate fails on a stale generated artifact
 
 ---
 id: REQ-CMDREGISTRY-311
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

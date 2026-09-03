@@ -1,7 +1,7 @@
 ---
 id: ARCH-VLEVEL-037
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 priority: should-have
@@ -130,7 +130,7 @@ CASE-7
 
 ---
 id: REQ-VLEVEL-806
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -166,7 +166,7 @@ Scenario: scan_test_levels recognizes all three level suffixes
 
 ---
 id: REQ-VLEVEL-807
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -199,7 +199,7 @@ Scenario: one level suffix applies to every id in the list
 
 ---
 id: REQ-VLEVEL-808
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -234,7 +234,7 @@ Scenario: a tag with no level, or an unrecognised one, still resolves as a plain
 
 ---
 id: REQ-VLEVEL-809
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -268,7 +268,7 @@ Scenario: scan_test_levels records the file:line that declares each level
 
 ---
 id: REQ-VLEVEL-810
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -303,7 +303,7 @@ Scenario: a level suffix does not change the ordinary member tuple shape
 
 ---
 id: REQ-VLEVEL-811
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -338,7 +338,7 @@ Scenario: a backticked levelled-tag example does not count as coverage
 
 ---
 id: REQ-VLEVEL-812
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -373,7 +373,7 @@ Scenario: a levelled tag inside a docstring or string literal is not coverage
 
 ---
 id: REQ-VLEVEL-813
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -407,7 +407,7 @@ Scenario: an unvalidated confirmed need is named once the repo has opted in
 
 ---
 id: REQ-VLEVEL-814
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -441,7 +441,7 @@ Scenario: no validated-against tag anywhere keeps the rule silent
 
 ---
 id: REQ-VLEVEL-815
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -476,7 +476,7 @@ Scenario: a bus requirement verified only at @system level warns
 
 ---
 id: REQ-VLEVEL-816
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -511,7 +511,7 @@ Scenario: a bus requirement with only an unlevelled tested-by link is never judg
 
 ---
 id: REQ-VLEVEL-817
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -546,7 +546,7 @@ Scenario: a feature requirement verified only at @system stays silent
 
 ---
 id: REQ-VLEVEL-818
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -580,7 +580,7 @@ Scenario: the unvalidated-need and system-only-bus findings never bump the exit 
 
 ---
 id: REQ-VLEVEL-820
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

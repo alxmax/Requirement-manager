@@ -1,7 +1,7 @@
 ---
 id: ARCH-MAP-007
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-SCAN-002]
@@ -143,7 +143,7 @@ CASE-5
 
 ---
 id: REQ-MAP-476
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -172,7 +172,7 @@ Scenario: map and export both produce _map.json
 
 ---
 id: REQ-MAP-478
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -200,7 +200,7 @@ Scenario: the graph has one node per requirement and one edge per dependency
 
 ---
 id: REQ-MAP-479
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -230,7 +230,7 @@ Scenario: a node carries its full requirement metadata
 
 ---
 id: REQ-MAP-480
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -259,7 +259,7 @@ Scenario: acc lists one entry per criterion in either acceptance form
 
 ---
 id: REQ-MAP-481
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -289,7 +289,7 @@ Scenario: repo resolves to the git remote's owner/repo
 
 ---
 id: REQ-MAP-483
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -318,7 +318,7 @@ Scenario: a changed repo field never trips map --check
 
 ---
 id: REQ-MAP-484
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -347,7 +347,7 @@ Scenario: map succeeds when the tree has no git remote
 
 ---
 id: REQ-MAP-485
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -377,7 +377,7 @@ Scenario: a changed engine_version never trips map --check
 
 ---
 id: REQ-MAP-486
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -407,7 +407,7 @@ Scenario: map derives the todos array from TODO.md
 
 ---
 id: REQ-MAP-487
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -436,7 +436,7 @@ Scenario: a wrapped clause line folds into the clause above it
 
 ---
 id: REQ-MAP-488
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -465,7 +465,7 @@ Scenario: a flush-left bold line reads as a group label, not a clause
 
 ---
 id: REQ-MAP-489
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -495,7 +495,7 @@ Scenario: an indented bold-opening continuation folds by position
 
 ---
 id: REQ-MAP-490
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -523,7 +523,7 @@ Scenario: map --check fails on a stale committed generated file
 
 ---
 id: REQ-MAP-491
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -552,7 +552,7 @@ Scenario: gate warns about a stale map without failing the commit
 
 ---
 id: REQ-MAP-493
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

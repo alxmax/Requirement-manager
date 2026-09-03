@@ -2,7 +2,7 @@
 id: ARCH-MODULEFILE-056
 status: confirmed
 form: atomic
-level: architecture
+level: system
 layer: bus
 owner: Alex
 priority: should-have

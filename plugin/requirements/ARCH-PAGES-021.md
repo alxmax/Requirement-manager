@@ -1,7 +1,7 @@
 ---
 id: ARCH-PAGES-021
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-MAP-007]
@@ -86,7 +86,7 @@ CASE-5
 
 ---
 id: REQ-PAGES-560
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -118,7 +118,7 @@ Scenario: map copies the viewer to docs/map.html only when a Pages signal exists
 
 ---
 id: REQ-PAGES-561
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -150,7 +150,7 @@ Scenario: check flags an edited docs/map.html as stale, absent copy as fresh
 
 ---
 id: REQ-PAGES-562
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

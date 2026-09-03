@@ -1,7 +1,7 @@
 ---
 id: ARCH-SCAN-005
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: [ARCH-PARSE-001, ARCH-SCAN-002]
@@ -78,7 +78,7 @@ CASE-3
 
 ---
 id: REQ-SCAN-640
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -107,7 +107,7 @@ Scenario: every member is printed on its own line under its id
 
 ---
 id: REQ-SCAN-641
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -136,7 +136,7 @@ Scenario: scan lists ids from both requirements and code tags, sorted
 
 ---
 id: REQ-SCAN-642
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -164,7 +164,7 @@ Scenario: a requirement with no members prints the no-members marker
 
 ---
 id: REQ-SCAN-643
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

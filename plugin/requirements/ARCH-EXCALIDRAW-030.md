@@ -1,7 +1,7 @@
 ---
 id: ARCH-EXCALIDRAW-030
 status: confirmed
-level: architecture
+level: system
 layer: feature
 owner: Alex
 depends_on: []
@@ -88,7 +88,7 @@ CASE-5
 
 ---
 id: REQ-EXCALIDRAW-352
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -117,7 +117,7 @@ Scenario: Scene() produces an excalidraw.com-importable JSON scene
 
 ---
 id: REQ-EXCALIDRAW-353
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -145,7 +145,7 @@ Scenario: each shape primitive adds one element of its kind
 
 ---
 id: REQ-EXCALIDRAW-354
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -174,7 +174,7 @@ Scenario: ISO 5807 aliases produce their underlying shapes
 
 ---
 id: REQ-EXCALIDRAW-355
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -203,7 +203,7 @@ Scenario: layout helpers place shapes without overlap
 
 ---
 id: REQ-EXCALIDRAW-356
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -231,7 +231,7 @@ Scenario: annotation helpers attach text without raising
 
 ---
 id: REQ-EXCALIDRAW-357
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -259,7 +259,7 @@ Scenario: connector helpers link two shapes
 
 ---
 id: REQ-EXCALIDRAW-358
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -289,7 +289,7 @@ Scenario: one .save() call writes both output files
 
 ---
 id: REQ-EXCALIDRAW-359
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -317,7 +317,7 @@ Scenario: a fixed seed reproduces byte-identical output
 
 ---
 id: REQ-EXCALIDRAW-360
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
