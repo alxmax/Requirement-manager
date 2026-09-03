@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.4"
+MAP_ENGINE_VERSION = "2026-09-03.5"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -906,7 +906,13 @@ def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: AR
             meta, body = parse_frontmatter(_blk)
             # only the FIRST block may fall back to the filename; a later block without an
             # explicit id is a malformed block, not a second requirement named after the file.
-            rid = meta.get("id") or (os.path.splitext(name)[0] if _i == 0 else None)
+            # A file preamble (ARCH-MODULEFILE-056) can also land at index 0 when the real
+            # block 0 is preceded by prose — but a preamble never starts with the frontmatter
+            # delimiter '---' (parse_frontmatter's own test for "this text has frontmatter"),
+            # so gating the fallback on that same test keeps prose from minting a synthetic id
+            # that can collide with (and silently shadow) the real block 0's own id.
+            rid = meta.get("id") or (
+                os.path.splitext(name)[0] if _i == 0 and _blk.startswith("---") else None)
             if not rid:
                 continue
             if rid in reqs:

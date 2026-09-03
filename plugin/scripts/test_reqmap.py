@@ -7301,6 +7301,25 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
         self.assertIn("Module heading", blocks[0])
         self.assertTrue(blocks[1].startswith("---\nid: AREA-E-001"))
 
+    def test_preamble_does_not_shadow_a_same_named_first_block(self):
+        # bug: a file preamble landing at split index 0 used to be eligible for the
+        # filename fallback exactly like a genuine block 0. When the file is named
+        # after its own real first requirement's id, the empty-meta preamble claimed
+        # that id first and the real block was silently dropped as a "duplicate".
+        with tempfile.TemporaryDirectory() as d:
+            text = ("# Module heading\n\nsome prose\n\n" + REQ.format(
+                id="AREA-E-001", status="draft", layer="bus", extra="", title="E")
+                + "\nreal body content\n")
+            _write(os.path.join(d, "AREA-E-001.md"), text)
+            buf = io.StringIO()
+            with redirect_stderr(buf):
+                reqs = R.load_requirements(d)
+            self.assertEqual(list(reqs), ["AREA-E-001"])
+            self.assertEqual(reqs["AREA-E-001"]["meta"].get("status"), "draft")
+            self.assertEqual(reqs["AREA-E-001"]["meta"].get("layer"), "bus")
+            self.assertIn("real body content", reqs["AREA-E-001"]["body"])
+            self.assertEqual(buf.getvalue(), "")  # no spurious duplicate-id warning
+
 
 class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
     """`## Description` + `## Cases`/`CASE-N` are the current names; the older
