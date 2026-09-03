@@ -101,7 +101,7 @@ CASE-7
 
 ---
 id: REQ-SELFGATE-668
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -130,7 +130,7 @@ Scenario: the CI job runs all three checks on both triggers
 
 ---
 id: REQ-SELFGATE-669
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -189,7 +189,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-SELFGATE-671
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

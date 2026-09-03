@@ -101,7 +101,7 @@ CASE-4
 
 ---
 id: REQ-DRIFT-200
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -130,7 +130,7 @@ Scenario: binding_hash returns a fixed-length hex digest
 
 ---
 id: REQ-DRIFT-201
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -159,7 +159,7 @@ Scenario: the legacy Output heading is still treated as normative
 
 ---
 id: REQ-DRIFT-202
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -188,7 +188,7 @@ Scenario: editing Notes and the member list leaves the hash unchanged
 
 ---
 id: REQ-DRIFT-203
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -216,7 +216,7 @@ Scenario: binding_hash is deterministic across repeated calls
 
 ---
 id: REQ-DRIFT-204
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -245,7 +245,7 @@ Scenario: save_lock then load_lock round-trips through _reqlock.json
 
 ---
 id: REQ-DRIFT-205
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -273,7 +273,7 @@ Scenario: a missing or corrupt lock file loads as an empty dict
 
 ---
 id: REQ-DRIFT-206
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -301,7 +301,7 @@ Scenario: save_lock creates a missing requirements directory
 
 ---
 id: REQ-DRIFT-207
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

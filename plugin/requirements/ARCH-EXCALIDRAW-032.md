@@ -81,7 +81,7 @@ CASE-4
 
 ---
 id: REQ-EXCALIDRAW-370
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -111,7 +111,7 @@ Scenario: no-arg invocation runs the smoke test and exits 0
 
 ---
 id: REQ-EXCALIDRAW-371
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -141,7 +141,7 @@ Scenario: render rebuilds the HTML viewer without touching the source
 
 ---
 id: REQ-EXCALIDRAW-372
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -172,7 +172,7 @@ Scenario: discover emits a runnable multi-layer stub
 
 ---
 id: REQ-EXCALIDRAW-373
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

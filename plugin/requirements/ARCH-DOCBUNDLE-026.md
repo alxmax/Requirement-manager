@@ -114,7 +114,7 @@ CASE-6
 
 ---
 id: REQ-DOCBUNDLE-339
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -149,7 +149,7 @@ Scenario: a large untagged docs/ HTML file is flagged
 
 ---
 id: REQ-DOCBUNDLE-340
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -182,7 +182,7 @@ Scenario: a large untagged HTML file outside docs/ is never flagged
 
 ---
 id: REQ-DOCBUNDLE-341
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: engine outputs are excluded even when large and untagged
 
 ---
 id: REQ-DOCBUNDLE-343
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

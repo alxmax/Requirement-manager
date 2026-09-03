@@ -79,7 +79,7 @@ CASE-4
 
 ---
 id: REQ-SCANCACHE-644
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -109,7 +109,7 @@ Scenario: cache sidecar is written only when --cache is passed
 
 ---
 id: REQ-SCANCACHE-645
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -140,7 +140,7 @@ Scenario: rewriting a file's size invalidates its cache entry
 
 ---
 id: REQ-SCANCACHE-646
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -171,7 +171,7 @@ Scenario: a deleted file's entry is pruned from the rewritten cache
 
 ---
 id: REQ-SCANCACHE-647
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -201,7 +201,7 @@ Scenario: cache=True and cache=False return identical members
 
 ---
 id: REQ-SCANCACHE-648
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

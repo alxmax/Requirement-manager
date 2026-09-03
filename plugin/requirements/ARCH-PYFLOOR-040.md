@@ -83,7 +83,7 @@ CASE-3
 
 ---
 id: REQ-PYFLOOR-603
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -111,7 +111,7 @@ Scenario: MIN_PYTHON names a concrete required version
 
 ---
 id: REQ-PYFLOOR-604
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -140,7 +140,7 @@ Scenario: MIN_PYTHON matches the CI matrix's oldest entry
 
 ---
 id: REQ-PYFLOOR-605
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -169,7 +169,7 @@ Scenario: an interpreter below the floor is refused before any command runs
 
 ---
 id: REQ-PYFLOOR-606
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -199,7 +199,7 @@ Scenario: the refusal exits 2 and names both versions and the fix
 
 ---
 id: REQ-PYFLOOR-607
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

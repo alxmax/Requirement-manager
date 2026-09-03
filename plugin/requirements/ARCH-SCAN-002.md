@@ -132,7 +132,7 @@ CASE-7
 
 ---
 id: REQ-SCAN-218
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -161,7 +161,7 @@ Scenario: an implements: tag in a scanned file is picked up by the walk
 
 ---
 id: REQ-SCAN-219
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -189,7 +189,7 @@ Scenario: a member entry is a (role, relative_file, line) tuple
 
 ---
 id: REQ-SCAN-220
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -218,7 +218,7 @@ Scenario: all four roles are recognized and an unknown role string is not
 
 ---
 id: REQ-SCAN-221
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -246,7 +246,7 @@ Scenario: TAG_RE only matches an uppercase, hyphenated id shape
 
 ---
 id: REQ-SCAN-222
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -275,7 +275,7 @@ Scenario: reimplements: and x-implements: are not read as real tags
 
 ---
 id: REQ-SCAN-223
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -303,7 +303,7 @@ Scenario: a duplicated tag on one line is recorded only once
 
 ---
 id: REQ-SCAN-224
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -331,7 +331,7 @@ Scenario: a nested file's member path uses forward slashes, root-relative
 
 ---
 id: REQ-SCAN-225
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -360,7 +360,7 @@ Scenario: a comma-separated tag registers members under every listed id
 
 ---
 id: REQ-SCAN-226
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -389,7 +389,7 @@ Scenario: every id in a multi-id tag carries the identical (role, file, line) tr
 
 ---
 id: REQ-SCAN-228
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -418,7 +418,7 @@ Scenario: a tag inside the real SSOT requirements/ dir is not scanned
 
 ---
 id: REQ-SCAN-229
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -447,7 +447,7 @@ Scenario: a source package named requirements/ that is not the SSOT dir is still
 
 ---
 id: REQ-SCAN-230
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -475,7 +475,7 @@ Scenario: a file listed in .reqmapignore is excluded from the scan
 
 ---
 id: REQ-SCAN-231
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -503,7 +503,7 @@ Scenario: an unreadable file yields None instead of raising
 
 ---
 id: REQ-SCAN-232
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

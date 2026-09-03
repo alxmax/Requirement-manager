@@ -117,7 +117,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-REPRO-619
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -232,7 +232,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-REPRO-623
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

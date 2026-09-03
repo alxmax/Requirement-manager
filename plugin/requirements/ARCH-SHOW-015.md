@@ -117,7 +117,7 @@ CASE-6
 
 ---
 id: REQ-SHOW-674
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -146,7 +146,7 @@ Scenario: one show call surfaces header, contract, deps, and members together
 
 ---
 id: REQ-SHOW-675
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -174,7 +174,7 @@ Scenario: show leaves the requirement file byte-identical on disk
 
 ---
 id: REQ-SHOW-676
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -202,7 +202,7 @@ Scenario: the header line carries id, status, and layer
 
 ---
 id: REQ-SHOW-677
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -231,7 +231,7 @@ Scenario: a set priority appears on the header line
 
 ---
 id: REQ-SHOW-678
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -259,7 +259,7 @@ Scenario: no priority leaves no blank header segment
 
 ---
 id: REQ-SHOW-679
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -288,7 +288,7 @@ Scenario: a multi-line WHY blockquote prints in full, not just its first line
 
 ---
 id: REQ-SHOW-680
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -317,7 +317,7 @@ Scenario: a requirement with no Description section says so instead of listing b
 
 ---
 id: REQ-SHOW-681
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -346,7 +346,7 @@ Scenario: show lists a reverse dependency under Depended on by
 
 ---
 id: REQ-SHOW-682
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -375,7 +375,7 @@ Scenario: a tagged member prints its role and file:line
 
 ---
 id: REQ-SHOW-683
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -403,7 +403,7 @@ Scenario: a levelled tested-by member is annotated with its level
 
 ---
 id: REQ-SHOW-684
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -433,7 +433,7 @@ Scenario: an open verify-intent bullet shows; the None placeholder does not
 
 ---
 id: REQ-SHOW-685
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -464,7 +464,7 @@ Scenario: show prints a risk signal alongside its advice text
 
 ---
 id: REQ-SHOW-686
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

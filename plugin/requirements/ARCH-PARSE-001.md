@@ -99,7 +99,7 @@ CASE-5
 
 ---
 id: REQ-PARSE-208
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -128,7 +128,7 @@ Scenario: load_requirements returns a meta/body/path record per file
 
 ---
 id: REQ-PARSE-209
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -157,7 +157,7 @@ Scenario: parse_frontmatter splits the header fields from the markdown that foll
 
 ---
 id: REQ-PARSE-210
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -185,7 +185,7 @@ Scenario: a file with no id: field is keyed by its filename stem
 
 ---
 id: REQ-PARSE-211
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -214,7 +214,7 @@ Scenario: a block-style key: / indented - item list parses to a Python list
 
 ---
 id: REQ-PARSE-212
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -242,7 +242,7 @@ Scenario: a trailing # comment does not leak into the parsed value
 
 ---
 id: REQ-PARSE-213
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -270,7 +270,7 @@ Scenario: matching quote characters are stripped from a scalar value
 
 ---
 id: REQ-PARSE-214
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -299,7 +299,7 @@ Scenario: an unclosed inline list still parses as a list, not a literal string
 
 ---
 id: REQ-PARSE-215
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -327,7 +327,7 @@ Scenario: a file with no frontmatter block yields empty meta and the full text a
 
 ---
 id: REQ-PARSE-216
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -355,7 +355,7 @@ Scenario: an underscore-prefixed file is excluded from load_requirements
 
 ---
 id: REQ-PARSE-217
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

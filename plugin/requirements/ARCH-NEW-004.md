@@ -88,7 +88,7 @@ CASE-5
 
 ---
 id: REQ-NEW-519
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -118,7 +118,7 @@ Scenario: new stamps the scaffold with the given id
 
 ---
 id: REQ-NEW-520
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -146,7 +146,7 @@ Scenario: new creates a missing requirements directory
 
 ---
 id: REQ-NEW-521
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -175,7 +175,7 @@ Scenario: new falls back to REQUIREMENT_TEMPLATE with no on-disk template
 
 ---
 id: REQ-NEW-522
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -204,7 +204,7 @@ Scenario: an on-disk template wins over the built-in scaffold
 
 ---
 id: REQ-NEW-523
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -232,7 +232,7 @@ Scenario: new refuses to clobber an existing requirement file
 
 ---
 id: REQ-NEW-524
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -262,7 +262,7 @@ Scenario: the template's Description opens with the binding line and no modal ve
 
 ---
 id: REQ-NEW-525
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -292,7 +292,7 @@ Scenario: the shipped template body passes its own linter
 
 ---
 id: REQ-NEW-526
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

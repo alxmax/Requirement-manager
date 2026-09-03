@@ -178,7 +178,7 @@ CASE-12
 
 ---
 id: REQ-NEXT-527
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -206,7 +206,7 @@ Scenario: an untested confirmed requirement lands in the Needs-tests bucket
 
 ---
 id: REQ-NEXT-528
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -235,7 +235,7 @@ Scenario: a bucket's advice line matches RISK_ADVICE verbatim
 
 ---
 id: REQ-NEXT-529
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -264,7 +264,7 @@ Scenario: the header names all four counts
 
 ---
 id: REQ-NEXT-530
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -292,7 +292,7 @@ Scenario: implements-only members do not count as tested
 
 ---
 id: REQ-NEXT-531
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -322,7 +322,7 @@ Scenario: all four action bucket labels appear for their matching signal
 
 ---
 id: REQ-NEXT-532
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -350,7 +350,7 @@ Scenario: Orphans prints before Needs tests, before Needs intent review, before 
 
 ---
 id: REQ-NEXT-533
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -378,7 +378,7 @@ Scenario: a high-fan-in requirement's blast-radius signal never prints
 
 ---
 id: REQ-NEXT-534
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -407,7 +407,7 @@ Scenario: Untagged files prints after every action bucket
 
 ---
 id: REQ-NEXT-535
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -437,7 +437,7 @@ Scenario: CLAUDE.md and TODO.md never appear as untagged
 
 ---
 id: REQ-NEXT-536
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -465,7 +465,7 @@ Scenario: no code_root means no Untagged files section at all
 
 ---
 id: REQ-NEXT-537
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -495,7 +495,7 @@ Scenario: an Orphans note names the map-recorded member and --code
 
 ---
 id: REQ-NEXT-538
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -524,7 +524,7 @@ Scenario: equal priority and risk falls back to id order
 
 ---
 id: REQ-NEXT-539
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -553,7 +553,7 @@ Scenario: a no-priority item sorts after a could-have item
 
 ---
 id: REQ-NEXT-540
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -581,7 +581,7 @@ Scenario: a risk: 2 draft is ordered first and tagged REVIEW
 
 ---
 id: REQ-NEXT-541
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -609,7 +609,7 @@ Scenario: an item's line names its requirement file
 
 ---
 id: REQ-NEXT-542
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -637,7 +637,7 @@ Scenario: only the top 3 of 5 items print without --all
 
 ---
 id: REQ-NEXT-543
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -665,7 +665,7 @@ Scenario: a truncated bucket prints a "... N more" line
 
 ---
 id: REQ-NEXT-544
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -693,7 +693,7 @@ Scenario: --all prints every item and drops the "more" line
 
 ---
 id: REQ-NEXT-545
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -721,7 +721,7 @@ Scenario: 5 untagged files show only the top 3 by default
 
 ---
 id: REQ-NEXT-546
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -751,7 +751,7 @@ Scenario: an empty registry gets its own message, never the all-clear line
 
 ---
 id: REQ-NEXT-547
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -779,7 +779,7 @@ Scenario: a fully clean registry prints the all-clear line
 
 ---
 id: REQ-NEXT-548
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -807,7 +807,7 @@ Scenario: two runs on the same input print byte-identical output
 
 ---
 id: REQ-NEXT-549
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

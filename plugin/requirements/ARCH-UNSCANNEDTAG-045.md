@@ -99,7 +99,7 @@ both, and the next engine release scans both types.
 
 ---
 id: REQ-UNSCANNEDTAG-775
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -128,7 +128,7 @@ Scenario: a tagged Caddyfile is listed as unscannable
 
 ---
 id: REQ-UNSCANNEDTAG-776
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -157,7 +157,7 @@ Scenario: the gate warning names up to five files and the total count
 
 ---
 id: REQ-UNSCANNEDTAG-777
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -186,7 +186,7 @@ Scenario: the warning states the remedy, not just the file names
 
 ---
 id: REQ-UNSCANNEDTAG-778
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: ignored, SSOT, underscore-prefixed and oversized files are skipped
 
 ---
 id: REQ-UNSCANNEDTAG-779
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -245,7 +245,7 @@ Scenario: a non-UTF-8 file is skipped without warning
 
 ---
 id: REQ-UNSCANNEDTAG-780
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

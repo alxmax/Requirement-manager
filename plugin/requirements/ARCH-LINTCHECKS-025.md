@@ -217,7 +217,7 @@ CASE-12
 
 ---
 id: REQ-LINTCHECKS-457
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -246,7 +246,7 @@ Scenario: statement-too-long fires past the sentence ceiling
 
 ---
 id: REQ-LINTCHECKS-458
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -275,7 +275,7 @@ Scenario: stacked-conditions fires at the connector ceiling
 
 ---
 id: REQ-LINTCHECKS-459
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -305,7 +305,7 @@ Scenario: stacked-conditions fires on Acceptance text too, with no modal verb
 
 ---
 id: REQ-LINTCHECKS-460
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -334,7 +334,7 @@ Scenario: anonymous-subject fires on a bare "It" opener
 
 ---
 id: REQ-LINTCHECKS-461
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -363,7 +363,7 @@ Scenario: anonymous-subject ignores Acceptance prose
 
 ---
 id: REQ-LINTCHECKS-462
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -392,7 +392,7 @@ Scenario: ac-count-low fires under the minimum
 
 ---
 id: REQ-LINTCHECKS-463
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -421,7 +421,7 @@ Scenario: ac-count-high fires over the maximum, either counting style
 
 ---
 id: REQ-LINTCHECKS-464
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -450,7 +450,7 @@ Scenario: over-scoped fires only when both ceilings are crossed
 
 ---
 id: REQ-LINTCHECKS-465
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -480,7 +480,7 @@ Scenario: over-scoped counts bold groups, not raw clauses
 
 ---
 id: REQ-LINTCHECKS-466
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -509,7 +509,7 @@ Scenario: file-spread fires at the distinct-file ceiling
 
 ---
 id: REQ-LINTCHECKS-467
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -538,7 +538,7 @@ Scenario: file-spread is silent without member data
 
 ---
 id: REQ-LINTCHECKS-468
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -567,7 +567,7 @@ Scenario: layer-mismatch fires on a fan-out bus with no dependents
 
 ---
 id: REQ-LINTCHECKS-469
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -595,7 +595,7 @@ Scenario: layer-mismatch is silent without fan-in data
 
 ---
 id: REQ-LINTCHECKS-470
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -624,7 +624,7 @@ Scenario: vague-term fires on a closed-set word
 
 ---
 id: REQ-LINTCHECKS-471
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -652,7 +652,7 @@ Scenario: vague-term ignores a backticked span
 
 ---
 id: REQ-LINTCHECKS-472
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -680,7 +680,7 @@ Scenario: vague-term reports each distinct term once
 
 ---
 id: REQ-LINTCHECKS-473
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -709,7 +709,7 @@ Scenario: redundant-modal fires on shall or must
 
 ---
 id: REQ-LINTCHECKS-474
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -738,7 +738,7 @@ Scenario: redundant-modal ignores a backticked span
 
 ---
 id: REQ-LINTCHECKS-475
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -766,7 +766,7 @@ Scenario: redundant-modal reports each distinct term once
 
 ---
 id: REQ-LINTCHECKS-476
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -797,7 +797,7 @@ Scenario: atomic-bullet-then-mismatch fires when bullets and Then lines disagree
 
 ---
 id: REQ-LINTCHECKS-477
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

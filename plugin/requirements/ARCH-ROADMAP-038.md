@@ -98,7 +98,7 @@ CASE-5
 
 ---
 id: REQ-ROADMAP-632
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -126,7 +126,7 @@ Scenario: _roadmap_signals falls back to the parent directory for TODO.md
 
 ---
 id: REQ-ROADMAP-633
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -155,7 +155,7 @@ Scenario: no TODO.md means no roadmap keys in health --json
 
 ---
 id: REQ-ROADMAP-634
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -186,7 +186,7 @@ Scenario: behind-signal names both the roadmap's and requirements' newest milest
 
 ---
 id: REQ-ROADMAP-635
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -214,7 +214,7 @@ Scenario: no behind-signal when the roadmap is current or ahead
 
 ---
 id: REQ-ROADMAP-636
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -242,7 +242,7 @@ Scenario: v2.10 sorts above v2.9 under _version_key
 
 ---
 id: REQ-ROADMAP-637
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -271,7 +271,7 @@ Scenario: a non-version heading is listed under roadmap_unversioned_headings
 
 ---
 id: REQ-ROADMAP-638
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

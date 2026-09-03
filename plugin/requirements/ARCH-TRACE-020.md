@@ -108,7 +108,7 @@ CASE-5
 
 ---
 id: REQ-TRACE-750
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -137,7 +137,7 @@ Scenario: satisfies: parses into a frontmatter list like any other id field
 
 ---
 id: REQ-TRACE-751
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -166,7 +166,7 @@ Scenario: a dangling satisfies id warns without failing the gate
 
 ---
 id: REQ-TRACE-752
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -195,7 +195,7 @@ Scenario: an unaddressed confirmed need warns at the gate
 
 ---
 id: REQ-TRACE-753
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -226,7 +226,7 @@ Scenario: a confirmed aggregate with no implements tag passes the gate
 
 ---
 id: REQ-TRACE-754
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -255,7 +255,7 @@ Scenario: confirm refuses an aggregate with an empty depends_on
 
 ---
 id: REQ-TRACE-756
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -285,7 +285,7 @@ Scenario: a confirmed need raises no implements/tested-by finding
 
 ---
 id: REQ-TRACE-757
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -316,7 +316,7 @@ Scenario: a confirmed need with no validated-against tag warns once the repo opt
 
 ---
 id: REQ-TRACE-758
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -346,7 +346,7 @@ Scenario: show prints the trace in both directions
 
 ---
 id: REQ-TRACE-759
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

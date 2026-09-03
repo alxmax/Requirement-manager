@@ -126,7 +126,7 @@ CASE-7
 
 ---
 id: REQ-CANDIDATES-257
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -155,7 +155,7 @@ Scenario: plan emits one JSON object with the documented shape
 
 ---
 id: REQ-CANDIDATES-258
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -183,7 +183,7 @@ Scenario: plan writes zero .md files
 
 ---
 id: REQ-CANDIDATES-259
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -212,7 +212,7 @@ Scenario: plan skips the same paths scanning skips
 
 ---
 id: REQ-CANDIDATES-260
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -241,7 +241,7 @@ Scenario: per-file facts capture docstrings, signatures, imports and size
 
 ---
 id: REQ-CANDIDATES-261
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -270,7 +270,7 @@ Scenario: an unparseable file still becomes a candidate
 
 ---
 id: REQ-CANDIDATES-262
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -299,7 +299,7 @@ Scenario: Python signatures come from ast, not text matching
 
 ---
 id: REQ-CANDIDATES-263
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -327,7 +327,7 @@ Scenario: an unparseable file never aborts the run
 
 ---
 id: REQ-CANDIDATES-264
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -357,7 +357,7 @@ Scenario: every candidate carries the full documented field set
 
 ---
 id: REQ-CANDIDATES-265
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -386,7 +386,7 @@ Scenario: is_test follows test-file convention, not content
 
 ---
 id: REQ-CANDIDATES-266
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -414,7 +414,7 @@ Scenario: an import edge becomes a depends_on edge
 
 ---
 id: REQ-CANDIDATES-267
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -442,7 +442,7 @@ Scenario: high fan-in earns a bus suggestion
 
 ---
 id: REQ-CANDIDATES-268
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -470,7 +470,7 @@ Scenario: an already-tagged file reports its existing requirement
 
 ---
 id: REQ-CANDIDATES-269
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -499,7 +499,7 @@ Scenario: _capmap.json groups files into one candidate
 
 ---
 id: REQ-CANDIDATES-270
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

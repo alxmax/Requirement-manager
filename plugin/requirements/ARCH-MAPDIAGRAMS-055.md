@@ -122,7 +122,7 @@ CASE-5
 
 ---
 id: REQ-MAPDIAGRAMS-494
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -151,7 +151,7 @@ Scenario: map writes _map.md from the graph, overwriting any manual edit
 
 ---
 id: REQ-MAPDIAGRAMS-495
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -180,7 +180,7 @@ Scenario: _map.md carries exactly the five named diagrams
 
 ---
 id: REQ-MAPDIAGRAMS-496
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -208,7 +208,7 @@ Scenario: every diagram block ships its own legend
 
 ---
 id: REQ-MAPDIAGRAMS-497
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -237,7 +237,7 @@ Scenario: the Hierarchy follows satisfies edges, not depends_on
 
 ---
 id: REQ-MAPDIAGRAMS-498
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -265,7 +265,7 @@ Scenario: the Hierarchy draws a node per system and architecture requirement
 
 ---
 id: REQ-MAPDIAGRAMS-499
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -294,7 +294,7 @@ Scenario: the Hierarchy folds code requirements into their parent's count
 
 ---
 id: REQ-MAPDIAGRAMS-501
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -322,7 +322,7 @@ Scenario: a node's area falls back to its id prefix
 
 ---
 id: REQ-MAPDIAGRAMS-502
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -351,7 +351,7 @@ Scenario: the System Map collapses a lone node into misc
 
 ---
 id: REQ-MAPDIAGRAMS-503
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -380,7 +380,7 @@ Scenario: the System Map hides edges into a bus node
 
 ---
 id: REQ-MAPDIAGRAMS-504
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -408,7 +408,7 @@ Scenario: the Dependency Map draws one counted node per area
 
 ---
 id: REQ-MAPDIAGRAMS-505
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -437,7 +437,7 @@ Scenario: the Dependency Map draws one area edge per cross-area dependency
 
 ---
 id: REQ-MAPDIAGRAMS-506
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -466,7 +466,7 @@ Scenario: Req→Code colors nodes by link status
 
 ---
 id: REQ-MAPDIAGRAMS-507
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -494,7 +494,7 @@ Scenario: Req→Code collapses same-file members to a line range
 
 ---
 id: REQ-MAPDIAGRAMS-508
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -523,7 +523,7 @@ Scenario: the Risk diagram omits a requirement with no risk signal
 
 ---
 id: REQ-MAPDIAGRAMS-509
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -551,7 +551,7 @@ Scenario: every Risk node carries a recommendation
 
 ---
 id: REQ-MAPDIAGRAMS-510
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

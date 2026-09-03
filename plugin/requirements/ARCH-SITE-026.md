@@ -88,7 +88,7 @@ CASE-5
 
 ---
 id: REQ-SITE-703
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -120,7 +120,7 @@ Scenario: a second attach run with no change is byte-identical
 
 ---
 id: REQ-SITE-704
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -151,7 +151,7 @@ Scenario: site scaffolds a full page when the attach target is absent
 
 ---
 id: REQ-SITE-705
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -182,7 +182,7 @@ Scenario: an absent nav target is omitted, not an error
 
 ---
 id: REQ-SITE-706
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -211,7 +211,7 @@ Scenario: reqmap.py's own source never references the excalidraw builder
 
 ---
 id: REQ-SITE-707
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -243,7 +243,7 @@ Scenario: init scaffolds the site page unless --no-site is passed
 
 ---
 id: REQ-SITE-708
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

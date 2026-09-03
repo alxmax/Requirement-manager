@@ -91,7 +91,7 @@ CASE-4
 
 ---
 id: REQ-PROSE-594
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -121,7 +121,7 @@ Scenario: draft writes a requirement for an untagged capability-bucket prose fil
 
 ---
 id: REQ-PROSE-596
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -152,7 +152,7 @@ Scenario: classify_prose buckets meta/boilerplate files as ignore
 
 ---
 id: REQ-PROSE-597
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -182,7 +182,7 @@ Scenario: classify_prose buckets README/docs/html paths as sync_only
 
 ---
 id: REQ-PROSE-598
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -211,7 +211,7 @@ Scenario: classify_prose buckets prompt/spec prose as capability
 
 ---
 id: REQ-PROSE-599
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -240,7 +240,7 @@ Scenario: an explicit generated-from tag registers a sync_only file as a member
 
 ---
 id: REQ-PROSE-600
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -270,7 +270,7 @@ Scenario: _prose_facts prefers frontmatter title, then collects the H2 headings
 
 ---
 id: REQ-PROSE-601
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -299,7 +299,7 @@ Scenario: later H1 headings become the section hint when no H2 exists
 
 ---
 id: REQ-PROSE-602
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

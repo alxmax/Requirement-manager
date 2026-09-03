@@ -103,7 +103,7 @@ CASE-6
 
 ---
 id: REQ-FANOUT-388
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -132,7 +132,7 @@ Scenario: the finding names the exact child count
 
 ---
 id: REQ-FANOUT-389
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -160,7 +160,7 @@ Scenario: depends_on edges never feed the fan-out count
 
 ---
 id: REQ-FANOUT-390
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -188,7 +188,7 @@ Scenario: a leaf with zero children is never a fan-out finding
 
 ---
 id: REQ-FANOUT-391
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -217,7 +217,7 @@ Scenario: crossing the ceiling flips the finding on
 
 ---
 id: REQ-FANOUT-392
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -245,7 +245,7 @@ Scenario: a thin parent at a declared level is not reported
 
 ---
 id: REQ-FANOUT-393
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -273,7 +273,7 @@ Scenario: a fan-out finding does not fail the run
 
 ---
 id: REQ-FANOUT-394
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

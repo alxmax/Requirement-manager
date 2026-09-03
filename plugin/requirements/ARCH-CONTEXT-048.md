@@ -115,7 +115,7 @@ CASE-5
 
 ---
 id: REQ-CONTEXT-312
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -144,7 +144,7 @@ Scenario: a newly scaffolded requirement carries the Context form
 
 ---
 id: REQ-CONTEXT-313
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -175,7 +175,7 @@ Scenario: bold sub-group labels keep each group's bullets separate
 
 ---
 id: REQ-CONTEXT-314
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -204,7 +204,7 @@ Scenario: an absent sub-group returns empty instead of a neighboring group's bul
 
 ---
 id: REQ-CONTEXT-316
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -238,7 +238,7 @@ Scenario: notes come from the legacy heading, not the Context fallback, when pre
 
 ---
 id: REQ-CONTEXT-317
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

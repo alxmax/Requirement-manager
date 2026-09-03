@@ -119,7 +119,7 @@ CASE-7
 
 ---
 id: REQ-HEALTH-413
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -147,7 +147,7 @@ Scenario: health prints a snapshot covering the whole corpus
 
 ---
 id: REQ-HEALTH-414
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -175,7 +175,7 @@ Scenario: health runs without writing any file
 
 ---
 id: REQ-HEALTH-415
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -203,7 +203,7 @@ Scenario: the headline score is the percentage that are green
 
 ---
 id: REQ-HEALTH-416
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -232,7 +232,7 @@ Scenario: an open verify-intent question excludes a requirement from green
 
 ---
 id: REQ-HEALTH-417
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -260,7 +260,7 @@ Scenario: a bus requirement without an implements member is uncovered
 
 ---
 id: REQ-HEALTH-418
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -289,7 +289,7 @@ Scenario: a test_exempt reason satisfies the test axis without a tested-by membe
 
 ---
 id: REQ-HEALTH-419
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -319,7 +319,7 @@ Scenario: a satisfied need passes its test axis without code
 
 ---
 id: REQ-HEALTH-420
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -376,7 +376,7 @@ Scenario: the printed counts cover every named category
 
 ---
 id: REQ-HEALTH-422
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -405,7 +405,7 @@ Scenario: --json and the console report the same numbers
 
 ---
 id: REQ-HEALTH-423
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -433,7 +433,7 @@ Scenario: an empty corpus reports zero with a bootstrap hint
 
 ---
 id: REQ-HEALTH-424
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

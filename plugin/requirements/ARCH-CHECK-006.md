@@ -40,9 +40,12 @@ Every bullet below is binding.
   [[ARCH-TRACE-020]].
 
 **What is a warning**
-- `gate` reports drift as a `WARN`, never an error: a `confirmed` requirement whose
+- `gate` reports drift as a `WARN` under plain `gate`: a `confirmed` requirement whose
   binding hash differs from the lock.
 - The drift warning names the member `file:line` locations to re-check.
+- `gate --strict` promotes drift (and the no-`tested-by:` warning below, and member
+  drift) to an `ERROR`. The `depends_on`-cycle warning and the legacy-schema warning
+  are the two exceptions — they stay warnings even under `--strict`.
 - A `confirmed` requirement with no `tested-by:` member is a `WARN`.
 - A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt
   from that test warning.
@@ -64,8 +67,9 @@ Every bullet below is binding.
   has no baseline to compare against.
 - That git-tracking check is fail-open: `gate` stays silent when git is unavailable or
   the tree is not a work tree.
-- `gate` names every requirement whose body lacks a `## Verify intent` section in
-  one aggregated legacy-schema `WARN`.
+- `gate` names every sectioned-form requirement whose body lacks a `## Verify intent`
+  section in one aggregated legacy-schema `WARN`. Atomic-form requirements (`form:
+  atomic`) carry no such heading by design and are excluded from this check.
 - `gate` counts those legacy-schema requirements in the summary.
 - The legacy-schema warning does not affect the exit code.
 - A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at
@@ -84,7 +88,8 @@ Every bullet below is binding.
 **Advancing the lock**
 - With `--update-lock`, `gate` writes the current binding hashes to
   `requirements/_reqlock.json`.
-- `sync` and the deprecated `check` alias pass `--update-lock`.
+- `sync` always passes `--update-lock`. The deprecated `check` alias does not — it
+  only advances the lock when the caller explicitly passes `--update-lock`.
 - The `gate` verb itself is report-only.
 
 ## Verify intent (open questions for the human)
@@ -207,7 +212,7 @@ CASE-14
 
 ---
 id: REQ-CHECK-272
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -236,7 +241,7 @@ Scenario: a dangling tag is a gate ERROR
 
 ---
 id: REQ-CHECK-273
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -265,7 +270,7 @@ Scenario: an invalid status or layer is a gate ERROR
 
 ---
 id: REQ-CHECK-274
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -293,7 +298,7 @@ Scenario: a depends_on target that does not exist is a gate ERROR
 
 ---
 id: REQ-CHECK-275
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -321,7 +326,7 @@ Scenario: a confirmed requirement with no implements tag is a gate ERROR
 
 ---
 id: REQ-CHECK-276
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -350,7 +355,7 @@ Scenario: ENFORCED names exactly the three enforced statuses
 
 ---
 id: REQ-CHECK-277
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -380,7 +385,7 @@ Scenario: a confirmed need with no implements tag raises no gate error
 
 ---
 id: REQ-CHECK-278
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -391,13 +396,15 @@ superseded_by:
 
 # Gate reports drift as a WARN, never an
 
-> `gate` reports drift as a `WARN`, never an error: a `confirmed` requirement whose
-> binding hash differs from the lock.
+> Plain `gate` reports drift as a `WARN`, never an error: a `confirmed` requirement
+> whose binding hash differs from the lock. `gate --strict` promotes this same drift
+> to an ERROR instead (contrast REQ-CHECK-298, where `--strict` does NOT promote the
+> depends_on-cycle warning).
 
-Scenario: a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR
+Scenario: a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR under plain gate
   Given  a confirmed requirement locked at an old hash, whose Description text has since
          changed
-  When   `gate` runs
+  When   plain `gate` runs (no `--strict`)
   Then   its output contains "DRIFT" on a line printed with the "WARN" prefix, never
          "ERROR"
 
@@ -411,7 +418,7 @@ Scenario: a confirmed requirement's changed contract warns DRIFT, prefixed WARN 
 
 ---
 id: REQ-CHECK-279
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -439,7 +446,7 @@ Scenario: the drift warning names the member's file and line
 
 ---
 id: REQ-CHECK-280
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -468,7 +475,7 @@ Scenario: a confirmed requirement with no tested-by tag warns, not errors
 
 ---
 id: REQ-CHECK-281
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -498,7 +505,7 @@ Scenario: test_exempt suppresses the no-tested-by warning
 
 ---
 id: REQ-CHECK-282
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -527,7 +534,7 @@ Scenario: a confirmed need with no tested-by tag raises no test warning
 
 ---
 id: REQ-CHECK-283
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -557,7 +564,7 @@ Scenario: a confirmed requirement missing Description warns and exits 0
 
 ---
 id: REQ-CHECK-284
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -587,7 +594,7 @@ Scenario: a confirmed requirement missing Cases warns and exits 0
 
 ---
 id: REQ-CHECK-285
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -616,7 +623,7 @@ Scenario: a well-shaped milestone value is silent
 
 ---
 id: REQ-CHECK-286
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -646,7 +653,7 @@ Scenario: a malformed milestone value warns
 
 ---
 id: REQ-CHECK-287
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -674,7 +681,7 @@ Scenario: a deprecated requirement's malformed milestone is silent
 
 ---
 id: REQ-CHECK-288
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -703,7 +710,7 @@ Scenario: a corrupt _reqlock.json warns and does not crash the gate
 
 ---
 id: REQ-CHECK-289
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -733,7 +740,7 @@ Scenario: an untracked lock file is flagged, then clears once tracked
 
 ---
 id: REQ-CHECK-291
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -762,7 +769,7 @@ Scenario: the untracked-lock check is silent outside a git work tree
 
 ---
 id: REQ-CHECK-292
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -773,11 +780,13 @@ superseded_by:
 
 # Gate names every requirement whose body lacks a
 
-> `gate` names every requirement whose body lacks a `## Verify intent` section in
-> one aggregated legacy-schema `WARN`.
+> `gate` names every SECTIONED-form requirement whose body lacks a `## Verify intent`
+> section in one aggregated legacy-schema `WARN`. Atomic-form requirements (`form:
+> atomic`) are excluded by design — they carry no `## Verify intent` heading at all,
+> so the check would otherwise flag every atomic requirement in the corpus.
 
-Scenario: a requirement missing Verify intent is named in the legacy-schema warning
-  Given  a requirement whose body has no `## Verify intent` section
+Scenario: a sectioned-form requirement missing Verify intent is named in the legacy-schema warning
+  Given  a sectioned-form requirement whose body has no `## Verify intent` section
   When   `gate` runs
   Then   its output contains "legacy schema" naming that requirement's id, and "findings`
          is inactive"
@@ -792,7 +801,7 @@ Scenario: a requirement missing Verify intent is named in the legacy-schema warn
 
 ---
 id: REQ-CHECK-293
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -820,7 +829,7 @@ Scenario: the summary line reports the legacy-schema count
 
 ---
 id: REQ-CHECK-294
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -848,7 +857,7 @@ Scenario: a legacy-schema requirement warns but the gate exits 0
 
 ---
 id: REQ-CHECK-295
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -878,7 +887,7 @@ Scenario: an unvalidated confirmed need warns once the repo has opted in
 
 ---
 id: REQ-CHECK-296
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -908,7 +917,7 @@ Scenario: a bus requirement verified only at @system warns
 
 ---
 id: REQ-CHECK-297
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -937,7 +946,7 @@ Scenario: a depends_on cycle warns once, naming the whole chain
 
 ---
 id: REQ-CHECK-298
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -966,7 +975,7 @@ Scenario: --strict does not promote the cycle warning to an error
 
 ---
 id: REQ-CHECK-299
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -995,7 +1004,7 @@ Scenario: gate reports the open verify-intent finding count
 
 ---
 id: REQ-CHECK-300
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -1024,7 +1033,7 @@ Scenario: an open verify-intent finding does not change an otherwise-clean exit 
 
 ---
 id: REQ-CHECK-301
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -1053,7 +1062,7 @@ Scenario: the summary line reports the confirmed and legacy-schema counts
 
 ---
 id: REQ-CHECK-302
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -1082,7 +1091,7 @@ Scenario: --update-lock writes the requirement's hash into the lock
 
 ---
 id: REQ-CHECK-303
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -1093,7 +1102,10 @@ superseded_by:
 
 # Sync and the deprecated check alias pass --update-lock
 
-> `sync` and the deprecated `check` alias pass `--update-lock`.
+> `sync` always advances the lock, as if `--update-lock` had been passed. The
+> deprecated `check` alias does NOT — it only advances the lock when the caller
+> explicitly passes `--update-lock` on the command line, exactly mirroring its
+> pre-`sync` legacy behavior.
 
 Scenario: a clean sync run advances the lock and regenerates the map
   Given  a clean corpus (no gate errors)
@@ -1111,7 +1123,7 @@ Scenario: a clean sync run advances the lock and regenerates the map
 
 ---
 id: REQ-CHECK-304
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

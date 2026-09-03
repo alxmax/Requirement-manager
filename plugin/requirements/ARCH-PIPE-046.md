@@ -79,7 +79,7 @@ twelve lines and exits 0 on Windows, instead of `OSError: [Errno 22] Invalid arg
 
 ---
 id: REQ-PIPE-563
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -108,7 +108,7 @@ Scenario: a closed pipe ends the command quietly
 
 ---
 id: REQ-PIPE-564
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -137,7 +137,7 @@ Scenario: BrokenPipeError and its Windows OSError form are handled alike
 
 ---
 id: REQ-PIPE-565
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -166,7 +166,7 @@ Scenario: an unrelated OSError still propagates
 
 ---
 id: REQ-PIPE-566
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

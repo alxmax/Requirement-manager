@@ -127,7 +127,7 @@ CASE-7
 
 ---
 id: REQ-FINDINGS-395
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -156,7 +156,7 @@ Scenario: findings collects verify-intent bullets from every requirement
 
 ---
 id: REQ-FINDINGS-396
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -185,7 +185,7 @@ Scenario: findings writes its report to a single file
 
 ---
 id: REQ-FINDINGS-397
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -214,7 +214,7 @@ Scenario: findings drops the None placeholder bullet
 
 ---
 id: REQ-FINDINGS-398
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -242,7 +242,7 @@ Scenario: raw mode groups findings under their requirement
 
 ---
 id: REQ-FINDINGS-399
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -270,7 +270,7 @@ Scenario: raw report prints a count per group and in the header
 
 ---
 id: REQ-FINDINGS-400
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -299,7 +299,7 @@ Scenario: findings writes a clean report when nothing is open
 
 ---
 id: REQ-FINDINGS-401
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -327,7 +327,7 @@ Scenario: --raw ignores a present triage sidecar
 
 ---
 id: REQ-FINDINGS-402
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -356,7 +356,7 @@ Scenario: findings renders a classified view when a sidecar exists
 
 ---
 id: REQ-FINDINGS-403
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -387,7 +387,7 @@ Scenario: classified view orders sections by severity then class
 
 ---
 id: REQ-FINDINGS-404
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -415,7 +415,7 @@ Scenario: a confirmed bug entry shows its location and fix
 
 ---
 id: REQ-FINDINGS-405
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -444,7 +444,7 @@ Scenario: findings warns when raw and triaged counts diverge
 
 ---
 id: REQ-FINDINGS-408
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -473,7 +473,7 @@ Scenario: map refreshes an already-committed findings report
 
 ---
 id: REQ-FINDINGS-409
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -501,7 +501,7 @@ Scenario: map never creates a findings report that does not exist yet
 
 ---
 id: REQ-FINDINGS-410
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -532,7 +532,7 @@ Scenario: map --check flags a stale findings report but never an absent one
 
 ---
 id: REQ-FINDINGS-411
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

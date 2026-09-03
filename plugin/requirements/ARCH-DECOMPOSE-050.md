@@ -146,7 +146,7 @@ CASE-7
 
 ---
 id: REQ-DECOMPOSE-328
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -175,7 +175,7 @@ Scenario: a default lint run reports the finding but writes no file
 
 ---
 id: REQ-DECOMPOSE-329
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -203,7 +203,7 @@ Scenario: --decompose creates exactly one draft file per reported clause
 
 ---
 id: REQ-DECOMPOSE-330
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -232,7 +232,7 @@ Scenario: no invocation site passes --decompose
 
 ---
 id: REQ-DECOMPOSE-331
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -260,7 +260,7 @@ Scenario: the created draft carries status: draft and depends_on the parent
 
 ---
 id: REQ-DECOMPOSE-332
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -288,7 +288,7 @@ Scenario: the offending clause's own text appears verbatim in the created draft
 
 ---
 id: REQ-DECOMPOSE-333
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -316,7 +316,7 @@ Scenario: the created id reuses the parent's area/name with the next free number
 
 ---
 id: REQ-DECOMPOSE-334
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -345,7 +345,7 @@ Scenario: the parent file is byte-identical after a decompose run
 
 ---
 id: REQ-DECOMPOSE-335
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -373,7 +373,7 @@ Scenario: stdout discloses the split was by word count, not obligation
 
 ---
 id: REQ-DECOMPOSE-336
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -401,7 +401,7 @@ Scenario: the created draft's own text discloses the word-count-only split
 
 ---
 id: REQ-DECOMPOSE-338
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

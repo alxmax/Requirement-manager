@@ -193,7 +193,7 @@ CASE-8
 
 ---
 id: REQ-VIEWER-782
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -222,7 +222,7 @@ Scenario: render_html writes _map.html when the vendored template exists
 
 ---
 id: REQ-VIEWER-783
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -252,7 +252,7 @@ Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__
 
 ---
 id: REQ-VIEWER-785
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -280,7 +280,7 @@ Scenario: render_html returns None, not an error, when the template is missing
 
 ---
 id: REQ-VIEWER-786
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -309,7 +309,7 @@ Scenario: map still writes _map.md and _map.json when the viewer template is abs
 
 ---
 id: REQ-VIEWER-787
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -338,7 +338,7 @@ Scenario: the marker is consumed and replaced by a script assignment
 
 ---
 id: REQ-VIEWER-788
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -366,7 +366,7 @@ Scenario: the inlined blob's node id matches the graph handed to _inject_viewer
 
 ---
 id: REQ-VIEWER-789
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -397,7 +397,7 @@ Scenario: a field carrying all three dangerous sequences is fully escaped and st
 
 ---
 id: REQ-VIEWER-790
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -425,7 +425,7 @@ Scenario: a </script> breakout attempt in a field is neutralized
 
 ---
 id: REQ-VIEWER-791
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -454,7 +454,7 @@ Scenario: a literal <!-- inside a field is escaped to <\!--
 
 ---
 id: REQ-VIEWER-792
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -482,7 +482,7 @@ Scenario: a literal --> inside a field is escaped to -\->
 
 ---
 id: REQ-VIEWER-794
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -515,7 +515,7 @@ Scenario: U+2028/U+2029 in a title are escaped and still round-trip through JSON
 
 ---
 id: REQ-VIEWER-795
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -543,7 +543,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-796
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -571,7 +571,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-797
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -599,7 +599,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-798
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -628,7 +628,7 @@ Scenario: a map node carries both the raw accept block and the folded acc list
 
 ---
 id: REQ-VIEWER-799
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -657,7 +657,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-800
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -685,7 +685,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-801
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -743,7 +743,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-803
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -772,7 +772,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-804
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -800,7 +800,7 @@ Scenario: TODO — state the observable that proves this
 
 ---
 id: REQ-VIEWER-805
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

@@ -95,7 +95,7 @@ CASE-3
 
 ---
 id: REQ-REGISTRYLAG-608
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -124,7 +124,7 @@ Scenario: lag counts commits landed after the requirements dir's last touch
 
 ---
 id: REQ-REGISTRYLAG-609
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -153,7 +153,7 @@ Scenario: lag counts from the most recent touch, not the first
 
 ---
 id: REQ-REGISTRYLAG-610
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -181,7 +181,7 @@ Scenario: a malformed requirement file does not break the count
 
 ---
 id: REQ-REGISTRYLAG-611
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -209,7 +209,7 @@ Scenario: --json exposes the count as an integer key
 
 ---
 id: REQ-REGISTRYLAG-612
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -238,7 +238,7 @@ Scenario: the lag line appears only for a nonzero count
 
 ---
 id: REQ-REGISTRYLAG-614
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -267,7 +267,7 @@ Scenario: a nonzero lag leaves the health score unchanged
 
 ---
 id: REQ-REGISTRYLAG-615
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -296,7 +296,7 @@ Scenario: an unmeasurable lag omits the key entirely
 
 ---
 id: REQ-REGISTRYLAG-616
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

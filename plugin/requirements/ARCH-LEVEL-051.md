@@ -96,7 +96,7 @@ CASE-4
 
 ---
 id: REQ-LEVEL-436
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -124,7 +124,7 @@ Scenario: the gate accepts each of the three level values
 
 ---
 id: REQ-LEVEL-437
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -153,7 +153,7 @@ Scenario: a requirement without level: reads exactly as before
 
 ---
 id: REQ-LEVEL-438
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -181,7 +181,7 @@ Scenario: level and layer combine freely without cross-validation
 
 ---
 id: REQ-LEVEL-439
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -211,7 +211,7 @@ Scenario: an architecture-level requirement still needs an implements member
 
 ---
 id: REQ-LEVEL-440
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -239,7 +239,7 @@ Scenario: an aggregate-layer requirement stays exempt regardless of level
 
 ---
 id: REQ-LEVEL-442
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature

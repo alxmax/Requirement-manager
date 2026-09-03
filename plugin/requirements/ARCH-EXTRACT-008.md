@@ -126,7 +126,7 @@ CASE-6
 
 ---
 id: REQ-EXTRACT-374
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -155,7 +155,7 @@ Scenario: draft proposes a file for every untagged scannable extension
 
 ---
 id: REQ-EXTRACT-375
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -183,7 +183,7 @@ Scenario: draft skips a file already carrying a member tag
 
 ---
 id: REQ-EXTRACT-376
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -212,7 +212,7 @@ Scenario: draft skips a file matched by .reqmapignore
 
 ---
 id: REQ-EXTRACT-378
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -240,7 +240,7 @@ Scenario: draft writes one proposal file per remaining source file
 
 ---
 id: REQ-EXTRACT-379
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -269,7 +269,7 @@ Scenario: a fresh proposal is marked draft with a TODO contract
 
 ---
 id: REQ-EXTRACT-380
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -298,7 +298,7 @@ Scenario: a proposal's Contract opens exactly like new's scaffold
 
 ---
 id: REQ-EXTRACT-381
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -326,7 +326,7 @@ Scenario: draft creates a missing requirements directory
 
 ---
 id: REQ-EXTRACT-382
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -354,7 +354,7 @@ Scenario: draft ids stay unique across same-named files in different folders
 
 ---
 id: REQ-EXTRACT-383
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -383,7 +383,7 @@ Scenario: a marker-heavy file scores as higher risk
 
 ---
 id: REQ-EXTRACT-384
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -411,7 +411,7 @@ Scenario: the risk score routes the proposal's status hint
 
 ---
 id: REQ-EXTRACT-385
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -439,7 +439,7 @@ Scenario: re-running draft leaves an existing proposal untouched
 
 ---
 id: REQ-EXTRACT-386
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
@@ -468,7 +468,7 @@ Scenario: a Python proposal's WHERE names the docstring and top-level signatures
 
 ---
 id: REQ-EXTRACT-387
-status: draft
+status: baseline
 form: atomic
 level: code
 layer: feature
