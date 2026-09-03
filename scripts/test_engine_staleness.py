@@ -23,7 +23,7 @@ def _engine(path, version):
     return str(path)
 
 
-class StalenessProbe(unittest.TestCase):
+class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # tested-by: REQ-STALEENGINE-926
     def _run(self, vendored, reference, mode="warn", in_actions=False):
         """Run the probe, returning (exit_code, stdout)."""
         saved = os.environ.get("GITHUB_ACTIONS")
@@ -46,7 +46,7 @@ class StalenessProbe(unittest.TestCase):
         return (_engine(Path(d) / "vendored.py", vendored_ver),
                 _engine(Path(d) / "reference.py", reference_ver))
 
-    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043
+    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043  # verifies: REQ-STALEENGINE-925#CASE-1
         """AC-1: the motivating case — an old vendored engine, named, without failing."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -56,7 +56,7 @@ class StalenessProbe(unittest.TestCase):
             self.assertIn("2026-08-20.2", out)
             self.assertIn("stale", out.lower())
 
-    def test_stale_error_mode_exits_one(self):
+    def test_stale_error_mode_exits_one(self):  # verifies: REQ-STALEENGINE-925#CASE-6
         """AC-2."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -64,7 +64,7 @@ class StalenessProbe(unittest.TestCase):
             self.assertEqual(code, 1)
             self.assertIn("stale", out.lower())
 
-    def test_off_mode_is_silent(self):
+    def test_off_mode_is_silent(self):  # verifies: REQ-STALEENGINE-926#CASE-1
         """AC-3."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -72,7 +72,7 @@ class StalenessProbe(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertEqual(out, "")
 
-    def test_current_or_ahead_never_warns(self):
+    def test_current_or_ahead_never_warns(self):  # verifies: REQ-STALEENGINE-926#CASE-2
         """AC-4: equal, and a vendored engine ahead of the pinned action's."""
         for vendored, reference in [("2026-08-20.2", "2026-08-20.2"),
                                     ("2026-08-20.2", "2026-08-20"),
@@ -92,7 +92,7 @@ class StalenessProbe(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertIn("stale", out.lower())
 
-    def test_unreadable_version_is_a_skip_not_a_failure(self):
+    def test_unreadable_version_is_a_skip_not_a_failure(self):  # verifies: REQ-STALEENGINE-926#CASE-3
         """AC-5: fail open. An unreadable version is not evidence of staleness, so even
         `error` mode must not turn it into a red build."""
         with tempfile.TemporaryDirectory() as d:
@@ -105,7 +105,7 @@ class StalenessProbe(unittest.TestCase):
                 self.assertEqual(code, 0, (vendored, reference))
                 self.assertIn("skipped", out.lower(), (vendored, reference))
 
-    def test_internal_failure_is_a_skip_not_a_failure(self):
+    def test_internal_failure_is_a_skip_not_a_failure(self):  # verifies: REQ-STALEENGINE-926#CASE-4
         """AC-5, second half: whatever goes wrong inside the probe, the gate run it is
         attached to must not go red because of it."""
         with tempfile.TemporaryDirectory() as d:
@@ -119,7 +119,7 @@ class StalenessProbe(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertIn("skipped", out.lower())
 
-    def test_annotation_only_under_github_actions(self):
+    def test_annotation_only_under_github_actions(self):  # verifies: REQ-STALEENGINE-925#CASE-7
         """AC-6: the workflow-annotation syntax is noise in a local terminal."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")

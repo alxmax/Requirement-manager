@@ -295,11 +295,10 @@ honored by the scanner.
 
 ## Audience & writing level
 
-Write every requirement so a FIRST-YEAR ENGINEERING STUDENT can understand it without
-asking questions: someone who reads technical prose comfortably, but who may not program,
-and who knows nothing about this project. That is a lower baseline than "a developer new
-to the project", and it is deliberate — a requirement only anyone-who-already-knows can
-read is not a specification, it is a reminder. Rules:
+Write every requirement for a DEVELOPER NEW TO THE PROJECT: someone who programs, opens the
+requirement from a `# implements:` tag in code they do not understand, and knows nothing
+about this repo. File and function names are welcome (they say where to look); programming
+terms need no definition; project-specific terms still do. Rules:
 
 1. Define each project-specific term briefly, inline, on first use — e.g.
    "veto cascade (a fixed series of checks that can block or reroute the result)".

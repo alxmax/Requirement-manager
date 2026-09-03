@@ -1,13 +1,12 @@
 ---
 id: ARCH-ATOMICITY-049
-status: confirmed    # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: system
-layer: feature       # bus | feature | need | aggregate
+status: confirmed
+level: architecture
+layer: feature
 owner: Alex
 priority: should-have
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014]
 satisfies: [SYS-AUTHOR-101]
-superseded_by:
 ---
 
 # Statement atomicity
@@ -18,42 +17,12 @@ superseded_by:
 > a clause well-formed: one obligation, verifiable on its own. It also ships a word-count
 > heuristic that points a reader at clauses worth re-reading. The two are deliberately
 > not the same thing, and the second never decides the first.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a clause          one bullet in a requirement's Contract section — the unit a test
-                       answers to.
-     an obligation     one thing the system does, or one constraint it holds to.
-     atomicity         the property of a clause carrying exactly one obligation.
-     decomposition     splitting one clause into several, each stating one obligation,
-                       rather than shortening the prose.
-     the threshold     `LINT_STATEMENT_WORDS`, the word count above which a clause is
-                       reported. -->
+- A clause in a Contract section describes a single obligation that can be verified independently; `lint`'s `statement-size` check enforces a word-count threshold on top of that rule, advisory and silencable, never a proxy for the rule itself. [[REQ-ATOMICITY-824]]
+- `statement-size` measures textual size, never semantic atomicity: a short clause with two obligations passes, and a long single-obligation clause merely earns a re-read. [[REQ-ATOMICITY-825]]
 
-**The normative rule**
-- A clause in a Contract section describes a single obligation that can be verified independently.
-- A clause carrying two independent obligations counts as two clauses, not one.
-- Atomicity is judged by a human reader. No check in the engine determines it.
-
-**The `statement-size` heuristic**
-- A clause normally holds no more than `LINT_STATEMENT_WORDS` words, default 150.
-- The `statement-size` check reports a Contract clause above that threshold.
-- The threshold is advisory. A clause above it stays valid, and the exit code is unchanged.
-- `lint_exempt: [statement-size]` silences the check for one requirement.
-
-**What the check measures, and what it does not**
-- The `statement-size` check measures textual size, never semantic atomicity.
-- A short clause may carry several independent obligations and still pass the check.
-- A finding asks the author to re-read the clause for decomposition, and asserts no defect.
-
-**How a clause is counted**
-- The check counts words after each backticked code span is replaced by one token.
-- A nested sub-bullet is counted as its own clause, because it states its own obligation.
-- The check reads the Contract section only. Acceptance prose carries no size ceiling.
-
-## Verify intent (open questions for the human)
-- None — authored from stated intent, not reconstructed from code.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a Contract clause of 80 plain words
   When   `lint` runs
@@ -80,7 +49,17 @@ CASE-6
   Then   no `statement-size` finding is reported, because the check reads size and not
          atomicity
 
-## Context (non-binding)
+## Context
+**Terms**
+- a clause          one bullet in a requirement's Contract section — the unit a test
+- answers to.
+- an obligation     one thing the system does, or one constraint it holds to.
+- atomicity         the property of a clause carrying exactly one obligation.
+- decomposition     splitting one clause into several, each stating one obligation,
+- rather than shortening the prose.
+- the threshold     `LINT_STATEMENT_WORDS`, the word count above which a clause is
+- reported.
+
 **Notes**
 - The two halves are not the same kind of statement, and the file keeps them apart on
   purpose. Atomicity is the **normative rule**: a clause carrying two obligations is
@@ -137,318 +116,135 @@ CASE-6
   bare token with no padding, because `" x "` split trailing punctuation into a second word
   and inflated every such clause by one.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-ATOMICITY-244
-status: draft
-form: atomic
+id: REQ-ATOMICITY-824
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
 ---
 
-# A clause in a Contract section describes a
+# One obligation per clause, with an advisory length backstop
 
-> A clause in a Contract section describes a single obligation that can be verified
-> independently.
+## Description
+> A Contract clause is the unit a test answers to, so a clause stating two obligations
+> hides one of them from review. This is the normative rule a human applies when writing or
+> reviewing a clause, plus the one mechanical thing `lint` can check on top of it: a
+> word-count threshold (`LINT_STATEMENT_WORDS`, default 150) that flags a clause worth a
+> second look — advisory only, never a substitute for the human judgment above it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Every bullet below is binding.
+- A clause in a Contract section describes a single obligation that can be verified independently.
+- A clause carrying two independent obligations counts as two clauses, not one.
+- Atomicity is judged by a human reader. No check in the engine determines it.
+- A clause normally holds no more than `LINT_STATEMENT_WORDS` words, default 150.
+- The `statement-size` check reports a Contract clause above that threshold.
+- The threshold is advisory. A clause above it stays valid, and the exit code is unchanged.
+- `lint_exempt: [statement-size]` silences the check for one requirement.
 
-## Members in code (auto)
+## Cases
+CASE-1 — a clause stating two obligations is split, not shortened
+  Given  a clause covering both "the service issues a token on valid credentials" and
+         "the service revokes it on logout"
+  When   an author applies the atomicity rule during review
+  Then   the clause becomes two clauses, each stating one obligation and independently
+         verifiable — trimming words alone would not satisfy the rule
 
+CASE-2 — atomicity is a human judgment; the check never asserts it
+  Given  a short clause under the word-count threshold that still states two obligations
+  When   `lint` runs
+  Then   it reports no finding for that clause — the threshold check has nothing to say
+         about atomicity, only about length
 
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-245
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# A clause carrying two independent obligations counts as
-
-> A clause carrying two independent obligations counts as two clauses, not one.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-247
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# A clause normally holds no more than LINT_STATEMENT_WORDS
-
-> A clause normally holds no more than `LINT_STATEMENT_WORDS` words, default 150.
-
-Scenario: the default statement-size threshold is 150 words
+CASE-3 — the default statement-size threshold is 150 words
   Given  the module constant `LINT_STATEMENT_WORDS`
   When   its value is read
   Then   it equals `150`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-248
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The statement-size check reports a Contract clause above
-
-> The `statement-size` check reports a Contract clause above that threshold.
-
-Scenario: a 155-word clause produces exactly one statement-size finding
+CASE-4 — a 155-word clause produces exactly one statement-size finding
   Given  a Contract clause of 155 plain words
   When   `lint_requirement` runs
   Then   exactly one finding names `check: "statement-size"` and `clause_n: 1`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-249
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The threshold is advisory. A clause above it
-
-> The threshold is advisory. A clause above it stays valid, and the exit code is
-> unchanged.
-
-Scenario: an over-threshold clause's finding carries warn severity, not error
+CASE-5 — an over-threshold clause's finding carries warn severity, not error
   Given  a Contract clause of 155 plain words
   When   `lint_requirement` runs
   Then   the `statement-size` finding's `severity` reads `"warn"`, never `"error"`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-250
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# Lint_exempt: statement-size silences the check for one requirement
-
-> `lint_exempt: [statement-size]` silences the check for one requirement.
-
-Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding
+CASE-6 — lint_exempt: [statement-size] silences an otherwise-reported finding
   Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]`
   When   `lint_requirement` runs
   Then   no `statement-size` finding appears, though it appears without the exemption
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-ATOMICITY-252
-status: baseline
-form: atomic
+id: REQ-ATOMICITY-825
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
 ---
 
-# A short clause may carry several independent obligations
+# statement-size measures length, not atomicity
 
-> A short clause may carry several independent obligations and still pass the check.
+## Description
+> `statement-size` is a coarse proxy, not a determination: it counts words per Contract
+> clause (backticked spans collapsed to one token, comments and Acceptance prose excluded)
+> and flags one that runs long. A short clause with two obligations still passes — the
+> finding only ever asks for a re-read, never claims a defect.
 
-Scenario: a short two-obligation clause produces no statement-size finding
+Every bullet below is binding.
+- The `statement-size` check measures textual size, never semantic atomicity.
+- A short clause may carry several independent obligations and still pass the check.
+- A finding asks the author to re-read the clause for decomposition, and asserts no defect.
+- The check counts words after each backticked code span is replaced by one token.
+- A nested sub-bullet is counted as its own clause, because it states its own obligation.
+- The check reads the Contract section only. Acceptance prose carries no size ceiling.
+
+## Cases
+CASE-1 — a short two-obligation clause produces no statement-size finding
   Given  a 16-word clause stating both "issues a token" and "revokes it on logout"
   When   `lint_requirement` runs
   Then   no `statement-size` finding is reported for that clause
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-253
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# A finding asks the author to re-read the
-
-> A finding asks the author to re-read the clause for decomposition, and asserts no
-> defect.
-
-Scenario: the finding's detail text asks for a re-read, not a defect claim
+CASE-2 — the finding's detail text asks for a re-read, not a defect claim
   Given  a Contract clause of 155 plain words
   When   the `statement-size` finding is produced
   Then   its `detail` text reads "re-read it for decomposition"
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-254
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The check counts words after each backticked code
-
-> The check counts words after each backticked code span is replaced by one token.
-
-Scenario: a backticked span collapses to one token before counting
+CASE-3 — a backticked span collapses to one token before counting
   Given  a clause of 20 plain words plus one backticked span of 140 words
   When   `_clause_words` counts the clause
   Then   it returns 21, not the raw 161-word split count
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-255
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# A nested sub-bullet is counted as its own
-
-> A nested sub-bullet is counted as its own clause, because it states its own obligation.
-
-Scenario: a nested sub-bullet is flagged on its own, the parent is not
+CASE-4 — a nested sub-bullet is flagged on its own, the parent is not
   Given  a 40-word parent bullet with a nested 155-word sub-bullet
   When   `lint_requirement` runs
   Then   exactly one `statement-size` finding appears, naming `clause_n: 2` (the sub-bullet)
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-256
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The check reads the Contract section only. Acceptance
-
-> The check reads the Contract section only. Acceptance prose carries no size ceiling.
-
-Scenario: a 200-word Acceptance step produces no statement-size finding
+CASE-5 — a 200-word Acceptance step produces no statement-size finding
   Given  a requirement whose Contract clauses are all short but whose Acceptance
          section holds a 200-word step
   When   `lint_requirement` runs
   Then   no `statement-size` finding is reported
 
-## Members in code (auto)
+CASE-6 — a glossary HTML comment is not counted as a clause
+  Given  a Contract section opening with a 160-word HTML comment followed by one short clause
+  When   `_contract_clauses` parses it
+  Then   only the short clause is counted, at `clause_n: 1`, and no finding is reported
+
+CASE-7 — a clause wrapped over several lines is joined before counting
+  Given  a 155-word clause hard-wrapped as continuation lines of about 13 words each, none
+         individually over 25 words
+  When   `lint_requirement` runs
+  Then   exactly one `statement-size` finding is reported for the joined clause
+

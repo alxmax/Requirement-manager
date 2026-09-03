@@ -1,13 +1,12 @@
 ---
 id: ARCH-MAP-007
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
+milestone: v1.04
 depends_on: [ARCH-PARSE-001, ARCH-SCAN-002]
 satisfies: [SYS-VISUAL-106]
-superseded_by:
-milestone: v1.04
 ---
 
 # Requirement graph (_map.json)
@@ -17,68 +16,14 @@ milestone: v1.04
 > the graph: one node per requirement, one edge per dependency, each node carrying what the
 > requirement says, what code backs it and what is at risk. Everything that draws or
 > publishes a picture reads this file; nothing draws from the corpus directly.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a node          one requirement, as listed in the graph.
-     an edge         one `depends_on` link between two requirements.
-     an area         the group a requirement belongs to: its `area:` field, or the
-                     first part of its id when that field is absent.
-     a risk signal   a warning the engine derives about a requirement, such as
-                     "confirmed but no code links to it". -->
+- `map` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`; `export` writes the same file alone. [[REQ-MAP-870]]
+- `_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]
+- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
+- The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 
-**What it generates**
-- `map` generates `_map.json` under `requirements/`, and `export` writes the same file alone.
-- `_map.json` is a derived view. It is regenerated, never edited.
-
-**What `_map.json` carries**
-- `_map.json` carries one node per requirement and one edge per `depends_on`.
-- Each node carries its requirement's id, layer, status, area, title, intent,
-  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
-  `used_by`, and risk signals.
-- A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
-  written as a labelled `AC-N` block or as a bullet.
-- `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
-  repo directory name, else null.
-- `repo` identifies the project the map describes, for display in the viewer header.
-- `repo` is derived from the git remote, so it differs across forks and clones. It is
-  therefore excluded from the `map --check` freshness diff.
-- Resolving `repo` never raises and never blocks map generation, because git may be
-  absent or the tree may not be a checkout.
-- `engine_version` is likewise excluded from the `map --check` freshness diff. Updating the
-  vendored engine alone never makes a committed map stale; the next `sync` refreshes it.
-- `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
-  `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
-  requirements.
-
-**How a contract is read**
-- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
-  multi-line clause is never truncated to its first physical line.
-- A clause-group label groups the clauses below it: a bold-only line written flush left.
-  A label is a heading, not a clause, and never folds into the clause above.
-- Position decides a label, not the bold markers alone. An indented wrapped line folds
-  even when it opens and closes on bold spans, so a two-part clause keeps both halves.
-
-**Intent, only when it is not the contract**
-- The `intent` field carries a requirement's first blockquote, joined into one line.
-- The `intent` field is empty when that quote and the Contract say the same thing.
-- An atomic requirement is that case: its quote is its single obligation, so the map
-  emits the text once, under `contract`.
-- `show` follows the same rule, printing no intent line above a Contract that repeats it.
-
-**Freshness**
-- `map --check` fails when a committed generated file differs from a fresh render.
-- The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
-  cannot be surprised by that failure in CI.
-- The gate never regenerates the map. It only reports.
-
-**Safety**
-- All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
-  hostile id, title or body by construction. There is no markup context to break out of.
-
-## Verify intent (open questions for the human)
-- None — authored from known intent, not reconstructed from code.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  the corpus
   When   `map` runs
@@ -108,7 +53,15 @@ CASE-5
   When   `map` runs
   Then   that node's `intent` carries the quote unchanged
 
-## Context (non-binding)
+## Context
+**Terms**
+- a node          one requirement, as listed in the graph.
+- an edge         one `depends_on` link between two requirements.
+- an area         the group a requirement belongs to: its `area:` field, or the
+- first part of its id when that field is absent.
+- a risk signal   a warning the engine derives about a requirement, such as
+- "confirmed but no code links to it".
+
 **Notes**
 - `export` is a thin alias that writes only `_map.json` (or to stdout / `--out PATH`) for
   ad-hoc piping; `map` writes `_map.json` plus the diagrams ([[ARCH-MAPDIAGRAMS-055]]) and,
@@ -131,444 +84,233 @@ CASE-5
   `_build_json_text`, `_repo_name`, `_utf8_safe`, `_map_check`, `_stale_artifacts` and the
   body readers (`_title`, `_first_quote`, `_section`, `_bullets`, `_acc_items`) in `reqmap.py`.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-MAP-476
-status: baseline
-form: atomic
+id: REQ-MAP-870
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-MAP-007]
-superseded_by:
 ---
 
-# Map generates _map.json under requirements/, and export writes
+# Generating _map.json's node graph
 
-> `map` generates `_map.json` under `requirements/`, and `export` writes the same file
-> alone.
+## Description
+> Everything that draws or publishes a picture of the corpus reads `_map.json`; nothing draws
+> from the requirement files directly. `map` writes it alongside the diagrams and viewer;
+> `export` writes only this file, for ad-hoc piping into another tool. Because the file carries
+> requirement text verbatim, it must be safe to embed even when that text is adversarial.
 
-Scenario: map and export both produce _map.json
+Every bullet below is binding.
+- `map` generates `_map.json` under `requirements/`, and `export` writes the same file alone.
+- `_map.json` is a derived view. It is regenerated, never edited.
+- `_map.json` carries one node per requirement and one edge per `depends_on`.
+- Each node carries its requirement's id, layer, status, area, title, intent,
+  Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
+  `used_by`, and risk signals.
+- All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body
+  by construction — there is no markup context for it to break out of.
+
+## Cases
+CASE-1 — map and export both produce _map.json
   Given  a corpus of requirements
   When   `map` runs, and separately `export` runs
   Then   both write `requirements/_map.json`, and `export` writes no other file
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-478
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# _map.json carries one node per requirement and one
-
-> `_map.json` carries one node per requirement and one edge per `depends_on`.
-
-Scenario: the graph has one node per requirement and one edge per dependency
+CASE-2 — the graph has one node per requirement and one edge per dependency
   Given  a corpus of N requirements carrying a total of M `depends_on` links
   When   `map` runs
   Then   `_map.json` holds exactly N nodes and M edges
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-479
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Each node carries its requirement's id, layer, status
-
-> Each node carries its requirement's id, layer, status, area, title, intent,
-> Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
-> `used_by`, and risk signals.
-
-Scenario: a node carries its full requirement metadata
+CASE-3 — a node carries its full requirement metadata
   Given  a requirement with an id, layer, status, area, title, Contract clauses and members
   When   `map` runs
   Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-480
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# A node's acc list carries one entry per
-
-> A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
-> written as a labelled `AC-N` block or as a bullet.
-
-Scenario: acc lists one entry per criterion in either acceptance form
+CASE-4 — acc lists one entry per criterion in either acceptance form
   Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance
   When   `map` runs
   Then   each node's `acc` list has exactly one entry per criterion, in both requirements
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-481
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# _map.json carries a top-level repo field: a best-effort
-
-> `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo
-> directory name, else null.
-
-Scenario: repo resolves to the git remote's owner/repo
+CASE-5 — repo resolves to the git remote's owner/repo
   Given  a git checkout whose remote `origin` points at `owner/repo`
   When   `map` runs
   Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project
          for display in the viewer header
 
-## Members in code (auto)
-
-
+CASE-6 — a hostile id or title round-trips as inert data
+  Given  a requirement whose id contains `</script>` and whose title contains a raw quote
+  When   `map` runs
+  Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup
+         break-out
 
 
 --------------------
 
 
 ---
-id: REQ-MAP-483
-status: baseline
-form: atomic
+id: REQ-MAP-871
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-MAP-007]
-superseded_by:
 ---
 
-# Repo is derived from the git remote, so
+# Repo, engine version, todos, and freshness checking
 
-> `repo` is derived from the git remote, so it differs across forks and clones. It is
-> therefore excluded from the `map --check` freshness diff.
+## Description
+> `repo` and `engine_version` describe the environment the map was built in, not the corpus
+> itself — so both are excluded from the freshness diff, or a plain clone into a different fork,
+> or bumping the vendored engine, would make every committed map falsely look stale. `todos`
+> rides alongside for the same reason a picture needs planned work next to what already exists.
+> `map --check` is the freshness gate that reads all of this: a committed file that no longer
+> matches a fresh render is stale, and the gate surfaces that as a warning so a commit prepared
+> with `gate` alone is never surprised by it later in CI.
 
-Scenario: a changed repo field never trips map --check
+Every bullet below is binding.
+- `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the
+  repo directory name, else null.
+- `repo` identifies the project the map describes, for display in the viewer header.
+- `repo` is derived from the git remote, so it differs across forks and clones. It is
+  therefore excluded from the `map --check` freshness diff.
+- Resolving `repo` never raises and never blocks map generation, because git may be
+  absent or the tree may not be a checkout.
+- `engine_version` is likewise excluded from the `map --check` freshness diff. Updating the
+  vendored engine alone never makes a committed map stale; the next `sync` refreshes it.
+- `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
+  `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
+  requirements.
+- `map --check` fails and names the stale file when a committed generated file differs from a
+  fresh render.
+- The gate reports that same staleness as a warning, without failing the commit, and never
+  regenerates the map itself — only `sync` or `map` does that.
+
+## Cases
+CASE-1 — a changed repo field never trips map --check
   Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field
   When   `map --check` runs
   Then   it reports no staleness
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-484
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Resolving repo never raises and never blocks map
-
-> Resolving `repo` never raises and never blocks map generation, because git may be absent
-> or the tree may not be a checkout.
-
-Scenario: map succeeds when the tree has no git remote
+CASE-2 — map succeeds when the tree has no git remote
   Given  a working tree with no `.git` directory
   When   `map` runs
   Then   it completes without raising, and `_map.json`'s `repo` field is null
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-485
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Engine_version is likewise excluded from the map --check
-
-> `engine_version` is likewise excluded from the `map --check` freshness diff. Updating
-> the vendored engine alone never makes a committed map stale; the next `sync` refreshes
-> it.
-
-Scenario: a changed engine_version never trips map --check
+CASE-3 — a changed engine_version never trips map --check
   Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`
   When   `map --check` runs
   Then   it reports no staleness
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-486
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# _map.json carries a top-level todos array, derived from
-
-> `_map.json` carries a top-level `todos` array, derived from `TODO.md` via
-> `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
-> requirements.
-
-Scenario: map derives the todos array from TODO.md
+CASE-4 — map derives the todos array from TODO.md
   Given  a `TODO.md` with one open item under a milestone section
   When   `map` runs
   Then   `_map.json`'s top-level `todos` array contains that item
 
-## Members in code (auto)
+CASE-5 — map --check fails on a genuinely stale committed map
+  Given  a committed `_map.json` generated from one requirement title, then that title changed
+  When   `map --check` runs
+  Then   it exits non-zero and reports the file as stale
 
-
+CASE-6 — the gate warns about a stale map without failing the commit
+  Given  a committed `_map.json` that no longer matches a fresh render
+  When   `gate` runs
+  Then   it prints a staleness warning naming `_map.json`, and never regenerates the file itself
 
 
 --------------------
 
 
 ---
-id: REQ-MAP-487
-status: baseline
-form: atomic
+id: REQ-MAP-872
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-MAP-007]
-superseded_by:
 ---
 
-# Reading a requirement's clauses folds a wrapped line
+# Reading contract clauses across wrapped lines
 
-> Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
-> multi-line clause is never truncated to its first physical line.
+## Description
+> A contract clause is authored to read naturally, which means it sometimes wraps onto a second
+> physical line, and a bold-only label line groups several clauses under one heading. Reading
+> naively would truncate a wrapped clause to its first line, or worse, swallow a group label as
+> if it were a clause of its own.
 
-Scenario: a wrapped clause line folds into the clause above it
+Every bullet below is binding.
+- Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
+  multi-line clause is never truncated to its first physical line.
+- A clause-group label groups the clauses below it: a bold-only line written flush left.
+  A label is a heading, not a clause, and never folds into the clause above.
+- Position decides a label, not the bold markers alone. An indented wrapped line folds
+  even when it opens and closes on bold spans, so a two-part clause keeps both halves.
+
+## Cases
+CASE-1 — a wrapped clause line folds into the clause above it
   Given  a Contract clause written across two physical lines, the second indented
   When   the requirement is parsed
   Then   the clause reads as one unbroken sentence, never truncated to its first line
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-488
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# A clause-group label groups the clauses below it
-
-> A clause-group label groups the clauses below it: a bold-only line written flush left. A
-> label is a heading, not a clause, and never folds into the clause above.
-
-Scenario: a flush-left bold line reads as a group label, not a clause
+CASE-2 — a flush-left bold line reads as a group label, not a clause
   Given  a Contract section with a bold-only line flush left, followed by indented clauses
   When   the requirement is parsed
   Then   the bold line neither folds into the clause above it nor appears itself as a clause
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-489
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Position decides a label, not the bold markers
-
-> Position decides a label, not the bold markers alone. An indented wrapped line folds
-> even when it opens and closes on bold spans, so a two-part clause keeps both halves.
-
-Scenario: an indented bold-opening continuation folds by position
+CASE-3 — an indented bold-opening continuation folds by position
   Given  a clause whose wrapped continuation line is indented and both opens and closes on bold
          text
   When   the requirement is parsed
   Then   the continuation folds into the clause above, keeping both halves in one clause
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-MAP-490
-status: baseline
-form: atomic
+id: REQ-MAP-873
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-MAP-007]
-superseded_by:
 ---
 
-# Map --check fails when a committed generated file
+# Deduping intent against the contract
 
-> `map --check` fails when a committed generated file differs from a fresh render.
+## Description
+> In the atomic form the quote IS the single contract clause, so printing both `intent` and
+> `contract` showed the exact same sentence twice — measured at 588 of 646 nodes, 91% of this
+> corpus, before this existed. Deduping collapses that duplicate while leaving a sectioned
+> requirement's real rationale, which says something the clauses do not, untouched.
 
-Scenario: map --check fails on a stale committed generated file
-  Given  a committed `_map.json` that differs from a fresh render
-  When   `map --check` runs
-  Then   it exits non-zero and names the stale file
+Every bullet below is binding.
+- The `intent` field carries a requirement's first blockquote, joined into one line.
+- The `intent` field is empty when that quote and the Contract say the same thing.
+- An atomic requirement is that case: its quote is its single obligation, so the map
+  emits the text once, under `contract`.
+- The comparison ignores whitespace-only differences, so a quote re-wrapped across lines
+  still matches its clause and still dedupes.
+- `show` follows the same rule, printing no intent line above a Contract that repeats it.
 
-## Members in code (auto)
+## Cases
+CASE-1 — an atomic requirement's intent collapses into its contract
+  Given  an atomic requirement whose quote and single Contract clause are the same text
+  When   `_distinct_intent` runs
+  Then   it returns "", while the clause still survives under `contract`
 
+CASE-2 — a sectioned requirement's intent survives as real rationale
+  Given  a sectioned requirement whose quote is rationale distinct from its Contract clauses
+  When   `_distinct_intent` runs
+  Then   it returns the quote unchanged
 
+CASE-3 — intent dedup ignores only whitespace differences
+  Given  an atomic requirement whose quote is re-wrapped across two physical lines but is
+         otherwise identical to its single Contract clause
+  When   `_distinct_intent` runs
+  Then   it still returns "", because the comparison collapses whitespace before comparing
 
-
---------------------
-
-
----
-id: REQ-MAP-491
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# The gate reports the same staleness as a
-
-> The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
-> cannot be surprised by that failure in CI.
-
-Scenario: gate warns about a stale map without failing the commit
-  Given  a committed `_map.json` that differs from a fresh render
-  When   `gate` runs
-  Then   it prints a staleness warning, exits 0, and leaves `_map.json` unmodified
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-493
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# All requirement-derived text is JSON-encoded in _map.json, which
-
-> All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
-> hostile id, title or body by construction. There is no markup context to break out of.
-
-Scenario: hostile title text is neutralized by JSON encoding
-  Given  a requirement whose title contains `</script>` and an embedded quote
-  When   `map` runs
-  Then   `_map.json` stores that title as a JSON string with no unescaped markup break-out
-
-## Members in code (auto)

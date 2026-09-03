@@ -1,13 +1,12 @@
 ---
 id: ARCH-VIEWER-007
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
+milestone: v1.04
 depends_on: [ARCH-MAP-007]
 satisfies: [SYS-VISUAL-106]
-superseded_by:
-milestone: v1.04
 lint_exempt: [ac-count-high, file-spread]
 ---
 
@@ -18,88 +17,14 @@ lint_exempt: [ac-count-high, file-spread]
 > This inlines the map's JSON graph into a single self-contained HTML file you open by
 > double-click — no server, no install. It is optional: absent the vendored template, the
 > engine still emits the diagrams and the JSON.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     the template   scripts/_map_viewer.html — the pre-built React viewer vendored
-                    beside the engine, carrying a `<!--REQMAP_DATA-->` marker.
-     the graph      the `{nodes, edges}` registry data [[ARCH-MAP-007]] builds.
-     a V8 no-op     an escape the browser's JavaScript engine reads as if it were
-                    not there, so the data means the same after escaping. -->
+- `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the engine, and skips it (no crash) when the template is absent. [[REQ-VIEWER-940]]
+- `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order, each a V8 no-op that reads the same after parsing. [[REQ-VIEWER-941]]
+- The viewer ranks nodes by longest dependency path so `depends_on` edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. [[REQ-VIEWER-942]]
+- The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]
 
-**When it writes the viewer**
-- `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside
-  the engine.
-- `_map.html` is a self-contained, single-file copy of the React viewer — the Vite +
-  React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.
-- `_map.html` opens by double-click, with no server.
-- Absent the template, `render_html` emits nothing and returns None without failing.
-- `map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no
-  extra files.
-
-**How it injects the graph**
-- `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
-  `<script>window.__REQMAP_DATA__=…</script>` assignment.
-- That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds.
-
-**How it escapes the graph**
-- `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by
-  applying three escapes in order. All three are V8 no-ops: a backslash is silently
-  ignored before `/`, `!` and `-`.
-  - `</`   → `<\/`   — prevents `</script>` from closing the element early
-  - `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
-  - `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
-- The first guard alone was the original contract. The `<!--` and `-->` guards were added
-  in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and
-  therefore contain literal `<!--`) broke `file://` opening by making
-  `window.__REQMAP_DATA__` null.
-- `render_html` also escapes U+2028 and U+2029 to their `\\u2028`/`\\u2029` forms.
-  Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the
-  assignment into an unterminated string on any engine older than ES2019. The escaped forms
-  denote the same characters in JSON, so the parsed graph is unchanged.
-
-**How it places the nodes**
-- The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
-- The viewer excludes a cycle-closing edge from that ranking, and still draws it.
-- No node ranks higher than the number of nodes, whatever the registry's shape.
-
-**How it shows the acceptance criteria**
-- A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
-  block as the author wrote it, and `acc`, the same criteria folded to one line each.
-- The viewer renders `accept` — one line per line, as authored. `acc` is for search and
-  counting, never the thing a reader is shown when the authored block exists.
-
-**What language it shows**
-- The viewer renders its own UI chrome in English by default.
-- A locale control in the viewer's top bar switches that chrome to another bundled language.
-- Requirement content is never translated: id, title, intent, contract clauses, acceptance
-  criteria and member paths stay in the language their author wrote them in.
-- The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and
-  severity values stay the literal strings the requirement files and the gate use.
-- A chrome string with no entry in the active locale falls back to its English text.
-- The reader's chosen locale is remembered on their machine and is never written into the
-  generated file, so `_map.html` stays byte-identical whatever anyone last selected.
-
-## Verify intent (open questions for the human)
-- None — authored from known intent, not reconstructed from code.
-
-## Notes & known limitations (informative)
-- `lint_exempt: file-spread`: the members are one engine function plus the viewer's source
-  tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files
-  by construction; they are built into ONE artifact, so the spread is not diffuseness.
-- `lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one
-  artifact — data injection and its three escapes, node placement, UI language, and how
-  the acceptance block is rendered. Splitting them would produce requirements that all
-  point at the same single vendored file, which is the coupling the count is meant to
-  detect, not a fix for it.
-- The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as
-  `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the
-  marker for the inline data, so it ships a rich UI without itself depending on Node/npm.
-- `_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with
-  `map`. `_map.json` (owned by [[ARCH-MAP-007]]) is the committed source of its data.
-- Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate
-  capability — see [[ARCH-PAGES-021]].
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  the vendored `_map_viewer.html` template is present
   When   `map` runs
@@ -147,12 +72,37 @@ CASE-8
   Then   the Given/When/Then lines appear as authored, one per line, and the folded
          one-line form is not what the reader sees
 
-## Example — in practice (optional, non-binding)
+## Context
+**Terms**
+- the template   scripts/_map_viewer.html — the pre-built React viewer vendored
+- beside the engine, carrying a `REQMAP_DATA` marker.
+- the graph      the `{nodes, edges}` registry data [[ARCH-MAP-007]] builds.
+- a V8 no-op     an escape the browser's JavaScript engine reads as if it were
+- not there, so the data means the same after escaping. -->
+
+**Notes**
+- `lint_exempt: file-spread`: the members are one engine function plus the viewer's source
+  tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files
+  by construction; they are built into ONE artifact, so the spread is not diffuseness.
+- `lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one
+  artifact — data injection and its three escapes, node placement, UI language, and how
+  the acceptance block is rendered. Splitting them would produce requirements that all
+  point at the same single vendored file, which is the coupling the count is meant to
+  detect, not a fix for it.
+- The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as
+  `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the
+  marker for the inline data, so it ships a rich UI without itself depending on Node/npm.
+- `_map.html` is a regenerable artifact (template + `_map.json`), not committed; rebuild with
+  `map`. `_map.json` (owned by [[ARCH-MAP-007]]) is the committed source of its data.
+- Publishing this viewer to a repo's GitHub Pages folder and gating that copy is a separate
+  capability — see [[ARCH-PAGES-021]].
+
+**Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana runs `reqmap.py map`, then double-clicks `_map.html`. It opens in her browser with the
   whole requirement graph inlined — no server — even though the engine itself is stdlib-only.
 
-## WHERE — Current implementation
+**Current implementation**
 - `render_html`, `_inject_viewer`, `_viewer_template_path` in `reqmap.py`; `render_html` is
   called by `cmd_map` after `_map.json`/`_map.md` are written.
 - `check_viewer_data_sync` (+ `_vds_*` helpers) in `reqmap.py`, called from `cmd_check` (`gate`):
@@ -181,642 +131,262 @@ CASE-8
   fails when the committed copy differs. The build strips the comments, so the tags never reach
   `_map_viewer.html`; only `app/dist*`, `app/.vite` and the SSR bundle stay in `.reqmapignore`.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-VIEWER-782
-status: baseline
-form: atomic
+id: REQ-VIEWER-940
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
-superseded_by:
 ---
 
-# Map generates _map.html when the template _map_viewer.html is
+# Writing _map.html from the vendored template
 
-> `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the
-> engine.
+## Description
+> The viewer ships as one HTML file so it can be opened by double-click, with no server and no
+> Node/npm dependency for the stdlib engine itself. When the template is not vendored, `map`
+> still succeeds — it degrades to the two artifacts every consumer gets regardless of whether
+> they built the viewer.
 
-Scenario: render_html writes _map.html when the vendored template exists
+Every bullet below is binding.
+- `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside
+  the engine.
+- `_map.html` is a self-contained, single-file copy of the React viewer — the Vite +
+  React app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.
+- `_map.html` opens by double-click, with no server.
+- Absent the template, `render_html` emits nothing and returns None without failing.
+- `map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no
+  extra files.
+- `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
+  `<script>window.__REQMAP_DATA__=…</script>` assignment.
+- That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds.
+
+## Cases
+CASE-1 — render_html writes _map.html when the vendored template exists
   Given  the vendored `_map_viewer.html` template beside the engine
   When   `render_html(data, reqs_dir)` runs
   Then   it returns the path to a written `_map.html` file
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-783
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# _map.html is a self-contained, single-file copy of the
-
-> `_map.html` is a self-contained, single-file copy of the React viewer — the Vite + React
-> app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.
-
-Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__
+CASE-2 — the written _map.html carries the graph as window.__REQMAP_DATA__
   Given  `render_html({"nodes": [...], "edges": []}, reqs_dir)` writing `_map.html`
   When   the file is read back
   Then   it contains `"window.__REQMAP_DATA__="` and no leftover `<!--REQMAP_DATA-->`
          marker, and references no external file — opening by double-click with no server
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-785
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# Absent the template, render_html emits nothing and returns
-
-> Absent the template, `render_html` emits nothing and returns None without failing.
-
-Scenario: render_html returns None, not an error, when the template is missing
+CASE-3 — render_html returns None, not an error, when the template is missing
   Given  no `_map_viewer.html` template beside the engine
   When   `render_html(data, reqs_dir)` runs
   Then   it returns `None` and raises nothing
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-786
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# Map then still writes _map.md and _map.json, so
-
-> `map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no
-> extra files.
-
-Scenario: map still writes _map.md and _map.json when the viewer template is absent
+CASE-4 — map still writes _map.md and _map.json when the viewer template is absent
   Given  no vendored `_map_viewer.html` template
   When   `cmd_map` runs
   Then   `_map.md` and `_map.json` are written and `map` exits 0
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-787
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# Render_html replaces the template's <!--REQMAP_DATA--> marker with a
-
-> `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
-> `<script>window.__REQMAP_DATA__=…</script>` assignment.
-
-Scenario: the marker is consumed and replaced by a script assignment
+CASE-5 — the marker is consumed and replaced by a script assignment
   Given  template text `"<head><!--REQMAP_DATA--></head>"` and a graph with one node
   When   `_inject_viewer(template_text, data)` runs
   Then   the marker is gone and the output contains `"window.__REQMAP_DATA__="`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-788
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# That assignment carries the same {nodes, edges} graph
-
-> That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds.
-
-Scenario: the inlined blob's node id matches the graph handed to _inject_viewer
+CASE-6 — the inlined blob's node id matches the graph handed to _inject_viewer
   Given  a graph `{"nodes": [{"id": "A-1"}], "edges": []}`
   When   `_inject_viewer(template_text, data)` runs
   Then   the injected `<script>` text contains `"A-1"`
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-VIEWER-789
-status: baseline
-form: atomic
+id: REQ-VIEWER-941
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
-superseded_by:
 ---
 
-# Render_html makes the injected graph HTML-safe for embedding
+# Escaping the inlined graph for embedded <script>
 
-> `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by
-> applying three escapes in order. All three are V8 no-ops: a backslash is silently
-> ignored before `/`, `!` and `-`.
+## Description
+> The graph is embedded as a `<script>` assignment inside HTML the reader trusts, so any body a
+> requirement author wrote — including one that discusses HTML injection and therefore contains
+> `<!--` literally — must not be able to break out of that script or corrupt the page. Three
+> escapes close three different ways a literal sequence in requirement text could do that, each
+> added after a real failure was found.
 
-Scenario: a field carrying all three dangerous sequences is fully escaped and still parses
+Every bullet below is binding.
+- `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by
+  applying three escapes in order. All three are V8 no-ops: a backslash is silently
+  ignored before `/`, `!` and `-`.
+  - `</`   → `<\/`   — prevents `</script>` from closing the element early
+  - `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
+  - `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
+- The first guard alone was the original contract. The `<!--` and `-->` guards were added
+  in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and
+  therefore contain literal `<!--`) broke `file://` opening by making
+  `window.__REQMAP_DATA__` null.
+- `render_html` also escapes U+2028 and U+2029 to their `\\u2028`/`\\u2029` forms.
+  Those two characters end a line in JavaScript but not in JSON, so unescaped they turn the
+  assignment into an unterminated string on any engine older than ES2019. The escaped forms
+  denote the same characters in JSON, so the parsed graph is unchanged.
+
+## Cases
+CASE-1 — a field carrying all three dangerous sequences is fully escaped and still parses
   Given  a node title `"</script><!--x-->"`
   When   `_inject_viewer(template_text, data)` runs
   Then   the output has none of `</`, `<!--`, `-->` raw, and re-parsing the blob as JSON
          yields the original title unchanged
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-790
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# </ → <\/ — prevents </script> from closing
-
-> `</`   → `<\/`   — prevents `</script>` from closing the element early
-
-Scenario: a </script> breakout attempt in a field is neutralized
+CASE-2 — a </script> breakout attempt in a field is neutralized
   Given  a node id `"a</script><img src=x>"`
   When   `_inject_viewer(template_text, data)` runs
   Then   the output has no raw `"</script><img"` and contains `"<\\/script>"` instead
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-791
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# <!-- → <\!-- — prevents the HTML5 parser
-
-> `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
-
-Scenario: a literal <!-- inside a field is escaped to <\!--
+CASE-3 — a literal <!-- inside a field is escaped to <\!--
   Given  a node contract clause `"discusses HTML injection via <!-- markers"`
   When   `_inject_viewer(template_text, data)` runs
   Then   the output contains `"<\\!--"` and no raw `"<!--"` inside the injected blob,
          keeping `window.__REQMAP_DATA__` parseable instead of null
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-792
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# --> → -\-> — prevents prematurely closing that
-
-> `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
-
-Scenario: a literal --> inside a field is escaped to -\->
+CASE-4 — a literal --> inside a field is escaped to -\->
   Given  a node title containing the literal sequence `"-->"`
   When   `_inject_viewer(template_text, data)` runs
   Then   the output contains `"-\\->"` and no raw `"-->"` inside the injected blob
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-794
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# Render_html also escapes U+2028 and U+2029 to their
-
-> `render_html` also escapes U+2028 and U+2029 to their `\\u2028`/`\\u2029` forms. Those
-> two characters end a line in JavaScript but not in JSON, so unescaped they turn the
-> assignment into an unterminated string on any engine older than ES2019. The escaped
-> forms denote the same characters in JSON, so the parsed graph is unchanged.
-
-Scenario: U+2028/U+2029 in a title are escaped and still round-trip through JSON
+CASE-5 — U+2028/U+2029 in a title are escaped and still round-trip through JSON
   Given  a node title containing U+2028 and a contract clause containing U+2029
   When   `_inject_viewer(template_text, data)` runs
   Then   neither raw character appears in the output, the literal 6-character
          sequences \u2028 and \u2029 do, and re-parsing the blob as
          JSON yields the original title unchanged
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-VIEWER-795
-status: baseline
-form: atomic
+id: REQ-VIEWER-942
+status: confirmed
+lint_exempt: [file-spread]
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
-superseded_by:
 ---
 
-# The viewer ranks nodes by longest dependency path
+# Ranking nodes and rendering acceptance criteria as authored
 
-> The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
+## Description
+> A force-directed graph with no fixed coordinates would jump around on every reload and
+> correlate nothing with the dependency structure it is meant to show. Ranking by longest path
+> makes every `depends_on` edge point the same visual direction, so a reader learns the shape of
+> the corpus from where a node sits, not only from its label. The acceptance block gets the same
+> care: folding it to one line for search must not become what the reader is actually shown.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Every bullet below is binding.
+- The viewer ranks nodes by longest dependency path, so `depends_on` edges flow one way.
+- The viewer excludes a cycle-closing edge from that ranking, and still draws it.
+- No node ranks higher than the number of nodes, whatever the registry's shape.
+- A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
+  block as the author wrote it, and `acc`, the same criteria folded to one line each.
+- The viewer renders `accept` — one line per line, as authored. `acc` is for search and
+  counting, never the thing a reader is shown when the authored block exists.
 
-## Members in code (auto)
+## Cases
+CASE-1 — a deep dependency chain ranks by longest path
+  Given  an honest 12-node `depends_on` chain with no cycle
+  When   the layout is computed
+  Then   the deepest node's rank equals 11, one more than each of its direct predecessors
 
+CASE-2 — a cycle-closing edge is excluded from ranking but still drawn
+  Given  a registry whose `depends_on` edges close a 3-node cycle, plus a fourth node
+         depending on the cycle
+  When   the layout is computed
+  Then   the cycle-closing edge still appears among the drawn edges, and every node —
+         cyclic or not — receives a position
 
+CASE-3 — no rank exceeds the node count even on a cyclic registry
+  Given  the same cyclic registry
+  When   the layout is computed
+  Then   the highest rank is at most the node count minus one, and the canvas width stays
+         bounded rather than growing with the number of relaxation passes
 
-
---------------------
-
-
----
-id: REQ-VIEWER-796
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# The viewer excludes a cycle-closing edge from that
-
-> The viewer excludes a cycle-closing edge from that ranking, and still draws it.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-797
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# No node ranks higher than the number of
-
-> No node ranks higher than the number of nodes, whatever the registry's shape.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-798
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# A node carries the acceptance section twice: accept
-
-> A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
-> block as the author wrote it, and `acc`, the same criteria folded to one line each.
-
-Scenario: a map node carries both the raw accept block and the folded acc list
+CASE-4 — a map node carries both the raw accept block and the folded acc list
   Given  a confirmed requirement with a labelled `## Cases` block of two criteria
   When   `_build_map_data` builds the node
   Then   `node["acc"]` has two folded entries and `node["accept"]` holds the raw block
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-799
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# The viewer renders accept — one line per
-
-> The viewer renders `accept` — one line per line, as authored. `acc` is for search and
-> counting, never the thing a reader is shown when the authored block exists.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
+CASE-5 — the reader sees the authored Given/When/Then lines, not the folded one-liner
+  Given  a node whose `accept` field holds a labelled multi-line Given/When/Then case and
+         whose `acc` field holds the same case folded to one line
+  When   its spec is rendered
+  Then   the multi-line block appears as authored, and the folded one-line text is not
+         what the reader sees
 
 
 --------------------
 
 
 ---
-id: REQ-VIEWER-800
-status: baseline
-form: atomic
+id: REQ-VIEWER-943
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-VIEWER-007]
-superseded_by:
 ---
 
-# The viewer renders its own UI chrome in
+# UI chrome language, requirement content untranslated
 
-> The viewer renders its own UI chrome in English by default.
+## Description
+> The viewer's own chrome — nav labels, buttons, section headers — is UI text the tool owns and
+> can safely translate. A requirement's title, contract and acceptance criteria are the artifact
+> under review; translating those live would put words in the author's mouth and silently
+> diverge from the `.md` file on disk. The two must never be confused, so this draws the line
+> and holds it under every locale.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Every bullet below is binding.
+- The viewer renders its own UI chrome in English by default.
+- A locale control in the viewer's top bar switches that chrome to another bundled language.
+- Requirement content is never translated: id, title, intent, contract clauses, acceptance
+  criteria and member paths stay in the language their author wrote them in.
+- The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and
+  severity values stay the literal strings the requirement files and the gate use.
+- A chrome string with no entry in the active locale falls back to its English text.
+- The reader's chosen locale is remembered on their machine and is never written into the
+  generated file, so `_map.html` stays byte-identical whatever anyone last selected.
 
-## Members in code (auto)
+## Cases
+CASE-1 — the viewer defaults to English chrome
+  Given  no locale has been selected before
+  When   a requirement's spec is rendered
+  Then   its section headers appear in English
 
+CASE-2 — switching locale translates chrome section headers
+  Given  the Romanian locale selected
+  When   the same spec is rendered
+  Then   its section headers appear in Romanian, and the English header text is gone
 
+CASE-3 — an untranslated chrome string falls back to English
+  Given  a chrome string with no entry in the active locale's dictionary
+  When   it is looked up for display
+  Then   it renders as the original English text, not blank
 
+CASE-4 — chrome translations interpolate their placeholders
+  Given  a chrome string containing a `{n}`-style placeholder
+  When   it is rendered in a non-English locale
+  Then   the placeholder's value is substituted into the translated sentence
 
---------------------
+CASE-5 — requirement content stays in the author's language under any locale
+  Given  the Romanian locale selected and a requirement's spec rendered
+  Then   the requirement's own title appears exactly as authored, untranslated
 
+CASE-6 — engine vocabulary stays literal under any locale
+  Given  the Romanian locale selected and a requirement's spec rendered
+  Then   its `status` value appears as the literal engine string, not a translated word
 
----
-id: REQ-VIEWER-801
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# A locale control in the viewer's top bar
-
-> A locale control in the viewer's top bar switches that chrome to another bundled
-> language.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-802
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# Requirement content is never translated: id, title, intent
-
-> Requirement content is never translated: id, title, intent, contract clauses, acceptance
-> criteria and member paths stay in the language their author wrote them in.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-803
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# The engine's own vocabulary is never translated either
-
-> The engine's own vocabulary is never translated either: `status`, `layer`, tag-role and
-> severity values stay the literal strings the requirement files and the gate use.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-804
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# A chrome string with no entry in the
-
-> A chrome string with no entry in the active locale falls back to its English text.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-805
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# The reader's chosen locale is remembered on their
-
-> The reader's chosen locale is remembered on their machine and is never written into the
-> generated file, so `_map.html` stays byte-identical whatever anyone last selected.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

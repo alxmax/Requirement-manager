@@ -47,7 +47,7 @@ export function adaptNode(n) {
     // search and counting), so gating this on `acc` being empty meant that the day
     // the engine learned to parse the block form (v2.29.0) every criterion silently
     // collapsed into a run-on line. Prefer the authored shape whenever it exists.
-    gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,
+    gwt: typeof n.accept === "string" && n.accept.trim() ? n.accept : undefined,  // implements: REQ-VIEWER-942
     members: Array.isArray(n.members) ? n.members : [],
     deps: Array.isArray(n.deps) ? n.deps : [],
     usedBy: Array.isArray(n.used_by) ? n.used_by : [],
@@ -65,7 +65,7 @@ export function adaptNode(n) {
     priority: n.priority || "",
     // cached content translations, keyed by locale — see i18n.jsx's
     // translatedText(). Absent for nodes with no `reqmap.py translate` cache.
-    i18n: (n.i18n && typeof n.i18n === "object") ? n.i18n : null,
+    i18n: (n.i18n && typeof n.i18n === "object") ? n.i18n : null,  // implements: REQ-TRANSLATE-938
   };
 }
 

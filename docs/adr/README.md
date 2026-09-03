@@ -32,8 +32,9 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0020](0020-redundancy-signal-below-the-fire-rate-bar.md) | An exact-duplicate signal ships below ADR-0016's fire-rate bar | Accepted |
 | [0021](0021-corpus-grows-only-by-design.md) | The corpus grows only, and that asymmetry is intentional | Accepted |
 | [0022](0022-no-minimum-requirement-size-check.md) | No minimum-size check; and no lint ships without both halves of its bar | Accepted |
-| [0023](0023-fan-out-per-level-ceilings-no-floor.md) | `fan-out` gets per-level ceilings and no floor | Accepted (`system` ceiling superseded by 0024) |
-| [0024](0024-architecture-level-promoted-into-system.md) | The `architecture` level is promoted into `system`; `fan-out`'s `system` ceiling becomes fifty | Accepted |
+| [0023](0023-fan-out-per-level-ceilings-no-floor.md) | `fan-out` gets per-level ceilings and no floor | Accepted (`system` ceiling superseded by 0024, restored by 0025) |
+| [0024](0024-architecture-level-promoted-into-system.md) | The `architecture` level is promoted into `system`; `fan-out`'s `system` ceiling becomes fifty | Superseded by 0025 |
+| [0025](0025-three-levels-restored-corpus-folded-to-two-hundred.md) | Three levels restored, the corpus folded from 644 to ~200, and the lean requirement form | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Keeping code and specification in step
 
 > As someone committing a change, I want the engine to tell me when the code and the 

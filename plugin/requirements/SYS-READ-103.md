@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Reading a repository
 
 > As the engine, I want to read a repository's requirements and find every place the code 

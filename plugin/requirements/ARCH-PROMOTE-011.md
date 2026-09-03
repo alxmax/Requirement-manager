@@ -1,13 +1,12 @@
 ---
 id: ARCH-PROMOTE-011
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
+milestone: v1.08
 depends_on: [ARCH-PARSE-001]
 satisfies: [SYS-AUTHOR-101]
-superseded_by:
-milestone: v1.08
 ---
 
 # confirm
@@ -17,45 +16,13 @@ milestone: v1.08
 > command performs that sign-off in one step: it marks the requirement as `confirmed`, but first checks
 > that it actually points at real code and warns if no test is linked. Doing this by hand means editing
 > the file's header directly, which is easy to get subtly wrong; this command does it safely every time.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     frontmatter  the YAML block between the two `---` lines at the top of the file.
-     a member     a place in the code tagged as belonging to this requirement.
-     the lock     requirements/_reqlock.json — the saved fingerprint of every contract. -->
+- `confirm <ID>` edits only the value of the first `status:` line in the frontmatter, to `confirmed`, leaving the rest of the file byte-identical. [[REQ-PROMOTE-894]] details the behaviour.
+- `confirm` refuses a requirement with no `implements:` member — except a `need` or `aggregate`, which the gate covers by edge, not tag — and exits non-zero without writing anything. [[REQ-PROMOTE-895]] details the behaviour.
+- `confirm` warns, without failing, when no `tested-by:` member is linked, and reminds the caller to resync afterward. [[REQ-PROMOTE-896]] details the behaviour.
 
-**What it edits**
-- `confirm <ID>` sets the requirement's `status` to `confirmed`.
-- `confirm` edits only the value of the first `status:` line in the leading frontmatter.
-- `confirm` preserves that line's indentation and any trailing inline comment.
-- `confirm` leaves the body untouched.
-
-**When it refuses**
-- `confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes
-  nothing. A `confirmed` requirement with no code is a gate error.
-- `confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both are
-  covered by an edge rather than by a tag.
-- `confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate
-  with no dependency is an orphan.
-- A refusal prints the tag the caller needs to add.
-- `confirm` exits non-zero with a clear message for an unknown id, meaning no
-  `requirements/<ID>.md` exists.
-
-**What it warns about**
-- `confirm` warns, without failing, when no `tested-by:` member is linked.
-- That warning points at the test tag to add, or at the `test_exempt:` opt-out.
-- `confirm` reminds the caller to refresh the lock and regenerate the map afterwards.
-
-**Running it again**
-- `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and
-  exits zero.
-
-## Verify intent (open questions for the human)
-- None — behavior is fully specified by the acceptance criteria below.
-
-## Notes & known limitations (informative)
-- `confirm` does not itself run `sync`; the drift lock must be refreshed afterward so the newly-enforced contract is baselined (the command prints this reminder).
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a baseline requirement with an `implements:` member
   When   `confirm <ID>` runs
@@ -86,382 +53,174 @@ CASE-6
   When   `confirm <ID>` runs
   Then   the file is unchanged and exit is non-zero
 
-## Example — in practice (optional, non-binding)
+## Context
+**Terms**
+- frontmatter  the YAML block between the two `---` lines at the top of the file.
+- a member     a place in the code tagged as belonging to this requirement.
+- the lock     requirements/_reqlock.json — the saved fingerprint of every contract.
+
+**Notes**
+- `confirm` does not itself run `sync`; the drift lock must be refreshed afterward so the newly-enforced contract is baselined (the command prints this reminder).
+
+**Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana has finished reviewing a draft requirement that already has code behind it. She runs `reqmap.py confirm AUTH-LOGIN-001`: its status flips to `confirmed`, the rest of the file is untouched, and it reminds her to refresh the drift lock. When she tries the same on a requirement with no code yet, it refuses, leaves the file alone, and tells her exactly which `implements:` tag to add first.
 
-## WHERE — Current implementation
+**Current implementation**
 - plugin/scripts/reqmap.py (`cmd_promote`, `_set_frontmatter_status`)
-
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
 
 
 --------------------
 
 
 ---
-id: REQ-PROMOTE-567
+id: REQ-PROMOTE-894
 status: confirmed
-form: atomic
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-PROMOTE-011]
-superseded_by:
 ---
 
-# Confirm <ID> sets the requirement's status to confirmed
+# A surgical edit to the status line
 
-> `confirm <ID>` sets the requirement's `status` to `confirmed`.
+## Description
+> Hand-editing `status: draft` to `status: confirmed` risks touching the wrong line, losing a
+> trailing comment, or nudging the file's formatting. `confirm` finds and rewrites only the
+> frontmatter's first `status:` line, so the rest of the file — comments, spacing, body —
+> is guaranteed untouched.
 
-Scenario: confirm rewrites the status field
+Every bullet below is binding.
+- `confirm <ID>` sets the requirement's `status` to `confirmed`.
+- `confirm` edits only the value of the first `status:` line in the leading frontmatter.
+- `confirm` preserves that line's indentation and any trailing inline comment.
+- `confirm` leaves the body untouched.
+
+## Cases
+CASE-1 — confirm rewrites the status field
   Given  a `draft` requirement carrying at least one `implements:` member
   When   `confirm <ID>` runs
   Then   that requirement's frontmatter reads `status: confirmed`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-568
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm edits only the value of the first
-
-> `confirm` edits only the value of the first `status:` line in the leading frontmatter.
-
-Scenario: confirm rewrites the first status line only
+CASE-2 — confirm rewrites the first status line only
   Given  a draft requirement whose body also contains the word "status:" in prose
   When   `confirm <ID>` runs
   Then   only the frontmatter's first `status:` line changes; the prose text is untouched
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-569
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm preserves that line's indentation and any trailing
-
-> `confirm` preserves that line's indentation and any trailing inline comment.
-
-Scenario: confirm preserves the status line's formatting
+CASE-3 — confirm preserves the status line's formatting
   Given  a frontmatter line `status: draft  # pending review`
   When   `confirm <ID>` runs
   Then   the line becomes `status: confirmed  # pending review`, comment and spacing intact
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-570
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm leaves the body untouched
-
-> `confirm` leaves the body untouched.
-
-Scenario: confirm never touches the body
+CASE-4 — confirm never touches the body
   Given  a draft requirement with an `implements:` member
   When   `confirm <ID>` runs
   Then   every byte of the body after the frontmatter stays identical
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-PROMOTE-571
-status: baseline
-form: atomic
+id: REQ-PROMOTE-895
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-PROMOTE-011]
-superseded_by:
 ---
 
-# Confirm refuses a requirement with no implements: member
+# Refusing to confirm requirements with no code
 
-> `confirm` refuses a requirement with no `implements:` member: it exits non-zero and
-> writes nothing. A `confirmed` requirement with no code is a gate error.
+## Description
+> A `confirmed` requirement with no code behind it is a gate error waiting to happen, so
+> `confirm` catches it up front instead: no `implements:` member means no status change,
+> no file write, and a message naming exactly what to add. A `need` or `aggregate` is
+> exempt — those are covered by an edge in the graph, not a code tag.
 
-Scenario: confirm refuses a requirement with no code
+Every bullet below is binding.
+- `confirm` refuses a requirement with no `implements:` member: it exits non-zero and writes
+  nothing. A `confirmed` requirement with no code is a gate error.
+- `confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both are
+  covered by an edge rather than by a tag.
+- `confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate
+  with no dependency is an orphan.
+- A refusal prints the tag the caller needs to add.
+- `confirm` exits non-zero with a clear message for an unknown id, meaning no
+  `requirements/<ID>.md` exists.
+
+## Cases
+CASE-1 — confirm refuses a requirement with no code
   Given  a requirement carrying no `implements:` member
   When   `confirm <ID>` runs
   Then   it exits non-zero, writes nothing, and prints that a `confirmed` requirement needs code
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-572
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm exempts a need and an aggregate from
-
-> `confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both
-> are covered by an edge rather than by a tag.
-
-Scenario: confirm exempts a need requirement from the implements rule
+CASE-2 — confirm exempts a need requirement from the implements rule
   Given  a `layer: need` requirement with no `implements:` member
   When   `confirm <ID>` runs
   Then   it succeeds and sets `status: confirmed` despite carrying no code tag
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-573
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm refuses an aggregate whose depends_on list is
-
-> `confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate
-> with no dependency is an orphan.
-
-Scenario: confirm refuses an orphan aggregate
+CASE-3 — confirm refuses an orphan aggregate
   Given  a `layer: aggregate` requirement whose `depends_on` list is empty
   When   `confirm <ID>` runs
   Then   it exits non-zero and the file is unchanged
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-574
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# A refusal prints the tag the caller needs
-
-> A refusal prints the tag the caller needs to add.
-
-Scenario: a refusal names the missing tag
+CASE-4 — a refusal names the missing tag
   Given  a requirement with no `implements:` member
   When   `confirm <ID>` runs and refuses
   Then   its message names `implements:` as the tag to add
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-575
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm exits non-zero with a clear message for
-
-> `confirm` exits non-zero with a clear message for an unknown id, meaning no
-> `requirements/<ID>.md` exists.
-
-Scenario: confirm rejects an id with no requirement file
+CASE-5 — confirm rejects an id with no requirement file
   Given  an id with no `requirements/<ID>.md` on disk
   When   `confirm <ID>` runs
   Then   it exits non-zero and prints that the id is unknown
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-PROMOTE-576
-status: baseline
-form: atomic
+id: REQ-PROMOTE-896
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-PROMOTE-011]
-superseded_by:
 ---
 
-# Confirm warns, without failing, when no tested-by: member
+# A missing test link warns but does not block
 
-> `confirm` warns, without failing, when no `tested-by:` member is linked.
+## Description
+> Unlike missing code, a missing test is not disqualifying — some contracts are validated
+> by other means. So `confirm` still succeeds without a `tested-by:` member, but prints a
+> warning naming the tag to add (or the `test_exempt:` opt-out) and reminds the caller to
+> resync the drift lock afterward.
 
-Scenario: confirm warns but still succeeds without a test link
+Every bullet below is binding.
+- `confirm` warns, without failing, when no `tested-by:` member is linked.
+- That warning points at the test tag to add, or at the `test_exempt:` opt-out.
+- `confirm` reminds the caller to refresh the lock and regenerate the map afterwards.
+- `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged, and
+  exits zero.
+
+## Cases
+CASE-1 — confirm warns but still succeeds without a test link
   Given  a requirement with an `implements:` member and no `tested-by:` member
   When   `confirm <ID>` runs
   Then   it prints a warning, sets `status: confirmed`, and exits 0
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-577
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# That warning points at the test tag to
-
-> That warning points at the test tag to add, or at the `test_exempt:` opt-out.
-
-Scenario: the missing-test warning names the fix
+CASE-2 — the missing-test warning names the fix
   Given  a requirement confirmed with no `tested-by:` member
   When   `confirm <ID>` runs
   Then   its warning names the `tested-by:` tag to add, or the `test_exempt:` opt-out
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-578
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm reminds the caller to refresh the lock
-
-> `confirm` reminds the caller to refresh the lock and regenerate the map afterwards.
-
-Scenario: confirm reminds the caller to resync afterward
+CASE-3 — confirm reminds the caller to resync afterward
   Given  a requirement successfully confirmed
   When   `confirm <ID>` finishes
   Then   it prints a reminder to run `sync` and regenerate the map
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-PROMOTE-579
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-011]
-superseded_by:
----
-
-# Confirm is idempotent. An already-confirmed requirement is reported
-
-> `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged,
-> and exits zero.
-
-Scenario: confirming twice is a no-op the second time
+CASE-4 — confirming twice is a no-op the second time
   Given  a requirement already `status: confirmed`
   When   `confirm <ID>` runs
   Then   the file is unchanged and exit is 0
 
-## Members in code (auto)

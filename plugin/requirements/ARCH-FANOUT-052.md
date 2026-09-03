@@ -1,13 +1,12 @@
 ---
 id: ARCH-FANOUT-052
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
 priority: could-have
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014, ARCH-LEVEL-051]
 satisfies: [SYS-VMODEL-107]
-superseded_by:
 ---
 
 # Hierarchy breadth
@@ -17,31 +16,11 @@ superseded_by:
 > wearing a level's name; one holding two is a level that saves nobody any reading. This
 > reports a parent whose child count leaves the useful band, so a hierarchy that has
 > quietly flattened out gets looked at again.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a child        a requirement that names this one in its `satisfies:` list.
-     a parent       a requirement that has at least one child.
-     the ceiling    the largest child count a parent may carry before the check reports.
-                    The ceiling depends on the parent's `level:` — see the contract below. -->
+- The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it, and warns when a parent's child count leaves the useful band for its level (`system`: ceiling 10, `architecture`: ceiling 30, undeclared level: 5–20). [[REQ-FANOUT-852]]
 
-**What is counted**
-- The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it.
-- The count reads the `satisfies:` graph only, never `depends_on`.
-- A requirement with no children is skipped, because it is not a parent.
-
-**When it reports**
-- The `fan-out` check warns when a parent carries more children than its ceiling.
-- A `system` parent's ceiling is fifty; an `architecture` parent's is thirty.
-- A parent declaring no `level:` keeps the older uniform band, five to twenty, so a
-  repo that never adopts the level axis sees what it saw before.
-- The check reports no floor at either declared level.
-- The `fan-out` check is warn-only and never changes the gate's exit code.
-- `lint_exempt: [fan-out]` silences the check for one requirement.
-
-## Verify intent (open questions for the human)
-- None — authored from stated intent, not reconstructed from code.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  an `architecture` requirement satisfied by three others
   When   `lint` runs
@@ -63,11 +42,17 @@ CASE-5
   When   `lint` runs
   Then   no `fan-out` finding is reported at all
 CASE-6
-  Given  a `system` requirement satisfied by fifty-one others
+  Given  a `system` requirement satisfied by eleven others
   When   `lint` runs
-  Then   one `fan-out` finding names it as over its ceiling of fifty
+  Then   one `fan-out` finding names it as over its ceiling of ten
 
-## Context (non-binding)
+## Context
+**Terms**
+- a child        a requirement that names this one in its `satisfies:` list.
+- a parent       a requirement that has at least one child.
+- the ceiling    the largest child count a parent may carry before the check reports.
+- The ceiling depends on the parent's `level:` — see the contract below.
+
 **Notes**
 - The band is read against the `satisfies:` graph on purpose. Measured on this corpus, the
   `depends_on` out-degree runs 0 to 3, so a 5-to-20 band read against that axis would flag
@@ -90,204 +75,74 @@ CASE-6
   `lint_requirement`, fed by
   the `kids` count `cmd_lint` builds from every requirement's `satisfies:` list.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-FANOUT-388
-status: baseline
-form: atomic
+id: REQ-FANOUT-852
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-FANOUT-052]
-superseded_by:
 ---
 
-# The fan-out check counts, per requirement, how many
+# Counting children and reporting an out-of-band parent
 
-> The `fan-out` check counts, per requirement, how many requirements declare `satisfies:`
-> it.
+## Description
+> A level only earns its name if it groups: one requirement with fifty children is a bucket
+> wearing a level's name, and one with two saves nobody any reading. `fan-out` counts each
+> requirement's children along the `satisfies:` graph (never `depends_on`, whose out-degree
+> runs far lower on this corpus) and warns once a parent's count leaves the useful band for
+> its declared level.
 
-Scenario: the finding names the exact child count
+Every bullet below is binding.
+- The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it.
+- The count reads the `satisfies:` graph only, never `depends_on`.
+- A requirement with no children is skipped, because it is not a parent.
+- The `fan-out` check warns when a parent carries more children than its ceiling.
+- A `system` parent's ceiling is ten; an `architecture` parent's is thirty.
+- A parent declaring no `level:` keeps the older uniform band, five to twenty, so a
+  repo that never adopts the level axis sees what it saw before.
+- The check reports no floor at either declared level.
+- The `fan-out` check is warn-only and never changes the gate's exit code.
+- `lint_exempt: [fan-out]` silences the check for one requirement.
+
+## Cases
+CASE-1 — the finding names the exact child count
   Given  three requirements each declaring `satisfies: [REQ-P-001]`
   When   `lint_requirement` runs with `children=3`
   Then   the `fan-out` finding's detail reads "3 requirement(s) satisfy this one"
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-389
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# The count reads the satisfies: graph only, never
-
-> The count reads the `satisfies:` graph only, never `depends_on`.
-
-Scenario: depends_on edges never feed the fan-out count
+CASE-2 — depends_on edges never feed the fan-out count
   Given  a corpus where every requirement declares `depends_on` on one hub but no `satisfies:`
   When   `lint` runs
   Then   the hub gets no `fan-out` finding, because `depends_on` out-degree is never counted
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-390
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# A requirement with no children is skipped, because
-
-> A requirement with no children is skipped, because it is not a parent.
-
-Scenario: a leaf with zero children is never a fan-out finding
+CASE-3 — a leaf with zero children is never a fan-out finding
   Given  a requirement that nothing declares `satisfies:` on (`children=0`)
   When   `lint_requirement` runs
   Then   no `fan-out` finding appears for it
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-391
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# The fan-out check warns when a parent exceeds its ceiling
-
-> The `fan-out` check warns when a parent carries more children than its ceiling.
-
-Scenario: crossing the ceiling flips the finding on
+CASE-4 — crossing the ceiling flips the finding on
   Given  one `architecture` parent with 30 children (at its ceiling) and another with 31
   When   `lint` runs on each
   Then   the 30-child parent gets no `fan-out` finding and the 31-child parent gets one,
          with the gate's exit code unchanged either way
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-392
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# The check reports no floor at either declared level
-
-> The check reports no floor at either declared level.
-
-Scenario: a thin parent at a declared level is not reported
+CASE-5 — a thin parent at a declared level is not reported
   Given  one `architecture` parent with 3 children and one `system` parent with 2
   When   `lint` runs on each
   Then   neither gets a `fan-out` finding, because neither declared level carries a floor
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-393
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# The fan-out check is warn-only
-
-> The `fan-out` check is warn-only and never changes the gate's exit code.
-
-Scenario: a fan-out finding does not fail the run
+CASE-6 — a fan-out finding does not fail the run
   Given  an `architecture` parent with 32 children, over its ceiling
   When   `lint` runs without `--strict`
   Then   one `fan-out` finding is printed and the exit code is zero
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-394
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# Lint_exempt: fan-out silences the check for one requirement
-
-> `lint_exempt: [fan-out]` silences the check for one requirement.
-
-Scenario: lint_exempt: [fan-out] suppresses the finding
+CASE-7 — lint_exempt: [fan-out] suppresses the finding
   Given  a parent with 3 children and `lint_exempt: [fan-out]` in its frontmatter
   When   `lint_requirement` runs
   Then   no `fan-out` finding is reported for that requirement
 
-## Members in code (auto)

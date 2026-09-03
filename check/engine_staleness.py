@@ -57,7 +57,7 @@ def _key(v):
     return (date, int(n) if n.isdigit() else 0)
 
 
-def main(argv=None):
+def main(argv=None):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALEENGINE-926
     ap = argparse.ArgumentParser(description="Warn when a vendored reqmap.py is behind this action's engine.")
     ap.add_argument("--vendored", required=True, help="path to the consumer's vendored reqmap.py")
     ap.add_argument("--reference", default=DEFAULT_REFERENCE,
@@ -75,7 +75,7 @@ def main(argv=None):
         return 0
 
 
-def _probe(vendored_path, reference_path, mode):
+def _probe(vendored_path, reference_path, mode):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALEENGINE-926
     vendored, reference = version_at(vendored_path), version_at(reference_path)
     if not vendored or not reference:
         # Fail open in every mode: an unreadable version is not evidence of staleness,

@@ -1,5 +1,5 @@
 # Requirement-manager drift gate — published GitHub Action.
-# implements: ARCH-SELFGATE-039
+# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
 # implements: ARCH-STALEENGINE-043
 #
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
@@ -111,7 +111,7 @@ runs:
     # Warn-only by default — a new step that could newly fail a green build would be a
     # breaking change for an existing @v2 pin. Fails open (exit 0) when either version
     # is unreadable; see check/engine_staleness.py.
-    - name: reqmap engine staleness
+    - name: reqmap engine staleness  # implements: REQ-STALEENGINE-925
       if: ${{ inputs.stale-engine != 'off' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}

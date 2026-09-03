@@ -1,33 +1,50 @@
 ---
 id: ARCH-DESCRIPTION-057
 status: confirmed
-form: atomic
-level: system
+level: architecture
 layer: bus
 owner: Alex
 priority: should-have
-verification: automated test
-rationale: A reader met the same capability twice under two headings that both said WHAT — once as rationale, once as obligation — and the acceptance section was named after a sign-off step rather than after the cases it holds.
-satisfies: [SYS-AUTHOR-101]
 depends_on: [ARCH-PARSE-001, ARCH-DRIFT-003]
-superseded_by:
+satisfies: [SYS-AUTHOR-101]
 ---
 
 # One Description section, and Cases instead of Acceptance
 
-> As someone writing or reading a requirement, I want the intent and the binding clauses in a
-> single `## Description` section and the criteria under `## Cases` as `CASE-1`, `CASE-2`, so
-> that a requirement reads as one explanation followed by the cases that check it, instead of
-> a rationale and a contract split across two headings that both said WHAT.
+## Description
+> A reader met the same capability twice under two headings that both said WHAT — once as rationale, once as obligation — and the acceptance section was named after a sign-off step rather than after the cases it holds.
 
-Scenario: a requirement written under the current names, and one written under the old ones
-  Given  a requirement whose `## Description` opens with a `>` intent quote and continues in
-         binding bullets, and whose `## Cases` section labels its criteria `CASE-N`
-  When   the engine parses it, hashes its contract, lints it and a test tags one criterion
-         with `# verifies: <ID>#CASE-N`
-  Then   the quote is read as the intent and excluded from the drift hash while the bullets
-         are the binding clauses, the criteria are counted and covered exactly as labelled
-         criteria always were, and a requirement still written with `## WHAT — Contract`,
-         `## HOW — Acceptance` and `AC-N` behaves in every one of those ways unchanged
+Every bullet below is binding.
+- `## Description` merges the intent quote with the binding clauses into one section, and `## Cases` (labelled `CASE-1`, `CASE-2`, …) replaces the older acceptance heading and its `AC-N` labels.
+- A requirement still written with the older `## WHAT — Contract`, `## HOW — Acceptance` and `AC-N` spellings parses to the identical clause list and criterion count.
+- A `# verifies: <ID>#CASE-N` or `#AC-N` tag resolves under either spelling.
+- The intent quote sits inside the normative `## Description` section but is excluded from the drift hash, so improving the WHY never drifts a confirmed contract; editing a Contract clause or a Cases criterion still drifts.
 
-## Members in code (auto)
+## Cases
+CASE-1 — both spellings parse to the same clauses and criterion count
+  Given  the same requirement written once in the current form and once in the legacy form
+  When   the engine parses each
+  Then   both yield the identical Contract clause list and the identical criterion count
+
+CASE-2 — a verifies tag resolves under either label
+  Given  a `# verifies: <ID>#CASE-N` tag and a `# verifies: <ID>#AC-N` tag
+  When   the engine matches each tag to its requirement's criteria
+  Then   both resolve, because the label is an identifier a tag points at, not a fixed spelling
+
+CASE-3 — the intent quote is excluded from the drift hash
+  Given  a confirmed requirement whose `>` intent quote is edited but whose Contract and
+         Cases are not
+  When   `binding_hash` runs before and after the edit
+  Then   the hash is unchanged
+
+CASE-4 — editing a Contract clause or a Cases criterion still drifts
+  Given  the same requirement edited once in a Contract clause and once in a Cases criterion
+  When   `binding_hash` runs before and after each edit
+  Then   both edits change the hash
+
+CASE-5 — the intent is still read from inside the section
+  Given  a requirement in the current form and one in the legacy form, both with the same
+         intent quote
+  When   `_first_quote` reads each
+  Then   both return the identical intent text
+

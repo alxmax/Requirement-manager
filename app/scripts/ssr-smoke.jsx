@@ -1,4 +1,4 @@
-// tested-by: ARCH-VIEWER-007
+// tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
 // tested-by: ARCH-SEARCH-036
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
@@ -80,9 +80,9 @@ const SEARCH_FIXTURE = [
 ];
 const ranked = rankRequirements(SEARCH_FIXTURE, "contract changed against the lock hash");
 const nomatch = rankRequirements(SEARCH_FIXTURE, "banana photosynthesis wombat");
-const searchChecks = [
+const searchChecks = [  // tested-by: REQ-SEARCH-912
   ["ranked search returns the drift requirement first", ranked[0]?.req.id === "REQ-DRIFT-001"],
-  ["ranked search score matches the engine (0.4112)", ranked[0] && Math.abs(ranked[0].score - 0.4112) < 1e-4],
+  ["ranked search score matches the engine (0.4112)", ranked[0] && Math.abs(ranked[0].score - 0.4112) < 1e-4],  // verifies: REQ-SEARCH-912#CASE-5
   ["ranked search shows a score per hit", typeof ranked[0]?.score === "number"],
   ["ranked search floors out a no-overlap query", nomatch.length === 0],
 ];
@@ -115,15 +115,15 @@ const spec = (locale) => renderToString(
 const specEn = spec("en"), specRo = spec("ro");
 const reqUnderTest = REQUIREMENTS.find(r => r.id === "ARCH-MAP-007");
 const i18nChecks = [
-  ["i18n: English is the default rendering", specEn.includes("Where — Members in code")],
-  ["i18n: Romanian translates a section header",
+  ["i18n: English is the default rendering", specEn.includes("Where — Members in code")],  // verifies: REQ-VIEWER-943#CASE-1
+  ["i18n: Romanian translates a section header",  // verifies: REQ-VIEWER-943#CASE-2
     specRo.includes("Unde — Membri în cod") && !specRo.includes("Where — Members in code")],
-  ["i18n: an unknown string falls back to English rather than blanking",
+  ["i18n: an unknown string falls back to English rather than blanking",  // verifies: REQ-VIEWER-943#CASE-3
     translate("ro", "Not In The Dictionary") === "Not In The Dictionary"],
-  ["i18n: placeholders interpolate", translate("ro", "{n} members bound", { n: 7 }) === "7 membri legați"],
+  ["i18n: placeholders interpolate", translate("ro", "{n} members bound", { n: 7 }) === "7 membri legați"],  // verifies: REQ-VIEWER-943#CASE-4
   // The boundary the feature exists to respect: the artifact under review is never translated.
-  ["i18n: requirement title stays in the author's language", specRo.includes(reqUnderTest.title)],
-  ["i18n: engine vocabulary stays literal (status value, not a translation)",
+  ["i18n: requirement title stays in the author's language", specRo.includes(reqUnderTest.title)],  // verifies: REQ-VIEWER-943#CASE-5
+  ["i18n: engine vocabulary stays literal (status value, not a translation)",  // verifies: REQ-VIEWER-943#CASE-6
     specRo.includes(reqUnderTest.status)],
 ];
 for (const [label, ok] of i18nChecks) test(label, ok);
@@ -152,10 +152,10 @@ setRegistry([adaptNode({
 const noCacheSpecEn = renderToString(
   <I18nProvider initialLocale="en"><SpecView selId="I18N-NOCACHE-TEST-001" setSelId={noop} /></I18nProvider>);
 const i18nContentChecks = [
-  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],
-  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],
-  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],
-  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],
+  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
+  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
+  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
+  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
 ];
 for (const [label, ok] of i18nContentChecks) test(label, ok);
 // ---- acceptance criteria keep their Given/When/Then lines ------------------
@@ -173,9 +173,9 @@ setRegistry([adaptNode({
 })]);
 const gwtSpec = renderToString(<SpecView selId="GWT-TEST-001" setSelId={noop} />);
 const gwtChecks = [
-  ["acceptance: a labelled block renders as the multi-line gwt block, not a folded bullet",
+  ["acceptance: a labelled block renders as the multi-line gwt block, not a folded bullet",  // verifies: REQ-VIEWER-942#CASE-5
     gwtSpec.includes('class="gwt"')],
-  ["acceptance: the folded one-line form is not what the reader sees",
+  ["acceptance: the folded one-line form is not what the reader sees",  // verifies: REQ-VIEWER-942#CASE-5
     gwtSpec.includes("Given") && gwtSpec.includes("Then")
     && !gwtSpec.includes("AC-1 — Given")],
   ["acceptance: adaptNode still exposes acc for search and counting",
@@ -200,11 +200,11 @@ const chain = Array.from({ length: 12 }, (_, i) => ({
 }));
 const chainMaxRank = Math.max(...Object.values(computeLayout(chain).rankOf));
 const layoutChecks = [
-  ["layout: a cycle cannot rank beyond the node count", cycMaxRank <= cyc.length - 1],
-  ["layout: a cyclic graph stays in a bounded canvas", cycLayout.width < 2000],
-  ["layout: every node still gets a position", cyc.every((r) => cycLayout.pos[r.id])],
-  ["layout: cycle-closing edges are still drawn", cycLayout.edges.length === 4],
-  ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],
+  ["layout: a cycle cannot rank beyond the node count", cycMaxRank <= cyc.length - 1],  // verifies: REQ-VIEWER-942#CASE-3
+  ["layout: a cyclic graph stays in a bounded canvas", cycLayout.width < 2000],  // verifies: REQ-VIEWER-942#CASE-3
+  ["layout: every node still gets a position", cyc.every((r) => cycLayout.pos[r.id])],  // verifies: REQ-VIEWER-942#CASE-2
+  ["layout: cycle-closing edges are still drawn", cycLayout.edges.length === 4],  // verifies: REQ-VIEWER-942#CASE-2
+  ["layout: a deep DAG still ranks by longest path", chainMaxRank === 11],  // verifies: REQ-VIEWER-942#CASE-1
 ];
 for (const [label, ok] of layoutChecks) test(label, ok);
 

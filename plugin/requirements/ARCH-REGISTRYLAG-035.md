@@ -1,13 +1,12 @@
 ---
 id: ARCH-REGISTRYLAG-035
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
-depends_on: [ARCH-HEALTH-017]
 milestone: v2.12
+depends_on: [ARCH-HEALTH-017]
 satisfies: [SYS-REPORT-105]
-
 ---
 
 # Registry-lag signal — commits since the requirements dir was last touched
@@ -24,47 +23,12 @@ satisfies: [SYS-REPORT-105]
 > coverage answers "is this code traced?", lag answers "has the registry moved
 > lately at all?". Per the Senate audit that governs the coverage signal
 > (2026-06-21), advisory visibility only — never a hard gate.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     registry lag  how many commits have landed since anyone last touched a
-                   requirement file. It answers "has the spec moved lately at all?"
-     reqs_dir      the requirements directory.
-     an axis       one pass/fail question `health` asks of a requirement. -->
+- Registry lag is the number of commits on `HEAD` since the most recent commit that touched `reqs_dir`, computed from git alone, never from requirement contents. [[REQ-REGISTRYLAG-903]] details the behaviour.
+- `health --json` reports the count as a `commits_since_req_touch` integer key — present only when measurable, and never affecting the score or exit code. [[REQ-REGISTRYLAG-904]] details the behaviour.
 
-**What it measures**
-- Registry lag is the number of commits on `HEAD` since the most recent commit that touched
-  `reqs_dir`.
-- The count comes from git alone: the last commit touching `reqs_dir`
-  (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD`
-  (`git rev-list --count`).
-- The capability never parses requirement contents.
-
-**What it reports**
-- `health --json` includes the count as a `commits_since_req_touch` integer key.
-- Text output carries a labelled line only when the count is above zero. A lag of zero is the
-  healthy case and needs no line.
-
-**What it never does**
-- The signal is read-only and never a gate. It changes no exit code.
-- The signal never lowers the health score, because it is a repo-wide temporal fact rather
-  than a per-requirement axis.
-
-**When it cannot measure**
-- The `commits_since_req_touch` key is absent, not zero, whenever the value is unmeasurable.
-- Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is
-  unavailable, or `reqs_dir` has no commit in history.
-- Absence rather than zero preserves the `--json` schema, so a missing reading is never
-  mistaken for a fresh registry.
-
-## Verify intent (open questions for the human)
-- None — authored from known intent; scope and severity mirror the settled Senate decision on the sibling coverage signal ([[ARCH-COVERAGE-029]]).
-
-## Notes & known limitations (informative)
-- It measures RECENCY of any touch, not QUALITY of the update: a whitespace edit to one requirement resets the lag to 0. Accepted — like coverage, this is an advisory nudge, not proof the spec is current.
-- Granularity is whole-repo, not per requirement; it answers whether the registry as a body has moved, not which requirement is stale.
-- A shallow clone or a repo whose first commit already contained `reqs_dir` still reports correctly; only a genuinely absent git history or an untracked `reqs_dir` yields the absent (None) reading.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a git repo whose requirements dir was committed, then two later commits touched only code
   When   `health --json` runs with that code root
@@ -80,243 +44,124 @@ CASE-3
   When   `health --json` runs with that code root
   Then   the output carries no `commits_since_req_touch` key
 
-## WHERE — Current implementation
+## Context
+**Terms**
+- registry lag  how many commits have landed since anyone last touched a
+- requirement file. It answers "has the spec moved lately at all?"
+- reqs_dir      the requirements directory.
+- an axis       one pass/fail question `health` asks of a requirement.
+
+**Notes**
+- It measures RECENCY of any touch, not QUALITY of the update: a whitespace edit to one requirement resets the lag to 0. Accepted — like coverage, this is an advisory nudge, not proof the spec is current.
+- Granularity is whole-repo, not per requirement; it answers whether the registry as a body has moved, not which requirement is stale.
+- A shallow clone or a repo whose first commit already contained `reqs_dir` still reports correctly; only a genuinely absent git history or an untracked `reqs_dir` yields the absent (None) reading.
+
+**Current implementation**
 - `_commits_since_reqs_touch(code_root, reqs_dir)` in `reqmap.py`, wired into `cmd_health` alongside the untagged block; surfaced read-only in `health` text output and `--json`.
-
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
 
 
 --------------------
 
 
 ---
-id: REQ-REGISTRYLAG-608
-status: baseline
-form: atomic
+id: REQ-REGISTRYLAG-903
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
 ---
 
-# Registry lag is the number of commits on
+# Counting commits since the registry last moved
 
-> Registry lag is the number of commits on `HEAD` since the most recent commit that
-> touched `reqs_dir`.
+## Description
+> A registry can sit frozen while code races ahead of it, with nothing in `health`
+> noticing. Registry lag asks git directly — the last commit that touched `reqs_dir`,
+> then how many commits have landed on `HEAD` since — so it never needs to parse a
+> requirement file, and a malformed one can never break the count.
 
-Scenario: lag counts commits landed after the requirements dir's last touch
+Every bullet below is binding.
+- Registry lag is the number of commits on `HEAD` since the most recent commit that touched
+  `reqs_dir`.
+- The count comes from git alone: the last commit touching `reqs_dir`
+  (`git log -1 -- <reqs_dir>`), then the commit count from there to `HEAD`
+  (`git rev-list --count`).
+- The capability never parses requirement contents.
+
+## Cases
+CASE-1 — lag counts commits landed after the requirements dir's last touch
   Given  a commit that touches `requirements/`, then two commits that touch only code
   When   `health --json` runs with that repo as the code root
   Then   `commits_since_req_touch` equals 2
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-609
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# The count comes from git alone: the last
-
-> The count comes from git alone: the last commit touching `reqs_dir` (`git log -1 --
-> <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).
-
-Scenario: lag counts from the most recent touch, not the first
+CASE-2 — lag counts from the most recent touch, not the first
   Given  `requirements/` touched by commit A, then two code commits, then touched again by commit B, then one more code commit
   When   `_commits_since_reqs_touch` runs
   Then   it returns 1 (commits since B), not 3 (commits since A)
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-610
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# The capability never parses requirement contents
-
-> The capability never parses requirement contents.
-
-Scenario: a malformed requirement file does not break the count
+CASE-3 — a malformed requirement file does not break the count
   Given  `requirements/` holds a file with unparseable YAML frontmatter, committed, then two code commits
   When   `_commits_since_reqs_touch` runs
   Then   it returns 2 without raising, because it only asks git about the path, never opens the file
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-REGISTRYLAG-611
-status: baseline
-form: atomic
+id: REQ-REGISTRYLAG-904
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
 ---
 
-# Health --json includes the count as a commits_since_req_touch
+# Reporting lag without ever gating on it
 
-> `health --json` includes the count as a `commits_since_req_touch` integer key.
+## Description
+> Like the untagged-code signal, registry lag is visibility only — a repo-wide temporal
+> fact, not a per-requirement axis, so it never touches the score or exit code. Absence,
+> not zero, means the value could not be measured (no git worktree, no code root, no
+> commit history for `reqs_dir`), so a missing reading is never mistaken for a healthy,
+> just-touched registry.
 
-Scenario: --json exposes the count as an integer key
+Every bullet below is binding.
+- `health --json` includes the count as a `commits_since_req_touch` integer key.
+- Text output carries a labelled line only when the count is above zero. A lag of zero is the
+  healthy case and needs no line.
+- The signal is read-only and never a gate. It changes no exit code.
+- The signal never lowers the health score, because it is a repo-wide temporal fact rather
+  than a per-requirement axis.
+- The `commits_since_req_touch` key is absent, not zero, whenever the value is unmeasurable.
+- Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is
+  unavailable, or `reqs_dir` has no commit in history.
+- Absence rather than zero preserves the `--json` schema, so a missing reading is never
+  mistaken for a fresh registry.
+
+## Cases
+CASE-1 — --json exposes the count as an integer key
   Given  a repo with two commits landed after the last commit touching `requirements/`
   When   `health --json` runs
   Then   the parsed JSON object's `commits_since_req_touch` key equals the integer `2`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-612
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# Text output carries a labelled line only when
-
-> Text output carries a labelled line only when the count is above zero. A lag of zero is
-> the healthy case and needs no line.
-
-Scenario: the lag line appears only for a nonzero count
+CASE-2 — the lag line appears only for a nonzero count
   Given  one repo where the last commit touched `requirements/` (lag 0) and another with two later code commits (lag 2)
   When   `health` runs in text mode on each
   Then   the "commits since requirements touched" line is absent for the first and present for the second
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-614
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# The signal never lowers the health score, because
-
-> The signal never lowers the health score, because it is a repo-wide temporal fact rather
-> than a per-requirement axis.
-
-Scenario: a nonzero lag leaves the health score unchanged
+CASE-3 — a nonzero lag leaves the health score unchanged
   Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2)
   When   `health --json` runs
   Then   `score` still reads 100 and the exit code stays unchanged, unaffected by the nonzero lag
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-615
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# The commits_since_req_touch key is absent, not zero, whenever
-
-> The `commits_since_req_touch` key is absent, not zero, whenever the value is
-> unmeasurable.
-
-Scenario: an unmeasurable lag omits the key entirely
+CASE-4 — an unmeasurable lag omits the key entirely
   Given  a code root that is not a git worktree
   When   `health --json` runs with that code root
   Then   the parsed JSON object has no `commits_since_req_touch` key, preserving the `--json` schema so a missing reading is never mistaken for a fresh registry
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REGISTRYLAG-616
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# Unmeasurable means no code root was supplied, code_root
-
-> Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is
-> unavailable, or `reqs_dir` has no commit in history.
-
-Scenario: a git worktree whose reqs_dir has no commits reads as unmeasurable
+CASE-5 — a git worktree whose reqs_dir has no commits reads as unmeasurable
   Given  a git repo with commits, where `requirements/` was never committed
   When   `_commits_since_reqs_touch` runs against that repo
   Then   it returns `None`, not `0` or an exception
-
-## Members in code (auto)
-
-
-
 

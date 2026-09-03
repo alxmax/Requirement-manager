@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Adopting and shipping the engine
 
 > As someone bringing the engine into a repository, or releasing a new version of it, I 

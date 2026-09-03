@@ -41,7 +41,7 @@ export const LOCALES = [
 const STORAGE_KEY = "reqmap.viewer.locale";
 
 /* English -> Romanian, UI chrome only. Order mirrors the components. */
-const RO = {
+const RO = {  // implements: REQ-VIEWER-943
   // shell / top bar
   "local repo": "depozit local",
   "Search id, title, contract…": "Caută id, titlu, contract…",
@@ -139,7 +139,7 @@ function interpolate(s, params) {
   return s.replace(/\{(\w+)\}/g, (m, k) => (k in params ? String(params[k]) : m));
 }
 
-export function translate(locale, s, params) {
+export function translate(locale, s, params) {  // implements: REQ-VIEWER-943
   const table = DICT[locale];
   return interpolate((table && table[s]) || s, params);
 }
@@ -150,7 +150,7 @@ export function translate(locale, s, params) {
  * fallback rendering) when no cache entry exists — never throws, never
  * fabricates a translation. `isTranslated` is the only signal callers need to
  * decide whether to show the "machine-translated, unreviewed" badge. */
-export function translatedText(node, locale, field, fallback = null) {
+export function translatedText(node, locale, field, fallback = null) {  // implements: REQ-TRANSLATE-938
   const cached = node && node.i18n && node.i18n[locale] && node.i18n[locale][field];
   return cached ? { text: cached, isTranslated: true } : { text: fallback, isTranslated: false };
 }
@@ -173,7 +173,7 @@ const Ctx = createContext({
 
 /* `initialLocale` lets a host (or a test) preset the language; otherwise the
  * viewer remembers the reader's last choice, and falls back to English. */
-export function I18nProvider({ children, initialLocale }) {
+export function I18nProvider({ children, initialLocale }) {  // implements: REQ-VIEWER-943
   const [locale, setLocale] = useState(() => initialLocale || readStored() || "en");
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, locale); } catch { /* not fatal */ }

@@ -32,7 +32,7 @@ export function edgesWithin(reqs, ids) {
  * with three cycles produced maxRank 236 — where a DAG of 59 nodes cannot exceed
  * 58 — which is a 71,000px-wide canvas with ~230 empty columns, and edges drawn
  * as near-endless horizontal lines stepping through every one of them. */
-function backEdges(ids, edges) {
+function backEdges(ids, edges) {  // implements: REQ-VIEWER-942
   const out = {};
   ids.forEach((id) => (out[id] = []));
   for (const [a, b] of edges) if (out[a]) out[a].push(b);
@@ -59,7 +59,7 @@ function backEdges(ids, edges) {
  * Cycle-closing edges are excluded from the ranking (they are still drawn), so the
  * remaining graph is a DAG and the relaxation converges in at most `ids.length`
  * passes with rank <= ids.length - 1. */
-function rankNodes(ids, edges) {
+function rankNodes(ids, edges) {  // implements: REQ-VIEWER-942
   const back = backEdges(ids, edges);
   const acyclic = edges.filter(([a, b]) => !back.has(a + "\u0000" + b));
   const rank = {};
@@ -78,7 +78,7 @@ const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
  * @param {Array} reqs  list of {id, deps, ...}
  * @returns {{pos:Object<string,[number,number]>, edges:Array, width:number, height:number}}
  */
-export function computeLayout(reqs, opts = {}) {
+export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
   const COLW = opts.colW || 300, ROWH = opts.rowH || 170, X0 = 50, Y0 = 40, ISO_COLS = 3, ISO_W = 220;
   const ids = reqs.map((r) => r.id);
   const idset = new Set(ids);

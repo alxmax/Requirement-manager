@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v3.2.0` — 2026-09-03
+
+**The corpus is folded from 644 to 197 requirements on three levels, in a lean form** ([ADR-0025](docs/adr/0025-three-levels-restored-corpus-folded-to-two-hundred.md), superseding ADR-0024). The 573 one-sentence atomic leaves of the morning's decomposition were regrouped, one code-level requirement per behaviour group of the parent's Description: 9 `SYS-*` needs (`level: system`), 62 `ARCH-*` capabilities (`level: architecture` again), 126 `REQ-*` behaviour groups (`level: code`, 3-7 labelled cases each). Every requirement is `confirmed` with an `implements:` member; 844 members, 0 gate errors.
+
+- An `ARCH-*` Description is now its intent quote plus one obligation sentence per child ending in `[[REQ-…]]`; the detail lives only in the child. The parent's own `## Cases` are unchanged, so every existing `# verifies: ARCH-…#CASE-N` tag still resolves.
+- The lean form: frontmatter without comments or empty keys, `## Description` + `## Cases` + optional `## Context`; no `## Verify intent`, `## Links` or `## Members in code (auto)` on a confirmed requirement. `reqmap new`'s scaffold and `lint --decompose`'s scaffold drop the two auto sections nothing ever filled; the audience rule in `SKILL.md` and the scaffold is now "a developer new to the project", not "a first-year student".
+- `gate`'s legacy-schema warning keys on the old `## Input`/`## Output` triad only. It used to fire on any sectioned requirement without a `## Verify intent` section, which would have named every requirement in a lean corpus in one warning.
+- `LINT_FANOUT_BANDS["system"]` returns to `(None, 10)` (the test is `test_system_ceiling_is_ten` again); `architecture` stays `(None, 30)`.
+- Per-case coverage is now real: 624 `# verifies:` tags in `test_reqmap.py` alone, placed by reading each test; 132 cases across 76 requirements have no test yet and the gate names them, one aggregated warning per requirement. `ARCH-VLEVEL-037` warns that it is verified at `@unit` but not `@integration` — the first consequence of the level rungs applying to a populated `architecture` level.
+- The viewer's baked demo fixture (`app/src/lib/data.js`) carries the 13 lifted parents' new contracts.
+- `MAP_ENGINE_VERSION` `2026-09-03.18`.
+
 ## plugin `v3.1.1` — 2026-09-03
 
 **The `architecture` level is promoted into `system`** ([ADR-0024](docs/adr/0024-architecture-level-promoted-into-system.md), superseding [ADR-0023](docs/adr/0023-fan-out-per-level-ceilings-no-floor.md)'s `system` ceiling). A `/senate` audit rejected an earlier, literal 2-level proposal that froze the `system` tier at 9 requirements: flattening 573 `level: code` requirements onto 9 parents averages ~64 children each (one node hits 107), 2–3.5x over any proposed ceiling. The revised design that survived promotes the 62 `level: architecture` requirements into `level: system` instead of deleting them — the middle rung's grouping is unchanged, only its label moves, so no `satisfies:` edge is repointed and no confirmed contract's fan-out changes.
