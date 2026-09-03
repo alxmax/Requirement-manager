@@ -136,10 +136,10 @@ superseded_by:
 
 > `lint` reports readability problems and structure problems in requirement files.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: one run surfaces both a structural and a readability finding
+  Given  a confirmed requirement with no `## Cases` section and a Contract bullet joined by four "and"s
+  When   `lint_requirement` runs on it
+  Then   the findings include both a `missing-section` error and a `stacked-conditions` warning
 
 ## Members in code (auto)
 
@@ -164,10 +164,10 @@ superseded_by:
 
 > `lint` writes no file. It only reads and prints.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a default lint run leaves the requirements directory untouched
+  Given  a requirements directory with findings to report and no `--decompose` flag
+  When   `cmd_lint` runs
+  Then   the directory's file listing is identical before and after the call
 
 ## Members in code (auto)
 
@@ -194,10 +194,10 @@ superseded_by:
 > `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add
 > noise.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a draft with a bad clause is silently skipped
+  Given  a `draft` requirement whose Contract bullet is a 50-word run-on sentence
+  When   `cmd_lint` runs
+  Then   it exits 0 and its output names no findings for that requirement
 
 ## Members in code (auto)
 
@@ -223,10 +223,10 @@ superseded_by:
 > `lint` gives each finding one of two severities. A structural check reports an `error`;
 > a prose check or a scope check reports a `warn`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: structural findings are error, prose findings are warn
+  Given  a confirmed requirement with no `## Cases` section and a Contract line opening with a bare "It"
+  When   `lint_requirement` runs on it
+  Then   the `missing-section` finding carries severity `error` and the `anonymous-subject` finding carries `warn`
 
 ## Members in code (auto)
 
@@ -252,10 +252,10 @@ superseded_by:
 > The `missing-section` check reports an `error` when a non-draft requirement has no `##
 > WHAT — Contract` section, or no `## Cases` section.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement with no Acceptance heading gets a missing-section error
+  Given  a `confirmed` requirement body carrying a Contract section but no `## Cases`/`## HOW — Acceptance` heading
+  When   `lint_requirement` runs on it
+  Then   its findings include `("error", "missing-section")`
 
 ## Members in code (auto)
 
@@ -282,10 +282,10 @@ superseded_by:
 > carries nothing under it: no clauses, no criteria. Such a section passes
 > `missing-section` while documenting nothing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a heading with no content beneath it gets an empty-section warning
+  Given  a `confirmed` requirement whose Contract and Acceptance headings are both present but carry no bullets
+  When   `lint_requirement` runs on it
+  Then   its findings include an `empty-section` warning and no `missing-section` error
 
 ## Members in code (auto)
 
@@ -310,10 +310,10 @@ superseded_by:
 
 > The prose checks read the Contract and the Acceptance sections, and no other section.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only the first matching Contract heading's text is linted
+  Given  a short Contract clause followed by a `## Notes — contract addendum` heading holding a 50-word run-on line
+  When   `_lint_prose` runs against "contract"
+  Then   it returns only the short Contract line, never the Notes text
 
 ## Members in code (auto)
 
@@ -339,10 +339,10 @@ superseded_by:
 > The "Notes & limitations" section is exempt: only deep readers reach it, and it may stay
 > dense.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a stacked-conditions line under Notes never fires
+  Given  a `confirmed` requirement whose `## Notes & known limitations` section holds a line joined by four "and"s
+  When   `lint_requirement` runs on it
+  Then   no `stacked-conditions` finding is reported for that line
 
 ## Members in code (auto)
 
@@ -368,10 +368,10 @@ superseded_by:
 > The prose checks skip lines that are not prose — headings, table rows, blockquotes, and
 > any line inside a fenced code block.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a blockquote line with four joins is never linted as prose
+  Given  a Contract section whose only content is `> a and b and c and d.` (a blockquote line)
+  When   `_lint_prose` runs against "contract"
+  Then   it returns an empty list — the `>` line is skipped, not read as prose
 
 ## Members in code (auto)
 
@@ -396,10 +396,10 @@ superseded_by:
 
 > `lint` strips a bullet's leading marker before the checks read its text.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a bulleted "It" clause still triggers anonymous-subject
+  Given  a Contract bullet written as `- It creates the folder.`
+  When   `lint_requirement` runs on it
+  Then   it reports an `anonymous-subject` warning, proving the `^It` check saw the text after the `- ` marker was stripped
 
 ## Members in code (auto)
 
@@ -424,10 +424,10 @@ superseded_by:
 
 > `lint` returns zero by default, whatever it found.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing-section error does not fail a non-strict run
+  Given  a confirmed requirement with no `## Cases` section
+  When   `cmd_lint` runs without `--strict`
+  Then   it returns exit code 0 despite the error-severity finding
 
 ## Members in code (auto)
 
@@ -452,10 +452,10 @@ superseded_by:
 
 > With `--strict`, `lint` returns non-zero when at least one finding has `error` severity.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing section fails a strict run
+  Given  a confirmed requirement with a Contract section but no `## Cases` heading
+  When   `cmd_lint` runs with `--strict`
+  Then   it returns exit code 1
 
 ## Members in code (auto)
 

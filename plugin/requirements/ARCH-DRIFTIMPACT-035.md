@@ -98,10 +98,10 @@ superseded_by:
 > requirement lists the drifted one in `depends_on`, the same warning line also names
 > those dependent requirement ids.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: drift warning names a requirement that depends on the drifted one
+  Given  a confirmed drifted requirement and a second requirement with it in `depends_on`
+  When   `gate` runs
+  Then   the drift warning line includes "review dependent(s):" followed by the second id
 
 ## Members in code (auto)
 
@@ -127,10 +127,10 @@ superseded_by:
 > The dependent list is sorted and deduplicated, so the output is deterministic across
 > platforms and walk orders.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: two dependents are named in sorted order on the drift line
+  Given  a drifted requirement with two dependents whose ids sort after each other
+  When   `gate` runs
+  Then   the "review dependent(s):" list shows both ids in ascending id order
 
 ## Members in code (auto)
 
@@ -157,10 +157,10 @@ superseded_by:
 > transitive closures explode on bus-layer nodes and bury the signal; a reviewer follows
 > the chain one hop at a time. -->
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a dependent-of-a-dependent is not named on the drift line
+  Given  A depends on drifted B, and C depends on A (but not on B)
+  When   `gate` runs
+  Then   the drift warning for B names A but does not name C
 
 ## Members in code (auto)
 
@@ -186,10 +186,10 @@ superseded_by:
 > A drifted requirement with no dependents produces the existing warning unchanged — no
 > empty "dependents" clause.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an isolated drifted requirement's warning carries no dependents clause
+  Given  a confirmed drifted requirement that no other requirement lists in `depends_on`
+  When   `gate` runs
+  Then   the drift warning line contains no "review dependent(s):" text at all
 
 ## Members in code (auto)
 

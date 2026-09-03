@@ -162,10 +162,10 @@ superseded_by:
 
 > For each distinct `tested-by` file, the gate verifies that the file exists.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing tested-by target is reported as broken
+  Given  a path with no file on disk
+  When   `_test_link_problem` runs on that path
+  Then   it returns a string containing "does not exist"
 
 ## Members in code (auto)
 
@@ -190,10 +190,10 @@ superseded_by:
 
 > For each such file the gate also verifies that it holds at least one test function.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file with only a helper function fails the check
+  Given  a `.py` file whose only function is `def helper(): return 1`
+  When   `_test_link_problem` runs on that file
+  Then   it returns a string containing "no test function"
 
 ## Members in code (auto)
 
@@ -218,10 +218,10 @@ superseded_by:
 
 > The gate recognizes a test function lexically.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a test-shaped string inside a docstring still passes
+  Given  a `.py` file whose only content is a docstring containing the text `def test_foo():`
+  When   `_test_link_problem` runs on that file
+  Then   it returns "" — the pattern match is textual, with no AST parse behind it
 
 ## Members in code (auto)
 
@@ -246,10 +246,10 @@ superseded_by:
 
 > A Python `def test...(` counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file with def test_ passes the check
+  Given  a `.py` file containing `def test_something():`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -274,10 +274,10 @@ superseded_by:
 
 > A JavaScript or TypeScript `function test...(` counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a def-style JS test function passes the check
+  Given  a `.ts` file containing `function testAdd() { assert(1 + 1 === 2); }`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -302,10 +302,10 @@ superseded_by:
 
 > An `it(` call or a `test(` call counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a Jest-style it() call passes the check
+  Given  a `.test.js` file containing `it('works', () => { expect(1).toBe(1); });`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -330,10 +330,10 @@ superseded_by:
 
 > A Go `func Test/Benchmark/Example/Fuzz(` counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a Go func TestX passes the check
+  Given  a `.go` file containing `func TestScan(t *testing.T) {}`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -358,10 +358,10 @@ superseded_by:
 
 > A Rust `#[test]` counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a Rust #[test] attribute passes the check
+  Given  a `.rs` file containing `#[test]\n  fn checks() {}`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -387,10 +387,10 @@ superseded_by:
 > A `.py` file with no `def test...` also counts when it drives its checks from a
 > `run`/`run_tests`/`main` entry point under an `if __name__ == "__main__"` guard.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a run()-under-__main__ Python file passes the check
+  Given  a `.py` file with `def run(): return 0` and `if __name__ == "__main__": raise SystemExit(run())`
+  When   `_test_link_problem` runs on that file
+  Then   it returns ""
 
 ## Members in code (auto)
 
@@ -415,10 +415,10 @@ superseded_by:
 
 > A shell `test_x()` function, a `function test_x` definition, or a bats `@test` counts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a bash test_x() function and a bats @test case both pass
+  Given  a `.sh` file with `test_backup_runs() { [ -f x ]; }` and a `.bats` file with `@test "restore drill" { run ./restore }`
+  When   `_test_link_problem` runs on each file
+  Then   both return ""
 
 ## Members in code (auto)
 
@@ -443,10 +443,10 @@ superseded_by:
 
 > A shell file named by a test convention, such as `x.test.sh`, counts on its name alone.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a *.test.sh file with no test-shaped body still passes
+  Given  a file named `backup-check.test.sh` whose only content is `./backup-check --dry-run || exit 1`
+  When   `_test_link_problem` runs on that file
+  Then   it returns "", recognized by filename alone
 
 ## Members in code (auto)
 
@@ -472,10 +472,10 @@ superseded_by:
 > When a file is missing, unreadable, or holds no test function, the gate adds one
 > warning.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a broken tested-by link produces exactly one gate warning
+  Given  a confirmed requirement whose `tested-by` names `tests/missing_test.py`, a path that does not exist
+  When   `cmd_check` runs
+  Then   its output carries exactly one warning line naming that broken link
 
 ## Members in code (auto)
 
@@ -500,10 +500,10 @@ superseded_by:
 
 > That warning names the requirement and the file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the warning text names both the requirement id and the file
+  Given  `REQ-A-001` whose `tested-by` names `tests/missing_test.py`, a path that does not exist
+  When   `cmd_check` runs
+  Then   its output contains both "REQ-A-001" and "tests/missing_test.py" in the same line
 
 ## Members in code (auto)
 
@@ -557,10 +557,10 @@ superseded_by:
 
 > Under `--strict` the warning becomes an error only for a confirmed requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: strict promotion applies to confirmed, not to draft
+  Given  one `draft` and one `confirmed` requirement, each with a `tested-by` link to a non-test file
+  When   `cmd_check` runs with `strict=True` on each
+  Then   the draft's gate still exits 0 while the confirmed one exits 1
 
 ## Members in code (auto)
 
@@ -585,9 +585,9 @@ superseded_by:
 
 > The check stays silent on a well-formed corpus, so a green gate run gains no noise.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a valid tested-by link produces no test-link warning
+  Given  a confirmed requirement whose `tested-by` file exists and contains `def test_it(): pass`
+  When   `cmd_check` runs
+  Then   its output contains no "tested-by" warning line for that requirement
 
 ## Members in code (auto)

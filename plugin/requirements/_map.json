@@ -174,7 +174,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a verifies tag with no #AC-N suffix is not per-criterion coverage Given  a file carrying `# verifies: REQ-X-001` with no trailing `#AC-N` When   `scan_ac_verifies` scans it Then   it returns an empty mapping for `REQ-X-001`"
       ],
       "accept": "",
       "input": "",
@@ -212,7 +212,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: partial verifies coverage produces one warning naming every gap Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5 untagged When   `gate` runs Then   it prints exactly one \"automatable criteria\" line naming \"missing AC-2, AC-3, AC-4, AC-5\""
       ],
       "accept": "",
       "input": "",
@@ -250,7 +250,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the warning states the tagged-of-total count Given  a confirmed requirement with AC-1 and AC-2 labelled, only AC-1 tagged When   `gate` runs Then   its output contains \"1/2 automatable criteria\""
       ],
       "accept": "",
       "input": "",
@@ -288,7 +288,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: zero verifies tags is silent, not a violation Given  a confirmed requirement with two labelled criteria and zero `# verifies:` tags anywhere in the tree When   `gate` runs Then   its output contains no \"criterion unverified\" finding"
       ],
       "accept": "",
       "input": "",
@@ -326,7 +326,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: unlabelled bullet criteria never trigger the per-criterion warning Given  a confirmed requirement whose Cases are plain bullets, no `AC-N`/`CASE-N` labels, and a `# verifies:` tag present in code When   `gate` runs Then   its output contains no \"criterion unverified\" finding"
       ],
       "accept": "",
       "input": "",
@@ -364,7 +364,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an inspection-only criterion never triggers the automatable-criteria warning Given  a confirmed requirement with `AC-1` tagged and `AC-2` marked `<!-- verifiable by: inspection -->` When   `gate` runs Then   its output contains no \"automatable criteria\" line"
       ],
       "accept": "",
       "input": "",
@@ -402,7 +402,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: clauses/covered appear only once tagging is adopted Given  a requirement with two labelled criteria and no `verifies` coverage passed to `_build_map_data`, and separately the same requirement with `AC-1` covered When   `_build_map_data` builds each node Then   the untagged node has no `clauses`/`covered` keys and the tagged node has `clauses: 2, covered: 1`"
       ],
       "accept": "",
       "input": "",
@@ -440,7 +440,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: gap names the untagged criteria only when coverage is partial Given  a two-criterion requirement with only `AC-1` covered, and separately one with both `AC-1` and its only criterion covered When   `_build_map_data` builds each node Then   the partial node's `gap` contains \"AC-2\" and the fully-covered node carries no `gap` key"
       ],
       "accept": "",
       "input": "",
@@ -516,7 +516,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unverified criterion warns but the gate exits 0 Given  a confirmed requirement with `AC-1` tagged and `AC-2` untagged, nothing else causing an error When   `gate` runs Then   the run warns about AC-2 and still exits 0"
       ],
       "accept": "",
       "input": "",
@@ -833,7 +833,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the default statement-size threshold is 150 words Given  the module constant `LINT_STATEMENT_WORDS` When   its value is read Then   it equals `150`"
       ],
       "accept": "",
       "input": "",
@@ -871,7 +871,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a 155-word clause produces exactly one statement-size finding Given  a Contract clause of 155 plain words When   `lint_requirement` runs Then   exactly one finding names `check: \"statement-size\"` and `clause_n: 1`"
       ],
       "accept": "",
       "input": "",
@@ -909,7 +909,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an over-threshold clause's finding carries warn severity, not error Given  a Contract clause of 155 plain words When   `lint_requirement` runs Then   the `statement-size` finding's `severity` reads `\"warn\"`, never `\"error\"`"
       ],
       "accept": "",
       "input": "",
@@ -947,7 +947,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]` When   `lint_requirement` runs Then   no `statement-size` finding appears, though it appears without the exemption"
       ],
       "accept": "",
       "input": "",
@@ -1023,7 +1023,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a short two-obligation clause produces no statement-size finding Given  a 16-word clause stating both \"issues a token\" and \"revokes it on logout\" When   `lint_requirement` runs Then   no `statement-size` finding is reported for that clause"
       ],
       "accept": "",
       "input": "",
@@ -1061,7 +1061,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the finding's detail text asks for a re-read, not a defect claim Given  a Contract clause of 155 plain words When   the `statement-size` finding is produced Then   its `detail` text reads \"re-read it for decomposition\""
       ],
       "accept": "",
       "input": "",
@@ -1099,7 +1099,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a backticked span collapses to one token before counting Given  a clause of 20 plain words plus one backticked span of 140 words When   `_clause_words` counts the clause Then   it returns 21, not the raw 161-word split count"
       ],
       "accept": "",
       "input": "",
@@ -1137,7 +1137,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a nested sub-bullet is flagged on its own, the parent is not Given  a 40-word parent bullet with a nested 155-word sub-bullet When   `lint_requirement` runs Then   exactly one `statement-size` finding appears, naming `clause_n: 2` (the sub-bullet)"
       ],
       "accept": "",
       "input": "",
@@ -1175,7 +1175,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a 200-word Acceptance step produces no statement-size finding Given  a requirement whose Contract clauses are all short but whose Acceptance section holds a 200-word step When   `lint_requirement` runs Then   no `statement-size` finding is reported"
       ],
       "accept": "",
       "input": "",
@@ -2183,7 +2183,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a dangling tag is a gate ERROR Given  `mod.py` carrying `# implements: GHOST-CAP-001` and no such requirement When   `gate` runs Then   its output contains \"dangling tag\" and it exits 1"
       ],
       "accept": "",
       "input": "",
@@ -2221,7 +2221,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an invalid status or layer is a gate ERROR Given  a requirement with `status: bogus`, and separately one with `layer: bogus` When   `gate` runs on each Then   each output contains \"invalid status\" or \"invalid layer\" respectively, and each exits 1"
       ],
       "accept": "",
       "input": "",
@@ -2259,7 +2259,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a depends_on target that does not exist is a gate ERROR Given  a requirement with `depends_on: [GHOST-X-999]` and no such requirement When   `gate` runs Then   its output contains \"depends_on missing GHOST-X-999\" and it exits 1"
       ],
       "accept": "",
       "input": "",
@@ -2297,7 +2297,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement with no implements tag is a gate ERROR Given  a `status: confirmed` requirement with no `# implements:` tag anywhere When   `gate` runs Then   its output contains \"no implements\" and it exits 1"
       ],
       "accept": "",
       "input": "",
@@ -2335,7 +2335,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: ENFORCED names exactly the three enforced statuses Given  the module-level `R.ENFORCED` set When   it is inspected Then   it equals `{\"in-progress\", \"implemented\", \"confirmed\"}`, and `\"draft\"` is absent"
       ],
       "accept": "",
       "input": "",
@@ -2373,7 +2373,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed need with no implements tag raises no gate error Given  a confirmed `layer: need` requirement with no `implements:` tag, satisfied by another requirement When   `gate` runs Then   `_link_sync_errors` reports no missing-implements error for that need"
       ],
       "accept": "",
       "input": "",
@@ -2411,7 +2411,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR Given  a confirmed requirement locked at an old hash, whose Description text has since changed When   `gate` runs Then   its output contains \"DRIFT\" on a line printed with the \"WARN\" prefix, never \"ERROR\""
       ],
       "accept": "",
       "input": "",
@@ -2449,7 +2449,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the drift warning names the member's file and line Given  a confirmed, drifted requirement with one member tagged at `mod.py:1` When   `gate` runs Then   its output contains \"re-check 1 member\" and \"mod.py:1\""
       ],
       "accept": "",
       "input": "",
@@ -2487,7 +2487,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement with no tested-by tag warns, not errors Given  a confirmed requirement with an `implements:` tag but no `tested-by:` tag anywhere, and no `test_exempt` field When   `gate` runs Then   its output contains \"confirmed but no tested-by\" and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -2525,7 +2525,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: test_exempt suppresses the no-tested-by warning Given  a confirmed requirement with `test_exempt: covered by manual QA` and an `implements:` tag but no `tested-by:` tag When   `gate` runs Then   its output contains no \"tested-by\" finding and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -2563,7 +2563,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed need with no tested-by tag raises no test warning Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag, satisfied by another requirement When   `gate` runs Then   its output contains no missing-tested-by warning for that need"
       ],
       "accept": "",
       "input": "",
@@ -2601,7 +2601,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement missing Description warns and exits 0 Given  a confirmed `layer: bus` requirement whose body has no `## Description`/ `## Contract` section When   `gate` runs Then   its output contains \"missing '## Description'\" and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -2639,7 +2639,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement missing Cases warns and exits 0 Given  a confirmed `layer: bus` requirement whose body has a Description but no `## Cases`/`## Acceptance` section When   `gate` runs Then   its output contains \"missing '## Cases'\" and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -2677,7 +2677,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a well-shaped milestone value is silent Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`) When   `gate` runs Then   its output contains no \"malformed\" finding"
       ],
       "accept": "",
       "input": "",
@@ -2715,7 +2715,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a malformed milestone value warns Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`, `v1.14-beta`) When   `gate` runs Then   its output contains \"malformed\""
       ],
       "accept": "",
       "input": "",
@@ -2753,7 +2753,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a deprecated requirement's malformed milestone is silent Given  a `status: deprecated` requirement with `milestone: next` (malformed shape) When   `gate` runs Then   its output contains no \"malformed\" finding"
       ],
       "accept": "",
       "input": "",
@@ -2791,7 +2791,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a corrupt _reqlock.json warns and does not crash the gate Given  a `_reqlock.json` containing invalid JSON (\"{ not json\") When   `gate` runs Then   its output contains \"unreadable\" and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -2829,7 +2829,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an untracked lock file is flagged, then clears once tracked Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed When   `untracked_locks(reqs_dir)` runs before and after `git add -A` Then   it names `_reqlock.json` before the add and returns `[]` after it"
       ],
       "accept": "",
       "input": "",
@@ -2905,7 +2905,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the untracked-lock check is silent outside a git work tree Given  a `_reqlock.json` written to a plain directory that is not yet a git repository When   `untracked_locks(reqs_dir)` runs Then   it returns `[]`, not an error"
       ],
       "accept": "",
       "input": "",
@@ -2943,7 +2943,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a requirement missing Verify intent is named in the legacy-schema warning Given  a requirement whose body has no `## Verify intent` section When   `gate` runs Then   its output contains \"legacy schema\" naming that requirement's id, and \"findings` is inactive\""
       ],
       "accept": "",
       "input": "",
@@ -2981,7 +2981,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the summary line reports the legacy-schema count Given  one requirement whose body has no `## Verify intent` section When   `gate` runs Then   its final summary line contains \"1 legacy-schema\""
       ],
       "accept": "",
       "input": "",
@@ -3019,7 +3019,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a legacy-schema requirement warns but the gate exits 0 Given  a `status: baseline` requirement with no `## Verify intent` section When   `gate` runs Then   its output contains \"legacy schema\" and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -3057,7 +3057,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unvalidated confirmed need warns once the repo has opted in Given  a confirmed need with no `validated-against:` tag, in a repo where at least one `validated-against:` tag exists elsewhere When   `gate` runs Then   its output names that need alongside \"validated-against\""
       ],
       "accept": "",
       "input": "",
@@ -3095,7 +3095,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bus requirement verified only at @system warns Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is `@system` When   `gate` runs Then   its output contains \"@system\""
       ],
       "accept": "",
       "input": "",
@@ -3133,7 +3133,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a depends_on cycle warns once, naming the whole chain Given  two requirements whose `depends_on` fields point at each other When   `gate` runs Then   its output contains \"depends_on cycle\" and \"A-X-001 -> A-X-002 -> A-X-001\", and it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -3171,7 +3171,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: --strict does not promote the cycle warning to an error Given  two requirements whose `depends_on` fields point at each other When   `gate --strict` runs Then   it still exits 0"
       ],
       "accept": "",
       "input": "",
@@ -3209,7 +3209,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: gate reports the open verify-intent finding count Given  a requirement with one open `## Verify intent` question When   `gate` runs Then   its output contains \"1 open verify-intent finding(s)\""
       ],
       "accept": "",
       "input": "",
@@ -3247,7 +3247,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an open verify-intent finding does not change an otherwise-clean exit code Given  a `baseline` requirement with one open `## Verify intent` question and no other gate finding When   `gate` runs Then   it prints the finding count and returns exit code 0"
       ],
       "accept": "",
       "input": "",
@@ -3285,7 +3285,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the summary line reports the confirmed and legacy-schema counts Given  one confirmed requirement (implemented) and one baseline requirement, both in the current schema When   `gate` runs Then   its final line contains \"1 confirmed\" and \"0 legacy-schema\""
       ],
       "accept": "",
       "input": "",
@@ -3323,7 +3323,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: --update-lock writes the requirement's hash into the lock Given  a `baseline` requirement with no existing lock entry When   `cmd_check(..., update_lock=True)` runs Then   `load_lock(d)` afterward contains that requirement's id"
       ],
       "accept": "",
       "input": "",
@@ -3361,7 +3361,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a clean sync run advances the lock and regenerates the map Given  a clean corpus (no gate errors) When   `reqmap sync --root <d> --code <d>` runs Then   it exits 0 and `requirements/_map.json` exists, confirming the full check-with-lock-then-map pipeline ran"
       ],
       "accept": "",
       "input": "",
@@ -3399,7 +3399,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the gate verb never writes lock updated Given  a plain draft requirement, no `--update-lock` flag When   `reqmap.py gate --root <d>` runs Then   it exits 0 and its stdout contains no \"lock updated\" line"
       ],
       "accept": "",
       "input": "",
@@ -3890,7 +3890,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: bold sub-group labels keep each group's bullets separate Given  a `## Context` section with `**Notes**` bullets followed by `**Current implementation**` bullets When   `_context_group(body, \"notes\")` and `_context_group(body, \"current implementation\")` run Then   each call returns only the bullets under its own label, none from the other"
       ],
       "accept": "",
       "input": "",
@@ -3928,7 +3928,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an absent sub-group returns empty instead of a neighboring group's bullets Given  a `## Context` section with an `**Example**` sub-group but no `**Notes**` sub-group When   `_context_group(body, \"notes\")` runs Then   it returns `[]`, not the Example bullets"
       ],
       "accept": "",
       "input": "",
@@ -4004,7 +4004,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: notes come from the legacy heading, not the Context fallback, when present Given  a confirmed requirement carrying `## WHAT — Notes` with a legacy note (no `## Context` section) When   `map` regenerates `_map.json` via `_build_map_data` Then   the node's `notes` field holds the legacy bullet, unchanged from before this feature"
       ],
       "accept": "",
       "input": "",
@@ -4042,7 +4042,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: editing only the Context bullets leaves binding_hash unchanged Given  two bodies identical except for the bullets under a `## Context (non-binding)` section When   `binding_hash` runs on each body Then   both hashes are equal — the Context edit produces no drift"
       ],
       "accept": "",
       "input": "",
@@ -4657,7 +4657,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a default lint run reports the finding but writes no file Given  a requirement carrying a clause over the `statement-size` word threshold When   `lint` runs without `--decompose` Then   stdout names the \"statement-size\" finding and the requirements directory holds no new file"
       ],
       "accept": "",
       "input": "",
@@ -4695,7 +4695,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: --decompose creates exactly one draft file per reported clause Given  a parent with one clause over the `statement-size` threshold When   `lint --decompose` runs Then   exactly one new file appears in the requirements directory"
       ],
       "accept": "",
       "input": "",
@@ -4733,7 +4733,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no invocation site passes --decompose Given  `.githooks/pre-commit` and `.github/workflows/ci.yml` When   their `lint` invocation lines are read Then   neither contains the `--decompose` flag"
       ],
       "accept": "",
       "input": "",
@@ -4771,7 +4771,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the created draft carries status: draft and depends_on the parent Given  `lint --decompose` creates a draft from `REQ-AUTH-012` When   the created file's frontmatter is read Then   it contains `status: draft` and `depends_on: [REQ-AUTH-012]`"
       ],
       "accept": "",
       "input": "",
@@ -4809,7 +4809,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the offending clause's own text appears verbatim in the created draft Given  a parent clause of 155 repeated words flagged by `statement-size` When   `lint --decompose` creates the draft Then   the draft's Contract section contains that exact clause text"
       ],
       "accept": "",
       "input": "",
@@ -4847,7 +4847,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the created id reuses the parent's area/name with the next free number Given  parent `REQ-AUTH-012` in a corpus whose highest existing number is 049 When   `lint --decompose` runs Then   the created file is named `REQ-AUTH-050.md`"
       ],
       "accept": "",
       "input": "",
@@ -4885,7 +4885,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the parent file is byte-identical after a decompose run Given  the parent file's bytes captured before `lint --decompose` runs When   the run completes Then   the parent file's bytes are unchanged from the captured snapshot"
       ],
       "accept": "",
       "input": "",
@@ -4923,7 +4923,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: stdout discloses the split was by word count, not obligation Given  `lint --decompose` running on a flagged clause When   the run completes Then   stdout includes \"word count, not by obligation\""
       ],
       "accept": "",
       "input": "",
@@ -4961,7 +4961,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the created draft's own text discloses the word-count-only split Given  a draft created by `lint --decompose` When   its file text is read Then   it contains \"WORD COUNT, never by obligation\""
       ],
       "accept": "",
       "input": "",
@@ -5037,7 +5037,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a second decompose run skips the already-decomposed clause and reports it Given  a clause already decomposed by a prior `lint --decompose` run When   `lint --decompose` runs again Then   stdout reports \"skipped\" and no second file is created for that clause"
       ],
       "accept": "",
       "input": "",
@@ -5211,7 +5211,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a large untagged docs/ HTML file is flagged Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag When   `untagged_doc_bundles` scans the repo Then   it returns `[\"docs/arch.html\"]`"
       ],
       "accept": "",
       "input": "",
@@ -5249,7 +5249,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a large untagged HTML file outside docs/ is never flagged Given  a large, untagged `top.html` at the repo root, outside `docs/` When   `untagged_doc_bundles` scans the repo Then   `top.html` is absent from the result"
       ],
       "accept": "",
       "input": "",
@@ -5287,7 +5287,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: engine outputs are excluded even when large and untagged Given  large, untagged `docs/map.html` and `docs/_x.html` When   `untagged_doc_bundles` scans the repo Then   neither file appears in the result"
       ],
       "accept": "",
       "input": "",
@@ -5363,7 +5363,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a .reqmapignore pattern suppresses the finding Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html` When   `untagged_doc_bundles` scans the repo Then   `docs/poster.html` is absent from the result"
       ],
       "accept": "",
       "input": "",
@@ -5401,7 +5401,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a large untagged HTML file under docs/node_modules/ is never walked Given  a large, untagged `docs/node_modules/pkg/index.html` When   `untagged_doc_bundles` scans the repo Then   the file is absent from the result, because `node_modules` is pruned before it is reached"
       ],
       "accept": "",
       "input": "",
@@ -5439,7 +5439,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file that raises OSError on stat is skipped, not fatal Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it When   `untagged_doc_bundles` scans the repo Then   the scan completes without raising and `docs/broken.html` is absent from the result"
       ],
       "accept": "",
       "input": "",
@@ -5620,7 +5620,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: binding_hash returns a fixed-length hex digest Given  a requirement body with a `## Description` and `## Cases` section When   `binding_hash` runs on that body Then   it returns a 12-character lowercase hex string"
       ],
       "accept": "",
       "input": "",
@@ -5658,7 +5658,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the legacy Output heading is still treated as normative Given  a requirement body using the legacy `## Output` heading instead of `## Contract` When   the clause under `## Output` is edited Then   `binding_hash` changes, proving the legacy heading feeds the hash"
       ],
       "accept": "",
       "input": "",
@@ -5696,7 +5696,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: editing Notes and the member list leaves the hash unchanged Given  a requirement body with `## Notes & known limitations` and `## Members in code` sections When   only the text under those sections is edited Then   `binding_hash` returns the same value before and after the edit"
       ],
       "accept": "",
       "input": "",
@@ -5734,7 +5734,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: binding_hash is deterministic across repeated calls Given  the same requirement body When   `binding_hash` runs on it twice, independently Then   both calls return the identical 12-character hash"
       ],
       "accept": "",
       "input": "",
@@ -5772,7 +5772,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: save_lock then load_lock round-trips through _reqlock.json Given  the hash mapping `{\"A-B-001\": \"abc123def456\", \"C-D-002\": \"0123456789ab\"}` When   `save_lock` writes it to a directory and `load_lock` reads that same directory Then   `load_lock` returns the identical mapping, read from `_reqlock.json`"
       ],
       "accept": "",
       "input": "",
@@ -5810,7 +5810,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a missing or corrupt lock file loads as an empty dict Given  a directory with no `_reqlock.json`, and separately one holding non-UTF-8 bytes as `_reqlock.json` When   `load_lock` runs on each directory Then   both calls return `{}` and neither raises an exception"
       ],
       "accept": "",
       "input": "",
@@ -5848,7 +5848,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: save_lock creates a missing requirements directory Given  a target path whose parent directories (`does/not/exist`) do not exist yet When   `save_lock` writes a mapping to that path Then   the directory tree is created and `_reqlock.json` exists inside it"
       ],
       "accept": "",
       "input": "",
@@ -5886,7 +5886,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: save_lock writes sorted, indented JSON Given  a hash mapping with out-of-order keys (e.g. `{\"Z-9\": \"..\", \"A-1\": \"..\"}`) When   `save_lock` writes it to disk Then   the written `_reqlock.json` lists keys alphabetically and spans multiple indented lines"
       ],
       "accept": "",
       "input": "",
@@ -5990,7 +5990,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: drift warning names a requirement that depends on the drifted one Given  a confirmed drifted requirement and a second requirement with it in `depends_on` When   `gate` runs Then   the drift warning line includes \"review dependent(s):\" followed by the second id"
       ],
       "accept": "",
       "input": "",
@@ -6028,7 +6028,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: two dependents are named in sorted order on the drift line Given  a drifted requirement with two dependents whose ids sort after each other When   `gate` runs Then   the \"review dependent(s):\" list shows both ids in ascending id order"
       ],
       "accept": "",
       "input": "",
@@ -6066,7 +6066,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a dependent-of-a-dependent is not named on the drift line Given  A depends on drifted B, and C depends on A (but not on B) When   `gate` runs Then   the drift warning for B names A but does not name C"
       ],
       "accept": "",
       "input": "",
@@ -6104,7 +6104,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an isolated drifted requirement's warning carries no dependents clause Given  a confirmed drifted requirement that no other requirement lists in `depends_on` When   `gate` runs Then   the drift warning line contains no \"review dependent(s):\" text at all"
       ],
       "accept": "",
       "input": "",
@@ -7947,7 +7947,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the finding names the exact child count Given  three requirements each declaring `satisfies: [REQ-P-001]` When   `lint_requirement` runs with `children=3` Then   the `fan-out` finding's detail reads \"3 requirement(s) satisfy this one\""
       ],
       "accept": "",
       "input": "",
@@ -7985,7 +7985,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: depends_on edges never feed the fan-out count Given  a corpus where every requirement declares `depends_on` on one hub but no `satisfies:` When   `lint` runs Then   the hub gets no `fan-out` finding, because `depends_on` out-degree is never counted"
       ],
       "accept": "",
       "input": "",
@@ -8023,7 +8023,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a leaf with zero children is never a fan-out finding Given  a requirement that nothing declares `satisfies:` on (`children=0`) When   `lint_requirement` runs Then   no `fan-out` finding appears for it"
       ],
       "accept": "",
       "input": "",
@@ -8061,7 +8061,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: crossing the band boundary flips the finding on Given  one parent with 5 children (inside the band) and another with 4 (just below it) When   `lint` runs on each Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one"
       ],
       "accept": "",
       "input": "",
@@ -8099,7 +8099,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the finding text distinguishes too-few from too-many Given  one parent with 3 children and another with 25 When   `lint` runs on each Then   the first finding's detail says \"too few to be a level\" and the second says \"too many — split it\""
       ],
       "accept": "",
       "input": "",
@@ -8175,7 +8175,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: lint_exempt: [fan-out] suppresses the finding Given  a parent with 3 children and `lint_exempt: [fan-out]` in its frontmatter When   `lint_requirement` runs Then   no `fan-out` finding is reported for that requirement"
       ],
       "accept": "",
       "input": "",
@@ -9660,7 +9660,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: init creates a missing requirements directory Given  a repo with no `requirements/` folder When   `cmd_init` runs Then   `requirements/` exists afterward"
       ],
       "accept": "",
       "input": "",
@@ -9698,7 +9698,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an existing .reqmapignore is left byte-for-byte Given  a repo with `.reqmapignore` already containing `my-custom-glob/**` When   `cmd_init` runs Then   `.reqmapignore`'s content is unchanged"
       ],
       "accept": "",
       "input": "",
@@ -9736,7 +9736,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the seeded ignore lists scripts/reqmap.py in a non-self-hosting repo Given  a repo with no `.reqmapignore` and no self-hosting requirements When   `cmd_init` runs Then   the written `.reqmapignore` contains the line `scripts/reqmap.py`"
       ],
       "accept": "",
       "input": "",
@@ -9774,7 +9774,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the seeded ignore prunes both worktree-copy locations Given  a fresh repo with no `.reqmapignore`, after `cmd_init` runs When   a tagged file is then copied into `.worktrees/wt1/` and `.claude/worktrees/wt1/` Then   `scan_members` counts neither copy — only the original file — as a member"
       ],
       "accept": "",
       "input": "",
@@ -9812,7 +9812,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a self-hosting repo's seeded ignore does not ignore the engine Given  `requirements/CORE-X-001.md` exists and `scripts/reqmap.py` carries `# implements: CORE-X-001` When   `cmd_init` runs Then   the written `.reqmapignore` has no live (uncommented) `scripts/reqmap.py` glob, and `scan_members` still counts the engine as a member of `CORE-X-001`"
       ],
       "accept": "",
       "input": "",
@@ -9850,7 +9850,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a tag pointing at no local requirement is not self-hosting Given  `requirements/CORE-Y-002.md` exists and `scripts/reqmap.py` carries `# implements: CORE-GHOST-999` (an id with no matching file) When   `cmd_init` runs Then   the self-hosting exception does not fire: the written `.reqmapignore` still ignores `scripts/reqmap.py`"
       ],
       "accept": "",
       "input": "",
@@ -9888,7 +9888,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the lock and map cover the requirements init just drafted Given  an untagged `app.py` in a repo with no `requirements/` When   `cmd_init` runs Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written"
       ],
       "accept": "",
       "input": "",
@@ -9926,7 +9926,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the summary names next, not the full command list Given  a repo with extractable code When   `cmd_init` runs Then   its output contains \"reqmap.py next\" but names none of \"confirm\", \"dupes\", \"search\" or \"coverage\""
       ],
       "accept": "",
       "input": "",
@@ -9964,7 +9964,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an extraction-free repo gets a distinct empty-result message Given  a repo containing only `README.txt` (no extractable code) When   `cmd_init` runs Then   its output says \"no requirements were extracted\" and points at `reqmap.py new`, never \"0 requirement(s) tracked\""
       ],
       "accept": "",
       "input": "",
@@ -10002,7 +10002,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a second init run exits clean and reprints the summary Given  a repo already initialized by one `cmd_init` run When   `cmd_init` runs again Then   it exits 0 and its output again contains \"reqmap.py next\""
       ],
       "accept": "",
       "input": "",
@@ -10040,7 +10040,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a hand-authored requirement and .reqmapignore survive a re-run Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore` When   `cmd_init` runs (no `--wipe`) Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged"
       ],
       "accept": "",
       "input": "",
@@ -10570,7 +10570,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: one run surfaces both a structural and a readability finding Given  a confirmed requirement with no `## Cases` section and a Contract bullet joined by four \"and\"s When   `lint_requirement` runs on it Then   the findings include both a `missing-section` error and a `stacked-conditions` warning"
       ],
       "accept": "",
       "input": "",
@@ -10608,7 +10608,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a default lint run leaves the requirements directory untouched Given  a requirements directory with findings to report and no `--decompose` flag When   `cmd_lint` runs Then   the directory's file listing is identical before and after the call"
       ],
       "accept": "",
       "input": "",
@@ -10646,7 +10646,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a draft with a bad clause is silently skipped Given  a `draft` requirement whose Contract bullet is a 50-word run-on sentence When   `cmd_lint` runs Then   it exits 0 and its output names no findings for that requirement"
       ],
       "accept": "",
       "input": "",
@@ -10684,7 +10684,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: structural findings are error, prose findings are warn Given  a confirmed requirement with no `## Cases` section and a Contract line opening with a bare \"It\" When   `lint_requirement` runs on it Then   the `missing-section` finding carries severity `error` and the `anonymous-subject` finding carries `warn`"
       ],
       "accept": "",
       "input": "",
@@ -10722,7 +10722,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed requirement with no Acceptance heading gets a missing-section error Given  a `confirmed` requirement body carrying a Contract section but no `## Cases`/`## HOW — Acceptance` heading When   `lint_requirement` runs on it Then   its findings include `(\"error\", \"missing-section\")`"
       ],
       "accept": "",
       "input": "",
@@ -10760,7 +10760,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a heading with no content beneath it gets an empty-section warning Given  a `confirmed` requirement whose Contract and Acceptance headings are both present but carry no bullets When   `lint_requirement` runs on it Then   its findings include an `empty-section` warning and no `missing-section` error"
       ],
       "accept": "",
       "input": "",
@@ -10798,7 +10798,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: only the first matching Contract heading's text is linted Given  a short Contract clause followed by a `## Notes — contract addendum` heading holding a 50-word run-on line When   `_lint_prose` runs against \"contract\" Then   it returns only the short Contract line, never the Notes text"
       ],
       "accept": "",
       "input": "",
@@ -10836,7 +10836,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a stacked-conditions line under Notes never fires Given  a `confirmed` requirement whose `## Notes & known limitations` section holds a line joined by four \"and\"s When   `lint_requirement` runs on it Then   no `stacked-conditions` finding is reported for that line"
       ],
       "accept": "",
       "input": "",
@@ -10874,7 +10874,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a blockquote line with four joins is never linted as prose Given  a Contract section whose only content is `> a and b and c and d.` (a blockquote line) When   `_lint_prose` runs against \"contract\" Then   it returns an empty list — the `>` line is skipped, not read as prose"
       ],
       "accept": "",
       "input": "",
@@ -10912,7 +10912,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bulleted \"It\" clause still triggers anonymous-subject Given  a Contract bullet written as `- It creates the folder.` When   `lint_requirement` runs on it Then   it reports an `anonymous-subject` warning, proving the `^It` check saw the text after the `- ` marker was stripped"
       ],
       "accept": "",
       "input": "",
@@ -10950,7 +10950,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a missing-section error does not fail a non-strict run Given  a confirmed requirement with no `## Cases` section When   `cmd_lint` runs without `--strict` Then   it returns exit code 0 despite the error-severity finding"
       ],
       "accept": "",
       "input": "",
@@ -10988,7 +10988,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a missing section fails a strict run Given  a confirmed requirement with a Contract section but no `## Cases` heading When   `cmd_lint` runs with `--strict` Then   it returns exit code 1"
       ],
       "accept": "",
       "input": "",
@@ -14125,7 +14125,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: new stamps the scaffold with the given id Given  a template containing the placeholder `AREA-NAME-NNN` When   `new CORE-FOO-001` runs Then   `requirements/CORE-FOO-001.md` exists, contains \"CORE-FOO-001\", and no longer contains \"AREA-NAME-NNN\""
       ],
       "accept": "",
       "input": "",
@@ -14163,7 +14163,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: new creates a missing requirements directory Given  a `reqs_dir` path that does not exist yet When   `new CORE-FOO-001` runs Then   the directory is created and `requirements/CORE-FOO-001.md` is written inside it"
       ],
       "accept": "",
       "input": "",
@@ -14201,7 +14201,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: new falls back to REQUIREMENT_TEMPLATE with no on-disk template Given  no `templates/requirement.md` on disk When   `new CORE-FOO-001` runs with `tmpl_path=None` Then   the written file carries the built-in scaffold's sections — \"## Description\", \"## Cases\", and \"CASE-1\""
       ],
       "accept": "",
       "input": "",
@@ -14239,7 +14239,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an on-disk template wins over the built-in scaffold Given  an on-disk template file distinct from `REQUIREMENT_TEMPLATE` When   `new CORE-FOO-001` runs with that template's path Then   the written file is stamped from the on-disk template's content, not the built-in one"
       ],
       "accept": "",
       "input": "",
@@ -14277,7 +14277,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: new refuses to clobber an existing requirement file Given  `requirements/CORE-FOO-001.md` already exists with content \"existing\\n\" When   `new CORE-FOO-001` runs Then   it exits non-zero and the file's content is unchanged"
       ],
       "accept": "",
       "input": "",
@@ -14315,7 +14315,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the template's Description opens with the binding line and no modal verbs Given  `REQUIREMENT_TEMPLATE`, comments stripped When   its Description clauses are extracted with `_lint_prose` Then   the template contains \"Every bullet below is binding.\" and no clause contains \"shall\" or \"must\""
       ],
       "accept": "",
       "input": "",
@@ -14353,7 +14353,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the shipped template body passes its own linter Given  a requirement built from `REQUIREMENT_TEMPLATE`'s body, status `confirmed` When   `lint_requirement` runs on it Then   the findings carry no `anonymous-subject`, `statement-too-long`, or `statement-size` check"
       ],
       "accept": "",
       "input": "",
@@ -14391,7 +14391,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a same-area number collision warns but still creates the file Given  `ARCH-MAP-007.md` already in the registry When   `new ARCH-VIEWER-007` runs Then   `ARCH-VIEWER-007.md` is created, the exit code is 0, and the output contains \"WARN\" naming \"ARCH-MAP-007\""
       ],
       "accept": "",
       "input": "",
@@ -14593,7 +14593,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an untested confirmed requirement lands in the Needs-tests bucket Given  a confirmed requirement with an `implements` member but no `tested-by` member When   `cmd_next` runs Then   its output carries a \"Needs tests\" bucket naming that requirement"
       ],
       "accept": "",
       "input": "",
@@ -14631,7 +14631,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bucket's advice line matches RISK_ADVICE verbatim Given  a confirmed requirement carrying the `untested` signal When   `cmd_next` runs Then   the \"Needs tests\" bucket's `-> ...` line equals `RISK_ADVICE[\"untested\"]` exactly"
       ],
       "accept": "",
       "input": "",
@@ -14669,7 +14669,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the header names all four counts Given  one confirmed-and-tested requirement and one draft requirement When   `cmd_next` runs Then   its first line reads \"2 requirement(s) · 1 confirmed · 1 tested · 1 draft(s)\""
       ],
       "accept": "",
       "input": "",
@@ -14707,7 +14707,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: implements-only members do not count as tested Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member When   `cmd_next` runs Then   the header reads \"1 tested\", not \"2 tested\""
       ],
       "accept": "",
       "input": "",
@@ -14745,7 +14745,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: all four action bucket labels appear for their matching signal Given  one confirmed requirement with no members, one confirmed-untested, one confirmed with an open Verify-intent bullet, one draft When   `cmd_next` runs Then   its output contains \"Orphans\", \"Needs tests\", \"Needs intent review\" and \"Drafts to review\""
       ],
       "accept": "",
       "input": "",
@@ -14783,7 +14783,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: Orphans prints before Needs tests, before Needs intent review, before Drafts Given  one requirement triggering each of the four action signals When   `cmd_next` runs Then   \"Orphans\" appears before \"Needs tests\", which appears before \"Needs intent review\", which appears before \"Drafts to review\""
       ],
       "accept": "",
       "input": "",
@@ -14821,7 +14821,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a high-fan-in requirement's blast-radius signal never prints Given  a confirmed, tested requirement with three dependents (triggers `blast-radius`) When   `cmd_next` runs Then   its output never contains the word \"blast-radius\""
       ],
       "accept": "",
       "input": "",
@@ -14859,7 +14859,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: Untagged files prints after every action bucket Given  a draft requirement (triggers \"Drafts to review\") plus an untagged `orphan.py` in the code root When   `cmd_next` runs with that code root Then   \"Untagged files\" appears after \"Drafts to review\" in the output"
       ],
       "accept": "",
       "input": "",
@@ -14897,7 +14897,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: CLAUDE.md and TODO.md never appear as untagged Given  an untagged `CLAUDE.md`, `TODO.md`, `README.md` and `a.py` in the code root When   `_scan_untagged` runs Then   it lists `a.py` and `README.md` but neither `CLAUDE.md` nor `TODO.md`"
       ],
       "accept": "",
       "input": "",
@@ -14935,7 +14935,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no code_root means no Untagged files section at all Given  a draft requirement, called without a `code_root` argument When   `cmd_next` runs Then   its output never contains \"Untagged files\""
       ],
       "accept": "",
       "input": "",
@@ -14973,7 +14973,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an Orphans note names the map-recorded member and --code Given  a confirmed requirement with no locally scanned member, whose `_map.json` node records `src/foo.py` as a member When   `cmd_next` runs with that `reqs_dir` Then   the Orphans bucket still lists the requirement, plus a note naming `src/foo.py` and suggesting `--code <dir>`"
       ],
       "accept": "",
       "input": "",
@@ -15011,7 +15011,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: equal priority and risk falls back to id order Given  two `must-have`, `risk: 0` drafts, \"ZZZ-B-002\" and \"AAA-A-001\", in the same bucket When   `cmd_next` runs Then   \"AAA-A-001\" is printed before \"ZZZ-B-002\""
       ],
       "accept": "",
       "input": "",
@@ -15049,7 +15049,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a no-priority item sorts after a could-have item Given  a `could-have` draft and a draft with no `priority` field, in the same bucket When   `cmd_next` runs Then   the `could-have` draft is printed before the no-priority draft"
       ],
       "accept": "",
       "input": "",
@@ -15087,7 +15087,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a risk: 2 draft is ordered first and tagged REVIEW Given  a `risk: 0` draft and a `risk: 2` draft in the same bucket When   `cmd_next` runs Then   the `risk: 2` draft prints first and its line carries `[REVIEW]`"
       ],
       "accept": "",
       "input": "",
@@ -15125,7 +15125,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an item's line names its requirement file Given  a confirmed, untested requirement `CORE-FOO-001` When   `cmd_next` runs Then   its \"Needs tests\" line contains \"requirements/CORE-FOO-001.md\""
       ],
       "accept": "",
       "input": "",
@@ -15163,7 +15163,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: only the top 3 of 5 items print without --all Given  5 drafts in one bucket When   `cmd_next` runs with default `top_n=3` Then   exactly 3 of the 5 requirement ids appear in the output"
       ],
       "accept": "",
       "input": "",
@@ -15201,7 +15201,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a truncated bucket prints a \"... N more\" line Given  5 drafts in one bucket, shown with default `top_n=3` When   `cmd_next` runs Then   its output contains \"more — run `reqmap.py next --all`\""
       ],
       "accept": "",
       "input": "",
@@ -15239,7 +15239,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: --all prints every item and drops the \"more\" line Given  5 drafts in one bucket When   `cmd_next` runs with `show_all=True` Then   all 5 requirement ids appear and no \"more — run\" line is printed"
       ],
       "accept": "",
       "input": "",
@@ -15277,7 +15277,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: 5 untagged files show only the top 3 by default Given  one clean confirmed-tested requirement and a code root holding 5 unrelated untagged scannable files When   `cmd_next` runs with that code root and default `top_n=3` Then   the \"Untagged files\" section lists 3 files and a \"... 2 more\" line"
       ],
       "accept": "",
       "input": "",
@@ -15315,7 +15315,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an empty registry gets its own message, never the all-clear line Given  an empty requirements registry When   `cmd_next` runs Then   its output contains \"No requirements yet\" and \"reqmap.py init\", but never \"Nothing pending\""
       ],
       "accept": "",
       "input": "",
@@ -15353,7 +15353,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a fully clean registry prints the all-clear line Given  one confirmed requirement with both `implements` and `tested-by` members and no open questions When   `cmd_next` runs Then   its output contains \"Nothing pending\""
       ],
       "accept": "",
       "input": "",
@@ -15391,7 +15391,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: two runs on the same input print byte-identical output Given  a fixed corpus with a mix of confirmed, untested and draft requirements When   `cmd_next` runs on it twice Then   both runs' captured output are identical strings, and no file was created"
       ],
       "accept": "",
       "input": "",
@@ -15429,7 +15429,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a corpus full of orphans and drafts still exits 0 Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets When   `cmd_next` runs Then   it returns exit code 0"
       ],
       "accept": "",
       "input": "",
@@ -16006,7 +16006,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: map copies the viewer to docs/map.html only when a Pages signal exists Given  a `docs/` directory at the git root containing a `.nojekyll` file When   `map` runs and writes `_map.html` Then   `docs/map.html` exists with the same bytes; without the signal it is not written"
       ],
       "accept": "",
       "input": "",
@@ -16044,7 +16044,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: check flags an edited docs/map.html as stale, absent copy as fresh Given  a generated `docs/map.html` that is then overwritten with different HTML When   `map --check` runs Then   it exits 1 naming `map.html`; if the file is missing instead, it exits 0"
       ],
       "accept": "",
       "input": "",
@@ -16082,7 +16082,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a swapped repo field alone does not mark docs/map.html stale Given  a fresh `docs/map.html` whose embedded `\"repo\"` value is edited to a different slug When   `map --check` runs Then   it still exits 0 and reports the file fresh"
       ],
       "accept": "",
       "input": "",
@@ -16245,7 +16245,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: load_requirements returns a meta/body/path record per file Given  a `requirements/` directory with one valid `REQ-A-001.md` When   `load_requirements(dir)` runs Then   the returned dict's entry carries `meta`, `body`, and `path` keys"
       ],
       "accept": "",
       "input": "",
@@ -16283,7 +16283,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: parse_frontmatter splits the header fields from the markdown that follows Given  `\"---\\nid: REQ-A-001\\nstatus: draft\\n---\\nbody text\\n\"` When   `parse_frontmatter(text)` runs Then   `meta[\"id\"] == \"REQ-A-001\"` and `body == \"body text\\n\"`, with no `---` markers in either"
       ],
       "accept": "",
       "input": "",
@@ -16321,7 +16321,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file with no id: field is keyed by its filename stem Given  `REQ-A-001.md` whose frontmatter carries no `id:` line When   `load_requirements(dir)` runs Then   the returned dict has the key `\"REQ-A-001\"`, taken from the filename"
       ],
       "accept": "",
       "input": "",
@@ -16359,7 +16359,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a block-style key: / indented - item list parses to a Python list Given  `\"---\\ndepends_on:\\n  - A-B-001\\n  - C-D-002\\n---\\n\"` When   `parse_frontmatter(text)` runs Then   `meta[\"depends_on\"] == [\"A-B-001\", \"C-D-002\"]`"
       ],
       "accept": "",
       "input": "",
@@ -16397,7 +16397,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a trailing # comment does not leak into the parsed value Given  `\"---\\nstatus: draft  # not enforced\\n---\\n\"` When   `parse_frontmatter(text)` runs Then   `meta[\"status\"] == \"draft\"`, with the comment text absent"
       ],
       "accept": "",
       "input": "",
@@ -16435,7 +16435,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: matching quote characters are stripped from a scalar value Given  `'---\\nid: \"REQ-X-001\"\\nstatus: \\'draft\\'\\n---\\n'` When   `parse_frontmatter(text)` runs Then   `meta[\"id\"] == \"REQ-X-001\"` and `meta[\"status\"] == \"draft\"`, quotes removed"
       ],
       "accept": "",
       "input": "",
@@ -16473,7 +16473,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unclosed inline list still parses as a list, not a literal string Given  `\"---\\ntags: [x, y\\n---\\n\"` (no closing `]`) When   `parse_frontmatter(text)` runs Then   `meta[\"tags\"] == [\"x\", \"y\"]`, not the literal string `\"[x, y\"`"
       ],
       "accept": "",
       "input": "",
@@ -16511,7 +16511,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file with no frontmatter block yields empty meta and the full text as body Given  `\"# Title\\njust text\\n\"` (no leading `---`) When   `parse_frontmatter(text)` runs Then   `meta == {}` and `body == \"# Title\\njust text\\n\"`"
       ],
       "accept": "",
       "input": "",
@@ -16549,7 +16549,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an underscore-prefixed file is excluded from load_requirements Given  a `requirements/` directory holding `_draft.md` and `REQ-A-001.md` When   `load_requirements(dir)` runs Then   the result contains only `\"REQ-A-001\"`, not any id from `_draft.md`"
       ],
       "accept": "",
       "input": "",
@@ -16587,7 +16587,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a leading UTF-8 BOM does not break frontmatter parsing Given  a requirement file saved with a leading BOM before `---\\nid: REQ-A-001\\n...` When   `load_requirements(dir)` runs Then   `\"REQ-A-001\"` is a key in the result, with `meta[\"status\"]` read correctly"
       ],
       "accept": "",
       "input": "",
@@ -18155,7 +18155,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: draft writes a requirement for an untagged capability-bucket prose file Given  `prompts/foo.md` with no `# implements:` tag When   `draft` runs Then   a new `draft`-status requirement is written scaffolded from that file"
       ],
       "accept": "",
       "input": "",
@@ -18231,7 +18231,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: classify_prose buckets meta/boilerplate files as ignore Given  the paths `CLAUDE.md`, `LICENSE`, and `_map.html` When   `classify_prose` runs on each Then   each returns `\"ignore\"`"
       ],
       "accept": "",
       "input": "",
@@ -18269,7 +18269,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: classify_prose buckets README/docs/html paths as sync_only Given  the paths `README.md`, `docs/sub/guide.md`, and `x.html` When   `classify_prose` runs on each Then   each returns `\"sync_only\"`"
       ],
       "accept": "",
       "input": "",
@@ -18307,7 +18307,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: classify_prose buckets prompt/spec prose as capability Given  the paths `prompts/senators/aurelius.md`, `specs/foo.md`, and `notes.md` When   `classify_prose` runs on each Then   each returns `\"capability\"`"
       ],
       "accept": "",
       "input": "",
@@ -18345,7 +18345,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an explicit generated-from tag registers a sync_only file as a member Given  a `README.md` carrying a `<!-- generated-from: REQ-DOCS-001 -->` comment When   `scan_members` runs Then   the file appears as a member of `REQ-DOCS-001`, despite being sync_only"
       ],
       "accept": "",
       "input": "",
@@ -18383,7 +18383,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: _prose_facts prefers frontmatter title, then collects the H2 headings Given  a source with frontmatter `title: Senator Aurelius` and two `## ` headings When   `_prose_facts(src)` runs Then   it returns `(\"Senator Aurelius\", [\"Role\", \"Specialty\"])`"
       ],
       "accept": "",
       "input": "",
@@ -18421,7 +18421,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: later H1 headings become the section hint when no H2 exists Given  `\"# IDENTITY and PURPOSE\\n\\ntext\\n\\n# STEPS\\n\\n# OUTPUT INSTRUCTIONS\\n\"` (no `##` anywhere) When   `_prose_facts(src)` runs Then   the headings list is `[\"STEPS\", \"OUTPUT INSTRUCTIONS\"]`, drawn from the later H1s"
       ],
       "accept": "",
       "input": "",
@@ -18459,7 +18459,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: editing the source prose file does not change the requirement's binding_hash Given  a capability-bucket prose file drafted into a requirement, then edited afterward When   `binding_hash` is computed on the requirement body before and after the edit Then   the two hashes are equal — the prose edit produced no drift"
       ],
       "accept": "",
       "input": "",
@@ -18881,7 +18881,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: lag counts commits landed after the requirements dir's last touch Given  a commit that touches `requirements/`, then two commits that touch only code When   `health --json` runs with that repo as the code root Then   `commits_since_req_touch` equals 2"
       ],
       "accept": "",
       "input": "",
@@ -18919,7 +18919,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: lag counts from the most recent touch, not the first Given  `requirements/` touched by commit A, then two code commits, then touched again by commit B, then one more code commit When   `_commits_since_reqs_touch` runs Then   it returns 1 (commits since B), not 3 (commits since A)"
       ],
       "accept": "",
       "input": "",
@@ -18957,7 +18957,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a malformed requirement file does not break the count Given  `requirements/` holds a file with unparseable YAML frontmatter, committed, then two code commits When   `_commits_since_reqs_touch` runs Then   it returns 2 without raising, because it only asks git about the path, never opens the file"
       ],
       "accept": "",
       "input": "",
@@ -18995,7 +18995,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: --json exposes the count as an integer key Given  a repo with two commits landed after the last commit touching `requirements/` When   `health --json` runs Then   the parsed JSON object's `commits_since_req_touch` key equals the integer `2`"
       ],
       "accept": "",
       "input": "",
@@ -19033,7 +19033,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the lag line appears only for a nonzero count Given  one repo where the last commit touched `requirements/` (lag 0) and another with two later code commits (lag 2) When   `health` runs in text mode on each Then   the \"commits since requirements touched\" line is absent for the first and present for the second"
       ],
       "accept": "",
       "input": "",
@@ -19109,7 +19109,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a nonzero lag leaves the health score unchanged Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2) When   `health --json` runs Then   `score` still reads 100, unaffected by the nonzero lag"
       ],
       "accept": "",
       "input": "",
@@ -19147,7 +19147,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unmeasurable lag omits the key entirely Given  a code root that is not a git worktree When   `health --json` runs with that code root Then   the parsed JSON object has no `commits_since_req_touch` key at all"
       ],
       "accept": "",
       "input": "",
@@ -19185,7 +19185,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a git worktree whose reqs_dir has no commits reads as unmeasurable Given  a git repo with commits, where `requirements/` was never committed When   `_commits_since_reqs_touch` runs against that repo Then   it returns `None`, not `0` or an exception"
       ],
       "accept": "",
       "input": "",
@@ -20082,7 +20082,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: _roadmap_signals falls back to the parent directory for TODO.md Given  no `TODO.md` in the code root but one in its parent directory When   `_roadmap_signals(root)` runs Then   it reads the parent's `TODO.md` and returns its milestone data"
       ],
       "accept": "",
       "input": "",
@@ -20120,7 +20120,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no TODO.md means no roadmap keys in health --json Given  a repo with no `TODO.md` anywhere When   `health --json` runs Then   the payload has no `roadmap_behind` and no `roadmap_unversioned_headings` key"
       ],
       "accept": "",
       "input": "",
@@ -20158,7 +20158,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: behind-signal names both the roadmap's and requirements' newest milestone Given  a `TODO.md` newest heading `## v2.8` and a requirement with `milestone: v2.13` When   `health --json` runs Then   `roadmap_behind` equals `{\"todo\": \"v2.8\", \"requirements\": \"v2.13\"}`"
       ],
       "accept": "",
       "input": "",
@@ -20196,7 +20196,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no behind-signal when the roadmap is current or ahead Given  a `TODO.md` newest heading `## v2.16` and a requirement with `milestone: v2.13` When   `health --json` runs Then   the payload carries no `roadmap_behind` key"
       ],
       "accept": "",
       "input": "",
@@ -20234,7 +20234,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: v2.10 sorts above v2.9 under _version_key Given  the strings `\"v2.10\"` and `\"v2.9\"` When   `_version_key` is applied to each and compared Then   `_version_key(\"v2.10\") > _version_key(\"v2.9\")`, unlike a plain string compare"
       ],
       "accept": "",
       "input": "",
@@ -20272,7 +20272,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a non-version heading is listed under roadmap_unversioned_headings Given  a `TODO.md` with `## v2.16` followed later by `## Deferred work` When   `health --json` runs Then   `roadmap_unversioned_headings` equals `[\"Deferred work\"]`"
       ],
       "accept": "",
       "input": "",
@@ -20310,7 +20310,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an item under a non-version heading is filed under the prior milestone Given  `## v2.16` followed by `## Deferred work` followed by one checklist item When   `_parse_todos_from_text` parses the text Then   that item's `milestone` reads `\"v2.16\"`, not `\"Deferred work\"`"
       ],
       "accept": "",
       "input": "",
@@ -20537,7 +20537,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an implements: tag in a scanned file is picked up by the walk Given  `a.py` at the code root carrying `# implements: REQ-T-001` When   `scan_members(root, None)` runs Then   `\"REQ-T-001\"` is a key in the returned dict"
       ],
       "accept": "",
       "input": "",
@@ -20575,7 +20575,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a member entry is a (role, relative_file, line) tuple Given  `a.py` at the code root carrying `# implements: REQ-T-001` on line 1 When   `scan_members(root, None)` runs Then   `members[\"REQ-T-001\"] == [(\"implements\", \"a.py\", 1)]`"
       ],
       "accept": "",
       "input": "",
@@ -20613,7 +20613,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: all four roles are recognized and an unknown role string is not Given  one file carrying the four real role tags plus a `refines:` tag, all for one id When   `scan_members` runs Then   the recorded roles are exactly `implements`, `generated-from`, `validated-against`, `tested-by` — `refines` produces no member"
       ],
       "accept": "",
       "input": "",
@@ -20651,7 +20651,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: TAG_RE only matches an uppercase, hyphenated id shape Given  the strings `\"implements: FOO-BAR-001\"` and `\"implements: foobar\"` When   `TAG_RE.findall` runs on each Then   the first yields `[(\"implements\", \"FOO-BAR-001\")]` and the second yields `[]`"
       ],
       "accept": "",
       "input": "",
@@ -20689,7 +20689,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: reimplements: and x-implements: are not read as real tags Given  the lines `\"# reimplements: FOO-BAR-001\"` and `\"auto-implements: AB-CD-001\"` When   `TAG_RE.findall` runs on each Then   both return `[]`"
       ],
       "accept": "",
       "input": "",
@@ -20727,7 +20727,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a duplicated tag on one line is recorded only once Given  one line carrying `implements: FOO-BAR-001` twice When   `scan_members` runs Then   `len(members[\"FOO-BAR-001\"]) == 1`"
       ],
       "accept": "",
       "input": "",
@@ -20765,7 +20765,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a nested file's member path uses forward slashes, root-relative Given  a tag inside `sub/dir/m.py`, discovered via `scan_members(root, None)` When   the recorded member is read Then   its path field equals `\"sub/dir/m.py\"` (POSIX separators, even on Windows)"
       ],
       "accept": "",
       "input": "",
@@ -20803,7 +20803,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a comma-separated tag registers members under every listed id Given  `<!-- generated-from: REQ-MA-001, REQ-MB-002 -->` in `docs/arch.html` When   `scan_members` runs Then   both `\"REQ-MA-001\"` and `\"REQ-MB-002\"` are keys in the result"
       ],
       "accept": "",
       "input": "",
@@ -20841,7 +20841,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: every id in a multi-id tag carries the identical (role, file, line) triple Given  `<!-- generated-from: REQ-MA-001, REQ-MB-002 -->` in `docs/arch.html` When   `scan_members` runs Then   `members[\"REQ-MA-001\"] == members[\"REQ-MB-002\"] == [(\"generated-from\", \"docs/arch.html\", 1)]`"
       ],
       "accept": "",
       "input": "",
@@ -20917,7 +20917,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a tag inside the real SSOT requirements/ dir is not scanned Given  `ignored.py` inside the SSOT `requirements/` dir, tagged `SSOT-IGN-001` When   `scan_members(root, requirements_dir)` runs Then   `\"SSOT-IGN-001\"` is absent from the result"
       ],
       "accept": "",
       "input": "",
@@ -20955,7 +20955,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a source package named requirements/ that is not the SSOT dir is still scanned Given  a tagged file under `pkg/requirements/impl.py`, distinct from the real SSOT dir When   `scan_members(root, ssot_dir)` runs Then   `\"pkg/requirements/impl.py\"` appears among the recorded member paths"
       ],
       "accept": "",
       "input": "",
@@ -20993,7 +20993,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file listed in .reqmapignore is excluded from the scan Given  `.reqmapignore` naming `scripts/reqmap.py`, which itself carries a tag When   `scan_members` runs Then   the tagged id from that file is absent, while an untouched file's id is present"
       ],
       "accept": "",
       "input": "",
@@ -21031,7 +21031,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unreadable file yields None instead of raising Given  a path under a directory that does not exist When   `_scan_file_tags(path)` runs Then   it returns `None` rather than raising an exception"
       ],
       "accept": "",
       "input": "",
@@ -21069,7 +21069,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: scan_all's triple equals the three scanners run separately Given  a mixed tree with `.py`, `.ts` and `.md` files carrying tags, `verifies:` and `tested-by:` comments When   `scan_all(root, reqs_dir)` runs Then   it equals `(scan_members(...), scan_ac_verifies(...), scan_test_levels(...))`"
       ],
       "accept": "",
       "input": "",
@@ -21392,7 +21392,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: cache sidecar is written only when --cache is passed Given  a tagged tree with no `_scancache.json` sidecar yet When   `scan_members(code_root, reqs_dir)` runs without `cache=True` Then   `requirements/_scancache.json` is not created"
       ],
       "accept": "",
       "input": "",
@@ -21430,7 +21430,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: rewriting a file's size invalidates its cache entry Given  a file already cached under `scan_members(..., cache=True)` When   the file is rewritten with different content and a different size Then   the next cached scan drops the old tag and reports only the new one"
       ],
       "accept": "",
       "input": "",
@@ -21468,7 +21468,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a deleted file's entry is pruned from the rewritten cache Given  a file already cached by a prior `scan_members(..., cache=True)` run When   the file is removed and a cached scan runs again Then   its capability disappears from the results and its key is absent from `_scancache.json`"
       ],
       "accept": "",
       "input": "",
@@ -21506,7 +21506,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: cache=True and cache=False return identical members Given  the same tagged tree When   `scan_members` runs once with `cache=False` and twice with `cache=True` Then   all three calls return the same `{cap_id: [(role, file, line)]}` mapping"
       ],
       "accept": "",
       "input": "",
@@ -21544,7 +21544,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a corrupt cache file falls back to a full re-scan Given  a `_scancache.json` sidecar containing invalid JSON (`\"{ not json\"`) When   `scan_members(..., cache=True)` runs Then   it returns the same members as `scan_members(..., cache=False)`, without raising"
       ],
       "accept": "",
       "input": "",
@@ -22547,7 +22547,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the composite action runs the same three checks Given  `check/action.yml` When   its `runs.steps` are read Then   the composite action invokes `reqmap.py gate`, `map --check` and `lint --strict`, the same commands `ci.yml` runs on itself"
       ],
       "accept": "",
       "input": "",
@@ -22623,7 +22623,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the hook runs checks in the same relative order as CI Given  `.githooks/pre-commit` When   its script body is read top to bottom Then   it runs `check_versions.py`, `check_engine_bump.py --staged`, `gate`, `lint --strict`, `map --check` in that order, matching `ci.yml`'s `gate-and-tests` job"
       ],
       "accept": "",
       "input": "",
@@ -22820,7 +22820,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: one show call surfaces header, contract, deps, and members together Given  a requirement with a Contract bullet, a `depends_on` target, and a tagged member When   `show <ID>` runs once Then   the single output contains the header, \"Contract:\", \"Depends on:\", and \"Members in code\" — no second command needed"
       ],
       "accept": "",
       "input": "",
@@ -22858,7 +22858,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show leaves the requirement file byte-identical on disk Given  a requirement file with known content, loaded and passed to `cmd_show` When   `show <ID>` runs Then   the file's on-disk bytes are unchanged afterward"
       ],
       "accept": "",
       "input": "",
@@ -22896,7 +22896,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the header line carries id, status, and layer Given  a known requirement `REQ-X-001` with status `confirmed` and layer `feature` When   `show REQ-X-001` runs Then   its output contains \"REQ-X-001\", \"confirmed\", and \"feature\", and it returns 0"
       ],
       "accept": "",
       "input": "",
@@ -22934,7 +22934,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a set priority appears on the header line Given  a requirement with `priority: must-have` When   `show` runs Then   \"must-have\" appears in the first line of the output"
       ],
       "accept": "",
       "input": "",
@@ -22972,7 +22972,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no priority leaves no blank header segment Given  a requirement with no `priority` field When   `show` runs Then   the header line contains no empty \"·  ·\" segment"
       ],
       "accept": "",
       "input": "",
@@ -23010,7 +23010,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a multi-line WHY blockquote prints in full, not just its first line Given  a requirement whose intent is three consecutive `>` lines When   `_first_quote` (called by `show`) gathers the intent Then   it returns all three lines joined, not only the first"
       ],
       "accept": "",
       "input": "",
@@ -23048,7 +23048,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a requirement with no Description section says so instead of listing bullets Given  a requirement body with no `## Description`/`## Contract` section When   `show` runs Then   under \"Contract:\" it prints \"(none — no '## Description' section)\""
       ],
       "accept": "",
       "input": "",
@@ -23086,7 +23086,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show lists a reverse dependency under Depended on by Given  `REQ-B-002` with `depends_on: [CORE-A-001]` When   `show CORE-A-001` runs Then   its output contains \"Depended on by\" and \"REQ-B-002\""
       ],
       "accept": "",
       "input": "",
@@ -23124,7 +23124,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a tagged member prints its role and file:line Given  a member `(\"implements\", \"src/foo.py\", 42)` for `REQ-X-001` When   `show REQ-X-001` runs Then   its output contains \"implements\" and \"src/foo.py:42\""
       ],
       "accept": "",
       "input": "",
@@ -23162,7 +23162,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a levelled tested-by member is annotated with its level Given  a `tested-by` member at `t.py:2` whose `levels` mapping marks it `integration` When   `show REQ-X-001` runs with that level data Then   its output contains \"@integration\""
       ],
       "accept": "",
       "input": "",
@@ -23200,7 +23200,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an open verify-intent bullet shows; the None placeholder does not Given  a body with one real verify-intent question and one \"None — doc is unambiguous\" placeholder bullet When   `show` runs Then   its output contains the real question and omits the placeholder bullet"
       ],
       "accept": "",
       "input": "",
@@ -23238,7 +23238,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show prints a risk signal alongside its advice text Given  a requirement whose `_risk_signals(node)` yields at least one signal (e.g. `untested`) When   `show` runs Then   its output contains \"Risk signals:\" followed by that signal name and the matching `RISK_ADVICE` text"
       ],
       "accept": "",
       "input": "",
@@ -23276,7 +23276,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: exit code distinguishes a known id from an unknown one Given  a known id `REQ-X-001` and an unknown id `NOPE-000` When   `show` runs on each Then   the known id returns 0 and the unknown id returns 1 with \"no requirement with id NOPE-000\""
       ],
       "accept": "",
       "input": "",
@@ -24180,7 +24180,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a second attach run with no change is byte-identical Given  a page carrying `<h1>Mine</h1>` and no underlying data change When   `cmd_site(..., attach=page, regions=[\"nav\", \"stats\"])` runs twice Then   the file's content after the second run equals the content after the first, and `<h1>Mine</h1>` is still present"
       ],
       "accept": "",
       "input": "",
@@ -24218,7 +24218,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: site scaffolds a full page when the attach target is absent Given  no file at `docs/architecture.html` When   `cmd_site(..., attach=target, regions=[\"nav\", \"stats\"])` runs Then   the written page contains both region markers and the \"<!-- author me -->\" placeholder hero"
       ],
       "accept": "",
       "input": "",
@@ -24256,7 +24256,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an absent nav target is omitted, not an error Given  a rendering context with no repo URL, no map, and no diagram When   `_render_region(\"nav\", ctx)` runs Then   it returns markup with no `<a` link and raises nothing"
       ],
       "accept": "",
       "input": "",
@@ -24294,7 +24294,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: reqmap.py's own source never references the excalidraw builder Given  the `reqmap.py` source file When   its text is searched for \"excalidraw_builder\" Then   no occurrence is found"
       ],
       "accept": "",
       "input": "",
@@ -24332,7 +24332,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: init scaffolds the site page unless --no-site is passed Given  a `docs/` directory with no `architecture.html` When   `cmd_init(..., no_site=False)` runs, and separately `cmd_init(..., no_site=True)` Then   the first run creates `docs/architecture.html` with a `##REQMAP:NAV##` region; the second run creates no such file"
       ],
       "accept": "",
       "input": "",
@@ -24370,7 +24370,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: map --check fails only after the stats region is tampered with Given  a freshly generated site page with a `stats` region When   `_map_check` runs before and after the `stats` region is overwritten with \"TAMPERED\" Then   it exits 0 before the edit and exits 1 after it"
       ],
       "accept": "",
       "input": "",
@@ -25649,7 +25649,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a missing tested-by target is reported as broken Given  a path with no file on disk When   `_test_link_problem` runs on that path Then   it returns a string containing \"does not exist\""
       ],
       "accept": "",
       "input": "",
@@ -25687,7 +25687,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file with only a helper function fails the check Given  a `.py` file whose only function is `def helper(): return 1` When   `_test_link_problem` runs on that file Then   it returns a string containing \"no test function\""
       ],
       "accept": "",
       "input": "",
@@ -25725,7 +25725,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a test-shaped string inside a docstring still passes Given  a `.py` file whose only content is a docstring containing the text `def test_foo():` When   `_test_link_problem` runs on that file Then   it returns \"\" — the pattern match is textual, with no AST parse behind it"
       ],
       "accept": "",
       "input": "",
@@ -25763,7 +25763,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a file with def test_ passes the check Given  a `.py` file containing `def test_something():` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25801,7 +25801,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a def-style JS test function passes the check Given  a `.ts` file containing `function testAdd() { assert(1 + 1 === 2); }` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25839,7 +25839,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a Jest-style it() call passes the check Given  a `.test.js` file containing `it('works', () => { expect(1).toBe(1); });` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25877,7 +25877,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a Go func TestX passes the check Given  a `.go` file containing `func TestScan(t *testing.T) {}` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25915,7 +25915,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a Rust #[test] attribute passes the check Given  a `.rs` file containing `#[test]\\n  fn checks() {}` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25953,7 +25953,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a run()-under-__main__ Python file passes the check Given  a `.py` file with `def run(): return 0` and `if __name__ == \"__main__\": raise SystemExit(run())` When   `_test_link_problem` runs on that file Then   it returns \"\""
       ],
       "accept": "",
       "input": "",
@@ -25991,7 +25991,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bash test_x() function and a bats @test case both pass Given  a `.sh` file with `test_backup_runs() { [ -f x ]; }` and a `.bats` file with `@test \"restore drill\" { run ./restore }` When   `_test_link_problem` runs on each file Then   both return \"\""
       ],
       "accept": "",
       "input": "",
@@ -26029,7 +26029,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a *.test.sh file with no test-shaped body still passes Given  a file named `backup-check.test.sh` whose only content is `./backup-check --dry-run || exit 1` When   `_test_link_problem` runs on that file Then   it returns \"\", recognized by filename alone"
       ],
       "accept": "",
       "input": "",
@@ -26067,7 +26067,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a broken tested-by link produces exactly one gate warning Given  a confirmed requirement whose `tested-by` names `tests/missing_test.py`, a path that does not exist When   `cmd_check` runs Then   its output carries exactly one warning line naming that broken link"
       ],
       "accept": "",
       "input": "",
@@ -26105,7 +26105,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the warning text names both the requirement id and the file Given  `REQ-A-001` whose `tested-by` names `tests/missing_test.py`, a path that does not exist When   `cmd_check` runs Then   its output contains both \"REQ-A-001\" and \"tests/missing_test.py\" in the same line"
       ],
       "accept": "",
       "input": "",
@@ -26181,7 +26181,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: strict promotion applies to confirmed, not to draft Given  one `draft` and one `confirmed` requirement, each with a `tested-by` link to a non-test file When   `cmd_check` runs with `strict=True` on each Then   the draft's gate still exits 0 while the confirmed one exits 1"
       ],
       "accept": "",
       "input": "",
@@ -26219,7 +26219,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a valid tested-by link produces no test-link warning Given  a confirmed requirement whose `tested-by` file exists and contains `def test_it(): pass` When   `cmd_check` runs Then   its output contains no \"tested-by\" warning line for that requirement"
       ],
       "accept": "",
       "input": "",
@@ -26367,7 +26367,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: satisfies: parses into a frontmatter list like any other id field Given  a requirement file with `satisfies: [SYS-SSOT-001]` in its frontmatter When   `parse_frontmatter` reads the file Then   `meta[\"satisfies\"]` equals `[\"SYS-SSOT-001\"]`"
       ],
       "accept": "",
       "input": "",
@@ -26405,7 +26405,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a dangling satisfies id warns without failing the gate Given  a requirement with `satisfies: [GHOST-X-999]` and no such requirement in the corpus When   `gate` runs Then   it prints \"satisfies GHOST-X-999 but no such requirement\" and exits 0"
       ],
       "accept": "",
       "input": "",
@@ -26443,7 +26443,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unaddressed confirmed need warns at the gate Given  a confirmed `layer: need` requirement no other requirement satisfies When   `gate` runs Then   it warns \"need has no requirement that satisfies it (upstream trace unaddressed)\""
       ],
       "accept": "",
       "input": "",
@@ -26481,7 +26481,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed aggregate with no implements tag passes the gate Given  a confirmed `layer: aggregate` requirement with `depends_on` a code-backed requirement, and no `implements:` tag of its own When   `gate` runs Then   `_link_sync_errors` reports no missing-implements error for the aggregate"
       ],
       "accept": "",
       "input": "",
@@ -26519,7 +26519,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: confirm refuses an aggregate with an empty depends_on Given  a `layer: aggregate` requirement with `depends_on: []` When   `confirm <ID>` runs Then   it refuses with \"depends_on is empty\" and leaves the file's status unchanged"
       ],
       "accept": "",
       "input": "",
@@ -26595,7 +26595,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed need raises no implements/tested-by finding Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag, satisfied by another requirement so the orphan-need warn stays silent When   `gate` runs Then   it raises no missing-implements error and no missing-tested-by warning for that need"
       ],
       "accept": "",
       "input": "",
@@ -26633,7 +26633,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a confirmed need with no validated-against tag warns once the repo opts in Given  a corpus where at least one member carries a `validated-against:` tag, and a confirmed `layer: need` requirement with no `validated-against:` member of its own When   `gate` runs Then   it warns \"confirmed need with no `validated-against:` tag\""
       ],
       "accept": "",
       "input": "",
@@ -26671,7 +26671,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show prints the trace in both directions Given  a need `NEED-X-001` and a feature `A-FOO-001` with `satisfies: [NEED-X-001]` When   `show A-FOO-001` and `show NEED-X-001` each run Then   the feature's output contains \"Satisfies (upstream): NEED-X-001\" and the need's output contains \"Satisfied by: A-FOO-001\""
       ],
       "accept": "",
       "input": "",
@@ -26709,7 +26709,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: map data exposes satisfies, satisfied_by and upstream_edges Given  a need `NEED-X-001` and a feature `A-FOO-001` with `satisfies: [NEED-X-001]` When   `_build_map_data` builds the node graph Then   the feature node's `satisfies` is `[\"NEED-X-001\"]`, the need node's `satisfied_by` is `[\"A-FOO-001\"]`, and `[\"A-FOO-001\", \"NEED-X-001\"]` appears in `upstream_edges`"
       ],
       "accept": "",
       "input": "",
@@ -28103,7 +28103,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: render_html writes _map.html when the vendored template exists Given  the vendored `_map_viewer.html` template beside the engine When   `render_html(data, reqs_dir)` runs Then   it returns the path to a written `_map.html` file"
       ],
       "accept": "",
       "input": "",
@@ -28141,7 +28141,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__ Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` writing `_map.html` When   the file is read back Then   it contains `\"window.__REQMAP_DATA__=\"` and no leftover `<!--REQMAP_DATA-->` marker"
       ],
       "accept": "",
       "input": "",
@@ -28217,7 +28217,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: render_html returns None, not an error, when the template is missing Given  no `_map_viewer.html` template beside the engine When   `render_html(data, reqs_dir)` runs Then   it returns `None` and raises nothing"
       ],
       "accept": "",
       "input": "",
@@ -28255,7 +28255,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: map still writes _map.md and _map.json when the viewer template is absent Given  no vendored `_map_viewer.html` template When   `cmd_map` runs Then   `_map.md` and `_map.json` are written and `map` exits 0"
       ],
       "accept": "",
       "input": "",
@@ -28293,7 +28293,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the marker is consumed and replaced by a script assignment Given  template text `\"<head><!--REQMAP_DATA--></head>\"` and a graph with one node When   `_inject_viewer(template_text, data)` runs Then   the marker is gone and the output contains `\"window.__REQMAP_DATA__=\"`"
       ],
       "accept": "",
       "input": "",
@@ -28331,7 +28331,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the inlined blob's node id matches the graph handed to _inject_viewer Given  a graph `{\"nodes\": [{\"id\": \"A-1\"}], \"edges\": []}` When   `_inject_viewer(template_text, data)` runs Then   the injected `<script>` text contains `\"A-1\"`"
       ],
       "accept": "",
       "input": "",
@@ -28369,7 +28369,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a field carrying all three dangerous sequences is fully escaped and still parses Given  a node title `\"</script><!--x-->\"` When   `_inject_viewer(template_text, data)` runs Then   the output has none of `</`, `<!--`, `-->` raw, and re-parsing the blob as JSON yields the original title unchanged"
       ],
       "accept": "",
       "input": "",
@@ -28407,7 +28407,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a </script> breakout attempt in a field is neutralized Given  a node id `\"a</script><img src=x>\"` When   `_inject_viewer(template_text, data)` runs Then   the output has no raw `\"</script><img\"` and contains `\"<\\\\/script>\"` instead"
       ],
       "accept": "",
       "input": "",
@@ -28445,7 +28445,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a literal <!-- inside a field is escaped to <\\!-- Given  a node contract clause `\"discusses HTML injection via <!-- markers\"` When   `_inject_viewer(template_text, data)` runs Then   the output contains `\"<\\\\!--\"` and no raw `\"<!--\"` inside the injected blob"
       ],
       "accept": "",
       "input": "",
@@ -28483,7 +28483,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a literal --> inside a field is escaped to -\\-> Given  a node title containing the literal sequence `\"-->\"` When   `_inject_viewer(template_text, data)` runs Then   the output contains `\"-\\\\->\"` and no raw `\"-->\"` inside the injected blob"
       ],
       "accept": "",
       "input": "",
@@ -28559,7 +28559,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: U+2028/U+2029 in a title are escaped and still round-trip through JSON Given  a node title containing U+2028 and a contract clause containing U+2029 When   `_inject_viewer(template_text, data)` runs Then   neither raw character appears in the output, the literal 6-character sequences \\u2028 and \\u2029 do, and re-parsing the blob as JSON yields the original title unchanged"
       ],
       "accept": "",
       "input": "",
@@ -28711,7 +28711,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a map node carries both the raw accept block and the folded acc list Given  a confirmed requirement with a labelled `## Cases` block of two criteria When   `_build_map_data` builds the node Then   `node[\"acc\"]` has two folded entries and `node[\"accept\"]` holds the raw block"
       ],
       "accept": "",
       "input": "",
@@ -29158,7 +29158,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: scan_test_levels recognizes all three level suffixes Given  `# tested-by: REQ-A-001 @unit`, `# tested-by: REQ-A-001 @system`, and `# tested-by: REQ-B-002 @integration` in one file When   `scan_test_levels` runs Then   `REQ-A-001` reports levels `{\"unit\", \"system\"}` and `REQ-B-002` reports `{\"integration\"}`"
       ],
       "accept": "",
       "input": "",
@@ -29196,7 +29196,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: one level suffix applies to every id in the list Given  `# tested-by: REQ-A-001, REQ-B-002 @integration` When   `scan_test_levels` runs Then   both `REQ-A-001` and `REQ-B-002` report level `integration`"
       ],
       "accept": "",
       "input": "",
@@ -29234,7 +29234,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a tag with no level, or an unrecognised one, still resolves as a plain member Given  `# tested-by: REQ-D-004 @wrong` (an unknown level suffix) When   `_findall_tags` parses the line Then   it returns `[(\"tested-by\", \"REQ-D-004\")]`, same as an unlevelled tag — and `scan_test_levels` collects no level for `REQ-D-004`"
       ],
       "accept": "",
       "input": "",
@@ -29272,7 +29272,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: scan_test_levels records the file:line that declares each level Given  `# tested-by: REQ-B-002 @integration` as line 3 of `t_one.py` When   `scan_test_levels` runs Then   `got[\"REQ-B-002\"][\"integration\"]` equals `[(\"t_one.py\", 3)]`"
       ],
       "accept": "",
       "input": "",
@@ -29310,7 +29310,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a level suffix does not change the ordinary member tuple shape Given  `# tested-by: REQ-A-001 @unit` When   `_findall_tags` (the member scan) parses it Then   it returns the plain `[(\"tested-by\", \"REQ-A-001\")]` two-tuple, with no level field grafted on"
       ],
       "accept": "",
       "input": "",
@@ -29348,7 +29348,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a backticked levelled-tag example does not count as coverage Given  a line \"write it as `# tested-by: REQ-A-001 @unit` in your test\" plus a real `# tested-by: REQ-B-002 @unit` tag When   `scan_test_levels` runs Then   `REQ-A-001` is absent from the result and `REQ-B-002` reports `{\"unit\"}`"
       ],
       "accept": "",
       "input": "",
@@ -29386,7 +29386,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a levelled tag inside a docstring or string literal is not coverage Given  a `.py` file with `REQ-DOC-001 @unit` inside a docstring, `REQ-STR-001 @unit` inside a string literal, and a real `# tested-by: REQ-REAL-001 @unit` comment When   `scan_test_levels` runs Then   `REQ-DOC-001` and `REQ-STR-001` are absent; `REQ-REAL-001` reports `{\"unit\"}`"
       ],
       "accept": "",
       "input": "",
@@ -29424,7 +29424,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an unvalidated confirmed need is named once the repo has opted in Given  `NEED-A-001` carrying a `validated-against:` tag and `NEED-B-002` carrying none, both confirmed needs When   `gate` runs Then   its output names `NEED-B-002` alongside \"validated-against\""
       ],
       "accept": "",
       "input": "",
@@ -29462,7 +29462,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: no validated-against tag anywhere keeps the rule silent Given  a confirmed need and no `validated-against:` tag anywhere in the tree When   `gate` runs Then   its output contains no mention of \"validated-against\""
       ],
       "accept": "",
       "input": "",
@@ -29500,7 +29500,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bus requirement verified only at @system level warns Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is `@system` When   `gate` runs Then   its output contains \"@system\""
       ],
       "accept": "",
       "input": "",
@@ -29538,7 +29538,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a bus requirement with only an unlevelled tested-by link is never judged Given  a confirmed `layer: bus` requirement whose only `tested-by:` link carries no level suffix When   `gate` runs Then   its output contains no \"verified only at @system\" finding"
       ],
       "accept": "",
       "input": "",
@@ -29576,7 +29576,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a feature requirement verified only at @system stays silent Given  a confirmed `layer: feature` requirement whose only levelled `tested-by:` link is `@system` When   `gate` runs Then   its output contains no \"verified only at @system\" finding"
       ],
       "accept": "",
       "input": "",
@@ -29614,7 +29614,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the unvalidated-need and system-only-bus findings never bump the exit code Given  a confirmed need with no `validated-against:` tag, and separately a confirmed `bus` requirement verified only at `@system`, each in an opted-in repo When   `gate` runs on each Then   both runs warn and both return exit code 0"
       ],
       "accept": "",
       "input": "",
@@ -29652,7 +29652,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show annotates a levelled member with its level Given  a `tested-by` member at `t.py:2` whose level map marks it `integration` When   `show REQ-X-001` runs with that level data Then   its output contains \"@integration\""
       ],
       "accept": "",
       "input": "",
@@ -29690,7 +29690,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: show prints an unlevelled member with no level marker Given  a `tested-by` member at `t.py:2` and no `levels` argument passed to `cmd_show` When   `show REQ-X-001` runs with the old 3-argument call Then   its output contains \"t.py:2\" and no \"@\" marker after the members section"
       ],
       "accept": "",
       "input": "",

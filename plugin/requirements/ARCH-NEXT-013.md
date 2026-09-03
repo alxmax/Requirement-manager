@@ -191,10 +191,10 @@ superseded_by:
 
 > `next` groups every requirement's open risk signals into action buckets.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an untested confirmed requirement lands in the Needs-tests bucket
+  Given  a confirmed requirement with an `implements` member but no `tested-by` member
+  When   `cmd_next` runs
+  Then   its output carries a "Needs tests" bucket naming that requirement
 
 ## Members in code (auto)
 
@@ -220,10 +220,10 @@ superseded_by:
 > `next` reads those signals from `_risk_signals` and their wording from `RISK_ADVICE`,
 > the same two sources that drive the Risk tab. There is never a second signal path.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a bucket's advice line matches RISK_ADVICE verbatim
+  Given  a confirmed requirement carrying the `untested` signal
+  When   `cmd_next` runs
+  Then   the "Needs tests" bucket's `-> ...` line equals `RISK_ADVICE["untested"]` exactly
 
 ## Members in code (auto)
 
@@ -249,10 +249,10 @@ superseded_by:
 > `next` prints a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)`
 > before the buckets.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the header names all four counts
+  Given  one confirmed-and-tested requirement and one draft requirement
+  When   `cmd_next` runs
+  Then   its first line reads "2 requirement(s) · 1 confirmed · 1 tested · 1 draft(s)"
 
 ## Members in code (auto)
 
@@ -277,10 +277,10 @@ superseded_by:
 
 > In that header, `tested` counts the requirements that have a `tested-by` member.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: implements-only members do not count as tested
+  Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member
+  When   `cmd_next` runs
+  Then   the header reads "1 tested", not "2 tested"
 
 ## Members in code (auto)
 
@@ -307,10 +307,10 @@ superseded_by:
 > (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to
 > review).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: all four action bucket labels appear for their matching signal
+  Given  one confirmed requirement with no members, one confirmed-untested, one confirmed with an open Verify-intent bullet, one draft
+  When   `cmd_next` runs
+  Then   its output contains "Orphans", "Needs tests", "Needs intent review" and "Drafts to review"
 
 ## Members in code (auto)
 
@@ -335,10 +335,10 @@ superseded_by:
 
 > `next` prints those four buckets in that order, most urgent first.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: Orphans prints before Needs tests, before Needs intent review, before Drafts
+  Given  one requirement triggering each of the four action signals
+  When   `cmd_next` runs
+  Then   "Orphans" appears before "Needs tests", which appears before "Needs intent review", which appears before "Drafts to review"
 
 ## Members in code (auto)
 
@@ -363,10 +363,10 @@ superseded_by:
 
 > `next` omits `blast-radius`, because that signal is a caution, not a task.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a high-fan-in requirement's blast-radius signal never prints
+  Given  a confirmed, tested requirement with three dependents (triggers `blast-radius`)
+  When   `cmd_next` runs
+  Then   its output never contains the word "blast-radius"
 
 ## Members in code (auto)
 
@@ -392,10 +392,10 @@ superseded_by:
 > `next` surfaces every scannable file that carries no membership tag as an "Untagged
 > files" bucket, ranked lowest of all.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: Untagged files prints after every action bucket
+  Given  a draft requirement (triggers "Drafts to review") plus an untagged `orphan.py` in the code root
+  When   `cmd_next` runs with that code root
+  Then   "Untagged files" appears after "Drafts to review" in the output
 
 ## Members in code (auto)
 
@@ -422,10 +422,10 @@ superseded_by:
 > `CHANGELOG.md`, `LICENSE`, `_`-prefixed files): those are invisible to reqmap by
 > contract.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: CLAUDE.md and TODO.md never appear as untagged
+  Given  an untagged `CLAUDE.md`, `TODO.md`, `README.md` and `a.py` in the code root
+  When   `_scan_untagged` runs
+  Then   it lists `a.py` and `README.md` but neither `CLAUDE.md` nor `TODO.md`
 
 ## Members in code (auto)
 
@@ -450,10 +450,10 @@ superseded_by:
 
 > `next` skips that untagged scan when the caller gives no `code_root`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no code_root means no Untagged files section at all
+  Given  a draft requirement, called without a `code_root` argument
+  When   `cmd_next` runs
+  Then   its output never contains "Untagged files"
 
 ## Members in code (auto)
 
@@ -480,10 +480,10 @@ superseded_by:
 > did not find. Then `next` adds a note naming one such member and suggesting `--code
 > <dir>`. The note is advice; the item stays in the bucket.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an Orphans note names the map-recorded member and --code
+  Given  a confirmed requirement with no locally scanned member, whose `_map.json` node records `src/foo.py` as a member
+  When   `cmd_next` runs with that `reqs_dir`
+  Then   the Orphans bucket still lists the requirement, plus a note naming `src/foo.py` and suggesting `--code <dir>`
 
 ## Members in code (auto)
 
@@ -509,10 +509,10 @@ superseded_by:
 > Within a bucket, `next` orders items by `priority` rank, then by descending extract
 > `risk:` score, then by id.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: equal priority and risk falls back to id order
+  Given  two `must-have`, `risk: 0` drafts, "ZZZ-B-002" and "AAA-A-001", in the same bucket
+  When   `cmd_next` runs
+  Then   "AAA-A-001" is printed before "ZZZ-B-002"
 
 ## Members in code (auto)
 
@@ -538,10 +538,10 @@ superseded_by:
 > Priority rank runs `must-have` < `should-have` < `could-have` < `wont-have`. A
 > requirement with no `priority` ranks last.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a no-priority item sorts after a could-have item
+  Given  a `could-have` draft and a draft with no `priority` field, in the same bucket
+  When   `cmd_next` runs
+  Then   the `could-have` draft is printed before the no-priority draft
 
 ## Members in code (auto)
 
@@ -566,10 +566,10 @@ superseded_by:
 
 > `next` tags an item whose `risk:` is 2 or more with `[REVIEW]`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a risk: 2 draft is ordered first and tagged REVIEW
+  Given  a `risk: 0` draft and a `risk: 2` draft in the same bucket
+  When   `cmd_next` runs
+  Then   the `risk: 2` draft prints first and its line carries `[REVIEW]`
 
 ## Members in code (auto)
 
@@ -594,10 +594,10 @@ superseded_by:
 
 > `next` names the requirement file to open, as `requirements/<ID>.md`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an item's line names its requirement file
+  Given  a confirmed, untested requirement `CORE-FOO-001`
+  When   `cmd_next` runs
+  Then   its "Needs tests" line contains "requirements/CORE-FOO-001.md"
 
 ## Members in code (auto)
 
@@ -622,10 +622,10 @@ superseded_by:
 
 > By default `next` shows at most the top few items of a bucket.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only the top 3 of 5 items print without --all
+  Given  5 drafts in one bucket
+  When   `cmd_next` runs with default `top_n=3`
+  Then   exactly 3 of the 5 requirement ids appear in the output
 
 ## Members in code (auto)
 
@@ -650,10 +650,10 @@ superseded_by:
 
 > `next` prints a `... N more` line when a bucket holds more items than it showed.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a truncated bucket prints a "... N more" line
+  Given  5 drafts in one bucket, shown with default `top_n=3`
+  When   `cmd_next` runs
+  Then   its output contains "more — run `reqmap.py next --all`"
 
 ## Members in code (auto)
 
@@ -678,10 +678,10 @@ superseded_by:
 
 > With `--all`, `next` lists every item.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --all prints every item and drops the "more" line
+  Given  5 drafts in one bucket
+  When   `cmd_next` runs with `show_all=True`
+  Then   all 5 requirement ids appear and no "more — run" line is printed
 
 ## Members in code (auto)
 
@@ -706,10 +706,10 @@ superseded_by:
 
 > The "Untagged files" bucket truncates the same way as the others.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: 5 untagged files show only the top 3 by default
+  Given  one clean confirmed-tested requirement and a code root holding 5 unrelated untagged scannable files
+  When   `cmd_next` runs with that code root and default `top_n=3`
+  Then   the "Untagged files" section lists 3 files and a "... 2 more" line
 
 ## Members in code (auto)
 
@@ -736,10 +736,10 @@ superseded_by:
 > yet" message pointing at `init`/`new`. `next` never prints the all-clear line in that
 > case.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an empty registry gets its own message, never the all-clear line
+  Given  an empty requirements registry
+  When   `cmd_next` runs
+  Then   its output contains "No requirements yet" and "reqmap.py init", but never "Nothing pending"
 
 ## Members in code (auto)
 
@@ -764,10 +764,10 @@ superseded_by:
 
 > With requirements but no open signal, `next` prints the all-clear line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a fully clean registry prints the all-clear line
+  Given  one confirmed requirement with both `implements` and `tested-by` members and no open questions
+  When   `cmd_next` runs
+  Then   its output contains "Nothing pending"
 
 ## Members in code (auto)
 
@@ -792,10 +792,10 @@ superseded_by:
 
 > `next` is deterministic and writes no file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: two runs on the same input print byte-identical output
+  Given  a fixed corpus with a mix of confirmed, untested and draft requirements
+  When   `cmd_next` runs on it twice
+  Then   both runs' captured output are identical strings, and no file was created
 
 ## Members in code (auto)
 
@@ -820,9 +820,9 @@ superseded_by:
 
 > `next` always exits zero. The report is advice, not a gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a corpus full of orphans and drafts still exits 0
+  Given  three unimplemented confirmed requirements and two drafts with open verify-intent bullets
+  When   `cmd_next` runs
+  Then   it returns exit code 0
 
 ## Members in code (auto)

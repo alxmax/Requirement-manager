@@ -106,10 +106,10 @@ superseded_by:
 > The `fan-out` check counts, per requirement, how many requirements declare `satisfies:`
 > it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the finding names the exact child count
+  Given  three requirements each declaring `satisfies: [REQ-P-001]`
+  When   `lint_requirement` runs with `children=3`
+  Then   the `fan-out` finding's detail reads "3 requirement(s) satisfy this one"
 
 ## Members in code (auto)
 
@@ -134,10 +134,10 @@ superseded_by:
 
 > The count reads the `satisfies:` graph only, never `depends_on`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: depends_on edges never feed the fan-out count
+  Given  a corpus where every requirement declares `depends_on` on one hub but no `satisfies:`
+  When   `lint` runs
+  Then   the hub gets no `fan-out` finding, because `depends_on` out-degree is never counted
 
 ## Members in code (auto)
 
@@ -162,10 +162,10 @@ superseded_by:
 
 > A requirement with no children is skipped, because it is not a parent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a leaf with zero children is never a fan-out finding
+  Given  a requirement that nothing declares `satisfies:` on (`children=0`)
+  When   `lint_requirement` runs
+  Then   no `fan-out` finding appears for it
 
 ## Members in code (auto)
 
@@ -190,10 +190,10 @@ superseded_by:
 
 > The `fan-out` check warns when a parent's child count falls outside the band.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: crossing the band boundary flips the finding on
+  Given  one parent with 5 children (inside the band) and another with 4 (just below it)
+  When   `lint` runs on each
+  Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one
 
 ## Members in code (auto)
 
@@ -218,10 +218,10 @@ superseded_by:
 
 > The finding says whether the count is below the band or above it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the finding text distinguishes too-few from too-many
+  Given  one parent with 3 children and another with 25
+  When   `lint` runs on each
+  Then   the first finding's detail says "too few to be a level" and the second says "too many — split it"
 
 ## Members in code (auto)
 
@@ -274,9 +274,9 @@ superseded_by:
 
 > `lint_exempt: [fan-out]` silences the check for one requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: lint_exempt: [fan-out] suppresses the finding
+  Given  a parent with 3 children and `lint_exempt: [fan-out]` in its frontmatter
+  When   `lint_requirement` runs
+  Then   no `fan-out` finding is reported for that requirement
 
 ## Members in code (auto)

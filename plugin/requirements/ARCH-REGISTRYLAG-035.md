@@ -109,10 +109,10 @@ superseded_by:
 > Registry lag is the number of commits on `HEAD` since the most recent commit that
 > touched `reqs_dir`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: lag counts commits landed after the requirements dir's last touch
+  Given  a commit that touches `requirements/`, then two commits that touch only code
+  When   `health --json` runs with that repo as the code root
+  Then   `commits_since_req_touch` equals 2
 
 ## Members in code (auto)
 
@@ -138,10 +138,10 @@ superseded_by:
 > The count comes from git alone: the last commit touching `reqs_dir` (`git log -1 --
 > <reqs_dir>`), then the commit count from there to `HEAD` (`git rev-list --count`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: lag counts from the most recent touch, not the first
+  Given  `requirements/` touched by commit A, then two code commits, then touched again by commit B, then one more code commit
+  When   `_commits_since_reqs_touch` runs
+  Then   it returns 1 (commits since B), not 3 (commits since A)
 
 ## Members in code (auto)
 
@@ -166,10 +166,10 @@ superseded_by:
 
 > The capability never parses requirement contents.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a malformed requirement file does not break the count
+  Given  `requirements/` holds a file with unparseable YAML frontmatter, committed, then two code commits
+  When   `_commits_since_reqs_touch` runs
+  Then   it returns 2 without raising, because it only asks git about the path, never opens the file
 
 ## Members in code (auto)
 
@@ -194,10 +194,10 @@ superseded_by:
 
 > `health --json` includes the count as a `commits_since_req_touch` integer key.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --json exposes the count as an integer key
+  Given  a repo with two commits landed after the last commit touching `requirements/`
+  When   `health --json` runs
+  Then   the parsed JSON object's `commits_since_req_touch` key equals the integer `2`
 
 ## Members in code (auto)
 
@@ -223,10 +223,10 @@ superseded_by:
 > Text output carries a labelled line only when the count is above zero. A lag of zero is
 > the healthy case and needs no line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the lag line appears only for a nonzero count
+  Given  one repo where the last commit touched `requirements/` (lag 0) and another with two later code commits (lag 2)
+  When   `health` runs in text mode on each
+  Then   the "commits since requirements touched" line is absent for the first and present for the second
 
 ## Members in code (auto)
 
@@ -280,10 +280,10 @@ superseded_by:
 > The signal never lowers the health score, because it is a repo-wide temporal fact rather
 > than a per-requirement axis.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a nonzero lag leaves the health score unchanged
+  Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2)
+  When   `health --json` runs
+  Then   `score` still reads 100, unaffected by the nonzero lag
 
 ## Members in code (auto)
 
@@ -309,10 +309,10 @@ superseded_by:
 > The `commits_since_req_touch` key is absent, not zero, whenever the value is
 > unmeasurable.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unmeasurable lag omits the key entirely
+  Given  a code root that is not a git worktree
+  When   `health --json` runs with that code root
+  Then   the parsed JSON object has no `commits_since_req_touch` key at all
 
 ## Members in code (auto)
 
@@ -338,10 +338,10 @@ superseded_by:
 > Unmeasurable means no code root was supplied, `code_root` is not a git worktree, git is
 > unavailable, or `reqs_dir` has no commit in history.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a git worktree whose reqs_dir has no commits reads as unmeasurable
+  Given  a git repo with commits, where `requirements/` was never committed
+  When   `_commits_since_reqs_touch` runs against that repo
+  Then   it returns `None`, not `0` or an exception
 
 ## Members in code (auto)
 

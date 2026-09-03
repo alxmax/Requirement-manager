@@ -207,10 +207,10 @@ superseded_by:
 > `map` generates `_map.html` when the template `_map_viewer.html` is vendored beside the
 > engine.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: render_html writes _map.html when the vendored template exists
+  Given  the vendored `_map_viewer.html` template beside the engine
+  When   `render_html(data, reqs_dir)` runs
+  Then   it returns the path to a written `_map.html` file
 
 ## Members in code (auto)
 
@@ -236,10 +236,10 @@ superseded_by:
 > `_map.html` is a self-contained, single-file copy of the React viewer — the Vite + React
 > app under `app/` — with this repo's graph inlined as `window.__REQMAP_DATA__`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__
+  Given  `render_html({"nodes": [...], "edges": []}, reqs_dir)` writing `_map.html`
+  When   the file is read back
+  Then   it contains `"window.__REQMAP_DATA__="` and no leftover `<!--REQMAP_DATA-->` marker
 
 ## Members in code (auto)
 
@@ -292,10 +292,10 @@ superseded_by:
 
 > Absent the template, `render_html` emits nothing and returns None without failing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: render_html returns None, not an error, when the template is missing
+  Given  no `_map_viewer.html` template beside the engine
+  When   `render_html(data, reqs_dir)` runs
+  Then   it returns `None` and raises nothing
 
 ## Members in code (auto)
 
@@ -321,10 +321,10 @@ superseded_by:
 > `map` then still writes `_map.md` and `_map.json`, so the stdlib engine works with no
 > extra files.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map still writes _map.md and _map.json when the viewer template is absent
+  Given  no vendored `_map_viewer.html` template
+  When   `cmd_map` runs
+  Then   `_map.md` and `_map.json` are written and `map` exits 0
 
 ## Members in code (auto)
 
@@ -350,10 +350,10 @@ superseded_by:
 > `render_html` replaces the template's `<!--REQMAP_DATA-->` marker with a single inline
 > `<script>window.__REQMAP_DATA__=…</script>` assignment.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the marker is consumed and replaced by a script assignment
+  Given  template text `"<head><!--REQMAP_DATA--></head>"` and a graph with one node
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the marker is gone and the output contains `"window.__REQMAP_DATA__="`
 
 ## Members in code (auto)
 
@@ -378,10 +378,10 @@ superseded_by:
 
 > That assignment carries the same `{nodes, edges}` graph [[ARCH-MAP-007]] builds.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the inlined blob's node id matches the graph handed to _inject_viewer
+  Given  a graph `{"nodes": [{"id": "A-1"}], "edges": []}`
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the injected `<script>` text contains `"A-1"`
 
 ## Members in code (auto)
 
@@ -408,10 +408,11 @@ superseded_by:
 > applying three escapes in order. All three are V8 no-ops: a backslash is silently
 > ignored before `/`, `!` and `-`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a field carrying all three dangerous sequences is fully escaped and still parses
+  Given  a node title `"</script><!--x-->"`
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the output has none of `</`, `<!--`, `-->` raw, and re-parsing the blob as JSON
+         yields the original title unchanged
 
 ## Members in code (auto)
 
@@ -436,10 +437,10 @@ superseded_by:
 
 > `</`   → `<\/`   — prevents `</script>` from closing the element early
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a </script> breakout attempt in a field is neutralized
+  Given  a node id `"a</script><img src=x>"`
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the output has no raw `"</script><img"` and contains `"<\\/script>"` instead
 
 ## Members in code (auto)
 
@@ -464,10 +465,10 @@ superseded_by:
 
 > `<!--` → `<\!--` — prevents the HTML5 parser entering "script data escaped" state
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a literal <!-- inside a field is escaped to <\!--
+  Given  a node contract clause `"discusses HTML injection via <!-- markers"`
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the output contains `"<\\!--"` and no raw `"<!--"` inside the injected blob
 
 ## Members in code (auto)
 
@@ -492,10 +493,10 @@ superseded_by:
 
 > `-->`  → `-\->`  — prevents prematurely closing that state if somehow entered
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a literal --> inside a field is escaped to -\->
+  Given  a node title containing the literal sequence `"-->"`
+  When   `_inject_viewer(template_text, data)` runs
+  Then   the output contains `"-\\->"` and no raw `"-->"` inside the injected blob
 
 ## Members in code (auto)
 
@@ -554,10 +555,12 @@ superseded_by:
 > assignment into an unterminated string on any engine older than ES2019. The escaped
 > forms denote the same characters in JSON, so the parsed graph is unchanged.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: U+2028/U+2029 in a title are escaped and still round-trip through JSON
+  Given  a node title containing U+2028 and a contract clause containing U+2029
+  When   `_inject_viewer(template_text, data)` runs
+  Then   neither raw character appears in the output, the literal 6-character
+         sequences \u2028 and \u2029 do, and re-parsing the blob as
+         JSON yields the original title unchanged
 
 ## Members in code (auto)
 
@@ -667,10 +670,10 @@ superseded_by:
 > A node carries the acceptance section twice: `accept`, the labelled Given/When/Then
 > block as the author wrote it, and `acc`, the same criteria folded to one line each.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a map node carries both the raw accept block and the folded acc list
+  Given  a confirmed requirement with a labelled `## Cases` block of two criteria
+  When   `_build_map_data` builds the node
+  Then   `node["acc"]` has two folded entries and `node["accept"]` holds the raw block
 
 ## Members in code (auto)
 

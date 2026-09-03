@@ -106,10 +106,10 @@ superseded_by:
 > (`.md`/`.html`) — prose meaning human-readable spec/prompt text, as opposed to source
 > code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft writes a requirement for an untagged capability-bucket prose file
+  Given  `prompts/foo.md` with no `# implements:` tag
+  When   `draft` runs
+  Then   a new `draft`-status requirement is written scaffolded from that file
 
 ## Members in code (auto)
 
@@ -165,10 +165,10 @@ superseded_by:
 > `LICENSE`/`LICENSE.*`, and any `_`-prefixed generated file (`_map.html`, `_findings.md`,
 > …).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: classify_prose buckets meta/boilerplate files as ignore
+  Given  the paths `CLAUDE.md`, `LICENSE`, and `_map.html`
+  When   `classify_prose` runs on each
+  Then   each returns `"ignore"`
 
 ## Members in code (auto)
 
@@ -195,10 +195,10 @@ superseded_by:
 > every `*.html`. These are never drafted as their own requirement, but become a member
 > (and are drift-checked) when a human tags them `generated-from: <ID>`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: classify_prose buckets README/docs/html paths as sync_only
+  Given  the paths `README.md`, `docs/sub/guide.md`, and `x.html`
+  When   `classify_prose` runs on each
+  Then   each returns `"sync_only"`
 
 ## Members in code (auto)
 
@@ -224,10 +224,10 @@ superseded_by:
 > **capability** — everything else (e.g. `prompts/`, `specs/`, `modes/` prose). These are
 > auto-drafted.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: classify_prose buckets prompt/spec prose as capability
+  Given  the paths `prompts/senators/aurelius.md`, `specs/foo.md`, and `notes.md`
+  When   `classify_prose` runs on each
+  Then   each returns `"capability"`
 
 ## Members in code (auto)
 
@@ -253,10 +253,10 @@ superseded_by:
 > The buckets govern auto-drafting ONLY; an explicit tag on any file is always honored by
 > the scanner regardless of bucket (so a hand-tagged README is still a member).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an explicit generated-from tag registers a sync_only file as a member
+  Given  a `README.md` carrying a `<!-- generated-from: REQ-DOCS-001 -->` comment
+  When   `scan_members` runs
+  Then   the file appears as a member of `REQ-DOCS-001`, despite being sync_only
 
 ## Members in code (auto)
 
@@ -283,10 +283,10 @@ superseded_by:
 > `#` heading, else the HTML `<title>`/`<h1>`) plus its `##` section headings, recorded as
 > an authoring hint.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: _prose_facts prefers frontmatter title, then collects the H2 headings
+  Given  a source with frontmatter `title: Senator Aurelius` and two `## ` headings
+  When   `_prose_facts(src)` runs
+  Then   it returns `("Senator Aurelius", ["Role", "Specialty"])`
 
 ## Members in code (auto)
 
@@ -312,10 +312,10 @@ superseded_by:
 > When a file has no `##` heading at all, its later `#` headings are the sections instead,
 > so flat single-level prose (a prompt library) still yields a hint.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: later H1 headings become the section hint when no H2 exists
+  Given  `"# IDENTITY and PURPOSE\n\ntext\n\n# STEPS\n\n# OUTPUT INSTRUCTIONS\n"` (no `##` anywhere)
+  When   `_prose_facts(src)` runs
+  Then   the headings list is `["STEPS", "OUTPUT INSTRUCTIONS"]`, drawn from the later H1s
 
 ## Members in code (auto)
 
@@ -341,9 +341,9 @@ superseded_by:
 > The source prose is never the contract: the drift hash anchors on the authored Contract
 > + Acceptance, so the prose may later drift freely from the authored requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: editing the source prose file does not change the requirement's binding_hash
+  Given  a capability-bucket prose file drafted into a requirement, then edited afterward
+  When   `binding_hash` is computed on the requirement body before and after the edit
+  Then   the two hashes are equal — the prose edit produced no drift
 
 ## Members in code (auto)

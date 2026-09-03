@@ -157,10 +157,11 @@ superseded_by:
 
 > `lint` writes no file during the default run, whatever `statement-size` reports.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a default lint run reports the finding but writes no file
+  Given  a requirement carrying a clause over the `statement-size` word threshold
+  When   `lint` runs without `--decompose`
+  Then   stdout names the "statement-size" finding and the requirements directory
+         holds no new file
 
 ## Members in code (auto)
 
@@ -185,10 +186,10 @@ superseded_by:
 
 > `lint --decompose` creates one draft requirement for each reported clause.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --decompose creates exactly one draft file per reported clause
+  Given  a parent with one clause over the `statement-size` threshold
+  When   `lint --decompose` runs
+  Then   exactly one new file appears in the requirements directory
 
 ## Members in code (auto)
 
@@ -214,10 +215,10 @@ superseded_by:
 > The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay
 > read-only.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no invocation site passes --decompose
+  Given  `.githooks/pre-commit` and `.github/workflows/ci.yml`
+  When   their `lint` invocation lines are read
+  Then   neither contains the `--decompose` flag
 
 ## Members in code (auto)
 
@@ -242,10 +243,10 @@ superseded_by:
 
 > Each created draft carries `status: draft` and a `depends_on` entry naming its parent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created draft carries status: draft and depends_on the parent
+  Given  `lint --decompose` creates a draft from `REQ-AUTH-012`
+  When   the created file's frontmatter is read
+  Then   it contains `status: draft` and `depends_on: [REQ-AUTH-012]`
 
 ## Members in code (auto)
 
@@ -270,10 +271,10 @@ superseded_by:
 
 > The reported clause text is seeded into the created draft's Contract section.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the offending clause's own text appears verbatim in the created draft
+  Given  a parent clause of 155 repeated words flagged by `statement-size`
+  When   `lint --decompose` creates the draft
+  Then   the draft's Contract section contains that exact clause text
 
 ## Members in code (auto)
 
@@ -298,10 +299,10 @@ superseded_by:
 
 > The created id keeps the parent's area and name, and takes the next free corpus number.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created id reuses the parent's area/name with the next free number
+  Given  parent `REQ-AUTH-012` in a corpus whose highest existing number is 049
+  When   `lint --decompose` runs
+  Then   the created file is named `REQ-AUTH-050.md`
 
 ## Members in code (auto)
 
@@ -326,10 +327,10 @@ superseded_by:
 
 > `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the parent file is byte-identical after a decompose run
+  Given  the parent file's bytes captured before `lint --decompose` runs
+  When   the run completes
+  Then   the parent file's bytes are unchanged from the captured snapshot
 
 ## Members in code (auto)
 
@@ -354,10 +355,10 @@ superseded_by:
 
 > The command chooses the split by word count, never by obligation, and says so on stdout.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: stdout discloses the split was by word count, not obligation
+  Given  `lint --decompose` running on a flagged clause
+  When   the run completes
+  Then   stdout includes "word count, not by obligation"
 
 ## Members in code (auto)
 
@@ -382,10 +383,10 @@ superseded_by:
 
 > Each created draft records that its split point was chosen by word count alone.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created draft's own text discloses the word-count-only split
+  Given  a draft created by `lint --decompose`
+  When   its file text is read
+  Then   it contains "WORD COUNT, never by obligation"
 
 ## Members in code (auto)
 
@@ -440,9 +441,9 @@ superseded_by:
 > `lint --decompose` skips a clause whose target file already exists, and reports the
 > skip.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a second decompose run skips the already-decomposed clause and reports it
+  Given  a clause already decomposed by a prior `lint --decompose` run
+  When   `lint --decompose` runs again
+  Then   stdout reports "skipped" and no second file is created for that clause
 
 ## Members in code (auto)

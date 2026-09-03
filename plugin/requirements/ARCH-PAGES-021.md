@@ -103,10 +103,10 @@ superseded_by:
 > written — the behaviour is opt-in by folder contents, so a repo that does not publish a
 > page is unaffected.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map copies the viewer to docs/map.html only when a Pages signal exists
+  Given  a `docs/` directory at the git root containing a `.nojekyll` file
+  When   `map` runs and writes `_map.html`
+  Then   `docs/map.html` exists with the same bytes; without the signal it is not written
 
 ## Members in code (auto)
 
@@ -135,10 +135,10 @@ superseded_by:
 > `docs/map.html` already exists. A copy that was never generated is not stale (the same
 > absent-file rule the gate applies to `_map.*`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: check flags an edited docs/map.html as stale, absent copy as fresh
+  Given  a generated `docs/map.html` that is then overwritten with different HTML
+  When   `map --check` runs
+  Then   it exits 1 naming `map.html`; if the file is missing instead, it exits 0
 
 ## Members in code (auto)
 
@@ -167,9 +167,9 @@ superseded_by:
 > spuriously flagged; the rest of the injected data carries no wall-clock value, so the
 > comparison is deterministic.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a swapped repo field alone does not mark docs/map.html stale
+  Given  a fresh `docs/map.html` whose embedded `"repo"` value is edited to a different slug
+  When   `map --check` runs
+  Then   it still exits 0 and reports the file fresh
 
 ## Members in code (auto)

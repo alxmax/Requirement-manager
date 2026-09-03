@@ -124,10 +124,10 @@ superseded_by:
 > The gate warns for each file under `docs/` ending in `.html` that carries no
 > `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES` in size.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a large untagged docs/ HTML file is flagged
+  Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag
+  When   `untagged_doc_bundles` scans the repo
+  Then   it returns `["docs/arch.html"]`
 
 ## Members in code (auto)
 
@@ -152,10 +152,10 @@ superseded_by:
 
 > The gate considers only files under `docs/`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a large untagged HTML file outside docs/ is never flagged
+  Given  a large, untagged `top.html` at the repo root, outside `docs/`
+  When   `untagged_doc_bundles` scans the repo
+  Then   `top.html` is absent from the result
 
 ## Members in code (auto)
 
@@ -181,10 +181,10 @@ superseded_by:
 > The check skips engine-generated outputs: a file whose basename starts with `_`, and the
 > published `map.html` viewer.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: engine outputs are excluded even when large and untagged
+  Given  large, untagged `docs/map.html` and `docs/_x.html`
+  When   `untagged_doc_bundles` scans the repo
+  Then   neither file appears in the result
 
 ## Members in code (auto)
 
@@ -238,10 +238,10 @@ superseded_by:
 > The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
 > regenerable artifact out of scope rather than tag it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a .reqmapignore pattern suppresses the finding
+  Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`
+  When   `untagged_doc_bundles` scans the repo
+  Then   `docs/poster.html` is absent from the result
 
 ## Members in code (auto)
 
@@ -267,10 +267,10 @@ superseded_by:
 > The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
 > directory.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a large untagged HTML file under docs/node_modules/ is never walked
+  Given  a large, untagged `docs/node_modules/pkg/index.html`
+  When   `untagged_doc_bundles` scans the repo
+  Then   the file is absent from the result, because `node_modules` is pruned before it is reached
 
 ## Members in code (auto)
 
@@ -295,10 +295,10 @@ superseded_by:
 
 > The check skips a file it cannot read.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file that raises OSError on stat is skipped, not fatal
+  Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it
+  When   `untagged_doc_bundles` scans the repo
+  Then   the scan completes without raising and `docs/broken.html` is absent from the result
 
 ## Members in code (auto)
 

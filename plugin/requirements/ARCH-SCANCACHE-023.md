@@ -94,10 +94,10 @@ superseded_by:
 > The default path and the CI/gate path never read or write the cache unless `--cache` is
 > given.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: cache sidecar is written only when --cache is passed
+  Given  a tagged tree with no `_scancache.json` sidecar yet
+  When   `scan_members(code_root, reqs_dir)` runs without `cache=True`
+  Then   `requirements/_scancache.json` is not created
 
 ## Members in code (auto)
 
@@ -125,10 +125,10 @@ superseded_by:
 > never committed (mtimes differ across machines, so a committed cache would be
 > meaningless/stale).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: rewriting a file's size invalidates its cache entry
+  Given  a file already cached under `scan_members(..., cache=True)`
+  When   the file is rewritten with different content and a different size
+  Then   the next cached scan drops the old tag and reports only the new one
 
 ## Members in code (auto)
 
@@ -155,10 +155,11 @@ superseded_by:
 > tags; a changed or new file is re-parsed and its entry refreshed; a file no longer
 > present is pruned (absent from the rewritten cache).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a deleted file's entry is pruned from the rewritten cache
+  Given  a file already cached by a prior `scan_members(..., cache=True)` run
+  When   the file is removed and a cached scan runs again
+  Then   its capability disappears from the results and its key is absent from
+         `_scancache.json`
 
 ## Members in code (auto)
 
@@ -185,10 +186,10 @@ superseded_by:
 > byte-identical to `scan_members(cache=False)` for any consistent cache — same members,
 > same order.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: cache=True and cache=False return identical members
+  Given  the same tagged tree
+  When   `scan_members` runs once with `cache=False` and twice with `cache=True`
+  Then   all three calls return the same `{cap_id: [(role, file, line)]}` mapping
 
 ## Members in code (auto)
 
@@ -215,9 +216,9 @@ superseded_by:
 > empty cache (full re-scan), and an unwritable cache directory never fails or alters the
 > scan.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a corrupt cache file falls back to a full re-scan
+  Given  a `_scancache.json` sidecar containing invalid JSON (`"{ not json"`)
+  When   `scan_members(..., cache=True)` runs
+  Then   it returns the same members as `scan_members(..., cache=False)`, without raising
 
 ## Members in code (auto)
