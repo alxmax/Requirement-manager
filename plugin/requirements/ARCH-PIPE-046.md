@@ -43,8 +43,9 @@ CASE-3
 **Notes**
 - Exit 0 on purpose: `dupes | head -12` ended early because the reader had seen enough,
   and a non-zero code there would fail a shell pipeline that did exactly what was asked.
-- After the pipe closes, standard output is pointed at the null device so the interpreter
-  does not print a second complaint while shutting down.
+- After the pipe closes, standard output is pointed at the null device and the process ends
+  with `os._exit(0)`: measured on Windows, the interpreter's own shutdown flush still raised
+  `EINVAL` after the redirect and the command exited 120 with an "Exception ignored" line.
 
 **Example**
 `python -X utf8 scripts/reqmap.py dupes | head -12` on a 1,141-requirement corpus prints

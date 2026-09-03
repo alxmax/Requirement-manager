@@ -2435,7 +2435,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         self.assertIn("2 requirement(s)", out)
         self.assertIn("1 confirmed", out)
         self.assertIn("1 tested", out)
-        self.assertIn("1 draft(s)", out)
+        self.assertIn("1 unreviewed", out)
 
     def test_untested_confirmed_lands_in_needs_tests(self):  # verifies: REQ-NEXT-883#CASE-1  # verifies: REQ-NEXT-885#CASE-4
         reqs = {"CORE-FOO-001": self._req("confirmed")}
@@ -3454,7 +3454,7 @@ class Similar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-by: R
         terms = line.split("shared terms:")[1].strip().split(", ")
         self.assertEqual(terms, sorted(terms))
 
-    def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7  # verifies: REQ-SIMILAR-921#CASE-6
+    def test_test_suite_pairs_skipped_when_members_given(self):  # AC-7  # verifies: REQ-SIMILAR-923#CASE-6
         # A requirement and the requirement that IS its test suite share vocabulary by
         # construction; with the member map the pair is a known tested-by link, not a dupe.
         c = "resolve the dispatch model for each senator from prompt frontmatter"
@@ -7945,5 +7945,222 @@ class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.
+
+
+class GateRules(unittest.TestCase):  # tested-by: ARCH-RULES-059  # tested-by: REQ-RULES-947  # tested-by: REQ-RULES-948
+    """The gate rule registry: one bus every consumer of 'what is wrong' reads."""
+
+    def _run(self, files, **kw):
+        with tempfile.TemporaryDirectory() as d:
+            for name, text in files.items():
+                _write(os.path.join(d, name), text)
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_check(reqs, members, d, False, code_root=d, **kw)
+            return code, buf.getvalue()
+
+    def test_codes_are_unique_and_severities_valid(self):  # verifies: REQ-RULES-947#CASE-1  # verifies: ARCH-RULES-059#CASE-1
+        ids = [r.id for r in R.GATE_RULES]
+        self.assertEqual(len(ids), len(set(ids)))
+        self.assertTrue(all(r.severity in ("error", "warn") for r in R.GATE_RULES))
+        self.assertTrue(all(re.fullmatch(r"RM\d{3}", i) for i in ids))
+
+    def test_duplicate_code_is_refused(self):  # verifies: REQ-RULES-947#CASE-2
+        with self.assertRaises(ValueError):
+            R.gate_rule("RM001", "warn")(lambda ctx: iter(()))
+        self.assertEqual(sum(1 for r in R.GATE_RULES if r.id == "RM001"), 1)
+
+    def test_strict_promotes_only_strict_rules(self):  # verifies: REQ-RULES-947#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            body = REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
+                              extra="milestone: nope\n", title="T") + "## Description\n- x\n## Cases\n- y\n"
+            _write(os.path.join(d, "AREA-A-001.md"), body)
+            _write(os.path.join(d, "impl.py"), tag("AREA-A-001") + "\n")
+            R.save_lock(d, {"AREA-A-001": "0000deadbeef"})
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            ctx = R.GateContext(reqs, members, d, d)
+            ctx.full_member_hashes = None
+            errors, warns = R.run_gate_rules(ctx, strict=True)
+        self.assertIn("RM018", [e["rule"] for e in errors])          # DRIFT promoted
+        self.assertIn("RM004", [w["rule"] for w in warns])           # milestone stays a warn
+        self.assertNotIn("RM004", [e["rule"] for e in errors])
+
+    def test_health_and_gate_agree_on_link_sync(self):  # verifies: REQ-RULES-947#CASE-4  # verifies: ARCH-RULES-059#CASE-2
+        reqs = {"AREA-A-001": R.Requirement(meta={"id": "AREA-A-001", "status": "confirmed", "layer": "feature"},
+                                            body="", path="x", block=0)}
+        members = {"AREA-Z-999": [("implements", "z.py", 1)]}
+        errs = R._link_sync_errors(reqs, members)
+        self.assertEqual(len(errs), 2)
+        self.assertTrue(any("dangling tag" in e for e in errs))
+        self.assertTrue(any("no implements: tag" in e for e in errs))
+
+    def test_source_repo_only_rule_is_skipped_in_a_consumer(self):  # verifies: REQ-RULES-947#CASE-5
+        files = {
+            "AREA-A-001.md": REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
+                                        extra="", title="T") + "## Description\n- the real clause\n## Cases\n- y\n",
+            "impl.py": tag("AREA-A-001") + "\n",
+            os.path.join("app", "src", "lib", "data.js"):
+                'const BAKED = [\n  { id:"AREA-A-001", contract:[ "a different clause" ] }\n];\n',
+        }
+        _code, out = self._run(files)
+        self.assertNotIn("RM017", out)
+        self.assertNotIn("data.js out of sync", out)
+
+    def test_code_is_printed_with_severity(self):  # verifies: REQ-RULES-948#CASE-1
+        files = {"AREA-A-001.md": REQ.format(id="AREA-A-001", status="baseline", layer="feature",
+                                             extra="milestone: nope\n", title="T")}
+        _code, out = self._run(files)
+        self.assertIn("WARN  RM004 AREA-A-001: milestone 'nope' is malformed", out)
+
+    def test_json_carries_findings_records(self):  # verifies: REQ-RULES-948#CASE-2
+        files = {"AREA-A-001.md": REQ.format(id="AREA-A-001", status="baseline", layer="feature",
+                                             extra="milestone: nope\n", title="T")}
+        _code, out = self._run(files, as_json=True)
+        data = json.loads(out)
+        f = [x for x in data["findings"] if x["rule"] == "RM004"]
+        self.assertEqual(len(f), 1)
+        self.assertEqual(f[0]["severity"], "warn")
+        self.assertEqual(f[0]["rid"], "AREA-A-001")
+        self.assertTrue(any("malformed" in w for w in data["warnings"]))
+
+    def test_gate_exempt_silences_one_rule_for_one_requirement(self):  # verifies: REQ-RULES-948#CASE-3  # verifies: ARCH-RULES-059#CASE-3
+        files = {
+            "AREA-A-001.md": REQ.format(id="AREA-A-001", status="baseline", layer="feature",
+                                        extra="milestone: nope\ngate_exempt: [RM004]\n", title="A"),
+            "AREA-B-002.md": REQ.format(id="AREA-B-002", status="baseline", layer="feature",
+                                        extra="milestone: nope\n", title="B"),
+        }
+        _code, out = self._run(files)
+        self.assertNotIn("AREA-A-001: milestone", out)
+        self.assertIn("RM004 AREA-B-002: milestone", out)
+
+    def test_exemption_does_not_reach_another_rule(self):  # verifies: REQ-RULES-948#CASE-4
+        files = {
+            "AREA-A-001.md": REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
+                                        extra="milestone: nope\ngate_exempt: [RM004]\n", title="A")
+                             + "## Description\n- x\n## Cases\n- y\n",
+            "impl.py": tag("AREA-A-001") + "\n",
+        }
+        _code, out = self._run(files)
+        self.assertNotIn("RM004", out)
+        self.assertIn("RM007 AREA-A-001: confirmed but no tested-by", out)
+
+
+class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-by: REQ-CONFIG-949  # tested-by: REQ-SCANCACHE-911  # tested-by: REQ-NEXT-886  # tested-by: REQ-SIMILAR-921  # tested-by: REQ-MAPDIAGRAMS-877
+    """One walk with cache, the config file, and the verified-bug fixes of v3.3.0."""
+
+    def _restore(self, *names):
+        saved = {n: getattr(R, n) for n in names}
+        self.addCleanup(lambda: [setattr(R, n, v) for n, v in saved.items()])
+
+    def test_config_applies_a_numeric_threshold(self):  # verifies: REQ-CONFIG-949#CASE-1
+        self._restore("LINT_AC_MAX")
+        err = io.StringIO()
+        with redirect_stderr(err):
+            applied = R.apply_config({"LINT_AC_MAX": 12}, out=err)
+        self.assertEqual(applied, ["LINT_AC_MAX"])
+        self.assertEqual(R.LINT_AC_MAX, 12)
+        self.assertEqual(err.getvalue(), "")
+
+    def test_config_ignores_unknown_and_wrong_type(self):  # verifies: REQ-CONFIG-949#CASE-2
+        self._restore("LINT_AC_MAX")
+        err = io.StringIO()
+        applied = R.apply_config({"NOPE": 1, "LINT_AC_MAX": "seven", "MAP_ENGINE_VERSION": "x"}, out=err)
+        self.assertEqual(applied, [])
+        self.assertEqual(R.LINT_AC_MAX, 7)
+        self.assertIn("unknown key 'NOPE'", err.getvalue())
+        self.assertIn("ignoring LINT_AC_MAX", err.getvalue())
+        self.assertIn("unknown key 'MAP_ENGINE_VERSION'", err.getvalue())
+
+    def test_config_merges_fanout_bands_and_extends_code_exts(self):  # verifies: REQ-CONFIG-949#CASE-3
+        self._restore("LINT_FANOUT_BANDS", "CODE_EXTS")
+        R.apply_config({"LINT_FANOUT_BANDS": {"system": [None, 12]}, "extra_code_exts": ["foo", ".bar"]},
+                       out=io.StringIO())
+        self.assertEqual(R.LINT_FANOUT_BANDS["system"], (None, 12))
+        self.assertEqual(R.LINT_FANOUT_BANDS["architecture"], (None, 30))
+        self.assertEqual(R.CODE_EXTS[-2:], (".foo", ".bar"))
+        self.assertTrue(R._is_code_file("x.foo"))
+
+    def test_config_file_is_read_fail_open(self):  # verifies: REQ-CONFIG-949#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(R.load_config(d), {})
+            _write(os.path.join(d, "_config.json"), "{ not json")
+            self.assertEqual(R.load_config(d), {})
+            _write(os.path.join(d, "_config.json"), "[1, 2]")
+            self.assertEqual(R.load_config(d), {})
+            _write(os.path.join(d, "_config.json"), '{"LINT_AC_MAX": 9}')
+            self.assertEqual(R.load_config(d), {"LINT_AC_MAX": 9})
+
+    def test_scan_all_cache_covers_all_three_maps(self):  # verifies: REQ-SCANCACHE-911#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            os.makedirs(rq)
+            _write(os.path.join(d, "a.py"), tag("A-X-001") + "\n")
+            _write(os.path.join(d, "t.py"),
+                   "# tested-by: A-X-001 @unit\ndef test_a():  # verifies: A-X-001#CASE-1\n    pass\n")
+            plain = R.scan_all(d, rq)
+            c1 = R.scan_all(d, rq, cache=True)
+            c2 = R.scan_all(d, rq, cache=True)
+            self.assertEqual(plain, c1)
+            self.assertEqual(plain, c2)
+            self.assertEqual(set(plain[1]["A-X-001"]), {"CASE-1"})
+            self.assertEqual(set(plain[2]["A-X-001"]), {"unit"})
+            cache = json.load(open(os.path.join(rq, "_scancache.json"), encoding="utf-8"))
+            self.assertIn("ac", cache["t.py"])
+            self.assertIn("lv", cache["t.py"])
+            # an entry written by the older members-only cache is a miss, not a wrong hit
+            cache["t.py"].pop("ac"); cache["t.py"].pop("lv")
+            _write(os.path.join(rq, "_scancache.json"), json.dumps(cache))
+            self.assertEqual(plain, R.scan_all(d, rq, cache=True))
+
+    def test_untagged_skips_repo_boilerplate(self):  # verifies: REQ-NEXT-886#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            os.makedirs(rq)
+            _write(os.path.join(d, "a.py"), "print(1)\n")
+            _write(os.path.join(d, "docs", "adr", "0001-x.md"), "# ADR\n")
+            _write(os.path.join(d, ".github", "ISSUE_TEMPLATE", "bug.yml"), "name: bug\n")
+            _write(os.path.join(d, ".github", "PULL_REQUEST_TEMPLATE.md"), "# PR\n")
+            _write(os.path.join(d, "SECURITY.md"), "# policy\n")
+            _write(os.path.join(d, ".github", "dependabot.yml"), "version: 2\n")
+            self.assertEqual(R._scan_untagged(d, rq), ["a.py"])
+
+    def test_dupes_skips_a_parent_and_its_child(self):  # verifies: REQ-SIMILAR-921#CASE-5
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"ARCH-A-001": {"meta": {"id": "ARCH-A-001"}, "body": body},
+                "REQ-A-002": {"meta": {"id": "REQ-A-002", "satisfies": ["ARCH-A-001"]}, "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        out = buf.getvalue()
+        self.assertIn("skipped 1 pair(s) linked by tested-by or satisfies", out)
+        self.assertNotIn("<->", out)
+
+    def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},
+                "A-C-003": {"meta": {}, "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {}, top=1)
+        out = buf.getvalue()
+        self.assertEqual(out.count("<->"), 1)
+        self.assertIn("... 2 more pair(s)", out)
+
+    def test_req_to_code_omits_code_level_nodes(self):  # verifies: REQ-MAPDIAGRAMS-877#CASE-5
+        data = {"nodes": [
+            {"id": "ARCH-A-001", "level": "architecture", "status": "confirmed", "layer": "feature",
+             "area": "ARCH", "members": [{"role": "implements", "loc": "x.py:1"}]},
+            {"id": "REQ-A-002", "level": "code", "status": "confirmed", "layer": "feature",
+             "area": "REQ", "members": [{"role": "implements", "loc": "x.py:9"}]}],
+            "edges": []}
+        out = R._mermaid_req_to_code(data)
+        self.assertIn("ARCH_A_001", out)
+        self.assertNotIn("REQ_A_002", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

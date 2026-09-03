@@ -20,7 +20,7 @@ Every bullet below is binding.
 - `map` generates `_map.md` under `requirements/` — exactly 5 legended Mermaid blocks, rendered from the graph and never hand-edited. [[REQ-MAPDIAGRAMS-874]]
 - The Specification Hierarchy is drawn from the `satisfies:` edges, never from `depends_on:`, folding each code requirement into its parent's count instead of drawing it. [[REQ-MAPDIAGRAMS-875]]
 - The System Map groups nodes into per-area subgraphs, an area falling back to the node's id prefix when `area:` is absent, and omits edges into a bus or high-fan-in node. [[REQ-MAPDIAGRAMS-876]]
-- The Dependency Map is area-level — one counted node per area, one edge per cross-area dependency — and Req→Code colors nodes by link status and collapses same-file members to a line range. [[REQ-MAPDIAGRAMS-877]]
+- The Dependency Map is area-level: one counted node per area, one edge per cross-area dependency. Req→Code draws the system/architecture tiers only, coloured by link status, with same-file members collapsed to a line range. [[REQ-MAPDIAGRAMS-877]]
 - The Risk diagram shows only requirements with at least one risk signal (confirmed with zero members; `draft`/`baseline`; ≥3 dependents), each paired with a scripted recommendation. [[REQ-MAPDIAGRAMS-878]]
 
 ## Cases
@@ -239,6 +239,9 @@ Every bullet below is binding.
 - Req→Code colors an enforced-but-unlinked requirement red, and a baseline or draft
   not-yet-linked one muted grey.
 - Req→Code collapses multiple members in one file to a min–max line range.
+- Req→Code omits `level: code` requirements: they are counted in the hierarchy diagram and drawn
+  in the viewer, and drawing them here with their function-level members pushed the block past
+  the 50,000 characters GitHub renders.
 
 ## Cases
 CASE-1 — the Dependency Map draws one counted node per area
@@ -261,6 +264,10 @@ CASE-4 — Req→Code collapses same-file members to a line range
   When   Req→Code renders
   Then   that file shows a single `10–40` range, not three separate entries
 
+CASE-5 — code-level nodes stay out of Req→Code
+  Given  an architecture node and a code node, both with members
+  When   the Req→Code block is rendered
+  Then   the architecture node appears and the code node does not
 
 --------------------
 

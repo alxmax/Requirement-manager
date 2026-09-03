@@ -18,7 +18,7 @@ satisfies: [SYS-READ-103]
 > the results — only the speed — so the gate stays exactly as deterministic as before.
 
 Every bullet below is binding.
-- The `--cache` flag (off by default) enables a per-file scan cache for `scan_members`, keyed by `(mtime_ns, size)`, returning results byte-identical to an uncached scan; the default path and the CI/gate path never read or write it unless `--cache` is given. [[REQ-SCANCACHE-911]] details the behaviour.
+- The `--cache` flag (off by default) enables a per-file scan cache for the single walk `scan_all`, which also serves `scan_members`,, keyed by `(mtime_ns, size)`, returning results byte-identical to an uncached scan; the default path and the CI/gate path never read or write it unless `--cache` is given. [[REQ-SCANCACHE-911]] details the behaviour.
 
 ## Cases
 CASE-1
@@ -48,7 +48,7 @@ CASE-4
   acceptable because the cache is opt-in and deletable (the default gate path never uses it), so
   the worst case is a manual `rm requirements/_scancache.json`. Content-hash keying was rejected:
   it would have to read every file, eliminating the speedup the cache exists to provide.
-- Only `scan_members` is cached; `scan_ac_verifies` (the smaller per-AC verify scan) is not, and
+- Since v3.3.0 the one walk `scan_all` is cached, coverage maps included; before that only members were, and
   may be cached later if it ever becomes a measured bottleneck.
 
 **Current implementation**
@@ -78,7 +78,7 @@ satisfies: [ARCH-SCANCACHE-023]
 > one — never on by default, and never read on the gate's own path.
 
 Every bullet below is binding.
-- The `--cache` flag (off by default) enables a per-file scan cache for `scan_members`. The
+- The `--cache` flag (off by default) enables a per-file scan cache for the single walk `scan_all`, which also serves `scan_members`,. The
   default path and the CI/gate path never read or write the cache unless `--cache` is given.
 - The cache is a sidecar `requirements/_scancache.json`, keyed per file by `(mtime_ns, size)`
   → the membership tags found in that file. It is machine-local and gitignored — never committed
@@ -118,3 +118,9 @@ CASE-5 — a corrupt cache file falls back to a full re-scan
   When   `scan_members(..., cache=True)` runs
   Then   it returns the same members as `scan_members(..., cache=False)`, without raising
 
+
+
+CASE-6 — the cache covers all three scan results
+  Given  a tree with an `implements:` tag, a levelled `tested-by:` tag and a `verifies:` tag
+  When   `scan_all(cache=True)` runs twice
+  Then   members, per-case coverage and test levels equal the uncached run both times, and an entry lacking `ac`/`lv` is re-scanned

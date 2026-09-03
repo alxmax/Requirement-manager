@@ -321,6 +321,14 @@ expected and acceptable.
 
 `python scripts/reqmap.py gate` is report-only: it verifies these syncs and exits non-zero on **link-sync errors only**. It **never** touches `_reqlock.json`. To advance the drift baseline after intentionally editing a requirement, use `sync` (with `--accept-drift` when a confirmed/implemented contract changed).
 
+**Rule codes and exemptions.** Every gate line carries the code of the rule that produced it
+(`WARN  RM018 AUTH-LOGIN-001: DRIFT — ...`), `gate --json` lists the same findings as
+`{rule, severity, rid, msg}` records, and a requirement can switch one rule off for itself
+with `gate_exempt: [RM013]` in its frontmatter — the same shape as `lint_exempt:`. Codes are
+permanent. Thresholds (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, the fan-out
+bands, extra scanned extensions) can be set per repo in `requirements/_config.json`; an
+unknown or mistyped key is reported on stderr and ignored.
+
 | Check | Level | Effect on exit code |
 |---|---|---|
 | link sync (dangling tag, enforced req with no member, bad `depends_on`) | **ERROR** | exit 1 |

@@ -221,7 +221,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.18"
+MAP_ENGINE_VERSION = "2026-09-03.20"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -848,6 +848,115 @@ def _check_integration_fresh(plugin_root):  # implements: REQ-CMDREGISTRY-834
     return stale
 
 
+# ---------- core types: the records every command reads ----------
+# The engine passed bare dicts around for its whole life: a requirement was
+# {"meta", "body", "path", "block"}, a gate finding was a formatted string. Every
+# caller then re-derived the same facts its own way — which is how `gate`, `health`,
+# `next` and `confirm` came to disagree about who is exempt (ADR-0015) and which
+# requirement is oversize (v3.1.0). These two classes are dict subclasses on purpose:
+# every existing `r["meta"]` and `f["check"]` keeps working, and the derived facts
+# gain exactly one home.
+class Requirement(dict):  # implements: ARCH-PARSE-001
+    """One requirement block as loaded from disk. Behaves as the dict it always was
+    (`r["meta"]`, `r["body"]`, `r["path"]`, `r["block"]`) and adds the facts every
+    rule used to recompute from `meta` by hand."""
+    __slots__ = ()
+
+    @property
+    def meta(self):
+        return self.get("meta") or {}
+
+    @property
+    def body(self):
+        return self.get("body", "")
+
+    @property
+    def id(self):
+        return self.meta.get("id")
+
+    @property
+    def status(self):
+        return self.meta.get("status")
+
+    @property
+    def layer(self):
+        return self.meta.get("layer")
+
+    @property
+    def level(self):
+        return self.meta.get("level")
+
+    @property
+    def enforced(self):
+        return self.status in ENFORCED
+
+    @property
+    def confirmed(self):
+        return self.status == "confirmed"
+
+    @property
+    def impl_exempt(self):
+        return _impl_exempt(self.meta)
+
+    def list(self, key):
+        """A frontmatter field as a list (`depends_on`, `satisfies`, `lint_exempt`...)."""
+        return _as_list(self.meta.get(key))
+
+    def exempt_from(self, rule_id):
+        """True when `gate_exempt:` names this rule's code (`gate_exempt: [RM016]`)."""
+        return rule_id in set(self.list("gate_exempt"))
+
+    def has(self, labels):
+        return _has_any(self.body, labels)
+
+
+class Finding(dict):  # implements: ARCH-RULES-059  # implements: REQ-RULES-948
+    """One gate finding: `rule` (RMnnn), `severity` (error|warn), `rid` (or None for a
+    corpus-wide finding) and `msg` — the exact text the gate printed before findings
+    had a shape. `str(f)` is that text; the code goes in front of it on the printed
+    line and travels as its own key in `--json`."""
+    __slots__ = ()
+
+    def __init__(self, rule, severity, rid, msg):
+        super().__init__(rule=rule, severity=severity, rid=rid, msg=msg)
+
+    def __str__(self):
+        return self["msg"]
+
+
+class Rule(object):  # implements: ARCH-RULES-059
+    """A gate rule: a stable code, a default severity, whether `--strict` promotes it
+    to an error, and the function that yields `(rid, msg)` pairs over a GateContext.
+    `only_source_repo` marks a rule about this repository's own dogfooding (the
+    viewer's baked fixture) — it never runs inside a consumer repo."""
+    __slots__ = ("id", "severity", "strict", "fn", "only_source_repo")
+
+    def __init__(self, id, severity, strict, fn, only_source_repo=False):
+        self.id, self.severity, self.strict, self.fn = id, severity, strict, fn
+        self.only_source_repo = only_source_repo
+
+
+GATE_RULES = []   # the bus: every consumer of "what is wrong with this corpus" reads it
+
+
+def gate_rule(rule_id, severity, strict=False, only_source_repo=False):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947
+    """Register a gate rule. Codes are permanent identifiers (a consumer writes
+    `gate_exempt: [RM016]`), so a retired rule's number is never reused."""
+    def wrap(fn):
+        if any(r.id == rule_id for r in GATE_RULES):
+            raise ValueError("duplicate gate rule id " + rule_id)
+        GATE_RULES.append(Rule(rule_id, severity, strict, fn, only_source_repo))
+        return fn
+    return wrap
+
+
+def gate_rule_by_id(rule_id):
+    for r in GATE_RULES:
+        if r.id == rule_id:
+            return r
+    return None
+
+
 # ---------- parsing ----------
 def _as_list(v):  # implements: ARCH-PARSE-001
     """Coerce a frontmatter value to a list: lists pass through, a bare scalar
@@ -974,7 +1083,7 @@ def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: AR
                 print("WARNING: duplicate requirement id {!r} in {!r} — keeping {!r}".format(
                     rid, name, os.path.basename(reqs[rid]["path"])), file=sys.stderr)
                 continue
-            reqs[rid] = {"meta": meta, "body": body, "path": path, "block": _i}
+            reqs[rid] = Requirement(meta=meta, body=body, path=path, block=_i)
     return reqs
 
 
@@ -1248,78 +1357,68 @@ def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: ARCH-AC
                 level_out.setdefault(cap, {}).setdefault(level, []).append((rel, i))
 
 
-def scan_all(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-909
+def scan_all(code_root, reqs_dir=None, cache=False):  # implements: ARCH-SCAN-002  # implements: ARCH-SCANCACHE-023  # implements: REQ-SCAN-908  # implements: REQ-SCANCACHE-911
     """(members, ac_cover, level_cover) from ONE walk that reads each file once.
 
     The gate used to call three scanners that each walked the whole tree and opened
     every file: on a 10,000-file tree that measured 3.06s + 2.76s + 2.81s of its 8.49s
-    total — the scan was essentially the entire runtime, done three times. Results are
-    identical to calling `scan_members` / `scan_ac_verifies` / `scan_test_levels`
-    separately; a test asserts that equality rather than trusting the refactor.
-
-    `scan_members`'s opt-in mtime cache is deliberately not reproduced here: it is off
-    on the gate/CI path this exists to speed up, and duplicating its invalidation rules
-    would trade a measured win for a correctness risk.
-    """
-    members, ac_cover, level_cover = {}, {}, {}
-    for fp, rel in _walk_code(code_root, reqs_dir):
-        try:
-            with open(fp, encoding="utf-8", errors="ignore") as f:
-                lines = f.readlines()
-        except OSError:
-            continue          # unreadable file is skipped, never fatal — matches scan_members
-        for role, cap, line in _scan_file_tags(fp, lines) or []:
-            members.setdefault(cap, []).append((role, rel, line))
-        _extract_coverage(fp, rel, lines, ac_cover, level_cover)
-    return members, ac_cover, level_cover
-
-
-
-def scan_members(code_root, reqs_dir=None, cache=False):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908  # implements: REQ-SCAN-909
-    """Walk the code root for `implements:`/`tested-by:` tags → {cap_id: [(role, file, line)]}.
+    total. Results are identical to calling `scan_members` / `scan_ac_verifies` /
+    `scan_test_levels` separately; a test asserts that equality.
 
     Opt-in (cache=True with reqs_dir set): a sidecar keyed by (mtime_ns, size) lets an
-    unchanged file skip the read+parse. The cache is a PURE performance optimization —
-    results are byte-identical to cache=False — and is OFF by default, so the gate/CI
-    path is unaffected. A changed/new file is re-parsed and refreshed; a vanished file is
-    pruned (it is absent from the rewritten cache)."""
-    members = {}  # cap_id -> list[(role, file, line)]
-    ignore = load_ignore(code_root, reqs_dir)
+    unchanged file skip the read+parse for ALL three extractions. The cache is a PURE
+    performance optimization — results are byte-identical to cache=False — and OFF by
+    default, so the gate/CI path is unaffected. A changed/new file is re-parsed, a
+    vanished file is pruned (absent from the rewritten cache), and an entry written by
+    the older members-only cache (no `ac`/`lv` keys) is treated as a miss. `--cache`
+    used to be slower than no cache on `gate`: it kept the members walk cached and
+    then re-walked the tree twice for the coverage maps."""
+    members, ac_cover, level_cover = {}, {}, {}
     use_cache = bool(cache and reqs_dir)
     old = _load_scancache(reqs_dir) if use_cache else {}
     new = {}
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
-        dirs.sort()                  # deterministic descent — raw os.walk order is filesystem/OS-dependent
-        for fn in sorted(files):     # deterministic file order so the generated map is identical across platforms
-            if not _is_code_file(fn):
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        ent, st = None, None
+        if use_cache:
+            try:
+                st = os.stat(fp)
+            except OSError:
                 continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
+            e = old.get(rel)
+            if (e and e.get("mtime_ns") == st.st_mtime_ns and e.get("size") == st.st_size
+                    and "ac" in e and "lv" in e):
+                ent = e
+        if ent is None:
+            try:
+                with open(fp, encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+            except OSError:
+                continue          # unreadable file is skipped, never fatal
+            ac, lv = {}, {}
+            _extract_coverage(fp, rel, lines, ac, lv)
+            ent = {"tags": _scan_file_tags(fp, lines) or [],
+                   "ac": [[cap, a, ln] for cap, d in ac.items() for a, locs in d.items() for (_r, ln) in locs],
+                   "lv": [[cap, l, ln] for cap, d in lv.items() for l, locs in d.items() for (_r, ln) in locs]}
             if use_cache:
-                try:
-                    st = os.stat(fp)
-                except OSError:
-                    continue
-                ent = old.get(rel)
-                if ent and ent.get("mtime_ns") == st.st_mtime_ns and ent.get("size") == st.st_size:
-                    tags = ent.get("tags") or []
-                else:
-                    tags = _scan_file_tags(fp)
-                    if tags is None:
-                        continue
-                new[rel] = {"mtime_ns": st.st_mtime_ns, "size": st.st_size, "tags": tags}
-            else:
-                tags = _scan_file_tags(fp)
-                if tags is None:
-                    continue
-            for role, cap, line in tags:
-                members.setdefault(cap, []).append((role, rel, line))
+                ent["mtime_ns"], ent["size"] = st.st_mtime_ns, st.st_size
+        if use_cache:
+            new[rel] = ent
+        for role, cap, line in ent["tags"]:
+            members.setdefault(cap, []).append((role, rel, line))
+        for cap, a, ln in ent["ac"]:
+            ac_cover.setdefault(cap, {}).setdefault(a, []).append((rel, ln))
+        for cap, l, ln in ent["lv"]:
+            level_cover.setdefault(cap, {}).setdefault(l, []).append((rel, ln))
     if use_cache:
-        _save_scancache(reqs_dir, new)   # `new` omits vanished files → prune
-    return members
+        _save_scancache(reqs_dir, new)   # `new` omits vanished files -> prune
+    return members, ac_cover, level_cover
+
+
+def scan_members(code_root, reqs_dir=None, cache=False):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
+    """Walk the code root for `implements:`/`tested-by:` tags -> {cap_id: [(role, file, line)]}.
+    The members third of `scan_all`, kept for every caller that only ever asked for
+    members; it is not a second walk implementation."""
+    return scan_all(code_root, reqs_dir, cache)[0]
 
 
 _VDS_STRING_RE = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -1530,26 +1629,28 @@ def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: ARCH
     return sorted(out)
 
 
-def _scan_untagged(code_root, reqs_dir=None):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-884
-    """Return sorted relative paths of scannable files that carry no membership tags.
-    Same walk discipline as scan_members: honors .reqmapignore, prunes .git/node_modules."""
-    ignore = load_ignore(code_root, reqs_dir)
+# Files the "untagged" bucket never lists: prose and repo boilerplate that will not
+# carry a tag by design — decision records, issue/PR templates, security policy,
+# dependabot config. Everything else scannable and tagless is a real signal.
+_UNTAGGED_NOISE = ("adr/*", "*/adr/*", "decisions/*", "*/decisions/*",
+                   "*/ISSUE_TEMPLATE/*", "*PULL_REQUEST_TEMPLATE.md",
+                   "SECURITY.md", "*/SECURITY.md", "CODE_OF_CONDUCT.md", "*/CODE_OF_CONDUCT.md",
+                   "*dependabot.yml", "*/FUNDING.yml")
+
+
+def _scan_untagged(code_root, reqs_dir=None):  # implements: ARCH-NEXT-013  # implements: ARCH-COVERAGE-029  # implements: REQ-NEXT-886  # implements: REQ-COVERAGE-836
+    """Scannable files that carry no membership tag at all, as sorted rel paths.
+    Skips the auto-draft "ignore" bucket and `_UNTAGGED_NOISE`."""
     untagged = []
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
-        dirs.sort()
-        for fn in sorted(files):
-            if not _is_code_file(fn):
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
-                continue   # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by contract (ARCH-PROSE-024)
-            tags = _scan_file_tags(fp)
-            if tags is not None and not tags:
-                untagged.append(rel)
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        fn = os.path.basename(rel)
+        if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
+            continue   # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by contract (ARCH-PROSE-024)
+        if any(fnmatch.fnmatch(rel, pat) for pat in _UNTAGGED_NOISE):
+            continue
+        tags = _scan_file_tags(fp)
+        if tags is not None and not tags:
+            untagged.append(rel)
     return sorted(untagged)
 
 
@@ -2282,352 +2383,432 @@ def _test_link_problem(path):  # implements: ARCH-TESTLINK-018  # implements: RE
             "(def test.../func TestX.../#[test]/it()/bash test_x()/py run|main under __main__)")
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,  # implements: REQ-CHECK-828  # implements: REQ-CHECK-829  # implements: REQ-CHECK-830  # implements: REQ-CHECK-831  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-FINDINGS-856  # implements: REQ-VLEVEL-946
-              ac_cover=None, level_cover=None):  # implements: ARCH-CHECK-006
-    errors, warns = [], []
-    strict_warns = []   # warns promoted to errors under --strict
-    warn_if_stale()
-    cap_ids = set(reqs)
+# ---------- gate rules ----------
+class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947
+    """Everything a gate rule may read, computed once per run. `members` is the view
+    `--since` may have narrowed; `full_members` is always the whole scan, because an
+    existence check ("does an implements tag exist AT ALL") must never be answered
+    from a filtered view."""
 
-    # The reverse-drift baseline (_memberlock) must always cover the FULL member
-    # set; --since narrows `members` only to scope the gate's checks, so keep an
-    # unfiltered copy for the memberlock re-baseline below.
-    full_members = members
+    def __init__(self, reqs, members, reqs_dir, code_root, since=None,
+                 ac_cover=None, level_cover=None, full_members=None, update_lock=False):
+        self.reqs = reqs
+        self.members = members
+        self.full_members = members if full_members is None else full_members
+        self.reqs_dir, self.code_root, self.since = reqs_dir, code_root, since
+        self.update_lock = update_lock
+        self.cap_ids = set(reqs)
+        self.ac_cover = scan_ac_verifies(code_root, reqs_dir) if ac_cover is None else ac_cover
+        self.level_cover = scan_test_levels(code_root, reqs_dir) if level_cover is None else level_cover
+        self.any_validation = any(x[0] == "validated-against"
+                                  for hits in self.members.values() for x in hits)
+        self.satisfied_by = {rid: [] for rid in reqs}
+        self.dependents = {}
+        for rid, r in reqs.items():
+            for up in _as_list(r["meta"].get("satisfies")):
+                if up in self.satisfied_by:
+                    self.satisfied_by[up].append(rid)
+            for dep in _as_list(r["meta"].get("depends_on")):
+                self.dependents.setdefault(dep, set()).add(rid)
+        self.lock = load_lock(reqs_dir)
+        self.new_lock = {rid: binding_hash(r["body"]) for rid, r in reqs.items()}
+        self.source_repo = _is_source_repo(code_root)
 
-    # --since: scope checks to requirements whose member files changed since ref.
-    # Fail-open: fall back to full scan with WARN if git is unavailable or ref invalid.
-    if since:
-        changed = _since_changed_files(since, code_root)
-        if changed is None:
-            warns.append(f"--since {since!r}: git diff failed or ref not found; falling back to full scan")
-        else:
-            # Keep only members whose file appears in the changed set
-            filtered = {}
-            for cap, entries in members.items():
-                kept = [
-                    (role, fp, ln) for role, fp, ln in entries
-                    if _path_key(os.path.join(code_root, fp)) in changed
-                ]
-                if kept:
-                    filtered[cap] = kept
-            members = filtered
+    def req(self, rid):
+        r = self.reqs[rid]
+        return r if isinstance(r, Requirement) else Requirement(r)
 
-    # Both coverage maps come from the caller on the CLI path, where `scan_all` already
-    # produced them in the same walk that produced `members` — three passes over the
-    # tree collapsed into one. Computed here when absent, so every other caller
-    # (tests, an embedding tool) keeps working unchanged.
-    if ac_cover is None:
-        ac_cover = scan_ac_verifies(code_root, reqs_dir)  # {cap: {AC-N: [...]}}
-    # V-model opt-in triggers, computed once. Neither this rule nor the level-fit rule can
-    # fire until the repo has deliberately adopted the vocabulary, so installing this engine
-    # adds no warnings to a repo that never annotates a tag (ARCH-VLEVEL-037).
-    any_validation = any(x[0] == "validated-against"
-                         for hits in members.values() for x in hits)
-    if level_cover is None:
-        level_cover = scan_test_levels(code_root, reqs_dir)   # {cap: {level: [...]}}
-    satisfied_by = {rid: [] for rid in reqs}          # reverse upstream edges
-    for _rid, _r in reqs.items():
-        for _up in _as_list(_r["meta"].get("satisfies")):
-            if _up in satisfied_by:
-                satisfied_by[_up].append(_rid)
+    def in_scope(self, rid):
+        """--since scoping: an already-true finding is reported only when the
+        requirement's members are in the diff, or when there is no --since at all."""
+        return rid in self.members or not self.since
 
-    for cap, hits in members.items():
-        if cap not in cap_ids:
-            errors.append(f"dangling tag: code references {cap} but no requirement exists")
+    def roles(self, rid, full=True):
+        src = self.full_members if full else self.members
+        return [x[0] for x in src.get(rid, [])]
 
-    for rid, r in reqs.items():
+
+@gate_rule("RM001", "error")
+def _rule_dangling_tag(ctx):  # implements: REQ-CHECK-828  # implements: REQ-RULES-947
+    for cap in ctx.members:
+        if cap not in ctx.cap_ids:
+            yield None, f"dangling tag: code references {cap} but no requirement exists"
+
+
+@gate_rule("RM002", "error")
+def _rule_frontmatter(ctx):  # implements: ARCH-ATOMICFORM-053  # implements: ARCH-LEVEL-051  # implements: REQ-CHECK-828  # implements: REQ-LEVEL-862
+    for rid, r in ctx.reqs.items():
         m = r["meta"]
         if m.get("status") not in VALID_STATUS:
-            errors.append(f"{rid}: invalid status {m.get('status')!r}")
-        _frm = m.get("form")                              # implements: ARCH-ATOMICFORM-053
+            yield rid, f"{rid}: invalid status {m.get('status')!r}"
+        _frm = m.get("form")
         if _frm and _frm not in VALID_FORM:
-            errors.append(f"{rid}: invalid form {_frm!r} (expected one of {sorted(VALID_FORM)})")
+            yield rid, f"{rid}: invalid form {_frm!r} (expected one of {sorted(VALID_FORM)})"
         if _frm == "atomic" and not _atomic_spans(r["body"]):
-            errors.append(f"{rid}: form: atomic but the body has no `>` statement plus "
-                          f"`Scenario:` block before the first `## ` heading")
-        _lvl = m.get("level")                             # implements: ARCH-LEVEL-051
-        if _lvl and _lvl not in VALID_LEVEL:  # implements: REQ-LEVEL-862
-            errors.append(f"{rid}: invalid level {_lvl!r} (expected one of {sorted(VALID_LEVEL)})")
+            yield rid, (f"{rid}: form: atomic but the body has no `>` statement plus "
+                        f"`Scenario:` block before the first `## ` heading")
+        _lvl = m.get("level")
+        if _lvl and _lvl not in VALID_LEVEL:
+            yield rid, f"{rid}: invalid level {_lvl!r} (expected one of {sorted(VALID_LEVEL)})"
         if m.get("layer") not in VALID_LAYER:
-            errors.append(f"{rid}: invalid layer {m.get('layer')!r}")
-        # milestone (warn): an optional, roadmap-only field. A malformed value silently fails
-        # to sort in the Roadmap (semverCmp treats junk as 0) rather than breaking the build,
-        # so it warns (never errors), only when present and not deprecated.
+            yield rid, f"{rid}: invalid layer {m.get('layer')!r}"
+
+
+@gate_rule("RM003", "error")
+def _rule_depends_on_missing(ctx):  # implements: REQ-CHECK-828
+    for rid, r in ctx.reqs.items():
+        for dep in _as_list(r["meta"].get("depends_on")):
+            if dep not in ctx.cap_ids:
+                yield rid, f"{rid}: depends_on missing {dep}"
+
+
+@gate_rule("RM004", "warn")
+def _rule_milestone_shape(ctx):
+    # an optional, roadmap-only field: a malformed value silently fails to sort in the
+    # Roadmap rather than breaking the build, so it warns, only when present and not deprecated.
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
         ms = m.get("milestone")
         if ms and m.get("status") != "deprecated" and not MILESTONE_RE.match(str(ms).strip()):
-            warns.append(f"{rid}: milestone {ms!r} is malformed (expected v<digits>[.<digits>…], e.g. v1.14)")
-        for dep in _as_list(m.get("depends_on")):
-            if dep not in cap_ids:
-                errors.append(f"{rid}: depends_on missing {dep}")
-        # upstream traceability (warn-only): a `satisfies` id should resolve to a real
-        # requirement, but a dangling one is a WARN not an ERROR — an upstream need may
-        # be authored later or live in an external tracker.  # implements: ARCH-TRACE-020
-        for up in _as_list(m.get("satisfies")):
-            if up not in cap_ids:
-                warns.append(f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)")  # implements: REQ-TRACE-934
-        # a `need`/`aggregate` is covered by edges (satisfies:/depends_on), not code — so
-        # it is exempt from the code-coverage gates. # implements: ARCH-TRACE-020
-        is_need = m.get("layer") == "need"
-        impl_exempt = _impl_exempt(m)
-        # Existence checks (does an implements/tested-by tag exist AT ALL) must read the
-        # FULL, unfiltered scan — --since only decides whether an already-true finding is
-        # IN SCOPE to report this run. Reading the filtered `members` here would call a
-        # requirement's implements tag "missing" just because a DIFFERENT member file
-        # (e.g. its tested-by test) is what changed since ref.
-        impls = [x for x in full_members.get(rid, []) if x[0] == "implements"]
-        # When --since filters members, skip code-coverage checks for reqs with no members in the diff
-        if m.get("status") in ENFORCED and not impls and not impl_exempt:
-            if rid in members or not since:
-                errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-        tests = [x for x in full_members.get(rid, []) if x[0] == "tested-by"]
-        if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not impl_exempt:
-            # Similar logic for test checks: only enforce if the requirement is in scope
-            if rid in members or not since:
-                warns.append(f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked")
-        # V-model validation (warn-only): a `need` is validated, not tested. A unit test
-        # cannot show the RIGHT thing was built, so a need with only code coverage is
-        # false confidence exactly where it costs most. Opt-in via `any_validation`.
-        if is_need and m.get("status") == "confirmed" and any_validation:
-            if not [x for x in members.get(rid, []) if x[0] == "validated-against"]:
-                warns.append(f"{rid}: confirmed need with no `validated-against:` tag — "  # implements: REQ-TRACE-935
-                             "nothing shows the need was actually met")
-        # V-model level fit (warn-only): foundation code covered only end-to-end is slow,
-        # fragile, and localises failures poorly. Unlevelled links are ignored rather than
-        # assumed low-level — assuming would make the rule unfireable in exactly the
-        # half-migrated repos it helps most. Opt-in: no levelled link, no judgement.
-        if m.get("status") == "confirmed" and m.get("layer") == "bus":
-            levels = set(level_cover.get(rid, {}))
-            if levels == {"system"}:
-                warns.append(f"{rid}: bus capability verified only at @system level — "
-                             "add a @unit or @integration `tested-by:` link")
-        # V-model rungs (warn): a requirement that declares its specification level and
-        # carries levelled test links should carry at least one at the paired verification
-        # level — system requirements answered by system tests, architecture by integration,
-        # detailed design by unit. Deliberately narrow: it judges nothing without BOTH
-        # declarations, so it cannot fire on a corpus that has adopted neither, and it does
-        # not infer a level from `layer:` — that inference is what ADR-0007 measured at
-        # 36-of-40 and rejected. # implements: ARCH-VRUNGS-054
-        _want = LEVEL_TEST_PAIR.get(m.get("level"))  # implements: ARCH-VRUNGS-054
-        if m.get("status") == "confirmed" and _want:
-            _have = set(level_cover.get(rid, {}))
-            if _have and _want not in _have:
-                warns.append(f"{rid}: level: {m['level']} is verified at "
-                             f"{'/'.join('@' + x for x in sorted(_have))} but not @{_want} — "
-                             f"add a @{_want} `tested-by:` link, or change the level")
-        # owner accountability (warn): a confirmed requirement with owner: auto was never
-        # claimed by a human reviewer — assign an owner before the corpus grows anonymous.
-        if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
-            warns.append(f"{rid}: confirmed requirement has owner: auto — assign a named owner")
-        # behavior-sync (warn-only): a tested-by link must point at a file that
-        # exists and actually holds tests, else it asserts coverage it lacks.
-        # Checked at EVERY status, not only `confirmed`: a link pointing at a React
-        # component instead of its spec is wrong the day it is written, and hiding
-        # that until promotion means the corpus is audited exactly when it is largest.
-        # A non-confirmed requirement warns but is never strict-promoted, so a
-        # draft-heavy consumer's `--strict` CI cannot start failing on this.
-        if tests:
-            for fp in sorted({t[1] for t in tests}):  # implements: ARCH-TESTLINK-018  # implements: REQ-TESTLINK-930  # implements: REQ-TESTLINK-933
-                problem = _test_link_problem(os.path.join(code_root, fp))
-                if problem:
-                    bucket = strict_warns if m.get("status") == "confirmed" else warns
-                    bucket.append(f"{rid}: tested-by {fp} {problem}")
-        # per-AC coverage (warn-only): a confirmed requirement that LABELS its criteria
-        # (AC-1, AC-2, ...) should have a `# verifies: <id>#AC-N` tag for each. Only
-        # fires once at least one criterion is covered, so adopting per-AC tagging is
-        # opt-in: a requirement with zero verifies tags keeps the coarse tested-by check.
-        # ONE aggregated line, not one per missing criterion: a corpus that tagged 110
-        # criteria correctly saw its warning count fall only 171 -> 98, because every
-        # requirement that entered the regime lit up a warning per criterion still to
-        # do. Partial adoption is the step being asked for; it must not cost more than
-        # tagging nothing. Machine-unverifiable criteria are excluded (_automatable_acs).
-        if m.get("status") == "confirmed":  # implements: ARCH-ACVERIFY-019  # implements: REQ-ACVERIFY-821
-            labels = _automatable_acs(r["body"])
-            covered = ac_cover.get(rid, {})
-            if labels and covered:  # implements: REQ-ACVERIFY-822
-                missing = [ac for ac in labels if ac not in covered]
-                if missing:
-                    warns.append(
-                        f"{rid}: {len(labels) - len(missing)}/{len(labels)} automatable criteria "
-                        f"carry a `# verifies:` tag — missing " + ", ".join(missing))
-        if m.get("status") == "confirmed":
-            if not _has_any(r["body"], CONTRACT_LABELS):
-                warns.append(
-                    f"{rid}: confirmed but missing '## Description' section — "
-                    "add the normative contract or drop status back to in-progress"
-                )
-            if not _has_any(r["body"], ACCEPTANCE_LABELS):
-                warns.append(
-                    f"{rid}: confirmed but missing '## Cases' section — "
-                    "add acceptance criteria or drop status back to in-progress"
-                )
-        # reverse upstream traceability (warn-only): a stakeholder `need` that nothing
-        # satisfies is unaddressed — surface it so a need does not silently lack a
-        # requirement that fulfils it.  # implements: ARCH-TRACE-020
-        if is_need and m.get("status") in ENFORCED and not satisfied_by.get(rid):
-            warns.append(f"{rid}: need has no requirement that satisfies it (upstream trace unaddressed)")  # implements: REQ-TRACE-934
+            yield rid, f"{rid}: milestone {ms!r} is malformed (expected v<digits>[.<digits>…], e.g. v1.14)"
 
-    lock = load_lock(reqs_dir)
-    # load_lock fails open ({}) on an absent OR corrupt/merge-conflicted lock; the
-    # two look identical to the drift loop (every `old` is None -> no drift ever
-    # fires). Surface the corrupt case so a silently-disabled drift signal is visible.
-    lp = lock_path(reqs_dir)
+
+@gate_rule("RM005", "warn")
+def _rule_satisfies_dangling(ctx):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-934
+    # a dangling upstream id is a WARN not an ERROR — the need may be authored later
+    # or live in an external tracker.
+    for rid, r in ctx.reqs.items():
+        for up in _as_list(r["meta"].get("satisfies")):
+            if up not in ctx.cap_ids:
+                yield rid, f"{rid}: satisfies {up} but no such requirement (upstream trace dangling)"
+
+
+@gate_rule("RM006", "error")
+def _rule_no_implements(ctx):  # implements: ARCH-TRACE-020  # implements: REQ-CHECK-828  # implements: REQ-RULES-947
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("status") in ENFORCED and not _impl_exempt(m) \
+                and "implements" not in ctx.roles(rid) and ctx.in_scope(rid):
+            yield rid, f"{rid}: status {m['status']} but no implements: tag found in code"
+
+
+@gate_rule("RM007", "warn")
+def _rule_no_tested_by(ctx):  # implements: REQ-CHECK-829
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("status") == "confirmed" and "tested-by" not in ctx.roles(rid) \
+                and not m.get("test_exempt") and not _impl_exempt(m) and ctx.in_scope(rid):
+            yield rid, f"{rid}: confirmed but no tested-by: tag — acceptance tests not linked"
+
+
+@gate_rule("RM008", "warn")
+def _rule_need_not_validated(ctx):  # implements: ARCH-VLEVEL-037  # implements: REQ-CHECK-831
+    # a need is validated, not tested; opt-in via any `validated-against` tag in the repo.
+    if not ctx.any_validation:
+        return
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("layer") == "need" and m.get("status") == "confirmed" \
+                and "validated-against" not in ctx.roles(rid, full=False):
+            yield rid, (f"{rid}: confirmed need with no `validated-against:` tag — "
+                        "nothing shows the need was actually met")
+
+
+@gate_rule("RM009", "warn")
+def _rule_bus_only_system_level(ctx):  # implements: ARCH-VLEVEL-037  # implements: REQ-CHECK-831
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("status") == "confirmed" and m.get("layer") == "bus" \
+                and set(ctx.level_cover.get(rid, {})) == {"system"}:
+            yield rid, (f"{rid}: bus capability verified only at @system level — "
+                        "add a @unit or @integration `tested-by:` link")
+
+
+@gate_rule("RM010", "warn")
+def _rule_level_rung(ctx):  # implements: ARCH-VRUNGS-054
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        _want = LEVEL_TEST_PAIR.get(m.get("level"))
+        if m.get("status") == "confirmed" and _want:
+            _have = set(ctx.level_cover.get(rid, {}))
+            if _have and _want not in _have:
+                yield rid, (f"{rid}: level: {m['level']} is verified at "
+                            f"{'/'.join('@' + x for x in sorted(_have))} but not @{_want} — "
+                            f"add a @{_want} `tested-by:` link, or change the level")
+
+
+@gate_rule("RM011", "warn")
+def _rule_owner_auto(ctx):
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("status") == "confirmed" and m.get("owner", "auto") in ("auto", "", None):
+            yield rid, f"{rid}: confirmed requirement has owner: auto — assign a named owner"
+
+
+@gate_rule("RM012", "warn", strict=True)
+def _rule_test_link(ctx):  # implements: ARCH-TESTLINK-018  # implements: REQ-TESTLINK-933
+    # checked at EVERY status; only a confirmed requirement's broken link is strict-promoted
+    # (see cmd_check: a non-confirmed hit is downgraded to a plain warn there).
+    for rid, r in ctx.reqs.items():
+        tests = [x for x in ctx.full_members.get(rid, []) if x[0] == "tested-by"]
+        for fp in sorted({t[1] for t in tests}):
+            problem = _test_link_problem(os.path.join(ctx.code_root, fp))
+            if problem:
+                yield rid, f"{rid}: tested-by {fp} {problem}"
+
+
+@gate_rule("RM013", "warn")
+def _rule_case_coverage(ctx):  # implements: ARCH-ACVERIFY-019
+    # ONE aggregated line per requirement, only once it has adopted per-case tagging.
+    for rid, r in ctx.reqs.items():
+        if r["meta"].get("status") != "confirmed":
+            continue
+        labels = _automatable_acs(r["body"])
+        covered = ctx.ac_cover.get(rid, {})
+        if labels and covered:
+            missing = [ac for ac in labels if ac not in covered]
+            if missing:
+                yield rid, (f"{rid}: {len(labels) - len(missing)}/{len(labels)} automatable criteria "
+                            f"carry a `# verifies:` tag — missing " + ", ".join(missing))
+
+
+@gate_rule("RM014", "warn")
+def _rule_confirmed_sections(ctx):  # implements: REQ-CHECK-829
+    for rid, r in ctx.reqs.items():
+        if r["meta"].get("status") != "confirmed":
+            continue
+        if not _has_any(r["body"], CONTRACT_LABELS):
+            yield rid, (f"{rid}: confirmed but missing '## Description' section — "
+                        "add the normative contract or drop status back to in-progress")
+        if not _has_any(r["body"], ACCEPTANCE_LABELS):
+            yield rid, (f"{rid}: confirmed but missing '## Cases' section — "
+                        "add acceptance criteria or drop status back to in-progress")
+
+
+@gate_rule("RM015", "warn")
+def _rule_need_unsatisfied(ctx):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-934
+    for rid, r in ctx.reqs.items():
+        m = r["meta"]
+        if m.get("layer") == "need" and m.get("status") in ENFORCED and not ctx.satisfied_by.get(rid):
+            yield rid, f"{rid}: need has no requirement that satisfies it (upstream trace unaddressed)"
+
+
+@gate_rule("RM016", "warn")
+def _rule_corrupt_lock(ctx):
+    # load_lock fails open ({}) on an absent OR corrupt lock; surface the corrupt case so a
+    # silently-disabled drift signal is visible.
+    lp = lock_path(ctx.reqs_dir)
     if os.path.exists(lp):
         try:
             with open(lp, encoding="utf-8") as f:
                 json.load(f)
-        except (ValueError, OSError):  # JSONDecodeError + UnicodeDecodeError both subclass ValueError
-            warns.append("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
+        except (ValueError, OSError):
+            yield None, ("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
 
-    # app/src/lib/data.js drift (warn-only): the viewer's fallback fixture vs the
-    # live registry. Skipped entirely (no _viewer_nodes build) unless a data.js
-    # actually exists — true for every consumer repo without a vendored viewer.
-    for _candidate in (os.path.join(code_root, "app", "src", "lib", "data.js"),
-                        os.path.join(code_root, "..", "app", "src", "lib", "data.js")):
-        if os.path.exists(_candidate):
-            # Built here (not via _build_map_data) since only id+contract is
-            # needed — avoids computing used_by/satisfied_by for a check that
-            # discards them.
-            _viewer_nodes = [{"id": rid,
-                              "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS)}
-                              for rid, r in reqs.items()]
-            _drifted = check_viewer_data_sync(_candidate, _viewer_nodes)
-            if _drifted:
-                warns.append(
-                    "app/src/lib/data.js out of sync with {} requirement(s): {} — regenerate its "
-                    "BAKED fixture or accept the drift is intentional for this fallback demo data."
-                    .format(len(_drifted), ", ".join(_drifted)))
-            break
 
-    # Reverse depends_on index: a contract drift's blast radius is its direct
-    # dependents (one edge, not the transitive closure — a reviewer follows the
-    # chain one hop at a time).  # implements: ARCH-DRIFTIMPACT-035
-    dependents = {}
-    for _rid, _r in reqs.items():
-        for _dep in _as_list(_r["meta"].get("depends_on")):
-            dependents.setdefault(_dep, set()).add(_rid)  # implements: REQ-DRIFTIMPACT-843
-    new_lock = {}
-    for rid, r in reqs.items():
-        h = binding_hash(r["body"])
-        new_lock[rid] = h
-        old = lock.get(rid)
+@gate_rule("RM017", "warn", only_source_repo=True)
+def _rule_viewer_fixture(ctx):  # implements: ARCH-VIEWER-007
+    # the viewer's fallback fixture vs the live registry — this repository only.
+    candidate = os.path.join(ctx.code_root, "app", "src", "lib", "data.js")
+    if not os.path.exists(candidate):
+        return
+    nodes = [{"id": rid, "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS)}
+             for rid, r in ctx.reqs.items()]
+    drifted = check_viewer_data_sync(candidate, nodes)
+    if drifted:
+        yield None, ("app/src/lib/data.js out of sync with {} requirement(s): {} — regenerate its "
+                     "BAKED fixture or accept the drift is intentional for this fallback demo data."
+                     .format(len(drifted), ", ".join(drifted)))
+
+
+@gate_rule("RM018", "warn", strict=True)
+def _rule_drift(ctx):  # implements: ARCH-DRIFT-003  # implements: ARCH-DRIFTIMPACT-035  # implements: REQ-CHECK-829  # implements: REQ-DRIFTIMPACT-843
+    for rid, r in ctx.reqs.items():
+        h, old = ctx.new_lock[rid], ctx.lock.get(rid)
         if old and old != h and r["meta"].get("status") == "confirmed":
-            # name the member locations so the warning is actionable, not "its members"
-            locs = [f"{fp}:{ln}" for (_role, fp, ln) in members.get(rid, [])]
+            locs = [f"{fp}:{ln}" for (_role, fp, ln) in ctx.members.get(rid, [])]
             where = ", ".join(locs) if locs else "no members tagged — add an implements: tag"
-            deps_of = sorted(dependents.get(rid, ()))
-            fanout = "; review dependent(s): " + ", ".join(deps_of) if deps_of else ""  # implements: REQ-DRIFTIMPACT-843
-            strict_warns.append(f"{rid}: DRIFT — contract changed since lock; "
-                               f"re-check {len(locs)} member(s): {where}{fanout}")
+            deps_of = sorted(ctx.dependents.get(rid, ()))
+            fanout = "; review dependent(s): " + ", ".join(deps_of) if deps_of else ""
+            yield rid, (f"{rid}: DRIFT — contract changed since lock; "
+                        f"re-check {len(locs)} member(s): {where}{fanout}")
 
-    # Reverse-direction drift: a dedicated member changed while the contract stayed put
-    # (behaviour shipped, spec not updated). Warn-only, --strict-promotable (ARCH-MEMBERDRIFT-027).
-    memberlock = load_memberlock(reqs_dir)
-    # sync/init on a full scan (no --since) needs this same full-member hash set again
-    # below to re-baseline _memberlock.json — compute it once and hand it to member_drift
-    # instead of hashing every dedicated member file twice in one invocation.
-    _reuse_full_hashes = update_lock and members is full_members
-    _full_member_hashes = compute_member_hashes(code_root, full_members) if _reuse_full_hashes else None
-    for rid, rel in member_drift(reqs, members, lock, memberlock, code_root, current=_full_member_hashes):
-        strict_warns.append(f"{rid}: MEMBER DRIFT — {rel} changed since lock but the contract "
-                            "was not re-touched; re-check the requirement, or run sync to re-baseline")
 
-    # Tracking guard (warn-only): a committed-by-design lock that exists on disk but is not
-    # git-tracked silently disables drift detection in CI — a fresh checkout has no baseline,
-    # so accumulated member drift goes unseen. Surface it so an uncommitted lock cannot hide.
-    for lp_rel in untracked_locks(reqs_dir):
-        warns.append(f"{lp_rel} exists on disk but is not git-tracked — `git add {lp_rel}` so "
+@gate_rule("RM019", "warn", strict=True)
+def _rule_member_drift(ctx):  # implements: ARCH-MEMBERDRIFT-027
+    memberlock = load_memberlock(ctx.reqs_dir)
+    for rid, rel in member_drift(ctx.reqs, ctx.members, ctx.lock, memberlock, ctx.code_root,
+                                 current=ctx.full_member_hashes):
+        yield rid, (f"{rid}: MEMBER DRIFT — {rel} changed since lock but the contract "
+                    "was not re-touched; re-check the requirement, or run sync to re-baseline")
+
+
+@gate_rule("RM020", "warn")
+def _rule_untracked_lock(ctx):
+    for lp_rel in untracked_locks(ctx.reqs_dir):
+        yield None, (f"{lp_rel} exists on disk but is not git-tracked — `git add {lp_rel}` so "
                      "drift detection works in CI (an uncommitted lock is invisible to a fresh checkout)")
 
-    # Doc-sync blind spot: a large docs/ HTML doc generated from requirements but with
-    # no generated-from: lineage drifts from them unnoticed (warn-only — see ARCH-DOCBUNDLE-026).
-    for rel in untagged_doc_bundles(code_root, full_members, reqs_dir):  # full set: a doc's generated-from membership is independent of the --since diff
-        warns.append(f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
+
+@gate_rule("RM021", "warn")
+def _rule_doc_bundle(ctx):  # implements: ARCH-DOCBUNDLE-026
+    for rel in untagged_doc_bundles(ctx.code_root, ctx.full_members, ctx.reqs_dir):
+        yield None, (f"{rel}: large docs/ HTML bundle ({DOC_BUNDLE_MIN_BYTES // 1000}KB+) has no "
                      "generated-from: tag — link it to the requirement(s) it derives from "
                      "(`<!-- generated-from: A, B -->`), or add it to .reqmapignore")
 
-    # Members git does not track: the committed map records them, but a fresh checkout
-    # has none, so the map cannot be reproduced and `map --check` fails in CI for a file
-    # that is not in the repo. Warn-only and fail-open (silent outside a work tree), so a
-    # consumer who deliberately tags an ignored file is nudged, not blocked.
-    _untracked = untracked_members(code_root, full_members)   # implements: ARCH-TRACKED-042  # implements: REQ-TRACKED-936
+
+@gate_rule("RM022", "warn")
+def _rule_untracked_members(ctx):  # implements: ARCH-TRACKED-042
+    _untracked = untracked_members(ctx.code_root, ctx.full_members)
     if _untracked:
-        warns.append(
+        yield None, (
             "{} member(s) are not tracked by git: {} — the committed map records them, but a "
             "fresh checkout has no such file, so it cannot be regenerated there. Commit them, "
             "or exclude them in .reqmapignore.".format(
                 len(_untracked), ", ".join(_untracked[:5])
                 + ("" if len(_untracked) <= 5 else ", …")))
 
-    # Tags the scan cannot see: a tag in a file type outside CODE_EXTS is not a member,
-    # and until now nothing said so. Warn-only, fail-open outside a work tree.
-    _unscanned = tagged_unscanned_files(code_root, reqs_dir)   # implements: ARCH-UNSCANNEDTAG-045  # implements: REQ-UNSCANNEDTAG-939
+
+@gate_rule("RM023", "warn")
+def _rule_unscanned_tags(ctx):  # implements: ARCH-UNSCANNEDTAG-045
+    _unscanned = tagged_unscanned_files(ctx.code_root, ctx.reqs_dir)
     if _unscanned:
-        warns.append(
+        yield None, (
             "{} tag(s) in file type(s) the scan never reads: {} — those files are not members. "
             "Move the tag into a scannable file, or ask for the type to be added to the scan.".format(
                 len(_unscanned), ", ".join(_unscanned[:5])
                 + ("" if len(_unscanned) <= 5 else ", …")))
 
-    # Coverage erosion: a sizeable program file with no requirement link implements
-    # behavior no requirement describes. Plain warn — NEVER strict-promoted (the
-    # ARCH-COVERAGE-029 Senate audit capped coverage at advisory).  # implements: ARCH-ORPHANCODE-034
-    covered = {fp for hits in full_members.values() for (_role, fp, _ln) in hits}
-    covered.update(fp for acs in ac_cover.values()
+
+@gate_rule("RM024", "warn")
+def _rule_orphan_code(ctx):  # implements: ARCH-ORPHANCODE-034
+    covered = {fp for hits in ctx.full_members.values() for (_role, fp, _ln) in hits}
+    covered.update(fp for acs in ctx.ac_cover.values()
                    for locs in acs.values() for (fp, _ln) in locs)
-    for rel in orphan_code_files(code_root, covered, reqs_dir):
-        warns.append(f"{rel}: {ORPHAN_CODE_MIN_LOC}+-line code file has no membership tag — "
+    for rel in orphan_code_files(ctx.code_root, covered, ctx.reqs_dir):
+        yield None, (f"{rel}: {ORPHAN_CODE_MIN_LOC}+-line code file has no membership tag — "
                      "link it (`# implements: <ID>`), draft a requirement for it "
                      "(`reqmap.py draft`), or add it to .reqmapignore")
 
-    # Health signals (non-blocking): how much of the corpus is human-validated, and
-    # how much still uses the legacy body schema. Surfaced so an all-baseline corpus
-    # (drift fires only on `confirmed`, so the gate enforces nothing yet) and a
-    # silently-inactive `findings` cannot be mistaken for a clean, enforcing SSOT.
-    n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
-    # "Legacy" is the Input/Description/Output triad only. It used to be "no `## Verify
-    # intent` section", which made the lean form (Description + Cases + optional Context,
-    # no open-questions boilerplate once a requirement is confirmed) read as legacy and
-    # produced one warning naming every requirement in the corpus.
-    legacy = [rid for rid in sorted(reqs)                       # implements: ARCH-ATOMICFORM-053
-              if _has_any(reqs[rid]["body"], ("input", "output"))]
-    if legacy:
-        warns.append("{}/{} requirement(s) use the legacy schema (the Input/Description/"
-                     "Output triad) — `findings` is inactive for them: {}"
-                     .format(len(legacy), len(reqs), ", ".join(legacy)))
 
-    # depends_on cycles (warn-only): a cycle makes the dependency order unsatisfiable.
-    # Warn and not error, deliberately: a dangling `depends_on` target is a typo with
-    # one fix, while a cycle is a modelling call across several requirements — turning
-    # it into an error would fail a build that was green yesterday, on an upgrade, with
-    # no line of the consumer's own changed (ADR-0002).  # implements: ARCH-CHECK-006
-    for _cyc in _dependency_cycles(reqs):
-        warns.append("depends_on cycle: " + " -> ".join(_cyc)
+def _legacy_schema_ids(reqs):  # implements: ARCH-ATOMICFORM-053
+    """"Legacy" is the Input/Description/Output triad only. It used to be "no `## Verify
+    intent` section", which made the lean form read as legacy and produced one warning
+    naming every requirement in the corpus."""
+    return [rid for rid in sorted(reqs) if _has_any(reqs[rid]["body"], ("input", "output"))]
+
+
+@gate_rule("RM025", "warn")
+def _rule_legacy_schema(ctx):  # implements: REQ-CHECK-831
+    legacy = _legacy_schema_ids(ctx.reqs)
+    if legacy:
+        yield None, ("{}/{} requirement(s) use the legacy schema (the Input/Description/"
+                     "Output triad) — `findings` is inactive for them: {}"
+                     .format(len(legacy), len(ctx.reqs), ", ".join(legacy)))
+
+
+@gate_rule("RM026", "warn")
+def _rule_depends_on_cycle(ctx):  # implements: ARCH-CHECK-006  # implements: REQ-CHECK-831
+    # warn, not error: a cycle is a modelling call across several requirements (ADR-0002).
+    for _cyc in _dependency_cycles(ctx.reqs):
+        yield None, ("depends_on cycle: " + " -> ".join(_cyc)
                      + " — no requirement in a cycle can be built before the others; "
                        "drop the edge that closes it")
 
-    # Map freshness (warn-only): the committed map is GENERATED from this registry, so
-    # a requirement edit leaves it stale — and `gate` said nothing, so a consumer who
-    # runs only `gate` before committing (what this repo's own docs tell them to do)
-    # learns it from a red CI run. Reported here; still enforced by `map --check`.
-    # Skipped under update_lock: `sync` regenerates the map moments later.
-    if not update_lock:  # implements: ARCH-MAP-007
-        try:
-            stale_map = _stale_artifacts(
-                # full_members, not the --since-filtered view: a scoped gate must not
-                # report the map stale for members it deliberately did not look at.
-                _assemble_map_data(reqs, full_members, reqs_dir, code_root, ac_cover),
-                reqs_dir, code_root, reqs)
-        except Exception:
-            stale_map = []            # fail-open — a freshness probe never blocks the gate
-        if stale_map:
-            warns.append("committed map is stale: " + ", ".join(stale_map)
-                         + " — run `reqmap.py sync` (or `map`) and commit the result")
 
-    if strict:
-        errors.extend(strict_warns)
-    else:
-        warns.extend(strict_warns)
+@gate_rule("RM027", "warn")
+def _rule_map_stale(ctx):  # implements: ARCH-MAP-007
+    # skipped under update_lock: `sync` regenerates the map moments later.
+    if ctx.update_lock:
+        return
+    try:
+        stale_map = _stale_artifacts(
+            _assemble_map_data(ctx.reqs, ctx.full_members, ctx.reqs_dir, ctx.code_root, ctx.ac_cover),
+            ctx.reqs_dir, ctx.code_root, ctx.reqs)
+    except Exception:
+        stale_map = []            # fail-open — a freshness probe never blocks the gate
+    if stale_map:
+        yield None, ("committed map is stale: " + ", ".join(stale_map)
+                     + " — run `reqmap.py sync` (or `map`) and commit the result")
+
+
+def run_gate_rules(ctx, strict=False):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947  # implements: REQ-RULES-948
+    """Run every registered rule over `ctx` -> (errors, warns) as Finding lists, in
+    registry order. A rule's `strict` flag promotes its findings to errors under
+    `--strict`, except RM012 on a non-confirmed requirement, which stays a plain warn
+    so a draft-heavy consumer's strict CI cannot start failing on it. A requirement
+    whose `gate_exempt:` names the rule's code is skipped for that rule."""
+    errors, warns = [], []
+    for rule in GATE_RULES:
+        if rule.only_source_repo and not ctx.source_repo:
+            continue
+        for rid, msg in rule.fn(ctx):
+            if rid is not None and ctx.req(rid).exempt_from(rule.id):
+                continue
+            sev = rule.severity
+            if rule.strict and strict:
+                confirmed = rid is None or ctx.req(rid).status == "confirmed"
+                if rule.id != "RM012" or confirmed:
+                    sev = "error"
+            (errors if sev == "error" else warns).append(Finding(rule.id, sev, rid, msg))
+    return errors, warns
+
+
+def _link_sync_errors(reqs, members):  # implements: ARCH-HEALTH-017  # implements: REQ-RULES-947
+    """`gate`'s ERROR-level link-sync problems (dangling tags, enforced requirements
+    with no `implements:` member) as message strings, for `health` — the same two
+    rules the gate runs (RM001, RM006), read from the registry so the two commands
+    cannot drift apart again (RM-6 / Senate run reqmap-health-gate-cleanliness)."""
+    ctx = GateContext.__new__(GateContext)
+    ctx.reqs, ctx.members, ctx.full_members = reqs, members, members
+    ctx.cap_ids, ctx.since = set(reqs), None
+    return [msg for rule_id in ("RM001", "RM006")
+            for _rid, msg in gate_rule_by_id(rule_id).fn(ctx)]
+
+
+def _is_source_repo(code_root):
+    """True inside the requirement-manager repository itself (the one that dogfoods
+    the engine), never in a consumer: the plugin manifest and the viewer's source
+    both sit under `code_root`. Rules about this repo's own artifacts key on it."""
+    return (os.path.exists(os.path.join(code_root, "plugin", ".claude-plugin", "plugin.json"))
+            and os.path.exists(os.path.join(code_root, "app", "src", "lib", "data.js")))
+
+
+def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,
+              ac_cover=None, level_cover=None):  # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-RULES-948
+    """The gate: run GATE_RULES, print findings with their codes, advance the lock when
+    asked. Report-only unless `update_lock` (that is `sync`)."""
+    warn_if_stale()
+    full_members = members
+    pre_warns = []
+    # --since: scope checks to requirements whose member files changed since ref.
+    # Fail-open: fall back to full scan with WARN if git is unavailable or ref invalid.
+    if since:
+        changed = _since_changed_files(since, code_root)
+        if changed is None:
+            pre_warns.append(Finding("RM000", "warn", None,
+                                     f"--since {since!r}: git diff failed or ref not found; falling back to full scan"))
+        else:
+            filtered = {}
+            for cap, entries in members.items():
+                kept = [(role, fp, ln) for role, fp, ln in entries
+                        if _path_key(os.path.join(code_root, fp)) in changed]
+                if kept:
+                    filtered[cap] = kept
+            members = filtered
+    ctx = GateContext(reqs, members, reqs_dir, code_root, since=since, ac_cover=ac_cover,
+                      level_cover=level_cover, full_members=full_members, update_lock=update_lock)
+    # sync on a full scan re-baselines _memberlock below from this same hash set —
+    # computed once and handed to the member-drift rule instead of hashing twice.
+    _reuse_full_hashes = update_lock and members is full_members
+    ctx.full_member_hashes = compute_member_hashes(code_root, full_members) if _reuse_full_hashes else None
+    errors, warns = run_gate_rules(ctx, strict=strict)
+    warns = pre_warns + warns
+    n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
+    legacy = _legacy_schema_ids(reqs)
+    lock, new_lock = ctx.lock, ctx.new_lock
 
     lock_blocked = False
     if update_lock:
@@ -2641,7 +2822,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
             print(f"  lock update: {rid} removed from lock")
         # sync drift guard: refuse to silently re-baseline an EDITED confirmed/implemented
         # contract unless the caller explicitly accepts it (accept_drift). A brand-new
-        # requirement (old hash None) is not drift.  # implements: ARCH-CHECK-006
+        # requirement (old hash None) is not drift.
         confirmed_drift = [rid for (rid, old_h, _h) in changed
                            if old_h is not None
                            and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
@@ -2653,33 +2834,31 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 print(f"  drift: {rid}", file=sys.stderr)
         else:
             save_lock(reqs_dir, new_lock)
-            # re-baseline reverse drift over the FULL member set — using the
-            # --since-filtered `members` here would drop every unchanged member's
-            # baseline and silently disable reverse-drift detection for them.
-            # Reuse the hashes computed above when they cover the same full set.
-            save_memberlock(reqs_dir, _full_member_hashes
-                             if _full_member_hashes is not None
+            save_memberlock(reqs_dir, ctx.full_member_hashes
+                             if ctx.full_member_hashes is not None
                              else compute_member_hashes(code_root, full_members))
             print("lock updated.")
 
-    # Integration-artifact freshness: stale tool_definition.json or command-table region
-    # in SKILL.universal.md means someone edited COMMANDS without running gen-integration.
-    # Skipped silently when the artifacts don't exist (consumer/vendored repos).
-    # Must run BEFORE the as_json early-return so --json (the CI/badge path) also
-    # exits non-zero on a stale artifact.  # implements: ARCH-CMDREGISTRY-033
+    # Integration-artifact freshness (this repo's generated tool_definition.json + the
+    # SKILL.universal.md command table); skipped silently when the artifacts don't exist.
+    # Must run BEFORE the as_json early-return so --json also exits non-zero on it.
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     _stale = _check_integration_fresh(plugin_root)
     if _stale:
-        errors = list(errors) + ["stale integration artifact(s): " + ", ".join(_stale)]
+        errors = list(errors) + [Finding("RM028", "error", None,
+                                         "stale integration artifact(s): " + ", ".join(_stale))]
 
     if as_json:
-        print(json.dumps({"ok": not (errors or lock_blocked), "errors": errors, "warnings": warns}))
+        print(json.dumps({"ok": not (errors or lock_blocked),
+                          "errors": [str(e) for e in errors],
+                          "warnings": [str(w) for w in warns],
+                          "findings": [dict(f) for f in errors + warns]}))
         return 1 if (errors or lock_blocked) else 0
 
     for w in warns:
-        print("WARN ", w)
+        print("WARN ", w["rule"], str(w))
     for e in errors:
-        print("ERROR", e)
+        print("ERROR", e["rule"], str(e))
     if _stale:
         print("ERROR: stale generated integration artifact(s): " + ", ".join(_stale)
               + " — run `python scripts/reqmap.py gen-integration` and commit.", file=sys.stderr)
@@ -2692,6 +2871,7 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
           f"{sum(len(v) for v in members.values())} members, "
           f"{len(errors)} errors, {len(warns)} warnings.")
     return 1 if (errors or lock_blocked) else 0
+
 
 
 # Built-in scaffold so `new` needs no separate templates/ dir — the engine is
@@ -4220,9 +4400,11 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         return 0
     confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
     tested = sum(1 for rid in reqs if any(role == "tested-by" for role, *_ in members.get(rid, [])))
-    drafts = sum(1 for r in reqs.values() if r["meta"].get("status", "draft") == "draft")
-    print("{} requirement(s) · {} confirmed · {} tested · {} draft(s)\n".format(
-        total, confirmed, tested, drafts))
+    # `unreviewed` = draft + baseline, the same population the "Drafts to review" bucket
+    # holds; the header used to count `draft` only and disagree with the bucket beneath it.
+    unreviewed = sum(1 for r in reqs.values() if r["meta"].get("status", "draft") in ("draft", "baseline"))
+    print("{} requirement(s) · {} confirmed · {} tested · {} unreviewed\n".format(
+        total, confirmed, tested, unreviewed))
 
     dependents = {rid: 0 for rid in reqs}
     for rid, r in reqs.items():
@@ -4274,8 +4456,9 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         return 0
     if pending:
         total_actions = sum(len(ids) for _, _, ids in pending)
+        n_cat = len(pending) + bool(untagged) + bool(oversize) + bool(redundant)
         print("{} item(s) need attention across {} {}:\n".format(
-            total_actions, len(pending), "category" if len(pending) == 1 else "categories"))
+            total_actions, n_cat, "category" if n_cat == 1 else "categories"))
     for sig, label, ids in pending:
         print("{} ({})".format(label, len(ids)))
         shown = ids if show_all else ids[:top_n]
@@ -4893,7 +5076,7 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
         exempt = set(_as_list(r["meta"].get("lint_exempt")))
         if not fs and not exempt:
             continue
-        print("{}   requirements/{}.md".format(rid, rid))
+        print("{}   {}".format(rid, _req_file(reqs, rid)))
         if exempt:
             print("  (exempt: {})".format(", ".join(sorted(exempt))))
         for f in fs:
@@ -5132,7 +5315,7 @@ def _test_suite_pairs(members):  # implements: REQ-SIMILAR-921
     return linked
 
 
-def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-920  # implements: REQ-SIMILAR-923
+def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None, top=None):  # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-920  # implements: REQ-SIMILAR-923
     """Report requirement pairs whose contracts overlap at or above `threshold`
     (cosine over TF-IDF of title + intent + Contract), most-similar-first, so a human
     can spot a probable duplicate or a capability that should be merged. Read-only and
@@ -5140,7 +5323,12 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements:
     does not inflate the score. Callers pass a validated threshold in (0, 1].
     With `members`, a pair linked by `tested-by` (one requirement is the other's test
     suite) is skipped and counted instead of reported."""
-    linked = _test_suite_pairs(members)
+    linked = set(_test_suite_pairs(members))
+    # a child restates part of its parent's contract by construction (the parent's
+    # summary clause names it), so a parent-child pair is never a duplicate finding
+    for rid, r in reqs.items():
+        for up in _as_list((r.get("meta") or {}).get("satisfies")):
+            linked.add(frozenset((rid, up)))
     placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
     docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()
             if rid not in placeholder}
@@ -5167,17 +5355,20 @@ def cmd_similar(reqs, threshold=SIMILAR_THRESHOLD, members=None):  # implements:
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
     if skipped_linked:
-        print("skipped {} pair(s) linked by tested-by (a requirement and its own test suite "
-              "share vocabulary by construction).\n".format(skipped_linked))
+        print("skipped {} pair(s) linked by tested-by or satisfies (a requirement and its own "
+              "test suite, or a parent and its child, share vocabulary by construction).\n".format(skipped_linked))
     if not pairs:
         print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared.".format(
             threshold, len(docs)))
         return 0
     print("{} probable-duplicate pair(s) at or above {:.2f} (of {} requirement(s)):\n".format(
         len(pairs), threshold, len(docs)))
-    for s, a, b, shared in pairs:
+    shown = pairs if top is None else pairs[:top]
+    for s, a, b, shared in shown:
         print("  {:.2f}  {}  <->  {}".format(s, a, b))
         print("        shared terms: {}".format(", ".join(shared) or "(none)"))
+    if len(shown) < len(pairs):
+        print("  ... {} more pair(s) — raise --top to see them".format(len(pairs) - len(shown)))
     print("\nThese contracts overlap — check they are not the same capability "
           "implemented twice. Merge or differentiate, then re-run.")
     return 0
@@ -5289,31 +5480,6 @@ def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     pct_all = round(100 * tagged_all / total_all) if total_all else 0
     print("\nTotal: {}/{} files tagged ({:>3}%)".format(tagged_all, total_all, pct_all))
     return 0
-
-
-def _link_sync_errors(reqs, members):
-    """The two ERROR-level link-sync predicates `gate` enforces on a full scan:
-    a code tag pointing at a requirement id that does not exist, and an
-    ENFORCED-status requirement with no `implements:` member (`need`-layer
-    requirements are exempt — covered by `satisfies:` edges, not code).
-    Mirrors cmd_check's own checks so `health` can reflect gate's error state
-    without a second, independently-maintained walk of `members`. Deliberately
-    narrow: this does NOT catch a value changed with no supporting tag at all
-    (nothing points at it, so there is no dangling reference and no missing-
-    implements) — see RM-6 / Senate run reqmap-health-gate-cleanliness."""
-    errs = []
-    cap_ids = set(reqs)
-    for cap in members:
-        if cap not in cap_ids:
-            errs.append(f"dangling tag: code references {cap} but no requirement exists")
-    for rid, r in reqs.items():
-        m = r["meta"]
-        if _impl_exempt(m):
-            continue
-        impls = [x for x in members.get(rid, []) if x[0] == "implements"]
-        if m.get("status") in ENFORCED and not impls:
-            errs.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-    return errs
 
 
 def _dependency_cycles(reqs):  # implements: ARCH-CHECK-006
@@ -6189,6 +6355,12 @@ def _mermaid_req_to_code(data):  # implements: ARCH-MAPDIAGRAMS-055  # implement
     lines = ["graph LR"]
     loc_sid, sid_used = {}, {}        # distinct file:line locs must get distinct node ids
     for n in data["nodes"]:
+        if n.get("level") == "code":
+            # Counted, never drawn, like the hierarchy: a corpus with its behaviour
+            # groups split out carries hundreds of code-level nodes and their members
+            # at function granularity — the block passed 83,000 characters, past what
+            # GitHub renders. The viewer has that detail; this diagram is the overview.
+            continue
         rid = n["id"]
         sid = _safe_id(rid)
         lines.append('  {}["{}"]'.format(sid, _node_label(n)))
@@ -6308,7 +6480,7 @@ def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-
 _LEGEND_MD = [
     "The spec hierarchy: system needs -> architecture requirements (`satisfies:`), each box showing how many code-level requirements sit under it. The code level itself is counted, not drawn.",
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
-    "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
+    "Each system/architecture requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected). Code-level requirements are omitted here (see the viewer).",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
     "Requirements needing attention: red = unimplemented (confirmed, no code); orange = unreviewed (promote after review); yellow = untested (implemented but no tested-by — set `test_exempt` to silence), or unverified-intent (open verify-intent question).",
 ]
@@ -7298,6 +7470,69 @@ def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022  # implements:
     return 0
 
 
+# ---------- per-repo configuration ----------
+# Every threshold above is a module constant, and a consumer could change none of them
+# without forking the engine. `requirements/_config.json` overrides the named ones —
+# read fail-open, applied once at startup, a key of the wrong type or an unknown name
+# is reported and ignored. Set constants without rewiring: the circuit network.
+CONFIG_FILE = "_config.json"
+CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTRACT_MAX",
+               "LINT_FILE_SPREAD_MAX", "LINT_FANOUT_MIN", "LINT_FANOUT_MAX", "LINT_FANOUT_BANDS",
+               "LINT_STACKED_CONNECTORS", "LINT_CLAUSE_SENTENCES", "LINT_BUS_FANOUT_MIN",
+               "SIMILAR_THRESHOLD", "ORPHAN_CODE_MIN_LOC", "DOC_BUNDLE_MIN_BYTES",
+               "SYSTEM_HUB_FANIN", "BUS_FANIN_THRESHOLD", "SPLIT_LOC_THRESHOLD")
+
+
+def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
+    """The parsed `requirements/_config.json`, or {} when absent, unreadable or not an object."""
+    try:
+        with open(os.path.join(reqs_dir, CONFIG_FILE), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
+    """Apply `cfg` to the module constants. Returns the names applied. A key that is
+    not in CONFIG_KEYS, or whose value has a different type than the default, is
+    reported on `out` (stderr) and skipped — a typo must never silently change nothing."""
+    global CODE_EXTS
+    out = out or sys.stderr
+    applied = []
+    g = globals()
+    for key, value in (cfg or {}).items():
+        if key == "extra_code_exts":
+            if isinstance(value, list) and all(isinstance(x, str) for x in value):
+                extra = tuple(x if x.startswith(".") else "." + x for x in value if x)
+                CODE_EXTS = CODE_EXTS + tuple(e for e in extra if e not in CODE_EXTS)
+                applied.append(key)
+            else:
+                print("config: ignoring extra_code_exts (expected a list of strings)", file=out)
+            continue
+        if key not in CONFIG_KEYS:
+            print("config: ignoring unknown key {!r}".format(key), file=out)
+            continue
+        default = g[key]
+        if isinstance(default, dict):
+            if not isinstance(value, dict):
+                print("config: ignoring {} (expected an object)".format(key), file=out)
+                continue
+            merged = dict(default)
+            for k, v in value.items():
+                merged[k] = tuple(v) if isinstance(v, list) else v
+            g[key] = merged
+        elif isinstance(default, bool) or not isinstance(default, (int, float)) \
+                or isinstance(value, bool) or not isinstance(value, (int, float)):
+            print("config: ignoring {} (expected {})".format(key, type(default).__name__), file=out)
+            continue
+        else:
+            g[key] = type(default)(value)
+        applied.append(key)
+    return applied
+
+
+
 def main():
     # Refuse an interpreter below the declared floor before anything else runs, so the
     # user gets one readable line instead of an AttributeError from some stdlib call
@@ -7361,7 +7596,7 @@ def main():
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
                     help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--top", type=int, default=None,
-                    help="search: max ranked matches to show (default 5)")
+                    help="search: max ranked matches to show (default 5); dupes: max pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health|coverage: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
@@ -7406,6 +7641,7 @@ def main():
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
+    apply_config(load_config(reqs_dir))   # implements: ARCH-CONFIG-060
     # prefer an on-disk templates/requirement.md if present (back-compat), else the
     # built-in REQUIREMENT_TEMPLATE — so no templates/ dir is required.
     here = os.path.dirname(os.path.abspath(__file__))
@@ -7428,11 +7664,7 @@ def main():
     # One walk for the commands that need coverage too (gate/sync/check); the rest only
     # ever asked for members. --cache stays on scan_members, the only scanner that
     # implements it — see scan_all's docstring for why it is not duplicated there.
-    _ac_cover = _level_cover = None
-    if a.cmd in ("gate", "check", "sync", "show") and not a.cache:
-        members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir)
-    else:
-        members = scan_members(code_root, reqs_dir, cache=a.cache)
+    members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir, cache=a.cache)
     if a.cmd == "scan":
         cmd_scan(reqs, members); return 0
     if a.cmd == "next":
@@ -7448,7 +7680,7 @@ def main():
         levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
         return cmd_show(reqs, members, a.arg, levels)
     if a.cmd == "dupes":
-        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members)
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members, top=a.top)
     if a.cmd == "search":
         if not a.arg:
             print("usage: reqmap search \"<query>\"   [--top N]"); return 2
@@ -7539,7 +7771,15 @@ def _pipe_closed():  # implements: ARCH-PIPE-046
         os.dup2(devnull, sys.stdout.fileno())
     except Exception:
         pass
-    return 0
+    # Measured on Windows: after the dup2 the interpreter's shutdown flush of the
+    # original stdout buffer STILL raised EINVAL and the process exited 120 with
+    # "Exception ignored in: <_io.TextIOWrapper ...>" on stderr — the fix above made
+    # the traceback quieter, not the exit clean. Leave without that flush.
+    try:
+        sys.stderr.flush()
+    except Exception:
+        pass
+    os._exit(0)
 
 
 def _run_cli(entry=None):  # implements: ARCH-PIPE-046  # implements: REQ-PIPE-893

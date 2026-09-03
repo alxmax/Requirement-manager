@@ -108,7 +108,7 @@ CASE-12
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana starts her day unsure what's most important. She runs `reqmap.py next` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 draft(s)" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
+- Ana starts her day unsure what's most important. She runs `reqmap.py next` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 unreviewed" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
 
 **Current implementation**
 - `cmd_next`, `_risk_score`, and `_scan_untagged` in `reqmap.py` — prints the header, builds a minimal node per requirement, collects `_risk_signals`, orders each bucket by `risk:` score then id, truncates to the top-N unless `--all`, and prints `RISK_ADVICE` text. The draft intent-dedup is in `_risk_signals` (shared with the Risk tab). `_scan_untagged` adds the untagged-files bucket using the same walk as `scan_members`.
@@ -138,7 +138,7 @@ Every bullet below is binding.
 - `next` groups every requirement's open risk signals into action buckets.
 - `next` reads those signals from `_risk_signals` and their wording from `RISK_ADVICE`, the
   same two sources that drive the Risk tab. There is never a second signal path.
-- `next` prints a progress header `N requirement(s) · X confirmed · Y tested · Z draft(s)`
+- `next` prints a progress header `N requirement(s) · X confirmed · Y tested · Z unreviewed (draft + baseline, the population of the Drafts bucket)`
   before the buckets.
 - In that header, `tested` counts the requirements that have a `tested-by` member.
 
@@ -156,7 +156,7 @@ CASE-2 — a bucket's advice line matches RISK_ADVICE verbatim
 CASE-3 — the header names all four counts
   Given  one confirmed-and-tested requirement and one draft requirement
   When   `cmd_next` runs
-  Then   its first line reads "2 requirement(s) · 1 confirmed · 1 tested · 1 draft(s)"
+  Then   its first line reads "2 requirement(s) · 1 confirmed · 1 tested · 1 unreviewed"
 
 CASE-4 — implements-only members do not count as tested
   Given  two confirmed requirements: one with a `tested-by` member, one with only an `implements` member
@@ -204,6 +204,9 @@ Every bullet below is binding.
   bucket, ranked lowest of all.
 - That bucket omits prose in the auto-draft "ignore" bucket (`CLAUDE.md`, `TODO.md`,
   `CHANGELOG.md`, `LICENSE`, `_`-prefixed files): those are invisible to reqmap by contract.
+- That bucket also omits repository boilerplate that never carries a tag by design: decision
+  records under an `adr/` or `decisions/` directory, issue and pull-request templates,
+  `SECURITY.md`, `CODE_OF_CONDUCT.md` and dependabot configuration (`_UNTAGGED_NOISE`).
 - `next` skips that untagged scan when the caller gives no `code_root`.
 - An Orphans item may have members recorded in the committed `_map.json` that this scan did
   not find. Then `next` adds a note naming one such member and suggesting `--code <dir>`.
@@ -343,6 +346,11 @@ CASE-4 — 5 untagged files show only the top 3 by default
   When   `cmd_next` runs with that code root and default `top_n=3`
   Then   the "Untagged files" section lists 3 files and a "... 2 more" line
 
+
+CASE-5 — repository boilerplate is not an untagged file
+  Given  an untagged `a.py`, an ADR under `docs/adr/`, an issue template and a `SECURITY.md`
+  When   `next` scans for untagged files
+  Then   only `a.py` is listed
 
 --------------------
 

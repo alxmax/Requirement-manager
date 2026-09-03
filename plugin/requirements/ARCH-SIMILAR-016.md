@@ -58,7 +58,7 @@ CASE-6
 CASE-7
   Given  a requirement A whose `tested-by` file implements requirement B, with overlapping contracts
   When   `dupes` runs with the member map
-  Then   the pair A–B is not reported and a "linked by tested-by" count line is printed; without the member map it is reported as before
+  Then   the pair A–B is not reported and a "linked by tested-by or satisfies" count line is printed; without the member map it is reported as before
 
 ## Context
 **Terms**
@@ -162,6 +162,8 @@ Every bullet below is binding.
   other's `implements` file, so the second requirement IS the first one's test suite —
   and prints how many such pairs it skipped. Such a pair shares vocabulary by construction
   and is a known link, not a duplicate.
+- `dupes` also skips a pair joined by a `satisfies:` edge: a child restates part of its parent's
+  contract by construction, so a parent-child pair is a known link, not a duplicate.
 
 ## Cases
 CASE-1 — the bag of words comes from title, intent and Contract only
@@ -193,6 +195,11 @@ CASE-6 — a tested-by-linked pair is skipped and counted
   Given  requirement A whose `tested-by` file is requirement B's `implements` file, with overlapping wording
   When   `dupes` runs with the member map
   Then   the pair is excluded from the report and the linked-pairs count includes it
+
+CASE-7 — a parent and its child are never a duplicate finding
+  Given  two requirements with the same contract, one declaring `satisfies:` the other
+  When   `dupes` runs
+  Then   the pair is skipped and counted in the linked-pairs line
 
 
 --------------------
@@ -267,6 +274,8 @@ Every bullet below is binding.
   terms, so the reviewer can see why the pair was flagged.
 - `dupes` always returns zero. The report is advisory: a human decides whether a
   flagged pair is a real duplicate.
+- `dupes --top N` prints the N highest-scoring pairs and a `... M more pair(s)` line; without
+  `--top` every pair is printed.
 
 ## Cases
 CASE-1 — the default threshold is 0.35
@@ -294,3 +303,7 @@ CASE-5 — a below-threshold pair is left out of the report
   When   `dupes` runs
   Then   that pair is absent from the printed report
 
+CASE-6 — --top truncates with a count
+  Given  three mutually similar requirements and `--top 1`
+  When   `dupes` runs
+  Then   one pair is printed followed by `... 2 more pair(s)`

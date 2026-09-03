@@ -7,6 +7,7 @@ layer: need
 owner: Alex
 priority: must-have
 satisfies: [SYS-SSOT-001]
+lint_exempt: [fan-out]
 ---
 # Keeping code and specification in step
 
@@ -30,3 +31,7 @@ Scenario: a confirmed contract changes without its code
 - `ARCH-TESTLINK-018` — Test-link integrity check  (architecture)  ·  17 detailed design
 - `ARCH-TRACKED-042` — Untracked members reported  (architecture)  ·  5 detailed design
 - `ARCH-UNSCANNEDTAG-045` — Tags in unscanned file types reported  (architecture)  ·  7 detailed design
+
+## Context
+**Notes**
+- `lint_exempt: [fan-out]`: eleven architecture requirements satisfy this need since ARCH-RULES-059 joined (ADR-0023's `system` ceiling is ten). One over the band is not a bucket yet; splitting the gate need into link-sync and drift halves is deferred until a twelfth arrives.
