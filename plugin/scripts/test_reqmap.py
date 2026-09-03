@@ -1675,6 +1675,35 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
         return {"id": "A-FOO-001", "layer": "feature", "status": "confirmed", "title": "T",
                 "members": members}
 
+    # ARCH-MAP-007 CASE-4/CASE-5. In the atomic form the `>` quote IS the single
+    # contract clause, so emitting it as `intent` too printed one sentence twice on
+    # every surface — 588 of 646 nodes, 91% of the corpus, before this.
+    _ATOMIC = ("---\nid: REQ-A-001\nstatus: draft\nform: atomic\nlayer: feature\n---\n\n"
+               "# A lock sidecar that exists\n\n"
+               "> A lock sidecar that exists on disk but is not git-tracked is a `WARN`.\n\n"
+               "Scenario: an untracked lock is flagged\n"
+               "  Given  a lock written but never added\n"
+               "  When   the gate runs\n"
+               "  Then   it names the file\n")
+
+    def test_atomic_intent_is_empty_because_it_is_the_contract(self):  # verifies: ARCH-MAP-007#CASE-4
+        self.assertEqual(R._distinct_intent(self._ATOMIC), "")
+        self.assertTrue(R._from_any(R._bullets, self._ATOMIC, R.CONTRACT_LABELS),
+                        "the clause must survive under contract, only the duplicate goes")
+
+    def test_sectioned_intent_survives_when_it_is_real_rationale(self):  # verifies: ARCH-MAP-007#CASE-5
+        body = ("# T\n\n## Description\n"
+                "> Specs rot when nobody updates them, so this guards that.\n"
+                "- `gate` reports a dangling tag as an error.\n")
+        self.assertIn("Specs rot", R._distinct_intent(body))
+
+    def test_intent_dedupe_ignores_only_whitespace_differences(self):
+        # a quote re-wrapped across lines is still the same sentence as the clause
+        wrapped = self._ATOMIC.replace(
+            "> A lock sidecar that exists on disk but is not git-tracked is a `WARN`.",
+            "> A lock sidecar that exists on disk but is not\n> git-tracked is a `WARN`.")
+        self.assertEqual(R._distinct_intent(wrapped), "")
+
     def test_req_to_code_collapses_line_range(self):  # bug: mermaid-req-to-code-line-range-untested
         out = R._mermaid_req_to_code({"nodes": [self._node(
             [{"role": "implements", "loc": "src/a.py:10"},
@@ -2316,7 +2345,7 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011
             code = R.cmd_promote(reqs, members, cap_id)
         return code, buf.getvalue()
 
-    def test_promotes_baseline_with_implements(self):  # AC-1
+    def test_promotes_baseline_with_implements(self):  # AC-1  # tested-by: REQ-PROMOTE-567
         with tempfile.TemporaryDirectory() as d:
             body = REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A") + "\nbody line\n"
             _write(os.path.join(d, "AREA-A-001.md"), body)
@@ -2498,18 +2527,22 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
         return {"meta": {"status": "confirmed"}, "body": body}
 
     def test_granularity_at_threshold_warns(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(5)}
+        # threshold unified with lint's LINT_AC_MAX (7, unchanged) via the shared
+        # _oversize predicate 2026-09-03 -- "at threshold" is now LINT_AC_MAX + 1
+        # (was a hardcoded 5 against the old, next-only AC_SPLIT_THRESHOLD).
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX + 1)}
         _, out = self._next(reqs, {})
         self.assertIn("consider splitting", out)
         self.assertIn("AREA-FOO-001", out)
 
     def test_granularity_below_threshold_no_warn(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(4)}
+        # exactly LINT_AC_MAX ACs does not exceed it, so this must stay silent.
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX)}
         _, out = self._next(reqs, {})
         self.assertNotIn("consider splitting", out)
 
     def test_granularity_above_threshold_warns(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(8)}
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX + 5)}
         _, out = self._next(reqs, {})
         self.assertIn("consider splitting", out)
         self.assertIn("AREA-FOO-001", out)
@@ -2523,7 +2556,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
         self.assertIn("consider splitting", out)
 
     def test_granularity_truncates_to_top_n(self):  # bug: next-granularity-no-topn-truncation
-        reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(6) for i in range(1, 6)}
+        reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(R.LINT_AC_MAX + 1) for i in range(1, 6)}
         _, out = self._next(reqs, {})
         self.assertEqual(out.count("consider splitting"), 3)
         self.assertIn("more — run `reqmap.py next --all`", out)
@@ -2999,6 +3032,20 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
     def test_strict_nonzero_on_missing_section(self):
         body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no acceptance
         reqs = {"REQ-X-001": self._req("confirmed", body)}
+        code, _ = self._lint(reqs, strict=True)
+        self.assertEqual(code, 1)
+
+    def test_atomic_bullet_then_mismatch_is_strict_promoted(self):
+        # 3-bullet story, 1 Then: warn on plain lint, promoted to error under --strict —
+        # STRICT_PROMOTE is the mechanism, not an unconditional error severity.
+        body = ("# T\n\n> The refresh does three things:\n> - clears the cache\n"
+                "> - reloads the index\n> - re-renders the view\n\n"
+                "Scenario: a refresh clears the cache\n  Given  a stale cache\n"
+                "  When   refresh runs\n  Then   the cache is cleared\n\n"
+                "## Members in code (auto)\n")
+        reqs = {"REQ-X-001": self._req("confirmed", body)}
+        code, _ = self._lint(reqs, strict=False)
+        self.assertEqual(code, 0)
         code, _ = self._lint(reqs, strict=True)
         self.assertEqual(code, 1)
 
@@ -3524,7 +3571,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036
         self.assertIn("No strong match", none)
 
 
-class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
+class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109
     def _health(self, reqs, members, as_json=False):
         buf = io.StringIO()
         with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
@@ -3553,6 +3600,62 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
             "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
             "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0,
             "gate_errors": 0, "gate_link_sync_clean": True})
+
+    # ARCH-HEALTH-017 CASE-8 / CASE-9: a draft can never be green (the first axis is
+    # status `confirmed`), so every draft caps the headline score by construction. The
+    # reviewed-only score separates "not reviewed yet" from "rotting" WITHOUT redefining
+    # `score`, which CASE-2 binds to zero on an all-draft corpus and which every
+    # consumer badge already reads.
+    def _draft(self):
+        return {"meta": {"status": "draft"}, "body": "# T\n"}
+
+    def test_reviewed_score_excludes_drafts(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-1
+        reqs = {"REQ-A-001": self._green()}
+        for n in (2, 3, 4):
+            reqs["REQ-A-00%d" % n] = self._draft()
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 25)            # 1 green of 4 — unchanged meaning
+        self.assertEqual(obj["reviewed_score"], 100)  # 1 green of 1 reviewed
+        self.assertEqual(obj["reviewed_total"], 1)
+
+    def test_reviewed_score_absent_on_all_draft_corpus(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-2
+        _, out = self._health({"REQ-A-001": self._draft()}, {}, as_json=True)
+        obj = json.loads(out)
+        self.assertNotIn("reviewed_score", obj)       # 0 of 0 is not 0%
+        self.assertEqual(obj["score"], 0)             # CASE-2 still holds
+
+    def test_reviewed_score_absent_when_no_drafts(self):
+        # with no draft it would restate `score` — a key that means nothing is a schema cost
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        self.assertNotIn("reviewed_score", json.loads(out))
+
+    def test_reviewed_score_line_names_the_unconfirmed(self):
+        reqs = {"REQ-A-001": self._green(), "REQ-A-002": self._draft()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members)
+        self.assertIn("reviewed only", out)
+        self.assertIn("1 not confirmed yet", out)
+
+    def test_reviewed_score_denominator_is_confirmed_not_merely_non_draft(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-5
+        """`healthy`'s first axis is `status == confirmed`, so a non-draft that is not
+        yet `confirmed` can enter a "non-draft" denominator but never the numerator —
+        it would depress the reviewed score with nothing rotting. `deprecated` is the
+        sharpest case: retired, permanently un-green, capping the score forever.
+        Invisible in this repo (all non-drafts are `confirmed`), hence this test."""
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        for status in ("baseline", "in-progress", "implemented", "deprecated"):
+            reqs = {"REQ-A-001": self._green(),
+                    "REQ-A-002": {"meta": {"status": status}, "body": "# T\n"},
+                    "REQ-A-003": self._draft()}
+            _, out = self._health(reqs, members, as_json=True)
+            obj = json.loads(out)
+            self.assertEqual(obj["reviewed_total"], 1,
+                "status %r must not enter the reviewed denominator" % status)
+            self.assertEqual(obj["reviewed_score"], 100,
+                "status %r depressed the reviewed score with nothing rotting" % status)
 
     def test_drift_drops_out_of_green(self):  # bug-hunt #18: exercise the drift axis
         reqs = {"REQ-A-001": self._green()}
@@ -6322,11 +6425,15 @@ class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  #
             self.assertIn("[x] Widget", open(parent_todo, encoding="utf-8").read())
 
     def test_next_granularity_counts_labeled_acs(self):
-        # 5 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
-        # the advisory; _count_ac sees 5. Members are implements-only so the req has a
+        # 9 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
+        # the advisory; _count_ac sees 9. Members are implements-only so the req has a
         # pending ('untested') signal and execution reaches the granularity block.
+        # Bumped from 5 to 9 ACs: the Granularity threshold was unified with lint's
+        # LINT_AC_MAX (7, unchanged) via the shared `_oversize` predicate, so 5 no
+        # longer qualifies (2026-09-03, reqmap-oversize-unify) -- deliberate, see
+        # OversizeUnify below for the next/lint parity coverage this change needed.
         body = "# T\n\n## HOW — Acceptance\n" + "".join(
-            "AC-%d: criterion %d\n" % (i, i) for i in range(1, 6))
+            "AC-%d: criterion %d\n" % (i, i) for i in range(1, 10))
         reqs = {"CORE-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"}, "body": body}}
         members = {"CORE-FOO-001": [("implements", "x.py", 1)]}
         buf = io.StringIO()
@@ -7124,6 +7231,120 @@ class Decompose(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
         self.assertFalse(R._already_decomposed(self.reqs_dir, "REQ-AUTH-012", 1))
 
 
+class OversizeUnify(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-NEXT-013
+    """The shared `_oversize` predicate: `next`'s Granularity bucket and
+    `lint_requirement`'s `ac-count-high` check must report the identical id set for the
+    same corpus -- same threshold (LINT_AC_MAX, unchanged), same LINT_STATUSES scope
+    (drafts excluded), same `lint_exempt: [ac-count-high]` honoring. Also covers
+    `--decompose`'s ac-count-high triage-stub path, extended alongside the predicate."""
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.reqs_dir = os.path.join(self.tmp, "requirements")
+        os.makedirs(self.reqs_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _body(self, n):
+        return "# T\n\n{}\n{}".format(
+            self.ACCEPT, "".join("- AC {}.\n".format(i) for i in range(n)))
+
+    def _granularity_ids(self, out):
+        m = re.search(r"Granularity \(\d+\)\n((?:  .+\n)+)", out)
+        ids = set()
+        if m:
+            for line in m.group(1).splitlines():
+                mm = re.match(r"  (\S+)   \(", line)
+                if mm:
+                    ids.add(mm.group(1))
+        return ids
+
+    def test_next_and_lint_agree_on_ac_count_high_set(self):
+        reqs = {}
+        for n in range(5, 10):
+            reqs["REQ-N{}-001".format(n)] = {
+                "meta": {"status": "confirmed", "layer": "feature"},
+                "body": self._body(n)}
+            reqs["REQ-N{}X-002".format(n)] = {
+                "meta": {"status": "confirmed", "layer": "feature",
+                         "lint_exempt": ["ac-count-high"]},
+                "body": self._body(n)}
+        members = {rid: [("implements", "x.py", 1), ("tested-by", "t.py", 1)] for rid in reqs}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_next(reqs, members, show_all=True)
+        next_ids = self._granularity_ids(buf.getvalue())
+        lint_ids = {rid for rid, r in reqs.items()
+                    if "ac-count-high" in [f["check"] for f in R.lint_requirement(rid, r)]}
+        self.assertEqual(next_ids, lint_ids)
+        # a bug that leaves both sets empty (or both wrong in the same way) would still
+        # pass the equality check above -- pin the actual expected members too.
+        self.assertEqual(lint_ids, {"REQ-N8-001", "REQ-N9-001"})
+
+    def test_oversize_predicate_excludes_draft_status(self):
+        r = {"meta": {"status": "draft", "layer": "feature"}, "body": self._body(9)}
+        self.assertFalse(R._oversize("REQ-DRAFT-001", r))
+        reqs = {"REQ-DRAFT-001": r}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_next(reqs, {}, show_all=True)
+        self.assertNotIn("Granularity", buf.getvalue())
+
+    def test_decompose_covers_statement_size_only(self):  # verifies: ARCH-DECOMPOSE-050#CASE-7
+        """`--decompose` must NOT scaffold anything for an over-LINT_AC_MAX parent.
+        An `ac-count-high` triage-stub path existed briefly and was removed before it
+        shipped: it was unreachable in the live corpus (0 non-exempt oversize
+        requirements) and ADR-0022, adopted in the same change, forbids shipping on a
+        signal with no fire rate and no confirmation sample. This test is the tripwire
+        against re-adding it without meeting that bar."""
+        body = self._body(8)
+        _write(os.path.join(self.reqs_dir, "REQ-BIG-012.md"),
+               "---\nid: REQ-BIG-012\nstatus: confirmed\n---\n" + body)
+        reqs = {"REQ-BIG-012": {
+            "meta": {"status": "confirmed", "layer": "feature", "owner": "Ana"},
+            "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_lint(reqs, decompose=True, reqs_dir=self.reqs_dir)
+        out = buf.getvalue()
+        # the finding is still REPORTED (warn-only check untouched) ...
+        self.assertIn("ac-count-high", out)
+        # ... but nothing is written for it.
+        self.assertEqual(
+            sorted(f for f in os.listdir(self.reqs_dir) if f != "REQ-BIG-012.md"), [],
+            "--decompose scaffolded a file for an ac-count-high finding; that path was "
+            "removed on purpose (ADR-0022) and must not come back without its bar met")
+        self.assertNotIn("triage stub", out)
+
+    def test_no_ac_count_high_decompose_symbols_remain(self):
+        """Grep-level guard: the removed path leaves no orphan behind."""
+        src = open(R.__file__, encoding="utf-8").read()
+        for sym in ("_decompose_ac_count_high", "AC_COUNT_TRIAGE_TEMPLATE"):
+            self.assertNotIn(sym, src, "{} was reintroduced".format(sym))
+
+
+class LiveCorpusReachability(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
+    """Skeptic-stage closure: the OversizeUnify tests above run against SYNTHETIC
+    corpora that manufacture a non-exempt over-threshold parent this repo does not
+    actually have, so they stay green even if ARCH-DECOMPOSE-050's prose overclaims
+    what `--decompose` reaches in THIS corpus. This test reads the real corpus and
+    pins the honest-narrowing sentence in place: `--decompose` covers `statement-size`
+    only, and `ac-count-high` fires on nobody here."""
+
+    def test_arch_decompose_050_prose_matches_live_corpus_reachability(self):
+        real_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "requirements")
+        reqs = R.load_requirements(real_dir)
+        non_exempt_over = [rid for rid, r in reqs.items() if R._oversize(rid, r)]
+        text = open(os.path.join(real_dir, "ARCH-DECOMPOSE-050.md"), encoding="utf-8").read()
+        self.assertEqual(
+            non_exempt_over, [],
+            "the live corpus now has a non-exempt oversize requirement ({}) -- "
+            "ARCH-DECOMPOSE-050's reachability prose is stale".format(non_exempt_over))
+        self.assertIn("not currently reachable", text)
+
+
 class SpecLevel(unittest.TestCase):  # tested-by: ARCH-LEVEL-051
     """The `level:` axis: validated, optional, and granting no exemption."""
 
@@ -7180,13 +7401,42 @@ class FanOut(unittest.TestCase):  # tested-by: ARCH-FANOUT-052
         r = {"meta": {"status": "confirmed"}, "body": self._body()}
         return [f["check"] for f in R.lint_requirement("REQ-P-001", r, children=children)]
 
-    def test_too_few_children_is_reported(self):  # verifies: ARCH-FANOUT-052#CASE-1
+    def _level_checks(self, level, children):
+        r = {"meta": {"status": "confirmed", "level": level}, "body": self._body()}
+        return [f for f in R.lint_requirement("REQ-P-001", r, children=children)
+                if f["check"] == "fan-out"]
+
+    def test_too_few_children_is_reported_without_a_declared_level(self):
+        # The fallback band (5-20) still carries a floor: a repo that never adopts the
+        # `level:` axis must see exactly what it saw before (ADR-0019's doubly-opt-in rule).
         fs = [f for f in R.lint_requirement(
             "REQ-P-001", {"meta": {"status": "confirmed"}, "body": self._body()},
             children=3) if f["check"] == "fan-out"]
         self.assertEqual(len(fs), 1)
         self.assertEqual(fs[0]["severity"], "warn")
         self.assertIn("too few", fs[0]["detail"])
+
+    # Per-level ceilings, with no floor at either declared level. A blind review of all
+    # nine findings the old uniform floor produced confirmed 0 of 9 as real, and three of
+    # them had appeared *because* the corpus was correctly cleaned up — so the floor was
+    # dropped rather than retuned. See ARCH-FANOUT-052 and CHANGELOG v3.1.0.
+    def test_architecture_has_no_floor(self):  # verifies: ARCH-FANOUT-052#CASE-1
+        self.assertEqual(self._level_checks("architecture", 3), [])
+
+    def test_architecture_ceiling_is_thirty(self):  # verifies: ARCH-FANOUT-052#CASE-3
+        self.assertEqual(self._level_checks("architecture", 30), [])
+        fs = self._level_checks("architecture", 32)
+        self.assertEqual(len(fs), 1)
+        self.assertIn("too many", fs[0]["detail"])
+        self.assertIn("over 30", fs[0]["detail"])
+
+    def test_system_ceiling_is_lower_than_architecture(self):  # verifies: ARCH-FANOUT-052#CASE-6
+        self.assertEqual(self._level_checks("system", 10), [])
+        fs = self._level_checks("system", 12)
+        self.assertEqual(len(fs), 1)
+        self.assertIn("over 10", fs[0]["detail"])
+        # the same count is silent one level down — that is the point of per-level bands
+        self.assertEqual(self._level_checks("architecture", 12), [])
 
     def test_a_count_inside_the_band_is_silent(self):  # verifies: ARCH-FANOUT-052#CASE-2
         self.assertNotIn("fan-out", self._checks(8))
@@ -7263,6 +7513,43 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
                 "  Then   requests are throttled\n\n"
                 "## Members in code (auto)\n")
         self.assertEqual(R._bullets(body, "contract"), [">100 requests/sec triggers throttling."])
+
+    def _story(self, bullets, thens):
+        """An atomic body whose story quote lists `bullets` facts and whose Scenario
+        carries `thens` `Then` lines -- for the atomic-bullet-then-mismatch /
+        atomic-story-overlong fixtures below."""
+        quote = ["> The refresh does {} things:".format(bullets)]
+        quote += ["> - fact {}".format(i + 1) for i in range(bullets)]
+        scen = ["Scenario: a refresh", "  Given  a stale cache", "  When   refresh runs"]
+        scen += ["  Then   fact {} holds".format(i + 1) for i in range(thens)]
+        return "# T\n\n" + "\n".join(quote) + "\n\n" + "\n".join(scen) + "\n\n## Members in code (auto)\n"
+
+    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11
+        fs = R.lint_requirement("REQ-A-002", {"meta": {"status": "confirmed", "form": "atomic"},
+                                              "body": self._story(3, 1)})
+        self.assertIn(("warn", "atomic-bullet-then-mismatch"),
+                      [(f["severity"], f["check"]) for f in fs])
+
+    def test_atomic_story_bullets_matching_then_count_lints_clean(self):
+        fs = R.lint_requirement("REQ-A-003", {"meta": {"status": "confirmed", "form": "atomic"},
+                                              "body": self._story(2, 2)})
+        self.assertEqual(fs, [])
+
+    def test_atomic_story_bullets_at_the_ceiling_lints_clean(self):
+        # The ceiling is a CAN, not a MUST: 3 bullets (LINT_ATOMIC_STORY_BULLETS_MAX) with
+        # 3 matching Then lines is fully permitted, not just 1 or 2.
+        fs = R.lint_requirement("REQ-A-004", {"meta": {"status": "confirmed", "form": "atomic"},
+                                              "body": self._story(R.LINT_ATOMIC_STORY_BULLETS_MAX,
+                                                                   R.LINT_ATOMIC_STORY_BULLETS_MAX)})
+        self.assertEqual(fs, [])
+
+    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12
+        fs = R.lint_requirement("REQ-A-005", {"meta": {"status": "confirmed", "form": "atomic"},
+                                              "body": self._story(R.LINT_ATOMIC_STORY_BULLETS_MAX + 1,
+                                                                   R.LINT_ATOMIC_STORY_BULLETS_MAX + 1)})
+        checks = [(f["severity"], f["check"]) for f in fs]
+        self.assertIn(("warn", "atomic-story-overlong"), checks)
+        self.assertNotIn(("warn", "atomic-bullet-then-mismatch"), checks)
 
 
 class VRungs(unittest.TestCase):  # tested-by: ARCH-VRUNGS-054
@@ -7593,6 +7880,43 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
                 R.cmd_check(reqs, R.scan_members(d, d), d, False, d)
             self.assertNotIn("identical contract", buf.getvalue())
             self.assertNotIn("Redundancy", buf.getvalue())
+
+
+class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
+    """ADR-0021: the corpus grows only. Five paths create a requirement file
+    (`new`, `draft`, `init`, and `lint --decompose` on either of its two
+    triggers); none removes one. The single destructive path is `_wipe`, which
+    resets everything rather than pruning selectively.
+
+    This test is trivially green the day it is written — that is the point. It
+    fails the moment a second delete path appears, which routes the author back
+    to docs/adr/0021-corpus-grows-only-by-design.md to revisit the decision
+    deliberately instead of drifting past it."""
+
+    _DELETE_CALLS = ("os.remove", "os.unlink", "shutil.rmtree", "os.rename", "shutil.move")
+
+    def _enclosing_def(self, lines, idx):
+        """Name of the innermost top-level `def` above line *idx*, or None."""
+        for j in range(idx, -1, -1):
+            if lines[j].startswith("def "):
+                return lines[j][4:].split("(")[0]
+        return None
+
+    def test_delete_calls_live_only_in_wipe(self):
+        src = open(R.__file__, encoding="utf-8").read().split("\n")
+        offenders = []
+        for i, line in enumerate(src):
+            code = line.split("#", 1)[0]           # ignore mentions in comments
+            if not any(call + "(" in code for call in self._DELETE_CALLS):
+                continue
+            owner = self._enclosing_def(src, i)
+            if owner != "_wipe":
+                offenders.append("{}:{} in {}() -> {}".format(
+                    os.path.basename(R.__file__), i + 1, owner, line.strip()))
+        self.assertEqual(offenders, [], "\n".join(
+            ["a requirement-removing path appeared outside _wipe; ADR-0021 says the corpus",
+             "grows only. Adding one is allowed, but it supersedes that record — write the",
+             "new ADR first, then update this test:"] + offenders))
 
 
 # collected instead of 494, 16 silently skipped in the invocation

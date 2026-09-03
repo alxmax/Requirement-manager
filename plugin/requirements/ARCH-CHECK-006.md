@@ -206,34 +206,6 @@ CASE-14
 
 
 ---
-id: REQ-CHECK-271
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CHECK-006]
-superseded_by:
----
-
-# Gate reports an ERROR and exits non-zero for
-
-> `gate` reports an `ERROR` and exits non-zero for every condition in this group.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-CHECK-272
 status: draft
 form: atomic
@@ -249,10 +221,10 @@ superseded_by:
 > A dangling tag — a code tag referencing a capability no requirement defines — is such a
 > condition.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a dangling tag is a gate ERROR
+  Given  `mod.py` carrying `# implements: GHOST-CAP-001` and no such requirement
+  When   `gate` runs
+  Then   its output contains "dangling tag" and it exits 1
 
 ## Members in code (auto)
 
@@ -277,10 +249,11 @@ superseded_by:
 
 > An invalid `status` or an invalid `layer` is such a condition.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an invalid status or layer is a gate ERROR
+  Given  a requirement with `status: bogus`, and separately one with `layer: bogus`
+  When   `gate` runs on each
+  Then   each output contains "invalid status" or "invalid layer" respectively, and each
+         exits 1
 
 ## Members in code (auto)
 
@@ -305,10 +278,10 @@ superseded_by:
 
 > A `depends_on` pointing at a missing id is such a condition.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a depends_on target that does not exist is a gate ERROR
+  Given  a requirement with `depends_on: [GHOST-X-999]` and no such requirement
+  When   `gate` runs
+  Then   its output contains "depends_on missing GHOST-X-999" and it exits 1
 
 ## Members in code (auto)
 
@@ -333,10 +306,10 @@ superseded_by:
 
 > An enforced requirement with no `implements:` member is such a condition.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement with no implements tag is a gate ERROR
+  Given  a `status: confirmed` requirement with no `# implements:` tag anywhere
+  When   `gate` runs
+  Then   its output contains "no implements" and it exits 1
 
 ## Members in code (auto)
 
@@ -362,10 +335,10 @@ superseded_by:
 > A requirement is enforced when its status is `in-progress`, `implemented` or
 > `confirmed`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: ENFORCED names exactly the three enforced statuses
+  Given  the module-level `R.ENFORCED` set
+  When   it is inspected
+  Then   it equals `{"in-progress", "implemented", "confirmed"}`, and `"draft"` is absent
 
 ## Members in code (auto)
 
@@ -391,10 +364,11 @@ superseded_by:
 > A `layer: need` requirement is exempt from that `implements:` rule — see
 > [[ARCH-TRACE-020]].
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed need with no implements tag raises no gate error
+  Given  a confirmed `layer: need` requirement with no `implements:` tag, satisfied by
+         another requirement
+  When   `gate` runs
+  Then   `_link_sync_errors` reports no missing-implements error for that need
 
 ## Members in code (auto)
 
@@ -420,10 +394,12 @@ superseded_by:
 > `gate` reports drift as a `WARN`, never an error: a `confirmed` requirement whose
 > binding hash differs from the lock.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement's changed contract warns DRIFT, prefixed WARN not ERROR
+  Given  a confirmed requirement locked at an old hash, whose Description text has since
+         changed
+  When   `gate` runs
+  Then   its output contains "DRIFT" on a line printed with the "WARN" prefix, never
+         "ERROR"
 
 ## Members in code (auto)
 
@@ -448,10 +424,10 @@ superseded_by:
 
 > The drift warning names the member `file:line` locations to re-check.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the drift warning names the member's file and line
+  Given  a confirmed, drifted requirement with one member tagged at `mod.py:1`
+  When   `gate` runs
+  Then   its output contains "re-check 1 member" and "mod.py:1"
 
 ## Members in code (auto)
 
@@ -476,10 +452,11 @@ superseded_by:
 
 > A `confirmed` requirement with no `tested-by:` member is a `WARN`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement with no tested-by tag warns, not errors
+  Given  a confirmed requirement with an `implements:` tag but no `tested-by:` tag
+         anywhere, and no `test_exempt` field
+  When   `gate` runs
+  Then   its output contains "confirmed but no tested-by" and it exits 0
 
 ## Members in code (auto)
 
@@ -505,10 +482,11 @@ superseded_by:
 > A requirement carrying a `test_exempt: <reason>` opt-out in its frontmatter is exempt
 > from that test warning.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: test_exempt suppresses the no-tested-by warning
+  Given  a confirmed requirement with `test_exempt: covered by manual QA` and an
+         `implements:` tag but no `tested-by:` tag
+  When   `gate` runs
+  Then   its output contains no "tested-by" finding and it exits 0
 
 ## Members in code (auto)
 
@@ -533,10 +511,11 @@ superseded_by:
 
 > A `layer: need` requirement is exempt from it too.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed need with no tested-by tag raises no test warning
+  Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag,
+         satisfied by another requirement
+  When   `gate` runs
+  Then   its output contains no missing-tested-by warning for that need
 
 ## Members in code (auto)
 
@@ -562,10 +541,11 @@ superseded_by:
 > A `confirmed` requirement missing a `## Description` section is a `WARN`, in both
 > the `bus` and `feature` layers. It does not affect the exit code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement missing Description warns and exits 0
+  Given  a confirmed `layer: bus` requirement whose body has no `## Description`/
+         `## Contract` section
+  When   `gate` runs
+  Then   its output contains "missing '## Description'" and it exits 0
 
 ## Members in code (auto)
 
@@ -591,10 +571,11 @@ superseded_by:
 > A `confirmed` requirement missing a `## Cases` section is a `WARN`, in both
 > the `bus` and `feature` layers. It does not affect the exit code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed requirement missing Cases warns and exits 0
+  Given  a confirmed `layer: bus` requirement whose body has a Description but no
+         `## Cases`/`## Acceptance` section
+  When   `gate` runs
+  Then   its output contains "missing '## Cases'" and it exits 0
 
 ## Members in code (auto)
 
@@ -620,10 +601,10 @@ superseded_by:
 > The requirement `milestone:` field is optional. When present it matches the version
 > shape `v<digits>[.<digits>…]`, for example `v1.14`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a well-shaped milestone value is silent
+  Given  a confirmed requirement with `milestone: v1.14` (also tried: `v1.04`, `v2`)
+  When   `gate` runs
+  Then   its output contains no "malformed" finding
 
 ## Members in code (auto)
 
@@ -649,10 +630,11 @@ superseded_by:
 > A malformed `milestone:` value is a `WARN`, because that field is roadmap-only metadata
 > and never build-critical.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a malformed milestone value warns
+  Given  a confirmed requirement with `milestone: next` (also tried: `1.14`, `V1.0`,
+         `v1.14-beta`)
+  When   `gate` runs
+  Then   its output contains "malformed"
 
 ## Members in code (auto)
 
@@ -677,10 +659,10 @@ superseded_by:
 
 > A `deprecated` requirement is exempt from the `milestone:` shape check.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a deprecated requirement's malformed milestone is silent
+  Given  a `status: deprecated` requirement with `milestone: next` (malformed shape)
+  When   `gate` runs
+  Then   its output contains no "malformed" finding
 
 ## Members in code (auto)
 
@@ -706,10 +688,10 @@ superseded_by:
 > A present-but-unreadable `_reqlock.json` is a `WARN`. Drift is skipped for that run
 > rather than crashing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a corrupt _reqlock.json warns and does not crash the gate
+  Given  a `_reqlock.json` containing invalid JSON ("{ not json")
+  When   `gate` runs
+  Then   its output contains "unreadable" and it exits 0
 
 ## Members in code (auto)
 
@@ -735,39 +717,11 @@ superseded_by:
 > A lock sidecar (`_reqlock.json` or `_memberlock.json`) that exists on disk but is **not
 > git-tracked** is a `WARN` naming the file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-CHECK-290
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CHECK-006]
-superseded_by:
----
-
-# An uncommitted lock silently disables drift detection on
-
-> An uncommitted lock silently disables drift detection on a fresh CI checkout, which has
-> no baseline to compare against.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an untracked lock file is flagged, then clears once tracked
+  Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed
+  When   `untracked_locks(reqs_dir)` runs before and after `git add -A`
+  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap
+         where a fresh CI checkout would otherwise have no baseline for drift detection
 
 ## Members in code (auto)
 
@@ -793,10 +747,10 @@ superseded_by:
 > That git-tracking check is fail-open: `gate` stays silent when git is unavailable or the
 > tree is not a work tree.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the untracked-lock check is silent outside a git work tree
+  Given  a `_reqlock.json` written to a plain directory that is not yet a git repository
+  When   `untracked_locks(reqs_dir)` runs
+  Then   it returns `[]`, not an error
 
 ## Members in code (auto)
 
@@ -822,10 +776,11 @@ superseded_by:
 > `gate` names every requirement whose body lacks a `## Verify intent` section in
 > one aggregated legacy-schema `WARN`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a requirement missing Verify intent is named in the legacy-schema warning
+  Given  a requirement whose body has no `## Verify intent` section
+  When   `gate` runs
+  Then   its output contains "legacy schema" naming that requirement's id, and "findings`
+         is inactive"
 
 ## Members in code (auto)
 
@@ -850,10 +805,10 @@ superseded_by:
 
 > `gate` counts those legacy-schema requirements in the summary.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the summary line reports the legacy-schema count
+  Given  one requirement whose body has no `## Verify intent` section
+  When   `gate` runs
+  Then   its final summary line contains "1 legacy-schema"
 
 ## Members in code (auto)
 
@@ -878,10 +833,10 @@ superseded_by:
 
 > The legacy-schema warning does not affect the exit code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a legacy-schema requirement warns but the gate exits 0
+  Given  a `status: baseline` requirement with no `## Verify intent` section
+  When   `gate` runs
+  Then   its output contains "legacy schema" and it exits 0
 
 ## Members in code (auto)
 
@@ -907,10 +862,11 @@ superseded_by:
 > A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo
 > carries at least one such tag (see [[ARCH-VLEVEL-037]]).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unvalidated confirmed need warns once the repo has opted in
+  Given  a confirmed need with no `validated-against:` tag, in a repo where at least one
+         `validated-against:` tag exists elsewhere
+  When   `gate` runs
+  Then   its output names that need alongside "validated-against"
 
 ## Members in code (auto)
 
@@ -936,10 +892,11 @@ superseded_by:
 > A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a
 > `WARN`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a bus requirement verified only at @system warns
+  Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is
+         `@system`
+  When   `gate` runs
+  Then   its output contains "@system"
 
 ## Members in code (auto)
 
@@ -964,10 +921,11 @@ superseded_by:
 
 > A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a depends_on cycle warns once, naming the whole chain
+  Given  two requirements whose `depends_on` fields point at each other
+  When   `gate` runs
+  Then   its output contains "depends_on cycle" and "A-X-001 -> A-X-002 -> A-X-001", and
+         it exits 0
 
 ## Members in code (auto)
 
@@ -993,10 +951,10 @@ superseded_by:
 > The cycle warning stays a warning under `--strict`, so an existing corpus keeps its exit
 > code when the engine is upgraded.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --strict does not promote the cycle warning to an error
+  Given  two requirements whose `depends_on` fields point at each other
+  When   `gate --strict` runs
+  Then   it still exits 0
 
 ## Members in code (auto)
 
@@ -1022,10 +980,10 @@ superseded_by:
 > `gate` prints an advisory line carrying the open verify-intent finding count when that
 > count is above zero.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate reports the open verify-intent finding count
+  Given  a requirement with one open `## Verify intent` question
+  When   `gate` runs
+  Then   its output contains "1 open verify-intent finding(s)"
 
 ## Members in code (auto)
 
@@ -1050,10 +1008,11 @@ superseded_by:
 
 > That advisory line does not affect the exit code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an open verify-intent finding does not change an otherwise-clean exit code
+  Given  a `baseline` requirement with one open `## Verify intent` question and no other
+         gate finding
+  When   `gate` runs
+  Then   it prints the finding count and returns exit code 0
 
 ## Members in code (auto)
 
@@ -1078,10 +1037,11 @@ superseded_by:
 
 > `gate` prints a summary of requirements, members, errors and warnings.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the summary line reports the confirmed and legacy-schema counts
+  Given  one confirmed requirement (implemented) and one baseline requirement, both in
+         the current schema
+  When   `gate` runs
+  Then   its final line contains "1 confirmed" and "0 legacy-schema"
 
 ## Members in code (auto)
 
@@ -1107,10 +1067,10 @@ superseded_by:
 > With `--update-lock`, `gate` writes the current binding hashes to
 > `requirements/_reqlock.json`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --update-lock writes the requirement's hash into the lock
+  Given  a `baseline` requirement with no existing lock entry
+  When   `cmd_check(..., update_lock=True)` runs
+  Then   `load_lock(d)` afterward contains that requirement's id
 
 ## Members in code (auto)
 
@@ -1135,10 +1095,11 @@ superseded_by:
 
 > `sync` and the deprecated `check` alias pass `--update-lock`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a clean sync run advances the lock and regenerates the map
+  Given  a clean corpus (no gate errors)
+  When   `reqmap sync --root <d> --code <d>` runs
+  Then   it exits 0 and `requirements/_map.json` exists, confirming the full
+         check-with-lock-then-map pipeline ran
 
 ## Members in code (auto)
 
@@ -1163,9 +1124,9 @@ superseded_by:
 
 > The `gate` verb itself is report-only.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate verb never writes lock updated
+  Given  a plain draft requirement, no `--update-lock` flag
+  When   `reqmap.py gate --root <d>` runs
+  Then   it exits 0 and its stdout contains no "lock updated" line
 
 ## Members in code (auto)

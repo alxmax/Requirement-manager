@@ -134,10 +134,11 @@ superseded_by:
 > (`{"_schema": N, "members": {id: {relfile: sha}}}`), so `_reqlock.json` stays a
 > byte-stable cross-repo contract that an older seeded engine reads unchanged.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: member hashes live in a separate versioned sidecar
+  Given  a repo where `sync --update-lock` has run
+  When   the requirements directory is inspected
+  Then   `_memberlock.json` exists separately from `_reqlock.json`, holding `{"_schema": N,
+         "members": {...}}`
 
 ## Members in code (auto)
 
@@ -164,10 +165,11 @@ superseded_by:
 > `_schema` than the engine knows — degrading to "reverse-drift off this run" rather than
 > crashing or mis-comparing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an absent, corrupt or newer-schema sidecar loads as empty
+  Given  `_memberlock.json` is missing, and separately a copy whose `_schema` is above the
+         engine's known value
+  When   the sidecar is loaded
+  Then   both cases yield an empty member map rather than an error
 
 ## Members in code (auto)
 
@@ -194,10 +196,11 @@ superseded_by:
 > `implements:`/`generated-from:` member of exactly one id); a file shared by several
 > requirements is excluded, because a change there cannot be attributed without noise.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only single-requirement member files get a hash
+  Given  a file that is the sole `implements:` member of one requirement, and a file shared by
+         two requirements
+  When   member hashes are computed
+  Then   the sidecar records the dedicated file's hash and omits the shared file
 
 ## Members in code (auto)
 
@@ -226,10 +229,10 @@ superseded_by:
 > drift, which `--strict` escalates to errors — mirrors the contract hash, already
 > LF-normalized via the text-mode body parse.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: member hashes are stable across line-ending styles
+  Given  the same member content saved once with LF endings and once with CRLF endings
+  When   the member hash is computed for each
+  Then   both hashes are identical
 
 ## Members in code (auto)
 
@@ -256,10 +259,11 @@ superseded_by:
 > sidecar while the requirement's own contract hash did not. A requirement whose contract
 > also drifted is skipped (forward drift already owns it).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate warns only when the member drifted and the contract did not
+  Given  a confirmed requirement whose dedicated member changed while its contract hash is
+         unchanged, and a second requirement where both drifted
+  When   member drift is computed
+  Then   the first pair is reported and the second is skipped
 
 ## Members in code (auto)
 
@@ -285,10 +289,10 @@ superseded_by:
 > A member with no recorded baseline does not warn, so a freshly-tagged file is baselined
 > on the next sync rather than nagged on first sight.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a member with no sidecar baseline is silent
+  Given  a freshly-tagged member file absent from `_memberlock.json`
+  When   member drift is computed
+  Then   it produces no warning
 
 ## Members in code (auto)
 
@@ -314,10 +318,10 @@ superseded_by:
 > The check is warn-only by default and is promoted to an error under `--strict` (it joins
 > the same strict set as contract drift).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: member drift is a warning by default and an error under --strict
+  Given  a baselined dedicated member that was then edited
+  When   `gate` runs, then `gate --strict` runs
+  Then   the first exits 0 with a warning and the second exits non-zero
 
 ## Members in code (auto)
 
@@ -342,9 +346,10 @@ superseded_by:
 
 > `--update-lock` re-baselines the sidecar in lockstep with `_reqlock.json`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --update-lock re-baselines both lock files together
+  Given  a dedicated member edited since the last sidecar baseline
+  When   `sync --update-lock` runs
+  Then   `_memberlock.json`'s hash for that file matches its current content, alongside
+         `_reqlock.json`'s refresh
 
 ## Members in code (auto)

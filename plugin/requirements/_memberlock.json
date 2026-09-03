@@ -20,7 +20,7 @@
     "ARCH-VIEWER-007": {
       "app/scripts/install-viewer.mjs": "87088a30e7653b152155ea32d146f8f34f3542e949b22c9a2654317f5dbdda69",
       "app/src/App.jsx": "696b41461c83f808e56ea949753252daa714bf243b313e5602784f3036e2c6b0",
-      "app/src/lib/data.js": "c5908655c2334f804e1f4b15193885a11648d04e4ff72649d70f310a1f5be7e3",
+      "app/src/lib/data.js": "bfb7f5b3dc19421934a33da2e7b4e458ad9ac14ac7e81be0f1c6e8899db27bd5",
       "app/src/lib/icons.jsx": "6b4eb4b3b97949401faf5859d20593fac59f5951111307469c1844e127671b4d",
       "app/src/lib/layout.js": "277ea332c2c50a5ca328b65119a95216069de62d6318e79d5f02c951c227bca6",
       "app/src/lib/loadData.js": "f74c509fbaaf3fc5c80c7d9fe2f85059fdc61465e744fa3c2e8a4949ca61e8f1",
@@ -32,7 +32,7 @@
       "app/src/styles/colors_and_type.css": "3cbe4baad40046b946283376e20a41d43ee77cd7ebd9b138e31e4c7ea3342a04",
       "app/src/views/ExplorerView.jsx": "2e0b24c2822ddfa6f4cc01b732d87302e3c9769abea4619ffd75c90969b72bc9",
       "app/src/views/FindingsView.jsx": "10d407a2bcf242236db5d5502e87c4776d9c79491947e21e1a6030c08e15f67e",
-      "app/src/views/MapView.jsx": "78a59f0267e5f1f0a73009e35974b24c657493ba350c82adaf119afd1e4d0d85",
+      "app/src/views/MapView.jsx": "256cce24d0638bb71dc5ad2fd85a01cae4e883bcd563a5bb20359e2c864db28b",
       "app/src/views/ProblemsView.jsx": "0db01cc7f7c398ea6f8fd14f4c4cdcf639bacfe95cc0907c6f00df66f0459ab2",
       "app/src/views/RoadmapView.jsx": "b6458cdc828ffdfd13eb39fe581f902ec96b5366b257aa215fc6eef71339884b",
       "app/vite.viewer.config.js": "0cdcb9953b91d24d45dc42ea5d3ab06dcacf40a12309ef1c2bdbc4dd9eb1b5f9"

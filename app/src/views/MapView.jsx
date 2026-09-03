@@ -101,8 +101,11 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
         <button className="btn-icon bare x" title={t("close")} onClick={onClose}><Icon name="x" size={16} /></button>
       </div>
       <h2>{r.title}</h2>
-      <div className="lbl">{t("Why — Intent")}</div>
-      <p className="why">{r.intent}</p>
+      {/* absent for an atomic requirement, whose quote is its obligation — see _distinct_intent */}
+      {r.intent && <>
+        <div className="lbl">{t("Why — Intent")}</div>
+        <p className="why">{r.intent}</p>
+      </>}
 
       <div className="lbl">{t("Description")}</div>
       <ul>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>

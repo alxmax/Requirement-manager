@@ -116,10 +116,10 @@ superseded_by:
 > file; it never invokes an LLM. `review` (no arg) covers the whole corpus; `review <ID>`
 > covers one requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: review is deterministic, read-only and LLM-free
+  Given  any corpus
+  When   `review` runs twice with no edit between the runs
+  Then   both runs print byte-identical JSON to stdout, create no file, and make no network call
 
 ## Members in code (auto)
 
@@ -148,10 +148,10 @@ superseded_by:
 > more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`,
 > `requirements_in_plan`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan carries prose, structural anchors and a coverage summary
+  Given  one requirement in the corpus
+  When   `review <ID>` runs
+  Then   its JSON entry carries title, WHY, contract, acceptance, contract-clause count and acceptance count
 
 ## Members in code (auto)
 
@@ -180,10 +180,12 @@ superseded_by:
 > emitted, and severity is advisory-only (never `error`/`warn`, never carried in the
 > engine's severity vocabulary).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan names the three AI categories and the finding contract
+  Given  the emitted review plan
+  When   it is inspected
+  Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`,
+         each requiring a `suggested_rewrite` and mandatory human review as its
+         false-positive safeguard, never an LLM confidence value
 
 ## Members in code (auto)
 
@@ -210,10 +212,10 @@ superseded_by:
 > LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) reads,
 > writes, or regenerates the plan or any AI sidecar.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan is byte-identical across runs and gate never reads it
+  Given  the same corpus and an absent `_ai_review.md` sidecar
+  When   `review` runs twice, then `gate` runs
+  Then   the two `review` outputs are byte-identical and `gate`'s output is unaffected by the sidecar's absence
 
 ## Members in code (auto)
 
@@ -239,41 +241,10 @@ superseded_by:
 > `gate` behaves identically whether or not an AI sidecar (`requirements/_ai_review.md`)
 > is present.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REVIEW-629
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REVIEW-022]
-superseded_by:
----
-
-# The AI pass is non-deterministic and advisory: its
-
-> The AI pass is non-deterministic and advisory: its findings carry an unbounded
-> false-positive rate. The near-zero-false-positive property comes from MANDATORY human
-> review of each `suggested_rewrite`, not from any LLM confidence value (which is
-> uncalibrated triage only).
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate ignores the AI sidecar file entirely
+  Given  `gate` run once with no `_ai_review.md` and once with one present
+  When   both runs complete
+  Then   their exit codes and printed output are byte-identical
 
 ## Members in code (auto)
 
@@ -299,37 +270,6 @@ superseded_by:
 > The AI consumer (the `requirement-quality-review` skill) writes findings to a separate,
 > clearly-labelled "AI — advisory (non-deterministic)" sidecar — never `_findings.md`
 > (which stays deterministic) and never the gate — and never auto-edits a requirement.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REVIEW-631
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REVIEW-022]
-superseded_by:
----
-
-# Review is distinct from show: show is a
-
-> `review` is distinct from `show`: `show` is a human single-requirement dossier; `review`
-> is a machine corpus plan with structural anchors, a coverage summary and category
-> guidance for an out-of-band AI consumer — a different audience and shape, so they are
-> not merged.
 
 Scenario: TODO — state the observable that proves this
   Given  <precondition>

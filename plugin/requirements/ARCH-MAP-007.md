@@ -58,6 +58,13 @@ Every bullet below is binding.
 - Position decides a label, not the bold markers alone. An indented wrapped line folds
   even when it opens and closes on bold spans, so a two-part clause keeps both halves.
 
+**Intent, only when it is not the contract**
+- The `intent` field carries a requirement's first blockquote, joined into one line.
+- The `intent` field is empty when that quote and the Contract say the same thing.
+- An atomic requirement is that case: its quote is its single obligation, so the map
+  emits the text once, under `contract`.
+- `show` follows the same rule, printing no intent line above a Contract that repeats it.
+
 **Freshness**
 - `map --check` fails when a committed generated file differs from a fresh render.
 - The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
@@ -90,6 +97,16 @@ CASE-3
   Then   it round-trips through `_map.json` as data (no injection), a lone surrogate is
          written as U+FFFD rather than failing the write, and a node with no members
          reports an empty member list
+
+CASE-4
+  Given  an atomic requirement whose quote and single Contract clause are the same text
+  When   `map` runs
+  Then   that node's `intent` is empty and its `contract` still carries the clause
+
+CASE-5
+  Given  a sectioned requirement whose quote is rationale distinct from its clauses
+  When   `map` runs
+  Then   that node's `intent` carries the quote unchanged
 
 ## Context (non-binding)
 **Notes**
@@ -140,38 +157,10 @@ superseded_by:
 > `map` generates `_map.json` under `requirements/`, and `export` writes the same file
 > alone.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-477
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# _map.json is a derived view. It is regenerated
-
-> `_map.json` is a derived view. It is regenerated, never edited.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map and export both produce _map.json
+  Given  a corpus of requirements
+  When   `map` runs, and separately `export` runs
+  Then   both write `requirements/_map.json`, and `export` writes no other file
 
 ## Members in code (auto)
 
@@ -196,10 +185,10 @@ superseded_by:
 
 > `_map.json` carries one node per requirement and one edge per `depends_on`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the graph has one node per requirement and one edge per dependency
+  Given  a corpus of N requirements carrying a total of M `depends_on` links
+  When   `map` runs
+  Then   `_map.json` holds exactly N nodes and M edges
 
 ## Members in code (auto)
 
@@ -226,10 +215,10 @@ superseded_by:
 > Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
 > `used_by`, and risk signals.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a node carries its full requirement metadata
+  Given  a requirement with an id, layer, status, area, title, Contract clauses and members
+  When   `map` runs
+  Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals
 
 ## Members in code (auto)
 
@@ -255,10 +244,10 @@ superseded_by:
 > A node's `acc` list carries one entry per acceptance criterion, whether the criterion is
 > written as a labelled `AC-N` block or as a bullet.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: acc lists one entry per criterion in either acceptance form
+  Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance
+  When   `map` runs
+  Then   each node's `acc` list has exactly one entry per criterion, in both requirements
 
 ## Members in code (auto)
 
@@ -284,38 +273,11 @@ superseded_by:
 > `_map.json` carries a top-level `repo` field: a best-effort `owner/repo`, else the repo
 > directory name, else null.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-482
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Repo identifies the project the map describes, for
-
-> `repo` identifies the project the map describes, for display in the viewer header.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: repo resolves to the git remote's owner/repo
+  Given  a git checkout whose remote `origin` points at `owner/repo`
+  When   `map` runs
+  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project
+         for display in the viewer header
 
 ## Members in code (auto)
 
@@ -341,10 +303,10 @@ superseded_by:
 > `repo` is derived from the git remote, so it differs across forks and clones. It is
 > therefore excluded from the `map --check` freshness diff.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a changed repo field never trips map --check
+  Given  a committed `_map.json` and a fresh render whose only difference is the `repo` field
+  When   `map --check` runs
+  Then   it reports no staleness
 
 ## Members in code (auto)
 
@@ -370,10 +332,10 @@ superseded_by:
 > Resolving `repo` never raises and never blocks map generation, because git may be absent
 > or the tree may not be a checkout.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map succeeds when the tree has no git remote
+  Given  a working tree with no `.git` directory
+  When   `map` runs
+  Then   it completes without raising, and `_map.json`'s `repo` field is null
 
 ## Members in code (auto)
 
@@ -400,10 +362,10 @@ superseded_by:
 > the vendored engine alone never makes a committed map stale; the next `sync` refreshes
 > it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a changed engine_version never trips map --check
+  Given  a committed `_map.json` and a fresh render whose only difference is `engine_version`
+  When   `map --check` runs
+  Then   it reports no staleness
 
 ## Members in code (auto)
 
@@ -430,10 +392,10 @@ superseded_by:
 > `_parse_todos`, so the viewer's Roadmap tab can show planned work alongside
 > requirements.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map derives the todos array from TODO.md
+  Given  a `TODO.md` with one open item under a milestone section
+  When   `map` runs
+  Then   `_map.json`'s top-level `todos` array contains that item
 
 ## Members in code (auto)
 
@@ -459,10 +421,10 @@ superseded_by:
 > Reading a requirement's clauses folds a wrapped line back into the clause above it, so a
 > multi-line clause is never truncated to its first physical line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a wrapped clause line folds into the clause above it
+  Given  a Contract clause written across two physical lines, the second indented
+  When   the requirement is parsed
+  Then   the clause reads as one unbroken sentence, never truncated to its first line
 
 ## Members in code (auto)
 
@@ -488,10 +450,10 @@ superseded_by:
 > A clause-group label groups the clauses below it: a bold-only line written flush left. A
 > label is a heading, not a clause, and never folds into the clause above.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a flush-left bold line reads as a group label, not a clause
+  Given  a Contract section with a bold-only line flush left, followed by indented clauses
+  When   the requirement is parsed
+  Then   the bold line neither folds into the clause above it nor appears itself as a clause
 
 ## Members in code (auto)
 
@@ -517,10 +479,11 @@ superseded_by:
 > Position decides a label, not the bold markers alone. An indented wrapped line folds
 > even when it opens and closes on bold spans, so a two-part clause keeps both halves.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an indented bold-opening continuation folds by position
+  Given  a clause whose wrapped continuation line is indented and both opens and closes on bold
+         text
+  When   the requirement is parsed
+  Then   the continuation folds into the clause above, keeping both halves in one clause
 
 ## Members in code (auto)
 
@@ -545,10 +508,10 @@ superseded_by:
 
 > `map --check` fails when a committed generated file differs from a fresh render.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map --check fails on a stale committed generated file
+  Given  a committed `_map.json` that differs from a fresh render
+  When   `map --check` runs
+  Then   it exits non-zero and names the stale file
 
 ## Members in code (auto)
 
@@ -574,38 +537,10 @@ superseded_by:
 > The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
 > cannot be surprised by that failure in CI.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-492
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# The gate never regenerates the map. It only
-
-> The gate never regenerates the map. It only reports.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate warns about a stale map without failing the commit
+  Given  a committed `_map.json` that differs from a fresh render
+  When   `gate` runs
+  Then   it prints a staleness warning, exits 0, and leaves `_map.json` unmodified
 
 ## Members in code (auto)
 
@@ -631,9 +566,9 @@ superseded_by:
 > All requirement-derived text is JSON-encoded in `_map.json`, which neutralizes any
 > hostile id, title or body by construction. There is no markup context to break out of.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: hostile title text is neutralized by JSON encoding
+  Given  a requirement whose title contains `</script>` and an embedded quote
+  When   `map` runs
+  Then   `_map.json` stores that title as a JSON string with no unescaped markup break-out
 
 ## Members in code (auto)

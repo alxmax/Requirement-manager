@@ -156,6 +156,37 @@ LEVEL_TEST_PAIR = {"system": "system", "architecture": "integration", "code": "u
 # malformed parent, it is simply not a parent.
 LINT_FANOUT_MIN = 5
 LINT_FANOUT_MAX = 20
+# Per-level CEILINGS, keyed on the PARENT's `level:`. `None` means no floor at that level.
+# One band for the whole hierarchy was wrong in both directions: an architecture requirement
+# groups detailed design, where a dozen children is ordinary, while a system need groups
+# architecture, where ten is already a lot.
+#
+# The floor is gone because the corpus's own shape refutes it (ADR-0023 — read it before
+# restoring one). Measured at b0ce92b over the `satisfies:` graph, the old uniform band
+# produced 10 findings: 7 below the floor and 3 above the ceiling. The floor is
+# anti-correlated with corpus quality — several of those 7 appeared *because* commits
+# e254a34 and 72213fc folded away leaves that should not have existed, dropping their
+# parents from 5 children to 4. A check that gets louder as the corpus gets better is
+# measuring the wrong thing. In this corpus a child count is also a CLAUSE count, since the
+# `satisfies:` children were derived roughly one per Description bullet, so the floor
+# measures what `ac-count-high` already measures on the other axis. And the distribution
+# has no floor to find: 3:1, 4:6, 5:5, 6:8, 7:5, 8:9 is continuous. ADR-0019 pre-committed
+# the response: "the band is wrong for this shape of corpus and should be widened or
+# dropped — not lived with."
+#
+# NOTE: an earlier version of this comment claimed "a blind review confirmed 0 of 9 as
+# real". That figure was withdrawn — no commit ever produced 9 FLOOR findings (4, then 6,
+# then 7 as the corpus changed), and the one flag it called plausibly real, ARCH-CHECK-006,
+# is a CEILING finding. The floor rests on the distribution and the anti-correlation above,
+# both of which reproduce from a sha and a filter.
+#
+# The ceiling stays: the distribution DOES break at 19 -> 22 -> 23 -> 32, and the single
+# finding above it is ARCH-CHECK-006 at 32, which is real and left standing.
+# Measured after this change: 1 finding over 72 lintable requirements.
+# A parent with no `level:` keeps the uniform 5-20 band — the level axis stays doubly
+# opt-in (ADR-0019), so a repo that never declares it sees exactly what it saw before, and
+# this corpus's evidence is not silently imposed on a corpus shaped differently.
+LINT_FANOUT_BANDS = {"system": (None, 10), "architecture": (None, 30)}
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
@@ -185,7 +216,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.8"
+MAP_ENGINE_VERSION = "2026-09-03.15"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1839,6 +1870,33 @@ def _atomic_spans(body):  # implements: ARCH-ATOMICFORM-053
     return story, scen
 
 
+_ATOMIC_THEN_RE = re.compile(r"^then\b", re.I)
+
+
+def _atomic_story_bullets(story_lines):  # implements: ARCH-ATOMICFORM-053
+    """Count of `- ` facts enumerated inside an atomic story's `>` blockquote.
+
+    Mirrors `_bullets`' `>`-marker normalization (strip, then only the leading
+    literal `>` chars, never a `"> "` char class — see the
+    `bullets-lstrip-char-class` regression test) so the two never disagree on
+    where the marker ends and the content begins. `_bullets` itself JOINS every
+    story line into one clause and cannot see these; this is the one reader
+    that counts them."""
+    n = 0
+    for line in story_lines:
+        s = line.strip().lstrip(">").strip()
+        if s.startswith("- "):
+            n += 1
+    return n
+
+
+def _atomic_scenario_then_count(scen_lines):  # implements: ARCH-ATOMICFORM-053
+    """Count of `Then`-led lines in an atomic Scenario block — one per proven fact.
+    A wrapped continuation line of the same step does not open with the
+    keyword and is not counted separately."""
+    return sum(1 for line in scen_lines if _ATOMIC_THEN_RE.match(line.strip()))
+
+
 def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
@@ -2165,6 +2223,30 @@ def _impl_exempt(meta):  # implements: ARCH-TRACE-020
     exists to promote it — `SYS-SSOT-001` is `confirmed` here only because the file
     was hand-edited around `confirm`."""
     return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
+
+
+def _oversize(rid, r, threshold=None):  # implements: ARCH-DECOMPOSE-050  # implements: ARCH-NEXT-013
+    """True when a requirement is over the shared AC-count threshold and neither
+    scoped out by status nor exempted from the check.
+
+    One predicate, two callers (`cmd_next`'s Granularity bucket and
+    `lint_requirement`'s `ac-count-high` check) - they disagreed before: `next`
+    iterated every status with no exempt check, `lint` scoped to `LINT_STATUSES`
+    and honored `lint_exempt`, so the two commands could and did report different
+    sets for the same corpus. Scoped to `LINT_STATUSES` like every other lint
+    check (drafts are TODO stubs, not yet-scoped contracts - pinned down
+    explicitly per Control's mandatory dissent, not left to fall out of an
+    unscoped iteration by accident) and reads `lint_exempt` with the same
+    `_as_list` handling `lint_requirement` already uses, so a scalar-string
+    exemption behaves identically to a one-item list here too."""
+    meta = r.get("meta") or {}
+    if meta.get("status") not in LINT_STATUSES:
+        return False
+    if threshold is None:
+        threshold = LINT_AC_MAX
+    if _count_ac(r.get("body", "")) <= threshold:
+        return False
+    return "ac-count-high" not in set(_as_list(meta.get("lint_exempt")))
 
 
 def _test_link_problem(path):  # implements: ARCH-TESTLINK-018
@@ -2846,7 +2928,7 @@ def _set_frontmatter_status(text, value):  # implements: ARCH-PROMOTE-011
     return new_head + rest, n
 
 
-def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
+def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # implements: REQ-PROMOTE-567
     """Flip a requirement's status to `confirmed` (the human-validation step) by a
     single frontmatter edit. Refuses if the requirement has no `implements:` member
     (a confirmed requirement must point to code — else the gate would error), and
@@ -3587,7 +3669,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007
             "status": m.get("status", "draft"),
             "area": (m.get("area") or "").strip() or _area_of(rid),
             "title": _title(r["body"]),
-            "intent": _first_quote(r["body"]),
+            "intent": _distinct_intent(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS),
             "verify": _bullets(r["body"], "verify intent"),
@@ -4166,12 +4248,14 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else []
-    # Granularity advisory: requirements with many ACs covering disjoint behaviors
-    AC_SPLIT_THRESHOLD = 5
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors.
+    # Shares `_oversize` with lint's `ac-count-high` check (same threshold, same
+    # LINT_STATUSES scoping, same `lint_exempt` honoring) so `next` and `lint`
+    # can never report a different set for the same corpus.
     oversize = sorted(
         [(rid, _count_ac(r["body"]))
          for rid, r in reqs.items()
-         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
+         if _oversize(rid, r)],
         key=lambda x: (-x[1], x[0])
     )
     # The other direction of the same concern: covering the code with FEWER requirements.
@@ -4221,9 +4305,10 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         if not show_all and len(oversize) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
         print(
-            "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
-            "is a split candidate. Author two requirements, each with its own contract.\n"
-            .format(AC_SPLIT_THRESHOLD)
+            "  -> A requirement with more than {} acceptance criteria covering disjoint "
+            "behaviors is a split candidate. Author two requirements, each with its own "
+            "contract.\n"
+            .format(LINT_AC_MAX)
         )
     if redundant:
         spare = sum(len(g) - 1 for g in redundant)
@@ -4264,6 +4349,10 @@ LINT_STATEMENT_WORDS = 150     # a Contract CLAUSE — continuation lines joined
                                # threshold an explicit heuristic, so a longer clause stays valid.
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+LINT_ATOMIC_STORY_BULLETS_MAX = 3   # an atomic story quote may enumerate up to this many
+                               # `- ` facts before it is no longer one obligation (warn,
+                               # 'atomic-story-overlong'); each fact under the ceiling needs
+                               # its own `Then` line or 'atomic-bullet-then-mismatch' fires
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
                                # is the composite 'over-scoped' cohesion signal (warn)
 LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
@@ -4493,11 +4582,35 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "severity": "warn", "check": "ac-count-low",
                 "detail": "{} AC (< {}): requirement may be under-specified".format(
                     ac_n, LINT_AC_MIN)})
-        elif ac_n > LINT_AC_MAX:
+        elif _oversize(rid, r):
             findings.append({
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # atomic bullet/Then parity (warn, --strict-promotable): the atomic form's `>` story
+    # quote may enumerate up to LINT_ATOMIC_STORY_BULLETS_MAX facts, but every existing
+    # signal is blind to whether each one is actually proven — `_count_ac` counts the ONE
+    # Scenario regardless of how many facts the story bundles into it, and `ac-count-low`
+    # explicitly exempts the atomic form. A 3-bullet story with a single `Then` passed every
+    # check that existed before this one (the REQ-FANOUT-391/392 shape: a leaf asserted
+    # behavior its parent forbade, and nothing caught it).
+    _sp = _atomic_spans(body)
+    if _sp:
+        _story_lines, _scen_lines = _sp
+        _bn = _atomic_story_bullets(_story_lines)
+        _tn = _atomic_scenario_then_count(_scen_lines)
+        if _bn > LINT_ATOMIC_STORY_BULLETS_MAX:
+            findings.append({
+                "severity": "warn", "check": "atomic-story-overlong",
+                "detail": "{} bullets in the story quote (> {}): no longer a single "
+                          "obligation — split it into its own requirements".format(
+                              _bn, LINT_ATOMIC_STORY_BULLETS_MAX)})
+        elif _bn > 1 and _bn != _tn:
+            findings.append({
+                "severity": "warn", "check": "atomic-bullet-then-mismatch",
+                "detail": "{} bullets in the story quote but {} 'Then' line(s) in the "
+                          "Scenario — each enumerated fact needs its own Then".format(
+                              _bn, _tn)})
     # cohesion (warn): over BOTH the contract and acceptance ceilings at once is a strong
     # "several capabilities bundled into one" signal — each contract clause is a separate
     # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
@@ -4532,14 +4645,20 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     # `depends_on` depth here maxes out at 3, so a band of 5-20 read against it would flag
     # every requirement in the corpus. A leaf (zero children) is skipped: it is not a
     # malformed parent, it is not a parent at all.
+    # The band depends on which level the parent sits at — see LINT_FANOUT_BANDS. A parent
+    # declaring no level keeps the uniform band it always had.
+    _lo, _hi = LINT_FANOUT_BANDS.get(r["meta"].get("level"), (LINT_FANOUT_MIN, LINT_FANOUT_MAX))
     if children:
-        if not (LINT_FANOUT_MIN <= children <= LINT_FANOUT_MAX):
+        if _lo is not None and children < _lo:
             findings.append({
                 "severity": "warn", "check": "fan-out",
-                "detail": "{} requirement(s) satisfy this one (outside {}-{}): {}".format(
-                    children, LINT_FANOUT_MIN, LINT_FANOUT_MAX,
-                    "too few to be a level" if children < LINT_FANOUT_MIN
-                    else "too many — split it")})
+                "detail": "{} requirement(s) satisfy this one (below {}): too few to be "
+                          "a level".format(children, _lo)})
+        elif children > _hi:
+            findings.append({
+                "severity": "warn", "check": "fan-out",
+                "detail": "{} requirement(s) satisfy this one (over {}): too many — "
+                          "split it".format(children, _hi)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
@@ -4724,6 +4843,16 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: AR
     return new_id
 
 
+# NOTE: `--decompose` deliberately covers `statement-size` ONLY. An `ac-count-high`
+# triage-stub path was written and then removed before it ever shipped: `_oversize`
+# fires on 0 of this corpus's 72 lintable requirements (all six over LINT_AC_MAX
+# carry `lint_exempt: [ac-count-high]`), so the path was unreachable, and ADR-0022 —
+# adopted in the same change — forbids shipping on a signal with no published fire
+# rate AND no human-confirmation sample. `ac-count-high` had a 0.0% post-exempt rate
+# and no independent sample, which is the profile ADR-0022 used to REJECT its sibling
+# proposal. Re-adding it needs that ADR's bar met first, not a code review.
+
+
 def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
@@ -4735,12 +4864,15 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
     active exemptions are printed after the requirement header.
     The default run writes nothing. With `decompose` (the opt-in `--decompose` flag) each
-    `statement-size` finding also scaffolds one draft requirement from its clause. The gate,
-    the pre-commit hook and CI never pass it: .githooks/pre-commit runs gate -> lint --strict
-    -> map --check, so a file written during the lint step would fail the map --check step of
-    the same hook run (ARCH-DECOMPOSE-050)."""
+    `statement-size` finding scaffolds one draft requirement from its clause. It covers
+    that check ONLY - see the note above `cmd_lint` for why `ac-count-high` does not get
+    the same treatment. The gate, the pre-commit hook and CI never pass it:
+    .githooks/pre-commit runs gate -> lint --strict -> map --check, so a file written
+    during the lint step would fail the map --check step of the same hook run
+    (ARCH-DECOMPOSE-050)."""
     # Checks promoted from warn→error in --strict mode (structural, not style).
-    STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
+    STRICT_PROMOTE = {"ac-count-high", "over-scoped",
+                       "atomic-bullet-then-mismatch", "atomic-story-overlong"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
     fanin = {rid: 0 for rid in reqs}                      # implements: ARCH-LINTCHECKS-025
@@ -4774,15 +4906,14 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
             print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
         if decompose and reqs_dir:
             for f in fs:
-                if f["check"] != "statement-size":
-                    continue
-                made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
-                if made:
-                    created.append(made)
-                    print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
-                        made, f["clause_n"]))
-                else:
-                    print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
+                if f["check"] == "statement-size":
+                    made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
+                    if made:
+                        created.append(made)
+                        print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
+                            made, f["clause_n"]))
+                    else:
+                        print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
     print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
         len(targets), errors, warns))
     if created:
@@ -4815,7 +4946,7 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    intent = _first_quote(body)             # the full WHY block, gathered (not just line 1)
+    intent = _distinct_intent(body)         # "" when it would just repeat the Contract below
     if intent:
         print("  " + intent)
 
@@ -5315,12 +5446,38 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         if is_confirmed and covered and (has_test or _impl_exempt(m)) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
+    # Reviewed-subset score (read-only, ADDITIVE). `score` counts every requirement,
+    # and a `draft` can never be green because the first axis is status `confirmed` —
+    # so each draft caps `score` by construction until someone confirms it. That makes
+    # the headline unable to tell "rotting" from "not reviewed yet": a repo that runs
+    # `init` over legacy code gets hundreds of drafts and a near-zero score that no
+    # amount of care moves. This second number scores only the reviewed part, so the
+    # two readings are separable. `score` itself is NOT redefined — CASE-2 binds an
+    # all-draft corpus to zero, and every consumer badge already reads `score`.
+    # Absent (not zero) when nothing has been reviewed, like `untagged` above: 0 of 0
+    # is not 0%, and a consumer's schema must not gain a meaningless key.
+    # implements: ARCH-REVIEWEDSCORE-109
+    # Emitted only when drafts and reviewed requirements BOTH exist: with no reviewed
+    # requirement it would be 0 of 0, and with no draft it would restate `score` under a
+    # second name, which is how a consumer's schema quietly grows a key that means nothing.
+    # The denominator is `confirmed`, NOT "every non-draft". `healthy`'s first axis is
+    # `status == confirmed`, so a `baseline`/`in-progress`/`implemented`/`deprecated`
+    # requirement could enter a "non-draft" denominator but never the numerator — it
+    # would depress the score with nothing rotting. A `deprecated` requirement is the
+    # clearest case: retired, permanently un-green, and it would cap the score forever.
+    # Invisible in THIS repo (all 72 non-drafts are `confirmed`, so the two readings
+    # coincide at 100), which is exactly why it is pinned by a test instead of by luck.
+    reviewed_total = confirmed
+    reviewed_score = round(100 * healthy / reviewed_total) if (reviewed_total and drafts) else None
     gate_errors = _link_sync_errors(reqs, members)
     data = {"score": score, "total": total, "healthy": healthy,
             "confirmed": confirmed, "implemented": implemented, "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
             "open_intent": open_intent, "drift": drifted,
             "gate_errors": len(gate_errors), "gate_link_sync_clean": not gate_errors}
+    if reviewed_score is not None:
+        data["reviewed_score"] = reviewed_score
+        data["reviewed_total"] = reviewed_total
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
     # _scan_untagged (ARCH-NEXT-013). Informational only: it counts FILES, not
@@ -5364,6 +5521,12 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         print(json.dumps(data, indent=2))
         return 0
     print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    # Say what the headline cannot: a draft caps `score` by construction, so a low
+    # reading over a draft-heavy corpus means "not reviewed yet", not "rotting".
+    # Printed only when drafts actually pull the two numbers apart.
+    if reviewed_score is not None:
+        print("  reviewed only:      {}/100  ({}/{} confirmed, {} not confirmed yet)".format(
+            reviewed_score, healthy, reviewed_total, total - reviewed_total))
     print("  confirmed:   {}/{}".format(confirmed, total))
     print("  implemented: {}/{}".format(implemented, total))
     print("  tested:      {}/{}".format(tested, total))
@@ -5647,6 +5810,26 @@ def _title(body):  # implements: ARCH-MAP-007
         if line.strip().startswith("# "):
             return line.strip()[2:].strip()
     return ""
+
+
+def _distinct_intent(body):  # implements: ARCH-MAP-007
+    """The intent quote, but only when it says something the Contract does not.
+
+    In the atomic form ([[ARCH-ATOMICFORM-053]]) the `>` quote IS the obligation —
+    `_atomic_spans` makes the same span both the intent and the single contract
+    clause. Emitting it under both names makes every surface print one sentence
+    twice: the viewer draws a `Why — Intent` blockquote directly above an identical
+    `Description` bullet, and `show` prints the line under the title and again under
+    `Contract:`. Measured before this existed: 588 of 646 nodes, 91% of the corpus.
+
+    Returns "" when the quote and the joined contract are the same text, so a
+    consumer sees no separate intent rather than a duplicate one. The sectioned form,
+    where the quote is real rationale distinct from the clauses, is unaffected."""
+    intent = _first_quote(body)
+    if not intent:
+        return ""
+    contract = " ".join(_from_any(_bullets, body, CONTRACT_LABELS)).strip()
+    return "" if contract and " ".join(intent.split()) == " ".join(contract.split()) else intent
 
 
 def _first_quote(body):  # implements: ARCH-MAP-007

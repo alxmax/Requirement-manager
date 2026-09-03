@@ -27,8 +27,8 @@ Every bullet below is binding.
      the default run     `lint` invoked without `--decompose`. -->
 
 **When the command writes**
-- `lint` writes no file during the default run, whatever `statement-size` reports.
-- `lint --decompose` creates one draft requirement for each reported clause.
+- `lint` writes no file during the default run, whatever `statement-size` or `ac-count-high` reports.
+- `lint --decompose` creates one draft requirement for each reported `statement-size` clause.
 - The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay read-only.
 
 **What a created draft holds**
@@ -40,6 +40,7 @@ Every bullet below is binding.
 - `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
 - The command chooses the split by word count, never by obligation, and says so on stdout.
 - Each created draft records that its split point was chosen by word count alone.
+- `lint --decompose` scaffolds from `statement-size` findings only; an `ac-count-high` finding is reported and nothing is written for it.
 
 **Repeating and undoing**
 - Deleting a created draft restores the corpus exactly, because the parent was never edited.
@@ -73,6 +74,10 @@ CASE-6
   Given  a corpus where a previous `lint --decompose` already created the target file
   When   `lint --decompose` runs again
   Then   the clause is skipped, the skip is reported, and the existing file is unchanged
+CASE-7
+  Given  a non-exempt requirement above `LINT_AC_MAX` acceptance criteria
+  When   `lint --decompose` runs
+  Then   the `ac-count-high` finding is printed and no file is created for it
 
 ## Context (non-binding)
 **Notes**
@@ -97,6 +102,15 @@ CASE-6
 - The parent stays untouched on purpose. Rewriting a clause in a `confirmed` requirement
   changes its contract hash, which raises drift and forces `sync --accept-drift` — a large
   consequence for a warn-only finding (ADR-0002).
+- Measured reachability, this corpus, 2026-09-03: `statement-size` has never fired here —
+  `LINT_STATEMENT_WORDS` is 150 and the longest Contract clause anywhere is 61 words
+  (`ARCH-PAGES-021`), so no clause in this corpus is even half the threshold. `ac-count-high`
+  is not currently reachable at all: 6 of the 72 non-draft requirements exceed
+  `LINT_AC_MAX` (8.3% raw), but all 6 carry `lint_exempt: [ac-count-high]`, so the
+  post-exempt count is 0 of 72 (0.0%) today — a deliberate author choice, not a design
+  gap. That zero is why `--decompose` covers `statement-size` only: automation over a
+  signal with no fire rate and no confirmation sample is what ADR-0022 forbids, and an
+  `ac-count-high` triage path was removed before it shipped for exactly that reason.
 
 **Example**
 - `lint` tells Ana that clause 3 of `REQ-AUTH-012` runs to 84 words. She runs
@@ -113,6 +127,12 @@ CASE-6
   number, so a second run picks a fresh name and an existence check never fires. That was a
   real defect — the first implementation created a second file on every re-run, and CASE-6
   caught it.
+- There is no `ac-count-high` sibling. One was written (`AC_COUNT_TRIAGE_TEMPLATE`,
+  `_decompose_ac_count_high`) and removed before it shipped: it reached nobody, and
+  ADR-0022 — adopted in the same change — forbids shipping on a signal with no published
+  fire rate and no human-confirmation sample. `OversizeUnify`'s
+  `test_no_ac_count_high_decompose_symbols_remain` asserts neither symbol comes back, so
+  re-adding one is a deliberate act that has to meet that bar first.
 
 ## Links
 - Used by: (auto)
@@ -139,10 +159,11 @@ superseded_by:
 
 > `lint` writes no file during the default run, whatever `statement-size` reports.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a default lint run reports the finding but writes no file
+  Given  a requirement carrying a clause over the `statement-size` word threshold
+  When   `lint` runs without `--decompose`
+  Then   stdout names the "statement-size" finding and the requirements directory
+         holds no new file
 
 ## Members in code (auto)
 
@@ -167,10 +188,10 @@ superseded_by:
 
 > `lint --decompose` creates one draft requirement for each reported clause.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --decompose creates exactly one draft file per reported clause
+  Given  a parent with one clause over the `statement-size` threshold
+  When   `lint --decompose` runs
+  Then   exactly one new file appears in the requirements directory
 
 ## Members in code (auto)
 
@@ -196,10 +217,10 @@ superseded_by:
 > The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay
 > read-only.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no invocation site passes --decompose
+  Given  `.githooks/pre-commit` and `.github/workflows/ci.yml`
+  When   their `lint` invocation lines are read
+  Then   neither contains the `--decompose` flag
 
 ## Members in code (auto)
 
@@ -224,10 +245,10 @@ superseded_by:
 
 > Each created draft carries `status: draft` and a `depends_on` entry naming its parent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created draft carries status: draft and depends_on the parent
+  Given  `lint --decompose` creates a draft from `REQ-AUTH-012`
+  When   the created file's frontmatter is read
+  Then   it contains `status: draft` and `depends_on: [REQ-AUTH-012]`
 
 ## Members in code (auto)
 
@@ -252,10 +273,10 @@ superseded_by:
 
 > The reported clause text is seeded into the created draft's Contract section.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the offending clause's own text appears verbatim in the created draft
+  Given  a parent clause of 155 repeated words flagged by `statement-size`
+  When   `lint --decompose` creates the draft
+  Then   the draft's Contract section contains that exact clause text
 
 ## Members in code (auto)
 
@@ -280,10 +301,10 @@ superseded_by:
 
 > The created id keeps the parent's area and name, and takes the next free corpus number.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created id reuses the parent's area/name with the next free number
+  Given  parent `REQ-AUTH-012` in a corpus whose highest existing number is 049
+  When   `lint --decompose` runs
+  Then   the created file is named `REQ-AUTH-050.md`
 
 ## Members in code (auto)
 
@@ -308,10 +329,11 @@ superseded_by:
 
 > `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the parent file is byte-identical after a decompose run
+  Given  the parent file's bytes captured before `lint --decompose` runs
+  When   the run completes
+  Then   the parent file's bytes are unchanged from the captured snapshot, so deleting the
+         created draft restores the corpus exactly
 
 ## Members in code (auto)
 
@@ -336,10 +358,10 @@ superseded_by:
 
 > The command chooses the split by word count, never by obligation, and says so on stdout.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: stdout discloses the split was by word count, not obligation
+  Given  `lint --decompose` running on a flagged clause
+  When   the run completes
+  Then   stdout includes "word count, not by obligation"
 
 ## Members in code (auto)
 
@@ -364,39 +386,10 @@ superseded_by:
 
 > Each created draft records that its split point was chosen by word count alone.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-337
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# Deleting a created draft restores the corpus exactly
-
-> Deleting a created draft restores the corpus exactly, because the parent was never
-> edited.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the created draft's own text discloses the word-count-only split
+  Given  a draft created by `lint --decompose`
+  When   its file text is read
+  Then   it contains "WORD COUNT, never by obligation"
 
 ## Members in code (auto)
 
@@ -422,9 +415,9 @@ superseded_by:
 > `lint --decompose` skips a clause whose target file already exists, and reports the
 > skip.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a second decompose run skips the already-decomposed clause and reports it
+  Given  a clause already decomposed by a prior `lint --decompose` run
+  When   `lint --decompose` runs again
+  Then   stdout reports "skipped" and no second file is created for that clause
 
 ## Members in code (auto)

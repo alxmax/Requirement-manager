@@ -102,10 +102,10 @@ superseded_by:
 > `Scene()` produces a valid Excalidraw JSON scene (schema version 2) with a `type:
 > "excalidraw"` root and a `elements` list compatible with excalidraw.com import.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: Scene() produces an excalidraw.com-importable JSON scene
+  Given  a `Scene` with at least one shape added
+  When   `.save()` writes the `.excalidraw` file
+  Then   it parses as JSON with `type: "excalidraw"` and an `elements` list
 
 ## Members in code (auto)
 
@@ -130,10 +130,10 @@ superseded_by:
 
 > `Scene` exposes shape primitives: `box`, `ellipse`, `diamond`, `frame`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: each shape primitive adds one element of its kind
+  Given  a `Scene`
+  When   `box`, `ellipse`, `diamond` and `frame` are each called once
+  Then   the scene gains one element of each corresponding Excalidraw type
 
 ## Members in code (auto)
 
@@ -159,10 +159,10 @@ superseded_by:
 > `Scene` exposes ISO 5807 flowchart aliases: `process`, `terminator`, `decision`, `data`,
 > `predefined_process`, `preparation`, `connector`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: ISO 5807 aliases produce their underlying shapes
+  Given  a `Scene`
+  When   `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation` and `connector` are each called
+  Then   each adds an element without raising, using its mapped primitive shape
 
 ## Members in code (auto)
 
@@ -188,10 +188,10 @@ superseded_by:
 > `Scene` exposes layout helpers: `row`, `column`, `grid`, `enclose`, `lane`, `pipeline`,
 > `section`, `align`, `distribute`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: layout helpers place shapes without overlap
+  Given  three boxes
+  When   `row([...])` arranges them
+  Then   the resulting coordinates place them side by side with no overlapping pair
 
 ## Members in code (auto)
 
@@ -216,10 +216,10 @@ superseded_by:
 
 > `Scene` exposes annotation helpers: `title`, `label`, `legend`, `glossary`, `role`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: annotation helpers attach text without raising
+  Given  a `Scene` with one shape
+  When   `title`, `label`, `legend`, `glossary` and `role` are each called
+  Then   each adds its text element and `.save()` still succeeds
 
 ## Members in code (auto)
 
@@ -244,10 +244,10 @@ superseded_by:
 
 > `Scene` exposes connector helpers: `arrow`, `free_arrow`, `path`, `route_under`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: connector helpers link two shapes
+  Given  two boxes already placed in a `Scene`
+  When   `arrow(a, b)` is called
+  Then   the scene gains an arrow element bound to both shapes' ids
 
 ## Members in code (auto)
 
@@ -274,10 +274,10 @@ superseded_by:
 > `<basename>.html` (a self-contained viewer) in one call and raises `RuntimeError` if
 > called more than once on the same `Scene`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: one .save() call writes both output files
+  Given  a `Scene` with at least one shape
+  When   `.save("demo", out_dir)` is called
+  Then   both `demo.excalidraw` and `demo.html` exist in `out_dir` after the single call
 
 ## Members in code (auto)
 
@@ -302,10 +302,10 @@ superseded_by:
 
 > `Scene(seed=<int>)` produces byte-identical output across re-runs.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a fixed seed reproduces byte-identical output
+  Given  the same shape declarations built twice with `Scene(seed=42)`
+  When   each is saved to its own file
+  Then   the two `.excalidraw` files are byte-for-byte identical
 
 ## Members in code (auto)
 
@@ -330,9 +330,9 @@ superseded_by:
 
 > The builder has no external dependencies — stdlib only.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the builder imports only the standard library
+  Given  `excalidraw_builder.py`
+  When   its top-level imports are inspected
+  Then   every imported module belongs to the Python standard library
 
 ## Members in code (auto)

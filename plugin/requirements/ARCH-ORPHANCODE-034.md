@@ -45,9 +45,8 @@ Every bullet below is binding.
 **What it skips**
 - The check honors `.reqmapignore` and the standard scan walk, so a repo can
   mark generated or vendored code out of scope rather than tag it.
-- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
-  `requirements/` directory.
-- The check skips a file it cannot read.
+- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
+  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
 
 **Severity**
 - The check is warn-only and never changes the gate's exit code, including
@@ -123,6 +122,11 @@ CASE-6
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-ORPHANCODE-550
 status: draft
@@ -139,12 +143,17 @@ superseded_by:
 > The gate warns for each program file that carries no membership tag and no `verifies:`
 > tag, once that file is at least `ORPHAN_CODE_MIN_LOC` physical lines long.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an untagged file at the LOC threshold triggers the warning
+  Given  an untagged 400-line `.py` file with no `implements`/`verifies` tag
+  When   `gate` runs
+  Then   it prints a warn line naming that file as orphan code, and the gate's exit code is unchanged, including under `--strict`
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -168,12 +177,17 @@ superseded_by:
 > A program file is one ending in `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp .java .go
 > .rs`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only files on the program-extension list are considered
+  Given  an untagged 400-line `.go` file and an untagged 400-line `.txt` file
+  When   `gate` runs
+  Then   the `.go` file is reported as orphan code and the `.txt` file is not
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -197,12 +211,18 @@ superseded_by:
 > A membership tag is one of `implements`, `tested-by`, `generated-from` and
 > `validated-against`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: any of the four membership tags silences the warning
+  Given  four large untagged files, each carrying one of `implements`, `tested-by`,
+         `generated-from`, `validated-against`
+  When   `gate` runs
+  Then   none of the four is reported as orphan code
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -226,12 +246,17 @@ superseded_by:
 > The gate does not consider the prose, styling and config extensions (`.md .html .css
 > .sql .yaml .yml`). Prose coverage is [[ARCH-DOCBUNDLE-026]]'s concern.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: prose and config extensions are never checked for orphan code
+  Given  a large untagged `.md` file and a large untagged `.yaml` file
+  When   `gate` runs
+  Then   neither is reported as orphan code
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -255,10 +280,10 @@ superseded_by:
 > The check honors `.reqmapignore` and the standard scan walk, so a repo can mark
 > generated or vendored code out of scope rather than tag it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a .reqmapignore pattern exempts a large untagged file
+  Given  a large untagged `.py` file matched by a `.reqmapignore` pattern
+  When   `gate` runs
+  Then   it is not reported as orphan code, with no separate exemption mechanism beyond tagging or `.reqmapignore`
 
 ## Members in code (auto)
 
@@ -266,142 +291,3 @@ Scenario: TODO — state the observable that proves this
 
 
 --------------------
-
-
----
-id: REQ-ORPHANCODE-555
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# The scan walk prunes .git, node_modules, __pycache__ and
-
-> The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
-> directory.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ORPHANCODE-556
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# The check skips a file it cannot read
-
-> The check skips a file it cannot read.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ORPHANCODE-557
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# The check is warn-only and never changes the
-
-> The check is warn-only and never changes the gate's exit code, including under
-> `--strict`. <!-- Rationale: the 2026-06-21 Senate audit on ARCH-COVERAGE-029 rejected
-> coverage as a hard gate (hollow tags become the rational way to pass CI); this stays
-> advisory at any flag combination. -->
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ORPHANCODE-558
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# An author silences a file by tagging it
-
-> An author silences a file by tagging it or by adding it to `.reqmapignore`.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ORPHANCODE-559
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# There is no separate exemption mechanism
-
-> There is no separate exemption mechanism.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

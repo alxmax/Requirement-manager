@@ -146,10 +146,10 @@ superseded_by:
 > `scan_members` walks a code root and, in every source file with a known extension, finds
 > the inline tags.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an implements: tag in a scanned file is picked up by the walk
+  Given  `a.py` at the code root carrying `# implements: REQ-T-001`
+  When   `scan_members(root, None)` runs
+  Then   `"REQ-T-001"` is a key in the returned dict
 
 ## Members in code (auto)
 
@@ -174,10 +174,10 @@ superseded_by:
 
 > `scan_members` returns `cap_id -> [(role, relative_file, line), ...]`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a member entry is a (role, relative_file, line) tuple
+  Given  `a.py` at the code root carrying `# implements: REQ-T-001` on line 1
+  When   `scan_members(root, None)` runs
+  Then   `members["REQ-T-001"] == [("implements", "a.py", 1)]`
 
 ## Members in code (auto)
 
@@ -202,10 +202,11 @@ superseded_by:
 
 > A role is one of `implements`, `generated-from`, `validated-against` and `tested-by`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: all four roles are recognized and an unknown role string is not
+  Given  one file carrying the four real role tags plus a `refines:` tag, all for one id
+  When   `scan_members` runs
+  Then   the recorded roles are exactly `implements`, `generated-from`, `validated-against`,
+         `tested-by` — `refines` produces no member
 
 ## Members in code (auto)
 
@@ -230,10 +231,10 @@ superseded_by:
 
 > A tag ID matches `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: TAG_RE only matches an uppercase, hyphenated id shape
+  Given  the strings `"implements: FOO-BAR-001"` and `"implements: foobar"`
+  When   `TAG_RE.findall` runs on each
+  Then   the first yields `[("implements", "FOO-BAR-001")]` and the second yields `[]`
 
 ## Members in code (auto)
 
@@ -259,10 +260,10 @@ superseded_by:
 > A left-boundary guard prevents a substring match such as `reimplements:` or
 > `x-implements:` being read as a real tag.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: reimplements: and x-implements: are not read as real tags
+  Given  the lines `"# reimplements: FOO-BAR-001"` and `"auto-implements: AB-CD-001"`
+  When   `TAG_RE.findall` runs on each
+  Then   both return `[]`
 
 ## Members in code (auto)
 
@@ -287,10 +288,10 @@ superseded_by:
 
 > The same `(role, ID)` appearing twice on one line is recorded once.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a duplicated tag on one line is recorded only once
+  Given  one line carrying `implements: FOO-BAR-001` twice
+  When   `scan_members` runs
+  Then   `len(members["FOO-BAR-001"]) == 1`
 
 ## Members in code (auto)
 
@@ -315,10 +316,10 @@ superseded_by:
 
 > File paths are reported repo-root-relative, with POSIX separators.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a nested file's member path uses forward slashes, root-relative
+  Given  a tag inside `sub/dir/m.py`, discovered via `scan_members(root, None)`
+  When   the recorded member is read
+  Then   its path field equals `"sub/dir/m.py"` (POSIX separators, even on Windows)
 
 ## Members in code (auto)
 
@@ -344,10 +345,10 @@ superseded_by:
 > A single tag may bind several requirements through a comma-separated id list, written
 > `role: <ID>, <ID>, ...`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a comma-separated tag registers members under every listed id
+  Given  `<!-- generated-from: REQ-MA-001, REQ-MB-002 -->` in `docs/arch.html`
+  When   `scan_members` runs
+  Then   both `"REQ-MA-001"` and `"REQ-MB-002"` are keys in the result
 
 ## Members in code (auto)
 
@@ -372,39 +373,11 @@ superseded_by:
 
 > Each id in that list is recorded as a member of the same `(role, file, line)`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-SCAN-227
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-SCAN-002]
-superseded_by:
----
-
-# A whole-system doc generated from many requirements (generated-from
-
-> A whole-system doc generated from many requirements (`generated-from: A, B, C`) is
-> therefore a member of each, and drifts when ANY of them changes.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: every id in a multi-id tag carries the identical (role, file, line) triple
+  Given  `<!-- generated-from: REQ-MA-001, REQ-MB-002 -->` in `docs/arch.html`
+  When   `scan_members` runs
+  Then   `members["REQ-MA-001"] == members["REQ-MB-002"] == [("generated-from",
+         "docs/arch.html", 1)]`, so the doc drifts when either requirement's contract changes
 
 ## Members in code (auto)
 
@@ -430,10 +403,10 @@ superseded_by:
 > `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory are
 > skipped.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tag inside the real SSOT requirements/ dir is not scanned
+  Given  `ignored.py` inside the SSOT `requirements/` dir, tagged `SSOT-IGN-001`
+  When   `scan_members(root, requirements_dir)` runs
+  Then   `"SSOT-IGN-001"` is absent from the result
 
 ## Members in code (auto)
 
@@ -459,10 +432,10 @@ superseded_by:
 > The SSOT directory is matched by realpath, so a source package merely named
 > `requirements/` is still scanned.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a source package named requirements/ that is not the SSOT dir is still scanned
+  Given  a tagged file under `pkg/requirements/impl.py`, distinct from the real SSOT dir
+  When   `scan_members(root, ssot_dir)` runs
+  Then   `"pkg/requirements/impl.py"` appears among the recorded member paths
 
 ## Members in code (auto)
 
@@ -487,10 +460,10 @@ superseded_by:
 
 > Paths matching `.reqmapignore` are excluded.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file listed in .reqmapignore is excluded from the scan
+  Given  `.reqmapignore` naming `scripts/reqmap.py`, which itself carries a tag
+  When   `scan_members` runs
+  Then   the tagged id from that file is absent, while an untouched file's id is present
 
 ## Members in code (auto)
 
@@ -515,10 +488,10 @@ superseded_by:
 
 > An unreadable file is skipped without aborting the scan.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unreadable file yields None instead of raising
+  Given  a path under a directory that does not exist
+  When   `_scan_file_tags(path)` runs
+  Then   it returns `None` rather than raising an exception
 
 ## Members in code (auto)
 
@@ -544,9 +517,10 @@ superseded_by:
 > `scan_all` returns the members, the per-criterion coverage and the verification levels
 > from a single walk, and each result equals what the three separate scanners return.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: scan_all's triple equals the three scanners run separately
+  Given  a mixed tree with `.py`, `.ts` and `.md` files carrying tags, `verifies:` and
+         `tested-by:` comments
+  When   `scan_all(root, reqs_dir)` runs
+  Then   it equals `(scan_members(...), scan_ac_verifies(...), scan_test_levels(...))`
 
 ## Members in code (auto)

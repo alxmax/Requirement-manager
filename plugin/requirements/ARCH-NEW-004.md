@@ -102,10 +102,11 @@ superseded_by:
 > Given a capability id, `new` writes `requirements/<ID>.md`, stamped from the scaffold
 > with the placeholder `AREA-NAME-NNN` replaced by that id.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: new stamps the scaffold with the given id
+  Given  a template containing the placeholder `AREA-NAME-NNN`
+  When   `new CORE-FOO-001` runs
+  Then   `requirements/CORE-FOO-001.md` exists, contains "CORE-FOO-001", and no longer
+         contains "AREA-NAME-NNN"
 
 ## Members in code (auto)
 
@@ -130,10 +131,10 @@ superseded_by:
 
 > `new` creates the requirements directory if it is absent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: new creates a missing requirements directory
+  Given  a `reqs_dir` path that does not exist yet
+  When   `new CORE-FOO-001` runs
+  Then   the directory is created and `requirements/CORE-FOO-001.md` is written inside it
 
 ## Members in code (auto)
 
@@ -158,10 +159,11 @@ superseded_by:
 
 > The scaffold is the engine's built-in template.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: new falls back to REQUIREMENT_TEMPLATE with no on-disk template
+  Given  no `templates/requirement.md` on disk
+  When   `new CORE-FOO-001` runs with `tmpl_path=None`
+  Then   the written file carries the built-in scaffold's sections — "## Description",
+         "## Cases", and "CASE-1"
 
 ## Members in code (auto)
 
@@ -186,10 +188,11 @@ superseded_by:
 
 > An on-disk `templates/requirement.md`, when present, overrides the built-in template.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an on-disk template wins over the built-in scaffold
+  Given  an on-disk template file distinct from `REQUIREMENT_TEMPLATE`
+  When   `new CORE-FOO-001` runs with that template's path
+  Then   the written file is stamped from the on-disk template's content, not the
+         built-in one
 
 ## Members in code (auto)
 
@@ -214,10 +217,10 @@ superseded_by:
 
 > `new` refuses to overwrite an existing file. It exits non-zero and writes nothing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: new refuses to clobber an existing requirement file
+  Given  `requirements/CORE-FOO-001.md` already exists with content "existing\n"
+  When   `new CORE-FOO-001` runs
+  Then   it exits non-zero and the file's content is unchanged
 
 ## Members in code (auto)
 
@@ -243,10 +246,11 @@ superseded_by:
 > The emitted Contract section opens with "Every bullet below is binding.", so the
 > author writes clauses in present tense without a `shall` or `must` on each line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the template's Description opens with the binding line and no modal verbs
+  Given  `REQUIREMENT_TEMPLATE`, comments stripped
+  When   its Description clauses are extracted with `_lint_prose`
+  Then   the template contains "Every bullet below is binding." and no clause contains
+         "shall" or "must"
 
 ## Members in code (auto)
 
@@ -272,10 +276,11 @@ superseded_by:
 > The scaffold's guidance names the authoring rules the linter enforces, so a file written
 > from it starts clean.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the shipped template body passes its own linter
+  Given  a requirement built from `REQUIREMENT_TEMPLATE`'s body, status `confirmed`
+  When   `lint_requirement` runs on it
+  Then   the findings carry no `anonymous-subject`, `statement-too-long`, or
+         `statement-size` check
 
 ## Members in code (auto)
 
@@ -302,9 +307,10 @@ superseded_by:
 > uses the same `NNN` number. Ids stay unique by their full text; the warning keeps
 > numbers unambiguous in conversation.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a same-area number collision warns but still creates the file
+  Given  `ARCH-MAP-007.md` already in the registry
+  When   `new ARCH-VIEWER-007` runs
+  Then   `ARCH-VIEWER-007.md` is created, the exit code is 0, and the output contains
+         "WARN" naming "ARCH-MAP-007"
 
 ## Members in code (auto)

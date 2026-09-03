@@ -111,10 +111,10 @@ superseded_by:
 
 > `health` reads `TODO.md` from the code root, or from its parent when absent there.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: _roadmap_signals falls back to the parent directory for TODO.md
+  Given  no `TODO.md` in the code root but one in its parent directory
+  When   `_roadmap_signals(root)` runs
+  Then   it reads the parent's `TODO.md` and returns its milestone data
 
 ## Members in code (auto)
 
@@ -140,10 +140,10 @@ superseded_by:
 > `health --json` reports nothing about the roadmap when no `TODO.md` exists, so a repo
 > that keeps none sees no new output.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no TODO.md means no roadmap keys in health --json
+  Given  a repo with no `TODO.md` anywhere
+  When   `health --json` runs
+  Then   the payload has no `roadmap_behind` and no `roadmap_unversioned_headings` key
 
 ## Members in code (auto)
 
@@ -169,10 +169,12 @@ superseded_by:
 > `health --json` reports the newest milestone in the roadmap against the newest
 > `milestone:` recorded on any requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: behind-signal names both the roadmap's and requirements' newest milestone
+  Given  a `TODO.md` newest heading `## v2.8` and a requirement with `milestone: v2.13`
+  When   `health --json` runs
+  Then   `roadmap_behind` equals `{"todo": "v2.8", "requirements": "v2.13"}`, `health`
+         exits 0, and the health score is unchanged — the signal is read-only, like its
+         unversioned-heading counterpart
 
 ## Members in code (auto)
 
@@ -197,10 +199,10 @@ superseded_by:
 
 > `health --json` reports the pair only when the roadmap is the older of the two.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no behind-signal when the roadmap is current or ahead
+  Given  a `TODO.md` newest heading `## v2.16` and a requirement with `milestone: v2.13`
+  When   `health --json` runs
+  Then   the payload carries no `roadmap_behind` key
 
 ## Members in code (auto)
 
@@ -225,10 +227,10 @@ superseded_by:
 
 > Versions compare segment by segment as numbers, so `v2.10` ranks above `v2.9`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: v2.10 sorts above v2.9 under _version_key
+  Given  the strings `"v2.10"` and `"v2.9"`
+  When   `_version_key` is applied to each and compared
+  Then   `_version_key("v2.10") > _version_key("v2.9")`, unlike a plain string compare
 
 ## Members in code (auto)
 
@@ -254,10 +256,10 @@ superseded_by:
 > `health --json` lists every `## ` heading in the roadmap whose first token is not a
 > version.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a non-version heading is listed under roadmap_unversioned_headings
+  Given  a `TODO.md` with `## v2.16` followed later by `## Deferred work`
+  When   `health --json` runs
+  Then   `roadmap_unversioned_headings` equals `["Deferred work"]`
 
 ## Members in code (auto)
 
@@ -283,38 +285,9 @@ superseded_by:
 > Such a heading leaves the previous milestone in force, so items below it are filed under
 > the section above instead of their own.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ROADMAP-639
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ROADMAP-038]
-superseded_by:
----
-
-# Both signals are read-only. Neither changes an exit
-
-> Both signals are read-only. Neither changes an exit code, and neither lowers the health
-> score.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an item under a non-version heading is filed under the prior milestone
+  Given  `## v2.16` followed by `## Deferred work` followed by one checklist item
+  When   `_parse_todos_from_text` parses the text
+  Then   that item's `milestone` reads `"v2.16"`, not `"Deferred work"`
 
 ## Members in code (auto)

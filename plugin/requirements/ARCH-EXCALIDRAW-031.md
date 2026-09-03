@@ -133,10 +133,10 @@ superseded_by:
 > `"error"` (raises `ValueError`): `crossing_check`, `legend_check`, `overflow_check`,
 > `text_overlap_check`, `label_fit_check`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: each named gate accepts warn or error mode
+  Given  a scene with a crossing_check violation
+  When   `save(crossing_check="warn")` and `save(crossing_check="error")` are each called
+  Then   the warn call prints a warning and returns normally, the error call raises `ValueError`
 
 ## Members in code (auto)
 
@@ -162,10 +162,11 @@ superseded_by:
 > `crossing_check`: a bound arrow whose straight centre-to-centre path passes through an
 > unrelated box triggers the gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: crossing_check fires when an arrow's path crosses an unrelated box
+  Given  a bound arrow whose straight centre-to-centre path passes through a third, unrelated
+         box
+  When   `save(crossing_check="error")` is called
+  Then   a `ValueError` naming the crossing is raised
 
 ## Members in code (auto)
 
@@ -192,10 +193,11 @@ superseded_by:
 > triggers the gate (fires only after `legend()` is rendered; a scene with no legend is
 > exempt).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: legend_check fires for an unlegended colour, exempt with no legend
+  Given  a shape filled "blue" with `legend()` rendered but "blue" absent from its key
+  When   `save(legend_check="error")` is called
+  Then   a `ValueError` naming the unlegended colour is raised; the same scene with no
+         `legend()` call raises nothing
 
 ## Members in code (auto)
 
@@ -221,10 +223,10 @@ superseded_by:
 > `overflow_check`: a shape whose bound text is larger than the shape bounds (text spills
 > outside) triggers the gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: overflow_check fires when bound text exceeds the shape bounds
+  Given  a box whose bound text is wider than the box
+  When   `save(overflow_check="error")` is called
+  Then   a `ValueError` is raised
 
 ## Members in code (auto)
 
@@ -250,10 +252,10 @@ superseded_by:
 > `text_overlap_check`: two free captions or label elements that geometrically overlap
 > each other trigger the gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: text_overlap_check fires when two labels geometrically overlap
+  Given  two `label()` elements placed at overlapping coordinates
+  When   `save(text_overlap_check="error")` is called
+  Then   a `ValueError` naming the overlapping pair is raised
 
 ## Members in code (auto)
 
@@ -281,10 +283,10 @@ superseded_by:
 > projected onto the arrow direction — triggers the gate (the label crowds the arrowheads
 > or spills onto the joined boxes).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: label_fit_check fires when a label crowds a short arrow
+  Given  a bound arrow whose label leaves less than ~24px of visible line on one side
+  When   `save(label_fit_check="error")` is called
+  Then   a `ValueError` is raised
 
 ## Members in code (auto)
 
@@ -313,10 +315,13 @@ superseded_by:
 > short to render a visible line — only its label would show —
 > (`allow_short_arrows=True`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the two hard gates raise by default and respect their opt-out flags
+  Given  two overlapping non-container shapes, and separately a bound arrow clamped too short to
+         render
+  When   `save()` is called with defaults, then again with `allow_overlap=True` /
+         `allow_short_arrows=True`
+  Then   the default calls raise `ValueError`, and the opt-out calls write the files without
+         raising
 
 ## Members in code (auto)
 
@@ -344,38 +349,10 @@ superseded_by:
 > `check_short_arrows()`, `check_arrow_label_fit()` each return a list of offending items
 > (empty list = clean) and are callable before `.save()`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-EXCALIDRAW-369
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-EXCALIDRAW-031]
-superseded_by:
----
-
-# Test_excalidraw.py exercises the five named gates in both
-
-> `test_excalidraw.py` exercises the five named gates in both `"warn"` and `"error"`
-> modes, and the two hard gates, for each maintained example generator.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an inspection method returns offending items without saving
+  Given  a scene with one crossing-arrow violation and no other defects
+  When   `check_arrow_crossings()` is called before `.save()`
+  Then   it returns a list containing that one item, while an unaffected check like
+         `check_text_overflow()` returns an empty list
 
 ## Members in code (auto)

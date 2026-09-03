@@ -44,6 +44,8 @@ Every bullet below is binding.
 **What it prints**
 - `health` prints component counts alongside the score: confirmed, implemented, tested,
   drafts, orphans, untested, open verify-intent, and drift.
+- `health` prints the reviewed-only score defined by [[ARCH-REVIEWEDSCORE-109]] when that
+  requirement's conditions hold.
 - `--json` emits the same numbers as a JSON object, so the console output and a CI badge
   never disagree.
 - On an empty corpus `health` prints a score of zero and a hint to bootstrap.
@@ -130,10 +132,10 @@ superseded_by:
 
 > `health` prints a coherence snapshot of the whole requirement corpus.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: health prints a snapshot covering the whole corpus
+  Given  a corpus of several requirements in mixed states
+  When   `health` runs
+  Then   it prints one coherence snapshot summarizing every requirement, not a subset
 
 ## Members in code (auto)
 
@@ -158,10 +160,10 @@ superseded_by:
 
 > `health` writes nothing. It only reads and prints.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: health runs without writing any file
+  Given  any corpus
+  When   `health` runs
+  Then   no requirement file or lock file changes, and output goes only to stdout
 
 ## Members in code (auto)
 
@@ -186,10 +188,10 @@ superseded_by:
 
 > `health` computes a headline score: the percentage of requirements that are green.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the headline score is the percentage that are green
+  Given  a ten-requirement corpus where six pass every axis
+  When   `health` runs
+  Then   the printed score is 60
 
 ## Members in code (auto)
 
@@ -215,10 +217,10 @@ superseded_by:
 > The axes are status `confirmed`, coverage, a test signal, no open verify-intent
 > question, and no drift from the lock.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an open verify-intent question excludes a requirement from green
+  Given  a confirmed, implemented, tested, undrifted requirement carrying one open verify-intent question
+  When   `health` runs
+  Then   that requirement is excluded from the green count though every other axis passes
 
 ## Members in code (auto)
 
@@ -243,10 +245,10 @@ superseded_by:
 
 > For a `bus` or `feature` requirement, coverage means an `implements` member.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a bus requirement without an implements member is uncovered
+  Given  a `layer: bus` requirement with no `implements` member
+  When   `health` runs
+  Then   that requirement fails the coverage axis
 
 ## Members in code (auto)
 
@@ -272,10 +274,10 @@ superseded_by:
 > For those same layers, the test signal means a `tested-by` member or a `test_exempt`
 > reason.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a test_exempt reason satisfies the test axis without a tested-by member
+  Given  a `layer: feature` requirement with no `tested-by` member but a recorded `test_exempt` reason
+  When   `health` runs
+  Then   that requirement passes the test axis and its green status is unaffected
 
 ## Members in code (auto)
 
@@ -302,10 +304,10 @@ superseded_by:
 > always met, because a need is fulfilled by requirements rather than by code (see
 > [[ARCH-TRACE-020]]).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a satisfied need passes its test axis without code
+  Given  a `layer: need` requirement satisfied by one other requirement's `satisfies:`
+  When   `health` runs
+  Then   the need is counted covered and its test axis passes without any code member
 
 ## Members in code (auto)
 
@@ -330,10 +332,10 @@ superseded_by:
 
 > A confirmed `need` that no requirement satisfies counts as an orphan.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unsatisfied confirmed need is an orphan
+  Given  a confirmed `layer: need` requirement that no requirement's `satisfies:` names
+  When   `health` runs
+  Then   it is counted under orphans and excluded from green
 
 ## Members in code (auto)
 
@@ -359,10 +361,10 @@ superseded_by:
 > `health` prints component counts alongside the score: confirmed, implemented, tested,
 > drafts, orphans, untested, open verify-intent, and drift.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the printed counts cover every named category
+  Given  a corpus containing at least one draft, one orphan, and one drifted requirement
+  When   `health` runs
+  Then   it prints counts for confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift
 
 ## Members in code (auto)
 
@@ -388,10 +390,10 @@ superseded_by:
 > `--json` emits the same numbers as a JSON object, so the console output and a CI badge
 > never disagree.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --json and the console report the same numbers
+  Given  any corpus
+  When   `health` runs once plainly and once with `--json`
+  Then   the score and counts in both outputs match exactly
 
 ## Members in code (auto)
 
@@ -416,10 +418,10 @@ superseded_by:
 
 > On an empty corpus `health` prints a score of zero and a hint to bootstrap.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an empty corpus reports zero with a bootstrap hint
+  Given  a `requirements/` directory with no requirement files
+  When   `health` runs
+  Then   it prints a score of zero and a hint to run the bootstrap command
 
 ## Members in code (auto)
 
@@ -444,9 +446,9 @@ superseded_by:
 
 > `health` always returns zero. The snapshot is a report, not a gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: health exits zero even when the corpus scores below 100
+  Given  a corpus containing orphans and drift, scoring under 100
+  When   `health` runs
+  Then   the process still exits 0
 
 ## Members in code (auto)

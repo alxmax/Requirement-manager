@@ -42,9 +42,8 @@ Every bullet below is binding.
 - The engine owns those two and freshness-checks them separately.
 - The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
   regenerable artifact out of scope rather than tag it.
-- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
-  `requirements/` directory.
-- The check skips a file it cannot read.
+- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
+  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
 
 **Severity**
 - The check is warn-only and never changes the gate's exit code.
@@ -108,6 +107,11 @@ CASE-6
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-DOCBUNDLE-339
 status: draft
@@ -124,12 +128,18 @@ superseded_by:
 > The gate warns for each file under `docs/` ending in `.html` that carries no
 > `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES` in size.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a large untagged docs/ HTML file is flagged
+  Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag
+  When   `untagged_doc_bundles` scans the repo
+  Then   it returns `["docs/arch.html"]`, which `gate` folds into its warnings only —
+         never an error, leaving the exit code unaffected
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -152,12 +162,17 @@ superseded_by:
 
 > The gate considers only files under `docs/`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a large untagged HTML file outside docs/ is never flagged
+  Given  a large, untagged `top.html` at the repo root, outside `docs/`
+  When   `untagged_doc_bundles` scans the repo
+  Then   `top.html` is absent from the result
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -181,10 +196,11 @@ superseded_by:
 > The check skips engine-generated outputs: a file whose basename starts with `_`, and the
 > published `map.html` viewer.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: engine outputs are excluded even when large and untagged
+  Given  large, untagged `docs/map.html` and `docs/_x.html`
+  When   `untagged_doc_bundles` scans the repo
+  Then   neither file appears in the result, because the engine freshness-checks those
+         two separately, on its own path
 
 ## Members in code (auto)
 
@@ -192,29 +208,6 @@ Scenario: TODO — state the observable that proves this
 
 
 --------------------
-
-
----
-id: REQ-DOCBUNDLE-342
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The engine owns those two and freshness-checks them
-
-> The engine owns those two and freshness-checks them separately.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
 
 
 
@@ -238,10 +231,10 @@ superseded_by:
 > The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
 > regenerable artifact out of scope rather than tag it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a .reqmapignore pattern suppresses the finding
+  Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`
+  When   `untagged_doc_bundles` scans the repo
+  Then   `docs/poster.html` is absent from the result
 
 ## Members in code (auto)
 
@@ -249,83 +242,3 @@ Scenario: TODO — state the observable that proves this
 
 
 --------------------
-
-
----
-id: REQ-DOCBUNDLE-344
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The scan walk prunes .git, node_modules, __pycache__ and
-
-> The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
-> directory.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-345
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check skips a file it cannot read
-
-> The check skips a file it cannot read.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-346
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check is warn-only and never changes the
-
-> The check is warn-only and never changes the gate's exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

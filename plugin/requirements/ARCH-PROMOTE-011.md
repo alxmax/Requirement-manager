@@ -105,7 +105,7 @@ CASE-6
 
 ---
 id: REQ-PROMOTE-567
-status: draft
+status: confirmed
 form: atomic
 level: code
 layer: feature
@@ -118,10 +118,10 @@ superseded_by:
 
 > `confirm <ID>` sets the requirement's `status` to `confirmed`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm rewrites the status field
+  Given  a `draft` requirement carrying at least one `implements:` member
+  When   `confirm <ID>` runs
+  Then   that requirement's frontmatter reads `status: confirmed`
 
 ## Members in code (auto)
 
@@ -146,10 +146,10 @@ superseded_by:
 
 > `confirm` edits only the value of the first `status:` line in the leading frontmatter.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm rewrites the first status line only
+  Given  a draft requirement whose body also contains the word "status:" in prose
+  When   `confirm <ID>` runs
+  Then   only the frontmatter's first `status:` line changes; the prose text is untouched
 
 ## Members in code (auto)
 
@@ -174,10 +174,10 @@ superseded_by:
 
 > `confirm` preserves that line's indentation and any trailing inline comment.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm preserves the status line's formatting
+  Given  a frontmatter line `status: draft  # pending review`
+  When   `confirm <ID>` runs
+  Then   the line becomes `status: confirmed  # pending review`, comment and spacing intact
 
 ## Members in code (auto)
 
@@ -202,10 +202,10 @@ superseded_by:
 
 > `confirm` leaves the body untouched.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm never touches the body
+  Given  a draft requirement with an `implements:` member
+  When   `confirm <ID>` runs
+  Then   every byte of the body after the frontmatter stays identical
 
 ## Members in code (auto)
 
@@ -231,10 +231,10 @@ superseded_by:
 > `confirm` refuses a requirement with no `implements:` member: it exits non-zero and
 > writes nothing. A `confirmed` requirement with no code is a gate error.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm refuses a requirement with no code
+  Given  a requirement carrying no `implements:` member
+  When   `confirm <ID>` runs
+  Then   it exits non-zero, writes nothing, and prints that a `confirmed` requirement needs code
 
 ## Members in code (auto)
 
@@ -260,10 +260,10 @@ superseded_by:
 > `confirm` exempts a `need` and an `aggregate` from that rule, matching the gate. Both
 > are covered by an edge rather than by a tag.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm exempts a need requirement from the implements rule
+  Given  a `layer: need` requirement with no `implements:` member
+  When   `confirm <ID>` runs
+  Then   it succeeds and sets `status: confirmed` despite carrying no code tag
 
 ## Members in code (auto)
 
@@ -289,10 +289,10 @@ superseded_by:
 > `confirm` refuses an `aggregate` whose `depends_on` list is empty, because an aggregate
 > with no dependency is an orphan.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm refuses an orphan aggregate
+  Given  a `layer: aggregate` requirement whose `depends_on` list is empty
+  When   `confirm <ID>` runs
+  Then   it exits non-zero and the file is unchanged
 
 ## Members in code (auto)
 
@@ -317,10 +317,10 @@ superseded_by:
 
 > A refusal prints the tag the caller needs to add.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a refusal names the missing tag
+  Given  a requirement with no `implements:` member
+  When   `confirm <ID>` runs and refuses
+  Then   its message names `implements:` as the tag to add
 
 ## Members in code (auto)
 
@@ -346,10 +346,10 @@ superseded_by:
 > `confirm` exits non-zero with a clear message for an unknown id, meaning no
 > `requirements/<ID>.md` exists.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm rejects an id with no requirement file
+  Given  an id with no `requirements/<ID>.md` on disk
+  When   `confirm <ID>` runs
+  Then   it exits non-zero and prints that the id is unknown
 
 ## Members in code (auto)
 
@@ -374,10 +374,10 @@ superseded_by:
 
 > `confirm` warns, without failing, when no `tested-by:` member is linked.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm warns but still succeeds without a test link
+  Given  a requirement with an `implements:` member and no `tested-by:` member
+  When   `confirm <ID>` runs
+  Then   it prints a warning, sets `status: confirmed`, and exits 0
 
 ## Members in code (auto)
 
@@ -402,10 +402,10 @@ superseded_by:
 
 > That warning points at the test tag to add, or at the `test_exempt:` opt-out.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the missing-test warning names the fix
+  Given  a requirement confirmed with no `tested-by:` member
+  When   `confirm <ID>` runs
+  Then   its warning names the `tested-by:` tag to add, or the `test_exempt:` opt-out
 
 ## Members in code (auto)
 
@@ -430,10 +430,10 @@ superseded_by:
 
 > `confirm` reminds the caller to refresh the lock and regenerate the map afterwards.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm reminds the caller to resync afterward
+  Given  a requirement successfully confirmed
+  When   `confirm <ID>` finishes
+  Then   it prints a reminder to run `sync` and regenerate the map
 
 ## Members in code (auto)
 
@@ -459,9 +459,9 @@ superseded_by:
 > `confirm` is idempotent. An already-`confirmed` requirement is reported, left unchanged,
 > and exits zero.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirming twice is a no-op the second time
+  Given  a requirement already `status: confirmed`
+  When   `confirm <ID>` runs
+  Then   the file is unchanged and exit is 0
 
 ## Members in code (auto)

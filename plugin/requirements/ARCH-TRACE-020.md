@@ -122,10 +122,10 @@ superseded_by:
 > A requirement may declare a `satisfies:` frontmatter list of the upstream ids it
 > fulfils.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: satisfies: parses into a frontmatter list like any other id field
+  Given  a requirement file with `satisfies: [SYS-SSOT-001]` in its frontmatter
+  When   `parse_frontmatter` reads the file
+  Then   `meta["satisfies"]` equals `["SYS-SSOT-001"]`
 
 ## Members in code (auto)
 
@@ -151,10 +151,10 @@ superseded_by:
 > The gate warns, and never errors, when a `satisfies:` id resolves to no requirement. An
 > upstream anchor may be authored later, or tracked outside this repo.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a dangling satisfies id warns without failing the gate
+  Given  a requirement with `satisfies: [GHOST-X-999]` and no such requirement in the corpus
+  When   `gate` runs
+  Then   it prints "satisfies GHOST-X-999 but no such requirement" and exits 0
 
 ## Members in code (auto)
 
@@ -180,10 +180,10 @@ superseded_by:
 > The gate warns when a confirmed `need` has no requirement satisfying it, so an
 > unaddressed stakeholder need is visible.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unaddressed confirmed need warns at the gate
+  Given  a confirmed `layer: need` requirement no other requirement satisfies
+  When   `gate` runs
+  Then   it warns "need has no requirement that satisfies it (upstream trace unaddressed)"
 
 ## Members in code (auto)
 
@@ -209,10 +209,12 @@ superseded_by:
 > The `aggregate` layer is exempt from the implements check. Its implementation is the
 > implementation of the requirements it depends on.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed aggregate with no implements tag passes the gate
+  Given  a confirmed `layer: aggregate` requirement with `depends_on` a code-backed requirement,
+         and no `implements:` tag of its own
+  When   `gate` runs
+  Then   `_link_sync_errors` reports no missing-implements error for the aggregate, because
+         it adds no behaviour of its own — it only asserts its dependencies work together
 
 ## Members in code (auto)
 
@@ -238,39 +240,10 @@ superseded_by:
 > An aggregate declares at least one `depends_on` id. An aggregate with no dependency is
 > an orphan, not an aggregate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-TRACE-755
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-TRACE-020]
-superseded_by:
----
-
-# An aggregate adds no behaviour of its own
-
-> An aggregate adds no behaviour of its own. It asserts that its dependencies work
-> together.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm refuses an aggregate with an empty depends_on
+  Given  a `layer: aggregate` requirement with `depends_on: []`
+  When   `confirm <ID>` runs
+  Then   it refuses with "depends_on is empty" and leaves the file's status unchanged
 
 ## Members in code (auto)
 
@@ -296,10 +269,11 @@ superseded_by:
 > The `need` layer is exempt from the implements and tested-by checks. A need is satisfied
 > by other requirements, not implemented or tested by code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed need raises no implements/tested-by finding
+  Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag,
+         satisfied by another requirement so the orphan-need warn stays silent
+  When   `gate` runs
+  Then   it raises no missing-implements error and no missing-tested-by warning for that need
 
 ## Members in code (auto)
 
@@ -326,10 +300,11 @@ superseded_by:
 > role, because being satisfied by requirements is not evidence the need was met (see
 > [[ARCH-VLEVEL-037]]).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed need with no validated-against tag warns once the repo opts in
+  Given  a corpus where at least one member carries a `validated-against:` tag, and a
+         confirmed `layer: need` requirement with no `validated-against:` member of its own
+  When   `gate` runs
+  Then   it warns "confirmed need with no `validated-against:` tag"
 
 ## Members in code (auto)
 
@@ -355,10 +330,11 @@ superseded_by:
 > `show` prints the upstream ids a requirement satisfies and the requirements that satisfy
 > it, but only when that requirement takes part in traceability.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: show prints the trace in both directions
+  Given  a need `NEED-X-001` and a feature `A-FOO-001` with `satisfies: [NEED-X-001]`
+  When   `show A-FOO-001` and `show NEED-X-001` each run
+  Then   the feature's output contains "Satisfies (upstream): NEED-X-001" and the need's
+         output contains "Satisfied by: A-FOO-001"
 
 ## Members in code (auto)
 
@@ -384,9 +360,10 @@ superseded_by:
 > The map data carries `satisfies` and `satisfied_by` on each node, plus a list of
 > upstream edges, so a front-end can draw the trace.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map data exposes satisfies, satisfied_by and upstream_edges
+  Given  a need `NEED-X-001` and a feature `A-FOO-001` with `satisfies: [NEED-X-001]`
+  When   `_build_map_data` builds the node graph
+  Then   the feature node's `satisfies` is `["NEED-X-001"]`, the need node's `satisfied_by`
+         is `["A-FOO-001"]`, and `["A-FOO-001", "NEED-X-001"]` appears in `upstream_edges`
 
 ## Members in code (auto)

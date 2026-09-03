@@ -140,10 +140,10 @@ superseded_by:
 
 > `dupes` reports pairs of requirements whose contracts overlap.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: overlapping contracts are reported as a pair
+  Given  two requirements whose Contract bullets share most of their wording
+  When   `dupes` runs
+  Then   that pair appears in the printed report
 
 ## Members in code (auto)
 
@@ -168,10 +168,10 @@ superseded_by:
 
 > `dupes` writes nothing. It only reads and prints.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: dupes runs without writing any file
+  Given  a corpus with at least one flagged pair
+  When   `dupes` runs
+  Then   no requirement file changes and output goes only to stdout
 
 ## Members in code (auto)
 
@@ -197,10 +197,10 @@ superseded_by:
 > `dupes` builds a bag of words for each requirement from its title, its intent line, and
 > its Contract bullets.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the bag of words comes from title, intent and Contract only
+  Given  two requirements sharing wording only in their titles and Contract bullets
+  When   `dupes` builds each requirement's bag of words
+  Then   that shared wording is included and drives the comparison
 
 ## Members in code (auto)
 
@@ -226,10 +226,10 @@ superseded_by:
 > `dupes` leaves the "Notes & limitations" section out of that text, because that section
 > is dense and would add noise.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: text unique to the Notes section is left out of the bag
+  Given  two unrelated requirements whose Notes sections happen to share several words
+  When   `dupes` runs
+  Then   that shared Notes wording does not raise their pair's score
 
 ## Members in code (auto)
 
@@ -254,10 +254,10 @@ superseded_by:
 
 > `dupes` tokenizes text into lowercase alphanumeric words of length three or more.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: tokens shorter than three characters are dropped
+  Given  two requirements whose only shared wording is two-letter tokens
+  When   `dupes` tokenizes their text
+  Then   those tokens are absent from either bag of words
 
 ## Members in code (auto)
 
@@ -282,10 +282,10 @@ superseded_by:
 
 > `dupes` drops a small stopword set and pure numbers from those tokens.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: stopwords and pure numbers never count as shared terms
+  Given  two unrelated requirements sharing only stopwords and a number like "2026"
+  When   `dupes` runs
+  Then   neither is listed among the pair's shared terms
 
 ## Members in code (auto)
 
@@ -312,10 +312,10 @@ superseded_by:
 > (`TODO: …`), and prints how many it skipped. An unauthored contract has nothing to
 > compare.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unauthored draft is skipped and counted
+  Given  a requirement whose Contract bullets are all still `TODO: …`
+  When   `dupes` runs
+  Then   that requirement is excluded from comparison and the skip count includes it
 
 ## Members in code (auto)
 
@@ -343,10 +343,10 @@ superseded_by:
 > prints how many such pairs it skipped. Such a pair shares vocabulary by construction and
 > is a known link, not a duplicate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tested-by-linked pair is skipped and counted
+  Given  requirement A whose `tested-by` file is requirement B's `implements` file, with overlapping wording
+  When   `dupes` runs with the member map
+  Then   the pair is excluded from the report and the linked-pairs count includes it
 
 ## Members in code (auto)
 
@@ -371,10 +371,10 @@ superseded_by:
 
 > `dupes` weights terms with a smoothed TF-IDF (`log((1 + N) / (1 + df)) + 1`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a rarer term is weighted higher than a common one
+  Given  a corpus where one term appears in nearly every requirement and another appears in only two
+  When   `dupes` computes TF-IDF weights
+  Then   the rare term's weight is higher than the common term's
 
 ## Members in code (auto)
 
@@ -400,10 +400,10 @@ superseded_by:
 > The smoothing keeps every weight positive, so a two-requirement corpus does not collapse
 > to a zero score.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a two-requirement corpus still scores a shared term
+  Given  exactly two requirements sharing one term present in both
+  When   `dupes` scores that pair
+  Then   the score is above zero, not collapsed by an unsmoothed weight of zero
 
 ## Members in code (auto)
 
@@ -428,10 +428,10 @@ superseded_by:
 
 > `dupes` scores each pair with cosine similarity in the range zero to one.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: cosine score stays bounded between zero and one
+  Given  one pair of near-identical requirements and one pair with no shared wording
+  When   `dupes` scores both pairs
+  Then   the identical pair scores near one and the unrelated pair scores near zero, neither outside that range
 
 ## Members in code (auto)
 
@@ -456,10 +456,10 @@ superseded_by:
 
 > `dupes` reports only the pairs at or above the threshold.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a below-threshold pair is left out of the report
+  Given  two requirements whose score falls under the active threshold
+  When   `dupes` runs
+  Then   that pair is absent from the printed report
 
 ## Members in code (auto)
 
@@ -484,10 +484,10 @@ superseded_by:
 
 > The threshold defaults to `0.35`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the default threshold is 0.35
+  Given  a pair scoring above 0.35 and a pair scoring below it, with no `--threshold` flag
+  When   `dupes` runs
+  Then   only the pair above 0.35 is reported
 
 ## Members in code (auto)
 
@@ -512,10 +512,10 @@ superseded_by:
 
 > `--threshold` overrides that default.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --threshold replaces the default cutoff
+  Given  a pair scoring 0.20, below the default threshold
+  When   `dupes --threshold 0.1` runs
+  Then   that pair is now reported
 
 ## Members in code (auto)
 
@@ -541,10 +541,10 @@ superseded_by:
 > `dupes` prints pairs most-similar-first, each with its score and up to five shared
 > terms, so the reviewer can see why the pair was flagged.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: reported pairs are sorted and show their shared terms
+  Given  three flagged pairs with different scores, one sharing more than five terms
+  When   `dupes` runs
+  Then   they print highest-score-first, each with its score and at most five shared terms
 
 ## Members in code (auto)
 
@@ -570,9 +570,9 @@ superseded_by:
 > `dupes` always returns zero. The report is advisory: a human decides whether a flagged
 > pair is a real duplicate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: dupes exits zero regardless of what it finds
+  Given  a corpus containing several flagged pairs
+  When   `dupes` runs
+  Then   the process still exits 0
 
 ## Members in code (auto)

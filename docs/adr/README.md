@@ -1,6 +1,6 @@
 # Architecture decision records
 
-Eighteen decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
+Twenty-three decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
 were previously findable only by reading every release note in order.
 
 An ADR here records a decision that is **expensive to reverse** or that a reader would
@@ -28,8 +28,11 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0016](0016-no-edge-case-marker.md) | No first-class edge-case marker, section, or heuristic | Rejected |
 | [0017](0017-consolidated-context-section.md) | Consolidate Notes/Example/Current-implementation into one Context section | Accepted |
 | [0018](0018-no-contract-acceptance-traceability-marker-yet.md) | No Contract-to-Acceptance traceability marker, yet | Rejected |
-| [0019](0019-v-model-left-arm-adopted.md) | The V-model's left arm is adopted; its checks stay warn-only | Accepted |
+| [0019](0019-v-model-left-arm-adopted.md) | The V-model's left arm is adopted; its checks stay warn-only | Accepted (fan-out band superseded by 0023) |
 | [0020](0020-redundancy-signal-below-the-fire-rate-bar.md) | An exact-duplicate signal ships below ADR-0016's fire-rate bar | Accepted |
+| [0021](0021-corpus-grows-only-by-design.md) | The corpus grows only, and that asymmetry is intentional | Accepted |
+| [0022](0022-no-minimum-requirement-size-check.md) | No minimum-size check; and no lint ships without both halves of its bar | Accepted |
+| [0023](0023-fan-out-per-level-ceilings-no-floor.md) | `fan-out` gets per-level ceilings and no floor | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

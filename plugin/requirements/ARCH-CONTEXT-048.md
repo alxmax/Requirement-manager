@@ -129,10 +129,10 @@ superseded_by:
 > `new`'s built-in template scaffolds the Context form for every newly-created
 > requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a newly scaffolded requirement carries the Context form
+  Given  no requirement named `AREA-X-001`
+  When   `new AREA-X-001` runs
+  Then   the created file holds a `## Context (non-binding)` section
 
 ## Members in code (auto)
 
@@ -159,10 +159,11 @@ superseded_by:
 > `**Current implementation**`), the same clause-group convention the Contract section
 > already uses for five-plus clauses.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: bold sub-group labels keep each group's bullets separate
+  Given  a `## Context` section with `**Notes**` bullets followed by `**Current
+         implementation**` bullets
+  When   `_context_group(body, "notes")` and `_context_group(body, "current implementation")` run
+  Then   each call returns only the bullets under its own label, none from the other
 
 ## Members in code (auto)
 
@@ -188,40 +189,10 @@ superseded_by:
 > `_context_group(body, label)` returns the bullets under one bold sub-group inside `##
 > Context`, or an empty list when that sub-group or the section itself is absent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-CONTEXT-315
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CONTEXT-048]
-superseded_by:
----
-
-# The legacy form remains fully valid. Nothing in
-
-> The legacy form remains fully valid. Nothing in the gate, the lint checks, or the drift
-> hash reads `## WHAT — Notes`, `## Example — in practice` or `## WHERE — Current
-> implementation` by name, so no existing requirement file needs to change.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an absent sub-group returns empty instead of a neighboring group's bullets
+  Given  a `## Context` section with an `**Example**` sub-group but no `**Notes**` sub-group
+  When   `_context_group(body, "notes")` runs
+  Then   it returns `[]`, not the Example bullets
 
 ## Members in code (auto)
 
@@ -249,10 +220,13 @@ superseded_by:
 > heading is absent — never both at once in one file, so the fallback cannot mask real
 > content a legacy-form file already has.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: notes come from the legacy heading, not the Context fallback, when present
+  Given  a confirmed requirement carrying `## WHAT — Notes` with a legacy note (no `##
+         Context` section)
+  When   `map` regenerates `_map.json` via `_build_map_data`
+  Then   the node's `notes` field holds the legacy bullet, unchanged from before this
+         feature, because the gate, the lint checks and the drift hash never read that
+         heading by name either — the file needs no change
 
 ## Members in code (auto)
 
@@ -278,9 +252,9 @@ superseded_by:
 > `## Context` and its sub-groups are commentary: not hashed by `binding_hash`, not read
 > by `_has_section`, and not linted. Neither form can trip drift or `missing-section`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: editing only the Context bullets leaves binding_hash unchanged
+  Given  two bodies identical except for the bullets under a `## Context (non-binding)` section
+  When   `binding_hash` runs on each body
+  Then   both hashes are equal — the Context edit produces no drift
 
 ## Members in code (auto)

@@ -125,35 +125,6 @@ CASE-4
 
 
 ---
-id: REQ-SEARCH-649
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-SEARCH-036]
-superseded_by:
----
-
-# Search "<query>" ranks every requirement by how well
-
-> `search "<query>"` ranks every requirement by how well its wording matches the query,
-> then prints them most-relevant-first.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-SEARCH-650
 status: draft
 form: atomic
@@ -168,10 +139,10 @@ superseded_by:
 
 > `search` writes no file. It only reads and prints.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: search runs without creating or modifying any file
+  Given  a populated requirements corpus and a query with no output-writing flag
+  When   `search "<query>"` runs
+  Then   no file in the corpus changes and only stdout carries output
 
 ## Members in code (auto)
 
@@ -197,10 +168,10 @@ superseded_by:
 > `search` reuses the scoring machinery of `dupes` (ARCH-SIMILAR-016). There is never a
 > second scoring path.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: search scores a pair the same way dupes does
+  Given  a query text identical to one requirement's full bag of words
+  When   `search` and `dupes` score that same pair
+  Then   both report the identical cosine score, since both call `_tfidf` and `_cosine`
 
 ## Members in code (auto)
 
@@ -226,10 +197,10 @@ superseded_by:
 > The query and each requirement both reduce to the same bag of words: title, intent line,
 > Contract bullets.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only title, intent line and Contract bullets feed the match
+  Given  a requirement whose Notes section mentions a word absent from its title, intent and Contract
+  When   a query using only that Notes-only word runs through `search`
+  Then   that requirement does not score above the floor on that word alone
 
 ## Members in code (auto)
 
@@ -254,10 +225,11 @@ superseded_by:
 
 > `search` then compares those two bags by cosine over smoothed TF-IDF weights.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a rarer shared term outweighs a common one
+  Given  two requirements matching the query on one common word and one rare word respectively
+  When   `search` runs
+  Then   the requirement sharing the rare word ranks higher, reflecting its higher TF-IDF
+         weight, and prints before the other match
 
 ## Members in code (auto)
 
@@ -283,10 +255,10 @@ superseded_by:
 > `search` prints every match it shows together with that match's cosine score. A weak
 > match then looks weak, instead of carrying the authority of a strong one.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: each printed result carries its cosine score
+  Given  a query matching at least one requirement above the floor
+  When   `search` runs
+  Then   every printed match line shows that match's cosine score next to its id
 
 ## Members in code (auto)
 
@@ -311,10 +283,10 @@ superseded_by:
 
 > `search` shows at most `--top` matches. `--top` defaults to five.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: search defaults to five results
+  Given  a query matching more than five requirements above the floor, and no `--top` flag
+  When   `search` runs
+  Then   it prints exactly five matches
 
 ## Members in code (auto)
 
@@ -339,10 +311,10 @@ superseded_by:
 
 > A `--top` of zero or less counts as one.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a non-positive --top still prints one match
+  Given  a query with at least one match above the floor and `--top 0`
+  When   `search` runs
+  Then   it prints exactly one match, not zero
 
 ## Members in code (auto)
 
@@ -368,10 +340,10 @@ superseded_by:
 > `search` applies a relevance floor and never prints a ranked list of below-floor
 > results.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: below-floor results never appear as a ranked list
+  Given  a query whose best score falls under the floor
+  When   `search` runs
+  Then   no ranked results print, only the no-strong-match line
 
 ## Members in code (auto)
 
@@ -397,10 +369,10 @@ superseded_by:
 > When no requirement scores at or above the floor, `search` prints an explicit
 > no-strong-match line reporting the best score and the floor.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the no-strong-match line names the best score and the floor
+  Given  a query with no requirement scoring at or above the floor
+  When   `search` runs
+  Then   the printed line reports both the best score found and the floor value
 
 ## Members in code (auto)
 
@@ -425,10 +397,10 @@ superseded_by:
 
 > The floor defaults to `0.05`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the floor is 0.05 absent an override
+  Given  a query scoring just above 0.05 against one requirement and below against all others
+  When   `search` runs
+  Then   that one requirement is reported as a match
 
 ## Members in code (auto)
 
@@ -454,10 +426,10 @@ superseded_by:
 > When the query holds no searchable term, `search` says so and ranks nothing. That line
 > is distinct from the no-strong-match line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an all-stopword query says so, not "no strong match"
+  Given  a query made only of stopwords and pure numbers
+  When   `search` runs
+  Then   it prints the "no searchable terms" line, never the no-strong-match line
 
 ## Members in code (auto)
 
@@ -483,10 +455,10 @@ superseded_by:
 > Tokenizing drops short words, stopwords and pure numbers. A query holds no searchable
 > term when nothing survives that.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: short words and numbers never seed a match
+  Given  a query of only two-letter words and digit-only tokens
+  When   `search` tokenizes it
+  Then   every token is dropped, so the query counts as holding no searchable term
 
 ## Members in code (auto)
 
@@ -512,10 +484,10 @@ superseded_by:
 > The output of `search` says that the search is lexical, not synonym-aware. A user who
 > gets no hit then knows to try other words rather than conclude no requirement exists.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the no-strong-match line names the search as lexical
+  Given  a query with no requirement scoring at or above the floor
+  When   `search` prints its no-strong-match line
+  Then   that line states the match is lexical, not synonym-aware
 
 ## Members in code (auto)
 
@@ -540,10 +512,10 @@ superseded_by:
 
 > `search` always returns zero from a well-formed invocation.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a well-formed search always exits zero
+  Given  a query, whether it matches strongly, weakly, or not at all
+  When   `search` runs
+  Then   the process exits 0 in every case
 
 ## Members in code (auto)
 
@@ -568,10 +540,10 @@ superseded_by:
 
 > A missing query argument is a usage error and returns a non-zero code.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing query argument fails with a nonzero exit
+  Given  `search` invoked with no query argument
+  When   the command runs
+  Then   it prints a usage error and exits with a nonzero code
 
 ## Members in code (auto)
 

@@ -205,34 +205,6 @@ Scenario: TODO — state the observable that proves this
 
 
 ---
-id: REQ-ATOMICITY-246
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# Atomicity is judged by a human reader. No
-
-> Atomicity is judged by a human reader. No check in the engine determines it.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-ATOMICITY-247
 status: draft
 form: atomic
@@ -247,10 +219,10 @@ superseded_by:
 
 > A clause normally holds no more than `LINT_STATEMENT_WORDS` words, default 150.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the default statement-size threshold is 150 words
+  Given  the module constant `LINT_STATEMENT_WORDS`
+  When   its value is read
+  Then   it equals `150`
 
 ## Members in code (auto)
 
@@ -275,10 +247,10 @@ superseded_by:
 
 > The `statement-size` check reports a Contract clause above that threshold.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a 155-word clause produces exactly one statement-size finding
+  Given  a Contract clause of 155 plain words
+  When   `lint_requirement` runs
+  Then   exactly one finding names `check: "statement-size"` and `clause_n: 1`
 
 ## Members in code (auto)
 
@@ -304,10 +276,10 @@ superseded_by:
 > The threshold is advisory. A clause above it stays valid, and the exit code is
 > unchanged.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an over-threshold clause's finding carries warn severity, not error
+  Given  a Contract clause of 155 plain words
+  When   `lint_requirement` runs
+  Then   the `statement-size` finding's `severity` reads `"warn"`, never `"error"`
 
 ## Members in code (auto)
 
@@ -332,38 +304,10 @@ superseded_by:
 
 > `lint_exempt: [statement-size]` silences the check for one requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-251
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The statement-size check measures textual size, never semantic
-
-> The `statement-size` check measures textual size, never semantic atomicity.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding
+  Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]`
+  When   `lint_requirement` runs
+  Then   no `statement-size` finding appears, though it appears without the exemption
 
 ## Members in code (auto)
 
@@ -388,10 +332,10 @@ superseded_by:
 
 > A short clause may carry several independent obligations and still pass the check.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a short two-obligation clause produces no statement-size finding
+  Given  a 16-word clause stating both "issues a token" and "revokes it on logout"
+  When   `lint_requirement` runs
+  Then   no `statement-size` finding is reported for that clause
 
 ## Members in code (auto)
 
@@ -417,10 +361,10 @@ superseded_by:
 > A finding asks the author to re-read the clause for decomposition, and asserts no
 > defect.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the finding's detail text asks for a re-read, not a defect claim
+  Given  a Contract clause of 155 plain words
+  When   the `statement-size` finding is produced
+  Then   its `detail` text reads "re-read it for decomposition"
 
 ## Members in code (auto)
 
@@ -445,10 +389,10 @@ superseded_by:
 
 > The check counts words after each backticked code span is replaced by one token.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a backticked span collapses to one token before counting
+  Given  a clause of 20 plain words plus one backticked span of 140 words
+  When   `_clause_words` counts the clause
+  Then   it returns 21, not the raw 161-word split count
 
 ## Members in code (auto)
 
@@ -473,10 +417,10 @@ superseded_by:
 
 > A nested sub-bullet is counted as its own clause, because it states its own obligation.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a nested sub-bullet is flagged on its own, the parent is not
+  Given  a 40-word parent bullet with a nested 155-word sub-bullet
+  When   `lint_requirement` runs
+  Then   exactly one `statement-size` finding appears, naming `clause_n: 2` (the sub-bullet)
 
 ## Members in code (auto)
 
@@ -501,9 +445,10 @@ superseded_by:
 
 > The check reads the Contract section only. Acceptance prose carries no size ceiling.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a 200-word Acceptance step produces no statement-size finding
+  Given  a requirement whose Contract clauses are all short but whose Acceptance
+         section holds a 200-word step
+  When   `lint_requirement` runs
+  Then   no `statement-size` finding is reported
 
 ## Members in code (auto)

@@ -104,10 +104,11 @@ superseded_by:
 > paired markers and preserving all other (authored) content. A re-run with no underlying
 > change produces a byte-identical file (idempotent).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a second attach run with no change is byte-identical
+  Given  a page carrying `<h1>Mine</h1>` and no underlying data change
+  When   `cmd_site(..., attach=page, regions=["nav", "stats"])` runs twice
+  Then   the file's content after the second run equals the content after the first, and
+         `<h1>Mine</h1>` is still present
 
 ## Members in code (auto)
 
@@ -134,10 +135,11 @@ superseded_by:
 > page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder
 > hero.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: site scaffolds a full page when the attach target is absent
+  Given  no file at `docs/architecture.html`
+  When   `cmd_site(..., attach=target, regions=["nav", "stats"])` runs
+  Then   the written page contains both region markers and the "<!-- author me -->"
+         placeholder hero
 
 ## Members in code (auto)
 
@@ -165,10 +167,10 @@ superseded_by:
 > git remote resolves. A missing git remote, missing artifact, or non-checkout never
 > raises.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an absent nav target is omitted, not an error
+  Given  a rendering context with no repo URL, no map, and no diagram
+  When   `_render_region("nav", ctx)` runs
+  Then   it returns markup with no `<a` link and raises nothing
 
 ## Members in code (auto)
 
@@ -194,10 +196,10 @@ superseded_by:
 > The engine never imports or executes the excalidraw skill's builder; the Diagram entry
 > is a link only.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: reqmap.py's own source never references the excalidraw builder
+  Given  the `reqmap.py` source file
+  When   its text is searched for "excalidraw_builder"
+  Then   no occurrence is found
 
 ## Members in code (auto)
 
@@ -225,10 +227,11 @@ superseded_by:
 > a Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step does not
 > abort `init`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: init scaffolds the site page unless --no-site is passed
+  Given  a `docs/` directory with no `architecture.html`
+  When   `cmd_init(..., no_site=False)` runs, and separately `cmd_init(..., no_site=True)`
+  Then   the first run creates `docs/architecture.html` with a `##REQMAP:NAV##` region;
+         the second run creates no such file
 
 ## Members in code (auto)
 
@@ -255,9 +258,10 @@ superseded_by:
 > fresh render. The `nav` region is excluded (it embeds the fork-specific repo URL). A
 > page that was never generated, or that lacks a `stats` region, is not stale.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map --check fails only after the stats region is tampered with
+  Given  a freshly generated site page with a `stats` region
+  When   `_map_check` runs before and after the `stats` region is overwritten with
+         "TAMPERED"
+  Then   it exits 0 before the edit and exits 1 after it
 
 ## Members in code (auto)

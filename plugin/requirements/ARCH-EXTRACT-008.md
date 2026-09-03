@@ -140,10 +140,10 @@ superseded_by:
 > `draft` walks every untagged scannable code file — the extensions and basenames the scan
 > reads — plus prose in the capability bucket.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft proposes a file for every untagged scannable extension
+  Given  an untagged `.py` file and an untagged `.rs` file, both scannable extensions
+  When   `draft` runs
+  Then   it proposes one `DRAFT-*.md` for each
 
 ## Members in code (auto)
 
@@ -168,10 +168,10 @@ superseded_by:
 
 > `draft` skips a file that already carries a member tag.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft skips a file already carrying a member tag
+  Given  a `.py` file carrying `# implements: AUTH-LOGIN-001`
+  When   `draft` runs
+  Then   no `DRAFT-*.md` is proposed for that file
 
 ## Members in code (auto)
 
@@ -196,39 +196,11 @@ superseded_by:
 
 > `draft` honors `.reqmapignore`, the same fnmatch globs `scan` respects.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-EXTRACT-377
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-EXTRACT-008]
-superseded_by:
----
-
-# A file matching an ignore pattern is never
-
-> A file matching an ignore pattern is never drafted — notably the vendored
-> `scripts/reqmap.py` engine itself.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft skips a file matched by .reqmapignore
+  Given  an untagged file matching a `.reqmapignore` glob pattern
+  When   `draft` runs
+  Then   no `DRAFT-*.md` is proposed for that file — notably the vendored
+         `scripts/reqmap.py` engine itself
 
 ## Members in code (auto)
 
@@ -253,10 +225,10 @@ superseded_by:
 
 > `draft` proposes one `requirements/DRAFT-*.md` per remaining file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft writes one proposal file per remaining source file
+  Given  two untagged, unignored source files
+  When   `draft` runs
+  Then   it writes two distinct `requirements/DRAFT-*.md` files
 
 ## Members in code (auto)
 
@@ -282,10 +254,10 @@ superseded_by:
 > Every proposal carries `status: draft` and a TODO body. It captures observed behavior,
 > and never canonizes intent or correctness.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a fresh proposal is marked draft with a TODO contract
+  Given  an untagged source file
+  When   `draft` runs
+  Then   the proposal's frontmatter reads `status: draft` and its Contract is a TODO placeholder
 
 ## Members in code (auto)
 
@@ -311,10 +283,10 @@ superseded_by:
 > A proposal's Contract section opens with "Every bullet below is binding.",
 > matching what `new` scaffolds, so promoting a draft needs no reshaping.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a proposal's Contract opens exactly like new's scaffold
+  Given  a fresh `draft` proposal and a requirement scaffolded by `new`
+  When   both Contract sections are compared
+  Then   both open with "Every bullet below is binding."
 
 ## Members in code (auto)
 
@@ -339,10 +311,10 @@ superseded_by:
 
 > `draft` creates the requirements directory if it is absent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft creates a missing requirements directory
+  Given  a repo with no `requirements/` directory yet
+  When   `draft` runs
+  Then   `requirements/` is created and the proposals are written into it
 
 ## Members in code (auto)
 
@@ -367,10 +339,10 @@ superseded_by:
 
 > Draft ids are path-aware, so two files sharing a basename do not collide.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: draft ids stay unique across same-named files in different folders
+  Given  `src/a/util.py` and `src/b/util.py`, both untagged
+  When   `draft` runs
+  Then   it writes two proposals with distinct ids, one per path
 
 ## Members in code (auto)
 
@@ -396,10 +368,10 @@ superseded_by:
 > `draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers,
 > suppressions and file size.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a marker-heavy file scores as higher risk
+  Given  an untagged file containing `TODO`, `FIXME` and a suppression comment
+  When   `draft` runs
+  Then   its proposal carries a higher risk score than a clean file of the same size
 
 ## Members in code (auto)
 
@@ -424,10 +396,10 @@ superseded_by:
 
 > `draft` routes a score of 2 or more to `REVIEW`, and any lower score to `auto-baseline`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the risk score routes the proposal's status hint
+  Given  one file scoring 2 and one file scoring 0
+  When   `draft` runs
+  Then   the first proposal is flagged `REVIEW` and the second `auto-baseline`
 
 ## Members in code (auto)
 
@@ -452,10 +424,10 @@ superseded_by:
 
 > Re-running `draft` never overwrites an existing draft.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: re-running draft leaves an existing proposal untouched
+  Given  a `DRAFT-*.md` written by an earlier `draft` run, since hand-edited
+  When   `draft` runs again over the same file
+  Then   the existing proposal's content is unchanged
 
 ## Members in code (auto)
 
@@ -481,10 +453,10 @@ superseded_by:
 > A code proposal's WHERE section lists the file's observed surface — the module
 > docstring's first line and its top-level signatures — when the language has a parser.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a Python proposal's WHERE names the docstring and top-level signatures
+  Given  an untagged `.py` file with a module docstring and two top-level functions
+  When   `draft` runs
+  Then   the proposal's WHERE section names the docstring's first line and both function signatures
 
 ## Members in code (auto)
 
@@ -510,9 +482,9 @@ superseded_by:
 > That surface is an authoring hint under WHERE, never a Contract line. The Contract stays
 > a TODO until a human writes it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the extracted surface never leaks into the Contract
+  Given  the same `.py` file's proposal, whose WHERE lists two function signatures
+  When   the proposal's Contract section is inspected
+  Then   it is still the TODO placeholder, unchanged by what WHERE captured
 
 ## Members in code (auto)

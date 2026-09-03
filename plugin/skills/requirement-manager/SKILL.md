@@ -205,6 +205,27 @@ A capability is a **behavior** that can fail independently — one thing a user 
 
 If two behaviors live in the same file but can break in isolation (e.g. a veto path and a majority-vote path in an aggregator), they are **two capabilities** — give each its own requirement file. "One file per capability" means one *behavior per file*, not one *file per class*.
 
+**Split by failure mode, never by sentence.** When you decompose a requirement into
+detailed-design children, a clause earns its own requirement only if it names a behavior
+that can fail on its own. Three clause shapes never do, and each is a merge candidate
+rather than a child:
+
+- **an element of an enumeration** — "a Rust `#[test]` counts" is one arm of *the engine
+  recognises a test function*, not a capability. Six list items are one behavior.
+- **an attribute of a behavior** — "the check is warn-only and never changes the exit
+  code" qualifies how something else behaves. Fold it into that behavior's `Then`, where a
+  test actually observes it.
+- **a rationale or a consequence** — "deleting the created draft restores the corpus
+  exactly, because the parent was never edited" restates a sibling's obligation. It belongs
+  in Notes, or inside the sibling's scenario.
+
+The check is mechanical: **try to write the `Then`**. If the observable you write only
+repeats the clause in other words, the clause is not a capability. That test is the rule —
+no word count, no clause count, and no lint check substitutes for it, because none of them
+can tell a terse-but-complete obligation from a fragment (see
+[ADR-0022](../../../docs/adr/0022-no-minimum-requirement-size-check.md), which measured the
+attempt and rejected it).
+
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.

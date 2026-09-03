@@ -113,10 +113,10 @@ superseded_by:
 > `load_requirements` parses each `requirements/*.md` file into a record `{meta, body,
 > path}`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: load_requirements returns a meta/body/path record per file
+  Given  a `requirements/` directory with one valid `REQ-A-001.md`
+  When   `load_requirements(dir)` runs
+  Then   the returned dict's entry carries `meta`, `body`, and `path` keys
 
 ## Members in code (auto)
 
@@ -142,10 +142,10 @@ superseded_by:
 > `meta` is the parsed frontmatter, and `body` is the markdown after the frontmatter
 > block.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: parse_frontmatter splits the header fields from the markdown that follows
+  Given  `"---\nid: REQ-A-001\nstatus: draft\n---\nbody text\n"`
+  When   `parse_frontmatter(text)` runs
+  Then   `meta["id"] == "REQ-A-001"` and `body == "body text\n"`, with no `---` markers in either
 
 ## Members in code (auto)
 
@@ -170,10 +170,10 @@ superseded_by:
 
 > The `id` comes from the frontmatter `id:` field, falling back to the filename stem.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file with no id: field is keyed by its filename stem
+  Given  `REQ-A-001.md` whose frontmatter carries no `id:` line
+  When   `load_requirements(dir)` runs
+  Then   the returned dict has the key `"REQ-A-001"`, taken from the filename
 
 ## Members in code (auto)
 
@@ -199,10 +199,10 @@ superseded_by:
 > The grammar supports scalars, inline `[a, b]` lists, and block-style lists written as
 > `key:` then indented `- item`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a block-style key: / indented - item list parses to a Python list
+  Given  `"---\ndepends_on:\n  - A-B-001\n  - C-D-002\n---\n"`
+  When   `parse_frontmatter(text)` runs
+  Then   `meta["depends_on"] == ["A-B-001", "C-D-002"]`
 
 ## Members in code (auto)
 
@@ -227,10 +227,10 @@ superseded_by:
 
 > A trailing `# comment` is stripped from a value.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a trailing # comment does not leak into the parsed value
+  Given  `"---\nstatus: draft  # not enforced\n---\n"`
+  When   `parse_frontmatter(text)` runs
+  Then   `meta["status"] == "draft"`, with the comment text absent
 
 ## Members in code (auto)
 
@@ -255,10 +255,10 @@ superseded_by:
 
 > Matching surrounding quotes are removed from a scalar.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: matching quote characters are stripped from a scalar value
+  Given  `'---\nid: "REQ-X-001"\nstatus: \'draft\'\n---\n'`
+  When   `parse_frontmatter(text)` runs
+  Then   `meta["id"] == "REQ-X-001"` and `meta["status"] == "draft"`, quotes removed
 
 ## Members in code (auto)
 
@@ -284,10 +284,10 @@ superseded_by:
 > An inline list missing its closing `]` is parsed leniently, rather than kept as a
 > literal string.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unclosed inline list still parses as a list, not a literal string
+  Given  `"---\ntags: [x, y\n---\n"` (no closing `]`)
+  When   `parse_frontmatter(text)` runs
+  Then   `meta["tags"] == ["x", "y"]`, not the literal string `"[x, y"`
 
 ## Members in code (auto)
 
@@ -312,10 +312,10 @@ superseded_by:
 
 > A file with no leading `---` block yields empty `meta` and the whole text as `body`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a file with no frontmatter block yields empty meta and the full text as body
+  Given  `"# Title\njust text\n"` (no leading `---`)
+  When   `parse_frontmatter(text)` runs
+  Then   `meta == {}` and `body == "# Title\njust text\n"`
 
 ## Members in code (auto)
 
@@ -340,10 +340,10 @@ superseded_by:
 
 > A file whose name starts with `_` (a lock, the generated map) is excluded.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an underscore-prefixed file is excluded from load_requirements
+  Given  a `requirements/` directory holding `_draft.md` and `REQ-A-001.md`
+  When   `load_requirements(dir)` runs
+  Then   the result contains only `"REQ-A-001"`, not any id from `_draft.md`
 
 ## Members in code (auto)
 
@@ -368,9 +368,9 @@ superseded_by:
 
 > A leading UTF-8 BOM is tolerated.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a leading UTF-8 BOM does not break frontmatter parsing
+  Given  a requirement file saved with a leading BOM before `---\nid: REQ-A-001\n...`
+  When   `load_requirements(dir)` runs
+  Then   `"REQ-A-001"` is a key in the result, with `meta["status"]` read correctly
 
 ## Members in code (auto)

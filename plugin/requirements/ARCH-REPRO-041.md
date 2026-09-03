@@ -131,10 +131,11 @@ superseded_by:
 > `docs/full_architecture.html` derives from
 > `plugin/skills/excalidraw-diagram/examples/make_full_architecture.py`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the published architecture diagram matches its generator
+  Given  `make_full_architecture.py` regenerated into a temporary directory
+  When   its output is compared byte-for-byte against the committed
+         `docs/full_architecture.html`
+  Then   the two files are identical
 
 ## Members in code (auto)
 
@@ -245,9 +246,9 @@ superseded_by:
 > The `release` job runs only after `artifacts` passes, so a stale artifact never reaches
 > a published tag.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the release job depends on the artifacts job
+  Given  `.github/workflows/ci.yml`
+  When   the `release` job's `needs:` list is inspected
+  Then   it names `artifacts` alongside `gate-and-tests` and `tests`
 
 ## Members in code (auto)

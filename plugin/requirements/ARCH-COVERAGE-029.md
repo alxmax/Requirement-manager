@@ -104,10 +104,10 @@ superseded_by:
 > The capability reports the count of scannable code files that carry no membership tag —
 > "untagged code", code traced to no requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the untagged count reflects untagged files
+  Given  a code root with one tagged file and one untagged scannable file
+  When   `health --json` runs with that code root
+  Then   the `untagged` key equals 1, the health score is unchanged, and the exit code stays 0
 
 ## Members in code (auto)
 
@@ -133,10 +133,10 @@ superseded_by:
 > The denominator is exactly `_scan_untagged`'s (see [[ARCH-NEXT-013]]): the files matched
 > by the scanner extension walk, minus `.reqmapignore`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the untagged count shares its denominator with _scan_untagged
+  Given  a code root scanned by both `health` and `_scan_untagged` directly
+  When   both are run over the same tree
+  Then   the `untagged` count equals the length of `_scan_untagged`'s file list
 
 ## Members in code (auto)
 
@@ -162,10 +162,10 @@ superseded_by:
 > Any membership tag counts a file as covered. The tags are `implements`, `tested-by`,
 > `generated-from` and `validated-against`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tested-by tag alone covers a file
+  Given  an untagged file that is then given only a `# tested-by:` comment
+  When   `health --json` runs
+  Then   that file no longer counts toward `untagged`
 
 ## Members in code (auto)
 
@@ -191,10 +191,10 @@ superseded_by:
 > The `health` command includes this count as an `untagged` integer key in its `--json`
 > output.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: health --json exposes the untagged integer key
+  Given  a code root with one untagged scannable file
+  When   `health --json` runs
+  Then   its output is valid JSON carrying an integer `untagged` key
 
 ## Members in code (auto)
 
@@ -219,10 +219,10 @@ superseded_by:
 
 > The `health` command also includes it as a labelled line in its text output.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: health's text output labels the untagged count
+  Given  a code root with one untagged scannable file
+  When   `health` runs without `--json`
+  Then   its text output includes a labelled line naming the untagged count
 
 ## Members in code (auto)
 
@@ -248,66 +248,10 @@ superseded_by:
 > The `untagged` key is absent, not zero, when no code root is scanned — a unit-test
 > caller, for example. An existing `--json` consumer therefore keeps its schema.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-COVERAGE-324
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# The signal is read-only and is never a
-
-> The signal is read-only and is never a gate. It changes no exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-COVERAGE-325
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# The signal never lowers the health score, because
-
-> The signal never lowers the health score, because it counts files, not requirements.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the untagged key is absent without a code root
+  Given  a `health --json` invocation with no code root supplied
+  When   it runs
+  Then   the output carries no `untagged` key at all
 
 ## Members in code (auto)
 
@@ -333,37 +277,9 @@ superseded_by:
 > A file is silenced from the count either by tagging it, or by adding it to
 > `.reqmapignore`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-COVERAGE-327
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# There is no separate exemption mechanism
-
-> There is no separate exemption mechanism.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: tagging or ignoring a file drops it from the count
+  Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another
+  When   `health --json` runs after each change
+  Then   the `untagged` count drops by one either way, with no separate exemption mechanism
 
 ## Members in code (auto)

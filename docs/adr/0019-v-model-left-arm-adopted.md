@@ -1,6 +1,11 @@
 # ADR-0019 — The V-model's left arm is adopted; its checks stay warn-only
 
-- **Status:** Accepted — supersedes [ADR-0007](0007-v-model-gating-parked.md)
+- **Status:** Accepted — supersedes [ADR-0007](0007-v-model-gating-parked.md). Its **fan-out
+  band** Decision and Consequence are superseded by
+  [ADR-0023](0023-fan-out-per-level-ceilings-no-floor.md) (2026-09-03), which replaces the
+  uniform 5–20 band with per-level ceilings and no floor, and withdraws the claim below that
+  the band's seven findings were confirmed real. Everything else here stands; the reasoning
+  is left exactly as decided.
 - **Decided:** 2026-09-03 (`ARCH-LEVEL-051`, `ARCH-FANOUT-052`, `ARCH-VRUNGS-054`, `ARCH-ATOMICFORM-053`, `ARCH-MODULEFILE-056`)
 - **Evidence:** `CHANGELOG.md` `v2.32.0`; the nine-senator audit
   `runs/senate/2026-09-02_*-v-model*.json` (advisory); this repo's own corpus, 52 files → 689

@@ -144,10 +144,10 @@ superseded_by:
 
 > `init` creates the requirements folder if it is missing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: init creates a missing requirements directory
+  Given  a repo with no `requirements/` folder
+  When   `cmd_init` runs
+  Then   `requirements/` exists afterward
 
 ## Members in code (auto)
 
@@ -173,10 +173,10 @@ superseded_by:
 > `init` writes a starter `.reqmapignore` only if the repo has none. It never overwrites
 > one that is already there.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an existing .reqmapignore is left byte-for-byte
+  Given  a repo with `.reqmapignore` already containing `my-custom-glob/**`
+  When   `cmd_init` runs
+  Then   `.reqmapignore`'s content is unchanged
 
 ## Members in code (auto)
 
@@ -202,10 +202,10 @@ superseded_by:
 > The starter file lists `scripts/reqmap.py`. Without that line, the engine's own tags
 > look like they point at requirements that do not exist.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the seeded ignore lists scripts/reqmap.py in a non-self-hosting repo
+  Given  a repo with no `.reqmapignore` and no self-hosting requirements
+  When   `cmd_init` runs
+  Then   the written `.reqmapignore` contains the line `scripts/reqmap.py`
 
 ## Members in code (auto)
 
@@ -233,10 +233,10 @@ superseded_by:
 > without those lines every member is counted twice and the copies' tags read as dangling
 > refs: errors that are not in the code, in files a clean CI checkout never has.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the seeded ignore prunes both worktree-copy locations
+  Given  a fresh repo with no `.reqmapignore`, after `cmd_init` runs
+  When   a tagged file is then copied into `.worktrees/wt1/` and `.claude/worktrees/wt1/`
+  Then   `scan_members` counts neither copy — only the original file — as a member
 
 ## Members in code (auto)
 
@@ -263,10 +263,10 @@ superseded_by:
 > and writes a comment saying why. There the engine is ordinary tracked code, so the scan
 > keeps reading it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a self-hosting repo's seeded ignore does not ignore the engine
+  Given  `requirements/CORE-X-001.md` exists and `scripts/reqmap.py` carries `# implements: CORE-X-001`
+  When   `cmd_init` runs
+  Then   the written `.reqmapignore` has no live (uncommented) `scripts/reqmap.py` glob, and `scan_members` still counts the engine as a member of `CORE-X-001`
 
 ## Members in code (auto)
 
@@ -292,10 +292,10 @@ superseded_by:
 > "Describes itself" means `scripts/reqmap.py` carries tags whose ids match requirements
 > already in the repo.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tag pointing at no local requirement is not self-hosting
+  Given  `requirements/CORE-Y-002.md` exists and `scripts/reqmap.py` carries `# implements: CORE-GHOST-999` (an id with no matching file)
+  When   `cmd_init` runs
+  Then   the self-hosting exception does not fire: the written `.reqmapignore` still ignores `scripts/reqmap.py`
 
 ## Members in code (auto)
 
@@ -321,10 +321,10 @@ superseded_by:
 > `init` drafts requirements from untagged code, writes the lock, then builds the map, in
 > that order. When it finishes, the repo passes the gate and has a map.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the lock and map cover the requirements init just drafted
+  Given  an untagged `app.py` in a repo with no `requirements/`
+  When   `cmd_init` runs
+  Then   `_reqlock.json` carries a hash for the newly drafted `DRAFT-*` requirement, proving draft ran before the lock was written
 
 ## Members in code (auto)
 
@@ -350,10 +350,10 @@ superseded_by:
 > `init` ends with a short summary naming one next command: `reqmap.py next`. Not a list
 > of every option.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the summary names next, not the full command list
+  Given  a repo with extractable code
+  When   `cmd_init` runs
+  Then   its output contains "reqmap.py next" but names none of "confirm", "dupes", "search" or "coverage"
 
 ## Members in code (auto)
 
@@ -379,10 +379,10 @@ superseded_by:
 > If nothing was drafted, `init` says so in plain words and points at `new`. It never
 > prints a count summary that hides an empty result.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an extraction-free repo gets a distinct empty-result message
+  Given  a repo containing only `README.txt` (no extractable code)
+  When   `cmd_init` runs
+  Then   its output says "no requirements were extracted" and points at `reqmap.py new`, never "0 requirement(s) tracked"
 
 ## Members in code (auto)
 
@@ -408,10 +408,10 @@ superseded_by:
 > Running `init` twice is safe. The second run refreshes the lock and the map, then prints
 > the summary again.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a second init run exits clean and reprints the summary
+  Given  a repo already initialized by one `cmd_init` run
+  When   `cmd_init` runs again
+  Then   it exits 0 and its output again contains "reqmap.py next"
 
 ## Members in code (auto)
 
@@ -437,9 +437,9 @@ superseded_by:
 > A second run never deletes a requirement someone wrote, and never edits an existing
 > `.reqmapignore`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a hand-authored requirement and .reqmapignore survive a re-run
+  Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`
+  When   `cmd_init` runs (no `--wipe`)
+  Then   `CORE-FOO-001.md` still exists and `.reqmapignore`'s content is unchanged
 
 ## Members in code (auto)

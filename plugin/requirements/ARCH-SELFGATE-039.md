@@ -115,10 +115,10 @@ superseded_by:
 > `.github/workflows/ci.yml`'s `gate-and-tests` job invokes `reqmap.py gate` / `lint
 > --strict` / `map --check` on every push and pull request.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the CI job runs all three checks on both triggers
+  Given  `.github/workflows/ci.yml`
+  When   its `gate-and-tests` job is read
+  Then   the job invokes `gate`, `lint --strict` and `map --check`, and the workflow triggers on push and pull_request
 
 ## Members in code (auto)
 
@@ -144,10 +144,10 @@ superseded_by:
 > `check/action.yml` packages the same invocation as a reusable GitHub Action for consumer
 > repos.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the composite action runs the same three checks
+  Given  `check/action.yml`
+  When   its `runs.steps` are read
+  Then   the composite action invokes `reqmap.py gate`, `map --check` and `lint --strict`, the same commands `ci.yml` runs on itself
 
 ## Members in code (auto)
 
@@ -202,10 +202,10 @@ superseded_by:
 
 > `.githooks/pre-commit` mirrors the CI order locally, before a commit is created.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the hook runs checks in the same relative order as CI
+  Given  `.githooks/pre-commit`
+  When   its script body is read top to bottom
+  Then   it runs `check_versions.py`, `check_engine_bump.py --staged`, `gate`, `lint --strict`, `map --check` in that order, matching `ci.yml`'s `gate-and-tests` job
 
 ## Members in code (auto)
 

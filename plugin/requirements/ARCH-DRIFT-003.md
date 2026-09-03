@@ -115,10 +115,10 @@ superseded_by:
 > `binding_hash` computes a stable 12-character hex content hash over only the normative
 > sections of a requirement body.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: binding_hash returns a fixed-length hex digest
+  Given  a requirement body with a `## Description` and `## Cases` section
+  When   `binding_hash` runs on that body
+  Then   it returns a 12-character lowercase hex string
 
 ## Members in code (auto)
 
@@ -144,10 +144,10 @@ superseded_by:
 > The normative sections are the `Contract` and `Acceptance` headings, plus the legacy
 > `Input`/`Output`/`Acceptance` headings kept for back-compat.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the legacy Output heading is still treated as normative
+  Given  a requirement body using the legacy `## Output` heading instead of `## Contract`
+  When   the clause under `## Output` is edited
+  Then   `binding_hash` changes, proving the legacy heading feeds the hash
 
 ## Members in code (auto)
 
@@ -173,10 +173,10 @@ superseded_by:
 > Rationale, notes, verify-intent, links and the member list stay outside the hash, so
 > they may change without tripping drift.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: editing Notes and the member list leaves the hash unchanged
+  Given  a requirement body with `## Notes & known limitations` and `## Members in code` sections
+  When   only the text under those sections is edited
+  Then   `binding_hash` returns the same value before and after the edit
 
 ## Members in code (auto)
 
@@ -201,10 +201,10 @@ superseded_by:
 
 > The hash is deterministic for identical normative content.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: binding_hash is deterministic across repeated calls
+  Given  the same requirement body
+  When   `binding_hash` runs on it twice, independently
+  Then   both calls return the identical 12-character hash
 
 ## Members in code (auto)
 
@@ -230,10 +230,10 @@ superseded_by:
 > `load_lock` and `save_lock` read and write the per-id hash baseline at
 > `requirements/_reqlock.json`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: save_lock then load_lock round-trips through _reqlock.json
+  Given  the hash mapping `{"A-B-001": "abc123def456", "C-D-002": "0123456789ab"}`
+  When   `save_lock` writes it to a directory and `load_lock` reads that same directory
+  Then   `load_lock` returns the identical mapping, read from `_reqlock.json`
 
 ## Members in code (auto)
 
@@ -258,10 +258,10 @@ superseded_by:
 
 > A missing, empty or unparseable lock loads as an empty mapping, never a crash.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing or corrupt lock file loads as an empty dict
+  Given  a directory with no `_reqlock.json`, and separately one holding non-UTF-8 bytes as `_reqlock.json`
+  When   `load_lock` runs on each directory
+  Then   both calls return `{}` and neither raises an exception
 
 ## Members in code (auto)
 
@@ -286,10 +286,10 @@ superseded_by:
 
 > `save_lock` creates the requirements directory if it is absent.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: save_lock creates a missing requirements directory
+  Given  a target path whose parent directories (`does/not/exist`) do not exist yet
+  When   `save_lock` writes a mapping to that path
+  Then   the directory tree is created and `_reqlock.json` exists inside it
 
 ## Members in code (auto)
 
@@ -314,9 +314,9 @@ superseded_by:
 
 > `save_lock` writes sorted, indented JSON, so the lock file is diff-stable.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: save_lock writes sorted, indented JSON
+  Given  a hash mapping with out-of-order keys (e.g. `{"Z-9": "..", "A-1": ".."}`)
+  When   `save_lock` writes it to disk
+  Then   the written `_reqlock.json` lists keys alphabetically and spans multiple indented lines
 
 ## Members in code (auto)

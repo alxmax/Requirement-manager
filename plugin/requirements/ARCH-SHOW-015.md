@@ -130,10 +130,11 @@ superseded_by:
 
 > `show <ID>` prints one consolidated, human-readable view of a single requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: one show call surfaces header, contract, deps, and members together
+  Given  a requirement with a Contract bullet, a `depends_on` target, and a tagged member
+  When   `show <ID>` runs once
+  Then   the single output contains the header, "Contract:", "Depends on:", and "Members
+         in code" — no second command needed
 
 ## Members in code (auto)
 
@@ -158,10 +159,10 @@ superseded_by:
 
 > `show` writes nothing. It only reads and prints.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: show leaves the requirement file byte-identical on disk
+  Given  a requirement file with known content, loaded and passed to `cmd_show`
+  When   `show <ID>` runs
+  Then   the file's on-disk bytes are unchanged afterward
 
 ## Members in code (auto)
 
@@ -186,10 +187,10 @@ superseded_by:
 
 > `show` prints a header line carrying the id, the status and the layer.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the header line carries id, status, and layer
+  Given  a known requirement `REQ-X-001` with status `confirmed` and layer `feature`
+  When   `show REQ-X-001` runs
+  Then   its output contains "REQ-X-001", "confirmed", and "feature", and it returns 0
 
 ## Members in code (auto)
 
@@ -215,10 +216,10 @@ superseded_by:
 > The header appends `priority` after the layer when that field is present, then
 > `milestone`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a set priority appears on the header line
+  Given  a requirement with `priority: must-have`
+  When   `show` runs
+  Then   "must-have" appears in the first line of the output
 
 ## Members in code (auto)
 
@@ -243,10 +244,10 @@ superseded_by:
 
 > An absent optional field adds no empty segment to the header.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no priority leaves no blank header segment
+  Given  a requirement with no `priority` field
+  When   `show` runs
+  Then   the header line contains no empty "·  ·" segment
 
 ## Members in code (auto)
 
@@ -272,10 +273,10 @@ superseded_by:
 > `show` prints the title and the intent. A WHY spanning several `>` lines is gathered
 > whole, never truncated to its first line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a multi-line WHY blockquote prints in full, not just its first line
+  Given  a requirement whose intent is three consecutive `>` lines
+  When   `_first_quote` (called by `show`) gathers the intent
+  Then   it returns all three lines joined, not only the first
 
 ## Members in code (auto)
 
@@ -301,10 +302,10 @@ superseded_by:
 > `show` lists the Contract bullets. When the requirement has no `## Description`
 > section, `show` says so instead.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a requirement with no Description section says so instead of listing bullets
+  Given  a requirement body with no `## Description`/`## Contract` section
+  When   `show` runs
+  Then   under "Contract:" it prints "(none — no '## Description' section)"
 
 ## Members in code (auto)
 
@@ -330,10 +331,10 @@ superseded_by:
 > `show` prints dependencies in both directions: the `depends_on` ids, and the reverse
 > edges.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: show lists a reverse dependency under Depended on by
+  Given  `REQ-B-002` with `depends_on: [CORE-A-001]`
+  When   `show CORE-A-001` runs
+  Then   its output contains "Depended on by" and "REQ-B-002"
 
 ## Members in code (auto)
 
@@ -359,10 +360,10 @@ superseded_by:
 > `show` lists the code members grouped by role, each with its `file:line`. When no member
 > is tagged, `show` says so.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tagged member prints its role and file:line
+  Given  a member `("implements", "src/foo.py", 42)` for `REQ-X-001`
+  When   `show REQ-X-001` runs
+  Then   its output contains "implements" and "src/foo.py:42"
 
 ## Members in code (auto)
 
@@ -387,10 +388,10 @@ superseded_by:
 
 > `show` prints the verification level beside a member whose `tested-by:` tag carries one.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a levelled tested-by member is annotated with its level
+  Given  a `tested-by` member at `t.py:2` whose `levels` mapping marks it `integration`
+  When   `show REQ-X-001` runs with that level data
+  Then   its output contains "@integration"
 
 ## Members in code (auto)
 
@@ -416,10 +417,11 @@ superseded_by:
 > `show` lists the open `## Verify intent` questions, using the same filter as
 > `findings`, so the "None" placeholder is skipped.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an open verify-intent bullet shows; the None placeholder does not
+  Given  a body with one real verify-intent question and one "None — doc is unambiguous"
+         placeholder bullet
+  When   `show` runs
+  Then   its output contains the real question and omits the placeholder bullet
 
 ## Members in code (auto)
 
@@ -445,10 +447,12 @@ superseded_by:
 > `show` lists the risk signals with their advice, reusing the same `_risk_signals` source
 > as `next` and the Risk tab, so the three never disagree.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: show prints a risk signal alongside its advice text
+  Given  a requirement whose `_risk_signals(node)` yields at least one signal (e.g.
+         `untested`)
+  When   `show` runs
+  Then   its output contains "Risk signals:" followed by that signal name and the matching
+         `RISK_ADVICE` text
 
 ## Members in code (auto)
 
@@ -474,9 +478,10 @@ superseded_by:
 > `show` returns zero for a known id and a non-zero code for an unknown one, so a typo is
 > visible to a caller or to CI.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: exit code distinguishes a known id from an unknown one
+  Given  a known id `REQ-X-001` and an unknown id `NOPE-000`
+  When   `show` runs on each
+  Then   the known id returns 0 and the unknown id returns 1 with "no requirement with id
+         NOPE-000"
 
 ## Members in code (auto)
