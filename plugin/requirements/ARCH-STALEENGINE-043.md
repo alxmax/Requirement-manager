@@ -131,10 +131,10 @@ superseded_by:
 > The staleness probe compares the vendored engine's `MAP_ENGINE_VERSION` against the
 > reference engine's.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a vendored engine older than the reference one is named
+  Given  a consumer's `scripts/reqmap.py` whose `MAP_ENGINE_VERSION` predates the action's own copy
+  When   `engine_staleness.py` runs
+  Then   it annotates the run, naming the vendored version and the reference version
 
 ## Members in code (auto)
 

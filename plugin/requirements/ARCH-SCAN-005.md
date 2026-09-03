@@ -92,10 +92,10 @@ superseded_by:
 > `scan` prints every capability id, followed by its `role file:line` members, one member
 > per line.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: every member is printed on its own line under its id
+  Given  a corpus of one requirement carrying an `implements` and a `tested-by` member
+  When   `scan` runs
+  Then   the id is printed, followed by exactly two lines, each reading `role file:line`
 
 ## Members in code (auto)
 

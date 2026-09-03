@@ -105,7 +105,7 @@ CASE-6
 
 ---
 id: REQ-PROMOTE-567
-status: draft
+status: confirmed
 form: atomic
 level: code
 layer: feature
@@ -118,10 +118,10 @@ superseded_by:
 
 > `confirm <ID>` sets the requirement's `status` to `confirmed`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: confirm rewrites the status field
+  Given  a `draft` requirement carrying at least one `implements:` member
+  When   `confirm <ID>` runs
+  Then   that requirement's frontmatter reads `status: confirmed`
 
 ## Members in code (auto)
 

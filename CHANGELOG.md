@@ -16,7 +16,7 @@
 - **Absent, not zero**, following the `untagged` precedent (`ARCH-COVERAGE-029`): the key is omitted when nothing has been reviewed (zero of zero is not zero per cent) *and* when there are no drafts (it would restate `score` under a second name). An existing `--json` consumer's schema is unchanged.
 - `ARCH-HEALTH-017` gained CASE-8 and CASE-9; four new tests.
 - **Grow-only asymmetry recorded as [ADR-0021](docs/adr/0021-corpus-grows-only-by-design.md).** Five paths create a requirement file; none removes one. The single `os.remove` lives in `_wipe` (`init --wipe`), which resets to zero rather than pruning. The decision is to keep that asymmetry — growth writes a reversible draft, shrink deletes a file and rewrites `satisfies:`/`depends_on:` edges across a possible drift boundary — pinned by a `NoShrinkVerb` test that fails when a second delete path appears. The record also corrects two figures the deliberation got wrong: dropping the `ac-count-low` atomic exemption fires on 14/70 lintable (20.0%), not 621/691 (90%), because `lint` never examines drafts; and the 621 detailed-design leaves do *not* cost nothing — they are why the headline score reads 10.
-- `MAP_ENGINE_VERSION` → `2026-09-03.10`. 721 tests.
+- `MAP_ENGINE_VERSION` → `2026-09-03.11`. 721 tests.
 
 ## plugin `v3.0.1` — 2026-09-03
 

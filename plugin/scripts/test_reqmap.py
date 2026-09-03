@@ -2316,7 +2316,7 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011
             code = R.cmd_promote(reqs, members, cap_id)
         return code, buf.getvalue()
 
-    def test_promotes_baseline_with_implements(self):  # AC-1
+    def test_promotes_baseline_with_implements(self):  # AC-1  # tested-by: REQ-PROMOTE-567
         with tempfile.TemporaryDirectory() as d:
             body = REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A") + "\nbody line\n"
             _write(os.path.join(d, "AREA-A-001.md"), body)

@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.10"
+MAP_ENGINE_VERSION = "2026-09-03.11"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2870,7 +2870,7 @@ def _set_frontmatter_status(text, value):  # implements: ARCH-PROMOTE-011
     return new_head + rest, n
 
 
-def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
+def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # implements: REQ-PROMOTE-567
     """Flip a requirement's status to `confirmed` (the human-validation step) by a
     single frontmatter edit. Refuses if the requirement has no `implements:` member
     (a confirmed requirement must point to code — else the gate would error), and

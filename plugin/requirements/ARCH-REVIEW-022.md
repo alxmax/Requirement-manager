@@ -116,10 +116,10 @@ superseded_by:
 > file; it never invokes an LLM. `review` (no arg) covers the whole corpus; `review <ID>`
 > covers one requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: review is deterministic, read-only and LLM-free
+  Given  any corpus
+  When   `review` runs twice with no edit between the runs
+  Then   both runs print byte-identical JSON to stdout, create no file, and make no network call
 
 ## Members in code (auto)
 

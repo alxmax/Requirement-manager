@@ -124,10 +124,10 @@ superseded_by:
 > The gate scans code for `# verifies: <id>#AC-N` tags and maps each tag to the labelled
 > criterion it covers. This is the per-criterion half of behaviour-sync.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a verifies tag is mapped to its labelled criterion
+  Given  a test file carrying `# verifies: AREA-A-001#CASE-1` and a requirement labelling CASE-1 and CASE-2
+  When   `gate` runs
+  Then   it reports that 1 of the 2 automatable criteria carries a `verifies:` tag, naming CASE-2 as missing
 
 ## Members in code (auto)
 

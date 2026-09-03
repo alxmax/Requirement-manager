@@ -11,7 +11,7 @@
      <script>window.__REQMAP_DATA__ = { ...this repo's _map.json... }</script>
      It must run before the app module, so loadData() finds the inlined data. -->
 <script>window.__REQMAP_DATA__={
-  "engine_version": "2026-09-03.10",
+  "engine_version": "2026-09-03.11",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -148,7 +148,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a verifies tag is mapped to its labelled criterion Given  a test file carrying `# verifies: AREA-A-001#CASE-1` and a requirement labelling CASE-1 and CASE-2 When   `gate` runs Then   it reports that 1 of the 2 automatable criteria carries a `verifies:` tag, naming CASE-2 as missing"
       ],
       "accept": "",
       "input": "",
@@ -3864,7 +3864,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a newly scaffolded requirement carries the Context form Given  no requirement named `AREA-X-001` When   `new AREA-X-001` runs Then   the created file holds a `## Context (non-binding)` section"
       ],
       "accept": "",
       "input": "",
@@ -16702,7 +16702,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a closed pipe ends the command quietly Given  a command whose standard output is closed before it finishes writing, as `reqmap.py scan | head -1` does When   the command runs Then   it exits with code 0 and prints no traceback"
       ],
       "accept": "",
       "input": "",
@@ -16940,7 +16940,7 @@
       "id": "REQ-PROMOTE-567",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "Confirm <ID> sets the requirement's status to confirmed",
       "intent": "`confirm <ID>` sets the requirement's `status` to `confirmed`.",
@@ -16951,7 +16951,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: confirm rewrites the status field Given  a `draft` requirement carrying at least one `implements:` member When   `confirm <ID>` runs Then   that requirement's frontmatter reads `status: confirmed`"
       ],
       "accept": "",
       "input": "",
@@ -16963,16 +16963,20 @@
         "ARCH-PROMOTE-011"
       ],
       "satisfied_by": [],
-      "members": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:2873"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:2319"
+        }
+      ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-PROMOTE-568",
@@ -19640,7 +19644,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: review is deterministic, read-only and LLM-free Given  any corpus When   `review` runs twice with no edit between the runs Then   both runs print byte-identical JSON to stdout, create no file, and make no network call"
       ],
       "accept": "",
       "input": "",
@@ -21176,7 +21180,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: every member is printed on its own line under its id Given  a corpus of one requirement carrying an `implements` and a `tested-by` member When   `scan` runs Then   the id is printed, followed by exactly two lines, each reading `role file:line`"
       ],
       "accept": "",
       "input": "",
@@ -22517,7 +22521,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the CI job runs all three checks on both triggers Given  `.github/workflows/ci.yml` When   its `gate-and-tests` job is read Then   the job invokes `gate`, `lint --strict` and `map --check`, and the workflow triggers on push and pull_request"
       ],
       "accept": "",
       "input": "",
@@ -24502,7 +24506,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a vendored engine older than the reference one is named Given  a consumer's `scripts/reqmap.py` whose `MAP_ENGINE_VERSION` predates the action's own copy When   `engine_staleness.py` runs Then   it annotates the run, naming the vendored version and the reference version"
       ],
       "accept": "",
       "input": "",
@@ -25619,7 +25623,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a non-confirmed requirement's test link is still checked Given  a `baseline` requirement whose `tested-by:` file exists but holds no test function When   `gate` runs Then   it reports that link as a warning, because the check is not gated on status"
       ],
       "accept": "",
       "input": "",

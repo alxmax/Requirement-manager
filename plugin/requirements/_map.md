@@ -1,5 +1,5 @@
 ---
-generated: 2026-09-03 12:26
+generated: 2026-09-03 12:45
 nodes: 692
 edges: 98
 ---
@@ -1801,7 +1801,10 @@ graph LR
   f_plugin_scripts_test_reqmap_py_2310_6339["plugin/scripts/test_reqmap.py:2310-6339"]
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2310_6339
   REQ_PROMOTE_567["Confirm ‹ID› sets the requirement's status to confirmed<br><small>REQ-PROMOTE-567</small>"]
-  style REQ_PROMOTE_567 fill:#eee,stroke:#bbb,color:#888
+  f_plugin_scripts_reqmap_py_2873["plugin/scripts/reqmap.py:2873"]
+  REQ_PROMOTE_567 -->|implements| f_plugin_scripts_reqmap_py_2873
+  f_plugin_scripts_test_reqmap_py_2319["plugin/scripts/test_reqmap.py:2319"]
+  REQ_PROMOTE_567 -->|tested-by| f_plugin_scripts_test_reqmap_py_2319
   REQ_PROMOTE_568["Confirm edits only the value of the first<br><small>REQ-PROMOTE-568</small>"]
   style REQ_PROMOTE_568 fill:#eee,stroke:#bbb,color:#888
   REQ_PROMOTE_569["Confirm preserves that line's indentation and any trailing<br><small>REQ-PROMOTE-569</small>"]
@@ -2938,7 +2941,6 @@ graph LR
     REQ_PIPE_564["Reqmap.py treats BrokenPipeError and the Windows form of<br><small>REQ-PIPE-564</small><br>unreviewed"]
     REQ_PIPE_565["Any other OSError still propagates unchanged. The rule<br><small>REQ-PIPE-565</small><br>unreviewed"]
     REQ_PIPE_566["The rule lives in the command-line entry point<br><small>REQ-PIPE-566</small><br>unreviewed"]
-    REQ_PROMOTE_567["Confirm ‹ID› sets the requirement's status to confirmed<br><small>REQ-PROMOTE-567</small><br>unreviewed"]
     REQ_PROMOTE_568["Confirm edits only the value of the first<br><small>REQ-PROMOTE-568</small><br>unreviewed"]
     REQ_PROMOTE_569["Confirm preserves that line's indentation and any trailing<br><small>REQ-PROMOTE-569</small><br>unreviewed"]
     REQ_PROMOTE_570["Confirm leaves the body untouched<br><small>REQ-PROMOTE-570</small><br>unreviewed"]
@@ -3560,7 +3562,6 @@ graph LR
   style REQ_PIPE_564 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PIPE_565 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PIPE_566 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_567 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PROMOTE_568 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PROMOTE_569 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PROMOTE_570 fill:#fff3cd,stroke:#a66,color:#630
@@ -4187,7 +4188,6 @@ graph LR
 | REQ-PIPE-564 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PIPE-565 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PIPE-566 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-567 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PROMOTE-568 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PROMOTE-569 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PROMOTE-570 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

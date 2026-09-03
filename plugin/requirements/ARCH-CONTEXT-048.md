@@ -129,10 +129,10 @@ superseded_by:
 > `new`'s built-in template scaffolds the Context form for every newly-created
 > requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a newly scaffolded requirement carries the Context form
+  Given  no requirement named `AREA-X-001`
+  When   `new AREA-X-001` runs
+  Then   the created file holds a `## Context (non-binding)` section
 
 ## Members in code (auto)
 

@@ -134,10 +134,10 @@ superseded_by:
 > The gate checks every `tested-by` link, at every status. This is the deterministic half
 > of behavior-sync.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a non-confirmed requirement's test link is still checked
+  Given  a `baseline` requirement whose `tested-by:` file exists but holds no test function
+  When   `gate` runs
+  Then   it reports that link as a warning, because the check is not gated on status
 
 ## Members in code (auto)
 

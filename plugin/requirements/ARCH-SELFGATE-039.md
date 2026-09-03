@@ -115,10 +115,10 @@ superseded_by:
 > `.github/workflows/ci.yml`'s `gate-and-tests` job invokes `reqmap.py gate` / `lint
 > --strict` / `map --check` on every push and pull request.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the CI job runs all three checks on both triggers
+  Given  `.github/workflows/ci.yml`
+  When   its `gate-and-tests` job is read
+  Then   the job invokes `gate`, `lint --strict` and `map --check`, and the workflow triggers on push and pull_request
 
 ## Members in code (auto)
 

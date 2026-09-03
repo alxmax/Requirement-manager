@@ -93,10 +93,10 @@ superseded_by:
 > When the command's standard output turns out to be a closed pipe, `reqmap.py` ends the
 > command, prints no traceback, and exits with code 0.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a closed pipe ends the command quietly
+  Given  a command whose standard output is closed before it finishes writing, as `reqmap.py scan | head -1` does
+  When   the command runs
+  Then   it exits with code 0 and prints no traceback
 
 ## Members in code (auto)
 
