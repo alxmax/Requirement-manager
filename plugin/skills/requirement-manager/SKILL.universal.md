@@ -197,6 +197,16 @@ requirement whose levelled links are all `@system`. Nothing fires until you anno
 
 A capability is a **behavior** that can fail independently — one thing a user or caller can observe breaking on its own. It is **not** a file, a class, or a module; implementation shape is irrelevant. The test: "if I removed just this behavior, would a distinct failure appear?" If yes, that is one capability.
 
+**Split by failure mode, never by sentence.** When decomposing a requirement into
+detailed-design children, a clause earns its own requirement only if it names a behavior
+that can fail on its own. Three shapes never do: an **element of an enumeration** ("a Rust
+`#[test]` counts" is one arm of *the engine recognises a test function*), an **attribute**
+of a behavior ("the check is warn-only and never changes the exit code"), and a
+**rationale or consequence** that restates a sibling's obligation. Fold each into the
+behavior it qualifies. The check is mechanical: try to write the `Then` — if the observable
+only repeats the clause in other words, the clause is not a capability. No word count or
+clause count substitutes for that test.
+
 If two behaviors live in the same file but can break in isolation (e.g. a veto path and a majority-vote path in an aggregator), they are **two capabilities** — give each its own requirement file. "One file per capability" means one *behavior per file*, not one *file per class*.
 
 1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
