@@ -1675,6 +1675,35 @@ class MapInternals(unittest.TestCase):  # tested-by: ARCH-MAP-007, ARCH-CONTEXT-
         return {"id": "A-FOO-001", "layer": "feature", "status": "confirmed", "title": "T",
                 "members": members}
 
+    # ARCH-MAP-007 CASE-4/CASE-5. In the atomic form the `>` quote IS the single
+    # contract clause, so emitting it as `intent` too printed one sentence twice on
+    # every surface — 588 of 646 nodes, 91% of the corpus, before this.
+    _ATOMIC = ("---\nid: REQ-A-001\nstatus: draft\nform: atomic\nlayer: feature\n---\n\n"
+               "# A lock sidecar that exists\n\n"
+               "> A lock sidecar that exists on disk but is not git-tracked is a `WARN`.\n\n"
+               "Scenario: an untracked lock is flagged\n"
+               "  Given  a lock written but never added\n"
+               "  When   the gate runs\n"
+               "  Then   it names the file\n")
+
+    def test_atomic_intent_is_empty_because_it_is_the_contract(self):  # verifies: ARCH-MAP-007#CASE-4
+        self.assertEqual(R._distinct_intent(self._ATOMIC), "")
+        self.assertTrue(R._from_any(R._bullets, self._ATOMIC, R.CONTRACT_LABELS),
+                        "the clause must survive under contract, only the duplicate goes")
+
+    def test_sectioned_intent_survives_when_it_is_real_rationale(self):  # verifies: ARCH-MAP-007#CASE-5
+        body = ("# T\n\n## Description\n"
+                "> Specs rot when nobody updates them, so this guards that.\n"
+                "- `gate` reports a dangling tag as an error.\n")
+        self.assertIn("Specs rot", R._distinct_intent(body))
+
+    def test_intent_dedupe_ignores_only_whitespace_differences(self):
+        # a quote re-wrapped across lines is still the same sentence as the clause
+        wrapped = self._ATOMIC.replace(
+            "> A lock sidecar that exists on disk but is not git-tracked is a `WARN`.",
+            "> A lock sidecar that exists on disk but is not\n> git-tracked is a `WARN`.")
+        self.assertEqual(R._distinct_intent(wrapped), "")
+
     def test_req_to_code_collapses_line_range(self):  # bug: mermaid-req-to-code-line-range-untested
         out = R._mermaid_req_to_code({"nodes": [self._node(
             [{"role": "implements", "loc": "src/a.py:10"},

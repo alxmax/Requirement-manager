@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.11"
+MAP_ENGINE_VERSION = "2026-09-03.12"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -3611,7 +3611,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007
             "status": m.get("status", "draft"),
             "area": (m.get("area") or "").strip() or _area_of(rid),
             "title": _title(r["body"]),
-            "intent": _first_quote(r["body"]),
+            "intent": _distinct_intent(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS),
             "verify": _bullets(r["body"], "verify intent"),
@@ -4931,7 +4931,7 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  
         head += " · " + m["milestone"]
     print(head)
     print(_req_title(body, cap_id))
-    intent = _first_quote(body)             # the full WHY block, gathered (not just line 1)
+    intent = _distinct_intent(body)         # "" when it would just repeat the Contract below
     if intent:
         print("  " + intent)
 
@@ -5788,6 +5788,26 @@ def _title(body):  # implements: ARCH-MAP-007
         if line.strip().startswith("# "):
             return line.strip()[2:].strip()
     return ""
+
+
+def _distinct_intent(body):  # implements: ARCH-MAP-007
+    """The intent quote, but only when it says something the Contract does not.
+
+    In the atomic form ([[ARCH-ATOMICFORM-053]]) the `>` quote IS the obligation —
+    `_atomic_spans` makes the same span both the intent and the single contract
+    clause. Emitting it under both names makes every surface print one sentence
+    twice: the viewer draws a `Why — Intent` blockquote directly above an identical
+    `Description` bullet, and `show` prints the line under the title and again under
+    `Contract:`. Measured before this existed: 588 of 646 nodes, 91% of the corpus.
+
+    Returns "" when the quote and the joined contract are the same text, so a
+    consumer sees no separate intent rather than a duplicate one. The sectioned form,
+    where the quote is real rationale distinct from the clauses, is unaffected."""
+    intent = _first_quote(body)
+    if not intent:
+        return ""
+    contract = " ".join(_from_any(_bullets, body, CONTRACT_LABELS)).strip()
+    return "" if contract and " ".join(intent.split()) == " ".join(contract.split()) else intent
 
 
 def _first_quote(body):  # implements: ARCH-MAP-007

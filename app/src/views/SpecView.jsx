@@ -108,10 +108,15 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
         {r.priority && <PriorityBadge priority={r.priority} />}
       </div>
       <h1>{title.text}{title.isTranslated && <TranslatedBadge />}</h1>
-      <div className="sec why-sec">
-        <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
-        <p className="blockquote">{intent.text}</p>
-      </div>
+      {/* An atomic requirement's `>` quote IS its obligation, so the engine emits no
+          separate intent for one (_distinct_intent). Drawing the block anyway left an
+          empty blockquote under a "Why — Intent" heading on 91% of nodes. */}
+      {intent.text && (
+        <div className="sec why-sec">
+          <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
+          <p className="blockquote">{intent.text}</p>
+        </div>
+      )}
       <CovStrip r={r} />
 
       <div className="sec">

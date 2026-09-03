@@ -58,6 +58,13 @@ Every bullet below is binding.
 - Position decides a label, not the bold markers alone. An indented wrapped line folds
   even when it opens and closes on bold spans, so a two-part clause keeps both halves.
 
+**Intent, only when it is not the contract**
+- The `intent` field carries a requirement's first blockquote, joined into one line.
+- The `intent` field is empty when that quote and the Contract say the same thing.
+- An atomic requirement is that case: its quote is its single obligation, so the map
+  emits the text once, under `contract`.
+- `show` follows the same rule, printing no intent line above a Contract that repeats it.
+
 **Freshness**
 - `map --check` fails when a committed generated file differs from a fresh render.
 - The gate reports the same staleness as a warning, so a commit prepared with `gate` alone
@@ -90,6 +97,16 @@ CASE-3
   Then   it round-trips through `_map.json` as data (no injection), a lone surrogate is
          written as U+FFFD rather than failing the write, and a node with no members
          reports an empty member list
+
+CASE-4
+  Given  an atomic requirement whose quote and single Contract clause are the same text
+  When   `map` runs
+  Then   that node's `intent` is empty and its `contract` still carries the clause
+
+CASE-5
+  Given  a sectioned requirement whose quote is rationale distinct from its clauses
+  When   `map` runs
+  Then   that node's `intent` carries the quote unchanged
 
 ## Context (non-binding)
 **Notes**
