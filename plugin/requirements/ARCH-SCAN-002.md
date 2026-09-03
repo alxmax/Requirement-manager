@@ -377,36 +377,7 @@ Scenario: every id in a multi-id tag carries the identical (role, file, line) tr
   Given  `<!-- generated-from: REQ-MA-001, REQ-MB-002 -->` in `docs/arch.html`
   When   `scan_members` runs
   Then   `members["REQ-MA-001"] == members["REQ-MB-002"] == [("generated-from",
-         "docs/arch.html", 1)]`
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-SCAN-227
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-SCAN-002]
-superseded_by:
----
-
-# A whole-system doc generated from many requirements (generated-from
-
-> A whole-system doc generated from many requirements (`generated-from: A, B, C`) is
-> therefore a member of each, and drifts when ANY of them changes.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+         "docs/arch.html", 1)]`, so the doc drifts when either requirement's contract changes
 
 ## Members in code (auto)
 

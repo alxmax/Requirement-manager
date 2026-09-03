@@ -101,7 +101,8 @@ superseded_by:
 Scenario: drift warning names a requirement that depends on the drifted one
   Given  a confirmed drifted requirement and a second requirement with it in `depends_on`
   When   `gate` runs
-  Then   the drift warning line includes "review dependent(s):" followed by the second id
+  Then   the drift warning line includes "review dependent(s):" followed by the second id,
+         with severity unchanged — still warn-only, promotable only by `--strict`
 
 ## Members in code (auto)
 
@@ -196,28 +197,3 @@ Scenario: an isolated drifted requirement's warning carries no dependents clause
 
 
 
---------------------
-
-
----
-id: REQ-DRIFTIMPACT-351
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DRIFTIMPACT-035]
-superseded_by:
----
-
-# The addition does not change the drift warning's
-
-> The addition does not change the drift warning's severity: it stays warn-only by default
-> and promotable by `--strict`, exactly as before.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

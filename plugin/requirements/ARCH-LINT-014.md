@@ -455,34 +455,7 @@ superseded_by:
 Scenario: a missing section fails a strict run
   Given  a confirmed requirement with a Contract section but no `## Cases` heading
   When   `cmd_lint` runs with `--strict`
-  Then   it returns exit code 1
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LINT-456
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LINT-014]
-superseded_by:
----
-
-# A warning never changes the exit code
-
-> A warning never changes the exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   it returns exit code 1 because of the error finding; a warning alone would leave
+         the exit code at 0
 
 ## Members in code (auto)

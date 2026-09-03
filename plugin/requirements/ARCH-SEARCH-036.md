@@ -125,35 +125,6 @@ CASE-4
 
 
 ---
-id: REQ-SEARCH-649
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-SEARCH-036]
-superseded_by:
----
-
-# Search "<query>" ranks every requirement by how well
-
-> `search "<query>"` ranks every requirement by how well its wording matches the query,
-> then prints them most-relevant-first.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-SEARCH-650
 status: draft
 form: atomic
@@ -257,7 +228,8 @@ superseded_by:
 Scenario: a rarer shared term outweighs a common one
   Given  two requirements matching the query on one common word and one rare word respectively
   When   `search` runs
-  Then   the requirement sharing the rare word ranks higher, reflecting its higher TF-IDF weight
+  Then   the requirement sharing the rare word ranks higher, reflecting its higher TF-IDF
+         weight, and prints before the other match
 
 ## Members in code (auto)
 

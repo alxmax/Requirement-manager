@@ -124,7 +124,8 @@ superseded_by:
 Scenario: the gate warning caps the named files and reports the total
   Given  seven untracked member files
   When   `gate` runs inside a git work tree
-  Then   its warning names five of them by path and states the total count of 7
+  Then   its warning names five of them by path and states the total count of 7, and
+         `gate` exits 0 — the warning never changes the exit code
 
 ## Members in code (auto)
 
@@ -183,33 +184,5 @@ Scenario: the check stays silent outside a git work tree
   Given  a scan root that is not a git repository
   When   `untracked_members` runs
   Then   it returns nothing and `gate` prints no untracked-member warning
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-TRACKED-764
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-TRACKED-042]
-superseded_by:
----
-
-# The warning never changes the exit code
-
-> The warning never changes the exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)

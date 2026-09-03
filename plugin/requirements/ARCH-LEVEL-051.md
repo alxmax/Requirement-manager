@@ -140,7 +140,8 @@ superseded_by:
 Scenario: a requirement without level: reads exactly as before
   Given  a corpus of requirements written before `level:` existed, none carrying the field
   When   `gate` runs
-  Then   its output matches a run from before the field was introduced
+  Then   its output matches a run from before the field was introduced, with no
+         level-related finding for any requirement
 
 ## Members in code (auto)
 
@@ -197,7 +198,8 @@ superseded_by:
 Scenario: an architecture-level requirement still needs an implements member
   Given  a confirmed requirement carrying `level: architecture` and no `implements:` member
   When   `gate` runs
-  Then   it reports the missing-member error
+  Then   it reports the missing-member error, because no `level:` value is in the
+         implementation-exemption set
 
 ## Members in code (auto)
 
@@ -236,34 +238,6 @@ Scenario: an aggregate-layer requirement stays exempt regardless of level
 
 
 ---
-id: REQ-LEVEL-441
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# No level: value is added to the implementation-exemption
-
-> No `level:` value is added to the implementation-exemption set.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-LEVEL-442
 status: draft
 form: atomic
@@ -282,33 +256,5 @@ Scenario: an invalid level value is a gate error
   Given  a requirement carrying `level: detailed`
   When   `gate` runs
   Then   it reports one error naming the invalid value and exits 1
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-443
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# The gate says nothing about a requirement that
-
-> The gate says nothing about a requirement that carries no `level:` at all.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)

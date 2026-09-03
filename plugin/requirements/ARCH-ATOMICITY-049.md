@@ -205,34 +205,6 @@ Scenario: TODO — state the observable that proves this
 
 
 ---
-id: REQ-ATOMICITY-246
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# Atomicity is judged by a human reader. No
-
-> Atomicity is judged by a human reader. No check in the engine determines it.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-ATOMICITY-247
 status: draft
 form: atomic
@@ -336,34 +308,6 @@ Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding
   Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]`
   When   `lint_requirement` runs
   Then   no `statement-size` finding appears, though it appears without the exemption
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ATOMICITY-251
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ATOMICITY-049]
-superseded_by:
----
-
-# The statement-size check measures textual size, never semantic
-
-> The `statement-size` check measures textual size, never semantic atomicity.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

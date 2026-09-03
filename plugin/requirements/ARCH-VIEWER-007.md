@@ -239,35 +239,8 @@ superseded_by:
 Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__
   Given  `render_html({"nodes": [...], "edges": []}, reqs_dir)` writing `_map.html`
   When   the file is read back
-  Then   it contains `"window.__REQMAP_DATA__="` and no leftover `<!--REQMAP_DATA-->` marker
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-784
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# _map.html opens by double-click, with no server
-
-> `_map.html` opens by double-click, with no server.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   it contains `"window.__REQMAP_DATA__="` and no leftover `<!--REQMAP_DATA-->`
+         marker, and references no external file — opening by double-click with no server
 
 ## Members in code (auto)
 
@@ -468,7 +441,8 @@ superseded_by:
 Scenario: a literal <!-- inside a field is escaped to <\!--
   Given  a node contract clause `"discusses HTML injection via <!-- markers"`
   When   `_inject_viewer(template_text, data)` runs
-  Then   the output contains `"<\\!--"` and no raw `"<!--"` inside the injected blob
+  Then   the output contains `"<\\!--"` and no raw `"<!--"` inside the injected blob,
+         keeping `window.__REQMAP_DATA__` parseable instead of null
 
 ## Members in code (auto)
 
@@ -497,37 +471,6 @@ Scenario: a literal --> inside a field is escaped to -\->
   Given  a node title containing the literal sequence `"-->"`
   When   `_inject_viewer(template_text, data)` runs
   Then   the output contains `"-\\->"` and no raw `"-->"` inside the injected blob
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-VIEWER-793
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VIEWER-007]
-superseded_by:
----
-
-# The first guard alone was the original contract
-
-> The first guard alone was the original contract. The `<!--` and `-->` guards were added
-> in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and
-> therefore contain literal `<!--`) broke `file://` opening by making
-> `window.__REQMAP_DATA__` null.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

@@ -154,34 +154,6 @@ Scenario: map and export both produce _map.json
 
 
 ---
-id: REQ-MAP-477
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# _map.json is a derived view. It is regenerated
-
-> `_map.json` is a derived view. It is regenerated, never edited.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-MAP-478
 status: draft
 form: atomic
@@ -287,35 +259,8 @@ superseded_by:
 Scenario: repo resolves to the git remote's owner/repo
   Given  a git checkout whose remote `origin` points at `owner/repo`
   When   `map` runs
-  Then   `_map.json`'s top-level `repo` field reads `owner/repo`
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-482
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# Repo identifies the project the map describes, for
-
-> `repo` identifies the project the map describes, for display in the viewer header.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project
+         for display in the viewer header
 
 ## Members in code (auto)
 
@@ -578,35 +523,7 @@ superseded_by:
 Scenario: gate warns about a stale map without failing the commit
   Given  a committed `_map.json` that differs from a fresh render
   When   `gate` runs
-  Then   it prints a staleness warning and exits 0
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAP-492
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAP-007]
-superseded_by:
----
-
-# The gate never regenerates the map. It only
-
-> The gate never regenerates the map. It only reports.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   it prints a staleness warning, exits 0, and leaves `_map.json` unmodified
 
 ## Members in code (auto)
 

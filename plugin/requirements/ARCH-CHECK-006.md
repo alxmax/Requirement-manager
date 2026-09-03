@@ -206,34 +206,6 @@ CASE-14
 
 
 ---
-id: REQ-CHECK-271
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CHECK-006]
-superseded_by:
----
-
-# Gate reports an ERROR and exits non-zero for
-
-> `gate` reports an `ERROR` and exits non-zero for every condition in this group.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-CHECK-272
 status: draft
 form: atomic
@@ -748,36 +720,8 @@ superseded_by:
 Scenario: an untracked lock file is flagged, then clears once tracked
   Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed
   When   `untracked_locks(reqs_dir)` runs before and after `git add -A`
-  Then   it names `_reqlock.json` before the add and returns `[]` after it
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-CHECK-290
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CHECK-006]
-superseded_by:
----
-
-# An uncommitted lock silently disables drift detection on
-
-> An uncommitted lock silently disables drift detection on a fresh CI checkout, which has
-> no baseline to compare against.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap
+         where a fresh CI checkout would otherwise have no baseline for drift detection
 
 ## Members in code (auto)
 

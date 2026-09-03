@@ -193,7 +193,8 @@ superseded_by:
 Scenario: crossing the band boundary flips the finding on
   Given  one parent with 5 children (inside the band) and another with 4 (just below it)
   When   `lint` runs on each
-  Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one
+  Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one,
+         with the gate's exit code unchanged either way
 
 ## Members in code (auto)
 
@@ -222,34 +223,6 @@ Scenario: the finding text distinguishes too-few from too-many
   Given  one parent with 3 children and another with 25
   When   `lint` runs on each
   Then   the first finding's detail says "too few to be a level" and the second says "too many — split it"
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FANOUT-393
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FANOUT-052]
-superseded_by:
----
-
-# The fan-out check is warn-only and never changes
-
-> The `fan-out` check is warn-only and never changes the gate's exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

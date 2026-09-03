@@ -199,36 +199,8 @@ superseded_by:
 Scenario: draft skips a file matched by .reqmapignore
   Given  an untagged file matching a `.reqmapignore` glob pattern
   When   `draft` runs
-  Then   no `DRAFT-*.md` is proposed for that file
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-EXTRACT-377
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-EXTRACT-008]
-superseded_by:
----
-
-# A file matching an ignore pattern is never
-
-> A file matching an ignore pattern is never drafted — notably the vendored
-> `scripts/reqmap.py` engine itself.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   no `DRAFT-*.md` is proposed for that file — notably the vendored
+         `scripts/reqmap.py` engine itself
 
 ## Members in code (auto)
 

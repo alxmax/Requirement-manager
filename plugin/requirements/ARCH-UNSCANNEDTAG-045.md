@@ -144,7 +144,8 @@ superseded_by:
 Scenario: the gate warning names up to five files and the total count
   Given  seven tracked non-scannable files each carrying a tag
   When   `gate` runs
-  Then   it prints one warning naming five of them and stating the total of seven
+  Then   it prints one warning naming five of them and stating the total of seven, and the
+         exit code is unchanged
 
 ## Members in code (auto)
 
@@ -268,27 +269,3 @@ Scenario: outside a git work tree, the check stays silent
 
 
 
---------------------
-
-
----
-id: REQ-UNSCANNEDTAG-781
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-UNSCANNEDTAG-045]
-superseded_by:
----
-
-# The warning never changes the exit code
-
-> The warning never changes the exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

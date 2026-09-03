@@ -107,7 +107,7 @@ superseded_by:
 Scenario: the untagged count reflects untagged files
   Given  a code root with one tagged file and one untagged scannable file
   When   `health --json` runs with that code root
-  Then   the `untagged` key equals 1
+  Then   the `untagged` key equals 1, the health score is unchanged, and the exit code stays 0
 
 ## Members in code (auto)
 
@@ -262,62 +262,6 @@ Scenario: the untagged key is absent without a code root
 
 
 ---
-id: REQ-COVERAGE-324
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# The signal is read-only and is never a
-
-> The signal is read-only and is never a gate. It changes no exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-COVERAGE-325
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# The signal never lowers the health score, because
-
-> The signal never lowers the health score, because it counts files, not requirements.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-COVERAGE-326
 status: draft
 form: atomic
@@ -336,34 +280,6 @@ superseded_by:
 Scenario: tagging or ignoring a file drops it from the count
   Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another
   When   `health --json` runs after each change
-  Then   the `untagged` count drops by one either way
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-COVERAGE-327
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-COVERAGE-029]
-superseded_by:
----
-
-# There is no separate exemption mechanism
-
-> There is no separate exemption mechanism.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   the `untagged` count drops by one either way, with no separate exemption mechanism
 
 ## Members in code (auto)

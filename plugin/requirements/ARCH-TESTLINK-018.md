@@ -475,7 +475,8 @@ superseded_by:
 Scenario: a broken tested-by link produces exactly one gate warning
   Given  a confirmed requirement whose `tested-by` names `tests/missing_test.py`, a path that does not exist
   When   `cmd_check` runs
-  Then   its output carries exactly one warning line naming that broken link
+  Then   its output carries exactly one warning line naming that broken link, adding no
+         error — the gate's pass/fail stays unaffected
 
 ## Members in code (auto)
 
@@ -504,35 +505,6 @@ Scenario: the warning text names both the requirement id and the file
   Given  `REQ-A-001` whose `tested-by` names `tests/missing_test.py`, a path that does not exist
   When   `cmd_check` runs
   Then   its output contains both "REQ-A-001" and "tests/missing_test.py" in the same line
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-TESTLINK-747
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-TESTLINK-018]
-superseded_by:
----
-
-# The check is warn-only. It never adds an
-
-> The check is warn-only. It never adds an error, and never changes whether the gate
-> passes.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

@@ -173,34 +173,6 @@ Scenario: the gate action wires the staleness probe as its own step
 
 
 ---
-id: REQ-STALEENGINE-711
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-STALEENGINE-043]
-superseded_by:
----
-
-# The probe's --mode selects its behaviour: warn, error
-
-> The probe's `--mode` selects its behaviour: `warn`, `error`, or `off`.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-STALEENGINE-712
 status: draft
 form: atomic

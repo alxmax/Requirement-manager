@@ -172,7 +172,9 @@ superseded_by:
 Scenario: behind-signal names both the roadmap's and requirements' newest milestone
   Given  a `TODO.md` newest heading `## v2.8` and a requirement with `milestone: v2.13`
   When   `health --json` runs
-  Then   `roadmap_behind` equals `{"todo": "v2.8", "requirements": "v2.13"}`
+  Then   `roadmap_behind` equals `{"todo": "v2.8", "requirements": "v2.13"}`, `health`
+         exits 0, and the health score is unchanged — the signal is read-only, like its
+         unversioned-heading counterpart
 
 ## Members in code (auto)
 
@@ -287,34 +289,5 @@ Scenario: an item under a non-version heading is filed under the prior milestone
   Given  `## v2.16` followed by `## Deferred work` followed by one checklist item
   When   `_parse_todos_from_text` parses the text
   Then   that item's `milestone` reads `"v2.16"`, not `"Deferred work"`
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ROADMAP-639
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ROADMAP-038]
-superseded_by:
----
-
-# Both signals are read-only. Neither changes an exit
-
-> Both signals are read-only. Neither changes an exit code, and neither lowers the health
-> score.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)

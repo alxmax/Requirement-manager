@@ -127,7 +127,8 @@ superseded_by:
 Scenario: a large untagged docs/ HTML file is flagged
   Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag
   When   `untagged_doc_bundles` scans the repo
-  Then   it returns `["docs/arch.html"]`
+  Then   it returns `["docs/arch.html"]`, which `gate` folds into its warnings only —
+         never an error, leaving the exit code unaffected
 
 ## Members in code (auto)
 
@@ -184,35 +185,8 @@ superseded_by:
 Scenario: engine outputs are excluded even when large and untagged
   Given  large, untagged `docs/map.html` and `docs/_x.html`
   When   `untagged_doc_bundles` scans the repo
-  Then   neither file appears in the result
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-342
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The engine owns those two and freshness-checks them
-
-> The engine owns those two and freshness-checks them separately.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   neither file appears in the result, because the engine freshness-checks those
+         two separately, on its own path
 
 ## Members in code (auto)
 
@@ -299,33 +273,5 @@ Scenario: a file that raises OSError on stat is skipped, not fatal
   Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it
   When   `untagged_doc_bundles` scans the repo
   Then   the scan completes without raising and `docs/broken.html` is absent from the result
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-346
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check is warn-only and never changes the
-
-> The check is warn-only and never changes the gate's exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)

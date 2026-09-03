@@ -336,8 +336,8 @@ Scenario: clauses/covered appear only once tagging is adopted
   Given  a requirement with two labelled criteria and no `verifies` coverage passed to
          `_build_map_data`, and separately the same requirement with `AC-1` covered
   When   `_build_map_data` builds each node
-  Then   the untagged node has no `clauses`/`covered` keys and the tagged node has
-         `clauses: 2, covered: 1`
+  Then   the untagged node has no `clauses`/`covered` keys — absent means not measured,
+         never a substituted zero — and the tagged node has `clauses: 2, covered: 1`
 
 ## Members in code (auto)
 
@@ -368,34 +368,6 @@ Scenario: gap names the untagged criteria only when coverage is partial
   When   `_build_map_data` builds each node
   Then   the partial node's `gap` contains "AC-2" and the fully-covered node carries no
          `gap` key
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ACVERIFY-242
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ACVERIFY-019]
-superseded_by:
----
-
-# An absent clauses means "not measured". No reader
-
-> An absent `clauses` means "not measured". No reader may substitute a number of its own.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

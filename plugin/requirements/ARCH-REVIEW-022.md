@@ -183,7 +183,9 @@ superseded_by:
 Scenario: the plan names the three AI categories and the finding contract
   Given  the emitted review plan
   When   it is inspected
-  Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`, each requiring a `suggested_rewrite`
+  Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`,
+         each requiring a `suggested_rewrite` and mandatory human review as its
+         false-positive safeguard, never an LLM confidence value
 
 ## Members in code (auto)
 
@@ -253,37 +255,6 @@ Scenario: gate ignores the AI sidecar file entirely
 
 
 ---
-id: REQ-REVIEW-629
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REVIEW-022]
-superseded_by:
----
-
-# The AI pass is non-deterministic and advisory: its
-
-> The AI pass is non-deterministic and advisory: its findings carry an unbounded
-> false-positive rate. The near-zero-false-positive property comes from MANDATORY human
-> review of each `suggested_rewrite`, not from any LLM confidence value (which is
-> uncalibrated triage only).
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-REVIEW-630
 status: draft
 form: atomic
@@ -299,37 +270,6 @@ superseded_by:
 > The AI consumer (the `requirement-quality-review` skill) writes findings to a separate,
 > clearly-labelled "AI — advisory (non-deterministic)" sidecar — never `_findings.md`
 > (which stays deterministic) and never the gate — and never auto-edits a requirement.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-REVIEW-631
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REVIEW-022]
-superseded_by:
----
-
-# Review is distinct from show: show is a
-
-> `review` is distinct from `show`: `show` is a human single-requirement dossier; `review`
-> is a machine corpus plan with structural anchors, a coverage summary and category
-> guidance for an out-of-band AI consumer — a different audience and shape, so they are
-> not merged.
 
 Scenario: TODO — state the observable that proves this
   Given  <precondition>

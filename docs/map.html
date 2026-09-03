@@ -77,7 +77,6 @@
         "REQ-ACVERIFY-239",
         "REQ-ACVERIFY-240",
         "REQ-ACVERIFY-241",
-        "REQ-ACVERIFY-242",
         "REQ-ACVERIFY-243"
       ],
       "members": [
@@ -414,7 +413,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: clauses/covered appear only once tagging is adopted Given  a requirement with two labelled criteria and no `verifies` coverage passed to `_build_map_data`, and separately the same requirement with `AC-1` covered When   `_build_map_data` builds each node Then   the untagged node has no `clauses`/`covered` keys and the tagged node has `clauses: 2, covered: 1`"
+        "Scenario: clauses/covered appear only once tagging is adopted Given  a requirement with two labelled criteria and no `verifies` coverage passed to `_build_map_data`, and separately the same requirement with `AC-1` covered When   `_build_map_data` builds each node Then   the untagged node has no `clauses`/`covered` keys — absent means not measured, never a substituted zero — and the tagged node has `clauses: 2, covered: 1`"
       ],
       "accept": "",
       "input": "",
@@ -453,44 +452,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: gap names the untagged criteria only when coverage is partial Given  a two-criterion requirement with only `AC-1` covered, and separately one with both `AC-1` and its only criterion covered When   `_build_map_data` builds each node Then   the partial node's `gap` contains \"AC-2\" and the fully-covered node carries no `gap` key"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ACVERIFY-019"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ACVERIFY-242",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "An absent clauses means \"not measured\". No reader",
-      "intent": "An absent `clauses` means \"not measured\". No reader may substitute a number of its own.",
-      "contract": [
-        "An absent `clauses` means \"not measured\". No reader may substitute a number of its own."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -683,12 +644,10 @@
       "satisfied_by": [
         "REQ-ATOMICITY-244",
         "REQ-ATOMICITY-245",
-        "REQ-ATOMICITY-246",
         "REQ-ATOMICITY-247",
         "REQ-ATOMICITY-248",
         "REQ-ATOMICITY-249",
         "REQ-ATOMICITY-250",
-        "REQ-ATOMICITY-251",
         "REQ-ATOMICITY-252",
         "REQ-ATOMICITY-253",
         "REQ-ATOMICITY-254",
@@ -764,44 +723,6 @@
       "intent": "A clause carrying two independent obligations counts as two clauses, not one.",
       "contract": [
         "A clause carrying two independent obligations counts as two clauses, not one."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ATOMICITY-049"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ATOMICITY-246",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Atomicity is judged by a human reader. No",
-      "intent": "Atomicity is judged by a human reader. No check in the engine determines it.",
-      "contract": [
-        "Atomicity is judged by a human reader. No check in the engine determines it."
       ],
       "verify": [],
       "notes": [],
@@ -960,44 +881,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: lint_exempt: [statement-size] silences an otherwise-reported finding Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]` When   `lint_requirement` runs Then   no `statement-size` finding appears, though it appears without the exemption"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ATOMICITY-049"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ATOMICITY-251",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The statement-size check measures textual size, never semantic",
-      "intent": "The `statement-size` check measures textual size, never semantic atomicity.",
-      "contract": [
-        "The `statement-size` check measures textual size, never semantic atomicity."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -1986,7 +1869,6 @@
         "SYS-GATE-102"
       ],
       "satisfied_by": [
-        "REQ-CHECK-271",
         "REQ-CHECK-272",
         "REQ-CHECK-273",
         "REQ-CHECK-274",
@@ -2005,7 +1887,6 @@
         "REQ-CHECK-287",
         "REQ-CHECK-288",
         "REQ-CHECK-289",
-        "REQ-CHECK-290",
         "REQ-CHECK-291",
         "REQ-CHECK-292",
         "REQ-CHECK-293",
@@ -2141,44 +2022,6 @@
       "risks": [],
       "clauses": 14,
       "covered": 14
-    },
-    {
-      "id": "REQ-CHECK-271",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Gate reports an ERROR and exits non-zero for",
-      "intent": "`gate` reports an `ERROR` and exits non-zero for every condition in this group.",
-      "contract": [
-        "`gate` reports an `ERROR` and exits non-zero for every condition in this group."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-CHECK-006"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
     },
     {
       "id": "REQ-CHECK-272",
@@ -2841,45 +2684,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: an untracked lock file is flagged, then clears once tracked Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed When   `untracked_locks(reqs_dir)` runs before and after `git add -A` Then   it names `_reqlock.json` before the add and returns `[]` after it"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-CHECK-006"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-CHECK-290",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "An uncommitted lock silently disables drift detection on",
-      "intent": "An uncommitted lock silently disables drift detection on a fresh CI checkout, which has no baseline to compare against.",
-      "contract": [
-        "An uncommitted lock silently disables drift detection on a fresh CI checkout, which has no baseline to compare against."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: an untracked lock file is flagged, then clears once tracked Given  a git work tree with `_reqlock.json` written to disk but never `git add`ed When   `untracked_locks(reqs_dir)` runs before and after `git add -A` Then   it names `_reqlock.json` before the add and returns `[]` after it, closing the gap where a fresh CI checkout would otherwise have no baseline for drift detection"
       ],
       "accept": "",
       "input": "",
@@ -3485,7 +3290,6 @@
         "SYS-SHIP-108"
       ],
       "satisfied_by": [
-        "REQ-CMDREGISTRY-305",
         "REQ-CMDREGISTRY-306",
         "REQ-CMDREGISTRY-307",
         "REQ-CMDREGISTRY-308",
@@ -3515,44 +3319,6 @@
       "milestone": "v2.7",
       "priority": "",
       "risks": []
-    },
-    {
-      "id": "REQ-CMDREGISTRY-305",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "A COMMANDS dict is the single source of",
-      "intent": "A `COMMANDS` dict is the single source of truth for the CLI command set; no other location may enumerate commands authoritatively.",
-      "contract": [
-        "A `COMMANDS` dict is the single source of truth for the CLI command set; no other location may enumerate commands authoritatively."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-CMDREGISTRY-033"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
     },
     {
       "id": "REQ-CMDREGISTRY-306",
@@ -3830,7 +3596,6 @@
         "REQ-CONTEXT-312",
         "REQ-CONTEXT-313",
         "REQ-CONTEXT-314",
-        "REQ-CONTEXT-315",
         "REQ-CONTEXT-316",
         "REQ-CONTEXT-317"
       ],
@@ -3964,44 +3729,6 @@
       ]
     },
     {
-      "id": "REQ-CONTEXT-315",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The legacy form remains fully valid. Nothing in",
-      "intent": "The legacy form remains fully valid. Nothing in the gate, the lint checks, or the drift hash reads `## WHAT — Notes`, `## Example — in practice` or `## WHERE — Current implementation` by name, so no existing requirement file needs to change.",
-      "contract": [
-        "The legacy form remains fully valid. Nothing in the gate, the lint checks, or the drift hash reads `## WHAT — Notes`, `## Example — in practice` or `## WHERE — Current implementation` by name, so no existing requirement file needs to change."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-CONTEXT-048"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-CONTEXT-316",
       "layer": "feature",
       "level": "code",
@@ -4016,7 +3743,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: notes come from the legacy heading, not the Context fallback, when present Given  a confirmed requirement carrying `## WHAT — Notes` with a legacy note (no `## Context` section) When   `map` regenerates `_map.json` via `_build_map_data` Then   the node's `notes` field holds the legacy bullet, unchanged from before this feature"
+        "Scenario: notes come from the legacy heading, not the Context fallback, when present Given  a confirmed requirement carrying `## WHAT — Notes` with a legacy note (no `## Context` section) When   `map` regenerates `_map.json` via `_build_map_data` Then   the node's `notes` field holds the legacy bullet, unchanged from before this feature, because the gate, the lint checks and the drift hash never read that heading by name either — the file needs no change"
       ],
       "accept": "",
       "input": "",
@@ -4132,10 +3859,7 @@
         "REQ-COVERAGE-321",
         "REQ-COVERAGE-322",
         "REQ-COVERAGE-323",
-        "REQ-COVERAGE-324",
-        "REQ-COVERAGE-325",
-        "REQ-COVERAGE-326",
-        "REQ-COVERAGE-327"
+        "REQ-COVERAGE-326"
       ],
       "members": [
         {
@@ -4167,7 +3891,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the untagged count reflects untagged files Given  a code root with one tagged file and one untagged scannable file When   `health --json` runs with that code root Then   the `untagged` key equals 1"
+        "Scenario: the untagged count reflects untagged files Given  a code root with one tagged file and one untagged scannable file When   `health --json` runs with that code root Then   the `untagged` key equals 1, the health score is unchanged, and the exit code stays 0"
       ],
       "accept": "",
       "input": "",
@@ -4381,82 +4105,6 @@
       ]
     },
     {
-      "id": "REQ-COVERAGE-324",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The signal is read-only and is never a",
-      "intent": "The signal is read-only and is never a gate. It changes no exit code.",
-      "contract": [
-        "The signal is read-only and is never a gate. It changes no exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-COVERAGE-029"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-COVERAGE-325",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The signal never lowers the health score, because",
-      "intent": "The signal never lowers the health score, because it counts files, not requirements.",
-      "contract": [
-        "The signal never lowers the health score, because it counts files, not requirements."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-COVERAGE-029"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-COVERAGE-326",
       "layer": "feature",
       "level": "code",
@@ -4471,45 +4119,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: tagging or ignoring a file drops it from the count Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another When   `health --json` runs after each change Then   the `untagged` count drops by one either way"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-COVERAGE-029"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-COVERAGE-327",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "There is no separate exemption mechanism",
-      "intent": "There is no separate exemption mechanism.",
-      "contract": [
-        "There is no separate exemption mechanism."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: tagging or ignoring a file drops it from the count Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another When   `health --json` runs after each change Then   the `untagged` count drops by one either way, with no separate exemption mechanism"
       ],
       "accept": "",
       "input": "",
@@ -4602,7 +4212,6 @@
         "REQ-DECOMPOSE-334",
         "REQ-DECOMPOSE-335",
         "REQ-DECOMPOSE-336",
-        "REQ-DECOMPOSE-337",
         "REQ-DECOMPOSE-338"
       ],
       "members": [
@@ -4897,7 +4506,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the parent file is byte-identical after a decompose run Given  the parent file's bytes captured before `lint --decompose` runs When   the run completes Then   the parent file's bytes are unchanged from the captured snapshot"
+        "Scenario: the parent file is byte-identical after a decompose run Given  the parent file's bytes captured before `lint --decompose` runs When   the run completes Then   the parent file's bytes are unchanged from the captured snapshot, so deleting the created draft restores the corpus exactly"
       ],
       "accept": "",
       "input": "",
@@ -4974,44 +4583,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the created draft's own text discloses the word-count-only split Given  a draft created by `lint --decompose` When   its file text is read Then   it contains \"WORD COUNT, never by obligation\""
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DECOMPOSE-050"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DECOMPOSE-337",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Deleting a created draft restores the corpus exactly",
-      "intent": "Deleting a created draft restores the corpus exactly, because the parent was never edited.",
-      "contract": [
-        "Deleting a created draft restores the corpus exactly, because the parent was never edited."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -5185,11 +4756,9 @@
         "REQ-DOCBUNDLE-339",
         "REQ-DOCBUNDLE-340",
         "REQ-DOCBUNDLE-341",
-        "REQ-DOCBUNDLE-342",
         "REQ-DOCBUNDLE-343",
         "REQ-DOCBUNDLE-344",
-        "REQ-DOCBUNDLE-345",
-        "REQ-DOCBUNDLE-346"
+        "REQ-DOCBUNDLE-345"
       ],
       "members": [
         {
@@ -5223,7 +4792,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a large untagged docs/ HTML file is flagged Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag When   `untagged_doc_bundles` scans the repo Then   it returns `[\"docs/arch.html\"]`"
+        "Scenario: a large untagged docs/ HTML file is flagged Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag When   `untagged_doc_bundles` scans the repo Then   it returns `[\"docs/arch.html\"]`, which `gate` folds into its warnings only — never an error, leaving the exit code unaffected"
       ],
       "accept": "",
       "input": "",
@@ -5299,45 +4868,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: engine outputs are excluded even when large and untagged Given  large, untagged `docs/map.html` and `docs/_x.html` When   `untagged_doc_bundles` scans the repo Then   neither file appears in the result"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DOCBUNDLE-026"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DOCBUNDLE-342",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The engine owns those two and freshness-checks them",
-      "intent": "The engine owns those two and freshness-checks them separately.",
-      "contract": [
-        "The engine owns those two and freshness-checks them separately."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: engine outputs are excluded even when large and untagged Given  large, untagged `docs/map.html` and `docs/_x.html` When   `untagged_doc_bundles` scans the repo Then   neither file appears in the result, because the engine freshness-checks those two separately, on its own path"
       ],
       "accept": "",
       "input": "",
@@ -5452,44 +4983,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: a file that raises OSError on stat is skipped, not fatal Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it When   `untagged_doc_bundles` scans the repo Then   the scan completes without raising and `docs/broken.html` is absent from the result"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DOCBUNDLE-026"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DOCBUNDLE-346",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The check is warn-only and never changes the",
-      "intent": "The check is warn-only and never changes the gate's exit code.",
-      "contract": [
-        "The check is warn-only and never changes the gate's exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -5967,8 +5460,7 @@
         "REQ-DRIFTIMPACT-347",
         "REQ-DRIFTIMPACT-348",
         "REQ-DRIFTIMPACT-349",
-        "REQ-DRIFTIMPACT-350",
-        "REQ-DRIFTIMPACT-351"
+        "REQ-DRIFTIMPACT-350"
       ],
       "members": [
         {
@@ -6002,7 +5494,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: drift warning names a requirement that depends on the drifted one Given  a confirmed drifted requirement and a second requirement with it in `depends_on` When   `gate` runs Then   the drift warning line includes \"review dependent(s):\" followed by the second id"
+        "Scenario: drift warning names a requirement that depends on the drifted one Given  a confirmed drifted requirement and a second requirement with it in `depends_on` When   `gate` runs Then   the drift warning line includes \"review dependent(s):\" followed by the second id, with severity unchanged — still warn-only, promotable only by `--strict`"
       ],
       "accept": "",
       "input": "",
@@ -6117,44 +5609,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: an isolated drifted requirement's warning carries no dependents clause Given  a confirmed drifted requirement that no other requirement lists in `depends_on` When   `gate` runs Then   the drift warning line contains no \"review dependent(s):\" text at all"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DRIFTIMPACT-035"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DRIFTIMPACT-351",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The addition does not change the drift warning's",
-      "intent": "The addition does not change the drift warning's severity: it stays warn-only by default and promotable by `--strict`, exactly as before.",
-      "contract": [
-        "The addition does not change the drift warning's severity: it stays warn-only by default and promotable by `--strict`, exactly as before."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -6650,8 +6104,7 @@
         "REQ-EXCALIDRAW-365",
         "REQ-EXCALIDRAW-366",
         "REQ-EXCALIDRAW-367",
-        "REQ-EXCALIDRAW-368",
-        "REQ-EXCALIDRAW-369"
+        "REQ-EXCALIDRAW-368"
       ],
       "members": [
         {
@@ -6973,44 +6426,6 @@
       ]
     },
     {
-      "id": "REQ-EXCALIDRAW-369",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Test_excalidraw.py exercises the five named gates in both",
-      "intent": "`test_excalidraw.py` exercises the five named gates in both `\"warn\"` and `\"error\"` modes, and the two hard gates, for each maintained example generator.",
-      "contract": [
-        "`test_excalidraw.py` exercises the five named gates in both `\"warn\"` and `\"error\"` modes, and the two hard gates, for each maintained example generator."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-031"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "ARCH-EXCALIDRAW-032",
       "layer": "feature",
       "level": "architecture",
@@ -7286,7 +6701,6 @@
         "REQ-EXTRACT-374",
         "REQ-EXTRACT-375",
         "REQ-EXTRACT-376",
-        "REQ-EXTRACT-377",
         "REQ-EXTRACT-378",
         "REQ-EXTRACT-379",
         "REQ-EXTRACT-380",
@@ -7424,45 +6838,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: draft skips a file matched by .reqmapignore Given  an untagged file matching a `.reqmapignore` glob pattern When   `draft` runs Then   no `DRAFT-*.md` is proposed for that file"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXTRACT-008"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-EXTRACT-377",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "A file matching an ignore pattern is never",
-      "intent": "A file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself.",
-      "contract": [
-        "A file matching an ignore pattern is never drafted — notably the vendored `scripts/reqmap.py` engine itself."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: draft skips a file matched by .reqmapignore Given  an untagged file matching a `.reqmapignore` glob pattern When   `draft` runs Then   no `DRAFT-*.md` is proposed for that file — notably the vendored `scripts/reqmap.py` engine itself"
       ],
       "accept": "",
       "input": "",
@@ -7920,7 +7296,6 @@
         "REQ-FANOUT-390",
         "REQ-FANOUT-391",
         "REQ-FANOUT-392",
-        "REQ-FANOUT-393",
         "REQ-FANOUT-394"
       ],
       "members": [
@@ -8073,7 +7448,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: crossing the band boundary flips the finding on Given  one parent with 5 children (inside the band) and another with 4 (just below it) When   `lint` runs on each Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one"
+        "Scenario: crossing the band boundary flips the finding on Given  one parent with 5 children (inside the band) and another with 4 (just below it) When   `lint` runs on each Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one, with the gate's exit code unchanged either way"
       ],
       "accept": "",
       "input": "",
@@ -8112,44 +7487,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the finding text distinguishes too-few from too-many Given  one parent with 3 children and another with 25 When   `lint` runs on each Then   the first finding's detail says \"too few to be a level\" and the second says \"too many — split it\""
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-FANOUT-052"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-FANOUT-393",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The fan-out check is warn-only and never changes",
-      "intent": "The `fan-out` check is warn-only and never changes the gate's exit code.",
-      "contract": [
-        "The `fan-out` check is warn-only and never changes the gate's exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -8281,13 +7618,10 @@
         "REQ-FINDINGS-403",
         "REQ-FINDINGS-404",
         "REQ-FINDINGS-405",
-        "REQ-FINDINGS-406",
-        "REQ-FINDINGS-407",
         "REQ-FINDINGS-408",
         "REQ-FINDINGS-409",
         "REQ-FINDINGS-410",
-        "REQ-FINDINGS-411",
-        "REQ-FINDINGS-412"
+        "REQ-FINDINGS-411"
       ],
       "members": [
         {
@@ -8381,7 +7715,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: findings writes its report to a single file Given  a requirement with one open Verify-intent bullet When   `findings` runs Then   the requirements directory gains one new file, `_findings.md`, holding that bullet"
+        "Scenario: findings writes its report to a single file Given  a requirement with one open Verify-intent bullet When   `findings` runs Then   the requirements directory gains one new file, `_findings.md`, holding that bullet, and no other file appears"
       ],
       "accept": "",
       "input": "",
@@ -8609,7 +7943,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: findings renders a classified view when a sidecar exists Given  a `_findings_triage.json` sidecar present and no `--raw` flag When   `findings` runs Then   `_findings.md` is organized into classified sections instead of the raw grouped list"
+        "Scenario: findings renders a classified view when a sidecar exists Given  a `_findings_triage.json` sidecar present and no `--raw` flag When   `findings` runs Then   `_findings.md` is organized into classified sections using only the classes the sidecar already assigned, never ones `findings` computes itself"
       ],
       "accept": "",
       "input": "",
@@ -8724,82 +8058,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: findings warns when raw and triaged counts diverge Given  three raw Verify-intent items but only one item recorded in the sidecar When   `findings` runs Then   `_findings.md` carries an advisory staleness note"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-FINDINGS-010"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-FINDINGS-406",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Findings is deterministic and stdlib-only. It never classifies",
-      "intent": "`findings` is deterministic and stdlib-only. It never classifies a finding itself.",
-      "contract": [
-        "`findings` is deterministic and stdlib-only. It never classifies a finding itself."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-FINDINGS-010"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-FINDINGS-407",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Findings writes no file other than _findings.md",
-      "intent": "`findings` writes no file other than `_findings.md`.",
-      "contract": [
-        "`findings` writes no file other than `_findings.md`."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -8951,45 +8209,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: gate prints the open-findings count as an advisory Given  a requirement with one open Verify-intent item When   `gate` runs Then   its output includes a line naming the open-findings count"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-FINDINGS-010"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-FINDINGS-412",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The open-findings count never changes the gate's exit",
-      "intent": "The open-findings count never changes the gate's exit code.",
-      "contract": [
-        "The open-findings count never changes the gate's exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: gate prints the open-findings count as an advisory Given  a requirement with one open Verify-intent item When   `gate` runs Then   its output includes a line naming the open-findings count, and its exit code is unaffected"
       ],
       "accept": "",
       "input": "",
@@ -10131,9 +9351,7 @@
         "REQ-LEVEL-438",
         "REQ-LEVEL-439",
         "REQ-LEVEL-440",
-        "REQ-LEVEL-441",
-        "REQ-LEVEL-442",
-        "REQ-LEVEL-443"
+        "REQ-LEVEL-442"
       ],
       "members": [
         {
@@ -10217,7 +9435,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a requirement without level: reads exactly as before Given  a corpus of requirements written before `level:` existed, none carrying the field When   `gate` runs Then   its output matches a run from before the field was introduced"
+        "Scenario: a requirement without level: reads exactly as before Given  a corpus of requirements written before `level:` existed, none carrying the field When   `gate` runs Then   its output matches a run from before the field was introduced, with no level-related finding for any requirement"
       ],
       "accept": "",
       "input": "",
@@ -10293,7 +9511,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: an architecture-level requirement still needs an implements member Given  a confirmed requirement carrying `level: architecture` and no `implements:` member When   `gate` runs Then   it reports the missing-member error"
+        "Scenario: an architecture-level requirement still needs an implements member Given  a confirmed requirement carrying `level: architecture` and no `implements:` member When   `gate` runs Then   it reports the missing-member error, because no `level:` value is in the implementation-exemption set"
       ],
       "accept": "",
       "input": "",
@@ -10355,44 +9573,6 @@
       ]
     },
     {
-      "id": "REQ-LEVEL-441",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "No level: value is added to the implementation-exemption",
-      "intent": "No `level:` value is added to the implementation-exemption set.",
-      "contract": [
-        "No `level:` value is added to the implementation-exemption set."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-LEVEL-051"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-LEVEL-442",
       "layer": "feature",
       "level": "code",
@@ -10408,44 +9588,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: an invalid level value is a gate error Given  a requirement carrying `level: detailed` When   `gate` runs Then   it reports one error naming the invalid value and exits 1"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-LEVEL-051"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-LEVEL-443",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The gate says nothing about a requirement that",
-      "intent": "The gate says nothing about a requirement that carries no `level:` at all.",
-      "contract": [
-        "The gate says nothing about a requirement that carries no `level:` at all."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -10537,8 +9679,7 @@
         "REQ-LINT-452",
         "REQ-LINT-453",
         "REQ-LINT-454",
-        "REQ-LINT-455",
-        "REQ-LINT-456"
+        "REQ-LINT-455"
       ],
       "members": [
         {
@@ -11000,45 +10141,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a missing section fails a strict run Given  a confirmed requirement with a Contract section but no `## Cases` heading When   `cmd_lint` runs with `--strict` Then   it returns exit code 1"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-LINT-014"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-LINT-456",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "A warning never changes the exit code",
-      "intent": "A warning never changes the exit code.",
-      "contract": [
-        "A warning never changes the exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: a missing section fails a strict run Given  a confirmed requirement with a Contract section but no `## Cases` heading When   `cmd_lint` runs with `--strict` Then   it returns exit code 1 because of the error finding; a warning alone would leave the exit code at 0"
       ],
       "accept": "",
       "input": "",
@@ -11971,12 +11074,10 @@
       ],
       "satisfied_by": [
         "REQ-MAP-476",
-        "REQ-MAP-477",
         "REQ-MAP-478",
         "REQ-MAP-479",
         "REQ-MAP-480",
         "REQ-MAP-481",
-        "REQ-MAP-482",
         "REQ-MAP-483",
         "REQ-MAP-484",
         "REQ-MAP-485",
@@ -11986,7 +11087,6 @@
         "REQ-MAP-489",
         "REQ-MAP-490",
         "REQ-MAP-491",
-        "REQ-MAP-492",
         "REQ-MAP-493"
       ],
       "members": [
@@ -12163,44 +11263,6 @@
       ]
     },
     {
-      "id": "REQ-MAP-477",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "_map.json is a derived view. It is regenerated",
-      "intent": "`_map.json` is a derived view. It is regenerated, never edited.",
-      "contract": [
-        "`_map.json` is a derived view. It is regenerated, never edited."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-MAP-007"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-MAP-478",
       "layer": "feature",
       "level": "code",
@@ -12329,45 +11391,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: repo resolves to the git remote's owner/repo Given  a git checkout whose remote `origin` points at `owner/repo` When   `map` runs Then   `_map.json`'s top-level `repo` field reads `owner/repo`"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-MAP-007"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-MAP-482",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Repo identifies the project the map describes, for",
-      "intent": "`repo` identifies the project the map describes, for display in the viewer header.",
-      "contract": [
-        "`repo` identifies the project the map describes, for display in the viewer header."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: repo resolves to the git remote's owner/repo Given  a git checkout whose remote `origin` points at `owner/repo` When   `map` runs Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project for display in the viewer header"
       ],
       "accept": "",
       "input": "",
@@ -12709,45 +11733,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: gate warns about a stale map without failing the commit Given  a committed `_map.json` that differs from a fresh render When   `gate` runs Then   it prints a staleness warning and exits 0"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-MAP-007"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-MAP-492",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The gate never regenerates the map. It only",
-      "intent": "The gate never regenerates the map. It only reports.",
-      "contract": [
-        "The gate never regenerates the map. It only reports."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: gate warns about a stale map without failing the commit Given  a committed `_map.json` that differs from a fresh render When   `gate` runs Then   it prints a staleness warning, exits 0, and leaves `_map.json` unmodified"
       ],
       "accept": "",
       "input": "",
@@ -12870,7 +11856,6 @@
         "REQ-MAPDIAGRAMS-497",
         "REQ-MAPDIAGRAMS-498",
         "REQ-MAPDIAGRAMS-499",
-        "REQ-MAPDIAGRAMS-500",
         "REQ-MAPDIAGRAMS-501",
         "REQ-MAPDIAGRAMS-502",
         "REQ-MAPDIAGRAMS-503",
@@ -13137,45 +12122,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the Hierarchy folds code requirements into their parent's count Given  an architecture requirement with three `satisfies:`-linked code requirements When   the Specification Hierarchy renders Then   it draws no node for any code requirement and credits all three to the parent box"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-MAPDIAGRAMS-055"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-MAPDIAGRAMS-500",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "An architecture box shows how many code requirements",
-      "intent": "An architecture box shows how many code requirements sit under it.",
-      "contract": [
-        "An architecture box shows how many code requirements sit under it."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the Hierarchy folds code requirements into their parent's count Given  an architecture requirement with three `satisfies:`-linked code requirements When   the Specification Hierarchy renders Then   it draws no node for any code requirement, and the parent box shows a count of 3 code requirements sitting under it"
       ],
       "accept": "",
       "input": "",
@@ -15522,10 +14469,7 @@
         "REQ-ORPHANCODE-553",
         "REQ-ORPHANCODE-554",
         "REQ-ORPHANCODE-555",
-        "REQ-ORPHANCODE-556",
-        "REQ-ORPHANCODE-557",
-        "REQ-ORPHANCODE-558",
-        "REQ-ORPHANCODE-559"
+        "REQ-ORPHANCODE-556"
       ],
       "members": [
         {
@@ -15563,7 +14507,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: an untagged file at the LOC threshold triggers the warning Given  an untagged 400-line `.py` file with no `implements`/`verifies` tag When   `gate` runs Then   it prints a warn line naming that file as orphan code"
+        "Scenario: an untagged file at the LOC threshold triggers the warning Given  an untagged 400-line `.py` file with no `implements`/`verifies` tag When   `gate` runs Then   it prints a warn line naming that file as orphan code, and the gate's exit code is unchanged, including under `--strict`"
       ],
       "accept": "",
       "input": "",
@@ -15715,7 +14659,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a .reqmapignore pattern exempts a large untagged file Given  a large untagged `.py` file matched by a `.reqmapignore` pattern When   `gate` runs Then   it is not reported as orphan code"
+        "Scenario: a .reqmapignore pattern exempts a large untagged file Given  a large untagged `.py` file matched by a `.reqmapignore` pattern When   `gate` runs Then   it is not reported as orphan code, with no separate exemption mechanism beyond tagging or `.reqmapignore`"
       ],
       "accept": "",
       "input": "",
@@ -15792,120 +14736,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: an unreadable file is skipped rather than crashing the check Given  a large program file the process cannot read When   `gate` runs Then   it completes without error and prints no orphan-code line for that file"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ORPHANCODE-034"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ORPHANCODE-557",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The check is warn-only and never changes the",
-      "intent": "The check is warn-only and never changes the gate's exit code, including under `--strict`. <\!-- Rationale: the 2026-06-21 Senate audit on ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -\->",
-      "contract": [
-        "The check is warn-only and never changes the gate's exit code, including under `--strict`. <\!-- Rationale: the 2026-06-21 Senate audit on ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -\->"
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ORPHANCODE-034"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ORPHANCODE-558",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "An author silences a file by tagging it",
-      "intent": "An author silences a file by tagging it or by adding it to `.reqmapignore`.",
-      "contract": [
-        "An author silences a file by tagging it or by adding it to `.reqmapignore`."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ORPHANCODE-034"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ORPHANCODE-559",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "There is no separate exemption mechanism",
-      "intent": "There is no separate exemption mechanism.",
-      "contract": [
-        "There is no separate exemption mechanism."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -17488,7 +16318,6 @@
       "satisfied_by": [
         "REQ-PROMOTE-TODO-580",
         "REQ-PROMOTE-TODO-581",
-        "REQ-PROMOTE-TODO-582",
         "REQ-PROMOTE-TODO-583",
         "REQ-PROMOTE-TODO-584",
         "REQ-PROMOTE-TODO-585",
@@ -17578,44 +16407,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: matching is case-insensitive and trims whitespace Given  a TODO item named \"Add Export Command\" When   `new --from-todo \"  add export command  \" --id REQ-X-001` runs Then   the item is matched and the requirement is scaffolded"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-PROMOTE-TODO-001"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-PROMOTE-TODO-582",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "New --from-todo requires an explicit --id AREA-NAME-NNN. There",
-      "intent": "`new --from-todo` requires an explicit `--id AREA-NAME-NNN`. There is no interactive prompt, because the engine runs headless.",
-      "contract": [
-        "`new --from-todo` requires an explicit `--id AREA-NAME-NNN`. There is no interactive prompt, because the engine runs headless."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -17767,7 +16558,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a missing --id refuses the command Given  an unfinished TODO item and no `--id` flag When   `new --from-todo \"<name>\"` runs Then   it exits non-zero and writes no requirement file"
+        "Scenario: a missing --id refuses the command Given  an unfinished TODO item and no `--id` flag When   `new --from-todo \"<name>\"` runs Then   it exits non-zero and writes no requirement file, never prompting for the missing value — the engine runs headless"
       ],
       "accept": "",
       "input": "",
@@ -18104,7 +16895,6 @@
       ],
       "satisfied_by": [
         "REQ-PROSE-594",
-        "REQ-PROSE-595",
         "REQ-PROSE-596",
         "REQ-PROSE-597",
         "REQ-PROSE-598",
@@ -18168,44 +16958,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: draft writes a requirement for an untagged capability-bucket prose file Given  `prompts/foo.md` with no `# implements:` tag When   `draft` runs Then   a new `draft`-status requirement is written scaffolded from that file"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-PROSE-024"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-PROSE-595",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Each prose file is classified into one of",
-      "intent": "Each prose file is classified into one of three buckets before drafting:",
-      "contract": [
-        "Each prose file is classified into one of three buckets before drafting:"
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -18853,11 +17605,9 @@
         "REQ-REGISTRYLAG-610",
         "REQ-REGISTRYLAG-611",
         "REQ-REGISTRYLAG-612",
-        "REQ-REGISTRYLAG-613",
         "REQ-REGISTRYLAG-614",
         "REQ-REGISTRYLAG-615",
-        "REQ-REGISTRYLAG-616",
-        "REQ-REGISTRYLAG-617"
+        "REQ-REGISTRYLAG-616"
       ],
       "members": [
         {
@@ -19069,44 +17819,6 @@
       ]
     },
     {
-      "id": "REQ-REGISTRYLAG-613",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The signal is read-only and never a gate",
-      "intent": "The signal is read-only and never a gate. It changes no exit code.",
-      "contract": [
-        "The signal is read-only and never a gate. It changes no exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-REGISTRYLAG-035"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-REGISTRYLAG-614",
       "layer": "feature",
       "level": "code",
@@ -19121,7 +17833,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a nonzero lag leaves the health score unchanged Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2) When   `health --json` runs Then   `score` still reads 100, unaffected by the nonzero lag"
+        "Scenario: a nonzero lag leaves the health score unchanged Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2) When   `health --json` runs Then   `score` still reads 100 and the exit code stays unchanged, unaffected by the nonzero lag"
       ],
       "accept": "",
       "input": "",
@@ -19159,7 +17871,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: an unmeasurable lag omits the key entirely Given  a code root that is not a git worktree When   `health --json` runs with that code root Then   the parsed JSON object has no `commits_since_req_touch` key at all"
+        "Scenario: an unmeasurable lag omits the key entirely Given  a code root that is not a git worktree When   `health --json` runs with that code root Then   the parsed JSON object has no `commits_since_req_touch` key, preserving the `--json` schema so a missing reading is never mistaken for a fresh registry"
       ],
       "accept": "",
       "input": "",
@@ -19198,44 +17910,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: a git worktree whose reqs_dir has no commits reads as unmeasurable Given  a git repo with commits, where `requirements/` was never committed When   `_commits_since_reqs_touch` runs against that repo Then   it returns `None`, not `0` or an exception"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-REGISTRYLAG-035"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-REGISTRYLAG-617",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Absence rather than zero preserves the --json schema",
-      "intent": "Absence rather than zero preserves the `--json` schema, so a missing reading is never mistaken for a fresh registry.",
-      "contract": [
-        "Absence rather than zero preserves the `--json` schema, so a missing reading is never mistaken for a fresh registry."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -19602,9 +18276,7 @@
         "REQ-REVIEW-626",
         "REQ-REVIEW-627",
         "REQ-REVIEW-628",
-        "REQ-REVIEW-629",
-        "REQ-REVIEW-630",
-        "REQ-REVIEW-631"
+        "REQ-REVIEW-630"
       ],
       "members": [
         {
@@ -19720,7 +18392,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the plan names the three AI categories and the finding contract Given  the emitted review plan When   it is inspected Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`, each requiring a `suggested_rewrite`"
+        "Scenario: the plan names the three AI categories and the finding contract Given  the emitted review plan When   it is inspected Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`, each requiring a `suggested_rewrite` and mandatory human review as its false-positive safeguard, never an LLM confidence value"
       ],
       "accept": "",
       "input": "",
@@ -19820,44 +18492,6 @@
       ]
     },
     {
-      "id": "REQ-REVIEW-629",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The AI pass is non-deterministic and advisory: its",
-      "intent": "The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive rate. The near-zero-false-positive property comes from MANDATORY human review of each `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only).",
-      "contract": [
-        "The AI pass is non-deterministic and advisory: its findings carry an unbounded false-positive rate. The near-zero-false-positive property comes from MANDATORY human review of each `suggested_rewrite`, not from any LLM confidence value (which is uncalibrated triage only)."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-REVIEW-022"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "REQ-REVIEW-630",
       "layer": "feature",
       "level": "code",
@@ -19867,44 +18501,6 @@
       "intent": "The AI consumer (the `requirement-quality-review` skill) writes findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and never auto-edits a requirement.",
       "contract": [
         "The AI consumer (the `requirement-quality-review` skill) writes findings to a separate, clearly-labelled \"AI — advisory (non-deterministic)\" sidecar — never `_findings.md` (which stays deterministic) and never the gate — and never auto-edits a requirement."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-REVIEW-022"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-REVIEW-631",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Review is distinct from show: show is a",
-      "intent": "`review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a machine corpus plan with structural anchors, a coverage summary and category guidance for an out-of-band AI consumer — a different audience and shape, so they are not merged.",
-      "contract": [
-        "`review` is distinct from `show`: `show` is a human single-requirement dossier; `review` is a machine corpus plan with structural anchors, a coverage summary and category guidance for an out-of-band AI consumer — a different audience and shape, so they are not merged."
       ],
       "verify": [],
       "notes": [],
@@ -20051,8 +18647,7 @@
         "REQ-ROADMAP-635",
         "REQ-ROADMAP-636",
         "REQ-ROADMAP-637",
-        "REQ-ROADMAP-638",
-        "REQ-ROADMAP-639"
+        "REQ-ROADMAP-638"
       ],
       "members": [
         {
@@ -20170,7 +18765,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: behind-signal names both the roadmap's and requirements' newest milestone Given  a `TODO.md` newest heading `## v2.8` and a requirement with `milestone: v2.13` When   `health --json` runs Then   `roadmap_behind` equals `{\"todo\": \"v2.8\", \"requirements\": \"v2.13\"}`"
+        "Scenario: behind-signal names both the roadmap's and requirements' newest milestone Given  a `TODO.md` newest heading `## v2.8` and a requirement with `milestone: v2.13` When   `health --json` runs Then   `roadmap_behind` equals `{\"todo\": \"v2.8\", \"requirements\": \"v2.13\"}`, `health` exits 0, and the health score is unchanged — the signal is read-only, like its unversioned-heading counterpart"
       ],
       "accept": "",
       "input": "",
@@ -20346,44 +18941,6 @@
       ]
     },
     {
-      "id": "REQ-ROADMAP-639",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Both signals are read-only. Neither changes an exit",
-      "intent": "Both signals are read-only. Neither changes an exit code, and neither lowers the health score.",
-      "contract": [
-        "Both signals are read-only. Neither changes an exit code, and neither lowers the health score."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ROADMAP-038"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "ARCH-SCAN-002",
       "layer": "bus",
       "level": "architecture",
@@ -20466,7 +19023,6 @@
         "REQ-SCAN-224",
         "REQ-SCAN-225",
         "REQ-SCAN-226",
-        "REQ-SCAN-227",
         "REQ-SCAN-228",
         "REQ-SCAN-229",
         "REQ-SCAN-230",
@@ -20853,45 +19409,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: every id in a multi-id tag carries the identical (role, file, line) triple Given  `<\!-- generated-from: REQ-MA-001, REQ-MB-002 -\->` in `docs/arch.html` When   `scan_members` runs Then   `members[\"REQ-MA-001\"] == members[\"REQ-MB-002\"] == [(\"generated-from\", \"docs/arch.html\", 1)]`"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-SCAN-002"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-SCAN-227",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "A whole-system doc generated from many requirements (generated-from",
-      "intent": "A whole-system doc generated from many requirements (`generated-from: A, B, C`) is therefore a member of each, and drifts when ANY of them changes.",
-      "contract": [
-        "A whole-system doc generated from many requirements (`generated-from: A, B, C`) is therefore a member of each, and drifts when ANY of them changes."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: every id in a multi-id tag carries the identical (role, file, line) triple Given  `<\!-- generated-from: REQ-MA-001, REQ-MB-002 -\->` in `docs/arch.html` When   `scan_members` runs Then   `members[\"REQ-MA-001\"] == members[\"REQ-MB-002\"] == [(\"generated-from\", \"docs/arch.html\", 1)]`, so the doc drifts when either requirement's contract changes"
       ],
       "accept": "",
       "input": "",
@@ -21640,7 +20158,6 @@
         "SYS-REPORT-105"
       ],
       "satisfied_by": [
-        "REQ-SEARCH-649",
         "REQ-SEARCH-650",
         "REQ-SEARCH-651",
         "REQ-SEARCH-652",
@@ -21682,44 +20199,6 @@
       "milestone": "v2.13",
       "priority": "",
       "risks": []
-    },
-    {
-      "id": "REQ-SEARCH-649",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Search \"<query>\" ranks every requirement by how well",
-      "intent": "`search \"<query>\"` ranks every requirement by how well its wording matches the query, then prints them most-relevant-first.",
-      "contract": [
-        "`search \"<query>\"` ranks every requirement by how well its wording matches the query, then prints them most-relevant-first."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-SEARCH-036"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
     },
     {
       "id": "REQ-SEARCH-650",
@@ -21850,7 +20329,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a rarer shared term outweighs a common one Given  two requirements matching the query on one common word and one rare word respectively When   `search` runs Then   the requirement sharing the rare word ranks higher, reflecting its higher TF-IDF weight"
+        "Scenario: a rarer shared term outweighs a common one Given  two requirements matching the query on one common word and one rare word respectively When   `search` runs Then   the requirement sharing the rare word ranks higher, reflecting its higher TF-IDF weight, and prints before the other match"
       ],
       "accept": "",
       "input": "",
@@ -24461,7 +22940,6 @@
       "satisfied_by": [
         "REQ-STALEENGINE-709",
         "REQ-STALEENGINE-710",
-        "REQ-STALEENGINE-711",
         "REQ-STALEENGINE-712",
         "REQ-STALEENGINE-713",
         "REQ-STALEENGINE-714",
@@ -24545,44 +23023,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the gate action wires the staleness probe as its own step Given  `check/action.yml` When   its steps are inspected Then   one step invokes `engine_staleness.py` as part of the action's run"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-STALEENGINE-043"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-STALEENGINE-711",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The probe's --mode selects its behaviour: warn, error",
-      "intent": "The probe's `--mode` selects its behaviour: `warn`, `error`, or `off`.",
-      "contract": [
-        "The probe's `--mode` selects its behaviour: `warn`, `error`, or `off`."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -25573,7 +24013,6 @@
         "REQ-TESTLINK-744",
         "REQ-TESTLINK-745",
         "REQ-TESTLINK-746",
-        "REQ-TESTLINK-747",
         "REQ-TESTLINK-748",
         "REQ-TESTLINK-749"
       ],
@@ -26079,7 +24518,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a broken tested-by link produces exactly one gate warning Given  a confirmed requirement whose `tested-by` names `tests/missing_test.py`, a path that does not exist When   `cmd_check` runs Then   its output carries exactly one warning line naming that broken link"
+        "Scenario: a broken tested-by link produces exactly one gate warning Given  a confirmed requirement whose `tested-by` names `tests/missing_test.py`, a path that does not exist When   `cmd_check` runs Then   its output carries exactly one warning line naming that broken link, adding no error — the gate's pass/fail stays unaffected"
       ],
       "accept": "",
       "input": "",
@@ -26118,44 +24557,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the warning text names both the requirement id and the file Given  `REQ-A-001` whose `tested-by` names `tests/missing_test.py`, a path that does not exist When   `cmd_check` runs Then   its output contains both \"REQ-A-001\" and \"tests/missing_test.py\" in the same line"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-TESTLINK-018"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-TESTLINK-747",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The check is warn-only. It never adds an",
-      "intent": "The check is warn-only. It never adds an error, and never changes whether the gate passes.",
-      "contract": [
-        "The check is warn-only. It never adds an error, and never changes whether the gate passes."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -26309,7 +24710,6 @@
         "REQ-TRACE-752",
         "REQ-TRACE-753",
         "REQ-TRACE-754",
-        "REQ-TRACE-755",
         "REQ-TRACE-756",
         "REQ-TRACE-757",
         "REQ-TRACE-758",
@@ -26493,7 +24893,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a confirmed aggregate with no implements tag passes the gate Given  a confirmed `layer: aggregate` requirement with `depends_on` a code-backed requirement, and no `implements:` tag of its own When   `gate` runs Then   `_link_sync_errors` reports no missing-implements error for the aggregate"
+        "Scenario: a confirmed aggregate with no implements tag passes the gate Given  a confirmed `layer: aggregate` requirement with `depends_on` a code-backed requirement, and no `implements:` tag of its own When   `gate` runs Then   `_link_sync_errors` reports no missing-implements error for the aggregate, because it adds no behaviour of its own — it only asserts its dependencies work together"
       ],
       "accept": "",
       "input": "",
@@ -26532,44 +24932,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: confirm refuses an aggregate with an empty depends_on Given  a `layer: aggregate` requirement with `depends_on: []` When   `confirm <ID>` runs Then   it refuses with \"depends_on is empty\" and leaves the file's status unchanged"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-TRACE-020"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-TRACE-755",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "An aggregate adds no behaviour of its own",
-      "intent": "An aggregate adds no behaviour of its own. It asserts that its dependencies work together.",
-      "contract": [
-        "An aggregate adds no behaviour of its own. It asserts that its dependencies work together."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -26791,8 +25153,7 @@
         "REQ-TRACKED-760",
         "REQ-TRACKED-761",
         "REQ-TRACKED-762",
-        "REQ-TRACKED-763",
-        "REQ-TRACKED-764"
+        "REQ-TRACKED-763"
       ],
       "members": [
         {
@@ -26866,7 +25227,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the gate warning caps the named files and reports the total Given  seven untracked member files When   `gate` runs inside a git work tree Then   its warning names five of them by path and states the total count of 7"
+        "Scenario: the gate warning caps the named files and reports the total Given  seven untracked member files When   `gate` runs inside a git work tree Then   its warning names five of them by path and states the total count of 7, and `gate` exits 0 — the warning never changes the exit code"
       ],
       "accept": "",
       "input": "",
@@ -26943,44 +25304,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the check stays silent outside a git work tree Given  a scan root that is not a git repository When   `untracked_members` runs Then   it returns nothing and `gate` prints no untracked-member warning"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-TRACKED-042"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-TRACKED-764",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The warning never changes the exit code",
-      "intent": "The warning never changes the exit code.",
-      "contract": [
-        "The warning never changes the exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -27584,8 +25907,7 @@
         "REQ-UNSCANNEDTAG-777",
         "REQ-UNSCANNEDTAG-778",
         "REQ-UNSCANNEDTAG-779",
-        "REQ-UNSCANNEDTAG-780",
-        "REQ-UNSCANNEDTAG-781"
+        "REQ-UNSCANNEDTAG-780"
       ],
       "members": [
         {
@@ -27659,7 +25981,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the gate warning names up to five files and the total count Given  seven tracked non-scannable files each carrying a tag When   `gate` runs Then   it prints one warning naming five of them and stating the total of seven"
+        "Scenario: the gate warning names up to five files and the total count Given  seven tracked non-scannable files each carrying a tag When   `gate` runs Then   it prints one warning naming five of them and stating the total of seven, and the exit code is unchanged"
       ],
       "accept": "",
       "input": "",
@@ -27835,44 +26157,6 @@
       ]
     },
     {
-      "id": "REQ-UNSCANNEDTAG-781",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The warning never changes the exit code",
-      "intent": "The warning never changes the exit code.",
-      "contract": [
-        "The warning never changes the exit code."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-UNSCANNEDTAG-045"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
       "id": "ARCH-VIEWER-007",
       "layer": "feature",
       "level": "architecture",
@@ -27954,7 +26238,6 @@
       "satisfied_by": [
         "REQ-VIEWER-782",
         "REQ-VIEWER-783",
-        "REQ-VIEWER-784",
         "REQ-VIEWER-785",
         "REQ-VIEWER-786",
         "REQ-VIEWER-787",
@@ -27963,7 +26246,6 @@
         "REQ-VIEWER-790",
         "REQ-VIEWER-791",
         "REQ-VIEWER-792",
-        "REQ-VIEWER-793",
         "REQ-VIEWER-794",
         "REQ-VIEWER-795",
         "REQ-VIEWER-796",
@@ -28153,45 +26435,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__ Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` writing `_map.html` When   the file is read back Then   it contains `\"window.__REQMAP_DATA__=\"` and no leftover `<\!--REQMAP_DATA-\->` marker"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-VIEWER-007"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-VIEWER-784",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "_map.html opens by double-click, with no server",
-      "intent": "`_map.html` opens by double-click, with no server.",
-      "contract": [
-        "`_map.html` opens by double-click, with no server."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
+        "Scenario: the written _map.html carries the graph as window.__REQMAP_DATA__ Given  `render_html({\"nodes\": [...], \"edges\": []}, reqs_dir)` writing `_map.html` When   the file is read back Then   it contains `\"window.__REQMAP_DATA__=\"` and no leftover `<\!--REQMAP_DATA-\->` marker, and references no external file — opening by double-click with no server"
       ],
       "accept": "",
       "input": "",
@@ -28457,7 +26701,7 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "Scenario: a literal <\!-- inside a field is escaped to <\\!-- Given  a node contract clause `\"discusses HTML injection via <\!-- markers\"` When   `_inject_viewer(template_text, data)` runs Then   the output contains `\"<\\\\!--\"` and no raw `\"<\!--\"` inside the injected blob"
+        "Scenario: a literal <\!-- inside a field is escaped to <\\!-- Given  a node contract clause `\"discusses HTML injection via <\!-- markers\"` When   `_inject_viewer(template_text, data)` runs Then   the output contains `\"<\\\\!--\"` and no raw `\"<\!--\"` inside the injected blob, keeping `window.__REQMAP_DATA__` parseable instead of null"
       ],
       "accept": "",
       "input": "",
@@ -28496,44 +26740,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: a literal -\-> inside a field is escaped to -\\-> Given  a node title containing the literal sequence `\"-\->\"` When   `_inject_viewer(template_text, data)` runs Then   the output contains `\"-\\\\->\"` and no raw `\"-\->\"` inside the injected blob"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-VIEWER-007"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-VIEWER-793",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The first guard alone was the original contract",
-      "intent": "The first guard alone was the original contract. The `<\!--` and `-\->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<\!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null.",
-      "contract": [
-        "The first guard alone was the original contract. The `<\!--` and `-\->` guards were added in v2.3.5 after a confirmed bug: requirement bodies that discuss HTML injection (and therefore contain literal `<\!--`) broke `file://` opening by making `window.__REQMAP_DATA__` null."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: TODO — state the observable that proves this Given  <precondition> When   <action> Then   <observable, pass/fail result>"
       ],
       "accept": "",
       "input": "",
@@ -30591,10 +28797,6 @@
       "ARCH-ACVERIFY-019"
     ],
     [
-      "REQ-ACVERIFY-242",
-      "ARCH-ACVERIFY-019"
-    ],
-    [
       "REQ-ACVERIFY-243",
       "ARCH-ACVERIFY-019"
     ],
@@ -30615,10 +28817,6 @@
       "ARCH-ATOMICITY-049"
     ],
     [
-      "REQ-ATOMICITY-246",
-      "ARCH-ATOMICITY-049"
-    ],
-    [
       "REQ-ATOMICITY-247",
       "ARCH-ATOMICITY-049"
     ],
@@ -30632,10 +28830,6 @@
     ],
     [
       "REQ-ATOMICITY-250",
-      "ARCH-ATOMICITY-049"
-    ],
-    [
-      "REQ-ATOMICITY-251",
       "ARCH-ATOMICITY-049"
     ],
     [
@@ -30723,10 +28917,6 @@
       "SYS-GATE-102"
     ],
     [
-      "REQ-CHECK-271",
-      "ARCH-CHECK-006"
-    ],
-    [
       "REQ-CHECK-272",
       "ARCH-CHECK-006"
     ],
@@ -30799,10 +28989,6 @@
       "ARCH-CHECK-006"
     ],
     [
-      "REQ-CHECK-290",
-      "ARCH-CHECK-006"
-    ],
-    [
       "REQ-CHECK-291",
       "ARCH-CHECK-006"
     ],
@@ -30863,10 +29049,6 @@
       "SYS-SHIP-108"
     ],
     [
-      "REQ-CMDREGISTRY-305",
-      "ARCH-CMDREGISTRY-033"
-    ],
-    [
       "REQ-CMDREGISTRY-306",
       "ARCH-CMDREGISTRY-033"
     ],
@@ -30907,10 +29089,6 @@
       "ARCH-CONTEXT-048"
     ],
     [
-      "REQ-CONTEXT-315",
-      "ARCH-CONTEXT-048"
-    ],
-    [
       "REQ-CONTEXT-316",
       "ARCH-CONTEXT-048"
     ],
@@ -30947,19 +29125,7 @@
       "ARCH-COVERAGE-029"
     ],
     [
-      "REQ-COVERAGE-324",
-      "ARCH-COVERAGE-029"
-    ],
-    [
-      "REQ-COVERAGE-325",
-      "ARCH-COVERAGE-029"
-    ],
-    [
       "REQ-COVERAGE-326",
-      "ARCH-COVERAGE-029"
-    ],
-    [
-      "REQ-COVERAGE-327",
       "ARCH-COVERAGE-029"
     ],
     [
@@ -31003,10 +29169,6 @@
       "ARCH-DECOMPOSE-050"
     ],
     [
-      "REQ-DECOMPOSE-337",
-      "ARCH-DECOMPOSE-050"
-    ],
-    [
       "REQ-DECOMPOSE-338",
       "ARCH-DECOMPOSE-050"
     ],
@@ -31031,10 +29193,6 @@
       "ARCH-DOCBUNDLE-026"
     ],
     [
-      "REQ-DOCBUNDLE-342",
-      "ARCH-DOCBUNDLE-026"
-    ],
-    [
       "REQ-DOCBUNDLE-343",
       "ARCH-DOCBUNDLE-026"
     ],
@@ -31044,10 +29202,6 @@
     ],
     [
       "REQ-DOCBUNDLE-345",
-      "ARCH-DOCBUNDLE-026"
-    ],
-    [
-      "REQ-DOCBUNDLE-346",
       "ARCH-DOCBUNDLE-026"
     ],
     [
@@ -31104,10 +29258,6 @@
     ],
     [
       "REQ-DRIFTIMPACT-350",
-      "ARCH-DRIFTIMPACT-035"
-    ],
-    [
-      "REQ-DRIFTIMPACT-351",
       "ARCH-DRIFTIMPACT-035"
     ],
     [
@@ -31187,10 +29337,6 @@
       "ARCH-EXCALIDRAW-031"
     ],
     [
-      "REQ-EXCALIDRAW-369",
-      "ARCH-EXCALIDRAW-031"
-    ],
-    [
       "ARCH-EXCALIDRAW-032",
       "SYS-VISUAL-106"
     ],
@@ -31224,10 +29370,6 @@
     ],
     [
       "REQ-EXTRACT-376",
-      "ARCH-EXTRACT-008"
-    ],
-    [
-      "REQ-EXTRACT-377",
       "ARCH-EXTRACT-008"
     ],
     [
@@ -31295,10 +29437,6 @@
       "ARCH-FANOUT-052"
     ],
     [
-      "REQ-FANOUT-393",
-      "ARCH-FANOUT-052"
-    ],
-    [
       "REQ-FANOUT-394",
       "ARCH-FANOUT-052"
     ],
@@ -31351,14 +29489,6 @@
       "ARCH-FINDINGS-010"
     ],
     [
-      "REQ-FINDINGS-406",
-      "ARCH-FINDINGS-010"
-    ],
-    [
-      "REQ-FINDINGS-407",
-      "ARCH-FINDINGS-010"
-    ],
-    [
       "REQ-FINDINGS-408",
       "ARCH-FINDINGS-010"
     ],
@@ -31372,10 +29502,6 @@
     ],
     [
       "REQ-FINDINGS-411",
-      "ARCH-FINDINGS-010"
-    ],
-    [
-      "REQ-FINDINGS-412",
       "ARCH-FINDINGS-010"
     ],
     [
@@ -31503,15 +29629,7 @@
       "ARCH-LEVEL-051"
     ],
     [
-      "REQ-LEVEL-441",
-      "ARCH-LEVEL-051"
-    ],
-    [
       "REQ-LEVEL-442",
-      "ARCH-LEVEL-051"
-    ],
-    [
-      "REQ-LEVEL-443",
       "ARCH-LEVEL-051"
     ],
     [
@@ -31564,10 +29682,6 @@
     ],
     [
       "REQ-LINT-455",
-      "ARCH-LINT-014"
-    ],
-    [
-      "REQ-LINT-456",
       "ARCH-LINT-014"
     ],
     [
@@ -31659,10 +29773,6 @@
       "ARCH-MAP-007"
     ],
     [
-      "REQ-MAP-477",
-      "ARCH-MAP-007"
-    ],
-    [
       "REQ-MAP-478",
       "ARCH-MAP-007"
     ],
@@ -31676,10 +29786,6 @@
     ],
     [
       "REQ-MAP-481",
-      "ARCH-MAP-007"
-    ],
-    [
-      "REQ-MAP-482",
       "ARCH-MAP-007"
     ],
     [
@@ -31719,10 +29825,6 @@
       "ARCH-MAP-007"
     ],
     [
-      "REQ-MAP-492",
-      "ARCH-MAP-007"
-    ],
-    [
       "REQ-MAP-493",
       "ARCH-MAP-007"
     ],
@@ -31752,10 +29854,6 @@
     ],
     [
       "REQ-MAPDIAGRAMS-499",
-      "ARCH-MAPDIAGRAMS-055"
-    ],
-    [
-      "REQ-MAPDIAGRAMS-500",
       "ARCH-MAPDIAGRAMS-055"
     ],
     [
@@ -32003,18 +30101,6 @@
       "ARCH-ORPHANCODE-034"
     ],
     [
-      "REQ-ORPHANCODE-557",
-      "ARCH-ORPHANCODE-034"
-    ],
-    [
-      "REQ-ORPHANCODE-558",
-      "ARCH-ORPHANCODE-034"
-    ],
-    [
-      "REQ-ORPHANCODE-559",
-      "ARCH-ORPHANCODE-034"
-    ],
-    [
       "ARCH-PAGES-021",
       "SYS-VISUAL-106"
     ],
@@ -32163,10 +30249,6 @@
       "ARCH-PROMOTE-TODO-001"
     ],
     [
-      "REQ-PROMOTE-TODO-582",
-      "ARCH-PROMOTE-TODO-001"
-    ],
-    [
       "REQ-PROMOTE-TODO-583",
       "ARCH-PROMOTE-TODO-001"
     ],
@@ -32216,10 +30298,6 @@
     ],
     [
       "REQ-PROSE-594",
-      "ARCH-PROSE-024"
-    ],
-    [
-      "REQ-PROSE-595",
       "ARCH-PROSE-024"
     ],
     [
@@ -32303,10 +30381,6 @@
       "ARCH-REGISTRYLAG-035"
     ],
     [
-      "REQ-REGISTRYLAG-613",
-      "ARCH-REGISTRYLAG-035"
-    ],
-    [
       "REQ-REGISTRYLAG-614",
       "ARCH-REGISTRYLAG-035"
     ],
@@ -32316,10 +30390,6 @@
     ],
     [
       "REQ-REGISTRYLAG-616",
-      "ARCH-REGISTRYLAG-035"
-    ],
-    [
-      "REQ-REGISTRYLAG-617",
       "ARCH-REGISTRYLAG-035"
     ],
     [
@@ -32375,15 +30445,7 @@
       "ARCH-REVIEW-022"
     ],
     [
-      "REQ-REVIEW-629",
-      "ARCH-REVIEW-022"
-    ],
-    [
       "REQ-REVIEW-630",
-      "ARCH-REVIEW-022"
-    ],
-    [
-      "REQ-REVIEW-631",
       "ARCH-REVIEW-022"
     ],
     [
@@ -32420,10 +30482,6 @@
     ],
     [
       "REQ-ROADMAP-638",
-      "ARCH-ROADMAP-038"
-    ],
-    [
-      "REQ-ROADMAP-639",
       "ARCH-ROADMAP-038"
     ],
     [
@@ -32464,10 +30522,6 @@
     ],
     [
       "REQ-SCAN-226",
-      "ARCH-SCAN-002"
-    ],
-    [
-      "REQ-SCAN-227",
       "ARCH-SCAN-002"
     ],
     [
@@ -32537,10 +30591,6 @@
     [
       "ARCH-SEARCH-036",
       "SYS-REPORT-105"
-    ],
-    [
-      "REQ-SEARCH-649",
-      "ARCH-SEARCH-036"
     ],
     [
       "REQ-SEARCH-650",
@@ -32807,10 +30857,6 @@
       "ARCH-STALEENGINE-043"
     ],
     [
-      "REQ-STALEENGINE-711",
-      "ARCH-STALEENGINE-043"
-    ],
-    [
       "REQ-STALEENGINE-712",
       "ARCH-STALEENGINE-043"
     ],
@@ -32959,10 +31005,6 @@
       "ARCH-TESTLINK-018"
     ],
     [
-      "REQ-TESTLINK-747",
-      "ARCH-TESTLINK-018"
-    ],
-    [
       "REQ-TESTLINK-748",
       "ARCH-TESTLINK-018"
     ],
@@ -32992,10 +31034,6 @@
     ],
     [
       "REQ-TRACE-754",
-      "ARCH-TRACE-020"
-    ],
-    [
-      "REQ-TRACE-755",
       "ARCH-TRACE-020"
     ],
     [
@@ -33032,10 +31070,6 @@
     ],
     [
       "REQ-TRACKED-763",
-      "ARCH-TRACKED-042"
-    ],
-    [
-      "REQ-TRACKED-764",
       "ARCH-TRACKED-042"
     ],
     [
@@ -33111,10 +31145,6 @@
       "ARCH-UNSCANNEDTAG-045"
     ],
     [
-      "REQ-UNSCANNEDTAG-781",
-      "ARCH-UNSCANNEDTAG-045"
-    ],
-    [
       "ARCH-VIEWER-007",
       "SYS-VISUAL-106"
     ],
@@ -33124,10 +31154,6 @@
     ],
     [
       "REQ-VIEWER-783",
-      "ARCH-VIEWER-007"
-    ],
-    [
-      "REQ-VIEWER-784",
       "ARCH-VIEWER-007"
     ],
     [
@@ -33160,10 +31186,6 @@
     ],
     [
       "REQ-VIEWER-792",
-      "ARCH-VIEWER-007"
-    ],
-    [
-      "REQ-VIEWER-793",
       "ARCH-VIEWER-007"
     ],
     [

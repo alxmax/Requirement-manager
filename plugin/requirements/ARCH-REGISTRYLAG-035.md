@@ -237,34 +237,6 @@ Scenario: the lag line appears only for a nonzero count
 
 
 ---
-id: REQ-REGISTRYLAG-613
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# The signal is read-only and never a gate
-
-> The signal is read-only and never a gate. It changes no exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-REGISTRYLAG-614
 status: draft
 form: atomic
@@ -283,7 +255,7 @@ superseded_by:
 Scenario: a nonzero lag leaves the health score unchanged
   Given  one green requirement and two commits landed after `requirements/` was last touched (`commits_since_req_touch` = 2)
   When   `health --json` runs
-  Then   `score` still reads 100, unaffected by the nonzero lag
+  Then   `score` still reads 100 and the exit code stays unchanged, unaffected by the nonzero lag
 
 ## Members in code (auto)
 
@@ -312,7 +284,7 @@ superseded_by:
 Scenario: an unmeasurable lag omits the key entirely
   Given  a code root that is not a git worktree
   When   `health --json` runs with that code root
-  Then   the parsed JSON object has no `commits_since_req_touch` key at all
+  Then   the parsed JSON object has no `commits_since_req_touch` key, preserving the `--json` schema so a missing reading is never mistaken for a fresh registry
 
 ## Members in code (auto)
 
@@ -348,28 +320,3 @@ Scenario: a git worktree whose reqs_dir has no commits reads as unmeasurable
 
 
 
---------------------
-
-
----
-id: REQ-REGISTRYLAG-617
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-REGISTRYLAG-035]
-superseded_by:
----
-
-# Absence rather than zero preserves the --json schema
-
-> Absence rather than zero preserves the `--json` schema, so a missing reading is never
-> mistaken for a fresh registry.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)

@@ -120,34 +120,6 @@ Scenario: draft writes a requirement for an untagged capability-bucket prose fil
 
 
 ---
-id: REQ-PROSE-595
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROSE-024]
-superseded_by:
----
-
-# Each prose file is classified into one of
-
-> Each prose file is classified into one of three buckets before drafting:
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-PROSE-596
 status: draft
 form: atomic

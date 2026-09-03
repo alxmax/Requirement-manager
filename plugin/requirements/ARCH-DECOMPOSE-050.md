@@ -330,7 +330,8 @@ superseded_by:
 Scenario: the parent file is byte-identical after a decompose run
   Given  the parent file's bytes captured before `lint --decompose` runs
   When   the run completes
-  Then   the parent file's bytes are unchanged from the captured snapshot
+  Then   the parent file's bytes are unchanged from the captured snapshot, so deleting the
+         created draft restores the corpus exactly
 
 ## Members in code (auto)
 
@@ -387,35 +388,6 @@ Scenario: the created draft's own text discloses the word-count-only split
   Given  a draft created by `lint --decompose`
   When   its file text is read
   Then   it contains "WORD COUNT, never by obligation"
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-337
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# Deleting a created draft restores the corpus exactly
-
-> Deleting a created draft restores the corpus exactly, because the parent was never
-> edited.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

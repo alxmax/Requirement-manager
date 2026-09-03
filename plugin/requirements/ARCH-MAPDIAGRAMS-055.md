@@ -281,35 +281,8 @@ superseded_by:
 Scenario: the Hierarchy folds code requirements into their parent's count
   Given  an architecture requirement with three `satisfies:`-linked code requirements
   When   the Specification Hierarchy renders
-  Then   it draws no node for any code requirement and credits all three to the parent box
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-MAPDIAGRAMS-500
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-MAPDIAGRAMS-055]
-superseded_by:
----
-
-# An architecture box shows how many code requirements
-
-> An architecture box shows how many code requirements sit under it.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   it draws no node for any code requirement, and the parent box shows a count of 3
+         code requirements sitting under it
 
 ## Members in code (auto)
 

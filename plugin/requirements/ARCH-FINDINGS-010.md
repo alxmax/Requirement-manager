@@ -172,7 +172,8 @@ superseded_by:
 Scenario: findings writes its report to a single file
   Given  a requirement with one open Verify-intent bullet
   When   `findings` runs
-  Then   the requirements directory gains one new file, `_findings.md`, holding that bullet
+  Then   the requirements directory gains one new file, `_findings.md`, holding that
+         bullet, and no other file appears
 
 ## Members in code (auto)
 
@@ -342,7 +343,8 @@ superseded_by:
 Scenario: findings renders a classified view when a sidecar exists
   Given  a `_findings_triage.json` sidecar present and no `--raw` flag
   When   `findings` runs
-  Then   `_findings.md` is organized into classified sections instead of the raw grouped list
+  Then   `_findings.md` is organized into classified sections using only the classes the
+         sidecar already assigned, never ones `findings` computes itself
 
 ## Members in code (auto)
 
@@ -431,62 +433,6 @@ Scenario: findings warns when raw and triaged counts diverge
   Given  three raw Verify-intent items but only one item recorded in the sidecar
   When   `findings` runs
   Then   `_findings.md` carries an advisory staleness note
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FINDINGS-406
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FINDINGS-010]
-superseded_by:
----
-
-# Findings is deterministic and stdlib-only. It never classifies
-
-> `findings` is deterministic and stdlib-only. It never classifies a finding itself.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FINDINGS-407
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FINDINGS-010]
-superseded_by:
----
-
-# Findings writes no file other than _findings.md
-
-> `findings` writes no file other than `_findings.md`.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 
@@ -603,34 +549,7 @@ superseded_by:
 Scenario: gate prints the open-findings count as an advisory
   Given  a requirement with one open Verify-intent item
   When   `gate` runs
-  Then   its output includes a line naming the open-findings count
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-FINDINGS-412
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-FINDINGS-010]
-superseded_by:
----
-
-# The open-findings count never changes the gate's exit
-
-> The open-findings count never changes the gate's exit code.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+  Then   its output includes a line naming the open-findings count, and its exit code is
+         unaffected
 
 ## Members in code (auto)

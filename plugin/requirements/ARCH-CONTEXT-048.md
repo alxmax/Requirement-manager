@@ -203,36 +203,6 @@ Scenario: an absent sub-group returns empty instead of a neighboring group's bul
 
 
 ---
-id: REQ-CONTEXT-315
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CONTEXT-048]
-superseded_by:
----
-
-# The legacy form remains fully valid. Nothing in
-
-> The legacy form remains fully valid. Nothing in the gate, the lint checks, or the drift
-> hash reads `## WHAT — Notes`, `## Example — in practice` or `## WHERE — Current
-> implementation` by name, so no existing requirement file needs to change.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-CONTEXT-316
 status: draft
 form: atomic
@@ -254,7 +224,9 @@ Scenario: notes come from the legacy heading, not the Context fallback, when pre
   Given  a confirmed requirement carrying `## WHAT — Notes` with a legacy note (no `##
          Context` section)
   When   `map` regenerates `_map.json` via `_build_map_data`
-  Then   the node's `notes` field holds the legacy bullet, unchanged from before this feature
+  Then   the node's `notes` field holds the legacy bullet, unchanged from before this
+         feature, because the gate, the lint checks and the drift hash never read that
+         heading by name either — the file needs no change
 
 ## Members in code (auto)
 

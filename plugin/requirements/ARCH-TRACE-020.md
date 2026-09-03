@@ -213,7 +213,8 @@ Scenario: a confirmed aggregate with no implements tag passes the gate
   Given  a confirmed `layer: aggregate` requirement with `depends_on` a code-backed requirement,
          and no `implements:` tag of its own
   When   `gate` runs
-  Then   `_link_sync_errors` reports no missing-implements error for the aggregate
+  Then   `_link_sync_errors` reports no missing-implements error for the aggregate, because
+         it adds no behaviour of its own — it only asserts its dependencies work together
 
 ## Members in code (auto)
 
@@ -243,35 +244,6 @@ Scenario: confirm refuses an aggregate with an empty depends_on
   Given  a `layer: aggregate` requirement with `depends_on: []`
   When   `confirm <ID>` runs
   Then   it refuses with "depends_on is empty" and leaves the file's status unchanged
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-TRACE-755
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-TRACE-020]
-superseded_by:
----
-
-# An aggregate adds no behaviour of its own
-
-> An aggregate adds no behaviour of its own. It asserts that its dependencies work
-> together.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
 
 ## Members in code (auto)
 

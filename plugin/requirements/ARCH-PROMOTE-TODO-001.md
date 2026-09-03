@@ -157,35 +157,6 @@ Scenario: matching is case-insensitive and trims whitespace
 
 
 ---
-id: REQ-PROMOTE-TODO-582
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-PROMOTE-TODO-001]
-superseded_by:
----
-
-# New --from-todo requires an explicit --id AREA-NAME-NNN. There
-
-> `new --from-todo` requires an explicit `--id AREA-NAME-NNN`. There is no interactive
-> prompt, because the engine runs headless.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-PROMOTE-TODO-583
 status: draft
 form: atomic
@@ -291,7 +262,8 @@ superseded_by:
 Scenario: a missing --id refuses the command
   Given  an unfinished TODO item and no `--id` flag
   When   `new --from-todo "<name>"` runs
-  Then   it exits non-zero and writes no requirement file
+  Then   it exits non-zero and writes no requirement file, never prompting for the missing
+         value — the engine runs headless
 
 ## Members in code (auto)
 

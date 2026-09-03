@@ -77,35 +77,6 @@ CASE-5
 
 
 ---
-id: REQ-CMDREGISTRY-305
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-CMDREGISTRY-033]
-superseded_by:
----
-
-# A COMMANDS dict is the single source of
-
-> A `COMMANDS` dict is the single source of truth for the CLI command set; no other
-> location may enumerate commands authoritatively.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
 id: REQ-CMDREGISTRY-306
 status: draft
 form: atomic

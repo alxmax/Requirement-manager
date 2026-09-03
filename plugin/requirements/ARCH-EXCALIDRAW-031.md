@@ -356,32 +356,3 @@ Scenario: an inspection method returns offending items without saving
          `check_text_overflow()` returns an empty list
 
 ## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-EXCALIDRAW-369
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-EXCALIDRAW-031]
-superseded_by:
----
-
-# Test_excalidraw.py exercises the five named gates in both
-
-> `test_excalidraw.py` exercises the five named gates in both `"warn"` and `"error"`
-> modes, and the two hard gates, for each maintained example generator.
-
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Members in code (auto)
