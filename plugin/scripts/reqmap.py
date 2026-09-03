@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.3"
+MAP_ENGINE_VERSION = "2026-09-03.8"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -754,19 +754,35 @@ _REGION_RE = re.compile(r"(<!--##REQMAP:COMMANDS##-->)(.*?)(<!--##/REQMAP:COMMAN
 
 def _write_region(path, body):
     """Replace the delimited region body in `path`; prose outside is untouched."""
-    with open(path, encoding="utf-8") as f:
+    # newline="" on both ends: read/write the file's own line endings verbatim so
+    # regenerating the region never silently normalizes the WHOLE file's CRLF to LF on
+    # read (universal-newline translation) with no re-translation on write.
+    with open(path, encoding="utf-8", newline="") as f:
         text = f.read()
     new = _REGION_RE.sub(lambda m: m.group(1) + "\n" + body + "\n" + m.group(3), text)
     if new != text:
-        with open(path, "w", encoding="utf-8") as f:
+        with open(path, "w", encoding="utf-8", newline="") as f:
             f.write(new)
 
 
 def cmd_gen_integration(reqs_dir, code_root):
     """Write tool_definition.json (OpenAI function-calling schema) generated from COMMANDS."""
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    with open(os.path.join(plugin_root, "tool_definition.json"), "w", encoding="utf-8") as f:
-        f.write(_generate_schema())
+    tj_path = os.path.join(plugin_root, "tool_definition.json")
+    schema = _generate_schema()
+    # newline="" on both ends: read the file's existing CRLF/LF convention verbatim and
+    # re-apply it explicitly before writing. _generate_schema() always joins with bare
+    # "\n", so a bare text-mode write here would flip the whole committed CRLF file to LF
+    # on any non-Windows host (os.linesep == "\n" there) even though the JSON is unchanged.
+    eol = "\n"
+    if os.path.exists(tj_path):
+        with open(tj_path, encoding="utf-8", newline="") as f:
+            if "\r\n" in f.read():
+                eol = "\r\n"
+    if eol == "\r\n":
+        schema = schema.replace("\n", "\r\n")
+    with open(tj_path, "w", encoding="utf-8", newline="") as f:
+        f.write(schema)
     print("wrote tool_definition.json")
     skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
     if os.path.exists(skill):
@@ -906,7 +922,13 @@ def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: AR
             meta, body = parse_frontmatter(_blk)
             # only the FIRST block may fall back to the filename; a later block without an
             # explicit id is a malformed block, not a second requirement named after the file.
-            rid = meta.get("id") or (os.path.splitext(name)[0] if _i == 0 else None)
+            # A file preamble (ARCH-MODULEFILE-056) can also land at index 0 when the real
+            # block 0 is preceded by prose — but a preamble never starts with the frontmatter
+            # delimiter '---' (parse_frontmatter's own test for "this text has frontmatter"),
+            # so gating the fallback on that same test keeps prose from minting a synthetic id
+            # that can collide with (and silently shadow) the real block 0's own id.
+            rid = meta.get("id") or (
+                os.path.splitext(name)[0] if _i == 0 and _blk.startswith("---") else None)
             if not rid:
                 continue
             if rid in reqs:
@@ -1731,17 +1753,6 @@ def _automatable_acs(body):  # implements: ARCH-ACVERIFY-019
 
 
 # ---------- hashing / drift ----------
-# A normative section heading: the canonical `## WHAT — Contract …` / `## HOW —
-# Acceptance …`, or a legacy bare `## Contract`/`## Acceptance`/`## Input`/`## Output`.
-# Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
-# prefix), NOT anywhere in the heading — otherwise a commentary heading like
-# `## Notes — contract caveats` would leak into the drift hash.
-# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
-# section detection agree on which heading is a normative section (see its docstring)
-_NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
-    r"(?:description|contract|acceptan|input|output)", re.I)
-
 # The binding-clause section, current name first. `## Description` merged the standalone
 # `> WHY:` blockquote and `## WHAT — Contract (normative)` into one section: a reader met
 # the same capability described twice, once as rationale and once as obligation, under two
@@ -1756,6 +1767,24 @@ CONTRACT_LABELS = ("description", "contract")   # implements: ARCH-DESCRIPTION-0
 # identifier a tag points at, so dropping the old spelling would break every consumer tag
 # already written against it.
 ACCEPTANCE_LABELS = ("cases", "acceptan")       # implements: ARCH-DESCRIPTION-057
+
+# A normative section heading: the canonical `## Description` / `## Cases`, the older
+# `## WHAT — Contract …` / `## HOW — Acceptance …`, or a legacy bare
+# `## Contract`/`## Acceptance`/`## Input`/`## Output`. Anchored so the keyword must be
+# the label (right after `## ` or after a WHAT/HOW — prefix), NOT anywhere in the
+# heading — otherwise a commentary heading like `## Notes — contract caveats` would leak
+# into the drift hash.
+# Built FROM CONTRACT_LABELS/ACCEPTANCE_LABELS (plus the legacy input/output pair those
+# tuples never carry) rather than a hand-listed keyword set, so a label added to either
+# tuple is automatically recognised here too — a hand-maintained second copy is exactly
+# what let `## Cases` (the current spelling, most of this repo's own requirements) go
+# unrecognised as a normative heading and silently exclude its criteria from the drift hash.
+# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
+# section detection agree on which heading is a normative section (see its docstring)
+_NORMATIVE_HEADING_RE = re.compile(
+    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
+    r"(?:" + "|".join(re.escape(n) for n in CONTRACT_LABELS + ACCEPTANCE_LABELS
+                       + ("input", "output")) + ")", re.I)
 
 
 def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
@@ -2114,7 +2143,7 @@ _PY_MAIN_GUARD_RE = re.compile(r"""if\s+__name__\s*==\s*["']__main__["']""")
 # conventions are honored too: naming a file `*.test.sh` AND tagging it `tested-by`
 # are two independent declarations that it is a test.
 _SH_TEST_EXTS = (".sh", ".bash", ".zsh", ".bats")
-_SH_TEST_NAME_RE = re.compile(r"(?:^|[._-])test[._-]|[._-]test$|^test[._-]", re.I)
+_SH_TEST_NAME_RE = re.compile(r"(?:^|[._-])test[._-]|[._-]test$|^test[._-]|^tests?$", re.I)
 _SH_TEST_RE = re.compile(
     r"(?m)^\s*(?:@test\b"
     r"|(?:function\s+)?(?:test|assert|check|expect|should)[\w:.-]*\s*\(\s*\)"
@@ -2253,16 +2282,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         # it is exempt from the code-coverage gates. # implements: ARCH-TRACE-020
         is_need = m.get("layer") == "need"
         impl_exempt = _impl_exempt(m)
-        impls = [x for x in members.get(rid, []) if x[0] == "implements"]
+        # Existence checks (does an implements/tested-by tag exist AT ALL) must read the
+        # FULL, unfiltered scan — --since only decides whether an already-true finding is
+        # IN SCOPE to report this run. Reading the filtered `members` here would call a
+        # requirement's implements tag "missing" just because a DIFFERENT member file
+        # (e.g. its tested-by test) is what changed since ref.
+        impls = [x for x in full_members.get(rid, []) if x[0] == "implements"]
         # When --since filters members, skip code-coverage checks for reqs with no members in the diff
         if m.get("status") in ENFORCED and not impls and not impl_exempt:
-            if rid in members:
-                # Requirement is in the filtered scope but has no implements tag
+            if rid in members or not since:
                 errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-            elif not since:
-                # Full scan and requirement is enforced but has no impl tag
-                errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-        tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
+        tests = [x for x in full_members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not impl_exempt:
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
@@ -2731,7 +2761,9 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
         t = REQUIREMENT_TEMPLATE
     layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
     t = t.replace("AREA-NAME-NNN", cap_id)
-    t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    t, _layer_n = re.subn(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    if _layer_n == 0:
+        print(f"warning: template has no 'layer: feature' anchor; layer {layer!r} not recorded")
     # inject milestone at the template's anchor; if a custom template lacks it,
     # fall back to the frontmatter fence, else warn rather than silently drop it
     if "superseded_by:" in t:
@@ -2847,6 +2879,12 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
     # (universal-newline translation on read + os.linesep on write would do exactly that).
     with open(r["path"], encoding="utf-8-sig", newline="") as f:
         raw = f.read()
+    # Per-line EOL, so a file with MIXED line endings keeps every untouched bare-LF
+    # line bare-LF — only the substituted VALUE changes, never a line ending this
+    # function didn't touch. Line count is invariant (only a value is replaced), so
+    # zipping the original per-line endings back onto the edited text is exact.
+    orig_lines = raw.splitlines(keepends=True)
+    line_eols = [ln[len(ln.rstrip("\r\n")):] for ln in orig_lines]
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
     # A module file holds several requirements; flip the status of THIS one, not of the
@@ -2861,7 +2899,10 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
     if n == 0:
         print(f"could not find a `status:` line in {r['path']}")
         return 1
-    if eol == "\r\n":
+    new_lines = new_text.splitlines()
+    if len(new_lines) == len(line_eols):
+        new_text = "".join(nl + le for nl, le in zip(new_lines, line_eols))
+    elif eol == "\r\n":
         new_text = new_text.replace("\n", "\r\n")
     with open(r["path"], "w", encoding="utf-8", newline="") as f:
         f.write(new_text)
@@ -3100,7 +3141,7 @@ def _py_facts(src):  # implements: ARCH-CANDIDATES-009
     except (SyntaxError, ValueError):
         return facts
     mod_doc = ast.get_docstring(tree)
-    if mod_doc:
+    if mod_doc and mod_doc.strip():
         facts["docstrings"]["module"] = mod_doc.strip().splitlines()[0][:200]
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -3117,7 +3158,7 @@ def _py_facts(src):  # implements: ARCH-CANDIDATES-009
         else:
             continue
         d = ast.get_docstring(node)
-        if d:
+        if d and d.strip():
             facts["docstrings"][node.name] = d.strip().splitlines()[0][:200]
     imports = set()
     for node in ast.walk(tree):
@@ -3886,6 +3927,8 @@ def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-04
         try:
             with open(cache_path, encoding="utf-8") as f:
                 cache = json.load(f)
+            if not isinstance(cache, dict):
+                cache = {}
         except (OSError, ValueError):
             cache = {}
 
@@ -3949,6 +3992,8 @@ def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044
             with open(os.path.join(i18n_dir, fname), encoding="utf-8") as f:
                 cache = json.load(f)
         except (OSError, ValueError):
+            continue
+        if not isinstance(cache, dict):
             continue
         for rid, entry in cache.items():
             r = reqs.get(rid)
@@ -4121,7 +4166,21 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else []
-    if not pending and not untagged:
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors
+    AC_SPLIT_THRESHOLD = 5
+    oversize = sorted(
+        [(rid, _count_ac(r["body"]))
+         for rid, r in reqs.items()
+         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
+        key=lambda x: (-x[1], x[0])
+    )
+    # The other direction of the same concern: covering the code with FEWER requirements.
+    # Granularity above says "this one does too much"; this says "these say the same thing".
+    redundant = _redundant_groups(reqs)
+    # Computed BEFORE the early return: Granularity/Redundancy are their own findings, not
+    # a footnote on the four risk buckets above — a corpus clean on every bucket but still
+    # carrying an oversize or redundant requirement is NOT "nothing pending".
+    if not pending and not untagged and not oversize and not redundant:
         print("Nothing pending — every confirmed requirement is implemented, tested and intent-checked.")
         return 0
     if pending:
@@ -4153,27 +4212,19 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             print("  ... {} more — run `reqmap.py next --all`".format(len(untagged) - top_n))
         print("  -> Run `reqmap.py draft` to auto-extract requirements, "
               "or add to .reqmapignore to silence.\n")
-    # Granularity advisory: requirements with many ACs covering disjoint behaviors
-    AC_SPLIT_THRESHOLD = 5
-    oversize = sorted(
-        [(rid, _count_ac(r["body"]))
-         for rid, r in reqs.items()
-         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
-        key=lambda x: (-x[1], x[0])
-    )
     if oversize:
         print("Granularity ({})".format(len(oversize)))
-        for rid, n in oversize:
+        shown_o = oversize if show_all else oversize[:top_n]
+        for rid, n in shown_o:
             print("  {}   ({} ACs) — consider splitting   {}".format(
                 rid, n, _req_file(reqs, rid)))
+        if not show_all and len(oversize) > top_n:
+            print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
         print(
             "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
             "is a split candidate. Author two requirements, each with its own contract.\n"
             .format(AC_SPLIT_THRESHOLD)
         )
-    # The other direction of the same concern: covering the code with FEWER requirements.
-    # Granularity above says "this one does too much"; this says "these say the same thing".
-    redundant = _redundant_groups(reqs)
     if redundant:
         spare = sum(len(g) - 1 for g in redundant)
         print("Redundancy ({})".format(len(redundant)))
@@ -4492,32 +4543,38 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
+    # Iterates CONTRACT_LABELS (current `## Description` first, legacy `## Contract`
+    # still honoured) rather than the literal string "contract" — a hardcoded legacy
+    # label here left this check dead on every requirement using the current heading.
     seen_vague = set()
-    for ln in _lint_prose(body, "contract"):
-        bare = re.sub(r"`[^`]*`", " ", ln)
-        for w in _WORD_RE.findall(bare):
-            lw = w.lower()
-            if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
-                seen_vague.add(lw)
-                findings.append({
-                    "severity": "warn", "check": "vague-term",
-                    "detail": "vague word '{}' (no testable meaning): {}".format(
-                        w, _clip(ln))})
+    for name in CONTRACT_LABELS:
+        for ln in _lint_prose(body, name):
+            bare = re.sub(r"`[^`]*`", " ", ln)
+            for w in _WORD_RE.findall(bare):
+                lw = w.lower()
+                if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
+                    seen_vague.add(lw)
+                    findings.append({
+                        "severity": "warn", "check": "vague-term",
+                        "detail": "vague word '{}' (no testable meaning): {}".format(
+                                w, _clip(ln))})
     # redundant modal (warn): "shall"/"must" on a Contract clause is either dead weight
     # (the section header already binds every line) or a stray English modal dropped into
     # a non-English clause. Same one-finding-per-distinct-term shape as vague-term, above.
+    # Same CONTRACT_LABELS iteration as vague-term, above, for the same reason.
     seen_modal = set()
-    for ln in _lint_prose(body, "contract"):
-        bare = re.sub(r"`[^`]*`", " ", ln)
-        for w in _WORD_RE.findall(bare):
-            lw = w.lower()
-            if lw in LINT_MODAL_WORDS and lw not in seen_modal:
-                seen_modal.add(lw)
-                findings.append({
-                    "severity": "warn", "check": "redundant-modal",
-                    "detail": "redundant modal '{}' (the Contract header already binds "
-                              "every line — use plain present tense): {}".format(
-                                  w, _clip(ln))})
+    for name in CONTRACT_LABELS:
+        for ln in _lint_prose(body, name):
+            bare = re.sub(r"`[^`]*`", " ", ln)
+            for w in _WORD_RE.findall(bare):
+                lw = w.lower()
+                if lw in LINT_MODAL_WORDS and lw not in seen_modal:
+                    seen_modal.add(lw)
+                    findings.append({
+                        "severity": "warn", "check": "redundant-modal",
+                        "detail": "redundant modal '{}' (the Contract header already binds "
+                                  "every line — use plain present tense): {}".format(
+                                      w, _clip(ln))})
     # file-spread (warn): a requirement whose implements members span many distinct FILES is
     # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
     # cannot see, since a tight contract can still be smeared across many files. Auto-off when
@@ -4636,7 +4693,7 @@ def _already_decomposed(reqs_dir, parent_id, n):  # implements: ARCH-DECOMPOSE-0
             with open(os.path.join(reqs_dir, fn), encoding="utf-8") as f:
                 if needle in f.read():
                     return True
-        except OSError:
+        except (OSError, ValueError):
             continue
     return False
 
@@ -5181,7 +5238,13 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRY
     Read-only; never a gate, never enters the score."""
     try:
         last = subprocess.run(
-            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", reqs_dir],
+            # reqs_dir must resolve against the CALLER's cwd, not against code_root —
+            # `git -C code_root` changes where the pathspec is resolved, so a relative
+            # reqs_dir (e.g. `--code ..` from `plugin/`) would silently look for
+            # `../requirements` instead of `../plugin/requirements`. Mirrors the
+            # abspath(p) pattern `untracked_locks` already uses for the same reason
+            # (ARCH-CHECK-006).
+            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", os.path.abspath(reqs_dir)],
             capture_output=True, text=True, timeout=5)
         sha = last.stdout.strip()
         if last.returncode != 0 or not sha:
@@ -5249,7 +5312,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         untested += has_impl and not has_test_member and not m.get("test_exempt")
         open_intent += open_now
         drifted += is_drifted
-        if is_confirmed and covered and (has_test or is_need) and not open_now and not is_drifted:
+        if is_confirmed and covered and (has_test or _impl_exempt(m)) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
     gate_errors = _link_sync_errors(reqs, members)
@@ -5379,11 +5442,15 @@ def _wipe(reqs_dir, code_root):
                 # surrogateescape (read AND write) round-trips any non-UTF-8 bytes
                 # verbatim, so stripping a tag never silently corrupts e.g. a
                 # Latin-1 comment elsewhere in the file (errors="ignore" dropped them).
-                with open(fp, encoding="utf-8", errors="surrogateescape") as f:
+                # newline="" on both ends: read/write the file's own line endings verbatim
+                # so stripping ONE tag comment never silently normalizes the WHOLE file to
+                # the host platform's os.linesep (e.g. flips an LF-committed shell hook to
+                # CRLF on Windows, which breaks /bin/sh on the CR).
+                with open(fp, encoding="utf-8", errors="surrogateescape", newline="") as f:
                     lines = f.readlines()
                 new_lines = [_strip_line_tag(l) for l in lines]
                 if new_lines != lines:
-                    with open(fp, "w", encoding="utf-8", errors="surrogateescape") as f:
+                    with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
                         f.writelines(new_lines)
                     stripped_files += 1
             except OSError:
@@ -5620,7 +5687,10 @@ def _section(body, name):  # implements: ARCH-MAP-007
                 seen = True
             continue
         if grab and s and not s.startswith("<!--"):
-            out.append(s.lstrip("- "))
+            # strip only a literal one-time "- " bullet marker, not a lstrip() char
+            # class -- a class-lstrip also eats real leading "-"/">" content
+            # (e.g. "- -1 means error" must keep its "-1", not become "1 means error")
+            out.append(s[2:] if s.startswith("- ") else s)
     return " ".join(out)
 
 
@@ -5665,7 +5735,10 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
     if name in CONTRACT_LABELS:
         _sp = _atomic_spans(body)
         if _sp:                                    # the atomic statement is the one clause
-            return [" ".join(l.lstrip("> ").strip() for l in _sp[0]).strip()]
+            # strip whitespace, then only the literal ">" quote-marker chars (never a
+            # "> " char class -- that would also eat a real leading ">" in the content,
+            # e.g. ">100 requests/sec" losing its ">100"). Mirrors _first_quote.
+            return [" ".join(l.strip().lstrip(">").strip() for l in _sp[0]).strip()]
     out, grab, seen, fenced = [], False, False, False
     for line in body.splitlines():
         s = line.strip()
@@ -5813,7 +5886,7 @@ def _emit_area_subgraphs(lines, nodes, label_fn=None):
         # suffix on collision so two areas that sanitize to the same id (my-area /
         # my_area) don't emit duplicate `subgraph` ids and break the Mermaid render
         sg = base if k == 1 else "{}_{}".format(base, k)
-        lines.append('  subgraph sg_{}["{}"]'.format(sg, area))
+        lines.append('  subgraph sg_{}["{}"]'.format(sg, _mlabel(area)))
         for n in ns:
             lines.append('    {}["{}"]'.format(_safe_id(n["id"]), label_fn(n)))
         lines.append("  end")
@@ -5897,14 +5970,24 @@ def _mermaid_deps(data):  # implements: ARCH-MAPDIAGRAMS-055
         la, lb = label_of.get(a), label_of.get(b)
         if la and lb and la != lb:
             edges.add((la, lb))
+    # suffix on collision so two areas that sanitize to the same id (my-area /
+    # my_area) don't collapse into one Mermaid node -- mirrors _emit_area_subgraphs,
+    # which already guards its own sg_ ids the same way.
+    id_used, id_of = {}, {}
+    for label in sorted(counts):
+        base = _safe_id(label)
+        k = id_used.get(base, 0) + 1
+        id_used[base] = k
+        id_of[label] = "a_" + (base if k == 1 else "{}_{}".format(base, k))
+
     lines = ["graph LR"]
     for label in sorted(counts):
-        lines.append('  a_{}["{}<br><small>{} caps</small>"]'.format(
-            _safe_id(label), _mlabel(label), counts[label]))
+        lines.append('  {}["{}<br><small>{} caps</small>"]'.format(
+            id_of[label], _mlabel(label), counts[label]))
     for la, lb in sorted(edges):
-        lines.append("  a_{} --> a_{}".format(_safe_id(la), _safe_id(lb)))
+        lines.append("  {} --> {}".format(id_of[la], id_of[lb]))
     for label in sorted(bus_areas):
-        lines.append("  style a_{} stroke-width:3px".format(_safe_id(label)))
+        lines.append("  style {} stroke-width:3px".format(id_of[label]))
     return "\n".join(lines)
 
 
@@ -6025,9 +6108,11 @@ def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055
     return "\n".join(lines)
 
 
-# Per-tab legends (parallel to the 4 diagrams, same order) so each view is
-# self-explanatory. HTML uses colored swatches; markdown uses words.
+# Per-tab legends (parallel to the 5 diagrams emitted by _build_md_text, same
+# order) so each view is self-explanatory. HTML uses colored swatches; markdown
+# uses words.
 _LEGEND_MD = [
+    "The spec hierarchy: system needs -> architecture requirements (`satisfies:`), each box showing how many code-level requirements sit under it. The code level itself is counted, not drawn.",
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected).",
     "Area-level coupling: one box per area (N caps), arrow A->B = some capability in A depends on one in B. The System Map has the per-capability detail.",
@@ -6245,7 +6330,7 @@ def _render_region(name, ctx):  # implements: ARCH-SITE-026
         if ctx.get("repo_url"):
             links.append('<a href="{}" target="_blank" rel="noopener">GitHub ↗</a>'
                          .format(_html_escape(ctx["repo_url"])))
-        return '<nav class="reqmap-nav">' + "".join(links) + '</nav>'
+        return '<nav class="nav-links">' + "".join(links) + '</nav>'
     if name == "stats":
         c = ctx["counts"]
         cells = [("requirements", c["requirements"]), ("confirmed", c["confirmed"]),
@@ -6253,7 +6338,7 @@ def _render_region(name, ctx):  # implements: ARCH-SITE-026
                  ("engine", MAP_ENGINE_VERSION)]
         items = "".join('<div class="stat"><b>{}</b><span>{}</span></div>'.format(v, k)
                         for k, v in cells)
-        return '<div class="reqmap-stats">' + items + '</div>'
+        return items
     return ""
 
 
@@ -6919,7 +7004,10 @@ def _apply_verifies(proposals, code_root):  # implements: ARCH-SUGGESTVERIFIES-0
                 continue
             line = lines[ln - 1]
             tag = "{} {}: {}#{}".format(_comment_prefix(fp), "verifies", rid, ac)
-            if tag in line:
+            # Exact-tag match, not substring: `tag in line` would treat an existing
+            # `...#CASE-11` as already covering a proposed `...#CASE-1` (CASE-1 is a
+            # literal prefix of CASE-11), silently dropping the real, missing tag.
+            if re.search(re.escape(tag) + r"(?!\d)", line):
                 continue
             body, nl = line.rstrip("\r\n"), line[len(line.rstrip("\r\n")):]
             lines[ln - 1] = "{}  {}{}".format(body, tag, nl)
