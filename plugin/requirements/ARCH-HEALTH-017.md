@@ -44,6 +44,8 @@ Every bullet below is binding.
 **What it prints**
 - `health` prints component counts alongside the score: confirmed, implemented, tested,
   drafts, orphans, untested, open verify-intent, and drift.
+- `health` prints the reviewed-only score defined by [[ARCH-REVIEWEDSCORE-109]] when that
+  requirement's conditions hold.
 - `--json` emits the same numbers as a JSON object, so the console output and a CI badge
   never disagree.
 - On an empty corpus `health` prints a score of zero and a hint to bootstrap.

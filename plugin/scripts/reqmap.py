@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.9"
+MAP_ENGINE_VERSION = "2026-09-03.10"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -5431,12 +5431,31 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         if is_confirmed and covered and (has_test or _impl_exempt(m)) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
+    # Reviewed-subset score (read-only, ADDITIVE). `score` counts every requirement,
+    # and a `draft` can never be green because the first axis is status `confirmed` —
+    # so each draft caps `score` by construction until someone confirms it. That makes
+    # the headline unable to tell "rotting" from "not reviewed yet": a repo that runs
+    # `init` over legacy code gets hundreds of drafts and a near-zero score that no
+    # amount of care moves. This second number scores only the reviewed part, so the
+    # two readings are separable. `score` itself is NOT redefined — CASE-2 binds an
+    # all-draft corpus to zero, and every consumer badge already reads `score`.
+    # Absent (not zero) when nothing has been reviewed, like `untagged` above: 0 of 0
+    # is not 0%, and a consumer's schema must not gain a meaningless key.
+    # implements: ARCH-REVIEWEDSCORE-109
+    # Emitted only when drafts and reviewed requirements BOTH exist: with no reviewed
+    # requirement it would be 0 of 0, and with no draft it would restate `score` under a
+    # second name, which is how a consumer's schema quietly grows a key that means nothing.
+    reviewed_total = total - drafts
+    reviewed_score = round(100 * healthy / reviewed_total) if (reviewed_total and drafts) else None
     gate_errors = _link_sync_errors(reqs, members)
     data = {"score": score, "total": total, "healthy": healthy,
             "confirmed": confirmed, "implemented": implemented, "tested": tested,
             "drafts": drafts, "orphans": orphans, "untested": untested,
             "open_intent": open_intent, "drift": drifted,
             "gate_errors": len(gate_errors), "gate_link_sync_clean": not gate_errors}
+    if reviewed_score is not None:
+        data["reviewed_score"] = reviewed_score
+        data["reviewed_total"] = reviewed_total
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
     # _scan_untagged (ARCH-NEXT-013). Informational only: it counts FILES, not
@@ -5480,6 +5499,12 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         print(json.dumps(data, indent=2))
         return 0
     print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    # Say what the headline cannot: a draft caps `score` by construction, so a low
+    # reading over a draft-heavy corpus means "not reviewed yet", not "rotting".
+    # Printed only when drafts actually pull the two numbers apart.
+    if reviewed_score is not None:
+        print("  reviewed only:      {}/100  ({}/{} reviewed, {} draft(s) excluded)".format(
+            reviewed_score, healthy, reviewed_total, drafts))
     print("  confirmed:   {}/{}".format(confirmed, total))
     print("  implemented: {}/{}".format(implemented, total))
     print("  tested:      {}/{}".format(tested, total))

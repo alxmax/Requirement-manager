@@ -3528,7 +3528,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036
         self.assertIn("No strong match", none)
 
 
-class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
+class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109
     def _health(self, reqs, members, as_json=False):
         buf = io.StringIO()
         with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
@@ -3557,6 +3557,44 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
             "score": 100, "total": 1, "healthy": 1, "confirmed": 1, "implemented": 1,
             "tested": 1, "drafts": 0, "orphans": 0, "untested": 0, "open_intent": 0, "drift": 0,
             "gate_errors": 0, "gate_link_sync_clean": True})
+
+    # ARCH-HEALTH-017 CASE-8 / CASE-9: a draft can never be green (the first axis is
+    # status `confirmed`), so every draft caps the headline score by construction. The
+    # reviewed-only score separates "not reviewed yet" from "rotting" WITHOUT redefining
+    # `score`, which CASE-2 binds to zero on an all-draft corpus and which every
+    # consumer badge already reads.
+    def _draft(self):
+        return {"meta": {"status": "draft"}, "body": "# T\n"}
+
+    def test_reviewed_score_excludes_drafts(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-1
+        reqs = {"REQ-A-001": self._green()}
+        for n in (2, 3, 4):
+            reqs["REQ-A-00%d" % n] = self._draft()
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["score"], 25)            # 1 green of 4 — unchanged meaning
+        self.assertEqual(obj["reviewed_score"], 100)  # 1 green of 1 reviewed
+        self.assertEqual(obj["reviewed_total"], 1)
+
+    def test_reviewed_score_absent_on_all_draft_corpus(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-2
+        _, out = self._health({"REQ-A-001": self._draft()}, {}, as_json=True)
+        obj = json.loads(out)
+        self.assertNotIn("reviewed_score", obj)       # 0 of 0 is not 0%
+        self.assertEqual(obj["score"], 0)             # CASE-2 still holds
+
+    def test_reviewed_score_absent_when_no_drafts(self):
+        # with no draft it would restate `score` — a key that means nothing is a schema cost
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
+        self.assertNotIn("reviewed_score", json.loads(out))
+
+    def test_reviewed_score_line_names_the_excluded_drafts(self):
+        reqs = {"REQ-A-001": self._green(), "REQ-A-002": self._draft()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members)
+        self.assertIn("reviewed only", out)
+        self.assertIn("1 draft(s) excluded", out)
 
     def test_drift_drops_out_of_green(self):  # bug-hunt #18: exercise the drift axis
         reqs = {"REQ-A-001": self._green()}
