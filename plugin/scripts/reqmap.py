@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.3"
+MAP_ENGINE_VERSION = "2026-09-03.4"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2114,7 +2114,7 @@ _PY_MAIN_GUARD_RE = re.compile(r"""if\s+__name__\s*==\s*["']__main__["']""")
 # conventions are honored too: naming a file `*.test.sh` AND tagging it `tested-by`
 # are two independent declarations that it is a test.
 _SH_TEST_EXTS = (".sh", ".bash", ".zsh", ".bats")
-_SH_TEST_NAME_RE = re.compile(r"(?:^|[._-])test[._-]|[._-]test$|^test[._-]", re.I)
+_SH_TEST_NAME_RE = re.compile(r"(?:^|[._-])test[._-]|[._-]test$|^test[._-]|^tests?$", re.I)
 _SH_TEST_RE = re.compile(
     r"(?m)^\s*(?:@test\b"
     r"|(?:function\s+)?(?:test|assert|check|expect|should)[\w:.-]*\s*\(\s*\)"
@@ -2253,16 +2253,17 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         # it is exempt from the code-coverage gates. # implements: ARCH-TRACE-020
         is_need = m.get("layer") == "need"
         impl_exempt = _impl_exempt(m)
-        impls = [x for x in members.get(rid, []) if x[0] == "implements"]
+        # Existence checks (does an implements/tested-by tag exist AT ALL) must read the
+        # FULL, unfiltered scan — --since only decides whether an already-true finding is
+        # IN SCOPE to report this run. Reading the filtered `members` here would call a
+        # requirement's implements tag "missing" just because a DIFFERENT member file
+        # (e.g. its tested-by test) is what changed since ref.
+        impls = [x for x in full_members.get(rid, []) if x[0] == "implements"]
         # When --since filters members, skip code-coverage checks for reqs with no members in the diff
         if m.get("status") in ENFORCED and not impls and not impl_exempt:
-            if rid in members:
-                # Requirement is in the filtered scope but has no implements tag
+            if rid in members or not since:
                 errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-            elif not since:
-                # Full scan and requirement is enforced but has no impl tag
-                errors.append(f"{rid}: status {m['status']} but no implements: tag found in code")
-        tests = [x for x in members.get(rid, []) if x[0] == "tested-by"]
+        tests = [x for x in full_members.get(rid, []) if x[0] == "tested-by"]
         if m.get("status") == "confirmed" and not tests and not m.get("test_exempt") and not impl_exempt:
             # Similar logic for test checks: only enforce if the requirement is in scope
             if rid in members or not since:
@@ -2731,7 +2732,9 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
         t = REQUIREMENT_TEMPLATE
     layer = todo["lane"] if todo["lane"] in VALID_LAYER else "feature"   # 'ops' is a TODO lane, not a layer
     t = t.replace("AREA-NAME-NNN", cap_id)
-    t = re.sub(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    t, _layer_n = re.subn(r"(?m)^layer:\s*feature\b", f"layer: {layer}", t, count=1)
+    if _layer_n == 0:
+        print(f"warning: template has no 'layer: feature' anchor; layer {layer!r} not recorded")
     # inject milestone at the template's anchor; if a custom template lacks it,
     # fall back to the frontmatter fence, else warn rather than silently drop it
     if "superseded_by:" in t:
@@ -2847,6 +2850,12 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
     # (universal-newline translation on read + os.linesep on write would do exactly that).
     with open(r["path"], encoding="utf-8-sig", newline="") as f:
         raw = f.read()
+    # Per-line EOL, so a file with MIXED line endings keeps every untouched bare-LF
+    # line bare-LF — only the substituted VALUE changes, never a line ending this
+    # function didn't touch. Line count is invariant (only a value is replaced), so
+    # zipping the original per-line endings back onto the edited text is exact.
+    orig_lines = raw.splitlines(keepends=True)
+    line_eols = [ln[len(ln.rstrip("\r\n")):] for ln in orig_lines]
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
     # A module file holds several requirements; flip the status of THIS one, not of the
@@ -2861,7 +2870,10 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011
     if n == 0:
         print(f"could not find a `status:` line in {r['path']}")
         return 1
-    if eol == "\r\n":
+    new_lines = new_text.splitlines()
+    if len(new_lines) == len(line_eols):
+        new_text = "".join(nl + le for nl, le in zip(new_lines, line_eols))
+    elif eol == "\r\n":
         new_text = new_text.replace("\n", "\r\n")
     with open(r["path"], "w", encoding="utf-8", newline="") as f:
         f.write(new_text)
@@ -3100,7 +3112,7 @@ def _py_facts(src):  # implements: ARCH-CANDIDATES-009
     except (SyntaxError, ValueError):
         return facts
     mod_doc = ast.get_docstring(tree)
-    if mod_doc:
+    if mod_doc and mod_doc.strip():
         facts["docstrings"]["module"] = mod_doc.strip().splitlines()[0][:200]
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -3117,7 +3129,7 @@ def _py_facts(src):  # implements: ARCH-CANDIDATES-009
         else:
             continue
         d = ast.get_docstring(node)
-        if d:
+        if d and d.strip():
             facts["docstrings"][node.name] = d.strip().splitlines()[0][:200]
     imports = set()
     for node in ast.walk(tree):
@@ -3886,6 +3898,8 @@ def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-04
         try:
             with open(cache_path, encoding="utf-8") as f:
                 cache = json.load(f)
+            if not isinstance(cache, dict):
+                cache = {}
         except (OSError, ValueError):
             cache = {}
 
@@ -3949,6 +3963,8 @@ def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044
             with open(os.path.join(i18n_dir, fname), encoding="utf-8") as f:
                 cache = json.load(f)
         except (OSError, ValueError):
+            continue
+        if not isinstance(cache, dict):
             continue
         for rid, entry in cache.items():
             r = reqs.get(rid)
@@ -4121,7 +4137,21 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else []
-    if not pending and not untagged:
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors
+    AC_SPLIT_THRESHOLD = 5
+    oversize = sorted(
+        [(rid, _count_ac(r["body"]))
+         for rid, r in reqs.items()
+         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
+        key=lambda x: (-x[1], x[0])
+    )
+    # The other direction of the same concern: covering the code with FEWER requirements.
+    # Granularity above says "this one does too much"; this says "these say the same thing".
+    redundant = _redundant_groups(reqs)
+    # Computed BEFORE the early return: Granularity/Redundancy are their own findings, not
+    # a footnote on the four risk buckets above — a corpus clean on every bucket but still
+    # carrying an oversize or redundant requirement is NOT "nothing pending".
+    if not pending and not untagged and not oversize and not redundant:
         print("Nothing pending — every confirmed requirement is implemented, tested and intent-checked.")
         return 0
     if pending:
@@ -4153,27 +4183,19 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             print("  ... {} more — run `reqmap.py next --all`".format(len(untagged) - top_n))
         print("  -> Run `reqmap.py draft` to auto-extract requirements, "
               "or add to .reqmapignore to silence.\n")
-    # Granularity advisory: requirements with many ACs covering disjoint behaviors
-    AC_SPLIT_THRESHOLD = 5
-    oversize = sorted(
-        [(rid, _count_ac(r["body"]))
-         for rid, r in reqs.items()
-         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
-        key=lambda x: (-x[1], x[0])
-    )
     if oversize:
         print("Granularity ({})".format(len(oversize)))
-        for rid, n in oversize:
+        shown_o = oversize if show_all else oversize[:top_n]
+        for rid, n in shown_o:
             print("  {}   ({} ACs) — consider splitting   {}".format(
                 rid, n, _req_file(reqs, rid)))
+        if not show_all and len(oversize) > top_n:
+            print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
         print(
             "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
             "is a split candidate. Author two requirements, each with its own contract.\n"
             .format(AC_SPLIT_THRESHOLD)
         )
-    # The other direction of the same concern: covering the code with FEWER requirements.
-    # Granularity above says "this one does too much"; this says "these say the same thing".
-    redundant = _redundant_groups(reqs)
     if redundant:
         spare = sum(len(g) - 1 for g in redundant)
         print("Redundancy ({})".format(len(redundant)))
@@ -4636,7 +4658,7 @@ def _already_decomposed(reqs_dir, parent_id, n):  # implements: ARCH-DECOMPOSE-0
             with open(os.path.join(reqs_dir, fn), encoding="utf-8") as f:
                 if needle in f.read():
                     return True
-        except OSError:
+        except (OSError, ValueError):
             continue
     return False
 
@@ -5181,7 +5203,13 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRY
     Read-only; never a gate, never enters the score."""
     try:
         last = subprocess.run(
-            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", reqs_dir],
+            # reqs_dir must resolve against the CALLER's cwd, not against code_root —
+            # `git -C code_root` changes where the pathspec is resolved, so a relative
+            # reqs_dir (e.g. `--code ..` from `plugin/`) would silently look for
+            # `../requirements` instead of `../plugin/requirements`. Mirrors the
+            # abspath(p) pattern `untracked_locks` already uses for the same reason
+            # (ARCH-CHECK-006).
+            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", os.path.abspath(reqs_dir)],
             capture_output=True, text=True, timeout=5)
         sha = last.stdout.strip()
         if last.returncode != 0 or not sha:
@@ -5249,7 +5277,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         untested += has_impl and not has_test_member and not m.get("test_exempt")
         open_intent += open_now
         drifted += is_drifted
-        if is_confirmed and covered and (has_test or is_need) and not open_now and not is_drifted:
+        if is_confirmed and covered and (has_test or _impl_exempt(m)) and not open_now and not is_drifted:
             healthy += 1
     score = round(100 * healthy / total) if total else 0
     gate_errors = _link_sync_errors(reqs, members)
@@ -6245,7 +6273,7 @@ def _render_region(name, ctx):  # implements: ARCH-SITE-026
         if ctx.get("repo_url"):
             links.append('<a href="{}" target="_blank" rel="noopener">GitHub ↗</a>'
                          .format(_html_escape(ctx["repo_url"])))
-        return '<nav class="reqmap-nav">' + "".join(links) + '</nav>'
+        return '<nav class="nav-links">' + "".join(links) + '</nav>'
     if name == "stats":
         c = ctx["counts"]
         cells = [("requirements", c["requirements"]), ("confirmed", c["confirmed"]),
@@ -6253,7 +6281,7 @@ def _render_region(name, ctx):  # implements: ARCH-SITE-026
                  ("engine", MAP_ENGINE_VERSION)]
         items = "".join('<div class="stat"><b>{}</b><span>{}</span></div>'.format(v, k)
                         for k, v in cells)
-        return '<div class="reqmap-stats">' + items + '</div>'
+        return items
     return ""
 
 
@@ -6919,7 +6947,10 @@ def _apply_verifies(proposals, code_root):  # implements: ARCH-SUGGESTVERIFIES-0
                 continue
             line = lines[ln - 1]
             tag = "{} {}: {}#{}".format(_comment_prefix(fp), "verifies", rid, ac)
-            if tag in line:
+            # Exact-tag match, not substring: `tag in line` would treat an existing
+            # `...#CASE-11` as already covering a proposed `...#CASE-1` (CASE-1 is a
+            # literal prefix of CASE-11), silently dropping the real, missing tag.
+            if re.search(re.escape(tag) + r"(?!\d)", line):
                 continue
             body, nl = line.rstrip("\r\n"), line[len(line.rstrip("\r\n")):]
             lines[ln - 1] = "{}  {}{}".format(body, tag, nl)

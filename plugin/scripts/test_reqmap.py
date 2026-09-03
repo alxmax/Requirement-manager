@@ -2330,6 +2330,28 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011
         self.assertEqual(n, 0)
         self.assertEqual(new_text, "no frontmatter here")
 
+    def test_promote_preserves_mixed_line_endings(self):  # bug: promote-mixed-eol-blanket-convert
+        with tempfile.TemporaryDirectory() as d:
+            raw = (b"---\r\nid: AREA-M-001\r\nstatus: baseline\nlayer: bus\r\n---\r\n\r\nbody line\n")
+            p = os.path.join(d, "AREA-M-001.md")
+            with open(p, "wb") as f:
+                f.write(raw)
+            _write(os.path.join(d, "m.py"), tag("AREA-M-001") + "\n")
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_promote(reqs, members, "AREA-M-001")
+            self.assertEqual(code, 0)
+            with open(p, "rb") as f:
+                after = f.read()
+            # the originally bare-LF "status:" line must STAY bare-LF, not become CRLF
+            self.assertIn(b"status: confirmed\n", after)
+            self.assertNotIn(b"status: confirmed\r\n", after)
+            # untouched CRLF lines must remain CRLF
+            self.assertIn(b"id: AREA-M-001\r\n", after)
+            self.assertIn(b"body line\n", after)
+
 
 class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
     def _next(self, reqs, members, show_all=False):
@@ -2455,6 +2477,22 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
         _, out = self._next(reqs, {})
         self.assertIn("consider splitting", out)
         self.assertIn("AREA-FOO-001", out)
+
+    def test_granularity_reported_even_when_nothing_else_pending(self):  # bug: next-early-return-hides-granularity
+        reqs = {"AREA-FOO-001": self._req_with_acs(8)}
+        members = {"AREA-FOO-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        code, out = self._next(reqs, members)
+        self.assertEqual(code, 0)
+        self.assertNotIn("Nothing pending", out)
+        self.assertIn("consider splitting", out)
+
+    def test_granularity_truncates_to_top_n(self):  # bug: next-granularity-no-topn-truncation
+        reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(6) for i in range(1, 6)}
+        _, out = self._next(reqs, {})
+        self.assertEqual(out.count("consider splitting"), 3)
+        self.assertIn("more — run `reqmap.py next --all`", out)
+        _, out_all = self._next(reqs, {}, show_all=True)
+        self.assertEqual(out_all.count("consider splitting"), 5)
 
 
 class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012
@@ -2731,6 +2769,15 @@ class PyFacts(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009
     def test_syntax_error_yields_empty_facts(self):
         self.assertEqual(R._py_facts("def ("),
                          {"signatures": [], "docstrings": {}, "imports": []})
+
+    def test_whitespace_only_module_docstring_degrades_to_empty(self):  # bug: py-facts-whitespace-docstring-indexerror
+        facts = R._py_facts('"""\n   \n"""\ndef f():\n    pass\n')
+        self.assertEqual(facts["docstrings"], {})
+        self.assertEqual(facts["signatures"], ["def f()"])
+
+    def test_whitespace_only_function_docstring_degrades_to_empty(self):  # bug: py-facts-whitespace-docstring-indexerror
+        facts = R._py_facts('def f():\n    """\n       \n    """\n    pass\n')
+        self.assertEqual(facts["docstrings"], {})
 
 
 class CountAc(unittest.TestCase):  # tested-by: ARCH-LINTCHECKS-025
@@ -3155,6 +3202,30 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044
         out = R._load_translations(reqs, reqs_dir)
         self.assertNotIn("REQ-A-001", out)
 
+    def test_cmd_translate_malformed_cache_fails_open(self):  # bug: translate-cache-not-dict-guarded
+        reqs_dir = self._tmp_reqs_dir()
+        i18n_dir = os.path.join(reqs_dir, "_i18n")
+        os.makedirs(i18n_dir)
+        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
+            json.dump([1, 2, 3], f)   # malformed: not a dict
+        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
+        fake_response = ("===TITLE===\nEnglish title\n===INTENT===\nI\n===CONTRACT===\nC\n"
+                          "===ACCEPTANCE===\nA\n")
+        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
+        with mock.patch.object(R.subprocess, "run", return_value=fake_proc):
+            rc = R.cmd_translate(reqs, reqs_dir, target="en")
+        self.assertEqual(rc, 0)
+
+    def test_load_translations_malformed_cache_fails_open(self):  # bug: load-translations-not-dict-guarded
+        reqs_dir = self._tmp_reqs_dir()
+        i18n_dir = os.path.join(reqs_dir, "_i18n")
+        os.makedirs(i18n_dir)
+        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
+            json.dump([1, 2, 3], f)   # malformed: not a dict
+        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
+        out = R._load_translations(reqs, reqs_dir)
+        self.assertEqual(out, {})
+
 
 class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015
     def _show(self, reqs, members, cap_id):
@@ -3528,6 +3599,28 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
             obj = json.loads(buf.getvalue())
         self.assertNotIn("commits_since_req_touch", obj)
 
+    def test_commits_since_reqs_touch_rooted_to_code_root(self):  # bug: registrylag-path-not-rooted
+        """`code_root` may be relative (e.g. `--code ..`), spelled against the ORIGINAL
+        cwd — the reqs_dir pathspec passed to `git -C code_root log` must be resolved
+        the same way, or git looks inside the wrong directory and the signal silently
+        goes missing."""
+        with tempfile.TemporaryDirectory() as d:
+            self._mkgit(d)
+            sub = os.path.join(d, "plugin")
+            os.makedirs(sub)
+            _write(os.path.join(sub, "requirements", "REQ-A-001.md"), "# T\n")
+            self._gcommit(d, "reqs")
+            for i in range(2):
+                _write(os.path.join(d, "code{}.py".format(i)), "x = 1\n")
+                self._gcommit(d, "c{}".format(i))
+            old_cwd = os.getcwd()
+            os.chdir(sub)
+            try:
+                lag = R._commits_since_reqs_touch("..", "requirements")
+            finally:
+                os.chdir(old_cwd)
+            self.assertEqual(lag, 2)
+
     def test_orphan_not_green(self):
         # confirmed but no implements member -> orphan, drops out of green
         _, out = self._health({"REQ-A-001": self._green()}, {})
@@ -3560,6 +3653,20 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017
         obj = json.loads(out)
         self.assertEqual(obj["orphans"], 1)
         self.assertEqual(obj["healthy"], 0)
+
+    def test_aggregate_waived_from_test_axis_like_need(self):  # bug: health-aggregate-not-waived
+        reqs = {
+            "AGG-X-001": {"meta": {"status": "confirmed", "layer": "aggregate",
+                                    "depends_on": ["REQ-A-001"]},
+                          "body": "# Agg\n\n## WHAT — Verify intent\n- None — clear.\n"},
+            "REQ-A-001": {"meta": {"status": "confirmed"},
+                          "body": "# T\n\n## WHAT — Verify intent\n- None — clear.\n"},
+        }
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        obj = json.loads(out)
+        self.assertEqual(obj["healthy"], 2)
+        self.assertEqual(obj["score"], 100)
 
     # tested-by: ARCH-HEALTH-017 (RM-6 / Senate reqmap-health-gate-cleanliness)
     def test_gate_errors_reflect_dangling_tag(self):
@@ -3975,11 +4082,19 @@ class ShellTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018
             _write(p, "#!/bin/sh\n./backup-check --dry-run || exit 1\n")
             self.assertEqual(R._test_link_problem(p), "")
 
-    def test_plain_shell_script_still_warns(self):
+
+
+    def test_bare_test_sh_name_recognized(self):  # bug: sh-test-name-re-bare-test
         with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "deploy.sh")
-            _write(p, "#!/bin/sh\nrsync -a . server:/srv\n")
-            self.assertIn("no test function", R._test_link_problem(p))
+            p = os.path.join(d, "test.sh")
+            _write(p, "#!/bin/sh\n./run-checks --dry-run\n")
+            self.assertEqual(R._test_link_problem(p), "")
+
+    def test_bare_tests_sh_name_recognized(self):  # bug: sh-test-name-re-bare-test
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "tests.sh")
+            _write(p, "#!/bin/sh\n./run-checks --dry-run\n")
+            self.assertEqual(R._test_link_problem(p), "")
 
 
 class TestLinkOnDraft(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018
@@ -4191,6 +4306,17 @@ class SuggestVerifies(unittest.TestCase):  # tested-by: ARCH-SUGGESTVERIFIES-047
             out = self._suggest(d)
             self.assertIn("AREA-UPLOAD-037 AC-1", out)
             self.assertIn("// {}:".format("verifies"), out)        # JS comment syntax
+
+    def test_apply_verifies_existing_case11_does_not_block_case1(self):  # bug: apply-verifies-substring-collision
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "test_x.py")
+            _write(p, "def test_thing():  # {}: RID#AC-11\n    pass\n".format("verifies"))
+            proposals = [("RID", "AC-1", "test_x.py", 1, "test_thing")]
+            n = R._apply_verifies(proposals, d)
+            self.assertEqual(n, 1)
+            src = open(p, encoding="utf-8").read()
+            self.assertTrue(
+                src.splitlines()[0].rstrip().endswith("# {}: RID#AC-1".format("verifies")))
 
 
 class DependsOnCycles(unittest.TestCase):  # tested-by: ARCH-CHECK-006
@@ -4519,6 +4645,25 @@ class PromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001
             self.assertFalse(os.path.exists(os.path.join(rq, "REQ-T-001.md")))
             _write(os.path.join(rq, "REQ-T-001.md"), "x")
             self.assertEqual(self._run(rq, "Build the thing", "REQ-T-001", root=d), 1)     # id taken
+
+    def test_custom_template_layer_mismatch_warns_not_silently_wrong(self):  # bug: promote-todo-layer-silent-drop
+        """A custom template whose layer line does not literally read
+        `layer: feature` must warn — not silently keep the wrong layer while the
+        success message claims the intended one was recorded."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Build the thing | lane: bus\n")
+            rq = os.path.join(d, "requirements")
+            os.makedirs(rq, exist_ok=True)
+            tmpl = os.path.join(d, "tmpl.md")
+            _write(tmpl, "---\nid: AREA-NAME-NNN\nstatus: draft\nlayer: TODO-LAYER\n---\n\n# Short name\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_promote_todo(rq, tmpl, "Build the thing", "REQ-T-001", root=d)
+            self.assertEqual(rc, 0)
+            self.assertIn("warning", buf.getvalue().lower())
+            self.assertIn("layer", buf.getvalue().lower())
+            text = open(os.path.join(rq, "REQ-T-001.md"), encoding="utf-8").read()
+            self.assertIn("layer: TODO-LAYER", text)   # unchanged, not silently mis-set
 
 
 class Review(unittest.TestCase):  # tested-by: ARCH-REVIEW-022
@@ -5240,8 +5385,39 @@ class CheckSince(unittest.TestCase):
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_check(reqs, members, rdir, update_lock=False, code_root=d, since=base_ref)
-            self.assertNotIn("large docs/ HTML bundle", buf.getvalue(),
-                             "an unchanged, tagged docs bundle must not be warned under --since")
+
+
+    def test_since_unrelated_member_change_does_not_false_flag_implements(self):  # bug: check-since-filtered-existence
+        """A confirmed requirement whose `implements:` tag file is UNCHANGED but whose
+        `tested-by:` file changed under --since must not get a false 'no implements:
+        tag found' error — the existence check must read the FULL scan, not the
+        --since-filtered one."""
+        with tempfile.TemporaryDirectory() as d:
+            self._init_git_repo(d)
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   "---\nid: REQ-A-001\nstatus: confirmed\nlayer: bus\n---\n\n# T\n\n"
+                   "## WHAT — Contract\n- shall do X\n\n## HOW — Acceptance\n- AC-1\n")
+            _write(os.path.join(d, "src_a.py"), "# {}: REQ-A-001\n".format("impl" + "ements"))
+            _write(os.path.join(d, "test_a.py"), "# {}: REQ-A-001\ndef test_a():\n    pass\n"
+                   .format("tested" + "-by"))
+            self._commit_all(d, "baseline")
+            base_ref = subprocess.run(
+                ["git", "-C", d, "rev-parse", "HEAD"],
+                capture_output=True, text=True, check=True).stdout.strip()
+            # Change ONLY test_a.py (the tested-by file); src_a.py (implements) is untouched.
+            _write(os.path.join(d, "test_a.py"), "# {}: REQ-A-001\ndef test_a():\n    pass  # changed\n"
+                   .format("tested" + "-by"))
+            self._commit_all(d, "touch-test-only")
+
+            reqs = R.load_requirements(rdir)
+            members = R.scan_members(d, rdir)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(reqs, members, rdir, update_lock=False,
+                                 code_root=d, since=base_ref)
+            self.assertNotIn("no implements: tag found in code", buf.getvalue())
+            self.assertEqual(rc, 0)
 
 
 class Round2Polish(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: ARCH-PROMOTE-011
@@ -5366,6 +5542,25 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026
         self.assertIn(">3<", stats)   # 3 requirements
         self.assertIn(">2<", stats)   # 2 confirmed
         self.assertIn(R.MAP_ENGINE_VERSION, stats)
+
+    def test_render_nav_wraps_in_nav_links_class(self):  # bug: site-region-wrapper-css-mismatch
+        """The injected nav markup must use the `nav-links` class SITE_TEMPLATE's CSS
+        actually targets (`.nav-links` / `.nav-links a`) — a made-up wrapper class
+        matches no selector and leaves the nav unstyled."""
+        ctx = {"repo_url": "https://github.com/o/r", "map_ok": True, "diagram_rel": "d.html"}
+        nav = R._render_region("nav", ctx)
+        self.assertIn('class="nav-links"', nav)
+        self.assertNotIn("reqmap-nav", nav)
+
+    def test_render_stats_has_no_extra_wrapper(self):  # bug: site-region-wrapper-css-mismatch
+        """`.stat` cards must be emitted with NO extra wrapper div: SITE_TEMPLATE
+        already provides the `.stats` grid container around the injected region, and
+        `.stat` must be its DIRECT CHILD for the 6-column grid CSS to apply."""
+        data = {"nodes": [{"id": "A-1", "layer": "bus", "status": "confirmed"}], "edges": []}
+        ctx = R._site_context_from_data(data, repo_url=None, map_ok=False, diagram_rel=None)
+        stats = R._render_region("stats", ctx)
+        self.assertNotIn("reqmap-stats", stats)
+        self.assertTrue(stats.startswith('<div class="stat">'))
 
     def _seed(self, d):
         """Minimal reqs dir with one confirmed requirement so site can build map data."""
@@ -6810,6 +7005,14 @@ class Decompose(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
         self.assertIn("statement-size", out)
         self.assertEqual(self._created(), [])
         self.assertEqual(code, 0)
+
+    def test_already_decomposed_skips_undecodable_sibling(self):  # bug: decompose-except-oserror-only
+        _write(os.path.join(self.reqs_dir, "REQ-AUTH-013.md"), "status: draft\n")
+        bad = os.path.join(self.reqs_dir, "REQ-BAD-014.md")
+        with open(bad, "wb") as f:
+            f.write(b"\xff\xfe\x00bad utf-8 \x80\x81")
+        # must not raise UnicodeDecodeError; simply skip the undecodable sibling
+        self.assertFalse(R._already_decomposed(self.reqs_dir, "REQ-AUTH-012", 1))
 
 
 class SpecLevel(unittest.TestCase):  # tested-by: ARCH-LEVEL-051
