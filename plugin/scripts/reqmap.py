@@ -161,21 +161,28 @@ LINT_FANOUT_MAX = 20
 # groups detailed design, where a dozen children is ordinary, while a system need groups
 # architecture, where ten is already a lot.
 #
-# The floor is gone because it had no evidence. A blind review of all 9 findings the uniform
-# 5-20 floor produced (2026-09-03) confirmed 0 of 9 as real — against ADR-0016's required
-# 8 of 10 — and named why: in this corpus a child count is a CLAUSE count, since the
-# `satisfies:` children were derived roughly one per Description bullet. It measures what
-# `ac-count-high` already measures on the other axis. Worse, the floor is anti-correlated
-# with corpus quality: three of the nine appeared *because* commits e254a34 and 72213fc
-# folded away leaves that should not have existed, dropping their parents from 5 to 4. A
-# check that gets louder as the corpus gets better is measuring the wrong thing. The
-# distribution has no natural floor to find either — 3:1, 4:6, 5:5, 6:8, 7:5, 8:9 is
-# continuous. ADR-0019 pre-committed the response: "the band is wrong for this shape of
-# corpus and should be widened or dropped — not lived with."
+# The floor is gone because the corpus's own shape refutes it (ADR-0023 — read it before
+# restoring one). Measured at b0ce92b over the `satisfies:` graph, the old uniform band
+# produced 10 findings: 7 below the floor and 3 above the ceiling. The floor is
+# anti-correlated with corpus quality — several of those 7 appeared *because* commits
+# e254a34 and 72213fc folded away leaves that should not have existed, dropping their
+# parents from 5 children to 4. A check that gets louder as the corpus gets better is
+# measuring the wrong thing. In this corpus a child count is also a CLAUSE count, since the
+# `satisfies:` children were derived roughly one per Description bullet, so the floor
+# measures what `ac-count-high` already measures on the other axis. And the distribution
+# has no floor to find: 3:1, 4:6, 5:5, 6:8, 7:5, 8:9 is continuous. ADR-0019 pre-committed
+# the response: "the band is wrong for this shape of corpus and should be widened or
+# dropped — not lived with."
 #
-# The ceiling stays: the distribution DOES break at 19 -> 22 -> 23 -> 32, and the one
-# finding above it (ARCH-CHECK-006 at 32) is the single flag the review judged plausibly
-# real. Measured after this change: 1 finding over 72 lintable requirements.
+# NOTE: an earlier version of this comment claimed "a blind review confirmed 0 of 9 as
+# real". That figure was withdrawn — no commit ever produced 9 FLOOR findings (4, then 6,
+# then 7 as the corpus changed), and the one flag it called plausibly real, ARCH-CHECK-006,
+# is a CEILING finding. The floor rests on the distribution and the anti-correlation above,
+# both of which reproduce from a sha and a filter.
+#
+# The ceiling stays: the distribution DOES break at 19 -> 22 -> 23 -> 32, and the single
+# finding above it is ARCH-CHECK-006 at 32, which is real and left standing.
+# Measured after this change: 1 finding over 72 lintable requirements.
 # A parent with no `level:` keeps the uniform 5-20 band — the level axis stays doubly
 # opt-in (ADR-0019), so a repo that never declares it sees exactly what it saw before, and
 # this corpus's evidence is not silently imposed on a corpus shaped differently.
@@ -209,7 +216,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.13"
+MAP_ENGINE_VERSION = "2026-09-03.15"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1861,6 +1868,33 @@ def _atomic_spans(body):  # implements: ARCH-ATOMICFORM-053
     if not story or not scen:
         return None
     return story, scen
+
+
+_ATOMIC_THEN_RE = re.compile(r"^then\b", re.I)
+
+
+def _atomic_story_bullets(story_lines):  # implements: ARCH-ATOMICFORM-053
+    """Count of `- ` facts enumerated inside an atomic story's `>` blockquote.
+
+    Mirrors `_bullets`' `>`-marker normalization (strip, then only the leading
+    literal `>` chars, never a `"> "` char class — see the
+    `bullets-lstrip-char-class` regression test) so the two never disagree on
+    where the marker ends and the content begins. `_bullets` itself JOINS every
+    story line into one clause and cannot see these; this is the one reader
+    that counts them."""
+    n = 0
+    for line in story_lines:
+        s = line.strip().lstrip(">").strip()
+        if s.startswith("- "):
+            n += 1
+    return n
+
+
+def _atomic_scenario_then_count(scen_lines):  # implements: ARCH-ATOMICFORM-053
+    """Count of `Then`-led lines in an atomic Scenario block — one per proven fact.
+    A wrapped continuation line of the same step does not open with the
+    keyword and is not counted separately."""
+    return sum(1 for line in scen_lines if _ATOMIC_THEN_RE.match(line.strip()))
 
 
 def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053
@@ -4315,6 +4349,10 @@ LINT_STATEMENT_WORDS = 150     # a Contract CLAUSE — continuation lines joined
                                # threshold an explicit heuristic, so a longer clause stays valid.
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
+LINT_ATOMIC_STORY_BULLETS_MAX = 3   # an atomic story quote may enumerate up to this many
+                               # `- ` facts before it is no longer one obligation (warn,
+                               # 'atomic-story-overlong'); each fact under the ceiling needs
+                               # its own `Then` line or 'atomic-bullet-then-mismatch' fires
 LINT_CONTRACT_MAX = 10         # contract clauses over this, COMBINED with AC over LINT_AC_MAX,
                                # is the composite 'over-scoped' cohesion signal (warn)
 LINT_FILE_SPREAD_MAX = 3       # implements members spanning >= this many distinct files is a
@@ -4549,6 +4587,30 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
                     ac_n, LINT_AC_MAX)})
+    # atomic bullet/Then parity (warn, --strict-promotable): the atomic form's `>` story
+    # quote may enumerate up to LINT_ATOMIC_STORY_BULLETS_MAX facts, but every existing
+    # signal is blind to whether each one is actually proven — `_count_ac` counts the ONE
+    # Scenario regardless of how many facts the story bundles into it, and `ac-count-low`
+    # explicitly exempts the atomic form. A 3-bullet story with a single `Then` passed every
+    # check that existed before this one (the REQ-FANOUT-391/392 shape: a leaf asserted
+    # behavior its parent forbade, and nothing caught it).
+    _sp = _atomic_spans(body)
+    if _sp:
+        _story_lines, _scen_lines = _sp
+        _bn = _atomic_story_bullets(_story_lines)
+        _tn = _atomic_scenario_then_count(_scen_lines)
+        if _bn > LINT_ATOMIC_STORY_BULLETS_MAX:
+            findings.append({
+                "severity": "warn", "check": "atomic-story-overlong",
+                "detail": "{} bullets in the story quote (> {}): no longer a single "
+                          "obligation — split it into its own requirements".format(
+                              _bn, LINT_ATOMIC_STORY_BULLETS_MAX)})
+        elif _bn > 1 and _bn != _tn:
+            findings.append({
+                "severity": "warn", "check": "atomic-bullet-then-mismatch",
+                "detail": "{} bullets in the story quote but {} 'Then' line(s) in the "
+                          "Scenario — each enumerated fact needs its own Then".format(
+                              _bn, _tn)})
     # cohesion (warn): over BOTH the contract and acceptance ceilings at once is a strong
     # "several capabilities bundled into one" signal — each contract clause is a separate
     # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
@@ -4781,83 +4843,14 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: AR
     return new_id
 
 
-AC_COUNT_TRIAGE_TEMPLATE = """---
-id: {new_id}
-status: draft
-layer: {layer}
-owner: {owner}
-depends_on: [{parent}]
-superseded_by:
----
-
-# Triage stub: {parent} has {n} acceptance criteria
-
-<!-- decomposed-from: {parent}#ac-count-high -->
-
-## Description
-> Scaffolded by `lint --decompose` because {parent} carries more than
-> LINT_AC_MAX acceptance criteria. THIS IS NOT A DECISION - a human must decide
-> which obligation each criterion below belongs to before this file (or
-> {parent}) means anything. Everything below is copied verbatim, not split by
-> obligation - the engine can count criteria, it cannot group them.
-
-Every acceptance criterion {parent} declares, copied here for triage:
-
-{criteria}
-
-## Verify intent (open questions for the human)
-- Which of the {n} criteria above are one obligation, and which are several?
-  This is not automatable (ARCH-ATOMICITY-049's reasoning for a clause applies
-  at the criterion level too) - read {parent} and decide.
-
-## Cases (= tests)
-CASE-1
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
-
-## Context (non-binding)
-**Notes**
-- SCAFFOLD, NOT A DECISION. `lint --decompose` copied ALL acceptance criteria of
-  {parent} here verbatim because {parent} is over LINT_AC_MAX. It does not choose
-  how to split them - only a human can decide which criteria belong together.
-- {parent} was not modified. Deleting this file restores the corpus exactly.
-- Confirming this file unedited does not clear {parent}'s `ac-count-high`
-  finding - {parent} still carries every one of its criteria until a human
-  actually re-partitions them.
-
-## Links
-- Used by: (auto)
-## Members in code (auto)
-"""
-
-
-def _decompose_ac_count_high(reqs_dir, parent_id, parent):  # implements: ARCH-DECOMPOSE-050
-    """Scaffold one 'triage stub' draft listing ALL of an over-threshold parent's
-    acceptance criteria verbatim - it never partitions them, because the engine
-    cannot decide which obligation each criterion belongs to (only a human can).
-    Keyed on a `#ac-count-high` marker distinct from `_decompose_clause`'s
-    `#<clause-n>` namespace, so the two paths can never collide. Re-running is a
-    no-op, the same guarantee `_decompose_clause` gives for statement-size."""
-    if _already_decomposed(reqs_dir, parent_id, "ac-count-high"):
-        return None
-    parts = parent_id.split("-")
-    stem = "-".join(parts[:-1]) if len(parts) >= 3 and parts[-1].isdigit() else parent_id
-    new_id = "{}-{:03d}".format(stem, _next_free_number(reqs_dir))
-    dest = os.path.join(reqs_dir, new_id + ".md")
-    if os.path.exists(dest):
-        return None
-    meta = parent["meta"]
-    criteria = _acc_items(parent["body"])
-    listed = "\n".join("- {}".format(c) for c in criteria)
-    text = AC_COUNT_TRIAGE_TEMPLATE.format(
-        new_id=new_id, parent=parent_id, n=len(criteria), criteria=listed,
-        layer=meta.get("layer", "feature") or "feature",
-        owner=meta.get("owner", "") or "")
-    os.makedirs(reqs_dir, exist_ok=True)
-    with open(dest, "w", encoding="utf-8") as f:
-        f.write(text)
-    return new_id
+# NOTE: `--decompose` deliberately covers `statement-size` ONLY. An `ac-count-high`
+# triage-stub path was written and then removed before it ever shipped: `_oversize`
+# fires on 0 of this corpus's 72 lintable requirements (all six over LINT_AC_MAX
+# carry `lint_exempt: [ac-count-high]`), so the path was unreachable, and ADR-0022 —
+# adopted in the same change — forbids shipping on a signal with no published fire
+# rate AND no human-confirmation sample. `ac-count-high` had a 0.0% post-exempt rate
+# and no independent sample, which is the profile ADR-0022 used to REJECT its sibling
+# proposal. Re-adding it needs that ADR's bar met first, not a code review.
 
 
 def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050
@@ -4871,15 +4864,15 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
     active exemptions are printed after the requirement header.
     The default run writes nothing. With `decompose` (the opt-in `--decompose` flag) each
-    `statement-size` finding scaffolds one draft requirement from its clause, and each
-    `ac-count-high` finding scaffolds one triage-stub draft listing every one of the
-    parent's criteria verbatim (a human decides how to split them - the engine only
-    counts, never partitions). The gate, the pre-commit hook and CI never pass it:
+    `statement-size` finding scaffolds one draft requirement from its clause. It covers
+    that check ONLY - see the note above `cmd_lint` for why `ac-count-high` does not get
+    the same treatment. The gate, the pre-commit hook and CI never pass it:
     .githooks/pre-commit runs gate -> lint --strict -> map --check, so a file written
     during the lint step would fail the map --check step of the same hook run
     (ARCH-DECOMPOSE-050)."""
     # Checks promoted from warn→error in --strict mode (structural, not style).
-    STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
+    STRICT_PROMOTE = {"ac-count-high", "over-scoped",
+                       "atomic-bullet-then-mismatch", "atomic-story-overlong"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES]
     fanin = {rid: 0 for rid in reqs}                      # implements: ARCH-LINTCHECKS-025
@@ -4921,14 +4914,6 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
                             made, f["clause_n"]))
                     else:
                         print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
-                elif f["check"] == "ac-count-high":
-                    made = _decompose_ac_count_high(reqs_dir, rid, r)
-                    if made:
-                        created.append(made)
-                        print("  created  requirements/{}.md  (draft, triage stub \u2014 all "
-                              "criteria listed, not partitioned)".format(made))
-                    else:
-                        print("  skipped  ac-count-high \u2014 already scaffolded")
     print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
         len(targets), errors, warns))
     if created:
@@ -5475,7 +5460,14 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     # Emitted only when drafts and reviewed requirements BOTH exist: with no reviewed
     # requirement it would be 0 of 0, and with no draft it would restate `score` under a
     # second name, which is how a consumer's schema quietly grows a key that means nothing.
-    reviewed_total = total - drafts
+    # The denominator is `confirmed`, NOT "every non-draft". `healthy`'s first axis is
+    # `status == confirmed`, so a `baseline`/`in-progress`/`implemented`/`deprecated`
+    # requirement could enter a "non-draft" denominator but never the numerator — it
+    # would depress the score with nothing rotting. A `deprecated` requirement is the
+    # clearest case: retired, permanently un-green, and it would cap the score forever.
+    # Invisible in THIS repo (all 72 non-drafts are `confirmed`, so the two readings
+    # coincide at 100), which is exactly why it is pinned by a test instead of by luck.
+    reviewed_total = confirmed
     reviewed_score = round(100 * healthy / reviewed_total) if (reviewed_total and drafts) else None
     gate_errors = _link_sync_errors(reqs, members)
     data = {"score": score, "total": total, "healthy": healthy,
@@ -5533,8 +5525,8 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     # reading over a draft-heavy corpus means "not reviewed yet", not "rotting".
     # Printed only when drafts actually pull the two numbers apart.
     if reviewed_score is not None:
-        print("  reviewed only:      {}/100  ({}/{} reviewed, {} draft(s) excluded)".format(
-            reviewed_score, healthy, reviewed_total, drafts))
+        print("  reviewed only:      {}/100  ({}/{} confirmed, {} not confirmed yet)".format(
+            reviewed_score, healthy, reviewed_total, total - reviewed_total))
     print("  confirmed:   {}/{}".format(confirmed, total))
     print("  implemented: {}/{}".format(implemented, total))
     print("  tested:      {}/{}".format(tested, total))

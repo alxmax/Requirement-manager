@@ -34,9 +34,7 @@ Every bullet below is binding.
 - A `system` parent's ceiling is ten; an `architecture` parent's is thirty.
 - A parent declaring no `level:` keeps the older uniform band, five to twenty, so a
   repo that never adopts the level axis sees what it saw before.
-- The check reports no floor at either declared level. A blind review of all nine
-  findings the old floor produced confirmed none of them as real, so the floor was
-  dropped rather than retuned.
+- The check reports no floor at either declared level.
 - The `fan-out` check is warn-only and never changes the gate's exit code.
 - `lint_exempt: [fan-out]` silences the check for one requirement.
 
@@ -199,14 +197,14 @@ satisfies: [ARCH-FANOUT-052]
 superseded_by:
 ---
 
-# The fan-out check warns when a parent's child
+# The fan-out check warns when a parent exceeds its ceiling
 
-> The `fan-out` check warns when a parent's child count falls outside the band.
+> The `fan-out` check warns when a parent carries more children than its ceiling.
 
-Scenario: crossing the band boundary flips the finding on
-  Given  one parent with 5 children (inside the band) and another with 4 (just below it)
+Scenario: crossing the ceiling flips the finding on
+  Given  one `architecture` parent with 30 children (at its ceiling) and another with 31
   When   `lint` runs on each
-  Then   the 5-child parent gets no `fan-out` finding and the 4-child parent gets one,
+  Then   the 30-child parent gets no `fan-out` finding and the 31-child parent gets one,
          with the gate's exit code unchanged either way
 
 ## Members in code (auto)
@@ -228,14 +226,42 @@ satisfies: [ARCH-FANOUT-052]
 superseded_by:
 ---
 
-# The finding says whether the count is below
+# The check reports no floor at either declared level
 
-> The finding says whether the count is below the band or above it.
+> The check reports no floor at either declared level.
 
-Scenario: the finding text distinguishes too-few from too-many
-  Given  one parent with 3 children and another with 25
+Scenario: a thin parent at a declared level is not reported
+  Given  one `architecture` parent with 3 children and one `system` parent with 2
   When   `lint` runs on each
-  Then   the first finding's detail says "too few to be a level" and the second says "too many — split it"
+  Then   neither gets a `fan-out` finding, because neither declared level carries a floor
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-FANOUT-393
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-FANOUT-052]
+superseded_by:
+---
+
+# The fan-out check is warn-only
+
+> The `fan-out` check is warn-only and never changes the gate's exit code.
+
+Scenario: a fan-out finding does not fail the run
+  Given  an `architecture` parent with 32 children, over its ceiling
+  When   `lint` runs without `--strict`
+  Then   one `fan-out` finding is printed and the exit code is zero
 
 ## Members in code (auto)
 

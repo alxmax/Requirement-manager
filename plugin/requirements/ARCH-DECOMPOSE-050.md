@@ -29,7 +29,6 @@ Every bullet below is binding.
 **When the command writes**
 - `lint` writes no file during the default run, whatever `statement-size` or `ac-count-high` reports.
 - `lint --decompose` creates one draft requirement for each reported `statement-size` clause.
-- `lint --decompose` also creates one triage-stub draft per non-exempt `ac-count-high` finding, listing every one of the parent's acceptance criteria verbatim and deciding nothing — a human chooses how to split them.
 - The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay read-only.
 
 **What a created draft holds**
@@ -41,7 +40,7 @@ Every bullet below is binding.
 - `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
 - The command chooses the split by word count, never by obligation, and says so on stdout.
 - Each created draft records that its split point was chosen by word count alone.
-- `lint --decompose` never scaffolds from an `ac-count-high` finding on a requirement carrying `lint_exempt: [ac-count-high]` — the exemption is honored before the finding ever reaches `--decompose`, the same as every other check.
+- `lint --decompose` scaffolds from `statement-size` findings only; an `ac-count-high` finding is reported and nothing is written for it.
 
 **Repeating and undoing**
 - Deleting a created draft restores the corpus exactly, because the parent was never edited.
@@ -78,7 +77,7 @@ CASE-6
 CASE-7
   Given  a non-exempt requirement above `LINT_AC_MAX` acceptance criteria
   When   `lint --decompose` runs
-  Then   one triage-stub draft is created, listing every one of the parent's criteria verbatim
+  Then   the `ac-count-high` finding is printed and no file is created for it
 
 ## Context (non-binding)
 **Notes**
@@ -106,12 +105,12 @@ CASE-7
 - Measured reachability, this corpus, 2026-09-03: `statement-size` has never fired here —
   `LINT_STATEMENT_WORDS` is 150 and the longest Contract clause anywhere is 61 words
   (`ARCH-PAGES-021`), so no clause in this corpus is even half the threshold. `ac-count-high`
-  is not currently reachable by `--decompose` either, for a different reason: 6 of 70
-  non-draft requirements exceed `LINT_AC_MAX` (8.6% raw), but all 6 carry
-  `lint_exempt: [ac-count-high]`, so the post-exempt reachable count is 0 of 70 (0.0%) today
-  — a deliberate author choice, not a design gap. Both triggers are real code paths this
-  corpus happens not to exercise; a future requirement crossing either threshold un-exempted
-  will exercise it for the first time.
+  is not currently reachable at all: 6 of the 72 non-draft requirements exceed
+  `LINT_AC_MAX` (8.3% raw), but all 6 carry `lint_exempt: [ac-count-high]`, so the
+  post-exempt count is 0 of 72 (0.0%) today — a deliberate author choice, not a design
+  gap. That zero is why `--decompose` covers `statement-size` only: automation over a
+  signal with no fire rate and no confirmation sample is what ADR-0022 forbids, and an
+  `ac-count-high` triage path was removed before it shipped for exactly that reason.
 
 **Example**
 - `lint` tells Ana that clause 3 of `REQ-AUTH-012` runs to 84 words. She runs
@@ -128,9 +127,12 @@ CASE-7
   number, so a second run picks a fresh name and an existence check never fires. That was a
   real defect — the first implementation created a second file on every re-run, and CASE-6
   caught it.
-- `AC_COUNT_TRIAGE_TEMPLATE` and `_decompose_ac_count_high` are the `ac-count-high` sibling:
-  same `decomposed-from` marker convention, keyed on `#ac-count-high` instead of a clause
-  number so the two decompose paths can never collide on the same parent.
+- There is no `ac-count-high` sibling. One was written (`AC_COUNT_TRIAGE_TEMPLATE`,
+  `_decompose_ac_count_high`) and removed before it shipped: it reached nobody, and
+  ADR-0022 — adopted in the same change — forbids shipping on a signal with no published
+  fire rate and no human-confirmation sample. `OversizeUnify`'s
+  `test_no_ac_count_high_decompose_symbols_remain` asserts neither symbol comes back, so
+  re-adding one is a deliberate act that has to meet that bar first.
 
 ## Links
 - Used by: (auto)

@@ -17,8 +17,9 @@ milestone: v1.14
 > The linter's rulebook: the individual checks that catch hard-to-read or overloaded
 > requirement prose — sentences that run long, lines that stack conditions, bloated or
 > skimpy acceptance lists, contracts that bundle several capabilities, vague quality
-> words, and code spread across too many files. The framework that runs them, scopes
-> them and decides exit codes is [[ARCH-LINT-014]]; this is what each check flags.
+> words, code spread across too many files, and an atomic-form leaf that lists more
+> facts than its Scenario proves. The framework that runs them, scopes them and
+> decides exit codes is [[ARCH-LINT-014]]; this is what each check flags.
 Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a normative line  any line inside the Contract or Acceptance section. The section
@@ -56,6 +57,16 @@ Every bullet below is binding.
   `LINT_FILE_SPREAD_MAX`, default 3, distinct files.
 - `file-spread` is an architectural-diffuseness signal and is skipped when no member data is
   supplied.
+
+**Atomic-form parity checks**
+- The `atomic-bullet-then-mismatch` check warns on an atomic-form story quote that lists more
+  than one `- ` fact when the count of `Then` lines in the Scenario does not equal the bullet
+  count.
+- The `atomic-story-overlong` check warns on an atomic-form story quote listing more than
+  `LINT_ATOMIC_STORY_BULLETS_MAX`, default 3, `- ` facts — beyond that it is no longer one
+  obligation.
+- Both checks are promoted to error under `lint --strict`, the same mechanism as
+  `ac-count-high` and `over-scoped`.
 
 **Layer check**
 - The `layer-mismatch` check warns on a `layer: bus` requirement that nothing depends on and
@@ -103,6 +114,16 @@ Every bullet below is binding.
   the nine criteria pins exactly one check's behaviour. Merging them to reach the ceiling
   would leave checks tested only implicitly, which is the outcome the count exists to
   prevent. Same reasoning as [[ARCH-CHECK-006]]'s severity table.
+- `atomic-bullet-then-mismatch`/`atomic-story-overlong` fire on 0 of the corpus's atomic-form
+  requirements at launch — no existing body enumerates more than one `- ` fact in its story
+  quote. [ADR-0022](../../docs/adr/0022-no-minimum-requirement-size-check.md)'s launch
+  discipline (a published fire rate AND a human-confirmed sample) is satisfied only on the
+  fire-rate half here; there is no live finding to sample. This is an explicit, acknowledged
+  gap, not a silent one: the check is deterministic and structural (a bullet either has a
+  matching `Then` or it does not — no size judgement is made), the same class as
+  `missing-section`, not a heuristic threshold like the rejected minimum-size proposal — and
+  `warn`+`STRICT_PROMOTE` (not unconditional error) was chosen specifically so a plain `lint`
+  run stays exactly as quiet as it was before this check existed.
 
 ## Cases (= tests)
 CASE-1
@@ -160,6 +181,18 @@ CASE-10
   When   `lint` runs
   Then   it reports two `redundant-modal` warnings ("shall" + "must"); a backticked
          `shall_retry` identifier and a plain present-tense bullet report none
+
+CASE-11
+  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line
+  When   `lint` runs
+  Then   it reports an `atomic-bullet-then-mismatch` warning, promoted to error under
+         `--strict`; the same story with 3 matching `Then` lines reports none
+
+CASE-12
+  Given  an atomic-form story quote listing 4 `- ` facts, one over `LINT_ATOMIC_STORY_BULLETS_MAX`
+  When   `lint` runs
+  Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, regardless of
+         how many `Then` lines the Scenario carries
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
@@ -722,5 +755,67 @@ Scenario: redundant-modal reports each distinct term once
   Given  a Contract bullet reading "The system shall log the event and must retry once."
   When   `lint` runs
   Then   it reports two `redundant-modal` findings, one for "shall" and one for "must"
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-LINTCHECKS-476
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-LINTCHECKS-025]
+superseded_by:
+---
+
+# The atomic-bullet-then-mismatch check warns on a story quote
+
+> The `atomic-bullet-then-mismatch` check warns on an atomic-form story quote that lists
+> more than one `- ` fact when the count of `Then` lines in the Scenario does not equal
+> the bullet count.
+
+Scenario: atomic-bullet-then-mismatch fires when bullets and Then lines disagree
+  Given  an atomic-form story quote listing 3 `- ` facts and a Scenario with 1 `Then` line
+  When   `lint` runs
+  Then   it reports an `atomic-bullet-then-mismatch` warning; the same story with 3 matching
+         `Then` lines reports none
+
+## Members in code (auto)
+
+
+
+
+--------------------
+
+
+---
+id: REQ-LINTCHECKS-477
+status: draft
+form: atomic
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-LINTCHECKS-025]
+superseded_by:
+---
+
+# The atomic-story-overlong check warns past the bullet ceiling
+
+> The `atomic-story-overlong` check warns on an atomic-form story quote listing more than
+> `LINT_ATOMIC_STORY_BULLETS_MAX`, default 3, `- ` facts — beyond that it is no longer one
+> obligation.
+
+Scenario: atomic-story-overlong fires over the ceiling regardless of Then count
+  Given  an atomic-form story quote listing 4 `- ` facts, one over the ceiling
+  When   `lint` runs
+  Then   it reports `atomic-story-overlong`, not `atomic-bullet-then-mismatch`, even when
+         the Scenario carries 4 matching `Then` lines
 
 ## Members in code (auto)

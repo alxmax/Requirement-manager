@@ -24,7 +24,8 @@ requirement whose Contract holds fewer than N words, with N somewhere near 10–
 **The fire rate was computed over the wrong population.** The proposal reported 14% at
 N=10 and 24% at N=12, both inside [ADR-0016](0016-no-edge-case-marker.md)'s 5–40% band.
 Those figures cover all 575 leaves. But `cmd_lint` filters its targets to `LINT_STATUSES`,
-which excludes `draft`, and every one of the 575 leaves is a draft. ADR-0016's own wording
+which excludes `draft`, and 574 of the 575 leaves are drafts (`REQ-PROMOTE-567`, confirmed
+at `f7714bb` as the worked example of the standard, is the one exception). ADR-0016's own wording
 settles the denominator — it requires a predicate that
 
 > fires on **5–40%** of confirmed requirements **and** at least **8 of 10** sampled flags
@@ -78,7 +79,7 @@ The record is one-directional and has no exception:
 
 | check | published at launch | exemptions today |
 |---|---|---|
-| `fan-out` | fire rate **and** 7/7 confirmed real | **0** |
+| `fan-out` | fire rate only — the confirmation half was demanded and never taken (see below) | **0** |
 | `redundant-modal` | 17 hits, no sample — all 17 later fixed as real | 0 |
 | `statement-size` | fire rate only (0 of 599 clauses) — never fired; threshold later widened 75→150 | 0 |
 | `long-sentence` | neither | deleted after ~3 months, having reported 0 corpus-wide for its whole life |
@@ -94,7 +95,7 @@ runs 4 (`v2.14.0`) → 5 → 6 → 8 → 9 (`v2.29.3`), flat at 9 since.
 
 The sharpest single figure is `ac-count-high`, the nearest relative of the rejected
 proposal — a structural count with a threshold, launched with no sample. It is **0.0%
-post-exempt**: six of 70 non-draft requirements exceed `LINT_AC_MAX`, and all six are
+post-exempt**: six of the 72 non-draft requirements exceed `LINT_AC_MAX`, and all six are
 deliberately exempt. Every live finding it has ever produced was judged a false positive by
 its own author.
 
@@ -122,21 +123,34 @@ confirmation real while making it affordable:
   a rubber stamp and the bar is decorative again — the same failure this ADR documents for
   `ac-count-high`, and detectable the same way: by a number, after the fact.
 
-**First application, same day.** The `fan-out` recalibration (per-level ceilings, floor
-dropped) was confirmed under exactly this procedure. A blind reviewer, given the nine
-findings the old floor produced and told that any mix of verdicts was acceptable, returned
-**0 of 9 as real** — against the required 8 of 10 — and additionally caught two defects in
-the proposed change itself: a justification comment carrying a false measurement (it
-claimed seven findings where execution showed one, because zero-child parents cannot fire),
-and a floor of 2 that no corpus member could ever reach. Both were fixed before the change
-shipped. The author ratified. That the reviewer's most useful output was a correction to
-the proposal, not an endorsement of it, is the evidence the procedure has teeth.
+**This rule has no existence proof yet, and that is stated rather than papered over.**
+An earlier draft of this record cited the `fan-out` recalibration as its first successful
+application — "a blind reviewer returned 0 of 9 as real". **That claim is withdrawn.** The
+number does not reproduce: no commit ever produced nine floor findings (the floor produced
+4, then 6, then 7 as the corpus changed), nine was the floor-plus-ceiling total at an
+intermediate commit, and the one flag that reading called plausibly real is a *ceiling*
+finding that cannot belong to a floor sample. No artifact in the tree records who reviewed
+what, so it cannot be repaired — only retracted. The `fan-out` row above is the same story
+one rung earlier: [ADR-0019](0019-v-model-left-arm-adopted.md) recorded the band's seven
+findings as real on the proposing author's own verdict, while the Senate auditing that very
+proposal (`runs/senate/2026-09-02_223252-...`, MODIFY 8–1) had already recorded the
+confirmation half as skipped and the sample "pre-failed". It shipped anyway; that run's
+outcome row is `OVR`.
+
+So this rule is adopted **prospectively**, binding the next check, with no check yet having
+passed it. [ADR-0023](0023-fan-out-per-level-ceilings-no-floor.md) records why the fan-out
+recalibration did not need it: dropping a floor can only make a check report *less*, and a
+loosening cannot manufacture a false positive for a reader to triage. The first check that
+TIGHTENS anything is the one that must produce the sample, and it must commit the verdicts,
+the evidence cited for each, the reviewer and the refusal-rate entry — not a summary
+sentence. An unauditable confirmation is what this ADR exists to forbid, and its own first
+draft is the worked example.
 
 ## Consequences
 
 - The 575 leaves are cleaned by hand, by the pass already in flight, not by a check. That
-  pass has merged 46 attribute-clauses into the behaviours they qualify and given 551
-  leaves a real observable.
+  pass has merged 46 attribute-clauses into the behaviours they qualify and given 546 of
+  570 leaves a real observable (measured at `b0ce92b`; the figure moves with the corpus).
 - A future minimum-size proposal has a precondition: `_contract_clauses` must first learn
   the atomic form, or every number quoted for such a check describes the 72 requirements it
   is not aimed at.
@@ -146,7 +160,7 @@ the proposal, not an endorsement of it, is the evidence the procedure has teeth.
 - This is the fifth corpus-shape check this repo has considered and the fifth that did not
   ship as an enforcing check ([ADR-0012](0012-internal-consistency-lint-rejected.md), the
   rejected coverage gate, roadmap coherence, [ADR-0016](0016-no-edge-case-marker.md), and
-  now this). `fan-out` remains the existence proof that the bar is passable.
+  now this). No check has yet passed the bar in full; the discipline binds the next one.
 
 ## Revisit when
 

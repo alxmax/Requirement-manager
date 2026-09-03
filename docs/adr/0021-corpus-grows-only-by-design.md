@@ -63,8 +63,9 @@ defended with them.
 | the 621 detailed-design leaves **cost nothing** today | `health` reports **10/100** (70/691 green); `next` lists all 621 under *Drafts to review* |
 
 The first error came from using the whole corpus as the denominator. `lint` only examines
-requirements whose status is in `LINT_STATUSES`, which excludes `draft`; all 621 leaves are
-`draft`, so `lint` never reaches them. Of the 70 lintable requirements only 13 are atomic
+requirements whose status is in `LINT_STATUSES`, which excludes `draft`; 620 of the 621
+leaves are `draft` (`REQ-PROMOTE-567` is the one confirmed exception), so `lint` reaches
+essentially none of them. Of the 70 lintable requirements only 13 are atomic
 form, and the un-exempted check would fire on 14 — mostly the 9 `SYS-*` records, not the 621.
 **The fire-rate argument against dropping the exemption is therefore void**; the semantic
 argument above is what carries the decision.

@@ -24,16 +24,21 @@ Every bullet below is binding.
      green            a requirement that passes every health axis at once, per
                       [[ARCH-HEALTH-017]].
      the headline     the existing `score`: green requirements over ALL requirements.
-     reviewed         a requirement whose status is not `draft`.
+     reviewed         a requirement whose status is `confirmed`. Not merely
+                      "not a draft": green requires `confirmed`, so any other
+                      status could enter the denominator but never the numerator.
      a consumer       another repository that vendored this engine and reads its output. -->
 
 **What it computes**
 - The reviewed-only score is the percentage of green requirements among the reviewed ones.
 - The count of green requirements is the same one the headline uses. Only the denominator
   differs.
+- The denominator counts `confirmed` requirements only. A requirement at any other
+  status is left out of both sides, so it can never depress the score without being
+  able to lift it.
 
 **When it is absent**
-- The reviewed-only score is absent, rather than zero, when no requirement is reviewed.
+- The reviewed-only score is absent, rather than zero, when no requirement is confirmed.
   Zero of zero is not zero per cent.
 - The reviewed-only score is absent when no requirement is a draft, because it would then
   restate the headline under a second name.
@@ -50,10 +55,11 @@ Every bullet below is binding.
 - None — authored from stated intent after the measurement below.
 
 ## Notes & known limitations (informative)
-- Measured on this repo when the signal was added: the headline read `10/100` (70 green of
-  691) while every one of the 70 reviewed requirements was green on every axis — the 621
+- Measured on this repo at commit `1eea8f1`, when the signal was added: the headline read
+  `10/100` while every one of the 71 confirmed requirements was green on every axis — the
   detailed-design drafts [[ARCH-DECOMPOSE-050]] seeded were the whole difference. The
-  reviewed-only score reads `100/100` there.
+  reviewed-only score read `100/100` there. This is a dated snapshot, not a live figure:
+  the corpus only grows ([[ARCH-DECOMPOSE-050]], ADR-0021), so run `health` for today's.
 - It shares the "absent, not zero" discipline with the untagged-code count
   ([[ARCH-COVERAGE-029]]), which is the same shape of problem: a signal printed by `health`
   that must not silently widen a consumer's JSON schema.
@@ -82,14 +88,21 @@ CASE-3
 CASE-4
   Given  a corpus holding both drafts and reviewed requirements
   When   `health` runs
-  Then   the printed line names the reviewed count and how many drafts were excluded
+  Then   the printed line names the confirmed count and how many are not confirmed yet
+
+CASE-5
+  Given  a corpus of one green confirmed requirement, one draft, and one requirement at
+         `baseline`, `in-progress`, `implemented` or `deprecated`
+  When   `health --json` runs
+  Then   the reviewed-only score is 100 and its denominator is 1, because the fourth
+         status is neither green nor counted against green
 
 ## Context (non-binding)
 **Example**
 - Ana vendors the engine into a legacy repo and runs `draft`, which seeds 400 requirements
   from existing code. `health` reads `2/100`, which looks alarming and is not: nothing has
-  decayed, nothing has been reviewed. The second line reads `100/100 (8/8 reviewed, 400
-  draft(s) excluded)`, so she can see her reviewed corpus is clean and the number to move is
+  decayed, nothing has been reviewed. The second line reads `100/100 (8/8 confirmed, 400
+  not confirmed yet)`, so she can see her reviewed corpus is clean and the number to move is
   the review backlog, not decay.
 
 **Current implementation**
