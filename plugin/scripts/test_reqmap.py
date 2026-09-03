@@ -6104,6 +6104,45 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033
                                 "gate", "--json"], cwd=dst, capture_output=True, text=True)
             self.assertNotEqual(r.returncode, 0, "gate --json must fail on a stale artifact")
 
+    def test_write_region_preserves_untouched_line_endings(self):
+        """Regenerating the delimited region must not silently normalize the WHOLE
+        file's line endings to the host platform's os.linesep -- contradicts the
+        function's own docstring promise that \"prose outside is untouched\"."""
+        with tempfile.TemporaryDirectory() as d:
+            fp = os.path.join(d, "SKILL.universal.md")
+            content = (b"prose before\n"
+                       b"<!--##REQMAP:COMMANDS##-->\n"
+                       b"old table\n"
+                       b"<!--##/REQMAP:COMMANDS##-->\n"
+                       b"prose after\n")
+            with open(fp, "wb") as f:
+                f.write(content)
+            R._write_region(fp, "new table")
+            with open(fp, "rb") as f:
+                data = f.read()
+            self.assertIn(b"new table", data)
+            self.assertNotIn(b"\r\n", data, "prose outside the region was flipped to CRLF")
+
+    def test_gen_integration_preserves_existing_eol_convention(self):
+        """Regenerating tool_definition.json from scratch must not silently normalize
+        the file's existing line-ending convention to the host platform's os.linesep,
+        even though the regenerated JSON content itself always uses bare \"\\n\"."""
+        import tempfile, shutil, subprocess, sys
+        HERE = os.path.dirname(os.path.abspath(__file__))
+        with tempfile.TemporaryDirectory() as d:
+            dst = os.path.join(d, "plugin")
+            shutil.copytree(os.path.join(HERE, ".."), dst)
+            tj = os.path.join(dst, "tool_definition.json")
+            with open(tj, "wb") as f:
+                f.write(b"[]\n")             # pre-existing LF-only committed convention
+            r = subprocess.run([sys.executable, "-X", "utf8", os.path.join(dst, "scripts", "reqmap.py"),
+                                "gen-integration"], cwd=dst, capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            with open(tj, "rb") as f:
+                data = f.read()
+            self.assertNotIn(b"\r\n", data,
+                              "regenerating flipped the file's existing LF convention to CRLF")
+
 
 # ---------------------------------------------------------------------------
 # Regression tests for the 2026-06-28 multi-agent (consilium) bug hunt — 15 fixes.
@@ -6307,6 +6346,22 @@ class BugHuntRender(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by:
                 data = f.read()
             self.assertIn(b"\xe9", data, "non-UTF-8 byte dropped by wipe")
             self.assertNotIn(b"WIPE-001", data, "tag not stripped")
+
+    def test_wipe_preserves_untouched_line_endings(self):
+        """Stripping ONE tag comment must not silently normalize the WHOLE file's
+        line endings to the host platform's os.linesep -- concretely, an LF-committed
+        shell hook stripped on Windows must stay LF, or /bin/sh chokes on the CR."""
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements"); os.makedirs(rdir)
+            fp = os.path.join(d, "hook.sh")
+            with open(fp, "wb") as f:
+                f.write(b"#!/bin/sh\n# " + b"impl" + b"ements: WIPE-EOL-001\necho done\n")
+            with redirect_stdout(io.StringIO()):
+                R._wipe(rdir, d)
+            with open(fp, "rb") as f:
+                data = f.read()
+            self.assertNotIn(b"WIPE-EOL-001", data, "tag not stripped")
+            self.assertNotIn(b"\r\n", data, "untouched lines were flipped to CRLF")
 
     def test_section_includes_content_after_fenced_heading(self):
         body = "## WHAT — Contract\nfirst clause\n```yaml\n## not a heading\nk: v\n```\nlast clause\n"

@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.6"
+MAP_ENGINE_VERSION = "2026-09-03.7"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -754,19 +754,35 @@ _REGION_RE = re.compile(r"(<!--##REQMAP:COMMANDS##-->)(.*?)(<!--##/REQMAP:COMMAN
 
 def _write_region(path, body):
     """Replace the delimited region body in `path`; prose outside is untouched."""
-    with open(path, encoding="utf-8") as f:
+    # newline="" on both ends: read/write the file's own line endings verbatim so
+    # regenerating the region never silently normalizes the WHOLE file's CRLF to LF on
+    # read (universal-newline translation) with no re-translation on write.
+    with open(path, encoding="utf-8", newline="") as f:
         text = f.read()
     new = _REGION_RE.sub(lambda m: m.group(1) + "\n" + body + "\n" + m.group(3), text)
     if new != text:
-        with open(path, "w", encoding="utf-8") as f:
+        with open(path, "w", encoding="utf-8", newline="") as f:
             f.write(new)
 
 
 def cmd_gen_integration(reqs_dir, code_root):
     """Write tool_definition.json (OpenAI function-calling schema) generated from COMMANDS."""
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    with open(os.path.join(plugin_root, "tool_definition.json"), "w", encoding="utf-8") as f:
-        f.write(_generate_schema())
+    tj_path = os.path.join(plugin_root, "tool_definition.json")
+    schema = _generate_schema()
+    # newline="" on both ends: read the file's existing CRLF/LF convention verbatim and
+    # re-apply it explicitly before writing. _generate_schema() always joins with bare
+    # "\n", so a bare text-mode write here would flip the whole committed CRLF file to LF
+    # on any non-Windows host (os.linesep == "\n" there) even though the JSON is unchanged.
+    eol = "\n"
+    if os.path.exists(tj_path):
+        with open(tj_path, encoding="utf-8", newline="") as f:
+            if "\r\n" in f.read():
+                eol = "\r\n"
+    if eol == "\r\n":
+        schema = schema.replace("\n", "\r\n")
+    with open(tj_path, "w", encoding="utf-8", newline="") as f:
+        f.write(schema)
     print("wrote tool_definition.json")
     skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
     if os.path.exists(skill):
@@ -5426,11 +5442,15 @@ def _wipe(reqs_dir, code_root):
                 # surrogateescape (read AND write) round-trips any non-UTF-8 bytes
                 # verbatim, so stripping a tag never silently corrupts e.g. a
                 # Latin-1 comment elsewhere in the file (errors="ignore" dropped them).
-                with open(fp, encoding="utf-8", errors="surrogateescape") as f:
+                # newline="" on both ends: read/write the file's own line endings verbatim
+                # so stripping ONE tag comment never silently normalizes the WHOLE file to
+                # the host platform's os.linesep (e.g. flips an LF-committed shell hook to
+                # CRLF on Windows, which breaks /bin/sh on the CR).
+                with open(fp, encoding="utf-8", errors="surrogateescape", newline="") as f:
                     lines = f.readlines()
                 new_lines = [_strip_line_tag(l) for l in lines]
                 if new_lines != lines:
-                    with open(fp, "w", encoding="utf-8", errors="surrogateescape") as f:
+                    with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
                         f.writelines(new_lines)
                     stripped_files += 1
             except OSError:
