@@ -1,7 +1,7 @@
 ---
-generated: 2026-09-03 20:21
-nodes: 644
-edges: 98
+generated: 2026-09-04 00:07
+nodes: 202
+edges: 101
 ---
 
 # Requirement Map
@@ -12,67 +12,69 @@ _The spec hierarchy: system needs -> architecture requirements (`satisfies:`), e
 
 ```mermaid
 graph TD
-  ARCH_ACVERIFY_019[ARCH-ACVERIFY-019<br/>10 code]
+  ARCH_ACVERIFY_019[ARCH-ACVERIFY-019<br/>3 code]
   ARCH_ATOMICFORM_053[[ARCH-ATOMICFORM-053]]
-  ARCH_ATOMICITY_049[ARCH-ATOMICITY-049<br/>11 code]
-  ARCH_CANDIDATES_009[ARCH-CANDIDATES-009<br/>14 code]
-  ARCH_CHECK_006[ARCH-CHECK-006<br/>32 code]
-  ARCH_CMDREGISTRY_033[ARCH-CMDREGISTRY-033<br/>6 code]
-  ARCH_CONTEXT_048[ARCH-CONTEXT-048<br/>5 code]
-  ARCH_COVERAGE_029[ARCH-COVERAGE-029<br/>7 code]
-  ARCH_DECOMPOSE_050[ARCH-DECOMPOSE-050<br/>10 code]
+  ARCH_ATOMICITY_049[ARCH-ATOMICITY-049<br/>2 code]
+  ARCH_CANDIDATES_009[ARCH-CANDIDATES-009<br/>2 code]
+  ARCH_CHECK_006[ARCH-CHECK-006<br/>6 code]
+  ARCH_CMDREGISTRY_033[ARCH-CMDREGISTRY-033<br/>1 code]
+  ARCH_CONFIG_060[ARCH-CONFIG-060<br/>1 code]
+  ARCH_CONTEXT_048[ARCH-CONTEXT-048<br/>1 code]
+  ARCH_COVERAGE_029[ARCH-COVERAGE-029<br/>1 code]
+  ARCH_DECOMPOSE_050[ARCH-DECOMPOSE-050<br/>3 code]
   ARCH_DESCRIPTION_057[[ARCH-DESCRIPTION-057]]
-  ARCH_DOCBUNDLE_026[ARCH-DOCBUNDLE-026<br/>4 code]
-  ARCH_DRIFT_003[ARCH-DRIFT-003<br/>8 code]
-  ARCH_DRIFTIMPACT_035[ARCH-DRIFTIMPACT-035<br/>4 code]
-  ARCH_EXCALIDRAW_030[ARCH-EXCALIDRAW-030<br/>9 code]
-  ARCH_EXCALIDRAW_031[ARCH-EXCALIDRAW-031<br/>8 code]
-  ARCH_EXCALIDRAW_032[ARCH-EXCALIDRAW-032<br/>4 code]
-  ARCH_EXTRACT_008[ARCH-EXTRACT-008<br/>13 code]
-  ARCH_FANOUT_052[ARCH-FANOUT-052<br/>7 code]
-  ARCH_FINDINGS_010[ARCH-FINDINGS-010<br/>15 code]
-  ARCH_HEALTH_017[ARCH-HEALTH-017<br/>12 code]
-  ARCH_INIT_012[ARCH-INIT-012<br/>11 code]
-  ARCH_LEVEL_051[ARCH-LEVEL-051<br/>6 code]
-  ARCH_LINT_014[ARCH-LINT-014<br/>12 code]
-  ARCH_LINTCHECKS_025[ARCH-LINTCHECKS-025<br/>21 code]
-  ARCH_MAP_007[ARCH-MAP-007<br/>15 code]
-  ARCH_MAPDIAGRAMS_055[ARCH-MAPDIAGRAMS-055<br/>16 code]
-  ARCH_MEMBERDRIFT_027[ARCH-MEMBERDRIFT-027<br/>8 code]
+  ARCH_DOCBUNDLE_026[ARCH-DOCBUNDLE-026<br/>1 code]
+  ARCH_DRIFT_003[ARCH-DRIFT-003<br/>2 code]
+  ARCH_DRIFTIMPACT_035[ARCH-DRIFTIMPACT-035<br/>1 code]
+  ARCH_EXCALIDRAW_030[ARCH-EXCALIDRAW-030<br/>2 code]
+  ARCH_EXCALIDRAW_031[ARCH-EXCALIDRAW-031<br/>2 code]
+  ARCH_EXCALIDRAW_032[ARCH-EXCALIDRAW-032<br/>1 code]
+  ARCH_EXTRACT_008[ARCH-EXTRACT-008<br/>3 code]
+  ARCH_FANOUT_052[ARCH-FANOUT-052<br/>1 code]
+  ARCH_FINDINGS_010[ARCH-FINDINGS-010<br/>4 code]
+  ARCH_HEALTH_017[ARCH-HEALTH-017<br/>3 code]
+  ARCH_INIT_012[ARCH-INIT-012<br/>2 code]
+  ARCH_LEVEL_051[ARCH-LEVEL-051<br/>1 code]
+  ARCH_LINT_014[ARCH-LINT-014<br/>2 code]
+  ARCH_LINTCHECKS_025[ARCH-LINTCHECKS-025<br/>5 code]
+  ARCH_MAP_007[ARCH-MAP-007<br/>4 code]
+  ARCH_MAPDIAGRAMS_055[ARCH-MAPDIAGRAMS-055<br/>5 code]
+  ARCH_MEMBERDRIFT_027[ARCH-MEMBERDRIFT-027<br/>2 code]
   ARCH_MODULEFILE_056[[ARCH-MODULEFILE-056]]
-  ARCH_NEW_004[ARCH-NEW-004<br/>8 code]
-  ARCH_NEXT_013[ARCH-NEXT-013<br/>23 code]
-  ARCH_ORPHANCODE_034[ARCH-ORPHANCODE-034<br/>5 code]
-  ARCH_PAGES_021[ARCH-PAGES-021<br/>3 code]
-  ARCH_PARSE_001[ARCH-PARSE-001<br/>10 code]
-  ARCH_PIPE_046[ARCH-PIPE-046<br/>4 code]
-  ARCH_PROMOTE_011[ARCH-PROMOTE-011<br/>13 code]
-  ARCH_PROMOTE_TODO_001[ARCH-PROMOTE-TODO-001<br/>13 code]
-  ARCH_PROSE_024[ARCH-PROSE-024<br/>8 code]
-  ARCH_PYFLOOR_040[ARCH-PYFLOOR-040<br/>5 code]
+  ARCH_NEW_004[ARCH-NEW-004<br/>2 code]
+  ARCH_NEXT_013[ARCH-NEXT-013<br/>5 code]
+  ARCH_ORPHANCODE_034[ARCH-ORPHANCODE-034<br/>1 code]
+  ARCH_PAGES_021[ARCH-PAGES-021<br/>1 code]
+  ARCH_PARSE_001[ARCH-PARSE-001<br/>3 code]
+  ARCH_PIPE_046[ARCH-PIPE-046<br/>1 code]
+  ARCH_PROMOTE_011[ARCH-PROMOTE-011<br/>3 code]
+  ARCH_PROMOTE_TODO_001[ARCH-PROMOTE-TODO-001<br/>3 code]
+  ARCH_PROSE_024[ARCH-PROSE-024<br/>2 code]
+  ARCH_PYFLOOR_040[ARCH-PYFLOOR-040<br/>1 code]
   ARCH_REDUNDANCY_058[[ARCH-REDUNDANCY-058]]
-  ARCH_REGISTRYLAG_035[ARCH-REGISTRYLAG-035<br/>8 code]
-  ARCH_REPRO_041[ARCH-REPRO-041<br/>6 code]
-  ARCH_REVIEW_022[ARCH-REVIEW-022<br/>6 code]
+  ARCH_REGISTRYLAG_035[ARCH-REGISTRYLAG-035<br/>2 code]
+  ARCH_REPRO_041[ARCH-REPRO-041<br/>1 code]
+  ARCH_REVIEW_022[ARCH-REVIEW-022<br/>1 code]
   ARCH_REVIEWEDSCORE_109[[ARCH-REVIEWEDSCORE-109]]
-  ARCH_ROADMAP_038[ARCH-ROADMAP-038<br/>7 code]
-  ARCH_SCAN_002[ARCH-SCAN-002<br/>14 code]
-  ARCH_SCAN_005[ARCH-SCAN-005<br/>4 code]
-  ARCH_SCANCACHE_023[ARCH-SCANCACHE-023<br/>5 code]
-  ARCH_SEARCH_036[ARCH-SEARCH-036<br/>18 code]
-  ARCH_SELFGATE_039[ARCH-SELFGATE-039<br/>6 code]
-  ARCH_SHOW_015[ARCH-SHOW-015<br/>13 code]
-  ARCH_SIMILAR_016[ARCH-SIMILAR-016<br/>16 code]
-  ARCH_SITE_026[ARCH-SITE-026<br/>6 code]
-  ARCH_STALEENGINE_043[ARCH-STALEENGINE-043<br/>11 code]
-  ARCH_SUGGESTVERIFIES_047[ARCH-SUGGESTVERIFIES-047<br/>12 code]
-  ARCH_TESTLINK_018[ARCH-TESTLINK-018<br/>16 code]
-  ARCH_TRACE_020[ARCH-TRACE-020<br/>9 code]
-  ARCH_TRACKED_042[ARCH-TRACKED-042<br/>4 code]
-  ARCH_TRANSLATE_044[ARCH-TRANSLATE-044<br/>10 code]
-  ARCH_UNSCANNEDTAG_045[ARCH-UNSCANNEDTAG-045<br/>6 code]
-  ARCH_VIEWER_007[ARCH-VIEWER-007<br/>22 code]
-  ARCH_VLEVEL_037[ARCH-VLEVEL-037<br/>14 code]
+  ARCH_ROADMAP_038[ARCH-ROADMAP-038<br/>1 code]
+  ARCH_RULES_059[ARCH-RULES-059<br/>2 code]
+  ARCH_SCAN_002[ARCH-SCAN-002<br/>2 code]
+  ARCH_SCAN_005[ARCH-SCAN-005<br/>1 code]
+  ARCH_SCANCACHE_023[ARCH-SCANCACHE-023<br/>1 code]
+  ARCH_SEARCH_036[ARCH-SEARCH-036<br/>4 code]
+  ARCH_SELFGATE_039[ARCH-SELFGATE-039<br/>1 code]
+  ARCH_SHOW_015[ARCH-SHOW-015<br/>3 code]
+  ARCH_SIMILAR_016[ARCH-SIMILAR-016<br/>4 code]
+  ARCH_SITE_026[ARCH-SITE-026<br/>1 code]
+  ARCH_STALEENGINE_043[ARCH-STALEENGINE-043<br/>2 code]
+  ARCH_SUGGESTVERIFIES_047[ARCH-SUGGESTVERIFIES-047<br/>3 code]
+  ARCH_TESTLINK_018[ARCH-TESTLINK-018<br/>4 code]
+  ARCH_TRACE_020[ARCH-TRACE-020<br/>2 code]
+  ARCH_TRACKED_042[ARCH-TRACKED-042<br/>1 code]
+  ARCH_TRANSLATE_044[ARCH-TRANSLATE-044<br/>2 code]
+  ARCH_UNSCANNEDTAG_045[ARCH-UNSCANNEDTAG-045<br/>1 code]
+  ARCH_VIEWER_007[ARCH-VIEWER-007<br/>4 code]
+  ARCH_VLEVEL_037[ARCH-VLEVEL-037<br/>3 code]
   ARCH_VRUNGS_054[[ARCH-VRUNGS-054]]
   SYS_AUTHOR_101[[SYS-AUTHOR-101]]
   SYS_GATE_102[[SYS-GATE-102]]
@@ -89,6 +91,7 @@ graph TD
   SYS_READ_103 --> ARCH_CANDIDATES_009
   SYS_GATE_102 --> ARCH_CHECK_006
   SYS_SHIP_108 --> ARCH_CMDREGISTRY_033
+  SYS_AUTHOR_101 --> ARCH_CONFIG_060
   SYS_AUTHOR_101 --> ARCH_CONTEXT_048
   SYS_REPORT_105 --> ARCH_COVERAGE_029
   SYS_AUTHOR_101 --> ARCH_DECOMPOSE_050
@@ -127,6 +130,7 @@ graph TD
   SYS_QUALITY_104 --> ARCH_REVIEW_022
   SYS_REPORT_105 --> ARCH_REVIEWEDSCORE_109
   SYS_REPORT_105 --> ARCH_ROADMAP_038
+  SYS_GATE_102 --> ARCH_RULES_059
   SYS_READ_103 --> ARCH_SCAN_002
   SYS_REPORT_105 --> ARCH_SCAN_005
   SYS_READ_103 --> ARCH_SCANCACHE_023
@@ -183,6 +187,7 @@ graph LR
     ARCH_CANDIDATES_009["Capability candidates (extraction plan)<br><small>ARCH-CANDIDATES-009</small>"]
     ARCH_CHECK_006["The gate<br><small>ARCH-CHECK-006</small>"]
     ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
+    ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
     ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
     ARCH_COVERAGE_029["Untagged-code coverage signal<br><small>ARCH-COVERAGE-029</small>"]
     ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
@@ -221,6 +226,7 @@ graph LR
     ARCH_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>ARCH-REVIEW-022</small>"]
     ARCH_REVIEWEDSCORE_109["Reviewed-only health score<br><small>ARCH-REVIEWEDSCORE-109</small>"]
     ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
+    ARCH_RULES_059["The gate rule registry<br><small>ARCH-RULES-059</small>"]
     ARCH_SCAN_002["Member discovery<br><small>ARCH-SCAN-002</small>"]
     ARCH_SCAN_005["List members per capability<br><small>ARCH-SCAN-005</small>"]
     ARCH_SCANCACHE_023["Opt-in scan cache<br><small>ARCH-SCANCACHE-023</small>"]
@@ -241,579 +247,135 @@ graph LR
     ARCH_VRUNGS_054["Level-to-verification correspondence<br><small>ARCH-VRUNGS-054</small>"]
   end
   subgraph sg_REQ["REQ"]
-    REQ_ACVERIFY_233["The gate scans code for # verifies: ‹id›#AC-N<br><small>REQ-ACVERIFY-233</small>"]
-    REQ_ACVERIFY_234["The gate recognises a verifies tag only with<br><small>REQ-ACVERIFY-234</small>"]
-    REQ_ACVERIFY_235["For a confirmed requirement that labels its criteria<br><small>REQ-ACVERIFY-235</small>"]
-    REQ_ACVERIFY_236["That single warning also states how many labelled<br><small>REQ-ACVERIFY-236</small>"]
-    REQ_ACVERIFY_237["A confirmed requirement with no verifies tag is<br><small>REQ-ACVERIFY-237</small>"]
-    REQ_ACVERIFY_238["A requirement whose criteria are unlabelled bullets is<br><small>REQ-ACVERIFY-238</small>"]
-    REQ_ACVERIFY_239["A criterion marked ‹!-- verifiable by: inspection --›<br><small>REQ-ACVERIFY-239</small>"]
-    REQ_ACVERIFY_240["The map emits clauses and covered on a<br><small>REQ-ACVERIFY-240</small>"]
-    REQ_ACVERIFY_241["The map emits a gap naming the untagged<br><small>REQ-ACVERIFY-241</small>"]
-    REQ_ACVERIFY_243["The check is warn-only. It never changes the<br><small>REQ-ACVERIFY-243</small>"]
-    REQ_ATOMICITY_244["A clause in a Contract section describes a<br><small>REQ-ATOMICITY-244</small>"]
-    REQ_ATOMICITY_245["A clause carrying two independent obligations counts as<br><small>REQ-ATOMICITY-245</small>"]
-    REQ_ATOMICITY_247["A clause normally holds no more than LINT_STATEMENT_WORDS<br><small>REQ-ATOMICITY-247</small>"]
-    REQ_ATOMICITY_248["The statement-size check reports a Contract clause above<br><small>REQ-ATOMICITY-248</small>"]
-    REQ_ATOMICITY_249["The threshold is advisory. A clause above it<br><small>REQ-ATOMICITY-249</small>"]
-    REQ_ATOMICITY_250["Lint_exempt: statement-size silences the check for one requirement<br><small>REQ-ATOMICITY-250</small>"]
-    REQ_ATOMICITY_252["A short clause may carry several independent obligations<br><small>REQ-ATOMICITY-252</small>"]
-    REQ_ATOMICITY_253["A finding asks the author to re-read the<br><small>REQ-ATOMICITY-253</small>"]
-    REQ_ATOMICITY_254["The check counts words after each backticked code<br><small>REQ-ATOMICITY-254</small>"]
-    REQ_ATOMICITY_255["A nested sub-bullet is counted as its own<br><small>REQ-ATOMICITY-255</small>"]
-    REQ_ATOMICITY_256["The check reads the Contract section only. Acceptance<br><small>REQ-ATOMICITY-256</small>"]
-    REQ_CANDIDATES_257["Plan emits a single JSON object, to stdout<br><small>REQ-CANDIDATES-257</small>"]
-    REQ_CANDIDATES_258["Plan writes NO .md files. It cannot repeat<br><small>REQ-CANDIDATES-258</small>"]
-    REQ_CANDIDATES_259["Plan walks the code with the same exclusions<br><small>REQ-CANDIDATES-259</small>"]
-    REQ_CANDIDATES_260["Plan gathers per-file facts: module and symbol docstrings<br><small>REQ-CANDIDATES-260</small>"]
-    REQ_CANDIDATES_261["Plan lists every scannable code file as a<br><small>REQ-CANDIDATES-261</small>"]
-    REQ_CANDIDATES_262["Plan reads top-level signatures from Python via ast<br><small>REQ-CANDIDATES-262</small>"]
-    REQ_CANDIDATES_263["An unparseable file yields empty facts. It never<br><small>REQ-CANDIDATES-263</small>"]
-    REQ_CANDIDATES_264["Each candidate carries (suggested_id, suggested_layer, files, docstrings(), signatures<br><small>REQ-CANDIDATES-264</small>"]
-    REQ_CANDIDATES_265["Is_test is true when every file of the<br><small>REQ-CANDIDATES-265</small>"]
-    REQ_CANDIDATES_266["Depends_on is derived from imports resolved to other<br><small>REQ-CANDIDATES-266</small>"]
-    REQ_CANDIDATES_267["Suggested_layer is bus when importer_count ≥ BUS_FANIN_THRESHOLD, else<br><small>REQ-CANDIDATES-267</small>"]
-    REQ_CANDIDATES_268["A file already carrying an implements: tag is<br><small>REQ-CANDIDATES-268</small>"]
-    REQ_CANDIDATES_269["Plan groups files by requirements/_capmap.json when that file<br><small>REQ-CANDIDATES-269</small>"]
-    REQ_CANDIDATES_270["Absent _capmap.json, plan falls back to one candidate<br><small>REQ-CANDIDATES-270</small>"]
-    REQ_CHECK_272["A dangling tag — a code tag referencing<br><small>REQ-CHECK-272</small>"]
-    REQ_CHECK_273["An invalid status or an invalid layer is<br><small>REQ-CHECK-273</small>"]
-    REQ_CHECK_274["A depends_on pointing at a missing id is<br><small>REQ-CHECK-274</small>"]
-    REQ_CHECK_275["An enforced requirement with no implements: member is<br><small>REQ-CHECK-275</small>"]
-    REQ_CHECK_276["A requirement is enforced when its status is<br><small>REQ-CHECK-276</small>"]
-    REQ_CHECK_277["A layer: need requirement is exempt from that<br><small>REQ-CHECK-277</small>"]
-    REQ_CHECK_278["Gate reports drift as a WARN, never an<br><small>REQ-CHECK-278</small>"]
-    REQ_CHECK_279["The drift warning names the member file:line locations<br><small>REQ-CHECK-279</small>"]
-    REQ_CHECK_280["A confirmed requirement with no tested-by: member is<br><small>REQ-CHECK-280</small>"]
-    REQ_CHECK_281["A requirement carrying a test_exempt: ‹reason› opt-out in<br><small>REQ-CHECK-281</small>"]
-    REQ_CHECK_282["A layer: need requirement is exempt from it<br><small>REQ-CHECK-282</small>"]
-    REQ_CHECK_283["A confirmed requirement missing a ## WHAT —<br><small>REQ-CHECK-283</small>"]
-    REQ_CHECK_284["A confirmed requirement missing a ## HOW —<br><small>REQ-CHECK-284</small>"]
-    REQ_CHECK_285["The requirement milestone: field is optional. When present<br><small>REQ-CHECK-285</small>"]
-    REQ_CHECK_286["A malformed milestone: value is a WARN, because<br><small>REQ-CHECK-286</small>"]
-    REQ_CHECK_287["A deprecated requirement is exempt from the milestone<br><small>REQ-CHECK-287</small>"]
-    REQ_CHECK_288["A present-but-unreadable _reqlock.json is a WARN. Drift is<br><small>REQ-CHECK-288</small>"]
-    REQ_CHECK_289["A lock sidecar (_reqlock.json or _memberlock.json) that exists<br><small>REQ-CHECK-289</small>"]
-    REQ_CHECK_291["That git-tracking check is fail-open: gate stays silent<br><small>REQ-CHECK-291</small>"]
-    REQ_CHECK_292["Gate names every requirement whose body lacks a<br><small>REQ-CHECK-292</small>"]
-    REQ_CHECK_293["Gate counts those legacy-schema requirements in the summary<br><small>REQ-CHECK-293</small>"]
-    REQ_CHECK_294["The legacy-schema warning does not affect the exit<br><small>REQ-CHECK-294</small>"]
-    REQ_CHECK_295["A confirmed need with no validated-against: member is<br><small>REQ-CHECK-295</small>"]
-    REQ_CHECK_296["A confirmed bus requirement whose levelled tested-by: links<br><small>REQ-CHECK-296</small>"]
-    REQ_CHECK_297["A depends_on cycle is a WARN naming the<br><small>REQ-CHECK-297</small>"]
-    REQ_CHECK_298["The cycle warning stays a warning under --strict<br><small>REQ-CHECK-298</small>"]
-    REQ_CHECK_299["Gate prints an advisory line carrying the open<br><small>REQ-CHECK-299</small>"]
-    REQ_CHECK_300["That advisory line does not affect the exit<br><small>REQ-CHECK-300</small>"]
-    REQ_CHECK_301["Gate prints a summary of requirements, members, errors<br><small>REQ-CHECK-301</small>"]
-    REQ_CHECK_302["With --update-lock, gate writes the current binding hashes<br><small>REQ-CHECK-302</small>"]
-    REQ_CHECK_303["Sync and the deprecated check alias pass --update-lock<br><small>REQ-CHECK-303</small>"]
-    REQ_CHECK_304["The gate verb itself is report-only<br><small>REQ-CHECK-304</small>"]
-    REQ_CMDREGISTRY_306["Argparse choices are derived from COMMANDS at runtime<br><small>REQ-CMDREGISTRY-306</small>"]
-    REQ_CMDREGISTRY_307["Tool_definition.json (the function-calling schema) is generated from COMMANDS<br><small>REQ-CMDREGISTRY-307</small>"]
-    REQ_CMDREGISTRY_308["The SKILL.universal.md command table is generated from COMMANDS<br><small>REQ-CMDREGISTRY-308</small>"]
-    REQ_CMDREGISTRY_309["Internal commands (e.g. gen-integration) are excluded from AI-facing<br><small>REQ-CMDREGISTRY-309</small>"]
-    REQ_CMDREGISTRY_310["The gate fails (exit non-zero) when a committed<br><small>REQ-CMDREGISTRY-310</small>"]
-    REQ_CMDREGISTRY_311["All generators and the gate check are stdlib-only<br><small>REQ-CMDREGISTRY-311</small>"]
-    REQ_CONTEXT_312["New's built-in template scaffolds the Context form for<br><small>REQ-CONTEXT-312</small>"]
-    REQ_CONTEXT_313["The Context form groups sub-topics with a bold<br><small>REQ-CONTEXT-313</small>"]
-    REQ_CONTEXT_314["_context_group(body, label) returns the bullets under one bold<br><small>REQ-CONTEXT-314</small>"]
-    REQ_CONTEXT_316["_build_map_data's notes and current_impl fields try the legacy<br><small>REQ-CONTEXT-316</small>"]
-    REQ_CONTEXT_317["## Context and its sub-groups are commentary: not<br><small>REQ-CONTEXT-317</small>"]
-    REQ_COVERAGE_318["The capability reports the count of scannable code<br><small>REQ-COVERAGE-318</small>"]
-    REQ_COVERAGE_319["The denominator is exactly _scan_untagged's (see ARCH-NEXT-013): the<br><small>REQ-COVERAGE-319</small>"]
-    REQ_COVERAGE_320["Any membership tag counts a file as covered<br><small>REQ-COVERAGE-320</small>"]
-    REQ_COVERAGE_321["The health command includes this count as an<br><small>REQ-COVERAGE-321</small>"]
-    REQ_COVERAGE_322["The health command also includes it as a<br><small>REQ-COVERAGE-322</small>"]
-    REQ_COVERAGE_323["The untagged key is absent, not zero, when<br><small>REQ-COVERAGE-323</small>"]
-    REQ_COVERAGE_326["A file is silenced from the count either<br><small>REQ-COVERAGE-326</small>"]
-    REQ_DECOMPOSE_328["Lint writes no file during the default run<br><small>REQ-DECOMPOSE-328</small>"]
-    REQ_DECOMPOSE_329["Lint --decompose creates one draft requirement for each<br><small>REQ-DECOMPOSE-329</small>"]
-    REQ_DECOMPOSE_330["The gate, the pre-commit hook and CI never<br><small>REQ-DECOMPOSE-330</small>"]
-    REQ_DECOMPOSE_331["Each created draft carries status: draft and a<br><small>REQ-DECOMPOSE-331</small>"]
-    REQ_DECOMPOSE_332["The reported clause text is seeded into the<br><small>REQ-DECOMPOSE-332</small>"]
-    REQ_DECOMPOSE_333["The created id keeps the parent's area and<br><small>REQ-DECOMPOSE-333</small>"]
-    REQ_DECOMPOSE_334["Lint --decompose leaves the parent unchanged, so no<br><small>REQ-DECOMPOSE-334</small>"]
-    REQ_DECOMPOSE_335["The command chooses the split by word count<br><small>REQ-DECOMPOSE-335</small>"]
-    REQ_DECOMPOSE_336["Each created draft records that its split point<br><small>REQ-DECOMPOSE-336</small>"]
-    REQ_DECOMPOSE_338["Lint --decompose skips a clause whose target file<br><small>REQ-DECOMPOSE-338</small>"]
-    REQ_DOCBUNDLE_339["The gate warns for each file under docs/<br><small>REQ-DOCBUNDLE-339</small>"]
-    REQ_DOCBUNDLE_340["The gate considers only files under docs/<br><small>REQ-DOCBUNDLE-340</small>"]
-    REQ_DOCBUNDLE_341["The check skips engine-generated outputs: a file whose<br><small>REQ-DOCBUNDLE-341</small>"]
-    REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small>"]
-    REQ_DRIFT_200["Binding_hash computes a stable 12-character hex content hash<br><small>REQ-DRIFT-200</small>"]
-    REQ_DRIFT_201["The normative sections are the Contract and Acceptance<br><small>REQ-DRIFT-201</small>"]
-    REQ_DRIFT_202["Rationale, notes, verify-intent, links and the member list<br><small>REQ-DRIFT-202</small>"]
-    REQ_DRIFT_203["The hash is deterministic for identical normative content<br><small>REQ-DRIFT-203</small>"]
-    REQ_DRIFT_204["Load_lock and save_lock read and write the per-id<br><small>REQ-DRIFT-204</small>"]
-    REQ_DRIFT_205["A missing, empty or unparseable lock loads as<br><small>REQ-DRIFT-205</small>"]
-    REQ_DRIFT_206["Save_lock creates the requirements directory if it is<br><small>REQ-DRIFT-206</small>"]
-    REQ_DRIFT_207["Save_lock writes sorted, indented JSON, so the lock<br><small>REQ-DRIFT-207</small>"]
-    REQ_DRIFTIMPACT_347["When the gate reports a contract drift for<br><small>REQ-DRIFTIMPACT-347</small>"]
-    REQ_DRIFTIMPACT_348["The dependent list is sorted and deduplicated, so<br><small>REQ-DRIFTIMPACT-348</small>"]
-    REQ_DRIFTIMPACT_349["Only direct dependents are named (one edge, not<br><small>REQ-DRIFTIMPACT-349</small>"]
-    REQ_DRIFTIMPACT_350["A drifted requirement with no dependents produces the<br><small>REQ-DRIFTIMPACT-350</small>"]
-    REQ_EXCALIDRAW_352["Scene() produces a valid Excalidraw JSON scene (schema<br><small>REQ-EXCALIDRAW-352</small>"]
-    REQ_EXCALIDRAW_353["Scene exposes shape primitives: box, ellipse, diamond, frame<br><small>REQ-EXCALIDRAW-353</small>"]
-    REQ_EXCALIDRAW_354["Scene exposes ISO 5807 flowchart aliases: process, terminator<br><small>REQ-EXCALIDRAW-354</small>"]
-    REQ_EXCALIDRAW_355["Scene exposes layout helpers: row, column, grid, enclose<br><small>REQ-EXCALIDRAW-355</small>"]
-    REQ_EXCALIDRAW_356["Scene exposes annotation helpers: title, label, legend, glossary<br><small>REQ-EXCALIDRAW-356</small>"]
-    REQ_EXCALIDRAW_357["Scene exposes connector helpers: arrow, free_arrow, path, route_under<br><small>REQ-EXCALIDRAW-357</small>"]
-    REQ_EXCALIDRAW_358[".save(basename, out_dir) writes both ‹basename›.excalidraw (the scene JSON)<br><small>REQ-EXCALIDRAW-358</small>"]
-    REQ_EXCALIDRAW_359["Scene(seed=‹int›) produces byte-identical output across re-runs<br><small>REQ-EXCALIDRAW-359</small>"]
-    REQ_EXCALIDRAW_360["The builder has no external dependencies — stdlib<br><small>REQ-EXCALIDRAW-360</small>"]
-    REQ_EXCALIDRAW_361[".save() supports five named gates, each accepting 'warn'<br><small>REQ-EXCALIDRAW-361</small>"]
-    REQ_EXCALIDRAW_362["Crossing_check: a bound arrow whose straight centre-to-centre path<br><small>REQ-EXCALIDRAW-362</small>"]
-    REQ_EXCALIDRAW_363["Legend_check: a fill colour used on any shape<br><small>REQ-EXCALIDRAW-363</small>"]
-    REQ_EXCALIDRAW_364["Overflow_check: a shape whose bound text is larger<br><small>REQ-EXCALIDRAW-364</small>"]
-    REQ_EXCALIDRAW_365["Text_overlap_check: two free captions or label elements that<br><small>REQ-EXCALIDRAW-365</small>"]
-    REQ_EXCALIDRAW_366["Label_fit_check: a bound arrow whose text label is<br><small>REQ-EXCALIDRAW-366</small>"]
-    REQ_EXCALIDRAW_367[".save() additionally enforces two hard gates that raise<br><small>REQ-EXCALIDRAW-367</small>"]
-    REQ_EXCALIDRAW_368["The inspection methods check_overlaps(), check_arrow_crossings(), check_legend_coverage(), check_text_overflow(), check_text_overlaps()<br><small>REQ-EXCALIDRAW-368</small>"]
-    REQ_EXCALIDRAW_370["Invoking python excalidraw_builder.py with no arguments runs the<br><small>REQ-EXCALIDRAW-370</small>"]
-    REQ_EXCALIDRAW_371["Python excalidraw_builder.py render ‹scene.excalidraw› out_dir reads an existing<br><small>REQ-EXCALIDRAW-371</small>"]
-    REQ_EXCALIDRAW_372["Python excalidraw_builder.py discover ‹repo› out.py scans ‹repo› for<br><small>REQ-EXCALIDRAW-372</small>"]
-    REQ_EXCALIDRAW_373["Any unrecognised verb exits with code 2 and<br><small>REQ-EXCALIDRAW-373</small>"]
-    REQ_EXTRACT_374["Draft walks every untagged scannable code file —<br><small>REQ-EXTRACT-374</small>"]
-    REQ_EXTRACT_375["Draft skips a file that already carries a<br><small>REQ-EXTRACT-375</small>"]
-    REQ_EXTRACT_376["Draft honors .reqmapignore, the same fnmatch globs scan<br><small>REQ-EXTRACT-376</small>"]
-    REQ_EXTRACT_378["Draft proposes one requirements/DRAFT-.md per remaining file<br><small>REQ-EXTRACT-378</small>"]
-    REQ_EXTRACT_379["Every proposal carries status: draft and a TODO<br><small>REQ-EXTRACT-379</small>"]
-    REQ_EXTRACT_380["A proposal's Contract section opens with 'Every line<br><small>REQ-EXTRACT-380</small>"]
-    REQ_EXTRACT_381["Draft creates the requirements directory if it is<br><small>REQ-EXTRACT-381</small>"]
-    REQ_EXTRACT_382["Draft ids are path-aware, so two files sharing<br><small>REQ-EXTRACT-382</small>"]
-    REQ_EXTRACT_383["Draft assigns a cheap risk score from TODO/FIXME/HACK/XXX<br><small>REQ-EXTRACT-383</small>"]
-    REQ_EXTRACT_384["Draft routes a score of 2 or more<br><small>REQ-EXTRACT-384</small>"]
-    REQ_EXTRACT_385["Re-running draft never overwrites an existing draft<br><small>REQ-EXTRACT-385</small>"]
-    REQ_EXTRACT_386["A code proposal's WHERE section lists the file's<br><small>REQ-EXTRACT-386</small>"]
-    REQ_EXTRACT_387["That surface is an authoring hint under WHERE<br><small>REQ-EXTRACT-387</small>"]
-    REQ_FANOUT_388["The fan-out check counts, per requirement, how many<br><small>REQ-FANOUT-388</small>"]
-    REQ_FANOUT_389["The count reads the satisfies: graph only, never<br><small>REQ-FANOUT-389</small>"]
-    REQ_FANOUT_390["A requirement with no children is skipped, because<br><small>REQ-FANOUT-390</small>"]
-    REQ_FANOUT_391["The fan-out check warns when a parent exceeds its ceiling<br><small>REQ-FANOUT-391</small>"]
-    REQ_FANOUT_392["The check reports no floor at either declared level<br><small>REQ-FANOUT-392</small>"]
-    REQ_FANOUT_393["The fan-out check is warn-only<br><small>REQ-FANOUT-393</small>"]
-    REQ_FANOUT_394["Lint_exempt: fan-out silences the check for one requirement<br><small>REQ-FANOUT-394</small>"]
-    REQ_FINDINGS_395["Findings scans every requirement and collects the bullet<br><small>REQ-FINDINGS-395</small>"]
-    REQ_FINDINGS_396["Findings writes them into a single _findings.md in<br><small>REQ-FINDINGS-396</small>"]
-    REQ_FINDINGS_397["Findings excludes the 'None — …' placeholder bullet<br><small>REQ-FINDINGS-397</small>"]
-    REQ_FINDINGS_398["In raw mode, findings groups the findings by<br><small>REQ-FINDINGS-398</small>"]
-    REQ_FINDINGS_399["Each group and the document header carry a<br><small>REQ-FINDINGS-399</small>"]
-    REQ_FINDINGS_400["With zero findings, findings still writes a well-formed<br><small>REQ-FINDINGS-400</small>"]
-    REQ_FINDINGS_401["With the raw flag set, findings ignores any<br><small>REQ-FINDINGS-401</small>"]
-    REQ_FINDINGS_402["When the sidecar exists and raw mode is<br><small>REQ-FINDINGS-402</small>"]
-    REQ_FINDINGS_403["That view puts confirmed bugs first, ordered by<br><small>REQ-FINDINGS-403</small>"]
-    REQ_FINDINGS_404["A bug entry shows its location and its<br><small>REQ-FINDINGS-404</small>"]
-    REQ_FINDINGS_405["Findings emits an advisory staleness note when the<br><small>REQ-FINDINGS-405</small>"]
-    REQ_FINDINGS_408["Map rewrites _findings.md when that file already exists<br><small>REQ-FINDINGS-408</small>"]
-    REQ_FINDINGS_409["Map never creates _findings.md. Running findings once opts<br><small>REQ-FINDINGS-409</small>"]
-    REQ_FINDINGS_410["Map --check reports _findings.md stale when the committed<br><small>REQ-FINDINGS-410</small>"]
-    REQ_FINDINGS_411["The gate prints a non-error advisory line carrying<br><small>REQ-FINDINGS-411</small>"]
-    REQ_HEALTH_413["Health prints a coherence snapshot of the whole<br><small>REQ-HEALTH-413</small>"]
-    REQ_HEALTH_414["Health writes nothing. It only reads and prints<br><small>REQ-HEALTH-414</small>"]
-    REQ_HEALTH_415["Health computes a headline score: the percentage of<br><small>REQ-HEALTH-415</small>"]
-    REQ_HEALTH_416["The axes are status confirmed, coverage, a test<br><small>REQ-HEALTH-416</small>"]
-    REQ_HEALTH_417["For a bus or feature requirement, coverage means<br><small>REQ-HEALTH-417</small>"]
-    REQ_HEALTH_418["For those same layers, the test signal means<br><small>REQ-HEALTH-418</small>"]
-    REQ_HEALTH_419["A need is covered when at least one<br><small>REQ-HEALTH-419</small>"]
-    REQ_HEALTH_420["A confirmed need that no requirement satisfies counts<br><small>REQ-HEALTH-420</small>"]
-    REQ_HEALTH_421["Health prints component counts alongside the score: confirmed<br><small>REQ-HEALTH-421</small>"]
-    REQ_HEALTH_422["--json emits the same numbers as a JSON<br><small>REQ-HEALTH-422</small>"]
-    REQ_HEALTH_423["On an empty corpus health prints a score<br><small>REQ-HEALTH-423</small>"]
-    REQ_HEALTH_424["Health always returns zero. The snapshot is a<br><small>REQ-HEALTH-424</small>"]
-    REQ_INIT_425["Init creates the requirements folder if it is<br><small>REQ-INIT-425</small>"]
-    REQ_INIT_426["Init writes a starter .reqmapignore only if the<br><small>REQ-INIT-426</small>"]
-    REQ_INIT_427["The starter file lists scripts/reqmap.py. Without that line<br><small>REQ-INIT-427</small>"]
-    REQ_INIT_428["The starter file also lists .worktrees/ and .claude/worktrees/<br><small>REQ-INIT-428</small>"]
-    REQ_INIT_429["One exception: if the engine describes itself in<br><small>REQ-INIT-429</small>"]
-    REQ_INIT_430["'Describes itself' means scripts/reqmap.py carries tags whose ids<br><small>REQ-INIT-430</small>"]
-    REQ_INIT_431["Init drafts requirements from untagged code, writes the<br><small>REQ-INIT-431</small>"]
-    REQ_INIT_432["Init ends with a short summary naming one<br><small>REQ-INIT-432</small>"]
-    REQ_INIT_433["If nothing was drafted, init says so in<br><small>REQ-INIT-433</small>"]
-    REQ_INIT_434["Running init twice is safe. The second run<br><small>REQ-INIT-434</small>"]
-    REQ_INIT_435["A second run never deletes a requirement someone<br><small>REQ-INIT-435</small>"]
-    REQ_LEVEL_436["A requirement may carry a level: value of<br><small>REQ-LEVEL-436</small>"]
-    REQ_LEVEL_437["The level: field is optional. A requirement without<br><small>REQ-LEVEL-437</small>"]
-    REQ_LEVEL_438["The level: axis is independent of layer:, and<br><small>REQ-LEVEL-438</small>"]
-    REQ_LEVEL_439["An architecture requirement owns code, so the gate<br><small>REQ-LEVEL-439</small>"]
-    REQ_LEVEL_440["The aggregate layer stays exempt from that rule<br><small>REQ-LEVEL-440</small>"]
-    REQ_LEVEL_442["The gate reports an error for a level<br><small>REQ-LEVEL-442</small>"]
-    REQ_LINT_444["Lint reports readability problems and structure problems in<br><small>REQ-LINT-444</small>"]
-    REQ_LINT_445["Lint writes no file. It only reads and<br><small>REQ-LINT-445</small>"]
-    REQ_LINT_446["Lint checks non-draft requirements only — status baseline<br><small>REQ-LINT-446</small>"]
-    REQ_LINT_447["Lint gives each finding one of two severities<br><small>REQ-LINT-447</small>"]
-    REQ_LINT_448["The missing-section check reports an error when a<br><small>REQ-LINT-448</small>"]
-    REQ_LINT_449["The empty-section check reports a warn when one<br><small>REQ-LINT-449</small>"]
-    REQ_LINT_450["The prose checks read the Contract and the<br><small>REQ-LINT-450</small>"]
-    REQ_LINT_451["The 'Notes & limitations' section is exempt: only<br><small>REQ-LINT-451</small>"]
-    REQ_LINT_452["The prose checks skip lines that are not<br><small>REQ-LINT-452</small>"]
-    REQ_LINT_453["Lint strips a bullet's leading marker before the<br><small>REQ-LINT-453</small>"]
-    REQ_LINT_454["Lint returns zero by default, whatever it found<br><small>REQ-LINT-454</small>"]
-    REQ_LINT_455["With --strict, lint returns non-zero when at least<br><small>REQ-LINT-455</small>"]
-    REQ_LINTCHECKS_457["The statement-too-long check warns on a Contract bullet<br><small>REQ-LINTCHECKS-457</small>"]
-    REQ_LINTCHECKS_458["The stacked-conditions check warns on a normative line<br><small>REQ-LINTCHECKS-458</small>"]
-    REQ_LINTCHECKS_459["Stacked-conditions reads every normative line. It does not<br><small>REQ-LINTCHECKS-459</small>"]
-    REQ_LINTCHECKS_460["The anonymous-subject check warns on a Contract clause<br><small>REQ-LINTCHECKS-460</small>"]
-    REQ_LINTCHECKS_461["Anonymous-subject reads the Contract only. Acceptance prose may<br><small>REQ-LINTCHECKS-461</small>"]
-    REQ_LINTCHECKS_462["The ac-count-low check warns on an Acceptance section<br><small>REQ-LINTCHECKS-462</small>"]
-    REQ_LINTCHECKS_463["The ac-count-high check warns on more than LINT_AC_MAX<br><small>REQ-LINTCHECKS-463</small>"]
-    REQ_LINTCHECKS_464["The over-scoped check warns on a requirement over<br><small>REQ-LINTCHECKS-464</small>"]
-    REQ_LINTCHECKS_465["Over-scoped counts clause groups when the Contract carries<br><small>REQ-LINTCHECKS-465</small>"]
-    REQ_LINTCHECKS_466["The file-spread check warns on a requirement whose<br><small>REQ-LINTCHECKS-466</small>"]
-    REQ_LINTCHECKS_467["File-spread is an architectural-diffuseness signal and is skipped<br><small>REQ-LINTCHECKS-467</small>"]
-    REQ_LINTCHECKS_468["The layer-mismatch check warns on a layer: bus<br><small>REQ-LINTCHECKS-468</small>"]
-    REQ_LINTCHECKS_469["Layer-mismatch is skipped when no fan-in data is<br><small>REQ-LINTCHECKS-469</small>"]
-    REQ_LINTCHECKS_470["The vague-term check warns on a Contract bullet<br><small>REQ-LINTCHECKS-470</small>"]
-    REQ_LINTCHECKS_471["Backticked code spans are stripped before the vague-term<br><small>REQ-LINTCHECKS-471</small>"]
-    REQ_LINTCHECKS_472["Vague-term emits one finding per distinct term<br><small>REQ-LINTCHECKS-472</small>"]
-    REQ_LINTCHECKS_473["The redundant-modal check warns on a Contract bullet<br><small>REQ-LINTCHECKS-473</small>"]
-    REQ_LINTCHECKS_474["Backticked code spans are stripped before the redundant-modal<br><small>REQ-LINTCHECKS-474</small>"]
-    REQ_LINTCHECKS_475["Redundant-modal emits one finding per distinct term<br><small>REQ-LINTCHECKS-475</small>"]
-    REQ_LINTCHECKS_476["The atomic-bullet-then-mismatch check warns on a story quote<br><small>REQ-LINTCHECKS-476</small>"]
-    REQ_LINTCHECKS_477["The atomic-story-overlong check warns past the bullet ceiling<br><small>REQ-LINTCHECKS-477</small>"]
-    REQ_MAP_476["Map generates _map.json under requirements/, and export writes<br><small>REQ-MAP-476</small>"]
-    REQ_MAP_478["_map.json carries one node per requirement and one<br><small>REQ-MAP-478</small>"]
-    REQ_MAP_479["Each node carries its requirement's id, layer, status<br><small>REQ-MAP-479</small>"]
-    REQ_MAP_480["A node's acc list carries one entry per<br><small>REQ-MAP-480</small>"]
-    REQ_MAP_481["_map.json carries a top-level repo field: a best-effort<br><small>REQ-MAP-481</small>"]
-    REQ_MAP_483["Repo is derived from the git remote, so<br><small>REQ-MAP-483</small>"]
-    REQ_MAP_484["Resolving repo never raises and never blocks map<br><small>REQ-MAP-484</small>"]
-    REQ_MAP_485["Engine_version is likewise excluded from the map --check<br><small>REQ-MAP-485</small>"]
-    REQ_MAP_486["_map.json carries a top-level todos array, derived from<br><small>REQ-MAP-486</small>"]
-    REQ_MAP_487["Reading a requirement's clauses folds a wrapped line<br><small>REQ-MAP-487</small>"]
-    REQ_MAP_488["A clause-group label groups the clauses below it<br><small>REQ-MAP-488</small>"]
-    REQ_MAP_489["Position decides a label, not the bold markers<br><small>REQ-MAP-489</small>"]
-    REQ_MAP_490["Map --check fails when a committed generated file<br><small>REQ-MAP-490</small>"]
-    REQ_MAP_491["The gate reports the same staleness as a<br><small>REQ-MAP-491</small>"]
-    REQ_MAP_493["All requirement-derived text is JSON-encoded in _map.json, which<br><small>REQ-MAP-493</small>"]
-    REQ_MAPDIAGRAMS_494["Map generates _map.md under requirements/, rendered from the<br><small>REQ-MAPDIAGRAMS-494</small>"]
-    REQ_MAPDIAGRAMS_495["_map.md contains exactly 5 Mermaid code blocks: Specification<br><small>REQ-MAPDIAGRAMS-495</small>"]
-    REQ_MAPDIAGRAMS_496["Each of those 5 blocks carries a legend<br><small>REQ-MAPDIAGRAMS-496</small>"]
-    REQ_MAPDIAGRAMS_497["The Specification Hierarchy is drawn from the satisfies<br><small>REQ-MAPDIAGRAMS-497</small>"]
-    REQ_MAPDIAGRAMS_498["The Hierarchy draws a node for each system<br><small>REQ-MAPDIAGRAMS-498</small>"]
-    REQ_MAPDIAGRAMS_499["The Hierarchy counts a code requirement against its<br><small>REQ-MAPDIAGRAMS-499</small>"]
-    REQ_MAPDIAGRAMS_501["A node's area is its area: field, or<br><small>REQ-MAPDIAGRAMS-501</small>"]
-    REQ_MAPDIAGRAMS_502["The System Map groups nodes into per-area subgraphs<br><small>REQ-MAPDIAGRAMS-502</small>"]
-    REQ_MAPDIAGRAMS_503["The System Map omits a depends_on edge whose<br><small>REQ-MAPDIAGRAMS-503</small>"]
-    REQ_MAPDIAGRAMS_504["The Dependency Map is area-level: one node per<br><small>REQ-MAPDIAGRAMS-504</small>"]
-    REQ_MAPDIAGRAMS_505["The Dependency Map draws an edge A→B when<br><small>REQ-MAPDIAGRAMS-505</small>"]
-    REQ_MAPDIAGRAMS_506["Req→Code colors an enforced-but-unlinked requirement red, and a<br><small>REQ-MAPDIAGRAMS-506</small>"]
-    REQ_MAPDIAGRAMS_507["Req→Code collapses multiple members in one file to<br><small>REQ-MAPDIAGRAMS-507</small>"]
-    REQ_MAPDIAGRAMS_508["The Risk diagram shows only requirements with at<br><small>REQ-MAPDIAGRAMS-508</small>"]
-    REQ_MAPDIAGRAMS_509["The Risk diagram pairs each of them with<br><small>REQ-MAPDIAGRAMS-509</small>"]
-    REQ_MAPDIAGRAMS_510["A draft's open verify-intent question is suppressed, subsumed<br><small>REQ-MAPDIAGRAMS-510</small>"]
-    REQ_MEMBERDRIFT_511["Member content hashes live in a separate, versioned<br><small>REQ-MEMBERDRIFT-511</small>"]
-    REQ_MEMBERDRIFT_512["The sidecar fails open (treated as empty) when<br><small>REQ-MEMBERDRIFT-512</small>"]
-    REQ_MEMBERDRIFT_513["Member hashes are recorded only for files dedicated<br><small>REQ-MEMBERDRIFT-513</small>"]
-    REQ_MEMBERDRIFT_514["Member hashes are computed on line-ending-normalized bytes (CRLF<br><small>REQ-MEMBERDRIFT-514</small>"]
-    REQ_MEMBERDRIFT_515["The gate warns for each confirmed requirement whose<br><small>REQ-MEMBERDRIFT-515</small>"]
-    REQ_MEMBERDRIFT_516["A member with no recorded baseline does not<br><small>REQ-MEMBERDRIFT-516</small>"]
-    REQ_MEMBERDRIFT_517["The check is warn-only by default and is<br><small>REQ-MEMBERDRIFT-517</small>"]
-    REQ_MEMBERDRIFT_518["--update-lock re-baselines the sidecar in lockstep with _reqlock.json<br><small>REQ-MEMBERDRIFT-518</small>"]
-    REQ_NEW_519["Given a capability id, new writes requirements/‹ID›.md, stamped<br><small>REQ-NEW-519</small>"]
-    REQ_NEW_520["New creates the requirements directory if it is<br><small>REQ-NEW-520</small>"]
-    REQ_NEW_521["The scaffold is the engine's built-in template<br><small>REQ-NEW-521</small>"]
-    REQ_NEW_522["An on-disk templates/requirement.md, when present, overrides the built-in<br><small>REQ-NEW-522</small>"]
-    REQ_NEW_523["New refuses to overwrite an existing file. It<br><small>REQ-NEW-523</small>"]
-    REQ_NEW_524["The emitted Contract section opens with 'Every line<br><small>REQ-NEW-524</small>"]
-    REQ_NEW_525["The scaffold's guidance names the authoring rules the<br><small>REQ-NEW-525</small>"]
-    REQ_NEW_526["New warns, and still exits zero, when another<br><small>REQ-NEW-526</small>"]
-    REQ_NEXT_527["Next groups every requirement's open risk signals into<br><small>REQ-NEXT-527</small>"]
-    REQ_NEXT_528["Next reads those signals from _risk_signals and their<br><small>REQ-NEXT-528</small>"]
-    REQ_NEXT_529["Next prints a progress header N requirement(s) ·<br><small>REQ-NEXT-529</small>"]
-    REQ_NEXT_530["In that header, tested counts the requirements that<br><small>REQ-NEXT-530</small>"]
-    REQ_NEXT_531["Next surfaces exactly the actionable buckets: unimplemented (Orphans)<br><small>REQ-NEXT-531</small>"]
-    REQ_NEXT_532["Next prints those four buckets in that order<br><small>REQ-NEXT-532</small>"]
-    REQ_NEXT_533["Next omits blast-radius, because that signal is a<br><small>REQ-NEXT-533</small>"]
-    REQ_NEXT_534["Next surfaces every scannable file that carries no<br><small>REQ-NEXT-534</small>"]
-    REQ_NEXT_535["That bucket omits prose in the auto-draft 'ignore'<br><small>REQ-NEXT-535</small>"]
-    REQ_NEXT_536["Next skips that untagged scan when the caller<br><small>REQ-NEXT-536</small>"]
-    REQ_NEXT_537["An Orphans item may have members recorded in<br><small>REQ-NEXT-537</small>"]
-    REQ_NEXT_538["Within a bucket, next orders items by priority<br><small>REQ-NEXT-538</small>"]
-    REQ_NEXT_539["Priority rank runs must-have ‹ should-have ‹ could-have<br><small>REQ-NEXT-539</small>"]
-    REQ_NEXT_540["Next tags an item whose risk: is 2<br><small>REQ-NEXT-540</small>"]
-    REQ_NEXT_541["Next names the requirement file to open, as<br><small>REQ-NEXT-541</small>"]
-    REQ_NEXT_542["By default next shows at most the top<br><small>REQ-NEXT-542</small>"]
-    REQ_NEXT_543["Next prints a ... N more line when<br><small>REQ-NEXT-543</small>"]
-    REQ_NEXT_544["With --all, next lists every item<br><small>REQ-NEXT-544</small>"]
-    REQ_NEXT_545["The 'Untagged files' bucket truncates the same way<br><small>REQ-NEXT-545</small>"]
-    REQ_NEXT_546["With a registry that holds no requirements, next<br><small>REQ-NEXT-546</small>"]
-    REQ_NEXT_547["With requirements but no open signal, next prints<br><small>REQ-NEXT-547</small>"]
-    REQ_NEXT_548["Next is deterministic and writes no file<br><small>REQ-NEXT-548</small>"]
-    REQ_NEXT_549["Next always exits zero. The report is advice<br><small>REQ-NEXT-549</small>"]
-    REQ_ORPHANCODE_550["The gate warns for each program file that<br><small>REQ-ORPHANCODE-550</small>"]
-    REQ_ORPHANCODE_551["A program file is one ending in .py<br><small>REQ-ORPHANCODE-551</small>"]
-    REQ_ORPHANCODE_552["A membership tag is one of implements, tested-by<br><small>REQ-ORPHANCODE-552</small>"]
-    REQ_ORPHANCODE_553["The gate does not consider the prose, styling<br><small>REQ-ORPHANCODE-553</small>"]
-    REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small>"]
-    REQ_PAGES_560["When _map.html is generated AND a docs/ directory<br><small>REQ-PAGES-560</small>"]
-    REQ_PAGES_561["Map --check (the no-write freshness gate) additionally flags<br><small>REQ-PAGES-561</small>"]
-    REQ_PAGES_562["The freshness comparison reads the on-disk copy as<br><small>REQ-PAGES-562</small>"]
-    REQ_PARSE_208["Load_requirements parses each requirements/.md file into a record<br><small>REQ-PARSE-208</small>"]
-    REQ_PARSE_209["Meta is the parsed frontmatter, and body is<br><small>REQ-PARSE-209</small>"]
-    REQ_PARSE_210["The id comes from the frontmatter id: field<br><small>REQ-PARSE-210</small>"]
-    REQ_PARSE_211["The grammar supports scalars, inline a, b lists<br><small>REQ-PARSE-211</small>"]
-    REQ_PARSE_212["A trailing # comment is stripped from a<br><small>REQ-PARSE-212</small>"]
-    REQ_PARSE_213["Matching surrounding quotes are removed from a scalar<br><small>REQ-PARSE-213</small>"]
-    REQ_PARSE_214["An inline list missing its closing is parsed<br><small>REQ-PARSE-214</small>"]
-    REQ_PARSE_215["A file with no leading --- block yields<br><small>REQ-PARSE-215</small>"]
-    REQ_PARSE_216["A file whose name starts with _ (a<br><small>REQ-PARSE-216</small>"]
-    REQ_PARSE_217["A leading UTF-8 BOM is tolerated<br><small>REQ-PARSE-217</small>"]
-    REQ_PIPE_563["When the command's standard output turns out to<br><small>REQ-PIPE-563</small>"]
-    REQ_PIPE_564["Reqmap.py treats BrokenPipeError and the Windows form of<br><small>REQ-PIPE-564</small>"]
-    REQ_PIPE_565["Any other OSError still propagates unchanged. The rule<br><small>REQ-PIPE-565</small>"]
-    REQ_PIPE_566["The rule lives in the command-line entry point<br><small>REQ-PIPE-566</small>"]
-    REQ_PROMOTE_567["Confirm ‹ID› sets the requirement's status to confirmed<br><small>REQ-PROMOTE-567</small>"]
-    REQ_PROMOTE_568["Confirm edits only the value of the first<br><small>REQ-PROMOTE-568</small>"]
-    REQ_PROMOTE_569["Confirm preserves that line's indentation and any trailing<br><small>REQ-PROMOTE-569</small>"]
-    REQ_PROMOTE_570["Confirm leaves the body untouched<br><small>REQ-PROMOTE-570</small>"]
-    REQ_PROMOTE_571["Confirm refuses a requirement with no implements: member<br><small>REQ-PROMOTE-571</small>"]
-    REQ_PROMOTE_572["Confirm exempts a need and an aggregate from<br><small>REQ-PROMOTE-572</small>"]
-    REQ_PROMOTE_573["Confirm refuses an aggregate whose depends_on list is<br><small>REQ-PROMOTE-573</small>"]
-    REQ_PROMOTE_574["A refusal prints the tag the caller needs<br><small>REQ-PROMOTE-574</small>"]
-    REQ_PROMOTE_575["Confirm exits non-zero with a clear message for<br><small>REQ-PROMOTE-575</small>"]
-    REQ_PROMOTE_576["Confirm warns, without failing, when no tested-by: member<br><small>REQ-PROMOTE-576</small>"]
-    REQ_PROMOTE_577["That warning points at the test tag to<br><small>REQ-PROMOTE-577</small>"]
-    REQ_PROMOTE_578["Confirm reminds the caller to refresh the lock<br><small>REQ-PROMOTE-578</small>"]
-    REQ_PROMOTE_579["Confirm is idempotent. An already-confirmed requirement is reported<br><small>REQ-PROMOTE-579</small>"]
-    REQ_PROMOTE_TODO_580["New --from-todo scaffolds a new requirement file from<br><small>REQ-PROMOTE-TODO-580</small>"]
-    REQ_PROMOTE_TODO_581["The item is selected by exact name, trimmed<br><small>REQ-PROMOTE-TODO-581</small>"]
-    REQ_PROMOTE_TODO_583["New --from-todo seeds the new requirement from the<br><small>REQ-PROMOTE-TODO-583</small>"]
-    REQ_PROMOTE_TODO_584["A lane: ops maps to layer: feature<br><small>REQ-PROMOTE-TODO-584</small>"]
-    REQ_PROMOTE_TODO_585["The new requirement's status is draft, so the<br><small>REQ-PROMOTE-TODO-585</small>"]
-    REQ_PROMOTE_TODO_586["New --from-todo refuses with a non-zero exit and<br><small>REQ-PROMOTE-TODO-586</small>"]
-    REQ_PROMOTE_TODO_587["The command refuses when the target id already<br><small>REQ-PROMOTE-TODO-587</small>"]
-    REQ_PROMOTE_TODO_588["The command refuses when no open TODO matches<br><small>REQ-PROMOTE-TODO-588</small>"]
-    REQ_PROMOTE_TODO_589["The command refuses when the name is ambiguous<br><small>REQ-PROMOTE-TODO-589</small>"]
-    REQ_PROMOTE_TODO_590["Each refusal prints a clear message. For a<br><small>REQ-PROMOTE-TODO-590</small>"]
-    REQ_PROMOTE_TODO_591["New --from-todo does not modify TODO.md by default<br><small>REQ-PROMOTE-TODO-591</small>"]
-    REQ_PROMOTE_TODO_592["With --mark-done it flips the matched item's checkbox<br><small>REQ-PROMOTE-TODO-592</small>"]
-    REQ_PROMOTE_TODO_593["That flip is best-effort: a write failure warns<br><small>REQ-PROMOTE-TODO-593</small>"]
-    REQ_PROSE_594["Draft also produces draft-status requirements from untagged prose<br><small>REQ-PROSE-594</small>"]
-    REQ_PROSE_596["Ignore — meta/boilerplate that is never a capability<br><small>REQ-PROSE-596</small>"]
-    REQ_PROSE_597["Sync_only — README/README. in any letter case, everything<br><small>REQ-PROSE-597</small>"]
-    REQ_PROSE_598["Capability — everything else (e.g. prompts/, specs/, modes/<br><small>REQ-PROSE-598</small>"]
-    REQ_PROSE_599["The buckets govern auto-drafting ONLY; an explicit tag<br><small>REQ-PROSE-599</small>"]
-    REQ_PROSE_600["A prose draft is scaffolded from the file's<br><small>REQ-PROSE-600</small>"]
-    REQ_PROSE_601["When a file has no ## heading at<br><small>REQ-PROSE-601</small>"]
-    REQ_PROSE_602["The source prose is never the contract: the<br><small>REQ-PROSE-602</small>"]
-    REQ_PYFLOOR_603["MIN_PYTHON names the oldest interpreter version the engine<br><small>REQ-PYFLOOR-603</small>"]
-    REQ_PYFLOOR_604["MIN_PYTHON equals the oldest version the CI test<br><small>REQ-PYFLOOR-604</small>"]
-    REQ_PYFLOOR_605["Reqmap.py refuses to run on an interpreter below<br><small>REQ-PYFLOOR-605</small>"]
-    REQ_PYFLOOR_606["Reqmap.py exits 2 on refusal and prints one<br><small>REQ-PYFLOOR-606</small>"]
-    REQ_PYFLOOR_607["_python_floor_error reports the refusal message for a caller-supplied<br><small>REQ-PYFLOOR-607</small>"]
-    REQ_REGISTRYLAG_608["Registry lag is the number of commits on<br><small>REQ-REGISTRYLAG-608</small>"]
-    REQ_REGISTRYLAG_609["The count comes from git alone: the last<br><small>REQ-REGISTRYLAG-609</small>"]
-    REQ_REGISTRYLAG_610["The capability never parses requirement contents<br><small>REQ-REGISTRYLAG-610</small>"]
-    REQ_REGISTRYLAG_611["Health --json includes the count as a commits_since_req_touch<br><small>REQ-REGISTRYLAG-611</small>"]
-    REQ_REGISTRYLAG_612["Text output carries a labelled line only when<br><small>REQ-REGISTRYLAG-612</small>"]
-    REQ_REGISTRYLAG_614["The signal never lowers the health score, because<br><small>REQ-REGISTRYLAG-614</small>"]
-    REQ_REGISTRYLAG_615["The commits_since_req_touch key is absent, not zero, whenever<br><small>REQ-REGISTRYLAG-615</small>"]
-    REQ_REGISTRYLAG_616["Unmeasurable means no code root was supplied, code_root<br><small>REQ-REGISTRYLAG-616</small>"]
-    REQ_REPRO_618["Plugin/scripts/_map_viewer.html derives from app/, built by npm run<br><small>REQ-REPRO-618</small>"]
-    REQ_REPRO_619["Docs/full_architecture.html derives from plugin/skills/excalidraw-diagram/examples/make_full_architecture.py<br><small>REQ-REPRO-619</small>"]
-    REQ_REPRO_620["The artifacts CI job rebuilds each covered artifact<br><small>REQ-REPRO-620</small>"]
-    REQ_REPRO_621["The job fails the build when a rebuilt<br><small>REQ-REPRO-621</small>"]
-    REQ_REPRO_622["The failure message names the stale file and<br><small>REQ-REPRO-622</small>"]
-    REQ_REPRO_623["The release job runs only after artifacts passes<br><small>REQ-REPRO-623</small>"]
-    REQ_REVIEW_624["The review command emits a DETERMINISTIC, read-only JSON<br><small>REQ-REVIEW-624</small>"]
-    REQ_REVIEW_625["The plan carries, per requirement, its prose (title<br><small>REQ-REVIEW-625</small>"]
-    REQ_REVIEW_626["The plan names exactly three AI categories —<br><small>REQ-REVIEW-626</small>"]
-    REQ_REVIEW_627["DETERMINISM WALL: the plan is byte-reproducible across runs<br><small>REQ-REVIEW-627</small>"]
-    REQ_REVIEW_628["Gate behaves identically whether or not an AI<br><small>REQ-REVIEW-628</small>"]
-    REQ_REVIEW_630["The AI consumer (the requirement-quality-review skill) writes findings<br><small>REQ-REVIEW-630</small>"]
-    REQ_ROADMAP_632["Health reads TODO.md from the code root, or<br><small>REQ-ROADMAP-632</small>"]
-    REQ_ROADMAP_633["Health --json reports nothing about the roadmap when<br><small>REQ-ROADMAP-633</small>"]
-    REQ_ROADMAP_634["Health --json reports the newest milestone in the<br><small>REQ-ROADMAP-634</small>"]
-    REQ_ROADMAP_635["Health --json reports the pair only when the<br><small>REQ-ROADMAP-635</small>"]
-    REQ_ROADMAP_636["Versions compare segment by segment as numbers, so<br><small>REQ-ROADMAP-636</small>"]
-    REQ_ROADMAP_637["Health --json lists every ## heading in the<br><small>REQ-ROADMAP-637</small>"]
-    REQ_ROADMAP_638["Such a heading leaves the previous milestone in<br><small>REQ-ROADMAP-638</small>"]
-    REQ_SCAN_218["Scan_members walks a code root and, in every<br><small>REQ-SCAN-218</small>"]
-    REQ_SCAN_219["Scan_members returns cap_id -› (role, relative_file, line),<br><small>REQ-SCAN-219</small>"]
-    REQ_SCAN_220["A role is one of implements, generated-from, validated-against<br><small>REQ-SCAN-220</small>"]
-    REQ_SCAN_221["A tag ID matches A-ZA-Z0-9(-A-Z0-9+)+<br><small>REQ-SCAN-221</small>"]
-    REQ_SCAN_222["A left-boundary guard prevents a substring match such<br><small>REQ-SCAN-222</small>"]
-    REQ_SCAN_223["The same (role, ID) appearing twice on one<br><small>REQ-SCAN-223</small>"]
-    REQ_SCAN_224["File paths are reported repo-root-relative, with POSIX separators<br><small>REQ-SCAN-224</small>"]
-    REQ_SCAN_225["A single tag may bind several requirements through<br><small>REQ-SCAN-225</small>"]
-    REQ_SCAN_226["Each id in that list is recorded as<br><small>REQ-SCAN-226</small>"]
-    REQ_SCAN_228[".git, node_modules, __pycache__ and the SSOT requirements/ directory<br><small>REQ-SCAN-228</small>"]
-    REQ_SCAN_229["The SSOT directory is matched by realpath, so<br><small>REQ-SCAN-229</small>"]
-    REQ_SCAN_230["Paths matching .reqmapignore are excluded<br><small>REQ-SCAN-230</small>"]
-    REQ_SCAN_231["An unreadable file is skipped without aborting the<br><small>REQ-SCAN-231</small>"]
-    REQ_SCAN_232["Scan_all returns the members, the per-criterion coverage and<br><small>REQ-SCAN-232</small>"]
-    REQ_SCAN_640["Scan prints every capability id, followed by its<br><small>REQ-SCAN-640</small>"]
-    REQ_SCAN_641["The listed ids are the union of the<br><small>REQ-SCAN-641</small>"]
-    REQ_SCAN_642["A capability with no members prints (no members<br><small>REQ-SCAN-642</small>"]
-    REQ_SCAN_643["A tag pointing at an id with no<br><small>REQ-SCAN-643</small>"]
-    REQ_SCANCACHE_644["The --cache flag (off by default) enables a<br><small>REQ-SCANCACHE-644</small>"]
-    REQ_SCANCACHE_645["The cache is a sidecar requirements/_scancache.json, keyed per<br><small>REQ-SCANCACHE-645</small>"]
-    REQ_SCANCACHE_646["With the cache on: an unchanged file (matching<br><small>REQ-SCANCACHE-646</small>"]
-    REQ_SCANCACHE_647["The cache is a PURE performance optimization: scan_members(cache=True)<br><small>REQ-SCANCACHE-647</small>"]
-    REQ_SCANCACHE_648["The cache fails open and best-effort: an absent<br><small>REQ-SCANCACHE-648</small>"]
-    REQ_SEARCH_650["Search writes no file. It only reads and<br><small>REQ-SEARCH-650</small>"]
-    REQ_SEARCH_651["Search reuses the scoring machinery of dupes (ARCH-SIMILAR-016)<br><small>REQ-SEARCH-651</small>"]
-    REQ_SEARCH_652["The query and each requirement both reduce to<br><small>REQ-SEARCH-652</small>"]
-    REQ_SEARCH_653["Search then compares those two bags by cosine<br><small>REQ-SEARCH-653</small>"]
-    REQ_SEARCH_654["Search prints every match it shows together with<br><small>REQ-SEARCH-654</small>"]
-    REQ_SEARCH_655["Search shows at most --top matches. --top defaults<br><small>REQ-SEARCH-655</small>"]
-    REQ_SEARCH_656["A --top of zero or less counts as<br><small>REQ-SEARCH-656</small>"]
-    REQ_SEARCH_657["Search applies a relevance floor and never prints<br><small>REQ-SEARCH-657</small>"]
-    REQ_SEARCH_658["When no requirement scores at or above the<br><small>REQ-SEARCH-658</small>"]
-    REQ_SEARCH_659["The floor defaults to 0.05<br><small>REQ-SEARCH-659</small>"]
-    REQ_SEARCH_660["When the query holds no searchable term, search<br><small>REQ-SEARCH-660</small>"]
-    REQ_SEARCH_661["Tokenizing drops short words, stopwords and pure numbers<br><small>REQ-SEARCH-661</small>"]
-    REQ_SEARCH_662["The output of search says that the search<br><small>REQ-SEARCH-662</small>"]
-    REQ_SEARCH_663["Search always returns zero from a well-formed invocation<br><small>REQ-SEARCH-663</small>"]
-    REQ_SEARCH_664["A missing query argument is a usage error<br><small>REQ-SEARCH-664</small>"]
-    REQ_SEARCH_665["The map viewer's search box ranks by this<br><small>REQ-SEARCH-665</small>"]
-    REQ_SEARCH_666["The viewer's ranking (app/src/lib/search.js) is a faithful port<br><small>REQ-SEARCH-666</small>"]
-    REQ_SEARCH_667["A shared golden fixture pins the port to<br><small>REQ-SEARCH-667</small>"]
-    REQ_SELFGATE_668[".github/workflows/ci.yml's gate-and-tests job invokes reqmap.py gate / lint<br><small>REQ-SELFGATE-668</small>"]
-    REQ_SELFGATE_669["Check/action.yml packages the same invocation as a reusable<br><small>REQ-SELFGATE-669</small>"]
-    REQ_SELFGATE_670["Ci.yml's release job force-moves the action's major-alias tag<br><small>REQ-SELFGATE-670</small>"]
-    REQ_SELFGATE_671[".githooks/pre-commit mirrors the CI order locally, before a<br><small>REQ-SELFGATE-671</small>"]
-    REQ_SELFGATE_672[".githooks/pre-push blocks a direct push to main<br><small>REQ-SELFGATE-672</small>"]
-    REQ_SELFGATE_673["Sync_reqmap.sh propagates plugin/scripts/reqmap.py (+ the vendored viewer template)<br><small>REQ-SELFGATE-673</small>"]
-    REQ_SHOW_674["Show ‹ID› prints one consolidated, human-readable view of<br><small>REQ-SHOW-674</small>"]
-    REQ_SHOW_675["Show writes nothing. It only reads and prints<br><small>REQ-SHOW-675</small>"]
-    REQ_SHOW_676["Show prints a header line carrying the id<br><small>REQ-SHOW-676</small>"]
-    REQ_SHOW_677["The header appends priority after the layer when<br><small>REQ-SHOW-677</small>"]
-    REQ_SHOW_678["An absent optional field adds no empty segment<br><small>REQ-SHOW-678</small>"]
-    REQ_SHOW_679["Show prints the title and the intent. A<br><small>REQ-SHOW-679</small>"]
-    REQ_SHOW_680["Show lists the Contract bullets. When the requirement<br><small>REQ-SHOW-680</small>"]
-    REQ_SHOW_681["Show prints dependencies in both directions: the depends_on<br><small>REQ-SHOW-681</small>"]
-    REQ_SHOW_682["Show lists the code members grouped by role<br><small>REQ-SHOW-682</small>"]
-    REQ_SHOW_683["Show prints the verification level beside a member<br><small>REQ-SHOW-683</small>"]
-    REQ_SHOW_684["Show lists the open ## WHAT — Verify<br><small>REQ-SHOW-684</small>"]
-    REQ_SHOW_685["Show lists the risk signals with their advice<br><small>REQ-SHOW-685</small>"]
-    REQ_SHOW_686["Show returns zero for a known id and<br><small>REQ-SHOW-686</small>"]
-    REQ_SIMILAR_687["Dupes reports pairs of requirements whose contracts overlap<br><small>REQ-SIMILAR-687</small>"]
-    REQ_SIMILAR_688["Dupes writes nothing. It only reads and prints<br><small>REQ-SIMILAR-688</small>"]
-    REQ_SIMILAR_689["Dupes builds a bag of words for each<br><small>REQ-SIMILAR-689</small>"]
-    REQ_SIMILAR_690["Dupes leaves the 'Notes & limitations' section out<br><small>REQ-SIMILAR-690</small>"]
-    REQ_SIMILAR_691["Dupes tokenizes text into lowercase alphanumeric words of<br><small>REQ-SIMILAR-691</small>"]
-    REQ_SIMILAR_692["Dupes drops a small stopword set and pure<br><small>REQ-SIMILAR-692</small>"]
-    REQ_SIMILAR_693["Dupes skips a requirement whose Contract bullets are<br><small>REQ-SIMILAR-693</small>"]
-    REQ_SIMILAR_694["Dupes skips a pair linked by tested-by —<br><small>REQ-SIMILAR-694</small>"]
-    REQ_SIMILAR_695["Dupes weights terms with a smoothed TF-IDF (log((1<br><small>REQ-SIMILAR-695</small>"]
-    REQ_SIMILAR_696["The smoothing keeps every weight positive, so a<br><small>REQ-SIMILAR-696</small>"]
-    REQ_SIMILAR_697["Dupes scores each pair with cosine similarity in<br><small>REQ-SIMILAR-697</small>"]
-    REQ_SIMILAR_698["Dupes reports only the pairs at or above<br><small>REQ-SIMILAR-698</small>"]
-    REQ_SIMILAR_699["The threshold defaults to 0.35<br><small>REQ-SIMILAR-699</small>"]
-    REQ_SIMILAR_700["--threshold overrides that default<br><small>REQ-SIMILAR-700</small>"]
-    REQ_SIMILAR_701["Dupes prints pairs most-similar-first, each with its score<br><small>REQ-SIMILAR-701</small>"]
-    REQ_SIMILAR_702["Dupes always returns zero. The report is advisory<br><small>REQ-SIMILAR-702</small>"]
-    REQ_SITE_703["Site --attach ‹page.html› injects the requested marker-delimited regions<br><small>REQ-SITE-703</small>"]
-    REQ_SITE_704["When the --attach target does not exist, site<br><small>REQ-SITE-704</small>"]
-    REQ_SITE_705["The nav region emits a link only when<br><small>REQ-SITE-705</small>"]
-    REQ_SITE_706["The engine never imports or executes the excalidraw<br><small>REQ-SITE-706</small>"]
-    REQ_SITE_707["Init, unless --no-site is given, runs a best-effort<br><small>REQ-SITE-707</small>"]
-    REQ_SITE_708["Map --check flags the site page stale when<br><small>REQ-SITE-708</small>"]
-    REQ_STALEENGINE_709["The staleness probe compares the vendored engine's MAP_ENGINE_VERSION<br><small>REQ-STALEENGINE-709</small>"]
-    REQ_STALEENGINE_710["Check/action.yml runs the probe as a step of<br><small>REQ-STALEENGINE-710</small>"]
-    REQ_STALEENGINE_712["The action's stale-engine input sets that mode and<br><small>REQ-STALEENGINE-712</small>"]
-    REQ_STALEENGINE_713["A vendored engine older than the reference produces<br><small>REQ-STALEENGINE-713</small>"]
-    REQ_STALEENGINE_714["In warn the message is a warning and<br><small>REQ-STALEENGINE-714</small>"]
-    REQ_STALEENGINE_715["In error the same condition exits 1<br><small>REQ-STALEENGINE-715</small>"]
-    REQ_STALEENGINE_716["Under GitHub Actions the message is emitted as<br><small>REQ-STALEENGINE-716</small>"]
-    REQ_STALEENGINE_717["Off produces no output and exit 0<br><small>REQ-STALEENGINE-717</small>"]
-    REQ_STALEENGINE_718["A vendored engine at or ahead of the<br><small>REQ-STALEENGINE-718</small>"]
-    REQ_STALEENGINE_719["A version that cannot be read from either<br><small>REQ-STALEENGINE-719</small>"]
-    REQ_STALEENGINE_720["An unexpected internal failure of the probe is<br><small>REQ-STALEENGINE-720</small>"]
-    REQ_SUGGESTVERIFIES_721["Suggest-verifies proposes a # verifies: ‹id›#AC-N tag for<br><small>REQ-SUGGESTVERIFIES-721</small>"]
-    REQ_SUGGESTVERIFIES_722["Suggest-verifies searches only the tested-by files of the<br><small>REQ-SUGGESTVERIFIES-722</small>"]
-    REQ_SUGGESTVERIFIES_723["Suggest-verifies reads a test name from a def<br><small>REQ-SUGGESTVERIFIES-723</small>"]
-    REQ_SUGGESTVERIFIES_724["A criterion already carrying a verifies tag is<br><small>REQ-SUGGESTVERIFIES-724</small>"]
-    REQ_SUGGESTVERIFIES_725["A criterion marked as not machine-verifiable is never<br><small>REQ-SUGGESTVERIFIES-725</small>"]
-    REQ_SUGGESTVERIFIES_726["A name matches a criterion only as a<br><small>REQ-SUGGESTVERIFIES-726</small>"]
-    REQ_SUGGESTVERIFIES_727["When the tested-by file belongs to more than<br><small>REQ-SUGGESTVERIFIES-727</small>"]
-    REQ_SUGGESTVERIFIES_728["A test whose name carries another requirement's number<br><small>REQ-SUGGESTVERIFIES-728</small>"]
-    REQ_SUGGESTVERIFIES_729["When two or more tests match one criterion<br><small>REQ-SUGGESTVERIFIES-729</small>"]
-    REQ_SUGGESTVERIFIES_730["Suggest-verifies writes nothing by default. It prints the<br><small>REQ-SUGGESTVERIFIES-730</small>"]
-    REQ_SUGGESTVERIFIES_731["--apply appends each proposed tag to its test's<br><small>REQ-SUGGESTVERIFIES-731</small>"]
-    REQ_SUGGESTVERIFIES_732["--apply leaves a line that already carries the<br><small>REQ-SUGGESTVERIFIES-732</small>"]
-    REQ_TESTLINK_733["The gate checks every tested-by link, at every<br><small>REQ-TESTLINK-733</small>"]
-    REQ_TESTLINK_734["For each distinct tested-by file, the gate verifies<br><small>REQ-TESTLINK-734</small>"]
-    REQ_TESTLINK_735["For each such file the gate also verifies<br><small>REQ-TESTLINK-735</small>"]
-    REQ_TESTLINK_736["The gate recognizes a test function lexically<br><small>REQ-TESTLINK-736</small>"]
-    REQ_TESTLINK_737["A Python def test...( counts<br><small>REQ-TESTLINK-737</small>"]
-    REQ_TESTLINK_738["A JavaScript or TypeScript function test...( counts<br><small>REQ-TESTLINK-738</small>"]
-    REQ_TESTLINK_739["An it( call or a test( call counts<br><small>REQ-TESTLINK-739</small>"]
-    REQ_TESTLINK_740["A Go func Test/Benchmark/Example/Fuzz( counts<br><small>REQ-TESTLINK-740</small>"]
-    REQ_TESTLINK_741["A Rust #test counts<br><small>REQ-TESTLINK-741</small>"]
-    REQ_TESTLINK_742["A .py file with no def test... also<br><small>REQ-TESTLINK-742</small>"]
-    REQ_TESTLINK_743["A shell test_x() function, a function test_x definition<br><small>REQ-TESTLINK-743</small>"]
-    REQ_TESTLINK_744["A shell file named by a test convention<br><small>REQ-TESTLINK-744</small>"]
-    REQ_TESTLINK_745["When a file is missing, unreadable, or holds<br><small>REQ-TESTLINK-745</small>"]
-    REQ_TESTLINK_746["That warning names the requirement and the file<br><small>REQ-TESTLINK-746</small>"]
-    REQ_TESTLINK_748["Under --strict the warning becomes an error only<br><small>REQ-TESTLINK-748</small>"]
-    REQ_TESTLINK_749["The check stays silent on a well-formed corpus<br><small>REQ-TESTLINK-749</small>"]
-    REQ_TRACE_750["A requirement may declare a satisfies: frontmatter list<br><small>REQ-TRACE-750</small>"]
-    REQ_TRACE_751["The gate warns, and never errors, when a<br><small>REQ-TRACE-751</small>"]
-    REQ_TRACE_752["The gate warns when a confirmed need has<br><small>REQ-TRACE-752</small>"]
-    REQ_TRACE_753["The aggregate layer is exempt from the implements<br><small>REQ-TRACE-753</small>"]
-    REQ_TRACE_754["An aggregate declares at least one depends_on id<br><small>REQ-TRACE-754</small>"]
-    REQ_TRACE_756["The need layer is exempt from the implements<br><small>REQ-TRACE-756</small>"]
-    REQ_TRACE_757["A need is still expected to carry a<br><small>REQ-TRACE-757</small>"]
-    REQ_TRACE_758["Show prints the upstream ids a requirement satisfies<br><small>REQ-TRACE-758</small>"]
-    REQ_TRACE_759["The map data carries satisfies and satisfied_by on<br><small>REQ-TRACE-759</small>"]
-    REQ_TRACKED_760["Untracked_members lists the member files git does not<br><small>REQ-TRACKED-760</small>"]
-    REQ_TRACKED_761["Gate reports those files in one warning naming<br><small>REQ-TRACKED-761</small>"]
-    REQ_TRACKED_762["The warning names the two remedies: commit the<br><small>REQ-TRACKED-762</small>"]
-    REQ_TRACKED_763["Untracked_members reports nothing and the gate stays silent<br><small>REQ-TRACKED-763</small>"]
-    REQ_TRANSLATE_765["Translate is reached ONLY by typing reqmap.py translate<br><small>REQ-TRANSLATE-765</small>"]
-    REQ_TRANSLATE_766["Corpus_lang(reqs) detects the corpus's majority language (ro or<br><small>REQ-TRANSLATE-766</small>"]
-    REQ_TRANSLATE_767["Translate --to ro/en translates every requirement whose effective<br><small>REQ-TRANSLATE-767</small>"]
-    REQ_TRANSLATE_768["The cache key is translation_hash(body, title) — a<br><small>REQ-TRANSLATE-768</small>"]
-    REQ_TRANSLATE_769["Before a translation is cached, _translation_preserves_structure() compares the<br><small>REQ-TRANSLATE-769</small>"]
-    REQ_TRANSLATE_770["The AC-N labels and the Gherkin keywords are<br><small>REQ-TRANSLATE-770</small>"]
-    REQ_TRANSLATE_771["A missing/erroring claude CLI, a timeout, or a<br><small>REQ-TRANSLATE-771</small>"]
-    REQ_TRANSLATE_772["A cache hit (stored hash matches current content)<br><small>REQ-TRANSLATE-772</small>"]
-    REQ_TRANSLATE_773["Map and export read requirements/_i18n/.json (when present) and<br><small>REQ-TRANSLATE-773</small>"]
-    REQ_TRANSLATE_774["The viewer consumes node.i18n ONLY through translatedText() (i18n.jsx)<br><small>REQ-TRANSLATE-774</small>"]
-    REQ_UNSCANNEDTAG_775["Tagged_unscanned_files lists the tracked, non-scannable files under the<br><small>REQ-UNSCANNEDTAG-775</small>"]
-    REQ_UNSCANNEDTAG_776["Gate reports those files in one warning naming<br><small>REQ-UNSCANNEDTAG-776</small>"]
-    REQ_UNSCANNEDTAG_777["The warning states that those files are not<br><small>REQ-UNSCANNEDTAG-777</small>"]
-    REQ_UNSCANNEDTAG_778["The check skips paths matching .reqmapignore, files under<br><small>REQ-UNSCANNEDTAG-778</small>"]
-    REQ_UNSCANNEDTAG_779["A file that is not valid UTF-8 text<br><small>REQ-UNSCANNEDTAG-779</small>"]
-    REQ_UNSCANNEDTAG_780["The check reports nothing and the gate stays<br><small>REQ-UNSCANNEDTAG-780</small>"]
-    REQ_VIEWER_782["Map generates _map.html when the template _map_viewer.html is<br><small>REQ-VIEWER-782</small>"]
-    REQ_VIEWER_783["_map.html is a self-contained, single-file copy of the<br><small>REQ-VIEWER-783</small>"]
-    REQ_VIEWER_785["Absent the template, render_html emits nothing and returns<br><small>REQ-VIEWER-785</small>"]
-    REQ_VIEWER_786["Map then still writes _map.md and _map.json, so<br><small>REQ-VIEWER-786</small>"]
-    REQ_VIEWER_787["Render_html replaces the template's ‹!--REQMAP_DATA--› marker with a<br><small>REQ-VIEWER-787</small>"]
-    REQ_VIEWER_788["That assignment carries the same (nodes, edges) graph<br><small>REQ-VIEWER-788</small>"]
-    REQ_VIEWER_789["Render_html makes the injected graph HTML-safe for embedding<br><small>REQ-VIEWER-789</small>"]
-    REQ_VIEWER_790["‹/ → ‹// — prevents ‹/script› from closing<br><small>REQ-VIEWER-790</small>"]
-    REQ_VIEWER_791["‹!-- → ‹/!-- — prevents the HTML5 parser<br><small>REQ-VIEWER-791</small>"]
-    REQ_VIEWER_792["--› → -/-› — prevents prematurely closing that<br><small>REQ-VIEWER-792</small>"]
-    REQ_VIEWER_794["Render_html also escapes U+2028 and U+2029 to their<br><small>REQ-VIEWER-794</small>"]
-    REQ_VIEWER_795["The viewer ranks nodes by longest dependency path<br><small>REQ-VIEWER-795</small>"]
-    REQ_VIEWER_796["The viewer excludes a cycle-closing edge from that<br><small>REQ-VIEWER-796</small>"]
-    REQ_VIEWER_797["No node ranks higher than the number of<br><small>REQ-VIEWER-797</small>"]
-    REQ_VIEWER_798["A node carries the acceptance section twice: accept<br><small>REQ-VIEWER-798</small>"]
-    REQ_VIEWER_799["The viewer renders accept — one line per<br><small>REQ-VIEWER-799</small>"]
-    REQ_VIEWER_800["The viewer renders its own UI chrome in<br><small>REQ-VIEWER-800</small>"]
-    REQ_VIEWER_801["A locale control in the viewer's top bar<br><small>REQ-VIEWER-801</small>"]
-    REQ_VIEWER_802["Requirement content is never translated: id, title, intent<br><small>REQ-VIEWER-802</small>"]
-    REQ_VIEWER_803["The engine's own vocabulary is never translated either<br><small>REQ-VIEWER-803</small>"]
-    REQ_VIEWER_804["A chrome string with no entry in the<br><small>REQ-VIEWER-804</small>"]
-    REQ_VIEWER_805["The reader's chosen locale is remembered on their<br><small>REQ-VIEWER-805</small>"]
-    REQ_VLEVEL_806["A tested-by: tag may end with a verification<br><small>REQ-VLEVEL-806</small>"]
-    REQ_VLEVEL_807["A level written on a tag applies to<br><small>REQ-VLEVEL-807</small>"]
-    REQ_VLEVEL_808["A tested-by: tag carrying no level, or an<br><small>REQ-VLEVEL-808</small>"]
-    REQ_VLEVEL_809["The engine reports, per requirement, each level it<br><small>REQ-VLEVEL-809</small>"]
-    REQ_VLEVEL_810["The level scan stays separate from the member<br><small>REQ-VLEVEL-810</small>"]
-    REQ_VLEVEL_811["The engine skips a levelled tag written inside<br><small>REQ-VLEVEL-811</small>"]
-    REQ_VLEVEL_812["In a Python file the engine also skips<br><small>REQ-VLEVEL-812</small>"]
-    REQ_VLEVEL_813["The gate warns when a confirmed need carries<br><small>REQ-VLEVEL-813</small>"]
-    REQ_VLEVEL_814["The gate holds that need warning back until<br><small>REQ-VLEVEL-814</small>"]
-    REQ_VLEVEL_815["The gate warns when a confirmed bus requirement's<br><small>REQ-VLEVEL-815</small>"]
-    REQ_VLEVEL_816["The gate judges no requirement that has no<br><small>REQ-VLEVEL-816</small>"]
-    REQ_VLEVEL_817["The gate applies the level-fit rule to the<br><small>REQ-VLEVEL-817</small>"]
-    REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small>"]
-    REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small>"]
+    REQ_ACVERIFY_821["Mapping verifies tags to labelled criteria<br><small>REQ-ACVERIFY-821</small>"]
+    REQ_ACVERIFY_822["When per-criterion coverage stays silent<br><small>REQ-ACVERIFY-822</small>"]
+    REQ_ACVERIFY_823["Emitting clauses, covered and gap on the map<br><small>REQ-ACVERIFY-823</small>"]
+    REQ_ATOMICITY_824["One obligation per clause, with an advisory length backstop<br><small>REQ-ATOMICITY-824</small>"]
+    REQ_ATOMICITY_825["statement-size measures length, not atomicity<br><small>REQ-ATOMICITY-825</small>"]
+    REQ_CANDIDATES_826["The plan's JSON shape and read-only scanning<br><small>REQ-CANDIDATES-826</small>"]
+    REQ_CANDIDATES_827["Fields a candidate carries<br><small>REQ-CANDIDATES-827</small>"]
+    REQ_CHECK_828["Gate errors that block a commit<br><small>REQ-CHECK-828</small>"]
+    REQ_CHECK_829["Contract drift and missing-coverage warnings<br><small>REQ-CHECK-829</small>"]
+    REQ_CHECK_830["Milestone shape and lock-file warnings<br><small>REQ-CHECK-830</small>"]
+    REQ_CHECK_831["Corpus-health warnings: needs, levels, cycles<br><small>REQ-CHECK-831</small>"]
+    REQ_CHECK_832["What the gate prints beyond pass or fail<br><small>REQ-CHECK-832</small>"]
+    REQ_CHECK_833["Advancing the lock file<br><small>REQ-CHECK-833</small>"]
+    REQ_CMDREGISTRY_834["One COMMANDS dict drives argparse, schema and docs<br><small>REQ-CMDREGISTRY-834</small>"]
+    REQ_CONFIG_949["Reading and applying '_config.json'<br><small>REQ-CONFIG-949</small>"]
+    REQ_CONTEXT_835["One Context section replaces three near-synonymous headings<br><small>REQ-CONTEXT-835</small>"]
+    REQ_COVERAGE_836["Counting untagged code as a read-only signal<br><small>REQ-COVERAGE-836</small>"]
+    REQ_DECOMPOSE_837["--decompose is opt-in; the default lint run never writes<br><small>REQ-DECOMPOSE-837</small>"]
+    REQ_DECOMPOSE_838["A created draft's shape: status, parent link, seeded clause, id<br><small>REQ-DECOMPOSE-838</small>"]
+    REQ_DECOMPOSE_839["The parent never changes, and the command knows its own limits<br><small>REQ-DECOMPOSE-839</small>"]
+    REQ_DOCBUNDLE_840["Flagging a large, unlinked docs/ HTML bundle<br><small>REQ-DOCBUNDLE-840</small>"]
+    REQ_DRIFT_841["Hashing only the normative sections<br><small>REQ-DRIFT-841</small>"]
+    REQ_DRIFT_842["Reading and writing the drift baseline<br><small>REQ-DRIFT-842</small>"]
+    REQ_DRIFTIMPACT_843["Name a drifted requirement's direct dependents<br><small>REQ-DRIFTIMPACT-843</small>"]
+    REQ_EXCALIDRAW_844["Shape, layout, and annotation vocabulary<br><small>REQ-EXCALIDRAW-844</small>"]
+    REQ_EXCALIDRAW_845["Connectors and the save() contract<br><small>REQ-EXCALIDRAW-845</small>"]
+    REQ_EXCALIDRAW_846["Named gates: crossing, legend, and overflow checks<br><small>REQ-EXCALIDRAW-846</small>"]
+    REQ_EXCALIDRAW_847["Text-overlap, label-fit gates, and the two hard gates<br><small>REQ-EXCALIDRAW-847</small>"]
+    REQ_EXCALIDRAW_848["Smoke test, render and discover verbs<br><small>REQ-EXCALIDRAW-848</small>"]
+    REQ_EXTRACT_849["Which files draft walks<br><small>REQ-EXTRACT-849</small>"]
+    REQ_EXTRACT_850["Writing one draft proposal per file<br><small>REQ-EXTRACT-850</small>"]
+    REQ_EXTRACT_851["Scoring risk and capturing an authoring hint<br><small>REQ-EXTRACT-851</small>"]
+    REQ_FANOUT_852["Counting children and reporting an out-of-band parent<br><small>REQ-FANOUT-852</small>"]
+    REQ_FINDINGS_853["Collecting open verify-intent bullets<br><small>REQ-FINDINGS-853</small>"]
+    REQ_FINDINGS_854["The raw findings report<br><small>REQ-FINDINGS-854</small>"]
+    REQ_FINDINGS_855["The triaged findings report<br><small>REQ-FINDINGS-855</small>"]
+    REQ_FINDINGS_856["Findings integration with map and gate<br><small>REQ-FINDINGS-856</small>"]
+    REQ_HEALTH_857["health is a read-only snapshot of the whole corpus<br><small>REQ-HEALTH-857</small>"]
+    REQ_HEALTH_858["The headline score: green means every axis passes at once<br><small>REQ-HEALTH-858</small>"]
+    REQ_HEALTH_859["Component counts, --json parity, and an always-zero exit<br><small>REQ-HEALTH-859</small>"]
+    REQ_INIT_860["Scaffolding the requirements folder and a starter .reqmapignore<br><small>REQ-INIT-860</small>"]
+    REQ_INIT_861["Running draft, lock, and map in a fixed order<br><small>REQ-INIT-861</small>"]
+    REQ_LEVEL_862["The level field, validated independently of layer<br><small>REQ-LEVEL-862</small>"]
+    REQ_LINT_863["What lint checks and skips<br><small>REQ-LINT-863</small>"]
+    REQ_LINT_864["Where the prose checks read from, and what fails a strict run<br><small>REQ-LINT-864</small>"]
+    REQ_LINTCHECKS_865["Readability checks: length, stacking, anonymous subjects<br><small>REQ-LINTCHECKS-865</small>"]
+    REQ_LINTCHECKS_866["Scope checks: acceptance count, over-scoping, file spread<br><small>REQ-LINTCHECKS-866</small>"]
+    REQ_LINTCHECKS_867["Atomic-form parity and layer-mismatch checks<br><small>REQ-LINTCHECKS-867</small>"]
+    REQ_LINTCHECKS_868["The vague-term check<br><small>REQ-LINTCHECKS-868</small>"]
+    REQ_LINTCHECKS_869["The redundant-modal check<br><small>REQ-LINTCHECKS-869</small>"]
+    REQ_MAP_870["Generating _map.json's node graph<br><small>REQ-MAP-870</small>"]
+    REQ_MAP_871["Repo, engine version, todos, and freshness checking<br><small>REQ-MAP-871</small>"]
+    REQ_MAP_872["Reading contract clauses across wrapped lines<br><small>REQ-MAP-872</small>"]
+    REQ_MAP_873["Deduping intent against the contract<br><small>REQ-MAP-873</small>"]
+    REQ_MAPDIAGRAMS_874["_map.md: five legended, always-regenerated Mermaid blocks<br><small>REQ-MAPDIAGRAMS-874</small>"]
+    REQ_MAPDIAGRAMS_875["Specification Hierarchy: satisfies edges only, code counted not drawn<br><small>REQ-MAPDIAGRAMS-875</small>"]
+    REQ_MAPDIAGRAMS_876["System Map: per-area subgraphs, bus edges hidden<br><small>REQ-MAPDIAGRAMS-876</small>"]
+    REQ_MAPDIAGRAMS_877["Dependency Map is area-level; Req→Code colors and collapses lines<br><small>REQ-MAPDIAGRAMS-877</small>"]
+    REQ_MAPDIAGRAMS_878["Risk diagram: only flagged requirements, each with advice<br><small>REQ-MAPDIAGRAMS-878</small>"]
+    REQ_MEMBERDRIFT_879["The member-hash sidecar<br><small>REQ-MEMBERDRIFT-879</small>"]
+    REQ_MEMBERDRIFT_880["Warning when code moves ahead of its spec<br><small>REQ-MEMBERDRIFT-880</small>"]
+    REQ_NEW_881["Stamping a fresh requirement file from a template<br><small>REQ-NEW-881</small>"]
+    REQ_NEW_882["Refusing to clobber, and a scaffold that lints clean<br><small>REQ-NEW-882</small>"]
+    REQ_NEXT_883["next reads the same risk signals the Risk tab reads<br><small>REQ-NEXT-883</small>"]
+    REQ_NEXT_884["Four action buckets, two advisory ones, and untagged files<br><small>REQ-NEXT-884</small>"]
+    REQ_NEXT_885["Priority, then risk score, then id decide bucket order<br><small>REQ-NEXT-885</small>"]
+    REQ_NEXT_886["Each bucket truncates to a top few, --all shows everything<br><small>REQ-NEXT-886</small>"]
+    REQ_NEXT_887["An empty registry and a clean one get different messages<br><small>REQ-NEXT-887</small>"]
+    REQ_ORPHANCODE_888["Warning on a sizeable file with no requirement link<br><small>REQ-ORPHANCODE-888</small>"]
+    REQ_PAGES_889["Publish docs/map.html and flag it when it drifts<br><small>REQ-PAGES-889</small>"]
+    REQ_PARSE_890["load_requirements returns one meta/body/path record per file<br><small>REQ-PARSE-890</small>"]
+    REQ_PARSE_891["The hand-rolled frontmatter grammar: scalars and lists only<br><small>REQ-PARSE-891</small>"]
+    REQ_PARSE_892["Missing frontmatter, underscore files, and a BOM never crash the reader<br><small>REQ-PARSE-892</small>"]
+    REQ_PIPE_893["A closed reader ends the command with exit 0<br><small>REQ-PIPE-893</small>"]
+    REQ_PROMOTE_894["A surgical edit to the status line<br><small>REQ-PROMOTE-894</small>"]
+    REQ_PROMOTE_895["Refusing to confirm requirements with no code<br><small>REQ-PROMOTE-895</small>"]
+    REQ_PROMOTE_896["A missing test link warns but does not block<br><small>REQ-PROMOTE-896</small>"]
+    REQ_PROMOTE_TODO_897["Scaffolding a draft from a matched TODO item<br><small>REQ-PROMOTE-TODO-897</small>"]
+    REQ_PROMOTE_TODO_898["Refusing an unresolvable promotion<br><small>REQ-PROMOTE-TODO-898</small>"]
+    REQ_PROMOTE_TODO_899["TODO.md stays untouched unless --mark-done asks otherwise<br><small>REQ-PROMOTE-TODO-899</small>"]
+    REQ_PROSE_900["Sorting prose files into three drafting buckets<br><small>REQ-PROSE-900</small>"]
+    REQ_PROSE_901["Scaffolding a draft from a prose file's own headings<br><small>REQ-PROSE-901</small>"]
+    REQ_PYFLOOR_902["Refusing an interpreter below the declared floor<br><small>REQ-PYFLOOR-902</small>"]
+    REQ_REGISTRYLAG_903["Counting commits since the registry last moved<br><small>REQ-REGISTRYLAG-903</small>"]
+    REQ_REGISTRYLAG_904["Reporting lag without ever gating on it<br><small>REQ-REGISTRYLAG-904</small>"]
+    REQ_REPRO_905["Rebuilding and diffing each committed artifact in CI<br><small>REQ-REPRO-905</small>"]
+    REQ_REVIEW_906["A deterministic plan for an out-of-band AI review<br><small>REQ-REVIEW-906</small>"]
+    REQ_ROADMAP_907["A behind roadmap and an unversioned heading, both read-only<br><small>REQ-ROADMAP-907</small>"]
+    REQ_RULES_947["One registry of gate rules<br><small>REQ-RULES-947</small>"]
+    REQ_RULES_948["Codes on every finding, and per-requirement exemption<br><small>REQ-RULES-948</small>"]
+    REQ_SCAN_908["scan_members walks the tree and collects role: ID tags<br><small>REQ-SCAN-908</small>"]
+    REQ_SCAN_909["One tag can bind several requirements, and directories are pruned<br><small>REQ-SCAN-909</small>"]
+    REQ_SCAN_910["List members per capability<br><small>REQ-SCAN-910</small>"]
+    REQ_SCANCACHE_911["Caching scan results without changing them<br><small>REQ-SCANCACHE-911</small>"]
+    REQ_SEARCH_912["Ranking a query against the corpus<br><small>REQ-SEARCH-912</small>"]
+    REQ_SEARCH_913["Printing ranked matches with their score<br><small>REQ-SEARCH-913</small>"]
+    REQ_SEARCH_914["The relevance floor and the empty-query message<br><small>REQ-SEARCH-914</small>"]
+    REQ_SEARCH_915["Search always exits zero on a well-formed query<br><small>REQ-SEARCH-915</small>"]
+    REQ_SELFGATE_916["Five files wire the gate into CI, hooks, and a consumer's Action<br><small>REQ-SELFGATE-916</small>"]
+    REQ_SHOW_917["A one-screen header, intent and contract<br><small>REQ-SHOW-917</small>"]
+    REQ_SHOW_918["Dependencies both ways, and the code members<br><small>REQ-SHOW-918</small>"]
+    REQ_SHOW_919["Open questions, risk signals, and a caller-visible exit code<br><small>REQ-SHOW-919</small>"]
+    REQ_SIMILAR_920["Reporting overlapping requirement pairs<br><small>REQ-SIMILAR-920</small>"]
+    REQ_SIMILAR_921["Building the comparison bag of words<br><small>REQ-SIMILAR-921</small>"]
+    REQ_SIMILAR_922["Weighting terms and scoring a pair<br><small>REQ-SIMILAR-922</small>"]
+    REQ_SIMILAR_923["The relevance threshold and report format<br><small>REQ-SIMILAR-923</small>"]
+    REQ_SITE_924["Inject engine-owned regions into a presentation page<br><small>REQ-SITE-924</small>"]
+    REQ_STALEENGINE_925["The gate action reports a stale vendored engine<br><small>REQ-STALEENGINE-925</small>"]
+    REQ_STALEENGINE_926["The staleness probe fails open, never the gate itself<br><small>REQ-STALEENGINE-926</small>"]
+    REQ_SUGGESTVERIFIES_927["Proposing a tag from a matching test name<br><small>REQ-SUGGESTVERIFIES-927</small>"]
+    REQ_SUGGESTVERIFIES_928["Refusing a match that could be wrong<br><small>REQ-SUGGESTVERIFIES-928</small>"]
+    REQ_SUGGESTVERIFIES_929["A dry run by default, --apply to write<br><small>REQ-SUGGESTVERIFIES-929</small>"]
+    REQ_TESTLINK_930["Checking every tested-by link, at every status<br><small>REQ-TESTLINK-930</small>"]
+    REQ_TESTLINK_931["Recognizing a test function by shape, not by parsing<br><small>REQ-TESTLINK-931</small>"]
+    REQ_TESTLINK_932["Recognizing Rust, shell, and stdlib-style test entry points<br><small>REQ-TESTLINK-932</small>"]
+    REQ_TESTLINK_933["Reporting a broken link as a warning, never an error<br><small>REQ-TESTLINK-933</small>"]
+    REQ_TRACE_934["Declaring and checking a satisfies: link<br><small>REQ-TRACE-934</small>"]
+    REQ_TRACE_935["How need and aggregate layers are exempt from code checks<br><small>REQ-TRACE-935</small>"]
+    REQ_TRACKED_936["Warning when a member is not tracked by git<br><small>REQ-TRACKED-936</small>"]
+    REQ_TRANSLATE_937["Detecting language and hashing what changes a translation<br><small>REQ-TRANSLATE-937</small>"]
+    REQ_TRANSLATE_938["Fidelity checking, fail-open failures, and reading the cache<br><small>REQ-TRANSLATE-938</small>"]
+    REQ_UNSCANNEDTAG_939["Warning about a tag the scan never reads<br><small>REQ-UNSCANNEDTAG-939</small>"]
+    REQ_VIEWER_940["Writing _map.html from the vendored template<br><small>REQ-VIEWER-940</small>"]
+    REQ_VIEWER_941["Escaping the inlined graph for embedded ‹script›<br><small>REQ-VIEWER-941</small>"]
+    REQ_VIEWER_942["Ranking nodes and rendering acceptance criteria as authored<br><small>REQ-VIEWER-942</small>"]
+    REQ_VIEWER_943["UI chrome language, requirement content untranslated<br><small>REQ-VIEWER-943</small>"]
+    REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
+    REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
+    REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]
   end
   subgraph sg_SYS["SYS"]
     SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small>"]
@@ -854,1140 +416,303 @@ graph LR
   ARCH_TRANSLATE_044 --> ARCH_VIEWER_007
   ARCH_VRUNGS_054 --> ARCH_LEVEL_051
   ARCH_VRUNGS_054 --> ARCH_VLEVEL_037
+  style ARCH_CONFIG_060 stroke-width:3px
+  style REQ_CONFIG_949 stroke-width:3px
   style ARCH_DESCRIPTION_057 stroke-width:3px
   style ARCH_DRIFT_003 stroke-width:3px
+  style REQ_DRIFT_841 stroke-width:3px
+  style REQ_DRIFT_842 stroke-width:3px
   style ARCH_MODULEFILE_056 stroke-width:3px
   style ARCH_PARSE_001 stroke-width:3px
+  style REQ_PARSE_890 stroke-width:3px
+  style REQ_PARSE_891 stroke-width:3px
+  style REQ_PARSE_892 stroke-width:3px
+  style ARCH_RULES_059 stroke-width:3px
+  style REQ_RULES_947 stroke-width:3px
+  style REQ_RULES_948 stroke-width:3px
   style ARCH_SCAN_002 stroke-width:3px
+  style REQ_SCAN_908 stroke-width:3px
+  style REQ_SCAN_909 stroke-width:3px
 ```
 
 ## Requirement-to-Code
 
-_Each requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected)._
+_Each system/architecture requirement → its code; arrow label = role (`implements` / `tested-by`). Red = confirmed but no code linked (a gap); grey = baseline/draft, not linked yet (expected). Code-level requirements are omitted here (see the viewer)._
 
 ```mermaid
 graph LR
   ARCH_ACVERIFY_019["Per-criterion test coverage<br><small>ARCH-ACVERIFY-019</small>"]
-  f_plugin_scripts_reqmap_py_1226_3635["plugin/scripts/reqmap.py:1226-3635"]
-  ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_py_1226_3635
+  f_plugin_scripts_reqmap_py_1332_3812["plugin/scripts/reqmap.py:1332-3812"]
+  ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_py_1332_3812
   f_plugin_scripts_test_reqmap_py_3978_6320["plugin/scripts/test_reqmap.py:3978-6320"]
   ARCH_ACVERIFY_019 -->|tested-by| f_plugin_scripts_test_reqmap_py_3978_6320
-  REQ_ACVERIFY_233["The gate scans code for # verifies: ‹id›#AC-N<br><small>REQ-ACVERIFY-233</small>"]
-  style REQ_ACVERIFY_233 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_234["The gate recognises a verifies tag only with<br><small>REQ-ACVERIFY-234</small>"]
-  style REQ_ACVERIFY_234 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_235["For a confirmed requirement that labels its criteria<br><small>REQ-ACVERIFY-235</small>"]
-  style REQ_ACVERIFY_235 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_236["That single warning also states how many labelled<br><small>REQ-ACVERIFY-236</small>"]
-  style REQ_ACVERIFY_236 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_237["A confirmed requirement with no verifies tag is<br><small>REQ-ACVERIFY-237</small>"]
-  style REQ_ACVERIFY_237 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_238["A requirement whose criteria are unlabelled bullets is<br><small>REQ-ACVERIFY-238</small>"]
-  style REQ_ACVERIFY_238 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_239["A criterion marked ‹!-- verifiable by: inspection --›<br><small>REQ-ACVERIFY-239</small>"]
-  style REQ_ACVERIFY_239 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_240["The map emits clauses and covered on a<br><small>REQ-ACVERIFY-240</small>"]
-  style REQ_ACVERIFY_240 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_241["The map emits a gap naming the untagged<br><small>REQ-ACVERIFY-241</small>"]
-  style REQ_ACVERIFY_241 fill:#eee,stroke:#bbb,color:#888
-  REQ_ACVERIFY_243["The check is warn-only. It never changes the<br><small>REQ-ACVERIFY-243</small>"]
-  style REQ_ACVERIFY_243 fill:#eee,stroke:#bbb,color:#888
   ARCH_ATOMICFORM_053["The atomic requirement form<br><small>ARCH-ATOMICFORM-053</small>"]
-  f_plugin_scripts_reqmap_py_1699_5925["plugin/scripts/reqmap.py:1699-5925"]
-  ARCH_ATOMICFORM_053 -->|implements| f_plugin_scripts_reqmap_py_1699_5925
-  f_plugin_scripts_test_reqmap_py_7463["plugin/scripts/test_reqmap.py:7463"]
-  ARCH_ATOMICFORM_053 -->|tested-by| f_plugin_scripts_test_reqmap_py_7463
+  f_plugin_scripts_reqmap_py_1797_6084["plugin/scripts/reqmap.py:1797-6084"]
+  ARCH_ATOMICFORM_053 -->|implements| f_plugin_scripts_reqmap_py_1797_6084
+  f_plugin_scripts_test_reqmap_py_7465["plugin/scripts/test_reqmap.py:7465"]
+  ARCH_ATOMICFORM_053 -->|tested-by| f_plugin_scripts_test_reqmap_py_7465
   ARCH_ATOMICITY_049["Statement atomicity<br><small>ARCH-ATOMICITY-049</small>"]
-  f_plugin_scripts_reqmap_py_4433_4441["plugin/scripts/reqmap.py:4433-4441"]
-  ARCH_ATOMICITY_049 -->|implements| f_plugin_scripts_reqmap_py_4433_4441
+  f_plugin_scripts_reqmap_py_4613_4621["plugin/scripts/reqmap.py:4613-4621"]
+  ARCH_ATOMICITY_049 -->|implements| f_plugin_scripts_reqmap_py_4613_4621
   f_plugin_scripts_test_reqmap_py_7070["plugin/scripts/test_reqmap.py:7070"]
   ARCH_ATOMICITY_049 -->|tested-by| f_plugin_scripts_test_reqmap_py_7070
-  REQ_ATOMICITY_244["A clause in a Contract section describes a<br><small>REQ-ATOMICITY-244</small>"]
-  style REQ_ATOMICITY_244 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_245["A clause carrying two independent obligations counts as<br><small>REQ-ATOMICITY-245</small>"]
-  style REQ_ATOMICITY_245 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_247["A clause normally holds no more than LINT_STATEMENT_WORDS<br><small>REQ-ATOMICITY-247</small>"]
-  style REQ_ATOMICITY_247 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_248["The statement-size check reports a Contract clause above<br><small>REQ-ATOMICITY-248</small>"]
-  style REQ_ATOMICITY_248 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_249["The threshold is advisory. A clause above it<br><small>REQ-ATOMICITY-249</small>"]
-  style REQ_ATOMICITY_249 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_250["Lint_exempt: statement-size silences the check for one requirement<br><small>REQ-ATOMICITY-250</small>"]
-  style REQ_ATOMICITY_250 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_252["A short clause may carry several independent obligations<br><small>REQ-ATOMICITY-252</small>"]
-  style REQ_ATOMICITY_252 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_253["A finding asks the author to re-read the<br><small>REQ-ATOMICITY-253</small>"]
-  style REQ_ATOMICITY_253 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_254["The check counts words after each backticked code<br><small>REQ-ATOMICITY-254</small>"]
-  style REQ_ATOMICITY_254 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_255["A nested sub-bullet is counted as its own<br><small>REQ-ATOMICITY-255</small>"]
-  style REQ_ATOMICITY_255 fill:#eee,stroke:#bbb,color:#888
-  REQ_ATOMICITY_256["The check reads the Contract section only. Acceptance<br><small>REQ-ATOMICITY-256</small>"]
-  style REQ_ATOMICITY_256 fill:#eee,stroke:#bbb,color:#888
   ARCH_CANDIDATES_009["Capability candidates (extraction plan)<br><small>ARCH-CANDIDATES-009</small>"]
-  f_plugin_scripts_reqmap_py_3213_3379["plugin/scripts/reqmap.py:3213-3379"]
-  ARCH_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_3213_3379
+  f_plugin_scripts_reqmap_py_3390_3556["plugin/scripts/reqmap.py:3390-3556"]
+  ARCH_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_3390_3556
   f_plugin_scripts_test_reqmap_py_1216_6962["plugin/scripts/test_reqmap.py:1216-6962"]
   ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_py_1216_6962
-  REQ_CANDIDATES_257["Plan emits a single JSON object, to stdout<br><small>REQ-CANDIDATES-257</small>"]
-  style REQ_CANDIDATES_257 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_258["Plan writes NO .md files. It cannot repeat<br><small>REQ-CANDIDATES-258</small>"]
-  style REQ_CANDIDATES_258 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_259["Plan walks the code with the same exclusions<br><small>REQ-CANDIDATES-259</small>"]
-  style REQ_CANDIDATES_259 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_260["Plan gathers per-file facts: module and symbol docstrings<br><small>REQ-CANDIDATES-260</small>"]
-  style REQ_CANDIDATES_260 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_261["Plan lists every scannable code file as a<br><small>REQ-CANDIDATES-261</small>"]
-  style REQ_CANDIDATES_261 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_262["Plan reads top-level signatures from Python via ast<br><small>REQ-CANDIDATES-262</small>"]
-  style REQ_CANDIDATES_262 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_263["An unparseable file yields empty facts. It never<br><small>REQ-CANDIDATES-263</small>"]
-  style REQ_CANDIDATES_263 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_264["Each candidate carries (suggested_id, suggested_layer, files, docstrings(), signatures<br><small>REQ-CANDIDATES-264</small>"]
-  style REQ_CANDIDATES_264 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_265["Is_test is true when every file of the<br><small>REQ-CANDIDATES-265</small>"]
-  style REQ_CANDIDATES_265 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_266["Depends_on is derived from imports resolved to other<br><small>REQ-CANDIDATES-266</small>"]
-  style REQ_CANDIDATES_266 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_267["Suggested_layer is bus when importer_count ≥ BUS_FANIN_THRESHOLD, else<br><small>REQ-CANDIDATES-267</small>"]
-  style REQ_CANDIDATES_267 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_268["A file already carrying an implements: tag is<br><small>REQ-CANDIDATES-268</small>"]
-  style REQ_CANDIDATES_268 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_269["Plan groups files by requirements/_capmap.json when that file<br><small>REQ-CANDIDATES-269</small>"]
-  style REQ_CANDIDATES_269 fill:#eee,stroke:#bbb,color:#888
-  REQ_CANDIDATES_270["Absent _capmap.json, plan falls back to one candidate<br><small>REQ-CANDIDATES-270</small>"]
-  style REQ_CANDIDATES_270 fill:#eee,stroke:#bbb,color:#888
   ARCH_CHECK_006["The gate<br><small>ARCH-CHECK-006</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_CHECK_006 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1829_6814["plugin/scripts/reqmap.py:1829-6814"]
-  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1829_6814
+  f_plugin_scripts_reqmap_py_1927_6979["plugin/scripts/reqmap.py:1927-6979"]
+  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1927_6979
   f_plugin_scripts_test_reqmap_py_145_6518["plugin/scripts/test_reqmap.py:145-6518"]
   ARCH_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_145_6518
-  REQ_CHECK_272["A dangling tag — a code tag referencing<br><small>REQ-CHECK-272</small>"]
-  style REQ_CHECK_272 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_273["An invalid status or an invalid layer is<br><small>REQ-CHECK-273</small>"]
-  style REQ_CHECK_273 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_274["A depends_on pointing at a missing id is<br><small>REQ-CHECK-274</small>"]
-  style REQ_CHECK_274 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_275["An enforced requirement with no implements: member is<br><small>REQ-CHECK-275</small>"]
-  style REQ_CHECK_275 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_276["A requirement is enforced when its status is<br><small>REQ-CHECK-276</small>"]
-  style REQ_CHECK_276 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_277["A layer: need requirement is exempt from that<br><small>REQ-CHECK-277</small>"]
-  style REQ_CHECK_277 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_278["Gate reports drift as a WARN, never an<br><small>REQ-CHECK-278</small>"]
-  style REQ_CHECK_278 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_279["The drift warning names the member file:line locations<br><small>REQ-CHECK-279</small>"]
-  style REQ_CHECK_279 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_280["A confirmed requirement with no tested-by: member is<br><small>REQ-CHECK-280</small>"]
-  style REQ_CHECK_280 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_281["A requirement carrying a test_exempt: ‹reason› opt-out in<br><small>REQ-CHECK-281</small>"]
-  style REQ_CHECK_281 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_282["A layer: need requirement is exempt from it<br><small>REQ-CHECK-282</small>"]
-  style REQ_CHECK_282 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_283["A confirmed requirement missing a ## WHAT —<br><small>REQ-CHECK-283</small>"]
-  style REQ_CHECK_283 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_284["A confirmed requirement missing a ## HOW —<br><small>REQ-CHECK-284</small>"]
-  style REQ_CHECK_284 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_285["The requirement milestone: field is optional. When present<br><small>REQ-CHECK-285</small>"]
-  style REQ_CHECK_285 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_286["A malformed milestone: value is a WARN, because<br><small>REQ-CHECK-286</small>"]
-  style REQ_CHECK_286 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_287["A deprecated requirement is exempt from the milestone<br><small>REQ-CHECK-287</small>"]
-  style REQ_CHECK_287 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_288["A present-but-unreadable _reqlock.json is a WARN. Drift is<br><small>REQ-CHECK-288</small>"]
-  style REQ_CHECK_288 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_289["A lock sidecar (_reqlock.json or _memberlock.json) that exists<br><small>REQ-CHECK-289</small>"]
-  style REQ_CHECK_289 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_291["That git-tracking check is fail-open: gate stays silent<br><small>REQ-CHECK-291</small>"]
-  style REQ_CHECK_291 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_292["Gate names every requirement whose body lacks a<br><small>REQ-CHECK-292</small>"]
-  style REQ_CHECK_292 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_293["Gate counts those legacy-schema requirements in the summary<br><small>REQ-CHECK-293</small>"]
-  style REQ_CHECK_293 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_294["The legacy-schema warning does not affect the exit<br><small>REQ-CHECK-294</small>"]
-  style REQ_CHECK_294 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_295["A confirmed need with no validated-against: member is<br><small>REQ-CHECK-295</small>"]
-  style REQ_CHECK_295 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_296["A confirmed bus requirement whose levelled tested-by: links<br><small>REQ-CHECK-296</small>"]
-  style REQ_CHECK_296 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_297["A depends_on cycle is a WARN naming the<br><small>REQ-CHECK-297</small>"]
-  style REQ_CHECK_297 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_298["The cycle warning stays a warning under --strict<br><small>REQ-CHECK-298</small>"]
-  style REQ_CHECK_298 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_299["Gate prints an advisory line carrying the open<br><small>REQ-CHECK-299</small>"]
-  style REQ_CHECK_299 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_300["That advisory line does not affect the exit<br><small>REQ-CHECK-300</small>"]
-  style REQ_CHECK_300 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_301["Gate prints a summary of requirements, members, errors<br><small>REQ-CHECK-301</small>"]
-  style REQ_CHECK_301 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_302["With --update-lock, gate writes the current binding hashes<br><small>REQ-CHECK-302</small>"]
-  style REQ_CHECK_302 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_303["Sync and the deprecated check alias pass --update-lock<br><small>REQ-CHECK-303</small>"]
-  style REQ_CHECK_303 fill:#eee,stroke:#bbb,color:#888
-  REQ_CHECK_304["The gate verb itself is report-only<br><small>REQ-CHECK-304</small>"]
-  style REQ_CHECK_304 fill:#eee,stroke:#bbb,color:#888
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
-  f_plugin_scripts_reqmap_py_264_2669["plugin/scripts/reqmap.py:264-2669"]
-  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_264_2669
+  f_plugin_scripts_reqmap_py_261_753["plugin/scripts/reqmap.py:261-753"]
+  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_261_753
   f_plugin_scripts_test_reqmap_py_6179["plugin/scripts/test_reqmap.py:6179"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_6179
-  REQ_CMDREGISTRY_306["Argparse choices are derived from COMMANDS at runtime<br><small>REQ-CMDREGISTRY-306</small>"]
-  style REQ_CMDREGISTRY_306 fill:#eee,stroke:#bbb,color:#888
-  REQ_CMDREGISTRY_307["Tool_definition.json (the function-calling schema) is generated from COMMANDS<br><small>REQ-CMDREGISTRY-307</small>"]
-  style REQ_CMDREGISTRY_307 fill:#eee,stroke:#bbb,color:#888
-  REQ_CMDREGISTRY_308["The SKILL.universal.md command table is generated from COMMANDS<br><small>REQ-CMDREGISTRY-308</small>"]
-  style REQ_CMDREGISTRY_308 fill:#eee,stroke:#bbb,color:#888
-  REQ_CMDREGISTRY_309["Internal commands (e.g. gen-integration) are excluded from AI-facing<br><small>REQ-CMDREGISTRY-309</small>"]
-  style REQ_CMDREGISTRY_309 fill:#eee,stroke:#bbb,color:#888
-  REQ_CMDREGISTRY_310["The gate fails (exit non-zero) when a committed<br><small>REQ-CMDREGISTRY-310</small>"]
-  style REQ_CMDREGISTRY_310 fill:#eee,stroke:#bbb,color:#888
-  REQ_CMDREGISTRY_311["All generators and the gate check are stdlib-only<br><small>REQ-CMDREGISTRY-311</small>"]
-  style REQ_CMDREGISTRY_311 fill:#eee,stroke:#bbb,color:#888
+  ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
+  f_plugin_scripts_reqmap_py_7486_7644["plugin/scripts/reqmap.py:7486-7644"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_7486_7644
+  f_plugin_scripts_test_reqmap_py_8052["plugin/scripts/test_reqmap.py:8052"]
+  ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_py_8052
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
-  f_plugin_scripts_reqmap_py_5966["plugin/scripts/reqmap.py:5966"]
-  ARCH_CONTEXT_048 -->|implements| f_plugin_scripts_reqmap_py_5966
+  f_plugin_scripts_reqmap_py_6125["plugin/scripts/reqmap.py:6125"]
+  ARCH_CONTEXT_048 -->|implements| f_plugin_scripts_reqmap_py_6125
   f_plugin_scripts_test_reqmap_py_1673["plugin/scripts/test_reqmap.py:1673"]
   ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_py_1673
-  REQ_CONTEXT_312["New's built-in template scaffolds the Context form for<br><small>REQ-CONTEXT-312</small>"]
-  style REQ_CONTEXT_312 fill:#eee,stroke:#bbb,color:#888
-  REQ_CONTEXT_313["The Context form groups sub-topics with a bold<br><small>REQ-CONTEXT-313</small>"]
-  style REQ_CONTEXT_313 fill:#eee,stroke:#bbb,color:#888
-  REQ_CONTEXT_314["_context_group(body, label) returns the bullets under one bold<br><small>REQ-CONTEXT-314</small>"]
-  style REQ_CONTEXT_314 fill:#eee,stroke:#bbb,color:#888
-  REQ_CONTEXT_316["_build_map_data's notes and current_impl fields try the legacy<br><small>REQ-CONTEXT-316</small>"]
-  style REQ_CONTEXT_316 fill:#eee,stroke:#bbb,color:#888
-  REQ_CONTEXT_317["## Context and its sub-groups are commentary: not<br><small>REQ-CONTEXT-317</small>"]
-  style REQ_CONTEXT_317 fill:#eee,stroke:#bbb,color:#888
   ARCH_COVERAGE_029["Untagged-code coverage signal<br><small>ARCH-COVERAGE-029</small>"]
-  f_plugin_scripts_reqmap_py_5494["plugin/scripts/reqmap.py:5494"]
-  ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_py_5494
+  f_plugin_scripts_reqmap_py_1641_5653["plugin/scripts/reqmap.py:1641-5653"]
+  ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_py_1641_5653
   f_plugin_scripts_test_reqmap_py_3673["plugin/scripts/test_reqmap.py:3673"]
   ARCH_COVERAGE_029 -->|tested-by| f_plugin_scripts_test_reqmap_py_3673
-  REQ_COVERAGE_318["The capability reports the count of scannable code<br><small>REQ-COVERAGE-318</small>"]
-  style REQ_COVERAGE_318 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_319["The denominator is exactly _scan_untagged's (see ARCH-NEXT-013): the<br><small>REQ-COVERAGE-319</small>"]
-  style REQ_COVERAGE_319 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_320["Any membership tag counts a file as covered<br><small>REQ-COVERAGE-320</small>"]
-  style REQ_COVERAGE_320 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_321["The health command includes this count as an<br><small>REQ-COVERAGE-321</small>"]
-  style REQ_COVERAGE_321 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_322["The health command also includes it as a<br><small>REQ-COVERAGE-322</small>"]
-  style REQ_COVERAGE_322 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_323["The untagged key is absent, not zero, when<br><small>REQ-COVERAGE-323</small>"]
-  style REQ_COVERAGE_323 fill:#eee,stroke:#bbb,color:#888
-  REQ_COVERAGE_326["A file is silenced from the count either<br><small>REQ-COVERAGE-326</small>"]
-  style REQ_COVERAGE_326 fill:#eee,stroke:#bbb,color:#888
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_scripts_reqmap_py_2236_4864["plugin/scripts/reqmap.py:2236-4864"]
-  ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2236_4864
-  f_plugin_scripts_test_reqmap_py_7148_7906["plugin/scripts/test_reqmap.py:7148-7906"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7148_7906
-  REQ_DECOMPOSE_328["Lint writes no file during the default run<br><small>REQ-DECOMPOSE-328</small>"]
-  style REQ_DECOMPOSE_328 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_329["Lint --decompose creates one draft requirement for each<br><small>REQ-DECOMPOSE-329</small>"]
-  style REQ_DECOMPOSE_329 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_330["The gate, the pre-commit hook and CI never<br><small>REQ-DECOMPOSE-330</small>"]
-  style REQ_DECOMPOSE_330 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_331["Each created draft carries status: draft and a<br><small>REQ-DECOMPOSE-331</small>"]
-  style REQ_DECOMPOSE_331 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_332["The reported clause text is seeded into the<br><small>REQ-DECOMPOSE-332</small>"]
-  style REQ_DECOMPOSE_332 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_333["The created id keeps the parent's area and<br><small>REQ-DECOMPOSE-333</small>"]
-  style REQ_DECOMPOSE_333 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_334["Lint --decompose leaves the parent unchanged, so no<br><small>REQ-DECOMPOSE-334</small>"]
-  style REQ_DECOMPOSE_334 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_335["The command chooses the split by word count<br><small>REQ-DECOMPOSE-335</small>"]
-  style REQ_DECOMPOSE_335 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_336["Each created draft records that its split point<br><small>REQ-DECOMPOSE-336</small>"]
-  style REQ_DECOMPOSE_336 fill:#eee,stroke:#bbb,color:#888
-  REQ_DECOMPOSE_338["Lint --decompose skips a clause whose target file<br><small>REQ-DECOMPOSE-338</small>"]
-  style REQ_DECOMPOSE_338 fill:#eee,stroke:#bbb,color:#888
+  f_plugin_scripts_reqmap_py_2334_5040["plugin/scripts/reqmap.py:2334-5040"]
+  ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2334_5040
+  f_plugin_scripts_test_reqmap_py_7148_7908["plugin/scripts/test_reqmap.py:7148-7908"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7148_7908
   ARCH_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>ARCH-DESCRIPTION-057</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_DESCRIPTION_057 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1800_2125["plugin/scripts/reqmap.py:1800-2125"]
-  ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1800_2125
-  f_plugin_scripts_test_reqmap_py_7765["plugin/scripts/test_reqmap.py:7765"]
-  ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7765
+  f_plugin_scripts_reqmap_py_1898_2223["plugin/scripts/reqmap.py:1898-2223"]
+  ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1898_2223
+  f_plugin_scripts_test_reqmap_py_7767["plugin/scripts/test_reqmap.py:7767"]
+  ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7767
   ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
-  f_plugin_scripts_reqmap_py_1505["plugin/scripts/reqmap.py:1505"]
-  ARCH_DOCBUNDLE_026 -->|implements| f_plugin_scripts_reqmap_py_1505
+  f_plugin_scripts_reqmap_py_1601_2655["plugin/scripts/reqmap.py:1601-2655"]
+  ARCH_DOCBUNDLE_026 -->|implements| f_plugin_scripts_reqmap_py_1601_2655
   f_plugin_scripts_test_reqmap_py_587["plugin/scripts/test_reqmap.py:587"]
   ARCH_DOCBUNDLE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_587
-  REQ_DOCBUNDLE_339["The gate warns for each file under docs/<br><small>REQ-DOCBUNDLE-339</small>"]
-  style REQ_DOCBUNDLE_339 fill:#eee,stroke:#bbb,color:#888
-  REQ_DOCBUNDLE_340["The gate considers only files under docs/<br><small>REQ-DOCBUNDLE-340</small>"]
-  style REQ_DOCBUNDLE_340 fill:#eee,stroke:#bbb,color:#888
-  REQ_DOCBUNDLE_341["The check skips engine-generated outputs: a file whose<br><small>REQ-DOCBUNDLE-341</small>"]
-  style REQ_DOCBUNDLE_341 fill:#eee,stroke:#bbb,color:#888
-  REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small>"]
-  style REQ_DOCBUNDLE_343 fill:#eee,stroke:#bbb,color:#888
   ARCH_DRIFT_003["Contract hashing & lock<br><small>ARCH-DRIFT-003</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_DRIFT_003 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1908_1969["plugin/scripts/reqmap.py:1908-1969"]
-  ARCH_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_1908_1969
+  f_plugin_scripts_reqmap_py_2006_2626["plugin/scripts/reqmap.py:2006-2626"]
+  ARCH_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_2006_2626
   f_plugin_scripts_test_reqmap_py_155_6336["plugin/scripts/test_reqmap.py:155-6336"]
   ARCH_DRIFT_003 -->|tested-by| f_plugin_scripts_test_reqmap_py_155_6336
-  REQ_DRIFT_200["Binding_hash computes a stable 12-character hex content hash<br><small>REQ-DRIFT-200</small>"]
-  style REQ_DRIFT_200 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_201["The normative sections are the Contract and Acceptance<br><small>REQ-DRIFT-201</small>"]
-  style REQ_DRIFT_201 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_202["Rationale, notes, verify-intent, links and the member list<br><small>REQ-DRIFT-202</small>"]
-  style REQ_DRIFT_202 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_203["The hash is deterministic for identical normative content<br><small>REQ-DRIFT-203</small>"]
-  style REQ_DRIFT_203 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_204["Load_lock and save_lock read and write the per-id<br><small>REQ-DRIFT-204</small>"]
-  style REQ_DRIFT_204 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_205["A missing, empty or unparseable lock loads as<br><small>REQ-DRIFT-205</small>"]
-  style REQ_DRIFT_205 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_206["Save_lock creates the requirements directory if it is<br><small>REQ-DRIFT-206</small>"]
-  style REQ_DRIFT_206 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFT_207["Save_lock writes sorted, indented JSON, so the lock<br><small>REQ-DRIFT-207</small>"]
-  style REQ_DRIFT_207 fill:#eee,stroke:#bbb,color:#888
   ARCH_DRIFTIMPACT_035["Drift blast-radius: name dependents<br><small>ARCH-DRIFTIMPACT-035</small>"]
-  f_plugin_scripts_reqmap_py_2507["plugin/scripts/reqmap.py:2507"]
-  ARCH_DRIFTIMPACT_035 -->|implements| f_plugin_scripts_reqmap_py_2507
+  f_plugin_scripts_reqmap_py_2626["plugin/scripts/reqmap.py:2626"]
+  ARCH_DRIFTIMPACT_035 -->|implements| f_plugin_scripts_reqmap_py_2626
   f_plugin_scripts_test_reqmap_py_802["plugin/scripts/test_reqmap.py:802"]
   ARCH_DRIFTIMPACT_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_802
-  REQ_DRIFTIMPACT_347["When the gate reports a contract drift for<br><small>REQ-DRIFTIMPACT-347</small>"]
-  style REQ_DRIFTIMPACT_347 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFTIMPACT_348["The dependent list is sorted and deduplicated, so<br><small>REQ-DRIFTIMPACT-348</small>"]
-  style REQ_DRIFTIMPACT_348 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFTIMPACT_349["Only direct dependents are named (one edge, not<br><small>REQ-DRIFTIMPACT-349</small>"]
-  style REQ_DRIFTIMPACT_349 fill:#eee,stroke:#bbb,color:#888
-  REQ_DRIFTIMPACT_350["A drifted requirement with no dependents produces the<br><small>REQ-DRIFTIMPACT-350</small>"]
-  style REQ_DRIFTIMPACT_350 fill:#eee,stroke:#bbb,color:#888
   ARCH_EXCALIDRAW_030["Excalidraw scene builder — core API<br><small>ARCH-EXCALIDRAW-030</small>"]
   f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:2"]
   ARCH_EXCALIDRAW_030 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2
   f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_2["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"]
   ARCH_EXCALIDRAW_030 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_2
-  REQ_EXCALIDRAW_352["Scene() produces a valid Excalidraw JSON scene (schema<br><small>REQ-EXCALIDRAW-352</small>"]
-  style REQ_EXCALIDRAW_352 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_353["Scene exposes shape primitives: box, ellipse, diamond, frame<br><small>REQ-EXCALIDRAW-353</small>"]
-  style REQ_EXCALIDRAW_353 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_354["Scene exposes ISO 5807 flowchart aliases: process, terminator<br><small>REQ-EXCALIDRAW-354</small>"]
-  style REQ_EXCALIDRAW_354 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_355["Scene exposes layout helpers: row, column, grid, enclose<br><small>REQ-EXCALIDRAW-355</small>"]
-  style REQ_EXCALIDRAW_355 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_356["Scene exposes annotation helpers: title, label, legend, glossary<br><small>REQ-EXCALIDRAW-356</small>"]
-  style REQ_EXCALIDRAW_356 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_357["Scene exposes connector helpers: arrow, free_arrow, path, route_under<br><small>REQ-EXCALIDRAW-357</small>"]
-  style REQ_EXCALIDRAW_357 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_358[".save(basename, out_dir) writes both ‹basename›.excalidraw (the scene JSON)<br><small>REQ-EXCALIDRAW-358</small>"]
-  style REQ_EXCALIDRAW_358 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_359["Scene(seed=‹int›) produces byte-identical output across re-runs<br><small>REQ-EXCALIDRAW-359</small>"]
-  style REQ_EXCALIDRAW_359 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_360["The builder has no external dependencies — stdlib<br><small>REQ-EXCALIDRAW-360</small>"]
-  style REQ_EXCALIDRAW_360 fill:#eee,stroke:#bbb,color:#888
   ARCH_EXCALIDRAW_031["Excalidraw quality gates<br><small>ARCH-EXCALIDRAW-031</small>"]
   f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_3["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:3"]
   ARCH_EXCALIDRAW_031 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_3
   f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_3["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:3"]
   ARCH_EXCALIDRAW_031 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_3
-  REQ_EXCALIDRAW_361[".save() supports five named gates, each accepting 'warn'<br><small>REQ-EXCALIDRAW-361</small>"]
-  style REQ_EXCALIDRAW_361 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_362["Crossing_check: a bound arrow whose straight centre-to-centre path<br><small>REQ-EXCALIDRAW-362</small>"]
-  style REQ_EXCALIDRAW_362 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_363["Legend_check: a fill colour used on any shape<br><small>REQ-EXCALIDRAW-363</small>"]
-  style REQ_EXCALIDRAW_363 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_364["Overflow_check: a shape whose bound text is larger<br><small>REQ-EXCALIDRAW-364</small>"]
-  style REQ_EXCALIDRAW_364 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_365["Text_overlap_check: two free captions or label elements that<br><small>REQ-EXCALIDRAW-365</small>"]
-  style REQ_EXCALIDRAW_365 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_366["Label_fit_check: a bound arrow whose text label is<br><small>REQ-EXCALIDRAW-366</small>"]
-  style REQ_EXCALIDRAW_366 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_367[".save() additionally enforces two hard gates that raise<br><small>REQ-EXCALIDRAW-367</small>"]
-  style REQ_EXCALIDRAW_367 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_368["The inspection methods check_overlaps(), check_arrow_crossings(), check_legend_coverage(), check_text_overflow(), check_text_overlaps()<br><small>REQ-EXCALIDRAW-368</small>"]
-  style REQ_EXCALIDRAW_368 fill:#eee,stroke:#bbb,color:#888
   ARCH_EXCALIDRAW_032["Excalidraw builder CLI verbs<br><small>ARCH-EXCALIDRAW-032</small>"]
   f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_4["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:4"]
   ARCH_EXCALIDRAW_032 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_4
   f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:4"]
   ARCH_EXCALIDRAW_032 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4
-  REQ_EXCALIDRAW_370["Invoking python excalidraw_builder.py with no arguments runs the<br><small>REQ-EXCALIDRAW-370</small>"]
-  style REQ_EXCALIDRAW_370 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_371["Python excalidraw_builder.py render ‹scene.excalidraw› out_dir reads an existing<br><small>REQ-EXCALIDRAW-371</small>"]
-  style REQ_EXCALIDRAW_371 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_372["Python excalidraw_builder.py discover ‹repo› out.py scans ‹repo› for<br><small>REQ-EXCALIDRAW-372</small>"]
-  style REQ_EXCALIDRAW_372 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXCALIDRAW_373["Any unrecognised verb exits with code 2 and<br><small>REQ-EXCALIDRAW-373</small>"]
-  style REQ_EXCALIDRAW_373 fill:#eee,stroke:#bbb,color:#888
   ARCH_EXTRACT_008["Legacy extraction<br><small>ARCH-EXTRACT-008</small>"]
-  f_plugin_scripts_reqmap_py_3013_3191["plugin/scripts/reqmap.py:3013-3191"]
-  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_py_3013_3191
+  f_plugin_scripts_reqmap_py_3190_3368["plugin/scripts/reqmap.py:3190-3368"]
+  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_py_3190_3368
   f_plugin_scripts_test_reqmap_py_1056_7002["plugin/scripts/test_reqmap.py:1056-7002"]
   ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_py_1056_7002
-  REQ_EXTRACT_374["Draft walks every untagged scannable code file —<br><small>REQ-EXTRACT-374</small>"]
-  style REQ_EXTRACT_374 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_375["Draft skips a file that already carries a<br><small>REQ-EXTRACT-375</small>"]
-  style REQ_EXTRACT_375 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_376["Draft honors .reqmapignore, the same fnmatch globs scan<br><small>REQ-EXTRACT-376</small>"]
-  style REQ_EXTRACT_376 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_378["Draft proposes one requirements/DRAFT-.md per remaining file<br><small>REQ-EXTRACT-378</small>"]
-  style REQ_EXTRACT_378 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_379["Every proposal carries status: draft and a TODO<br><small>REQ-EXTRACT-379</small>"]
-  style REQ_EXTRACT_379 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_380["A proposal's Contract section opens with 'Every line<br><small>REQ-EXTRACT-380</small>"]
-  style REQ_EXTRACT_380 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_381["Draft creates the requirements directory if it is<br><small>REQ-EXTRACT-381</small>"]
-  style REQ_EXTRACT_381 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_382["Draft ids are path-aware, so two files sharing<br><small>REQ-EXTRACT-382</small>"]
-  style REQ_EXTRACT_382 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_383["Draft assigns a cheap risk score from TODO/FIXME/HACK/XXX<br><small>REQ-EXTRACT-383</small>"]
-  style REQ_EXTRACT_383 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_384["Draft routes a score of 2 or more<br><small>REQ-EXTRACT-384</small>"]
-  style REQ_EXTRACT_384 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_385["Re-running draft never overwrites an existing draft<br><small>REQ-EXTRACT-385</small>"]
-  style REQ_EXTRACT_385 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_386["A code proposal's WHERE section lists the file's<br><small>REQ-EXTRACT-386</small>"]
-  style REQ_EXTRACT_386 fill:#eee,stroke:#bbb,color:#888
-  REQ_EXTRACT_387["That surface is an authoring hint under WHERE<br><small>REQ-EXTRACT-387</small>"]
-  style REQ_EXTRACT_387 fill:#eee,stroke:#bbb,color:#888
   ARCH_FANOUT_052["Hierarchy breadth<br><small>ARCH-FANOUT-052</small>"]
-  f_plugin_scripts_reqmap_py_4499_4887["plugin/scripts/reqmap.py:4499-4887"]
-  ARCH_FANOUT_052 -->|implements| f_plugin_scripts_reqmap_py_4499_4887
+  f_plugin_scripts_reqmap_py_4679_5063["plugin/scripts/reqmap.py:4679-5063"]
+  ARCH_FANOUT_052 -->|implements| f_plugin_scripts_reqmap_py_4679_5063
   f_plugin_scripts_test_reqmap_py_7391["plugin/scripts/test_reqmap.py:7391"]
   ARCH_FANOUT_052 -->|tested-by| f_plugin_scripts_test_reqmap_py_7391
-  REQ_FANOUT_388["The fan-out check counts, per requirement, how many<br><small>REQ-FANOUT-388</small>"]
-  style REQ_FANOUT_388 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_389["The count reads the satisfies: graph only, never<br><small>REQ-FANOUT-389</small>"]
-  style REQ_FANOUT_389 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_390["A requirement with no children is skipped, because<br><small>REQ-FANOUT-390</small>"]
-  style REQ_FANOUT_390 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_391["The fan-out check warns when a parent exceeds its ceiling<br><small>REQ-FANOUT-391</small>"]
-  style REQ_FANOUT_391 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_392["The check reports no floor at either declared level<br><small>REQ-FANOUT-392</small>"]
-  style REQ_FANOUT_392 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_393["The fan-out check is warn-only<br><small>REQ-FANOUT-393</small>"]
-  style REQ_FANOUT_393 fill:#eee,stroke:#bbb,color:#888
-  REQ_FANOUT_394["Lint_exempt: fan-out silences the check for one requirement<br><small>REQ-FANOUT-394</small>"]
-  style REQ_FANOUT_394 fill:#eee,stroke:#bbb,color:#888
   ARCH_FINDINGS_010["Open-findings report<br><small>ARCH-FINDINGS-010</small>"]
-  f_plugin_scripts_reqmap_py_3501_5763["plugin/scripts/reqmap.py:3501-5763"]
-  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_py_3501_5763
+  f_plugin_scripts_reqmap_py_3678_5922["plugin/scripts/reqmap.py:3678-5922"]
+  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_py_3678_5922
   f_plugin_scripts_test_reqmap_py_1289_6685["plugin/scripts/test_reqmap.py:1289-6685"]
   ARCH_FINDINGS_010 -->|tested-by| f_plugin_scripts_test_reqmap_py_1289_6685
-  REQ_FINDINGS_395["Findings scans every requirement and collects the bullet<br><small>REQ-FINDINGS-395</small>"]
-  style REQ_FINDINGS_395 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_396["Findings writes them into a single _findings.md in<br><small>REQ-FINDINGS-396</small>"]
-  style REQ_FINDINGS_396 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_397["Findings excludes the 'None — …' placeholder bullet<br><small>REQ-FINDINGS-397</small>"]
-  style REQ_FINDINGS_397 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_398["In raw mode, findings groups the findings by<br><small>REQ-FINDINGS-398</small>"]
-  style REQ_FINDINGS_398 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_399["Each group and the document header carry a<br><small>REQ-FINDINGS-399</small>"]
-  style REQ_FINDINGS_399 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_400["With zero findings, findings still writes a well-formed<br><small>REQ-FINDINGS-400</small>"]
-  style REQ_FINDINGS_400 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_401["With the raw flag set, findings ignores any<br><small>REQ-FINDINGS-401</small>"]
-  style REQ_FINDINGS_401 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_402["When the sidecar exists and raw mode is<br><small>REQ-FINDINGS-402</small>"]
-  style REQ_FINDINGS_402 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_403["That view puts confirmed bugs first, ordered by<br><small>REQ-FINDINGS-403</small>"]
-  style REQ_FINDINGS_403 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_404["A bug entry shows its location and its<br><small>REQ-FINDINGS-404</small>"]
-  style REQ_FINDINGS_404 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_405["Findings emits an advisory staleness note when the<br><small>REQ-FINDINGS-405</small>"]
-  style REQ_FINDINGS_405 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_408["Map rewrites _findings.md when that file already exists<br><small>REQ-FINDINGS-408</small>"]
-  style REQ_FINDINGS_408 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_409["Map never creates _findings.md. Running findings once opts<br><small>REQ-FINDINGS-409</small>"]
-  style REQ_FINDINGS_409 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_410["Map --check reports _findings.md stale when the committed<br><small>REQ-FINDINGS-410</small>"]
-  style REQ_FINDINGS_410 fill:#eee,stroke:#bbb,color:#888
-  REQ_FINDINGS_411["The gate prints a non-error advisory line carrying<br><small>REQ-FINDINGS-411</small>"]
-  style REQ_FINDINGS_411 fill:#eee,stroke:#bbb,color:#888
   ARCH_HEALTH_017["Corpus health snapshot<br><small>ARCH-HEALTH-017</small>"]
-  f_plugin_scripts_reqmap_py_5401["plugin/scripts/reqmap.py:5401"]
-  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_py_5401
+  f_plugin_scripts_reqmap_py_2759_5560["plugin/scripts/reqmap.py:2759-5560"]
+  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_py_2759_5560
   f_plugin_scripts_test_reqmap_py_3574_3828["plugin/scripts/test_reqmap.py:3574-3828"]
   ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_py_3574_3828
-  REQ_HEALTH_413["Health prints a coherence snapshot of the whole<br><small>REQ-HEALTH-413</small>"]
-  style REQ_HEALTH_413 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_414["Health writes nothing. It only reads and prints<br><small>REQ-HEALTH-414</small>"]
-  style REQ_HEALTH_414 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_415["Health computes a headline score: the percentage of<br><small>REQ-HEALTH-415</small>"]
-  style REQ_HEALTH_415 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_416["The axes are status confirmed, coverage, a test<br><small>REQ-HEALTH-416</small>"]
-  style REQ_HEALTH_416 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_417["For a bus or feature requirement, coverage means<br><small>REQ-HEALTH-417</small>"]
-  style REQ_HEALTH_417 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_418["For those same layers, the test signal means<br><small>REQ-HEALTH-418</small>"]
-  style REQ_HEALTH_418 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_419["A need is covered when at least one<br><small>REQ-HEALTH-419</small>"]
-  style REQ_HEALTH_419 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_420["A confirmed need that no requirement satisfies counts<br><small>REQ-HEALTH-420</small>"]
-  style REQ_HEALTH_420 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_421["Health prints component counts alongside the score: confirmed<br><small>REQ-HEALTH-421</small>"]
-  style REQ_HEALTH_421 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_422["--json emits the same numbers as a JSON<br><small>REQ-HEALTH-422</small>"]
-  style REQ_HEALTH_422 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_423["On an empty corpus health prints a score<br><small>REQ-HEALTH-423</small>"]
-  style REQ_HEALTH_423 fill:#eee,stroke:#bbb,color:#888
-  REQ_HEALTH_424["Health always returns zero. The snapshot is a<br><small>REQ-HEALTH-424</small>"]
-  style REQ_HEALTH_424 fill:#eee,stroke:#bbb,color:#888
   ARCH_INIT_012["First-use bootstrap<br><small>ARCH-INIT-012</small>"]
-  f_plugin_scripts_reqmap_py_5633_5669["plugin/scripts/reqmap.py:5633-5669"]
-  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_5633_5669
+  f_plugin_scripts_reqmap_py_5792_5828["plugin/scripts/reqmap.py:5792-5828"]
+  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_5792_5828
   f_plugin_scripts_test_reqmap_py_2567_6454["plugin/scripts/test_reqmap.py:2567-6454"]
   ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_py_2567_6454
-  REQ_INIT_425["Init creates the requirements folder if it is<br><small>REQ-INIT-425</small>"]
-  style REQ_INIT_425 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_426["Init writes a starter .reqmapignore only if the<br><small>REQ-INIT-426</small>"]
-  style REQ_INIT_426 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_427["The starter file lists scripts/reqmap.py. Without that line<br><small>REQ-INIT-427</small>"]
-  style REQ_INIT_427 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_428["The starter file also lists .worktrees/ and .claude/worktrees/<br><small>REQ-INIT-428</small>"]
-  style REQ_INIT_428 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_429["One exception: if the engine describes itself in<br><small>REQ-INIT-429</small>"]
-  style REQ_INIT_429 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_430["'Describes itself' means scripts/reqmap.py carries tags whose ids<br><small>REQ-INIT-430</small>"]
-  style REQ_INIT_430 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_431["Init drafts requirements from untagged code, writes the<br><small>REQ-INIT-431</small>"]
-  style REQ_INIT_431 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_432["Init ends with a short summary naming one<br><small>REQ-INIT-432</small>"]
-  style REQ_INIT_432 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_433["If nothing was drafted, init says so in<br><small>REQ-INIT-433</small>"]
-  style REQ_INIT_433 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_434["Running init twice is safe. The second run<br><small>REQ-INIT-434</small>"]
-  style REQ_INIT_434 fill:#eee,stroke:#bbb,color:#888
-  REQ_INIT_435["A second run never deletes a requirement someone<br><small>REQ-INIT-435</small>"]
-  style REQ_INIT_435 fill:#eee,stroke:#bbb,color:#888
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_LEVEL_051 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_148_3676["plugin/scripts/reqmap.py:148-3676"]
-  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_148_3676
+  f_plugin_scripts_reqmap_py_148_3853["plugin/scripts/reqmap.py:148-3853"]
+  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_148_3853
   f_plugin_scripts_test_reqmap_py_7348["plugin/scripts/test_reqmap.py:7348"]
   ARCH_LEVEL_051 -->|tested-by| f_plugin_scripts_test_reqmap_py_7348
-  REQ_LEVEL_436["A requirement may carry a level: value of<br><small>REQ-LEVEL-436</small>"]
-  style REQ_LEVEL_436 fill:#eee,stroke:#bbb,color:#888
-  REQ_LEVEL_437["The level: field is optional. A requirement without<br><small>REQ-LEVEL-437</small>"]
-  style REQ_LEVEL_437 fill:#eee,stroke:#bbb,color:#888
-  REQ_LEVEL_438["The level: axis is independent of layer:, and<br><small>REQ-LEVEL-438</small>"]
-  style REQ_LEVEL_438 fill:#eee,stroke:#bbb,color:#888
-  REQ_LEVEL_439["An architecture requirement owns code, so the gate<br><small>REQ-LEVEL-439</small>"]
-  style REQ_LEVEL_439 fill:#eee,stroke:#bbb,color:#888
-  REQ_LEVEL_440["The aggregate layer stays exempt from that rule<br><small>REQ-LEVEL-440</small>"]
-  style REQ_LEVEL_440 fill:#eee,stroke:#bbb,color:#888
-  REQ_LEVEL_442["The gate reports an error for a level<br><small>REQ-LEVEL-442</small>"]
-  style REQ_LEVEL_442 fill:#eee,stroke:#bbb,color:#888
   ARCH_LINT_014["Requirement readability linter<br><small>ARCH-LINT-014</small>"]
-  f_plugin_scripts_reqmap_py_4393_4864["plugin/scripts/reqmap.py:4393-4864"]
-  ARCH_LINT_014 -->|implements| f_plugin_scripts_reqmap_py_4393_4864
+  f_plugin_scripts_reqmap_py_4573_5040["plugin/scripts/reqmap.py:4573-5040"]
+  ARCH_LINT_014 -->|implements| f_plugin_scripts_reqmap_py_4573_5040
   f_plugin_scripts_test_reqmap_py_2868["plugin/scripts/test_reqmap.py:2868"]
   ARCH_LINT_014 -->|tested-by| f_plugin_scripts_test_reqmap_py_2868
-  REQ_LINT_444["Lint reports readability problems and structure problems in<br><small>REQ-LINT-444</small>"]
-  style REQ_LINT_444 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_445["Lint writes no file. It only reads and<br><small>REQ-LINT-445</small>"]
-  style REQ_LINT_445 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_446["Lint checks non-draft requirements only — status baseline<br><small>REQ-LINT-446</small>"]
-  style REQ_LINT_446 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_447["Lint gives each finding one of two severities<br><small>REQ-LINT-447</small>"]
-  style REQ_LINT_447 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_448["The missing-section check reports an error when a<br><small>REQ-LINT-448</small>"]
-  style REQ_LINT_448 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_449["The empty-section check reports a warn when one<br><small>REQ-LINT-449</small>"]
-  style REQ_LINT_449 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_450["The prose checks read the Contract and the<br><small>REQ-LINT-450</small>"]
-  style REQ_LINT_450 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_451["The 'Notes & limitations' section is exempt: only<br><small>REQ-LINT-451</small>"]
-  style REQ_LINT_451 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_452["The prose checks skip lines that are not<br><small>REQ-LINT-452</small>"]
-  style REQ_LINT_452 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_453["Lint strips a bullet's leading marker before the<br><small>REQ-LINT-453</small>"]
-  style REQ_LINT_453 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_454["Lint returns zero by default, whatever it found<br><small>REQ-LINT-454</small>"]
-  style REQ_LINT_454 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINT_455["With --strict, lint returns non-zero when at least<br><small>REQ-LINT-455</small>"]
-  style REQ_LINT_455 fill:#eee,stroke:#bbb,color:#888
   ARCH_LINTCHECKS_025["Readability & scope checks<br><small>ARCH-LINTCHECKS-025</small>"]
-  f_plugin_scripts_reqmap_py_4422_4886["plugin/scripts/reqmap.py:4422-4886"]
-  ARCH_LINTCHECKS_025 -->|implements| f_plugin_scripts_reqmap_py_4422_4886
+  f_plugin_scripts_reqmap_py_4602_5062["plugin/scripts/reqmap.py:4602-5062"]
+  ARCH_LINTCHECKS_025 -->|implements| f_plugin_scripts_reqmap_py_4602_5062
   f_plugin_scripts_test_reqmap_py_2852_4584["plugin/scripts/test_reqmap.py:2852-4584"]
   ARCH_LINTCHECKS_025 -->|tested-by| f_plugin_scripts_test_reqmap_py_2852_4584
-  REQ_LINTCHECKS_457["The statement-too-long check warns on a Contract bullet<br><small>REQ-LINTCHECKS-457</small>"]
-  style REQ_LINTCHECKS_457 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_458["The stacked-conditions check warns on a normative line<br><small>REQ-LINTCHECKS-458</small>"]
-  style REQ_LINTCHECKS_458 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_459["Stacked-conditions reads every normative line. It does not<br><small>REQ-LINTCHECKS-459</small>"]
-  style REQ_LINTCHECKS_459 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_460["The anonymous-subject check warns on a Contract clause<br><small>REQ-LINTCHECKS-460</small>"]
-  style REQ_LINTCHECKS_460 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_461["Anonymous-subject reads the Contract only. Acceptance prose may<br><small>REQ-LINTCHECKS-461</small>"]
-  style REQ_LINTCHECKS_461 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_462["The ac-count-low check warns on an Acceptance section<br><small>REQ-LINTCHECKS-462</small>"]
-  style REQ_LINTCHECKS_462 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_463["The ac-count-high check warns on more than LINT_AC_MAX<br><small>REQ-LINTCHECKS-463</small>"]
-  style REQ_LINTCHECKS_463 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_464["The over-scoped check warns on a requirement over<br><small>REQ-LINTCHECKS-464</small>"]
-  style REQ_LINTCHECKS_464 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_465["Over-scoped counts clause groups when the Contract carries<br><small>REQ-LINTCHECKS-465</small>"]
-  style REQ_LINTCHECKS_465 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_466["The file-spread check warns on a requirement whose<br><small>REQ-LINTCHECKS-466</small>"]
-  style REQ_LINTCHECKS_466 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_467["File-spread is an architectural-diffuseness signal and is skipped<br><small>REQ-LINTCHECKS-467</small>"]
-  style REQ_LINTCHECKS_467 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_468["The layer-mismatch check warns on a layer: bus<br><small>REQ-LINTCHECKS-468</small>"]
-  style REQ_LINTCHECKS_468 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_469["Layer-mismatch is skipped when no fan-in data is<br><small>REQ-LINTCHECKS-469</small>"]
-  style REQ_LINTCHECKS_469 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_470["The vague-term check warns on a Contract bullet<br><small>REQ-LINTCHECKS-470</small>"]
-  style REQ_LINTCHECKS_470 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_471["Backticked code spans are stripped before the vague-term<br><small>REQ-LINTCHECKS-471</small>"]
-  style REQ_LINTCHECKS_471 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_472["Vague-term emits one finding per distinct term<br><small>REQ-LINTCHECKS-472</small>"]
-  style REQ_LINTCHECKS_472 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_473["The redundant-modal check warns on a Contract bullet<br><small>REQ-LINTCHECKS-473</small>"]
-  style REQ_LINTCHECKS_473 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_474["Backticked code spans are stripped before the redundant-modal<br><small>REQ-LINTCHECKS-474</small>"]
-  style REQ_LINTCHECKS_474 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_475["Redundant-modal emits one finding per distinct term<br><small>REQ-LINTCHECKS-475</small>"]
-  style REQ_LINTCHECKS_475 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_476["The atomic-bullet-then-mismatch check warns on a story quote<br><small>REQ-LINTCHECKS-476</small>"]
-  style REQ_LINTCHECKS_476 fill:#eee,stroke:#bbb,color:#888
-  REQ_LINTCHECKS_477["The atomic-story-overlong check warns past the bullet ceiling<br><small>REQ-LINTCHECKS-477</small>"]
-  style REQ_LINTCHECKS_477 fill:#eee,stroke:#bbb,color:#888
   ARCH_MAP_007["Requirement graph (_map.json)<br><small>ARCH-MAP-007</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_MAP_007 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1761_6908["plugin/scripts/reqmap.py:1761-6908"]
-  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_1761_6908
+  f_plugin_scripts_reqmap_py_1859_7073["plugin/scripts/reqmap.py:1859-7073"]
+  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_1859_7073
   f_plugin_scripts_test_reqmap_py_1374_6867["plugin/scripts/test_reqmap.py:1374-6867"]
   ARCH_MAP_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1374_6867
-  REQ_MAP_476["Map generates _map.json under requirements/, and export writes<br><small>REQ-MAP-476</small>"]
-  style REQ_MAP_476 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_478["_map.json carries one node per requirement and one<br><small>REQ-MAP-478</small>"]
-  style REQ_MAP_478 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_479["Each node carries its requirement's id, layer, status<br><small>REQ-MAP-479</small>"]
-  style REQ_MAP_479 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_480["A node's acc list carries one entry per<br><small>REQ-MAP-480</small>"]
-  style REQ_MAP_480 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_481["_map.json carries a top-level repo field: a best-effort<br><small>REQ-MAP-481</small>"]
-  style REQ_MAP_481 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_483["Repo is derived from the git remote, so<br><small>REQ-MAP-483</small>"]
-  style REQ_MAP_483 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_484["Resolving repo never raises and never blocks map<br><small>REQ-MAP-484</small>"]
-  style REQ_MAP_484 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_485["Engine_version is likewise excluded from the map --check<br><small>REQ-MAP-485</small>"]
-  style REQ_MAP_485 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_486["_map.json carries a top-level todos array, derived from<br><small>REQ-MAP-486</small>"]
-  style REQ_MAP_486 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_487["Reading a requirement's clauses folds a wrapped line<br><small>REQ-MAP-487</small>"]
-  style REQ_MAP_487 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_488["A clause-group label groups the clauses below it<br><small>REQ-MAP-488</small>"]
-  style REQ_MAP_488 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_489["Position decides a label, not the bold markers<br><small>REQ-MAP-489</small>"]
-  style REQ_MAP_489 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_490["Map --check fails when a committed generated file<br><small>REQ-MAP-490</small>"]
-  style REQ_MAP_490 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_491["The gate reports the same staleness as a<br><small>REQ-MAP-491</small>"]
-  style REQ_MAP_491 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAP_493["All requirement-derived text is JSON-encoded in _map.json, which<br><small>REQ-MAP-493</small>"]
-  style REQ_MAP_493 fill:#eee,stroke:#bbb,color:#888
   ARCH_MAPDIAGRAMS_055["Mermaid diagrams (_map.md)<br><small>ARCH-MAPDIAGRAMS-055</small>"]
-  f_plugin_scripts_reqmap_py_6046_6376["plugin/scripts/reqmap.py:6046-6376"]
-  ARCH_MAPDIAGRAMS_055 -->|implements| f_plugin_scripts_reqmap_py_6046_6376
-  f_plugin_scripts_test_reqmap_py_883_7596["plugin/scripts/test_reqmap.py:883-7596"]
-  ARCH_MAPDIAGRAMS_055 -->|tested-by| f_plugin_scripts_test_reqmap_py_883_7596
-  REQ_MAPDIAGRAMS_494["Map generates _map.md under requirements/, rendered from the<br><small>REQ-MAPDIAGRAMS-494</small>"]
-  style REQ_MAPDIAGRAMS_494 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_495["_map.md contains exactly 5 Mermaid code blocks: Specification<br><small>REQ-MAPDIAGRAMS-495</small>"]
-  style REQ_MAPDIAGRAMS_495 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_496["Each of those 5 blocks carries a legend<br><small>REQ-MAPDIAGRAMS-496</small>"]
-  style REQ_MAPDIAGRAMS_496 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_497["The Specification Hierarchy is drawn from the satisfies<br><small>REQ-MAPDIAGRAMS-497</small>"]
-  style REQ_MAPDIAGRAMS_497 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_498["The Hierarchy draws a node for each system<br><small>REQ-MAPDIAGRAMS-498</small>"]
-  style REQ_MAPDIAGRAMS_498 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_499["The Hierarchy counts a code requirement against its<br><small>REQ-MAPDIAGRAMS-499</small>"]
-  style REQ_MAPDIAGRAMS_499 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_501["A node's area is its area: field, or<br><small>REQ-MAPDIAGRAMS-501</small>"]
-  style REQ_MAPDIAGRAMS_501 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_502["The System Map groups nodes into per-area subgraphs<br><small>REQ-MAPDIAGRAMS-502</small>"]
-  style REQ_MAPDIAGRAMS_502 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_503["The System Map omits a depends_on edge whose<br><small>REQ-MAPDIAGRAMS-503</small>"]
-  style REQ_MAPDIAGRAMS_503 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_504["The Dependency Map is area-level: one node per<br><small>REQ-MAPDIAGRAMS-504</small>"]
-  style REQ_MAPDIAGRAMS_504 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_505["The Dependency Map draws an edge A→B when<br><small>REQ-MAPDIAGRAMS-505</small>"]
-  style REQ_MAPDIAGRAMS_505 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_506["Req→Code colors an enforced-but-unlinked requirement red, and a<br><small>REQ-MAPDIAGRAMS-506</small>"]
-  style REQ_MAPDIAGRAMS_506 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_507["Req→Code collapses multiple members in one file to<br><small>REQ-MAPDIAGRAMS-507</small>"]
-  style REQ_MAPDIAGRAMS_507 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_508["The Risk diagram shows only requirements with at<br><small>REQ-MAPDIAGRAMS-508</small>"]
-  style REQ_MAPDIAGRAMS_508 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_509["The Risk diagram pairs each of them with<br><small>REQ-MAPDIAGRAMS-509</small>"]
-  style REQ_MAPDIAGRAMS_509 fill:#eee,stroke:#bbb,color:#888
-  REQ_MAPDIAGRAMS_510["A draft's open verify-intent question is suppressed, subsumed<br><small>REQ-MAPDIAGRAMS-510</small>"]
-  style REQ_MAPDIAGRAMS_510 fill:#eee,stroke:#bbb,color:#888
+  f_plugin_scripts_reqmap_py_6205_6541["plugin/scripts/reqmap.py:6205-6541"]
+  ARCH_MAPDIAGRAMS_055 -->|implements| f_plugin_scripts_reqmap_py_6205_6541
+  f_plugin_scripts_test_reqmap_py_883_7598["plugin/scripts/test_reqmap.py:883-7598"]
+  ARCH_MAPDIAGRAMS_055 -->|tested-by| f_plugin_scripts_test_reqmap_py_883_7598
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
-  f_plugin_scripts_reqmap_py_1985_2072["plugin/scripts/reqmap.py:1985-2072"]
-  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_scripts_reqmap_py_1985_2072
+  f_plugin_scripts_reqmap_py_2083_2639["plugin/scripts/reqmap.py:2083-2639"]
+  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_scripts_reqmap_py_2083_2639
   f_plugin_scripts_test_reqmap_py_642["plugin/scripts/test_reqmap.py:642"]
   ARCH_MEMBERDRIFT_027 -->|tested-by| f_plugin_scripts_test_reqmap_py_642
-  REQ_MEMBERDRIFT_511["Member content hashes live in a separate, versioned<br><small>REQ-MEMBERDRIFT-511</small>"]
-  style REQ_MEMBERDRIFT_511 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_512["The sidecar fails open (treated as empty) when<br><small>REQ-MEMBERDRIFT-512</small>"]
-  style REQ_MEMBERDRIFT_512 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_513["Member hashes are recorded only for files dedicated<br><small>REQ-MEMBERDRIFT-513</small>"]
-  style REQ_MEMBERDRIFT_513 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_514["Member hashes are computed on line-ending-normalized bytes (CRLF<br><small>REQ-MEMBERDRIFT-514</small>"]
-  style REQ_MEMBERDRIFT_514 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_515["The gate warns for each confirmed requirement whose<br><small>REQ-MEMBERDRIFT-515</small>"]
-  style REQ_MEMBERDRIFT_515 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_516["A member with no recorded baseline does not<br><small>REQ-MEMBERDRIFT-516</small>"]
-  style REQ_MEMBERDRIFT_516 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_517["The check is warn-only by default and is<br><small>REQ-MEMBERDRIFT-517</small>"]
-  style REQ_MEMBERDRIFT_517 fill:#eee,stroke:#bbb,color:#888
-  REQ_MEMBERDRIFT_518["--update-lock re-baselines the sidecar in lockstep with _reqlock.json<br><small>REQ-MEMBERDRIFT-518</small>"]
-  style REQ_MEMBERDRIFT_518 fill:#eee,stroke:#bbb,color:#888
   ARCH_MODULEFILE_056["Several requirements in one file<br><small>ARCH-MODULEFILE-056</small>"]
-  f_plugin_scripts_reqmap_py_931_4203["plugin/scripts/reqmap.py:931-4203"]
-  ARCH_MODULEFILE_056 -->|implements| f_plugin_scripts_reqmap_py_931_4203
-  f_plugin_scripts_test_reqmap_py_7676["plugin/scripts/test_reqmap.py:7676"]
-  ARCH_MODULEFILE_056 -->|tested-by| f_plugin_scripts_test_reqmap_py_7676
+  f_plugin_scripts_reqmap_py_1037_4380["plugin/scripts/reqmap.py:1037-4380"]
+  ARCH_MODULEFILE_056 -->|implements| f_plugin_scripts_reqmap_py_1037_4380
+  f_plugin_scripts_test_reqmap_py_7678["plugin/scripts/test_reqmap.py:7678"]
+  ARCH_MODULEFILE_056 -->|tested-by| f_plugin_scripts_test_reqmap_py_7678
   ARCH_NEW_004["Scaffold a requirement<br><small>ARCH-NEW-004</small>"]
-  f_plugin_scripts_reqmap_py_2778_2800["plugin/scripts/reqmap.py:2778-2800"]
-  ARCH_NEW_004 -->|implements| f_plugin_scripts_reqmap_py_2778_2800
+  f_plugin_scripts_reqmap_py_2955_2977["plugin/scripts/reqmap.py:2955-2977"]
+  ARCH_NEW_004 -->|implements| f_plugin_scripts_reqmap_py_2955_2977
   f_plugin_scripts_test_reqmap_py_1135_6787["plugin/scripts/test_reqmap.py:1135-6787"]
   ARCH_NEW_004 -->|tested-by| f_plugin_scripts_test_reqmap_py_1135_6787
-  REQ_NEW_519["Given a capability id, new writes requirements/‹ID›.md, stamped<br><small>REQ-NEW-519</small>"]
-  style REQ_NEW_519 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_520["New creates the requirements directory if it is<br><small>REQ-NEW-520</small>"]
-  style REQ_NEW_520 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_521["The scaffold is the engine's built-in template<br><small>REQ-NEW-521</small>"]
-  style REQ_NEW_521 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_522["An on-disk templates/requirement.md, when present, overrides the built-in<br><small>REQ-NEW-522</small>"]
-  style REQ_NEW_522 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_523["New refuses to overwrite an existing file. It<br><small>REQ-NEW-523</small>"]
-  style REQ_NEW_523 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_524["The emitted Contract section opens with 'Every line<br><small>REQ-NEW-524</small>"]
-  style REQ_NEW_524 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_525["The scaffold's guidance names the authoring rules the<br><small>REQ-NEW-525</small>"]
-  style REQ_NEW_525 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEW_526["New warns, and still exits zero, when another<br><small>REQ-NEW-526</small>"]
-  style REQ_NEW_526 fill:#eee,stroke:#bbb,color:#888
   ARCH_NEXT_013["What-should-I-do-next report<br><small>ARCH-NEXT-013</small>"]
-  f_plugin_scripts_reqmap_py_1536_4212["plugin/scripts/reqmap.py:1536-4212"]
-  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1536_4212
+  f_plugin_scripts_reqmap_py_1641_4389["plugin/scripts/reqmap.py:1641-4389"]
+  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1641_4389
   f_plugin_scripts_test_reqmap_py_2421_7234["plugin/scripts/test_reqmap.py:2421-7234"]
   ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_py_2421_7234
-  REQ_NEXT_527["Next groups every requirement's open risk signals into<br><small>REQ-NEXT-527</small>"]
-  style REQ_NEXT_527 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_528["Next reads those signals from _risk_signals and their<br><small>REQ-NEXT-528</small>"]
-  style REQ_NEXT_528 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_529["Next prints a progress header N requirement(s) ·<br><small>REQ-NEXT-529</small>"]
-  style REQ_NEXT_529 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_530["In that header, tested counts the requirements that<br><small>REQ-NEXT-530</small>"]
-  style REQ_NEXT_530 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_531["Next surfaces exactly the actionable buckets: unimplemented (Orphans)<br><small>REQ-NEXT-531</small>"]
-  style REQ_NEXT_531 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_532["Next prints those four buckets in that order<br><small>REQ-NEXT-532</small>"]
-  style REQ_NEXT_532 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_533["Next omits blast-radius, because that signal is a<br><small>REQ-NEXT-533</small>"]
-  style REQ_NEXT_533 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_534["Next surfaces every scannable file that carries no<br><small>REQ-NEXT-534</small>"]
-  style REQ_NEXT_534 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_535["That bucket omits prose in the auto-draft 'ignore'<br><small>REQ-NEXT-535</small>"]
-  style REQ_NEXT_535 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_536["Next skips that untagged scan when the caller<br><small>REQ-NEXT-536</small>"]
-  style REQ_NEXT_536 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_537["An Orphans item may have members recorded in<br><small>REQ-NEXT-537</small>"]
-  style REQ_NEXT_537 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_538["Within a bucket, next orders items by priority<br><small>REQ-NEXT-538</small>"]
-  style REQ_NEXT_538 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_539["Priority rank runs must-have ‹ should-have ‹ could-have<br><small>REQ-NEXT-539</small>"]
-  style REQ_NEXT_539 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_540["Next tags an item whose risk: is 2<br><small>REQ-NEXT-540</small>"]
-  style REQ_NEXT_540 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_541["Next names the requirement file to open, as<br><small>REQ-NEXT-541</small>"]
-  style REQ_NEXT_541 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_542["By default next shows at most the top<br><small>REQ-NEXT-542</small>"]
-  style REQ_NEXT_542 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_543["Next prints a ... N more line when<br><small>REQ-NEXT-543</small>"]
-  style REQ_NEXT_543 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_544["With --all, next lists every item<br><small>REQ-NEXT-544</small>"]
-  style REQ_NEXT_544 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_545["The 'Untagged files' bucket truncates the same way<br><small>REQ-NEXT-545</small>"]
-  style REQ_NEXT_545 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_546["With a registry that holds no requirements, next<br><small>REQ-NEXT-546</small>"]
-  style REQ_NEXT_546 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_547["With requirements but no open signal, next prints<br><small>REQ-NEXT-547</small>"]
-  style REQ_NEXT_547 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_548["Next is deterministic and writes no file<br><small>REQ-NEXT-548</small>"]
-  style REQ_NEXT_548 fill:#eee,stroke:#bbb,color:#888
-  REQ_NEXT_549["Next always exits zero. The report is advice<br><small>REQ-NEXT-549</small>"]
-  style REQ_NEXT_549 fill:#eee,stroke:#bbb,color:#888
   ARCH_ORPHANCODE_034["Orphan-code warning<br><small>ARCH-ORPHANCODE-034</small>"]
-  f_plugin_scripts_reqmap_py_1567_2577["plugin/scripts/reqmap.py:1567-2577"]
-  ARCH_ORPHANCODE_034 -->|implements| f_plugin_scripts_reqmap_py_1567_2577
+  f_plugin_scripts_reqmap_py_1665_2686["plugin/scripts/reqmap.py:1665-2686"]
+  ARCH_ORPHANCODE_034 -->|implements| f_plugin_scripts_reqmap_py_1665_2686
   f_plugin_scripts_test_reqmap_py_742["plugin/scripts/test_reqmap.py:742"]
   ARCH_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_py_742
-  REQ_ORPHANCODE_550["The gate warns for each program file that<br><small>REQ-ORPHANCODE-550</small>"]
-  style REQ_ORPHANCODE_550 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_551["A program file is one ending in .py<br><small>REQ-ORPHANCODE-551</small>"]
-  style REQ_ORPHANCODE_551 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_552["A membership tag is one of implements, tested-by<br><small>REQ-ORPHANCODE-552</small>"]
-  style REQ_ORPHANCODE_552 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_553["The gate does not consider the prose, styling<br><small>REQ-ORPHANCODE-553</small>"]
-  style REQ_ORPHANCODE_553 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small>"]
-  style REQ_ORPHANCODE_554 fill:#eee,stroke:#bbb,color:#888
   ARCH_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>ARCH-PAGES-021</small>"]
-  f_plugin_scripts_reqmap_py_4125_6924["plugin/scripts/reqmap.py:4125-6924"]
-  ARCH_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_4125_6924
+  f_plugin_scripts_reqmap_py_4302_7089["plugin/scripts/reqmap.py:4302-7089"]
+  ARCH_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_4302_7089
   f_plugin_scripts_test_reqmap_py_1478_2236["plugin/scripts/test_reqmap.py:1478-2236"]
   ARCH_PAGES_021 -->|tested-by| f_plugin_scripts_test_reqmap_py_1478_2236
-  REQ_PAGES_560["When _map.html is generated AND a docs/ directory<br><small>REQ-PAGES-560</small>"]
-  style REQ_PAGES_560 fill:#eee,stroke:#bbb,color:#888
-  REQ_PAGES_561["Map --check (the no-write freshness gate) additionally flags<br><small>REQ-PAGES-561</small>"]
-  style REQ_PAGES_561 fill:#eee,stroke:#bbb,color:#888
-  REQ_PAGES_562["The freshness comparison reads the on-disk copy as<br><small>REQ-PAGES-562</small>"]
-  style REQ_PAGES_562 fill:#eee,stroke:#bbb,color:#888
   ARCH_PARSE_001["Requirement reading<br><small>ARCH-PARSE-001</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_PARSE_001 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_855_950["plugin/scripts/reqmap.py:855-950"]
-  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_py_855_950
+  f_plugin_scripts_reqmap_py_859_1056["plugin/scripts/reqmap.py:859-1056"]
+  ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_py_859_1056
   f_plugin_scripts_test_reqmap_py_52_6289["plugin/scripts/test_reqmap.py:52-6289"]
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_52_6289
-  REQ_PARSE_208["Load_requirements parses each requirements/.md file into a record<br><small>REQ-PARSE-208</small>"]
-  style REQ_PARSE_208 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_209["Meta is the parsed frontmatter, and body is<br><small>REQ-PARSE-209</small>"]
-  style REQ_PARSE_209 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_210["The id comes from the frontmatter id: field<br><small>REQ-PARSE-210</small>"]
-  style REQ_PARSE_210 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_211["The grammar supports scalars, inline a, b lists<br><small>REQ-PARSE-211</small>"]
-  style REQ_PARSE_211 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_212["A trailing # comment is stripped from a<br><small>REQ-PARSE-212</small>"]
-  style REQ_PARSE_212 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_213["Matching surrounding quotes are removed from a scalar<br><small>REQ-PARSE-213</small>"]
-  style REQ_PARSE_213 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_214["An inline list missing its closing is parsed<br><small>REQ-PARSE-214</small>"]
-  style REQ_PARSE_214 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_215["A file with no leading --- block yields<br><small>REQ-PARSE-215</small>"]
-  style REQ_PARSE_215 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_216["A file whose name starts with _ (a<br><small>REQ-PARSE-216</small>"]
-  style REQ_PARSE_216 fill:#eee,stroke:#bbb,color:#888
-  REQ_PARSE_217["A leading UTF-8 BOM is tolerated<br><small>REQ-PARSE-217</small>"]
-  style REQ_PARSE_217 fill:#eee,stroke:#bbb,color:#888
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_7541_7552["plugin/scripts/reqmap.py:7541-7552"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_7541_7552
+  f_plugin_scripts_reqmap_py_7766_7785["plugin/scripts/reqmap.py:7766-7785"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_7766_7785
   f_plugin_scripts_test_reqmap_py_7049["plugin/scripts/test_reqmap.py:7049"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_py_7049
-  REQ_PIPE_563["When the command's standard output turns out to<br><small>REQ-PIPE-563</small>"]
-  style REQ_PIPE_563 fill:#eee,stroke:#bbb,color:#888
-  REQ_PIPE_564["Reqmap.py treats BrokenPipeError and the Windows form of<br><small>REQ-PIPE-564</small>"]
-  style REQ_PIPE_564 fill:#eee,stroke:#bbb,color:#888
-  REQ_PIPE_565["Any other OSError still propagates unchanged. The rule<br><small>REQ-PIPE-565</small>"]
-  style REQ_PIPE_565 fill:#eee,stroke:#bbb,color:#888
-  REQ_PIPE_566["The rule lives in the command-line entry point<br><small>REQ-PIPE-566</small>"]
-  style REQ_PIPE_566 fill:#eee,stroke:#bbb,color:#888
   ARCH_PROMOTE_011["confirm<br><small>ARCH-PROMOTE-011</small>"]
-  f_plugin_scripts_reqmap_py_2913_2939["plugin/scripts/reqmap.py:2913-2939"]
-  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_2913_2939
+  f_plugin_scripts_reqmap_py_3090_3116["plugin/scripts/reqmap.py:3090-3116"]
+  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_3090_3116
   f_plugin_scripts_test_reqmap_py_2339_6400["plugin/scripts/test_reqmap.py:2339-6400"]
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2339_6400
-  REQ_PROMOTE_567["Confirm ‹ID› sets the requirement's status to confirmed<br><small>REQ-PROMOTE-567</small>"]
-  f_plugin_scripts_reqmap_py_2939["plugin/scripts/reqmap.py:2939"]
-  REQ_PROMOTE_567 -->|implements| f_plugin_scripts_reqmap_py_2939
-  f_plugin_scripts_test_reqmap_py_2348["plugin/scripts/test_reqmap.py:2348"]
-  REQ_PROMOTE_567 -->|tested-by| f_plugin_scripts_test_reqmap_py_2348
-  REQ_PROMOTE_568["Confirm edits only the value of the first<br><small>REQ-PROMOTE-568</small>"]
-  style REQ_PROMOTE_568 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_569["Confirm preserves that line's indentation and any trailing<br><small>REQ-PROMOTE-569</small>"]
-  style REQ_PROMOTE_569 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_570["Confirm leaves the body untouched<br><small>REQ-PROMOTE-570</small>"]
-  style REQ_PROMOTE_570 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_571["Confirm refuses a requirement with no implements: member<br><small>REQ-PROMOTE-571</small>"]
-  style REQ_PROMOTE_571 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_572["Confirm exempts a need and an aggregate from<br><small>REQ-PROMOTE-572</small>"]
-  style REQ_PROMOTE_572 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_573["Confirm refuses an aggregate whose depends_on list is<br><small>REQ-PROMOTE-573</small>"]
-  style REQ_PROMOTE_573 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_574["A refusal prints the tag the caller needs<br><small>REQ-PROMOTE-574</small>"]
-  style REQ_PROMOTE_574 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_575["Confirm exits non-zero with a clear message for<br><small>REQ-PROMOTE-575</small>"]
-  style REQ_PROMOTE_575 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_576["Confirm warns, without failing, when no tested-by: member<br><small>REQ-PROMOTE-576</small>"]
-  style REQ_PROMOTE_576 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_577["That warning points at the test tag to<br><small>REQ-PROMOTE-577</small>"]
-  style REQ_PROMOTE_577 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_578["Confirm reminds the caller to refresh the lock<br><small>REQ-PROMOTE-578</small>"]
-  style REQ_PROMOTE_578 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_579["Confirm is idempotent. An already-confirmed requirement is reported<br><small>REQ-PROMOTE-579</small>"]
-  style REQ_PROMOTE_579 fill:#eee,stroke:#bbb,color:#888
   ARCH_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>ARCH-PROMOTE-TODO-001</small>"]
-  f_plugin_scripts_reqmap_py_2822_2881["plugin/scripts/reqmap.py:2822-2881"]
-  ARCH_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_2822_2881
+  f_plugin_scripts_reqmap_py_2999_3058["plugin/scripts/reqmap.py:2999-3058"]
+  ARCH_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_2999_3058
   f_plugin_scripts_test_reqmap_py_4740_6400["plugin/scripts/test_reqmap.py:4740-6400"]
   ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_4740_6400
-  REQ_PROMOTE_TODO_580["New --from-todo scaffolds a new requirement file from<br><small>REQ-PROMOTE-TODO-580</small>"]
-  style REQ_PROMOTE_TODO_580 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_581["The item is selected by exact name, trimmed<br><small>REQ-PROMOTE-TODO-581</small>"]
-  style REQ_PROMOTE_TODO_581 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_583["New --from-todo seeds the new requirement from the<br><small>REQ-PROMOTE-TODO-583</small>"]
-  style REQ_PROMOTE_TODO_583 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_584["A lane: ops maps to layer: feature<br><small>REQ-PROMOTE-TODO-584</small>"]
-  style REQ_PROMOTE_TODO_584 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_585["The new requirement's status is draft, so the<br><small>REQ-PROMOTE-TODO-585</small>"]
-  style REQ_PROMOTE_TODO_585 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_586["New --from-todo refuses with a non-zero exit and<br><small>REQ-PROMOTE-TODO-586</small>"]
-  style REQ_PROMOTE_TODO_586 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_587["The command refuses when the target id already<br><small>REQ-PROMOTE-TODO-587</small>"]
-  style REQ_PROMOTE_TODO_587 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_588["The command refuses when no open TODO matches<br><small>REQ-PROMOTE-TODO-588</small>"]
-  style REQ_PROMOTE_TODO_588 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_589["The command refuses when the name is ambiguous<br><small>REQ-PROMOTE-TODO-589</small>"]
-  style REQ_PROMOTE_TODO_589 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_590["Each refusal prints a clear message. For a<br><small>REQ-PROMOTE-TODO-590</small>"]
-  style REQ_PROMOTE_TODO_590 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_591["New --from-todo does not modify TODO.md by default<br><small>REQ-PROMOTE-TODO-591</small>"]
-  style REQ_PROMOTE_TODO_591 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_592["With --mark-done it flips the matched item's checkbox<br><small>REQ-PROMOTE-TODO-592</small>"]
-  style REQ_PROMOTE_TODO_592 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROMOTE_TODO_593["That flip is best-effort: a write failure warns<br><small>REQ-PROMOTE-TODO-593</small>"]
-  style REQ_PROMOTE_TODO_593 fill:#eee,stroke:#bbb,color:#888
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
-  f_plugin_scripts_reqmap_py_3021_3080["plugin/scripts/reqmap.py:3021-3080"]
-  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_py_3021_3080
+  f_plugin_scripts_reqmap_py_3198_3257["plugin/scripts/reqmap.py:3198-3257"]
+  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_py_3198_3257
   f_plugin_scripts_test_reqmap_py_840_6947["plugin/scripts/test_reqmap.py:840-6947"]
   ARCH_PROSE_024 -->|tested-by| f_plugin_scripts_test_reqmap_py_840_6947
-  REQ_PROSE_594["Draft also produces draft-status requirements from untagged prose<br><small>REQ-PROSE-594</small>"]
-  style REQ_PROSE_594 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_596["Ignore — meta/boilerplate that is never a capability<br><small>REQ-PROSE-596</small>"]
-  style REQ_PROSE_596 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_597["Sync_only — README/README. in any letter case, everything<br><small>REQ-PROSE-597</small>"]
-  style REQ_PROSE_597 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_598["Capability — everything else (e.g. prompts/, specs/, modes/<br><small>REQ-PROSE-598</small>"]
-  style REQ_PROSE_598 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_599["The buckets govern auto-drafting ONLY; an explicit tag<br><small>REQ-PROSE-599</small>"]
-  style REQ_PROSE_599 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_600["A prose draft is scaffolded from the file's<br><small>REQ-PROSE-600</small>"]
-  style REQ_PROSE_600 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_601["When a file has no ## heading at<br><small>REQ-PROSE-601</small>"]
-  style REQ_PROSE_601 fill:#eee,stroke:#bbb,color:#888
-  REQ_PROSE_602["The source prose is never the contract: the<br><small>REQ-PROSE-602</small>"]
-  style REQ_PROSE_602 fill:#eee,stroke:#bbb,color:#888
   ARCH_PYFLOOR_040["Declared Python support floor<br><small>ARCH-PYFLOOR-040</small>"]
   f__github_workflows_ci_yml_3[".github/workflows/ci.yml:3"]
   ARCH_PYFLOOR_040 -->|implements| f__github_workflows_ci_yml_3
-  f_plugin_scripts_reqmap_py_238["plugin/scripts/reqmap.py:238"]
-  ARCH_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_238
+  f_plugin_scripts_reqmap_py_235["plugin/scripts/reqmap.py:235"]
+  ARCH_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_235
   f_plugin_scripts_test_reqmap_py_5998["plugin/scripts/test_reqmap.py:5998"]
   ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_5998
-  REQ_PYFLOOR_603["MIN_PYTHON names the oldest interpreter version the engine<br><small>REQ-PYFLOOR-603</small>"]
-  style REQ_PYFLOOR_603 fill:#eee,stroke:#bbb,color:#888
-  REQ_PYFLOOR_604["MIN_PYTHON equals the oldest version the CI test<br><small>REQ-PYFLOOR-604</small>"]
-  style REQ_PYFLOOR_604 fill:#eee,stroke:#bbb,color:#888
-  REQ_PYFLOOR_605["Reqmap.py refuses to run on an interpreter below<br><small>REQ-PYFLOOR-605</small>"]
-  style REQ_PYFLOOR_605 fill:#eee,stroke:#bbb,color:#888
-  REQ_PYFLOOR_606["Reqmap.py exits 2 on refusal and prints one<br><small>REQ-PYFLOOR-606</small>"]
-  style REQ_PYFLOOR_606 fill:#eee,stroke:#bbb,color:#888
-  REQ_PYFLOOR_607["_python_floor_error reports the refusal message for a caller-supplied<br><small>REQ-PYFLOOR-607</small>"]
-  style REQ_PYFLOOR_607 fill:#eee,stroke:#bbb,color:#888
   ARCH_REDUNDANCY_058["Requirements that say the same thing<br><small>ARCH-REDUNDANCY-058</small>"]
-  f_plugin_scripts_reqmap_py_5044_7485["plugin/scripts/reqmap.py:5044-7485"]
-  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5044_7485
-  f_plugin_scripts_test_reqmap_py_7829["plugin/scripts/test_reqmap.py:7829"]
-  ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7829
+  f_plugin_scripts_reqmap_py_5220_7710["plugin/scripts/reqmap.py:5220-7710"]
+  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5220_7710
+  f_plugin_scripts_test_reqmap_py_7831["plugin/scripts/test_reqmap.py:7831"]
+  ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7831
   ARCH_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>ARCH-REGISTRYLAG-035</small>"]
-  f_plugin_scripts_reqmap_py_5369_5500["plugin/scripts/reqmap.py:5369-5500"]
-  ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_5369_5500
+  f_plugin_scripts_reqmap_py_5528_5659["plugin/scripts/reqmap.py:5528-5659"]
+  ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_5528_5659
   f_plugin_scripts_test_reqmap_py_3698["plugin/scripts/test_reqmap.py:3698"]
   ARCH_REGISTRYLAG_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_3698
-  REQ_REGISTRYLAG_608["Registry lag is the number of commits on<br><small>REQ-REGISTRYLAG-608</small>"]
-  style REQ_REGISTRYLAG_608 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_609["The count comes from git alone: the last<br><small>REQ-REGISTRYLAG-609</small>"]
-  style REQ_REGISTRYLAG_609 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_610["The capability never parses requirement contents<br><small>REQ-REGISTRYLAG-610</small>"]
-  style REQ_REGISTRYLAG_610 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_611["Health --json includes the count as a commits_since_req_touch<br><small>REQ-REGISTRYLAG-611</small>"]
-  style REQ_REGISTRYLAG_611 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_612["Text output carries a labelled line only when<br><small>REQ-REGISTRYLAG-612</small>"]
-  style REQ_REGISTRYLAG_612 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_614["The signal never lowers the health score, because<br><small>REQ-REGISTRYLAG-614</small>"]
-  style REQ_REGISTRYLAG_614 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_615["The commits_since_req_touch key is absent, not zero, whenever<br><small>REQ-REGISTRYLAG-615</small>"]
-  style REQ_REGISTRYLAG_615 fill:#eee,stroke:#bbb,color:#888
-  REQ_REGISTRYLAG_616["Unmeasurable means no code root was supplied, code_root<br><small>REQ-REGISTRYLAG-616</small>"]
-  style REQ_REGISTRYLAG_616 fill:#eee,stroke:#bbb,color:#888
   ARCH_REPRO_041["Committed build artifacts stay re-derivable<br><small>ARCH-REPRO-041</small>"]
   f__github_workflows_ci_yml_4[".github/workflows/ci.yml:4"]
   ARCH_REPRO_041 -->|implements| f__github_workflows_ci_yml_4
-  REQ_REPRO_618["Plugin/scripts/_map_viewer.html derives from app/, built by npm run<br><small>REQ-REPRO-618</small>"]
-  style REQ_REPRO_618 fill:#eee,stroke:#bbb,color:#888
-  REQ_REPRO_619["Docs/full_architecture.html derives from plugin/skills/excalidraw-diagram/examples/make_full_architecture.py<br><small>REQ-REPRO-619</small>"]
-  style REQ_REPRO_619 fill:#eee,stroke:#bbb,color:#888
-  REQ_REPRO_620["The artifacts CI job rebuilds each covered artifact<br><small>REQ-REPRO-620</small>"]
-  style REQ_REPRO_620 fill:#eee,stroke:#bbb,color:#888
-  REQ_REPRO_621["The job fails the build when a rebuilt<br><small>REQ-REPRO-621</small>"]
-  style REQ_REPRO_621 fill:#eee,stroke:#bbb,color:#888
-  REQ_REPRO_622["The failure message names the stale file and<br><small>REQ-REPRO-622</small>"]
-  style REQ_REPRO_622 fill:#eee,stroke:#bbb,color:#888
-  REQ_REPRO_623["The release job runs only after artifacts passes<br><small>REQ-REPRO-623</small>"]
-  style REQ_REPRO_623 fill:#eee,stroke:#bbb,color:#888
   ARCH_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>ARCH-REVIEW-022</small>"]
-  f_plugin_scripts_reqmap_py_7251["plugin/scripts/reqmap.py:7251"]
-  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_7251
+  f_plugin_scripts_reqmap_py_7416["plugin/scripts/reqmap.py:7416"]
+  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_7416
   f_plugin_scripts_test_reqmap_py_4826["plugin/scripts/test_reqmap.py:4826"]
   ARCH_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_py_4826
   f_plugin_skills_requirement_quality_review_SKILL_md_6["plugin/skills/requirement-quality-review/SKILL.md:6"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_md_6
   f_plugin_skills_requirement_quality_review_SKILL_universal_md_9["plugin/skills/requirement-quality-review/SKILL.universal.md:9"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_9
-  REQ_REVIEW_624["The review command emits a DETERMINISTIC, read-only JSON<br><small>REQ-REVIEW-624</small>"]
-  style REQ_REVIEW_624 fill:#eee,stroke:#bbb,color:#888
-  REQ_REVIEW_625["The plan carries, per requirement, its prose (title<br><small>REQ-REVIEW-625</small>"]
-  style REQ_REVIEW_625 fill:#eee,stroke:#bbb,color:#888
-  REQ_REVIEW_626["The plan names exactly three AI categories —<br><small>REQ-REVIEW-626</small>"]
-  style REQ_REVIEW_626 fill:#eee,stroke:#bbb,color:#888
-  REQ_REVIEW_627["DETERMINISM WALL: the plan is byte-reproducible across runs<br><small>REQ-REVIEW-627</small>"]
-  style REQ_REVIEW_627 fill:#eee,stroke:#bbb,color:#888
-  REQ_REVIEW_628["Gate behaves identically whether or not an AI<br><small>REQ-REVIEW-628</small>"]
-  style REQ_REVIEW_628 fill:#eee,stroke:#bbb,color:#888
-  REQ_REVIEW_630["The AI consumer (the requirement-quality-review skill) writes findings<br><small>REQ-REVIEW-630</small>"]
-  style REQ_REVIEW_630 fill:#eee,stroke:#bbb,color:#888
   ARCH_REVIEWEDSCORE_109["Reviewed-only health score<br><small>ARCH-REVIEWEDSCORE-109</small>"]
-  f_plugin_scripts_reqmap_py_5467["plugin/scripts/reqmap.py:5467"]
-  ARCH_REVIEWEDSCORE_109 -->|implements| f_plugin_scripts_reqmap_py_5467
+  f_plugin_scripts_reqmap_py_5626_5637["plugin/scripts/reqmap.py:5626-5637"]
+  ARCH_REVIEWEDSCORE_109 -->|implements| f_plugin_scripts_reqmap_py_5626_5637
   f_plugin_scripts_test_reqmap_py_3574["plugin/scripts/test_reqmap.py:3574"]
   ARCH_REVIEWEDSCORE_109 -->|tested-by| f_plugin_scripts_test_reqmap_py_3574
   ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
-  f_plugin_scripts_reqmap_py_3723_5506["plugin/scripts/reqmap.py:3723-5506"]
-  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_py_3723_5506
+  f_plugin_scripts_reqmap_py_3900_5665["plugin/scripts/reqmap.py:3900-5665"]
+  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_py_3900_5665
   f_plugin_scripts_test_reqmap_py_6541["plugin/scripts/test_reqmap.py:6541"]
   ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_py_6541
-  REQ_ROADMAP_632["Health reads TODO.md from the code root, or<br><small>REQ-ROADMAP-632</small>"]
-  style REQ_ROADMAP_632 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_633["Health --json reports nothing about the roadmap when<br><small>REQ-ROADMAP-633</small>"]
-  style REQ_ROADMAP_633 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_634["Health --json reports the newest milestone in the<br><small>REQ-ROADMAP-634</small>"]
-  style REQ_ROADMAP_634 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_635["Health --json reports the pair only when the<br><small>REQ-ROADMAP-635</small>"]
-  style REQ_ROADMAP_635 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_636["Versions compare segment by segment as numbers, so<br><small>REQ-ROADMAP-636</small>"]
-  style REQ_ROADMAP_636 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_637["Health --json lists every ## heading in the<br><small>REQ-ROADMAP-637</small>"]
-  style REQ_ROADMAP_637 fill:#eee,stroke:#bbb,color:#888
-  REQ_ROADMAP_638["Such a heading leaves the previous milestone in<br><small>REQ-ROADMAP-638</small>"]
-  style REQ_ROADMAP_638 fill:#eee,stroke:#bbb,color:#888
+  ARCH_RULES_059["The gate rule registry<br><small>ARCH-RULES-059</small>"]
+  f_plugin_scripts_reqmap_py_913_2780["plugin/scripts/reqmap.py:913-2780"]
+  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_py_913_2780
+  f_plugin_scripts_test_reqmap_py_7950["plugin/scripts/test_reqmap.py:7950"]
+  ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_py_7950
   ARCH_SCAN_002["Member discovery<br><small>ARCH-SCAN-002</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_SCAN_002 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_119_1281["plugin/scripts/reqmap.py:119-1281"]
-  ARCH_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_119_1281
+  f_plugin_scripts_reqmap_py_119_1417["plugin/scripts/reqmap.py:119-1417"]
+  ARCH_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_119_1417
   f_plugin_scripts_test_reqmap_py_342_6940["plugin/scripts/test_reqmap.py:342-6940"]
   ARCH_SCAN_002 -->|tested-by| f_plugin_scripts_test_reqmap_py_342_6940
-  REQ_SCAN_218["Scan_members walks a code root and, in every<br><small>REQ-SCAN-218</small>"]
-  style REQ_SCAN_218 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_219["Scan_members returns cap_id -› (role, relative_file, line),<br><small>REQ-SCAN-219</small>"]
-  style REQ_SCAN_219 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_220["A role is one of implements, generated-from, validated-against<br><small>REQ-SCAN-220</small>"]
-  style REQ_SCAN_220 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_221["A tag ID matches A-ZA-Z0-9(-A-Z0-9+)+<br><small>REQ-SCAN-221</small>"]
-  style REQ_SCAN_221 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_222["A left-boundary guard prevents a substring match such<br><small>REQ-SCAN-222</small>"]
-  style REQ_SCAN_222 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_223["The same (role, ID) appearing twice on one<br><small>REQ-SCAN-223</small>"]
-  style REQ_SCAN_223 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_224["File paths are reported repo-root-relative, with POSIX separators<br><small>REQ-SCAN-224</small>"]
-  style REQ_SCAN_224 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_225["A single tag may bind several requirements through<br><small>REQ-SCAN-225</small>"]
-  style REQ_SCAN_225 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_226["Each id in that list is recorded as<br><small>REQ-SCAN-226</small>"]
-  style REQ_SCAN_226 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_228[".git, node_modules, __pycache__ and the SSOT requirements/ directory<br><small>REQ-SCAN-228</small>"]
-  style REQ_SCAN_228 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_229["The SSOT directory is matched by realpath, so<br><small>REQ-SCAN-229</small>"]
-  style REQ_SCAN_229 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_230["Paths matching .reqmapignore are excluded<br><small>REQ-SCAN-230</small>"]
-  style REQ_SCAN_230 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_231["An unreadable file is skipped without aborting the<br><small>REQ-SCAN-231</small>"]
-  style REQ_SCAN_231 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_232["Scan_all returns the members, the per-criterion coverage and<br><small>REQ-SCAN-232</small>"]
-  style REQ_SCAN_232 fill:#eee,stroke:#bbb,color:#888
   ARCH_SCAN_005["List members per capability<br><small>ARCH-SCAN-005</small>"]
-  f_plugin_scripts_reqmap_py_2135["plugin/scripts/reqmap.py:2135"]
-  ARCH_SCAN_005 -->|implements| f_plugin_scripts_reqmap_py_2135
+  f_plugin_scripts_reqmap_py_2233["plugin/scripts/reqmap.py:2233"]
+  ARCH_SCAN_005 -->|implements| f_plugin_scripts_reqmap_py_2233
   f_plugin_scripts_test_reqmap_py_1202["plugin/scripts/test_reqmap.py:1202"]
   ARCH_SCAN_005 -->|tested-by| f_plugin_scripts_test_reqmap_py_1202
-  REQ_SCAN_640["Scan prints every capability id, followed by its<br><small>REQ-SCAN-640</small>"]
-  style REQ_SCAN_640 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_641["The listed ids are the union of the<br><small>REQ-SCAN-641</small>"]
-  style REQ_SCAN_641 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_642["A capability with no members prints (no members<br><small>REQ-SCAN-642</small>"]
-  style REQ_SCAN_642 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCAN_643["A tag pointing at an id with no<br><small>REQ-SCAN-643</small>"]
-  style REQ_SCAN_643 fill:#eee,stroke:#bbb,color:#888
   ARCH_SCANCACHE_023["Opt-in scan cache<br><small>ARCH-SCANCACHE-023</small>"]
-  f_plugin_scripts_reqmap_py_1181_1195["plugin/scripts/reqmap.py:1181-1195"]
-  ARCH_SCANCACHE_023 -->|implements| f_plugin_scripts_reqmap_py_1181_1195
+  f_plugin_scripts_reqmap_py_1287_1360["plugin/scripts/reqmap.py:1287-1360"]
+  ARCH_SCANCACHE_023 -->|implements| f_plugin_scripts_reqmap_py_1287_1360
   f_plugin_scripts_test_reqmap_py_4887["plugin/scripts/test_reqmap.py:4887"]
   ARCH_SCANCACHE_023 -->|tested-by| f_plugin_scripts_test_reqmap_py_4887
-  REQ_SCANCACHE_644["The --cache flag (off by default) enables a<br><small>REQ-SCANCACHE-644</small>"]
-  style REQ_SCANCACHE_644 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCANCACHE_645["The cache is a sidecar requirements/_scancache.json, keyed per<br><small>REQ-SCANCACHE-645</small>"]
-  style REQ_SCANCACHE_645 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCANCACHE_646["With the cache on: an unchanged file (matching<br><small>REQ-SCANCACHE-646</small>"]
-  style REQ_SCANCACHE_646 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCANCACHE_647["The cache is a PURE performance optimization: scan_members(cache=True)<br><small>REQ-SCANCACHE-647</small>"]
-  style REQ_SCANCACHE_647 fill:#eee,stroke:#bbb,color:#888
-  REQ_SCANCACHE_648["The cache fails open and best-effort: an absent<br><small>REQ-SCANCACHE-648</small>"]
-  style REQ_SCANCACHE_648 fill:#eee,stroke:#bbb,color:#888
   ARCH_SEARCH_036["Free-text requirement search<br><small>ARCH-SEARCH-036</small>"]
   f_app_scripts_ssr_smoke_jsx_2["app/scripts/ssr-smoke.jsx:2"]
   ARCH_SEARCH_036 -->|tested-by| f_app_scripts_ssr_smoke_jsx_2
   f_app_src_lib_search_js_1["app/src/lib/search.js:1"]
   ARCH_SEARCH_036 -->|implements| f_app_src_lib_search_js_1
-  f_plugin_scripts_reqmap_py_5205["plugin/scripts/reqmap.py:5205"]
-  ARCH_SEARCH_036 -->|implements| f_plugin_scripts_reqmap_py_5205
+  f_plugin_scripts_reqmap_py_5389["plugin/scripts/reqmap.py:5389"]
+  ARCH_SEARCH_036 -->|implements| f_plugin_scripts_reqmap_py_5389
   f_plugin_scripts_test_reqmap_py_3494["plugin/scripts/test_reqmap.py:3494"]
   ARCH_SEARCH_036 -->|tested-by| f_plugin_scripts_test_reqmap_py_3494
-  REQ_SEARCH_650["Search writes no file. It only reads and<br><small>REQ-SEARCH-650</small>"]
-  style REQ_SEARCH_650 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_651["Search reuses the scoring machinery of dupes (ARCH-SIMILAR-016)<br><small>REQ-SEARCH-651</small>"]
-  style REQ_SEARCH_651 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_652["The query and each requirement both reduce to<br><small>REQ-SEARCH-652</small>"]
-  style REQ_SEARCH_652 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_653["Search then compares those two bags by cosine<br><small>REQ-SEARCH-653</small>"]
-  style REQ_SEARCH_653 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_654["Search prints every match it shows together with<br><small>REQ-SEARCH-654</small>"]
-  style REQ_SEARCH_654 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_655["Search shows at most --top matches. --top defaults<br><small>REQ-SEARCH-655</small>"]
-  style REQ_SEARCH_655 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_656["A --top of zero or less counts as<br><small>REQ-SEARCH-656</small>"]
-  style REQ_SEARCH_656 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_657["Search applies a relevance floor and never prints<br><small>REQ-SEARCH-657</small>"]
-  style REQ_SEARCH_657 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_658["When no requirement scores at or above the<br><small>REQ-SEARCH-658</small>"]
-  style REQ_SEARCH_658 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_659["The floor defaults to 0.05<br><small>REQ-SEARCH-659</small>"]
-  style REQ_SEARCH_659 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_660["When the query holds no searchable term, search<br><small>REQ-SEARCH-660</small>"]
-  style REQ_SEARCH_660 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_661["Tokenizing drops short words, stopwords and pure numbers<br><small>REQ-SEARCH-661</small>"]
-  style REQ_SEARCH_661 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_662["The output of search says that the search<br><small>REQ-SEARCH-662</small>"]
-  style REQ_SEARCH_662 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_663["Search always returns zero from a well-formed invocation<br><small>REQ-SEARCH-663</small>"]
-  style REQ_SEARCH_663 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_664["A missing query argument is a usage error<br><small>REQ-SEARCH-664</small>"]
-  style REQ_SEARCH_664 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_665["The map viewer's search box ranks by this<br><small>REQ-SEARCH-665</small>"]
-  style REQ_SEARCH_665 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_666["The viewer's ranking (app/src/lib/search.js) is a faithful port<br><small>REQ-SEARCH-666</small>"]
-  style REQ_SEARCH_666 fill:#eee,stroke:#bbb,color:#888
-  REQ_SEARCH_667["A shared golden fixture pins the port to<br><small>REQ-SEARCH-667</small>"]
-  style REQ_SEARCH_667 fill:#eee,stroke:#bbb,color:#888
   ARCH_SELFGATE_039["This repo's own gate wiring<br><small>ARCH-SELFGATE-039</small>"]
   f_sync_reqmap_sh_2["sync_reqmap.sh:2"]
   ARCH_SELFGATE_039 -->|implements| f_sync_reqmap_sh_2
@@ -2005,103 +730,21 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_bump_py_56
   f_scripts_test_check_versions_py_93_100["scripts/test_check_versions.py:93-100"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_93_100
-  REQ_SELFGATE_668[".github/workflows/ci.yml's gate-and-tests job invokes reqmap.py gate / lint<br><small>REQ-SELFGATE-668</small>"]
-  style REQ_SELFGATE_668 fill:#eee,stroke:#bbb,color:#888
-  REQ_SELFGATE_669["Check/action.yml packages the same invocation as a reusable<br><small>REQ-SELFGATE-669</small>"]
-  style REQ_SELFGATE_669 fill:#eee,stroke:#bbb,color:#888
-  REQ_SELFGATE_670["Ci.yml's release job force-moves the action's major-alias tag<br><small>REQ-SELFGATE-670</small>"]
-  style REQ_SELFGATE_670 fill:#eee,stroke:#bbb,color:#888
-  REQ_SELFGATE_671[".githooks/pre-commit mirrors the CI order locally, before a<br><small>REQ-SELFGATE-671</small>"]
-  style REQ_SELFGATE_671 fill:#eee,stroke:#bbb,color:#888
-  REQ_SELFGATE_672[".githooks/pre-push blocks a direct push to main<br><small>REQ-SELFGATE-672</small>"]
-  style REQ_SELFGATE_672 fill:#eee,stroke:#bbb,color:#888
-  REQ_SELFGATE_673["Sync_reqmap.sh propagates plugin/scripts/reqmap.py (+ the vendored viewer template)<br><small>REQ-SELFGATE-673</small>"]
-  style REQ_SELFGATE_673 fill:#eee,stroke:#bbb,color:#888
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]
-  f_plugin_scripts_reqmap_py_4939["plugin/scripts/reqmap.py:4939"]
-  ARCH_SHOW_015 -->|implements| f_plugin_scripts_reqmap_py_4939
+  f_plugin_scripts_reqmap_py_5115["plugin/scripts/reqmap.py:5115"]
+  ARCH_SHOW_015 -->|implements| f_plugin_scripts_reqmap_py_5115
   f_plugin_scripts_test_reqmap_py_3331["plugin/scripts/test_reqmap.py:3331"]
   ARCH_SHOW_015 -->|tested-by| f_plugin_scripts_test_reqmap_py_3331
-  REQ_SHOW_674["Show ‹ID› prints one consolidated, human-readable view of<br><small>REQ-SHOW-674</small>"]
-  style REQ_SHOW_674 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_675["Show writes nothing. It only reads and prints<br><small>REQ-SHOW-675</small>"]
-  style REQ_SHOW_675 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_676["Show prints a header line carrying the id<br><small>REQ-SHOW-676</small>"]
-  style REQ_SHOW_676 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_677["The header appends priority after the layer when<br><small>REQ-SHOW-677</small>"]
-  style REQ_SHOW_677 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_678["An absent optional field adds no empty segment<br><small>REQ-SHOW-678</small>"]
-  style REQ_SHOW_678 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_679["Show prints the title and the intent. A<br><small>REQ-SHOW-679</small>"]
-  style REQ_SHOW_679 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_680["Show lists the Contract bullets. When the requirement<br><small>REQ-SHOW-680</small>"]
-  style REQ_SHOW_680 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_681["Show prints dependencies in both directions: the depends_on<br><small>REQ-SHOW-681</small>"]
-  style REQ_SHOW_681 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_682["Show lists the code members grouped by role<br><small>REQ-SHOW-682</small>"]
-  style REQ_SHOW_682 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_683["Show prints the verification level beside a member<br><small>REQ-SHOW-683</small>"]
-  style REQ_SHOW_683 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_684["Show lists the open ## WHAT — Verify<br><small>REQ-SHOW-684</small>"]
-  style REQ_SHOW_684 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_685["Show lists the risk signals with their advice<br><small>REQ-SHOW-685</small>"]
-  style REQ_SHOW_685 fill:#eee,stroke:#bbb,color:#888
-  REQ_SHOW_686["Show returns zero for a known id and<br><small>REQ-SHOW-686</small>"]
-  style REQ_SHOW_686 fill:#eee,stroke:#bbb,color:#888
   ARCH_SIMILAR_016["Duplicate-capability detector<br><small>ARCH-SIMILAR-016</small>"]
-  f_plugin_scripts_reqmap_py_5028_5142["plugin/scripts/reqmap.py:5028-5142"]
-  ARCH_SIMILAR_016 -->|implements| f_plugin_scripts_reqmap_py_5028_5142
+  f_plugin_scripts_reqmap_py_5204_5318["plugin/scripts/reqmap.py:5204-5318"]
+  ARCH_SIMILAR_016 -->|implements| f_plugin_scripts_reqmap_py_5204_5318
   f_plugin_scripts_test_reqmap_py_3413_7024["plugin/scripts/test_reqmap.py:3413-7024"]
   ARCH_SIMILAR_016 -->|tested-by| f_plugin_scripts_test_reqmap_py_3413_7024
-  REQ_SIMILAR_687["Dupes reports pairs of requirements whose contracts overlap<br><small>REQ-SIMILAR-687</small>"]
-  style REQ_SIMILAR_687 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_688["Dupes writes nothing. It only reads and prints<br><small>REQ-SIMILAR-688</small>"]
-  style REQ_SIMILAR_688 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_689["Dupes builds a bag of words for each<br><small>REQ-SIMILAR-689</small>"]
-  style REQ_SIMILAR_689 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_690["Dupes leaves the 'Notes & limitations' section out<br><small>REQ-SIMILAR-690</small>"]
-  style REQ_SIMILAR_690 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_691["Dupes tokenizes text into lowercase alphanumeric words of<br><small>REQ-SIMILAR-691</small>"]
-  style REQ_SIMILAR_691 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_692["Dupes drops a small stopword set and pure<br><small>REQ-SIMILAR-692</small>"]
-  style REQ_SIMILAR_692 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_693["Dupes skips a requirement whose Contract bullets are<br><small>REQ-SIMILAR-693</small>"]
-  style REQ_SIMILAR_693 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_694["Dupes skips a pair linked by tested-by —<br><small>REQ-SIMILAR-694</small>"]
-  style REQ_SIMILAR_694 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_695["Dupes weights terms with a smoothed TF-IDF (log((1<br><small>REQ-SIMILAR-695</small>"]
-  style REQ_SIMILAR_695 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_696["The smoothing keeps every weight positive, so a<br><small>REQ-SIMILAR-696</small>"]
-  style REQ_SIMILAR_696 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_697["Dupes scores each pair with cosine similarity in<br><small>REQ-SIMILAR-697</small>"]
-  style REQ_SIMILAR_697 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_698["Dupes reports only the pairs at or above<br><small>REQ-SIMILAR-698</small>"]
-  style REQ_SIMILAR_698 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_699["The threshold defaults to 0.35<br><small>REQ-SIMILAR-699</small>"]
-  style REQ_SIMILAR_699 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_700["--threshold overrides that default<br><small>REQ-SIMILAR-700</small>"]
-  style REQ_SIMILAR_700 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_701["Dupes prints pairs most-similar-first, each with its score<br><small>REQ-SIMILAR-701</small>"]
-  style REQ_SIMILAR_701 fill:#eee,stroke:#bbb,color:#888
-  REQ_SIMILAR_702["Dupes always returns zero. The report is advisory<br><small>REQ-SIMILAR-702</small>"]
-  style REQ_SIMILAR_702 fill:#eee,stroke:#bbb,color:#888
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
-  f_plugin_scripts_reqmap_py_5695_7513["plugin/scripts/reqmap.py:5695-7513"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_5695_7513
+  f_plugin_scripts_reqmap_py_5854_7738["plugin/scripts/reqmap.py:5854-7738"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_5854_7738
   f_plugin_scripts_test_reqmap_py_5619["plugin/scripts/test_reqmap.py:5619"]
   ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_5619
-  REQ_SITE_703["Site --attach ‹page.html› injects the requested marker-delimited regions<br><small>REQ-SITE-703</small>"]
-  style REQ_SITE_703 fill:#eee,stroke:#bbb,color:#888
-  REQ_SITE_704["When the --attach target does not exist, site<br><small>REQ-SITE-704</small>"]
-  style REQ_SITE_704 fill:#eee,stroke:#bbb,color:#888
-  REQ_SITE_705["The nav region emits a link only when<br><small>REQ-SITE-705</small>"]
-  style REQ_SITE_705 fill:#eee,stroke:#bbb,color:#888
-  REQ_SITE_706["The engine never imports or executes the excalidraw<br><small>REQ-SITE-706</small>"]
-  style REQ_SITE_706 fill:#eee,stroke:#bbb,color:#888
-  REQ_SITE_707["Init, unless --no-site is given, runs a best-effort<br><small>REQ-SITE-707</small>"]
-  style REQ_SITE_707 fill:#eee,stroke:#bbb,color:#888
-  REQ_SITE_708["Map --check flags the site page stale when<br><small>REQ-SITE-708</small>"]
-  style REQ_SITE_708 fill:#eee,stroke:#bbb,color:#888
   ARCH_STALEENGINE_043["Stale vendored engine, reported in CI<br><small>ARCH-STALEENGINE-043</small>"]
   f_check_action_yml_3["check/action.yml:3"]
   ARCH_STALEENGINE_043 -->|implements| f_check_action_yml_3
@@ -2109,178 +752,42 @@ graph LR
   ARCH_STALEENGINE_043 -->|implements| f_check_engine_staleness_py_2
   f_scripts_test_engine_staleness_py_49["scripts/test_engine_staleness.py:49"]
   ARCH_STALEENGINE_043 -->|tested-by| f_scripts_test_engine_staleness_py_49
-  REQ_STALEENGINE_709["The staleness probe compares the vendored engine's MAP_ENGINE_VERSION<br><small>REQ-STALEENGINE-709</small>"]
-  style REQ_STALEENGINE_709 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_710["Check/action.yml runs the probe as a step of<br><small>REQ-STALEENGINE-710</small>"]
-  style REQ_STALEENGINE_710 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_712["The action's stale-engine input sets that mode and<br><small>REQ-STALEENGINE-712</small>"]
-  style REQ_STALEENGINE_712 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_713["A vendored engine older than the reference produces<br><small>REQ-STALEENGINE-713</small>"]
-  style REQ_STALEENGINE_713 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_714["In warn the message is a warning and<br><small>REQ-STALEENGINE-714</small>"]
-  style REQ_STALEENGINE_714 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_715["In error the same condition exits 1<br><small>REQ-STALEENGINE-715</small>"]
-  style REQ_STALEENGINE_715 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_716["Under GitHub Actions the message is emitted as<br><small>REQ-STALEENGINE-716</small>"]
-  style REQ_STALEENGINE_716 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_717["Off produces no output and exit 0<br><small>REQ-STALEENGINE-717</small>"]
-  style REQ_STALEENGINE_717 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_718["A vendored engine at or ahead of the<br><small>REQ-STALEENGINE-718</small>"]
-  style REQ_STALEENGINE_718 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_719["A version that cannot be read from either<br><small>REQ-STALEENGINE-719</small>"]
-  style REQ_STALEENGINE_719 fill:#eee,stroke:#bbb,color:#888
-  REQ_STALEENGINE_720["An unexpected internal failure of the probe is<br><small>REQ-STALEENGINE-720</small>"]
-  style REQ_STALEENGINE_720 fill:#eee,stroke:#bbb,color:#888
   ARCH_SUGGESTVERIFIES_047["Suggest per-criterion 'verifies:' tags<br><small>ARCH-SUGGESTVERIFIES-047</small>"]
-  f_plugin_scripts_reqmap_py_7093_7224["plugin/scripts/reqmap.py:7093-7224"]
-  ARCH_SUGGESTVERIFIES_047 -->|implements| f_plugin_scripts_reqmap_py_7093_7224
+  f_plugin_scripts_reqmap_py_7258_7389["plugin/scripts/reqmap.py:7258-7389"]
+  ARCH_SUGGESTVERIFIES_047 -->|implements| f_plugin_scripts_reqmap_py_7258_7389
   f_plugin_scripts_test_reqmap_py_4334["plugin/scripts/test_reqmap.py:4334"]
   ARCH_SUGGESTVERIFIES_047 -->|tested-by| f_plugin_scripts_test_reqmap_py_4334
-  REQ_SUGGESTVERIFIES_721["Suggest-verifies proposes a # verifies: ‹id›#AC-N tag for<br><small>REQ-SUGGESTVERIFIES-721</small>"]
-  style REQ_SUGGESTVERIFIES_721 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_722["Suggest-verifies searches only the tested-by files of the<br><small>REQ-SUGGESTVERIFIES-722</small>"]
-  style REQ_SUGGESTVERIFIES_722 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_723["Suggest-verifies reads a test name from a def<br><small>REQ-SUGGESTVERIFIES-723</small>"]
-  style REQ_SUGGESTVERIFIES_723 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_724["A criterion already carrying a verifies tag is<br><small>REQ-SUGGESTVERIFIES-724</small>"]
-  style REQ_SUGGESTVERIFIES_724 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_725["A criterion marked as not machine-verifiable is never<br><small>REQ-SUGGESTVERIFIES-725</small>"]
-  style REQ_SUGGESTVERIFIES_725 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_726["A name matches a criterion only as a<br><small>REQ-SUGGESTVERIFIES-726</small>"]
-  style REQ_SUGGESTVERIFIES_726 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_727["When the tested-by file belongs to more than<br><small>REQ-SUGGESTVERIFIES-727</small>"]
-  style REQ_SUGGESTVERIFIES_727 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_728["A test whose name carries another requirement's number<br><small>REQ-SUGGESTVERIFIES-728</small>"]
-  style REQ_SUGGESTVERIFIES_728 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_729["When two or more tests match one criterion<br><small>REQ-SUGGESTVERIFIES-729</small>"]
-  style REQ_SUGGESTVERIFIES_729 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_730["Suggest-verifies writes nothing by default. It prints the<br><small>REQ-SUGGESTVERIFIES-730</small>"]
-  style REQ_SUGGESTVERIFIES_730 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_731["--apply appends each proposed tag to its test's<br><small>REQ-SUGGESTVERIFIES-731</small>"]
-  style REQ_SUGGESTVERIFIES_731 fill:#eee,stroke:#bbb,color:#888
-  REQ_SUGGESTVERIFIES_732["--apply leaves a line that already carries the<br><small>REQ-SUGGESTVERIFIES-732</small>"]
-  style REQ_SUGGESTVERIFIES_732 fill:#eee,stroke:#bbb,color:#888
   ARCH_TESTLINK_018["Test-link integrity check<br><small>ARCH-TESTLINK-018</small>"]
-  f_plugin_scripts_reqmap_py_2260_2432["plugin/scripts/reqmap.py:2260-2432"]
-  ARCH_TESTLINK_018 -->|implements| f_plugin_scripts_reqmap_py_2260_2432
+  f_plugin_scripts_reqmap_py_2358_2549["plugin/scripts/reqmap.py:2358-2549"]
+  ARCH_TESTLINK_018 -->|implements| f_plugin_scripts_reqmap_py_2358_2549
   f_plugin_scripts_test_reqmap_py_3902_4257["plugin/scripts/test_reqmap.py:3902-4257"]
   ARCH_TESTLINK_018 -->|tested-by| f_plugin_scripts_test_reqmap_py_3902_4257
-  REQ_TESTLINK_733["The gate checks every tested-by link, at every<br><small>REQ-TESTLINK-733</small>"]
-  style REQ_TESTLINK_733 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_734["For each distinct tested-by file, the gate verifies<br><small>REQ-TESTLINK-734</small>"]
-  style REQ_TESTLINK_734 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_735["For each such file the gate also verifies<br><small>REQ-TESTLINK-735</small>"]
-  style REQ_TESTLINK_735 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_736["The gate recognizes a test function lexically<br><small>REQ-TESTLINK-736</small>"]
-  style REQ_TESTLINK_736 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_737["A Python def test...( counts<br><small>REQ-TESTLINK-737</small>"]
-  style REQ_TESTLINK_737 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_738["A JavaScript or TypeScript function test...( counts<br><small>REQ-TESTLINK-738</small>"]
-  style REQ_TESTLINK_738 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_739["An it( call or a test( call counts<br><small>REQ-TESTLINK-739</small>"]
-  style REQ_TESTLINK_739 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_740["A Go func Test/Benchmark/Example/Fuzz( counts<br><small>REQ-TESTLINK-740</small>"]
-  style REQ_TESTLINK_740 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_741["A Rust #test counts<br><small>REQ-TESTLINK-741</small>"]
-  style REQ_TESTLINK_741 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_742["A .py file with no def test... also<br><small>REQ-TESTLINK-742</small>"]
-  style REQ_TESTLINK_742 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_743["A shell test_x() function, a function test_x definition<br><small>REQ-TESTLINK-743</small>"]
-  style REQ_TESTLINK_743 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_744["A shell file named by a test convention<br><small>REQ-TESTLINK-744</small>"]
-  style REQ_TESTLINK_744 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_745["When a file is missing, unreadable, or holds<br><small>REQ-TESTLINK-745</small>"]
-  style REQ_TESTLINK_745 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_746["That warning names the requirement and the file<br><small>REQ-TESTLINK-746</small>"]
-  style REQ_TESTLINK_746 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_748["Under --strict the warning becomes an error only<br><small>REQ-TESTLINK-748</small>"]
-  style REQ_TESTLINK_748 fill:#eee,stroke:#bbb,color:#888
-  REQ_TESTLINK_749["The check stays silent on a well-formed corpus<br><small>REQ-TESTLINK-749</small>"]
-  style REQ_TESTLINK_749 fill:#eee,stroke:#bbb,color:#888
   ARCH_TRACE_020["Upstream traceability<br><small>ARCH-TRACE-020</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_TRACE_020 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_2225_4974["plugin/scripts/reqmap.py:2225-4974"]
-  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2225_4974
+  f_plugin_scripts_reqmap_py_2323_5150["plugin/scripts/reqmap.py:2323-5150"]
+  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2323_5150
   f_plugin_scripts_test_reqmap_py_4155_4616["plugin/scripts/test_reqmap.py:4155-4616"]
   ARCH_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_4155_4616
-  REQ_TRACE_750["A requirement may declare a satisfies: frontmatter list<br><small>REQ-TRACE-750</small>"]
-  style REQ_TRACE_750 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_751["The gate warns, and never errors, when a<br><small>REQ-TRACE-751</small>"]
-  style REQ_TRACE_751 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_752["The gate warns when a confirmed need has<br><small>REQ-TRACE-752</small>"]
-  style REQ_TRACE_752 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_753["The aggregate layer is exempt from the implements<br><small>REQ-TRACE-753</small>"]
-  style REQ_TRACE_753 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_754["An aggregate declares at least one depends_on id<br><small>REQ-TRACE-754</small>"]
-  style REQ_TRACE_754 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_756["The need layer is exempt from the implements<br><small>REQ-TRACE-756</small>"]
-  style REQ_TRACE_756 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_757["A need is still expected to carry a<br><small>REQ-TRACE-757</small>"]
-  style REQ_TRACE_757 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_758["Show prints the upstream ids a requirement satisfies<br><small>REQ-TRACE-758</small>"]
-  style REQ_TRACE_758 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACE_759["The map data carries satisfies and satisfied_by on<br><small>REQ-TRACE-759</small>"]
-  style REQ_TRACE_759 fill:#eee,stroke:#bbb,color:#888
   ARCH_TRACKED_042["Untracked members reported<br><small>ARCH-TRACKED-042</small>"]
-  f_plugin_scripts_reqmap_py_1411_2556["plugin/scripts/reqmap.py:1411-2556"]
-  ARCH_TRACKED_042 -->|implements| f_plugin_scripts_reqmap_py_1411_2556
+  f_plugin_scripts_reqmap_py_1507_2663["plugin/scripts/reqmap.py:1507-2663"]
+  ARCH_TRACKED_042 -->|implements| f_plugin_scripts_reqmap_py_1507_2663
   f_plugin_scripts_test_reqmap_py_5886["plugin/scripts/test_reqmap.py:5886"]
   ARCH_TRACKED_042 -->|tested-by| f_plugin_scripts_test_reqmap_py_5886
-  REQ_TRACKED_760["Untracked_members lists the member files git does not<br><small>REQ-TRACKED-760</small>"]
-  style REQ_TRACKED_760 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACKED_761["Gate reports those files in one warning naming<br><small>REQ-TRACKED-761</small>"]
-  style REQ_TRACKED_761 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACKED_762["The warning names the two remedies: commit the<br><small>REQ-TRACKED-762</small>"]
-  style REQ_TRACKED_762 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRACKED_763["Untracked_members reports nothing and the gate stays silent<br><small>REQ-TRACKED-763</small>"]
-  style REQ_TRACKED_763 fill:#eee,stroke:#bbb,color:#888
   ARCH_TRANSLATE_044["Opt-in requirement-content translation<br><small>ARCH-TRANSLATE-044</small>"]
   f_app_src_lib_i18n_jsx_2["app/src/lib/i18n.jsx:2"]
   ARCH_TRANSLATE_044 -->|implements| f_app_src_lib_i18n_jsx_2
   f_app_src_views_SpecView_jsx_2["app/src/views/SpecView.jsx:2"]
   ARCH_TRANSLATE_044 -->|implements| f_app_src_views_SpecView_jsx_2
-  f_plugin_scripts_reqmap_py_3804_4101["plugin/scripts/reqmap.py:3804-4101"]
-  ARCH_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_3804_4101
+  f_plugin_scripts_reqmap_py_3981_4278["plugin/scripts/reqmap.py:3981-4278"]
+  ARCH_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_3981_4278
   f_plugin_scripts_test_reqmap_py_3144["plugin/scripts/test_reqmap.py:3144"]
   ARCH_TRANSLATE_044 -->|tested-by| f_plugin_scripts_test_reqmap_py_3144
-  REQ_TRANSLATE_765["Translate is reached ONLY by typing reqmap.py translate<br><small>REQ-TRANSLATE-765</small>"]
-  style REQ_TRANSLATE_765 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_766["Corpus_lang(reqs) detects the corpus's majority language (ro or<br><small>REQ-TRANSLATE-766</small>"]
-  style REQ_TRANSLATE_766 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_767["Translate --to ro/en translates every requirement whose effective<br><small>REQ-TRANSLATE-767</small>"]
-  style REQ_TRANSLATE_767 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_768["The cache key is translation_hash(body, title) — a<br><small>REQ-TRANSLATE-768</small>"]
-  style REQ_TRANSLATE_768 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_769["Before a translation is cached, _translation_preserves_structure() compares the<br><small>REQ-TRANSLATE-769</small>"]
-  style REQ_TRANSLATE_769 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_770["The AC-N labels and the Gherkin keywords are<br><small>REQ-TRANSLATE-770</small>"]
-  style REQ_TRANSLATE_770 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_771["A missing/erroring claude CLI, a timeout, or a<br><small>REQ-TRANSLATE-771</small>"]
-  style REQ_TRANSLATE_771 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_772["A cache hit (stored hash matches current content)<br><small>REQ-TRANSLATE-772</small>"]
-  style REQ_TRANSLATE_772 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_773["Map and export read requirements/_i18n/.json (when present) and<br><small>REQ-TRANSLATE-773</small>"]
-  style REQ_TRANSLATE_773 fill:#eee,stroke:#bbb,color:#888
-  REQ_TRANSLATE_774["The viewer consumes node.i18n ONLY through translatedText() (i18n.jsx)<br><small>REQ-TRANSLATE-774</small>"]
-  style REQ_TRANSLATE_774 fill:#eee,stroke:#bbb,color:#888
   ARCH_UNSCANNEDTAG_045["Tags in unscanned file types reported<br><small>ARCH-UNSCANNEDTAG-045</small>"]
-  f_plugin_scripts_reqmap_py_1454_2567["plugin/scripts/reqmap.py:1454-2567"]
-  ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_py_1454_2567
+  f_plugin_scripts_reqmap_py_1550_2675["plugin/scripts/reqmap.py:1550-2675"]
+  ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_py_1550_2675
   f_plugin_scripts_test_reqmap_py_6886["plugin/scripts/test_reqmap.py:6886"]
   ARCH_UNSCANNEDTAG_045 -->|tested-by| f_plugin_scripts_test_reqmap_py_6886
-  REQ_UNSCANNEDTAG_775["Tagged_unscanned_files lists the tracked, non-scannable files under the<br><small>REQ-UNSCANNEDTAG-775</small>"]
-  style REQ_UNSCANNEDTAG_775 fill:#eee,stroke:#bbb,color:#888
-  REQ_UNSCANNEDTAG_776["Gate reports those files in one warning naming<br><small>REQ-UNSCANNEDTAG-776</small>"]
-  style REQ_UNSCANNEDTAG_776 fill:#eee,stroke:#bbb,color:#888
-  REQ_UNSCANNEDTAG_777["The warning states that those files are not<br><small>REQ-UNSCANNEDTAG-777</small>"]
-  style REQ_UNSCANNEDTAG_777 fill:#eee,stroke:#bbb,color:#888
-  REQ_UNSCANNEDTAG_778["The check skips paths matching .reqmapignore, files under<br><small>REQ-UNSCANNEDTAG-778</small>"]
-  style REQ_UNSCANNEDTAG_778 fill:#eee,stroke:#bbb,color:#888
-  REQ_UNSCANNEDTAG_779["A file that is not valid UTF-8 text<br><small>REQ-UNSCANNEDTAG-779</small>"]
-  style REQ_UNSCANNEDTAG_779 fill:#eee,stroke:#bbb,color:#888
-  REQ_UNSCANNEDTAG_780["The check reports nothing and the gate stays<br><small>REQ-UNSCANNEDTAG-780</small>"]
-  style REQ_UNSCANNEDTAG_780 fill:#eee,stroke:#bbb,color:#888
   ARCH_VIEWER_007["Self-contained HTML map viewer<br><small>ARCH-VIEWER-007</small>"]
   f_app_vite_viewer_config_js_1["app/vite.viewer.config.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_vite_viewer_config_js_1
@@ -2326,92 +833,20 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_SpecView_jsx_1
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_VIEWER_007 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1383_7067["plugin/scripts/reqmap.py:1383-7067"]
-  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1383_7067
+  f_plugin_scripts_reqmap_py_1479_7232["plugin/scripts/reqmap.py:1479-7232"]
+  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1479_7232
   f_plugin_scripts_test_reqmap_py_1451_6584["plugin/scripts/test_reqmap.py:1451-6584"]
   ARCH_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1451_6584
-  REQ_VIEWER_782["Map generates _map.html when the template _map_viewer.html is<br><small>REQ-VIEWER-782</small>"]
-  style REQ_VIEWER_782 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_783["_map.html is a self-contained, single-file copy of the<br><small>REQ-VIEWER-783</small>"]
-  style REQ_VIEWER_783 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_785["Absent the template, render_html emits nothing and returns<br><small>REQ-VIEWER-785</small>"]
-  style REQ_VIEWER_785 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_786["Map then still writes _map.md and _map.json, so<br><small>REQ-VIEWER-786</small>"]
-  style REQ_VIEWER_786 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_787["Render_html replaces the template's ‹!--REQMAP_DATA--› marker with a<br><small>REQ-VIEWER-787</small>"]
-  style REQ_VIEWER_787 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_788["That assignment carries the same (nodes, edges) graph<br><small>REQ-VIEWER-788</small>"]
-  style REQ_VIEWER_788 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_789["Render_html makes the injected graph HTML-safe for embedding<br><small>REQ-VIEWER-789</small>"]
-  style REQ_VIEWER_789 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_790["‹/ → ‹// — prevents ‹/script› from closing<br><small>REQ-VIEWER-790</small>"]
-  style REQ_VIEWER_790 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_791["‹!-- → ‹/!-- — prevents the HTML5 parser<br><small>REQ-VIEWER-791</small>"]
-  style REQ_VIEWER_791 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_792["--› → -/-› — prevents prematurely closing that<br><small>REQ-VIEWER-792</small>"]
-  style REQ_VIEWER_792 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_794["Render_html also escapes U+2028 and U+2029 to their<br><small>REQ-VIEWER-794</small>"]
-  style REQ_VIEWER_794 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_795["The viewer ranks nodes by longest dependency path<br><small>REQ-VIEWER-795</small>"]
-  style REQ_VIEWER_795 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_796["The viewer excludes a cycle-closing edge from that<br><small>REQ-VIEWER-796</small>"]
-  style REQ_VIEWER_796 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_797["No node ranks higher than the number of<br><small>REQ-VIEWER-797</small>"]
-  style REQ_VIEWER_797 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_798["A node carries the acceptance section twice: accept<br><small>REQ-VIEWER-798</small>"]
-  style REQ_VIEWER_798 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_799["The viewer renders accept — one line per<br><small>REQ-VIEWER-799</small>"]
-  style REQ_VIEWER_799 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_800["The viewer renders its own UI chrome in<br><small>REQ-VIEWER-800</small>"]
-  style REQ_VIEWER_800 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_801["A locale control in the viewer's top bar<br><small>REQ-VIEWER-801</small>"]
-  style REQ_VIEWER_801 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_802["Requirement content is never translated: id, title, intent<br><small>REQ-VIEWER-802</small>"]
-  style REQ_VIEWER_802 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_803["The engine's own vocabulary is never translated either<br><small>REQ-VIEWER-803</small>"]
-  style REQ_VIEWER_803 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_804["A chrome string with no entry in the<br><small>REQ-VIEWER-804</small>"]
-  style REQ_VIEWER_804 fill:#eee,stroke:#bbb,color:#888
-  REQ_VIEWER_805["The reader's chosen locale is remembered on their<br><small>REQ-VIEWER-805</small>"]
-  style REQ_VIEWER_805 fill:#eee,stroke:#bbb,color:#888
   ARCH_VLEVEL_037["Verification levels<br><small>ARCH-VLEVEL-037</small>"]
-  f_plugin_scripts_reqmap_py_1639_4939["plugin/scripts/reqmap.py:1639-4939"]
-  ARCH_VLEVEL_037 -->|implements| f_plugin_scripts_reqmap_py_1639_4939
+  f_plugin_scripts_reqmap_py_1737_5115["plugin/scripts/reqmap.py:1737-5115"]
+  ARCH_VLEVEL_037 -->|implements| f_plugin_scripts_reqmap_py_1737_5115
   f_plugin_scripts_test_reqmap_py_274_3403["plugin/scripts/test_reqmap.py:274-3403"]
   ARCH_VLEVEL_037 -->|tested-by| f_plugin_scripts_test_reqmap_py_274_3403
-  REQ_VLEVEL_806["A tested-by: tag may end with a verification<br><small>REQ-VLEVEL-806</small>"]
-  style REQ_VLEVEL_806 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_807["A level written on a tag applies to<br><small>REQ-VLEVEL-807</small>"]
-  style REQ_VLEVEL_807 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_808["A tested-by: tag carrying no level, or an<br><small>REQ-VLEVEL-808</small>"]
-  style REQ_VLEVEL_808 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_809["The engine reports, per requirement, each level it<br><small>REQ-VLEVEL-809</small>"]
-  style REQ_VLEVEL_809 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_810["The level scan stays separate from the member<br><small>REQ-VLEVEL-810</small>"]
-  style REQ_VLEVEL_810 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_811["The engine skips a levelled tag written inside<br><small>REQ-VLEVEL-811</small>"]
-  style REQ_VLEVEL_811 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_812["In a Python file the engine also skips<br><small>REQ-VLEVEL-812</small>"]
-  style REQ_VLEVEL_812 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_813["The gate warns when a confirmed need carries<br><small>REQ-VLEVEL-813</small>"]
-  style REQ_VLEVEL_813 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_814["The gate holds that need warning back until<br><small>REQ-VLEVEL-814</small>"]
-  style REQ_VLEVEL_814 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_815["The gate warns when a confirmed bus requirement's<br><small>REQ-VLEVEL-815</small>"]
-  style REQ_VLEVEL_815 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_816["The gate judges no requirement that has no<br><small>REQ-VLEVEL-816</small>"]
-  style REQ_VLEVEL_816 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_817["The gate applies the level-fit rule to the<br><small>REQ-VLEVEL-817</small>"]
-  style REQ_VLEVEL_817 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small>"]
-  style REQ_VLEVEL_818 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small>"]
-  style REQ_VLEVEL_820 fill:#eee,stroke:#bbb,color:#888
   ARCH_VRUNGS_054["Level-to-verification correspondence<br><small>ARCH-VRUNGS-054</small>"]
-  f_plugin_scripts_reqmap_py_2412["plugin/scripts/reqmap.py:2412"]
-  ARCH_VRUNGS_054 -->|implements| f_plugin_scripts_reqmap_py_2412
-  f_plugin_scripts_test_reqmap_py_7553["plugin/scripts/test_reqmap.py:7553"]
-  ARCH_VRUNGS_054 -->|tested-by| f_plugin_scripts_test_reqmap_py_7553
+  f_plugin_scripts_reqmap_py_2528["plugin/scripts/reqmap.py:2528"]
+  ARCH_VRUNGS_054 -->|implements| f_plugin_scripts_reqmap_py_2528
+  f_plugin_scripts_test_reqmap_py_7555["plugin/scripts/test_reqmap.py:7555"]
+  ARCH_VRUNGS_054 -->|tested-by| f_plugin_scripts_test_reqmap_py_7555
   SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small>"]
   style SYS_AUTHOR_101 fill:#fee,stroke:#c66
   SYS_GATE_102["Keeping code and specification in step<br><small>SYS-GATE-102</small>"]
@@ -2438,10 +873,11 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 
 ```mermaid
 graph LR
-  a_ARCH["ARCH<br><small>62 caps</small>"]
-  a_REQ["REQ<br><small>573 caps</small>"]
+  a_ARCH["ARCH<br><small>64 caps</small>"]
+  a_REQ["REQ<br><small>129 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   style a_ARCH stroke-width:3px
+  style a_REQ stroke-width:3px
 ```
 
 ## Risk & Unknowns
@@ -2450,1727 +886,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_REQ["REQ"]
-    REQ_ACVERIFY_233["The gate scans code for # verifies: ‹id›#AC-N<br><small>REQ-ACVERIFY-233</small><br>unreviewed"]
-    REQ_ACVERIFY_234["The gate recognises a verifies tag only with<br><small>REQ-ACVERIFY-234</small><br>unreviewed"]
-    REQ_ACVERIFY_235["For a confirmed requirement that labels its criteria<br><small>REQ-ACVERIFY-235</small><br>unreviewed"]
-    REQ_ACVERIFY_236["That single warning also states how many labelled<br><small>REQ-ACVERIFY-236</small><br>unreviewed"]
-    REQ_ACVERIFY_237["A confirmed requirement with no verifies tag is<br><small>REQ-ACVERIFY-237</small><br>unreviewed"]
-    REQ_ACVERIFY_238["A requirement whose criteria are unlabelled bullets is<br><small>REQ-ACVERIFY-238</small><br>unreviewed"]
-    REQ_ACVERIFY_239["A criterion marked ‹!-- verifiable by: inspection --›<br><small>REQ-ACVERIFY-239</small><br>unreviewed"]
-    REQ_ACVERIFY_240["The map emits clauses and covered on a<br><small>REQ-ACVERIFY-240</small><br>unreviewed"]
-    REQ_ACVERIFY_241["The map emits a gap naming the untagged<br><small>REQ-ACVERIFY-241</small><br>unreviewed"]
-    REQ_ACVERIFY_243["The check is warn-only. It never changes the<br><small>REQ-ACVERIFY-243</small><br>unreviewed"]
-    REQ_ATOMICITY_244["A clause in a Contract section describes a<br><small>REQ-ATOMICITY-244</small><br>unreviewed"]
-    REQ_ATOMICITY_245["A clause carrying two independent obligations counts as<br><small>REQ-ATOMICITY-245</small><br>unreviewed"]
-    REQ_ATOMICITY_247["A clause normally holds no more than LINT_STATEMENT_WORDS<br><small>REQ-ATOMICITY-247</small><br>unreviewed"]
-    REQ_ATOMICITY_248["The statement-size check reports a Contract clause above<br><small>REQ-ATOMICITY-248</small><br>unreviewed"]
-    REQ_ATOMICITY_249["The threshold is advisory. A clause above it<br><small>REQ-ATOMICITY-249</small><br>unreviewed"]
-    REQ_ATOMICITY_250["Lint_exempt: statement-size silences the check for one requirement<br><small>REQ-ATOMICITY-250</small><br>unreviewed"]
-    REQ_ATOMICITY_252["A short clause may carry several independent obligations<br><small>REQ-ATOMICITY-252</small><br>unreviewed"]
-    REQ_ATOMICITY_253["A finding asks the author to re-read the<br><small>REQ-ATOMICITY-253</small><br>unreviewed"]
-    REQ_ATOMICITY_254["The check counts words after each backticked code<br><small>REQ-ATOMICITY-254</small><br>unreviewed"]
-    REQ_ATOMICITY_255["A nested sub-bullet is counted as its own<br><small>REQ-ATOMICITY-255</small><br>unreviewed"]
-    REQ_ATOMICITY_256["The check reads the Contract section only. Acceptance<br><small>REQ-ATOMICITY-256</small><br>unreviewed"]
-    REQ_CANDIDATES_257["Plan emits a single JSON object, to stdout<br><small>REQ-CANDIDATES-257</small><br>unreviewed"]
-    REQ_CANDIDATES_258["Plan writes NO .md files. It cannot repeat<br><small>REQ-CANDIDATES-258</small><br>unreviewed"]
-    REQ_CANDIDATES_259["Plan walks the code with the same exclusions<br><small>REQ-CANDIDATES-259</small><br>unreviewed"]
-    REQ_CANDIDATES_260["Plan gathers per-file facts: module and symbol docstrings<br><small>REQ-CANDIDATES-260</small><br>unreviewed"]
-    REQ_CANDIDATES_261["Plan lists every scannable code file as a<br><small>REQ-CANDIDATES-261</small><br>unreviewed"]
-    REQ_CANDIDATES_262["Plan reads top-level signatures from Python via ast<br><small>REQ-CANDIDATES-262</small><br>unreviewed"]
-    REQ_CANDIDATES_263["An unparseable file yields empty facts. It never<br><small>REQ-CANDIDATES-263</small><br>unreviewed"]
-    REQ_CANDIDATES_264["Each candidate carries (suggested_id, suggested_layer, files, docstrings(), signatures<br><small>REQ-CANDIDATES-264</small><br>unreviewed"]
-    REQ_CANDIDATES_265["Is_test is true when every file of the<br><small>REQ-CANDIDATES-265</small><br>unreviewed"]
-    REQ_CANDIDATES_266["Depends_on is derived from imports resolved to other<br><small>REQ-CANDIDATES-266</small><br>unreviewed"]
-    REQ_CANDIDATES_267["Suggested_layer is bus when importer_count ≥ BUS_FANIN_THRESHOLD, else<br><small>REQ-CANDIDATES-267</small><br>unreviewed"]
-    REQ_CANDIDATES_268["A file already carrying an implements: tag is<br><small>REQ-CANDIDATES-268</small><br>unreviewed"]
-    REQ_CANDIDATES_269["Plan groups files by requirements/_capmap.json when that file<br><small>REQ-CANDIDATES-269</small><br>unreviewed"]
-    REQ_CANDIDATES_270["Absent _capmap.json, plan falls back to one candidate<br><small>REQ-CANDIDATES-270</small><br>unreviewed"]
-    REQ_CHECK_272["A dangling tag — a code tag referencing<br><small>REQ-CHECK-272</small><br>unreviewed"]
-    REQ_CHECK_273["An invalid status or an invalid layer is<br><small>REQ-CHECK-273</small><br>unreviewed"]
-    REQ_CHECK_274["A depends_on pointing at a missing id is<br><small>REQ-CHECK-274</small><br>unreviewed"]
-    REQ_CHECK_275["An enforced requirement with no implements: member is<br><small>REQ-CHECK-275</small><br>unreviewed"]
-    REQ_CHECK_276["A requirement is enforced when its status is<br><small>REQ-CHECK-276</small><br>unreviewed"]
-    REQ_CHECK_277["A layer: need requirement is exempt from that<br><small>REQ-CHECK-277</small><br>unreviewed"]
-    REQ_CHECK_278["Gate reports drift as a WARN, never an<br><small>REQ-CHECK-278</small><br>unreviewed"]
-    REQ_CHECK_279["The drift warning names the member file:line locations<br><small>REQ-CHECK-279</small><br>unreviewed"]
-    REQ_CHECK_280["A confirmed requirement with no tested-by: member is<br><small>REQ-CHECK-280</small><br>unreviewed"]
-    REQ_CHECK_281["A requirement carrying a test_exempt: ‹reason› opt-out in<br><small>REQ-CHECK-281</small><br>unreviewed"]
-    REQ_CHECK_282["A layer: need requirement is exempt from it<br><small>REQ-CHECK-282</small><br>unreviewed"]
-    REQ_CHECK_283["A confirmed requirement missing a ## WHAT —<br><small>REQ-CHECK-283</small><br>unreviewed"]
-    REQ_CHECK_284["A confirmed requirement missing a ## HOW —<br><small>REQ-CHECK-284</small><br>unreviewed"]
-    REQ_CHECK_285["The requirement milestone: field is optional. When present<br><small>REQ-CHECK-285</small><br>unreviewed"]
-    REQ_CHECK_286["A malformed milestone: value is a WARN, because<br><small>REQ-CHECK-286</small><br>unreviewed"]
-    REQ_CHECK_287["A deprecated requirement is exempt from the milestone<br><small>REQ-CHECK-287</small><br>unreviewed"]
-    REQ_CHECK_288["A present-but-unreadable _reqlock.json is a WARN. Drift is<br><small>REQ-CHECK-288</small><br>unreviewed"]
-    REQ_CHECK_289["A lock sidecar (_reqlock.json or _memberlock.json) that exists<br><small>REQ-CHECK-289</small><br>unreviewed"]
-    REQ_CHECK_291["That git-tracking check is fail-open: gate stays silent<br><small>REQ-CHECK-291</small><br>unreviewed"]
-    REQ_CHECK_292["Gate names every requirement whose body lacks a<br><small>REQ-CHECK-292</small><br>unreviewed"]
-    REQ_CHECK_293["Gate counts those legacy-schema requirements in the summary<br><small>REQ-CHECK-293</small><br>unreviewed"]
-    REQ_CHECK_294["The legacy-schema warning does not affect the exit<br><small>REQ-CHECK-294</small><br>unreviewed"]
-    REQ_CHECK_295["A confirmed need with no validated-against: member is<br><small>REQ-CHECK-295</small><br>unreviewed"]
-    REQ_CHECK_296["A confirmed bus requirement whose levelled tested-by: links<br><small>REQ-CHECK-296</small><br>unreviewed"]
-    REQ_CHECK_297["A depends_on cycle is a WARN naming the<br><small>REQ-CHECK-297</small><br>unreviewed"]
-    REQ_CHECK_298["The cycle warning stays a warning under --strict<br><small>REQ-CHECK-298</small><br>unreviewed"]
-    REQ_CHECK_299["Gate prints an advisory line carrying the open<br><small>REQ-CHECK-299</small><br>unreviewed"]
-    REQ_CHECK_300["That advisory line does not affect the exit<br><small>REQ-CHECK-300</small><br>unreviewed"]
-    REQ_CHECK_301["Gate prints a summary of requirements, members, errors<br><small>REQ-CHECK-301</small><br>unreviewed"]
-    REQ_CHECK_302["With --update-lock, gate writes the current binding hashes<br><small>REQ-CHECK-302</small><br>unreviewed"]
-    REQ_CHECK_303["Sync and the deprecated check alias pass --update-lock<br><small>REQ-CHECK-303</small><br>unreviewed"]
-    REQ_CHECK_304["The gate verb itself is report-only<br><small>REQ-CHECK-304</small><br>unreviewed"]
-    REQ_CMDREGISTRY_306["Argparse choices are derived from COMMANDS at runtime<br><small>REQ-CMDREGISTRY-306</small><br>unreviewed"]
-    REQ_CMDREGISTRY_307["Tool_definition.json (the function-calling schema) is generated from COMMANDS<br><small>REQ-CMDREGISTRY-307</small><br>unreviewed"]
-    REQ_CMDREGISTRY_308["The SKILL.universal.md command table is generated from COMMANDS<br><small>REQ-CMDREGISTRY-308</small><br>unreviewed"]
-    REQ_CMDREGISTRY_309["Internal commands (e.g. gen-integration) are excluded from AI-facing<br><small>REQ-CMDREGISTRY-309</small><br>unreviewed"]
-    REQ_CMDREGISTRY_310["The gate fails (exit non-zero) when a committed<br><small>REQ-CMDREGISTRY-310</small><br>unreviewed"]
-    REQ_CMDREGISTRY_311["All generators and the gate check are stdlib-only<br><small>REQ-CMDREGISTRY-311</small><br>unreviewed"]
-    REQ_CONTEXT_312["New's built-in template scaffolds the Context form for<br><small>REQ-CONTEXT-312</small><br>unreviewed"]
-    REQ_CONTEXT_313["The Context form groups sub-topics with a bold<br><small>REQ-CONTEXT-313</small><br>unreviewed"]
-    REQ_CONTEXT_314["_context_group(body, label) returns the bullets under one bold<br><small>REQ-CONTEXT-314</small><br>unreviewed"]
-    REQ_CONTEXT_316["_build_map_data's notes and current_impl fields try the legacy<br><small>REQ-CONTEXT-316</small><br>unreviewed"]
-    REQ_CONTEXT_317["## Context and its sub-groups are commentary: not<br><small>REQ-CONTEXT-317</small><br>unreviewed"]
-    REQ_COVERAGE_318["The capability reports the count of scannable code<br><small>REQ-COVERAGE-318</small><br>unreviewed"]
-    REQ_COVERAGE_319["The denominator is exactly _scan_untagged's (see ARCH-NEXT-013): the<br><small>REQ-COVERAGE-319</small><br>unreviewed"]
-    REQ_COVERAGE_320["Any membership tag counts a file as covered<br><small>REQ-COVERAGE-320</small><br>unreviewed"]
-    REQ_COVERAGE_321["The health command includes this count as an<br><small>REQ-COVERAGE-321</small><br>unreviewed"]
-    REQ_COVERAGE_322["The health command also includes it as a<br><small>REQ-COVERAGE-322</small><br>unreviewed"]
-    REQ_COVERAGE_323["The untagged key is absent, not zero, when<br><small>REQ-COVERAGE-323</small><br>unreviewed"]
-    REQ_COVERAGE_326["A file is silenced from the count either<br><small>REQ-COVERAGE-326</small><br>unreviewed"]
-    REQ_DECOMPOSE_328["Lint writes no file during the default run<br><small>REQ-DECOMPOSE-328</small><br>unreviewed"]
-    REQ_DECOMPOSE_329["Lint --decompose creates one draft requirement for each<br><small>REQ-DECOMPOSE-329</small><br>unreviewed"]
-    REQ_DECOMPOSE_330["The gate, the pre-commit hook and CI never<br><small>REQ-DECOMPOSE-330</small><br>unreviewed"]
-    REQ_DECOMPOSE_331["Each created draft carries status: draft and a<br><small>REQ-DECOMPOSE-331</small><br>unreviewed"]
-    REQ_DECOMPOSE_332["The reported clause text is seeded into the<br><small>REQ-DECOMPOSE-332</small><br>unreviewed"]
-    REQ_DECOMPOSE_333["The created id keeps the parent's area and<br><small>REQ-DECOMPOSE-333</small><br>unreviewed"]
-    REQ_DECOMPOSE_334["Lint --decompose leaves the parent unchanged, so no<br><small>REQ-DECOMPOSE-334</small><br>unreviewed"]
-    REQ_DECOMPOSE_335["The command chooses the split by word count<br><small>REQ-DECOMPOSE-335</small><br>unreviewed"]
-    REQ_DECOMPOSE_336["Each created draft records that its split point<br><small>REQ-DECOMPOSE-336</small><br>unreviewed"]
-    REQ_DECOMPOSE_338["Lint --decompose skips a clause whose target file<br><small>REQ-DECOMPOSE-338</small><br>unreviewed"]
-    REQ_DOCBUNDLE_339["The gate warns for each file under docs/<br><small>REQ-DOCBUNDLE-339</small><br>unreviewed"]
-    REQ_DOCBUNDLE_340["The gate considers only files under docs/<br><small>REQ-DOCBUNDLE-340</small><br>unreviewed"]
-    REQ_DOCBUNDLE_341["The check skips engine-generated outputs: a file whose<br><small>REQ-DOCBUNDLE-341</small><br>unreviewed"]
-    REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small><br>unreviewed"]
-    REQ_DRIFT_200["Binding_hash computes a stable 12-character hex content hash<br><small>REQ-DRIFT-200</small><br>unreviewed"]
-    REQ_DRIFT_201["The normative sections are the Contract and Acceptance<br><small>REQ-DRIFT-201</small><br>unreviewed"]
-    REQ_DRIFT_202["Rationale, notes, verify-intent, links and the member list<br><small>REQ-DRIFT-202</small><br>unreviewed"]
-    REQ_DRIFT_203["The hash is deterministic for identical normative content<br><small>REQ-DRIFT-203</small><br>unreviewed"]
-    REQ_DRIFT_204["Load_lock and save_lock read and write the per-id<br><small>REQ-DRIFT-204</small><br>unreviewed"]
-    REQ_DRIFT_205["A missing, empty or unparseable lock loads as<br><small>REQ-DRIFT-205</small><br>unreviewed"]
-    REQ_DRIFT_206["Save_lock creates the requirements directory if it is<br><small>REQ-DRIFT-206</small><br>unreviewed"]
-    REQ_DRIFT_207["Save_lock writes sorted, indented JSON, so the lock<br><small>REQ-DRIFT-207</small><br>unreviewed"]
-    REQ_DRIFTIMPACT_347["When the gate reports a contract drift for<br><small>REQ-DRIFTIMPACT-347</small><br>unreviewed"]
-    REQ_DRIFTIMPACT_348["The dependent list is sorted and deduplicated, so<br><small>REQ-DRIFTIMPACT-348</small><br>unreviewed"]
-    REQ_DRIFTIMPACT_349["Only direct dependents are named (one edge, not<br><small>REQ-DRIFTIMPACT-349</small><br>unreviewed"]
-    REQ_DRIFTIMPACT_350["A drifted requirement with no dependents produces the<br><small>REQ-DRIFTIMPACT-350</small><br>unreviewed"]
-    REQ_EXCALIDRAW_352["Scene() produces a valid Excalidraw JSON scene (schema<br><small>REQ-EXCALIDRAW-352</small><br>unreviewed"]
-    REQ_EXCALIDRAW_353["Scene exposes shape primitives: box, ellipse, diamond, frame<br><small>REQ-EXCALIDRAW-353</small><br>unreviewed"]
-    REQ_EXCALIDRAW_354["Scene exposes ISO 5807 flowchart aliases: process, terminator<br><small>REQ-EXCALIDRAW-354</small><br>unreviewed"]
-    REQ_EXCALIDRAW_355["Scene exposes layout helpers: row, column, grid, enclose<br><small>REQ-EXCALIDRAW-355</small><br>unreviewed"]
-    REQ_EXCALIDRAW_356["Scene exposes annotation helpers: title, label, legend, glossary<br><small>REQ-EXCALIDRAW-356</small><br>unreviewed"]
-    REQ_EXCALIDRAW_357["Scene exposes connector helpers: arrow, free_arrow, path, route_under<br><small>REQ-EXCALIDRAW-357</small><br>unreviewed"]
-    REQ_EXCALIDRAW_358[".save(basename, out_dir) writes both ‹basename›.excalidraw (the scene JSON)<br><small>REQ-EXCALIDRAW-358</small><br>unreviewed"]
-    REQ_EXCALIDRAW_359["Scene(seed=‹int›) produces byte-identical output across re-runs<br><small>REQ-EXCALIDRAW-359</small><br>unreviewed"]
-    REQ_EXCALIDRAW_360["The builder has no external dependencies — stdlib<br><small>REQ-EXCALIDRAW-360</small><br>unreviewed"]
-    REQ_EXCALIDRAW_361[".save() supports five named gates, each accepting 'warn'<br><small>REQ-EXCALIDRAW-361</small><br>unreviewed"]
-    REQ_EXCALIDRAW_362["Crossing_check: a bound arrow whose straight centre-to-centre path<br><small>REQ-EXCALIDRAW-362</small><br>unreviewed"]
-    REQ_EXCALIDRAW_363["Legend_check: a fill colour used on any shape<br><small>REQ-EXCALIDRAW-363</small><br>unreviewed"]
-    REQ_EXCALIDRAW_364["Overflow_check: a shape whose bound text is larger<br><small>REQ-EXCALIDRAW-364</small><br>unreviewed"]
-    REQ_EXCALIDRAW_365["Text_overlap_check: two free captions or label elements that<br><small>REQ-EXCALIDRAW-365</small><br>unreviewed"]
-    REQ_EXCALIDRAW_366["Label_fit_check: a bound arrow whose text label is<br><small>REQ-EXCALIDRAW-366</small><br>unreviewed"]
-    REQ_EXCALIDRAW_367[".save() additionally enforces two hard gates that raise<br><small>REQ-EXCALIDRAW-367</small><br>unreviewed"]
-    REQ_EXCALIDRAW_368["The inspection methods check_overlaps(), check_arrow_crossings(), check_legend_coverage(), check_text_overflow(), check_text_overlaps()<br><small>REQ-EXCALIDRAW-368</small><br>unreviewed"]
-    REQ_EXCALIDRAW_370["Invoking python excalidraw_builder.py with no arguments runs the<br><small>REQ-EXCALIDRAW-370</small><br>unreviewed"]
-    REQ_EXCALIDRAW_371["Python excalidraw_builder.py render ‹scene.excalidraw› out_dir reads an existing<br><small>REQ-EXCALIDRAW-371</small><br>unreviewed"]
-    REQ_EXCALIDRAW_372["Python excalidraw_builder.py discover ‹repo› out.py scans ‹repo› for<br><small>REQ-EXCALIDRAW-372</small><br>unreviewed"]
-    REQ_EXCALIDRAW_373["Any unrecognised verb exits with code 2 and<br><small>REQ-EXCALIDRAW-373</small><br>unreviewed"]
-    REQ_EXTRACT_374["Draft walks every untagged scannable code file —<br><small>REQ-EXTRACT-374</small><br>unreviewed"]
-    REQ_EXTRACT_375["Draft skips a file that already carries a<br><small>REQ-EXTRACT-375</small><br>unreviewed"]
-    REQ_EXTRACT_376["Draft honors .reqmapignore, the same fnmatch globs scan<br><small>REQ-EXTRACT-376</small><br>unreviewed"]
-    REQ_EXTRACT_378["Draft proposes one requirements/DRAFT-.md per remaining file<br><small>REQ-EXTRACT-378</small><br>unreviewed"]
-    REQ_EXTRACT_379["Every proposal carries status: draft and a TODO<br><small>REQ-EXTRACT-379</small><br>unreviewed"]
-    REQ_EXTRACT_380["A proposal's Contract section opens with 'Every line<br><small>REQ-EXTRACT-380</small><br>unreviewed"]
-    REQ_EXTRACT_381["Draft creates the requirements directory if it is<br><small>REQ-EXTRACT-381</small><br>unreviewed"]
-    REQ_EXTRACT_382["Draft ids are path-aware, so two files sharing<br><small>REQ-EXTRACT-382</small><br>unreviewed"]
-    REQ_EXTRACT_383["Draft assigns a cheap risk score from TODO/FIXME/HACK/XXX<br><small>REQ-EXTRACT-383</small><br>unreviewed"]
-    REQ_EXTRACT_384["Draft routes a score of 2 or more<br><small>REQ-EXTRACT-384</small><br>unreviewed"]
-    REQ_EXTRACT_385["Re-running draft never overwrites an existing draft<br><small>REQ-EXTRACT-385</small><br>unreviewed"]
-    REQ_EXTRACT_386["A code proposal's WHERE section lists the file's<br><small>REQ-EXTRACT-386</small><br>unreviewed"]
-    REQ_EXTRACT_387["That surface is an authoring hint under WHERE<br><small>REQ-EXTRACT-387</small><br>unreviewed"]
-    REQ_FANOUT_388["The fan-out check counts, per requirement, how many<br><small>REQ-FANOUT-388</small><br>unreviewed"]
-    REQ_FANOUT_389["The count reads the satisfies: graph only, never<br><small>REQ-FANOUT-389</small><br>unreviewed"]
-    REQ_FANOUT_390["A requirement with no children is skipped, because<br><small>REQ-FANOUT-390</small><br>unreviewed"]
-    REQ_FANOUT_391["The fan-out check warns when a parent exceeds its ceiling<br><small>REQ-FANOUT-391</small><br>unreviewed"]
-    REQ_FANOUT_392["The check reports no floor at either declared level<br><small>REQ-FANOUT-392</small><br>unreviewed"]
-    REQ_FANOUT_393["The fan-out check is warn-only<br><small>REQ-FANOUT-393</small><br>unreviewed"]
-    REQ_FANOUT_394["Lint_exempt: fan-out silences the check for one requirement<br><small>REQ-FANOUT-394</small><br>unreviewed"]
-    REQ_FINDINGS_395["Findings scans every requirement and collects the bullet<br><small>REQ-FINDINGS-395</small><br>unreviewed"]
-    REQ_FINDINGS_396["Findings writes them into a single _findings.md in<br><small>REQ-FINDINGS-396</small><br>unreviewed"]
-    REQ_FINDINGS_397["Findings excludes the 'None — …' placeholder bullet<br><small>REQ-FINDINGS-397</small><br>unreviewed"]
-    REQ_FINDINGS_398["In raw mode, findings groups the findings by<br><small>REQ-FINDINGS-398</small><br>unreviewed"]
-    REQ_FINDINGS_399["Each group and the document header carry a<br><small>REQ-FINDINGS-399</small><br>unreviewed"]
-    REQ_FINDINGS_400["With zero findings, findings still writes a well-formed<br><small>REQ-FINDINGS-400</small><br>unreviewed"]
-    REQ_FINDINGS_401["With the raw flag set, findings ignores any<br><small>REQ-FINDINGS-401</small><br>unreviewed"]
-    REQ_FINDINGS_402["When the sidecar exists and raw mode is<br><small>REQ-FINDINGS-402</small><br>unreviewed"]
-    REQ_FINDINGS_403["That view puts confirmed bugs first, ordered by<br><small>REQ-FINDINGS-403</small><br>unreviewed"]
-    REQ_FINDINGS_404["A bug entry shows its location and its<br><small>REQ-FINDINGS-404</small><br>unreviewed"]
-    REQ_FINDINGS_405["Findings emits an advisory staleness note when the<br><small>REQ-FINDINGS-405</small><br>unreviewed"]
-    REQ_FINDINGS_408["Map rewrites _findings.md when that file already exists<br><small>REQ-FINDINGS-408</small><br>unreviewed"]
-    REQ_FINDINGS_409["Map never creates _findings.md. Running findings once opts<br><small>REQ-FINDINGS-409</small><br>unreviewed"]
-    REQ_FINDINGS_410["Map --check reports _findings.md stale when the committed<br><small>REQ-FINDINGS-410</small><br>unreviewed"]
-    REQ_FINDINGS_411["The gate prints a non-error advisory line carrying<br><small>REQ-FINDINGS-411</small><br>unreviewed"]
-    REQ_HEALTH_413["Health prints a coherence snapshot of the whole<br><small>REQ-HEALTH-413</small><br>unreviewed"]
-    REQ_HEALTH_414["Health writes nothing. It only reads and prints<br><small>REQ-HEALTH-414</small><br>unreviewed"]
-    REQ_HEALTH_415["Health computes a headline score: the percentage of<br><small>REQ-HEALTH-415</small><br>unreviewed"]
-    REQ_HEALTH_416["The axes are status confirmed, coverage, a test<br><small>REQ-HEALTH-416</small><br>unreviewed"]
-    REQ_HEALTH_417["For a bus or feature requirement, coverage means<br><small>REQ-HEALTH-417</small><br>unreviewed"]
-    REQ_HEALTH_418["For those same layers, the test signal means<br><small>REQ-HEALTH-418</small><br>unreviewed"]
-    REQ_HEALTH_419["A need is covered when at least one<br><small>REQ-HEALTH-419</small><br>unreviewed"]
-    REQ_HEALTH_420["A confirmed need that no requirement satisfies counts<br><small>REQ-HEALTH-420</small><br>unreviewed"]
-    REQ_HEALTH_421["Health prints component counts alongside the score: confirmed<br><small>REQ-HEALTH-421</small><br>unreviewed"]
-    REQ_HEALTH_422["--json emits the same numbers as a JSON<br><small>REQ-HEALTH-422</small><br>unreviewed"]
-    REQ_HEALTH_423["On an empty corpus health prints a score<br><small>REQ-HEALTH-423</small><br>unreviewed"]
-    REQ_HEALTH_424["Health always returns zero. The snapshot is a<br><small>REQ-HEALTH-424</small><br>unreviewed"]
-    REQ_INIT_425["Init creates the requirements folder if it is<br><small>REQ-INIT-425</small><br>unreviewed"]
-    REQ_INIT_426["Init writes a starter .reqmapignore only if the<br><small>REQ-INIT-426</small><br>unreviewed"]
-    REQ_INIT_427["The starter file lists scripts/reqmap.py. Without that line<br><small>REQ-INIT-427</small><br>unreviewed"]
-    REQ_INIT_428["The starter file also lists .worktrees/ and .claude/worktrees/<br><small>REQ-INIT-428</small><br>unreviewed"]
-    REQ_INIT_429["One exception: if the engine describes itself in<br><small>REQ-INIT-429</small><br>unreviewed"]
-    REQ_INIT_430["'Describes itself' means scripts/reqmap.py carries tags whose ids<br><small>REQ-INIT-430</small><br>unreviewed"]
-    REQ_INIT_431["Init drafts requirements from untagged code, writes the<br><small>REQ-INIT-431</small><br>unreviewed"]
-    REQ_INIT_432["Init ends with a short summary naming one<br><small>REQ-INIT-432</small><br>unreviewed"]
-    REQ_INIT_433["If nothing was drafted, init says so in<br><small>REQ-INIT-433</small><br>unreviewed"]
-    REQ_INIT_434["Running init twice is safe. The second run<br><small>REQ-INIT-434</small><br>unreviewed"]
-    REQ_INIT_435["A second run never deletes a requirement someone<br><small>REQ-INIT-435</small><br>unreviewed"]
-    REQ_LEVEL_436["A requirement may carry a level: value of<br><small>REQ-LEVEL-436</small><br>unreviewed"]
-    REQ_LEVEL_437["The level: field is optional. A requirement without<br><small>REQ-LEVEL-437</small><br>unreviewed"]
-    REQ_LEVEL_438["The level: axis is independent of layer:, and<br><small>REQ-LEVEL-438</small><br>unreviewed"]
-    REQ_LEVEL_439["An architecture requirement owns code, so the gate<br><small>REQ-LEVEL-439</small><br>unreviewed"]
-    REQ_LEVEL_440["The aggregate layer stays exempt from that rule<br><small>REQ-LEVEL-440</small><br>unreviewed"]
-    REQ_LEVEL_442["The gate reports an error for a level<br><small>REQ-LEVEL-442</small><br>unreviewed"]
-    REQ_LINT_444["Lint reports readability problems and structure problems in<br><small>REQ-LINT-444</small><br>unreviewed"]
-    REQ_LINT_445["Lint writes no file. It only reads and<br><small>REQ-LINT-445</small><br>unreviewed"]
-    REQ_LINT_446["Lint checks non-draft requirements only — status baseline<br><small>REQ-LINT-446</small><br>unreviewed"]
-    REQ_LINT_447["Lint gives each finding one of two severities<br><small>REQ-LINT-447</small><br>unreviewed"]
-    REQ_LINT_448["The missing-section check reports an error when a<br><small>REQ-LINT-448</small><br>unreviewed"]
-    REQ_LINT_449["The empty-section check reports a warn when one<br><small>REQ-LINT-449</small><br>unreviewed"]
-    REQ_LINT_450["The prose checks read the Contract and the<br><small>REQ-LINT-450</small><br>unreviewed"]
-    REQ_LINT_451["The 'Notes & limitations' section is exempt: only<br><small>REQ-LINT-451</small><br>unreviewed"]
-    REQ_LINT_452["The prose checks skip lines that are not<br><small>REQ-LINT-452</small><br>unreviewed"]
-    REQ_LINT_453["Lint strips a bullet's leading marker before the<br><small>REQ-LINT-453</small><br>unreviewed"]
-    REQ_LINT_454["Lint returns zero by default, whatever it found<br><small>REQ-LINT-454</small><br>unreviewed"]
-    REQ_LINT_455["With --strict, lint returns non-zero when at least<br><small>REQ-LINT-455</small><br>unreviewed"]
-    REQ_LINTCHECKS_457["The statement-too-long check warns on a Contract bullet<br><small>REQ-LINTCHECKS-457</small><br>unreviewed"]
-    REQ_LINTCHECKS_458["The stacked-conditions check warns on a normative line<br><small>REQ-LINTCHECKS-458</small><br>unreviewed"]
-    REQ_LINTCHECKS_459["Stacked-conditions reads every normative line. It does not<br><small>REQ-LINTCHECKS-459</small><br>unreviewed"]
-    REQ_LINTCHECKS_460["The anonymous-subject check warns on a Contract clause<br><small>REQ-LINTCHECKS-460</small><br>unreviewed"]
-    REQ_LINTCHECKS_461["Anonymous-subject reads the Contract only. Acceptance prose may<br><small>REQ-LINTCHECKS-461</small><br>unreviewed"]
-    REQ_LINTCHECKS_462["The ac-count-low check warns on an Acceptance section<br><small>REQ-LINTCHECKS-462</small><br>unreviewed"]
-    REQ_LINTCHECKS_463["The ac-count-high check warns on more than LINT_AC_MAX<br><small>REQ-LINTCHECKS-463</small><br>unreviewed"]
-    REQ_LINTCHECKS_464["The over-scoped check warns on a requirement over<br><small>REQ-LINTCHECKS-464</small><br>unreviewed"]
-    REQ_LINTCHECKS_465["Over-scoped counts clause groups when the Contract carries<br><small>REQ-LINTCHECKS-465</small><br>unreviewed"]
-    REQ_LINTCHECKS_466["The file-spread check warns on a requirement whose<br><small>REQ-LINTCHECKS-466</small><br>unreviewed"]
-    REQ_LINTCHECKS_467["File-spread is an architectural-diffuseness signal and is skipped<br><small>REQ-LINTCHECKS-467</small><br>unreviewed"]
-    REQ_LINTCHECKS_468["The layer-mismatch check warns on a layer: bus<br><small>REQ-LINTCHECKS-468</small><br>unreviewed"]
-    REQ_LINTCHECKS_469["Layer-mismatch is skipped when no fan-in data is<br><small>REQ-LINTCHECKS-469</small><br>unreviewed"]
-    REQ_LINTCHECKS_470["The vague-term check warns on a Contract bullet<br><small>REQ-LINTCHECKS-470</small><br>unreviewed"]
-    REQ_LINTCHECKS_471["Backticked code spans are stripped before the vague-term<br><small>REQ-LINTCHECKS-471</small><br>unreviewed"]
-    REQ_LINTCHECKS_472["Vague-term emits one finding per distinct term<br><small>REQ-LINTCHECKS-472</small><br>unreviewed"]
-    REQ_LINTCHECKS_473["The redundant-modal check warns on a Contract bullet<br><small>REQ-LINTCHECKS-473</small><br>unreviewed"]
-    REQ_LINTCHECKS_474["Backticked code spans are stripped before the redundant-modal<br><small>REQ-LINTCHECKS-474</small><br>unreviewed"]
-    REQ_LINTCHECKS_475["Redundant-modal emits one finding per distinct term<br><small>REQ-LINTCHECKS-475</small><br>unreviewed"]
-    REQ_LINTCHECKS_476["The atomic-bullet-then-mismatch check warns on a story quote<br><small>REQ-LINTCHECKS-476</small><br>unreviewed"]
-    REQ_LINTCHECKS_477["The atomic-story-overlong check warns past the bullet ceiling<br><small>REQ-LINTCHECKS-477</small><br>unreviewed"]
-    REQ_MAP_476["Map generates _map.json under requirements/, and export writes<br><small>REQ-MAP-476</small><br>unreviewed"]
-    REQ_MAP_478["_map.json carries one node per requirement and one<br><small>REQ-MAP-478</small><br>unreviewed"]
-    REQ_MAP_479["Each node carries its requirement's id, layer, status<br><small>REQ-MAP-479</small><br>unreviewed"]
-    REQ_MAP_480["A node's acc list carries one entry per<br><small>REQ-MAP-480</small><br>unreviewed"]
-    REQ_MAP_481["_map.json carries a top-level repo field: a best-effort<br><small>REQ-MAP-481</small><br>unreviewed"]
-    REQ_MAP_483["Repo is derived from the git remote, so<br><small>REQ-MAP-483</small><br>unreviewed"]
-    REQ_MAP_484["Resolving repo never raises and never blocks map<br><small>REQ-MAP-484</small><br>unreviewed"]
-    REQ_MAP_485["Engine_version is likewise excluded from the map --check<br><small>REQ-MAP-485</small><br>unreviewed"]
-    REQ_MAP_486["_map.json carries a top-level todos array, derived from<br><small>REQ-MAP-486</small><br>unreviewed"]
-    REQ_MAP_487["Reading a requirement's clauses folds a wrapped line<br><small>REQ-MAP-487</small><br>unreviewed"]
-    REQ_MAP_488["A clause-group label groups the clauses below it<br><small>REQ-MAP-488</small><br>unreviewed"]
-    REQ_MAP_489["Position decides a label, not the bold markers<br><small>REQ-MAP-489</small><br>unreviewed"]
-    REQ_MAP_490["Map --check fails when a committed generated file<br><small>REQ-MAP-490</small><br>unreviewed"]
-    REQ_MAP_491["The gate reports the same staleness as a<br><small>REQ-MAP-491</small><br>unreviewed"]
-    REQ_MAP_493["All requirement-derived text is JSON-encoded in _map.json, which<br><small>REQ-MAP-493</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_494["Map generates _map.md under requirements/, rendered from the<br><small>REQ-MAPDIAGRAMS-494</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_495["_map.md contains exactly 5 Mermaid code blocks: Specification<br><small>REQ-MAPDIAGRAMS-495</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_496["Each of those 5 blocks carries a legend<br><small>REQ-MAPDIAGRAMS-496</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_497["The Specification Hierarchy is drawn from the satisfies<br><small>REQ-MAPDIAGRAMS-497</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_498["The Hierarchy draws a node for each system<br><small>REQ-MAPDIAGRAMS-498</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_499["The Hierarchy counts a code requirement against its<br><small>REQ-MAPDIAGRAMS-499</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_501["A node's area is its area: field, or<br><small>REQ-MAPDIAGRAMS-501</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_502["The System Map groups nodes into per-area subgraphs<br><small>REQ-MAPDIAGRAMS-502</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_503["The System Map omits a depends_on edge whose<br><small>REQ-MAPDIAGRAMS-503</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_504["The Dependency Map is area-level: one node per<br><small>REQ-MAPDIAGRAMS-504</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_505["The Dependency Map draws an edge A→B when<br><small>REQ-MAPDIAGRAMS-505</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_506["Req→Code colors an enforced-but-unlinked requirement red, and a<br><small>REQ-MAPDIAGRAMS-506</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_507["Req→Code collapses multiple members in one file to<br><small>REQ-MAPDIAGRAMS-507</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_508["The Risk diagram shows only requirements with at<br><small>REQ-MAPDIAGRAMS-508</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_509["The Risk diagram pairs each of them with<br><small>REQ-MAPDIAGRAMS-509</small><br>unreviewed"]
-    REQ_MAPDIAGRAMS_510["A draft's open verify-intent question is suppressed, subsumed<br><small>REQ-MAPDIAGRAMS-510</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_511["Member content hashes live in a separate, versioned<br><small>REQ-MEMBERDRIFT-511</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_512["The sidecar fails open (treated as empty) when<br><small>REQ-MEMBERDRIFT-512</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_513["Member hashes are recorded only for files dedicated<br><small>REQ-MEMBERDRIFT-513</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_514["Member hashes are computed on line-ending-normalized bytes (CRLF<br><small>REQ-MEMBERDRIFT-514</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_515["The gate warns for each confirmed requirement whose<br><small>REQ-MEMBERDRIFT-515</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_516["A member with no recorded baseline does not<br><small>REQ-MEMBERDRIFT-516</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_517["The check is warn-only by default and is<br><small>REQ-MEMBERDRIFT-517</small><br>unreviewed"]
-    REQ_MEMBERDRIFT_518["--update-lock re-baselines the sidecar in lockstep with _reqlock.json<br><small>REQ-MEMBERDRIFT-518</small><br>unreviewed"]
-    REQ_NEW_519["Given a capability id, new writes requirements/‹ID›.md, stamped<br><small>REQ-NEW-519</small><br>unreviewed"]
-    REQ_NEW_520["New creates the requirements directory if it is<br><small>REQ-NEW-520</small><br>unreviewed"]
-    REQ_NEW_521["The scaffold is the engine's built-in template<br><small>REQ-NEW-521</small><br>unreviewed"]
-    REQ_NEW_522["An on-disk templates/requirement.md, when present, overrides the built-in<br><small>REQ-NEW-522</small><br>unreviewed"]
-    REQ_NEW_523["New refuses to overwrite an existing file. It<br><small>REQ-NEW-523</small><br>unreviewed"]
-    REQ_NEW_524["The emitted Contract section opens with 'Every line<br><small>REQ-NEW-524</small><br>unreviewed"]
-    REQ_NEW_525["The scaffold's guidance names the authoring rules the<br><small>REQ-NEW-525</small><br>unreviewed"]
-    REQ_NEW_526["New warns, and still exits zero, when another<br><small>REQ-NEW-526</small><br>unreviewed"]
-    REQ_NEXT_527["Next groups every requirement's open risk signals into<br><small>REQ-NEXT-527</small><br>unreviewed"]
-    REQ_NEXT_528["Next reads those signals from _risk_signals and their<br><small>REQ-NEXT-528</small><br>unreviewed"]
-    REQ_NEXT_529["Next prints a progress header N requirement(s) ·<br><small>REQ-NEXT-529</small><br>unreviewed"]
-    REQ_NEXT_530["In that header, tested counts the requirements that<br><small>REQ-NEXT-530</small><br>unreviewed"]
-    REQ_NEXT_531["Next surfaces exactly the actionable buckets: unimplemented (Orphans)<br><small>REQ-NEXT-531</small><br>unreviewed"]
-    REQ_NEXT_532["Next prints those four buckets in that order<br><small>REQ-NEXT-532</small><br>unreviewed"]
-    REQ_NEXT_533["Next omits blast-radius, because that signal is a<br><small>REQ-NEXT-533</small><br>unreviewed"]
-    REQ_NEXT_534["Next surfaces every scannable file that carries no<br><small>REQ-NEXT-534</small><br>unreviewed"]
-    REQ_NEXT_535["That bucket omits prose in the auto-draft 'ignore'<br><small>REQ-NEXT-535</small><br>unreviewed"]
-    REQ_NEXT_536["Next skips that untagged scan when the caller<br><small>REQ-NEXT-536</small><br>unreviewed"]
-    REQ_NEXT_537["An Orphans item may have members recorded in<br><small>REQ-NEXT-537</small><br>unreviewed"]
-    REQ_NEXT_538["Within a bucket, next orders items by priority<br><small>REQ-NEXT-538</small><br>unreviewed"]
-    REQ_NEXT_539["Priority rank runs must-have ‹ should-have ‹ could-have<br><small>REQ-NEXT-539</small><br>unreviewed"]
-    REQ_NEXT_540["Next tags an item whose risk: is 2<br><small>REQ-NEXT-540</small><br>unreviewed"]
-    REQ_NEXT_541["Next names the requirement file to open, as<br><small>REQ-NEXT-541</small><br>unreviewed"]
-    REQ_NEXT_542["By default next shows at most the top<br><small>REQ-NEXT-542</small><br>unreviewed"]
-    REQ_NEXT_543["Next prints a ... N more line when<br><small>REQ-NEXT-543</small><br>unreviewed"]
-    REQ_NEXT_544["With --all, next lists every item<br><small>REQ-NEXT-544</small><br>unreviewed"]
-    REQ_NEXT_545["The 'Untagged files' bucket truncates the same way<br><small>REQ-NEXT-545</small><br>unreviewed"]
-    REQ_NEXT_546["With a registry that holds no requirements, next<br><small>REQ-NEXT-546</small><br>unreviewed"]
-    REQ_NEXT_547["With requirements but no open signal, next prints<br><small>REQ-NEXT-547</small><br>unreviewed"]
-    REQ_NEXT_548["Next is deterministic and writes no file<br><small>REQ-NEXT-548</small><br>unreviewed"]
-    REQ_NEXT_549["Next always exits zero. The report is advice<br><small>REQ-NEXT-549</small><br>unreviewed"]
-    REQ_ORPHANCODE_550["The gate warns for each program file that<br><small>REQ-ORPHANCODE-550</small><br>unreviewed"]
-    REQ_ORPHANCODE_551["A program file is one ending in .py<br><small>REQ-ORPHANCODE-551</small><br>unreviewed"]
-    REQ_ORPHANCODE_552["A membership tag is one of implements, tested-by<br><small>REQ-ORPHANCODE-552</small><br>unreviewed"]
-    REQ_ORPHANCODE_553["The gate does not consider the prose, styling<br><small>REQ-ORPHANCODE-553</small><br>unreviewed"]
-    REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small><br>unreviewed"]
-    REQ_PAGES_560["When _map.html is generated AND a docs/ directory<br><small>REQ-PAGES-560</small><br>unreviewed"]
-    REQ_PAGES_561["Map --check (the no-write freshness gate) additionally flags<br><small>REQ-PAGES-561</small><br>unreviewed"]
-    REQ_PAGES_562["The freshness comparison reads the on-disk copy as<br><small>REQ-PAGES-562</small><br>unreviewed"]
-    REQ_PARSE_208["Load_requirements parses each requirements/.md file into a record<br><small>REQ-PARSE-208</small><br>unreviewed"]
-    REQ_PARSE_209["Meta is the parsed frontmatter, and body is<br><small>REQ-PARSE-209</small><br>unreviewed"]
-    REQ_PARSE_210["The id comes from the frontmatter id: field<br><small>REQ-PARSE-210</small><br>unreviewed"]
-    REQ_PARSE_211["The grammar supports scalars, inline a, b lists<br><small>REQ-PARSE-211</small><br>unreviewed"]
-    REQ_PARSE_212["A trailing # comment is stripped from a<br><small>REQ-PARSE-212</small><br>unreviewed"]
-    REQ_PARSE_213["Matching surrounding quotes are removed from a scalar<br><small>REQ-PARSE-213</small><br>unreviewed"]
-    REQ_PARSE_214["An inline list missing its closing is parsed<br><small>REQ-PARSE-214</small><br>unreviewed"]
-    REQ_PARSE_215["A file with no leading --- block yields<br><small>REQ-PARSE-215</small><br>unreviewed"]
-    REQ_PARSE_216["A file whose name starts with _ (a<br><small>REQ-PARSE-216</small><br>unreviewed"]
-    REQ_PARSE_217["A leading UTF-8 BOM is tolerated<br><small>REQ-PARSE-217</small><br>unreviewed"]
-    REQ_PIPE_563["When the command's standard output turns out to<br><small>REQ-PIPE-563</small><br>unreviewed"]
-    REQ_PIPE_564["Reqmap.py treats BrokenPipeError and the Windows form of<br><small>REQ-PIPE-564</small><br>unreviewed"]
-    REQ_PIPE_565["Any other OSError still propagates unchanged. The rule<br><small>REQ-PIPE-565</small><br>unreviewed"]
-    REQ_PIPE_566["The rule lives in the command-line entry point<br><small>REQ-PIPE-566</small><br>unreviewed"]
-    REQ_PROMOTE_568["Confirm edits only the value of the first<br><small>REQ-PROMOTE-568</small><br>unreviewed"]
-    REQ_PROMOTE_569["Confirm preserves that line's indentation and any trailing<br><small>REQ-PROMOTE-569</small><br>unreviewed"]
-    REQ_PROMOTE_570["Confirm leaves the body untouched<br><small>REQ-PROMOTE-570</small><br>unreviewed"]
-    REQ_PROMOTE_571["Confirm refuses a requirement with no implements: member<br><small>REQ-PROMOTE-571</small><br>unreviewed"]
-    REQ_PROMOTE_572["Confirm exempts a need and an aggregate from<br><small>REQ-PROMOTE-572</small><br>unreviewed"]
-    REQ_PROMOTE_573["Confirm refuses an aggregate whose depends_on list is<br><small>REQ-PROMOTE-573</small><br>unreviewed"]
-    REQ_PROMOTE_574["A refusal prints the tag the caller needs<br><small>REQ-PROMOTE-574</small><br>unreviewed"]
-    REQ_PROMOTE_575["Confirm exits non-zero with a clear message for<br><small>REQ-PROMOTE-575</small><br>unreviewed"]
-    REQ_PROMOTE_576["Confirm warns, without failing, when no tested-by: member<br><small>REQ-PROMOTE-576</small><br>unreviewed"]
-    REQ_PROMOTE_577["That warning points at the test tag to<br><small>REQ-PROMOTE-577</small><br>unreviewed"]
-    REQ_PROMOTE_578["Confirm reminds the caller to refresh the lock<br><small>REQ-PROMOTE-578</small><br>unreviewed"]
-    REQ_PROMOTE_579["Confirm is idempotent. An already-confirmed requirement is reported<br><small>REQ-PROMOTE-579</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_580["New --from-todo scaffolds a new requirement file from<br><small>REQ-PROMOTE-TODO-580</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_581["The item is selected by exact name, trimmed<br><small>REQ-PROMOTE-TODO-581</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_583["New --from-todo seeds the new requirement from the<br><small>REQ-PROMOTE-TODO-583</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_584["A lane: ops maps to layer: feature<br><small>REQ-PROMOTE-TODO-584</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_585["The new requirement's status is draft, so the<br><small>REQ-PROMOTE-TODO-585</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_586["New --from-todo refuses with a non-zero exit and<br><small>REQ-PROMOTE-TODO-586</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_587["The command refuses when the target id already<br><small>REQ-PROMOTE-TODO-587</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_588["The command refuses when no open TODO matches<br><small>REQ-PROMOTE-TODO-588</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_589["The command refuses when the name is ambiguous<br><small>REQ-PROMOTE-TODO-589</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_590["Each refusal prints a clear message. For a<br><small>REQ-PROMOTE-TODO-590</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_591["New --from-todo does not modify TODO.md by default<br><small>REQ-PROMOTE-TODO-591</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_592["With --mark-done it flips the matched item's checkbox<br><small>REQ-PROMOTE-TODO-592</small><br>unreviewed"]
-    REQ_PROMOTE_TODO_593["That flip is best-effort: a write failure warns<br><small>REQ-PROMOTE-TODO-593</small><br>unreviewed"]
-    REQ_PROSE_594["Draft also produces draft-status requirements from untagged prose<br><small>REQ-PROSE-594</small><br>unreviewed"]
-    REQ_PROSE_596["Ignore — meta/boilerplate that is never a capability<br><small>REQ-PROSE-596</small><br>unreviewed"]
-    REQ_PROSE_597["Sync_only — README/README. in any letter case, everything<br><small>REQ-PROSE-597</small><br>unreviewed"]
-    REQ_PROSE_598["Capability — everything else (e.g. prompts/, specs/, modes/<br><small>REQ-PROSE-598</small><br>unreviewed"]
-    REQ_PROSE_599["The buckets govern auto-drafting ONLY; an explicit tag<br><small>REQ-PROSE-599</small><br>unreviewed"]
-    REQ_PROSE_600["A prose draft is scaffolded from the file's<br><small>REQ-PROSE-600</small><br>unreviewed"]
-    REQ_PROSE_601["When a file has no ## heading at<br><small>REQ-PROSE-601</small><br>unreviewed"]
-    REQ_PROSE_602["The source prose is never the contract: the<br><small>REQ-PROSE-602</small><br>unreviewed"]
-    REQ_PYFLOOR_603["MIN_PYTHON names the oldest interpreter version the engine<br><small>REQ-PYFLOOR-603</small><br>unreviewed"]
-    REQ_PYFLOOR_604["MIN_PYTHON equals the oldest version the CI test<br><small>REQ-PYFLOOR-604</small><br>unreviewed"]
-    REQ_PYFLOOR_605["Reqmap.py refuses to run on an interpreter below<br><small>REQ-PYFLOOR-605</small><br>unreviewed"]
-    REQ_PYFLOOR_606["Reqmap.py exits 2 on refusal and prints one<br><small>REQ-PYFLOOR-606</small><br>unreviewed"]
-    REQ_PYFLOOR_607["_python_floor_error reports the refusal message for a caller-supplied<br><small>REQ-PYFLOOR-607</small><br>unreviewed"]
-    REQ_REGISTRYLAG_608["Registry lag is the number of commits on<br><small>REQ-REGISTRYLAG-608</small><br>unreviewed"]
-    REQ_REGISTRYLAG_609["The count comes from git alone: the last<br><small>REQ-REGISTRYLAG-609</small><br>unreviewed"]
-    REQ_REGISTRYLAG_610["The capability never parses requirement contents<br><small>REQ-REGISTRYLAG-610</small><br>unreviewed"]
-    REQ_REGISTRYLAG_611["Health --json includes the count as a commits_since_req_touch<br><small>REQ-REGISTRYLAG-611</small><br>unreviewed"]
-    REQ_REGISTRYLAG_612["Text output carries a labelled line only when<br><small>REQ-REGISTRYLAG-612</small><br>unreviewed"]
-    REQ_REGISTRYLAG_614["The signal never lowers the health score, because<br><small>REQ-REGISTRYLAG-614</small><br>unreviewed"]
-    REQ_REGISTRYLAG_615["The commits_since_req_touch key is absent, not zero, whenever<br><small>REQ-REGISTRYLAG-615</small><br>unreviewed"]
-    REQ_REGISTRYLAG_616["Unmeasurable means no code root was supplied, code_root<br><small>REQ-REGISTRYLAG-616</small><br>unreviewed"]
-    REQ_REPRO_618["Plugin/scripts/_map_viewer.html derives from app/, built by npm run<br><small>REQ-REPRO-618</small><br>unreviewed"]
-    REQ_REPRO_619["Docs/full_architecture.html derives from plugin/skills/excalidraw-diagram/examples/make_full_architecture.py<br><small>REQ-REPRO-619</small><br>unreviewed"]
-    REQ_REPRO_620["The artifacts CI job rebuilds each covered artifact<br><small>REQ-REPRO-620</small><br>unreviewed"]
-    REQ_REPRO_621["The job fails the build when a rebuilt<br><small>REQ-REPRO-621</small><br>unreviewed"]
-    REQ_REPRO_622["The failure message names the stale file and<br><small>REQ-REPRO-622</small><br>unreviewed"]
-    REQ_REPRO_623["The release job runs only after artifacts passes<br><small>REQ-REPRO-623</small><br>unreviewed"]
-    REQ_REVIEW_624["The review command emits a DETERMINISTIC, read-only JSON<br><small>REQ-REVIEW-624</small><br>unreviewed"]
-    REQ_REVIEW_625["The plan carries, per requirement, its prose (title<br><small>REQ-REVIEW-625</small><br>unreviewed"]
-    REQ_REVIEW_626["The plan names exactly three AI categories —<br><small>REQ-REVIEW-626</small><br>unreviewed"]
-    REQ_REVIEW_627["DETERMINISM WALL: the plan is byte-reproducible across runs<br><small>REQ-REVIEW-627</small><br>unreviewed"]
-    REQ_REVIEW_628["Gate behaves identically whether or not an AI<br><small>REQ-REVIEW-628</small><br>unreviewed"]
-    REQ_REVIEW_630["The AI consumer (the requirement-quality-review skill) writes findings<br><small>REQ-REVIEW-630</small><br>unreviewed"]
-    REQ_ROADMAP_632["Health reads TODO.md from the code root, or<br><small>REQ-ROADMAP-632</small><br>unreviewed"]
-    REQ_ROADMAP_633["Health --json reports nothing about the roadmap when<br><small>REQ-ROADMAP-633</small><br>unreviewed"]
-    REQ_ROADMAP_634["Health --json reports the newest milestone in the<br><small>REQ-ROADMAP-634</small><br>unreviewed"]
-    REQ_ROADMAP_635["Health --json reports the pair only when the<br><small>REQ-ROADMAP-635</small><br>unreviewed"]
-    REQ_ROADMAP_636["Versions compare segment by segment as numbers, so<br><small>REQ-ROADMAP-636</small><br>unreviewed"]
-    REQ_ROADMAP_637["Health --json lists every ## heading in the<br><small>REQ-ROADMAP-637</small><br>unreviewed"]
-    REQ_ROADMAP_638["Such a heading leaves the previous milestone in<br><small>REQ-ROADMAP-638</small><br>unreviewed"]
-    REQ_SCAN_218["Scan_members walks a code root and, in every<br><small>REQ-SCAN-218</small><br>unreviewed"]
-    REQ_SCAN_219["Scan_members returns cap_id -› (role, relative_file, line),<br><small>REQ-SCAN-219</small><br>unreviewed"]
-    REQ_SCAN_220["A role is one of implements, generated-from, validated-against<br><small>REQ-SCAN-220</small><br>unreviewed"]
-    REQ_SCAN_221["A tag ID matches A-ZA-Z0-9(-A-Z0-9+)+<br><small>REQ-SCAN-221</small><br>unreviewed"]
-    REQ_SCAN_222["A left-boundary guard prevents a substring match such<br><small>REQ-SCAN-222</small><br>unreviewed"]
-    REQ_SCAN_223["The same (role, ID) appearing twice on one<br><small>REQ-SCAN-223</small><br>unreviewed"]
-    REQ_SCAN_224["File paths are reported repo-root-relative, with POSIX separators<br><small>REQ-SCAN-224</small><br>unreviewed"]
-    REQ_SCAN_225["A single tag may bind several requirements through<br><small>REQ-SCAN-225</small><br>unreviewed"]
-    REQ_SCAN_226["Each id in that list is recorded as<br><small>REQ-SCAN-226</small><br>unreviewed"]
-    REQ_SCAN_228[".git, node_modules, __pycache__ and the SSOT requirements/ directory<br><small>REQ-SCAN-228</small><br>unreviewed"]
-    REQ_SCAN_229["The SSOT directory is matched by realpath, so<br><small>REQ-SCAN-229</small><br>unreviewed"]
-    REQ_SCAN_230["Paths matching .reqmapignore are excluded<br><small>REQ-SCAN-230</small><br>unreviewed"]
-    REQ_SCAN_231["An unreadable file is skipped without aborting the<br><small>REQ-SCAN-231</small><br>unreviewed"]
-    REQ_SCAN_232["Scan_all returns the members, the per-criterion coverage and<br><small>REQ-SCAN-232</small><br>unreviewed"]
-    REQ_SCAN_640["Scan prints every capability id, followed by its<br><small>REQ-SCAN-640</small><br>unreviewed"]
-    REQ_SCAN_641["The listed ids are the union of the<br><small>REQ-SCAN-641</small><br>unreviewed"]
-    REQ_SCAN_642["A capability with no members prints (no members<br><small>REQ-SCAN-642</small><br>unreviewed"]
-    REQ_SCAN_643["A tag pointing at an id with no<br><small>REQ-SCAN-643</small><br>unreviewed"]
-    REQ_SCANCACHE_644["The --cache flag (off by default) enables a<br><small>REQ-SCANCACHE-644</small><br>unreviewed"]
-    REQ_SCANCACHE_645["The cache is a sidecar requirements/_scancache.json, keyed per<br><small>REQ-SCANCACHE-645</small><br>unreviewed"]
-    REQ_SCANCACHE_646["With the cache on: an unchanged file (matching<br><small>REQ-SCANCACHE-646</small><br>unreviewed"]
-    REQ_SCANCACHE_647["The cache is a PURE performance optimization: scan_members(cache=True)<br><small>REQ-SCANCACHE-647</small><br>unreviewed"]
-    REQ_SCANCACHE_648["The cache fails open and best-effort: an absent<br><small>REQ-SCANCACHE-648</small><br>unreviewed"]
-    REQ_SEARCH_650["Search writes no file. It only reads and<br><small>REQ-SEARCH-650</small><br>unreviewed"]
-    REQ_SEARCH_651["Search reuses the scoring machinery of dupes (ARCH-SIMILAR-016)<br><small>REQ-SEARCH-651</small><br>unreviewed"]
-    REQ_SEARCH_652["The query and each requirement both reduce to<br><small>REQ-SEARCH-652</small><br>unreviewed"]
-    REQ_SEARCH_653["Search then compares those two bags by cosine<br><small>REQ-SEARCH-653</small><br>unreviewed"]
-    REQ_SEARCH_654["Search prints every match it shows together with<br><small>REQ-SEARCH-654</small><br>unreviewed"]
-    REQ_SEARCH_655["Search shows at most --top matches. --top defaults<br><small>REQ-SEARCH-655</small><br>unreviewed"]
-    REQ_SEARCH_656["A --top of zero or less counts as<br><small>REQ-SEARCH-656</small><br>unreviewed"]
-    REQ_SEARCH_657["Search applies a relevance floor and never prints<br><small>REQ-SEARCH-657</small><br>unreviewed"]
-    REQ_SEARCH_658["When no requirement scores at or above the<br><small>REQ-SEARCH-658</small><br>unreviewed"]
-    REQ_SEARCH_659["The floor defaults to 0.05<br><small>REQ-SEARCH-659</small><br>unreviewed"]
-    REQ_SEARCH_660["When the query holds no searchable term, search<br><small>REQ-SEARCH-660</small><br>unreviewed"]
-    REQ_SEARCH_661["Tokenizing drops short words, stopwords and pure numbers<br><small>REQ-SEARCH-661</small><br>unreviewed"]
-    REQ_SEARCH_662["The output of search says that the search<br><small>REQ-SEARCH-662</small><br>unreviewed"]
-    REQ_SEARCH_663["Search always returns zero from a well-formed invocation<br><small>REQ-SEARCH-663</small><br>unreviewed"]
-    REQ_SEARCH_664["A missing query argument is a usage error<br><small>REQ-SEARCH-664</small><br>unreviewed"]
-    REQ_SEARCH_665["The map viewer's search box ranks by this<br><small>REQ-SEARCH-665</small><br>unreviewed"]
-    REQ_SEARCH_666["The viewer's ranking (app/src/lib/search.js) is a faithful port<br><small>REQ-SEARCH-666</small><br>unreviewed"]
-    REQ_SEARCH_667["A shared golden fixture pins the port to<br><small>REQ-SEARCH-667</small><br>unreviewed"]
-    REQ_SELFGATE_668[".github/workflows/ci.yml's gate-and-tests job invokes reqmap.py gate / lint<br><small>REQ-SELFGATE-668</small><br>unreviewed"]
-    REQ_SELFGATE_669["Check/action.yml packages the same invocation as a reusable<br><small>REQ-SELFGATE-669</small><br>unreviewed"]
-    REQ_SELFGATE_670["Ci.yml's release job force-moves the action's major-alias tag<br><small>REQ-SELFGATE-670</small><br>unreviewed"]
-    REQ_SELFGATE_671[".githooks/pre-commit mirrors the CI order locally, before a<br><small>REQ-SELFGATE-671</small><br>unreviewed"]
-    REQ_SELFGATE_672[".githooks/pre-push blocks a direct push to main<br><small>REQ-SELFGATE-672</small><br>unreviewed"]
-    REQ_SELFGATE_673["Sync_reqmap.sh propagates plugin/scripts/reqmap.py (+ the vendored viewer template)<br><small>REQ-SELFGATE-673</small><br>unreviewed"]
-    REQ_SHOW_674["Show ‹ID› prints one consolidated, human-readable view of<br><small>REQ-SHOW-674</small><br>unreviewed"]
-    REQ_SHOW_675["Show writes nothing. It only reads and prints<br><small>REQ-SHOW-675</small><br>unreviewed"]
-    REQ_SHOW_676["Show prints a header line carrying the id<br><small>REQ-SHOW-676</small><br>unreviewed"]
-    REQ_SHOW_677["The header appends priority after the layer when<br><small>REQ-SHOW-677</small><br>unreviewed"]
-    REQ_SHOW_678["An absent optional field adds no empty segment<br><small>REQ-SHOW-678</small><br>unreviewed"]
-    REQ_SHOW_679["Show prints the title and the intent. A<br><small>REQ-SHOW-679</small><br>unreviewed"]
-    REQ_SHOW_680["Show lists the Contract bullets. When the requirement<br><small>REQ-SHOW-680</small><br>unreviewed"]
-    REQ_SHOW_681["Show prints dependencies in both directions: the depends_on<br><small>REQ-SHOW-681</small><br>unreviewed"]
-    REQ_SHOW_682["Show lists the code members grouped by role<br><small>REQ-SHOW-682</small><br>unreviewed"]
-    REQ_SHOW_683["Show prints the verification level beside a member<br><small>REQ-SHOW-683</small><br>unreviewed"]
-    REQ_SHOW_684["Show lists the open ## WHAT — Verify<br><small>REQ-SHOW-684</small><br>unreviewed"]
-    REQ_SHOW_685["Show lists the risk signals with their advice<br><small>REQ-SHOW-685</small><br>unreviewed"]
-    REQ_SHOW_686["Show returns zero for a known id and<br><small>REQ-SHOW-686</small><br>unreviewed"]
-    REQ_SIMILAR_687["Dupes reports pairs of requirements whose contracts overlap<br><small>REQ-SIMILAR-687</small><br>unreviewed"]
-    REQ_SIMILAR_688["Dupes writes nothing. It only reads and prints<br><small>REQ-SIMILAR-688</small><br>unreviewed"]
-    REQ_SIMILAR_689["Dupes builds a bag of words for each<br><small>REQ-SIMILAR-689</small><br>unreviewed"]
-    REQ_SIMILAR_690["Dupes leaves the 'Notes & limitations' section out<br><small>REQ-SIMILAR-690</small><br>unreviewed"]
-    REQ_SIMILAR_691["Dupes tokenizes text into lowercase alphanumeric words of<br><small>REQ-SIMILAR-691</small><br>unreviewed"]
-    REQ_SIMILAR_692["Dupes drops a small stopword set and pure<br><small>REQ-SIMILAR-692</small><br>unreviewed"]
-    REQ_SIMILAR_693["Dupes skips a requirement whose Contract bullets are<br><small>REQ-SIMILAR-693</small><br>unreviewed"]
-    REQ_SIMILAR_694["Dupes skips a pair linked by tested-by —<br><small>REQ-SIMILAR-694</small><br>unreviewed"]
-    REQ_SIMILAR_695["Dupes weights terms with a smoothed TF-IDF (log((1<br><small>REQ-SIMILAR-695</small><br>unreviewed"]
-    REQ_SIMILAR_696["The smoothing keeps every weight positive, so a<br><small>REQ-SIMILAR-696</small><br>unreviewed"]
-    REQ_SIMILAR_697["Dupes scores each pair with cosine similarity in<br><small>REQ-SIMILAR-697</small><br>unreviewed"]
-    REQ_SIMILAR_698["Dupes reports only the pairs at or above<br><small>REQ-SIMILAR-698</small><br>unreviewed"]
-    REQ_SIMILAR_699["The threshold defaults to 0.35<br><small>REQ-SIMILAR-699</small><br>unreviewed"]
-    REQ_SIMILAR_700["--threshold overrides that default<br><small>REQ-SIMILAR-700</small><br>unreviewed"]
-    REQ_SIMILAR_701["Dupes prints pairs most-similar-first, each with its score<br><small>REQ-SIMILAR-701</small><br>unreviewed"]
-    REQ_SIMILAR_702["Dupes always returns zero. The report is advisory<br><small>REQ-SIMILAR-702</small><br>unreviewed"]
-    REQ_SITE_703["Site --attach ‹page.html› injects the requested marker-delimited regions<br><small>REQ-SITE-703</small><br>unreviewed"]
-    REQ_SITE_704["When the --attach target does not exist, site<br><small>REQ-SITE-704</small><br>unreviewed"]
-    REQ_SITE_705["The nav region emits a link only when<br><small>REQ-SITE-705</small><br>unreviewed"]
-    REQ_SITE_706["The engine never imports or executes the excalidraw<br><small>REQ-SITE-706</small><br>unreviewed"]
-    REQ_SITE_707["Init, unless --no-site is given, runs a best-effort<br><small>REQ-SITE-707</small><br>unreviewed"]
-    REQ_SITE_708["Map --check flags the site page stale when<br><small>REQ-SITE-708</small><br>unreviewed"]
-    REQ_STALEENGINE_709["The staleness probe compares the vendored engine's MAP_ENGINE_VERSION<br><small>REQ-STALEENGINE-709</small><br>unreviewed"]
-    REQ_STALEENGINE_710["Check/action.yml runs the probe as a step of<br><small>REQ-STALEENGINE-710</small><br>unreviewed"]
-    REQ_STALEENGINE_712["The action's stale-engine input sets that mode and<br><small>REQ-STALEENGINE-712</small><br>unreviewed"]
-    REQ_STALEENGINE_713["A vendored engine older than the reference produces<br><small>REQ-STALEENGINE-713</small><br>unreviewed"]
-    REQ_STALEENGINE_714["In warn the message is a warning and<br><small>REQ-STALEENGINE-714</small><br>unreviewed"]
-    REQ_STALEENGINE_715["In error the same condition exits 1<br><small>REQ-STALEENGINE-715</small><br>unreviewed"]
-    REQ_STALEENGINE_716["Under GitHub Actions the message is emitted as<br><small>REQ-STALEENGINE-716</small><br>unreviewed"]
-    REQ_STALEENGINE_717["Off produces no output and exit 0<br><small>REQ-STALEENGINE-717</small><br>unreviewed"]
-    REQ_STALEENGINE_718["A vendored engine at or ahead of the<br><small>REQ-STALEENGINE-718</small><br>unreviewed"]
-    REQ_STALEENGINE_719["A version that cannot be read from either<br><small>REQ-STALEENGINE-719</small><br>unreviewed"]
-    REQ_STALEENGINE_720["An unexpected internal failure of the probe is<br><small>REQ-STALEENGINE-720</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_721["Suggest-verifies proposes a # verifies: ‹id›#AC-N tag for<br><small>REQ-SUGGESTVERIFIES-721</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_722["Suggest-verifies searches only the tested-by files of the<br><small>REQ-SUGGESTVERIFIES-722</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_723["Suggest-verifies reads a test name from a def<br><small>REQ-SUGGESTVERIFIES-723</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_724["A criterion already carrying a verifies tag is<br><small>REQ-SUGGESTVERIFIES-724</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_725["A criterion marked as not machine-verifiable is never<br><small>REQ-SUGGESTVERIFIES-725</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_726["A name matches a criterion only as a<br><small>REQ-SUGGESTVERIFIES-726</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_727["When the tested-by file belongs to more than<br><small>REQ-SUGGESTVERIFIES-727</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_728["A test whose name carries another requirement's number<br><small>REQ-SUGGESTVERIFIES-728</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_729["When two or more tests match one criterion<br><small>REQ-SUGGESTVERIFIES-729</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_730["Suggest-verifies writes nothing by default. It prints the<br><small>REQ-SUGGESTVERIFIES-730</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_731["--apply appends each proposed tag to its test's<br><small>REQ-SUGGESTVERIFIES-731</small><br>unreviewed"]
-    REQ_SUGGESTVERIFIES_732["--apply leaves a line that already carries the<br><small>REQ-SUGGESTVERIFIES-732</small><br>unreviewed"]
-    REQ_TESTLINK_733["The gate checks every tested-by link, at every<br><small>REQ-TESTLINK-733</small><br>unreviewed"]
-    REQ_TESTLINK_734["For each distinct tested-by file, the gate verifies<br><small>REQ-TESTLINK-734</small><br>unreviewed"]
-    REQ_TESTLINK_735["For each such file the gate also verifies<br><small>REQ-TESTLINK-735</small><br>unreviewed"]
-    REQ_TESTLINK_736["The gate recognizes a test function lexically<br><small>REQ-TESTLINK-736</small><br>unreviewed"]
-    REQ_TESTLINK_737["A Python def test...( counts<br><small>REQ-TESTLINK-737</small><br>unreviewed"]
-    REQ_TESTLINK_738["A JavaScript or TypeScript function test...( counts<br><small>REQ-TESTLINK-738</small><br>unreviewed"]
-    REQ_TESTLINK_739["An it( call or a test( call counts<br><small>REQ-TESTLINK-739</small><br>unreviewed"]
-    REQ_TESTLINK_740["A Go func Test/Benchmark/Example/Fuzz( counts<br><small>REQ-TESTLINK-740</small><br>unreviewed"]
-    REQ_TESTLINK_741["A Rust #test counts<br><small>REQ-TESTLINK-741</small><br>unreviewed"]
-    REQ_TESTLINK_742["A .py file with no def test... also<br><small>REQ-TESTLINK-742</small><br>unreviewed"]
-    REQ_TESTLINK_743["A shell test_x() function, a function test_x definition<br><small>REQ-TESTLINK-743</small><br>unreviewed"]
-    REQ_TESTLINK_744["A shell file named by a test convention<br><small>REQ-TESTLINK-744</small><br>unreviewed"]
-    REQ_TESTLINK_745["When a file is missing, unreadable, or holds<br><small>REQ-TESTLINK-745</small><br>unreviewed"]
-    REQ_TESTLINK_746["That warning names the requirement and the file<br><small>REQ-TESTLINK-746</small><br>unreviewed"]
-    REQ_TESTLINK_748["Under --strict the warning becomes an error only<br><small>REQ-TESTLINK-748</small><br>unreviewed"]
-    REQ_TESTLINK_749["The check stays silent on a well-formed corpus<br><small>REQ-TESTLINK-749</small><br>unreviewed"]
-    REQ_TRACE_750["A requirement may declare a satisfies: frontmatter list<br><small>REQ-TRACE-750</small><br>unreviewed"]
-    REQ_TRACE_751["The gate warns, and never errors, when a<br><small>REQ-TRACE-751</small><br>unreviewed"]
-    REQ_TRACE_752["The gate warns when a confirmed need has<br><small>REQ-TRACE-752</small><br>unreviewed"]
-    REQ_TRACE_753["The aggregate layer is exempt from the implements<br><small>REQ-TRACE-753</small><br>unreviewed"]
-    REQ_TRACE_754["An aggregate declares at least one depends_on id<br><small>REQ-TRACE-754</small><br>unreviewed"]
-    REQ_TRACE_756["The need layer is exempt from the implements<br><small>REQ-TRACE-756</small><br>unreviewed"]
-    REQ_TRACE_757["A need is still expected to carry a<br><small>REQ-TRACE-757</small><br>unreviewed"]
-    REQ_TRACE_758["Show prints the upstream ids a requirement satisfies<br><small>REQ-TRACE-758</small><br>unreviewed"]
-    REQ_TRACE_759["The map data carries satisfies and satisfied_by on<br><small>REQ-TRACE-759</small><br>unreviewed"]
-    REQ_TRACKED_760["Untracked_members lists the member files git does not<br><small>REQ-TRACKED-760</small><br>unreviewed"]
-    REQ_TRACKED_761["Gate reports those files in one warning naming<br><small>REQ-TRACKED-761</small><br>unreviewed"]
-    REQ_TRACKED_762["The warning names the two remedies: commit the<br><small>REQ-TRACKED-762</small><br>unreviewed"]
-    REQ_TRACKED_763["Untracked_members reports nothing and the gate stays silent<br><small>REQ-TRACKED-763</small><br>unreviewed"]
-    REQ_TRANSLATE_765["Translate is reached ONLY by typing reqmap.py translate<br><small>REQ-TRANSLATE-765</small><br>unreviewed"]
-    REQ_TRANSLATE_766["Corpus_lang(reqs) detects the corpus's majority language (ro or<br><small>REQ-TRANSLATE-766</small><br>unreviewed"]
-    REQ_TRANSLATE_767["Translate --to ro/en translates every requirement whose effective<br><small>REQ-TRANSLATE-767</small><br>unreviewed"]
-    REQ_TRANSLATE_768["The cache key is translation_hash(body, title) — a<br><small>REQ-TRANSLATE-768</small><br>unreviewed"]
-    REQ_TRANSLATE_769["Before a translation is cached, _translation_preserves_structure() compares the<br><small>REQ-TRANSLATE-769</small><br>unreviewed"]
-    REQ_TRANSLATE_770["The AC-N labels and the Gherkin keywords are<br><small>REQ-TRANSLATE-770</small><br>unreviewed"]
-    REQ_TRANSLATE_771["A missing/erroring claude CLI, a timeout, or a<br><small>REQ-TRANSLATE-771</small><br>unreviewed"]
-    REQ_TRANSLATE_772["A cache hit (stored hash matches current content)<br><small>REQ-TRANSLATE-772</small><br>unreviewed"]
-    REQ_TRANSLATE_773["Map and export read requirements/_i18n/.json (when present) and<br><small>REQ-TRANSLATE-773</small><br>unreviewed"]
-    REQ_TRANSLATE_774["The viewer consumes node.i18n ONLY through translatedText() (i18n.jsx)<br><small>REQ-TRANSLATE-774</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_775["Tagged_unscanned_files lists the tracked, non-scannable files under the<br><small>REQ-UNSCANNEDTAG-775</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_776["Gate reports those files in one warning naming<br><small>REQ-UNSCANNEDTAG-776</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_777["The warning states that those files are not<br><small>REQ-UNSCANNEDTAG-777</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_778["The check skips paths matching .reqmapignore, files under<br><small>REQ-UNSCANNEDTAG-778</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_779["A file that is not valid UTF-8 text<br><small>REQ-UNSCANNEDTAG-779</small><br>unreviewed"]
-    REQ_UNSCANNEDTAG_780["The check reports nothing and the gate stays<br><small>REQ-UNSCANNEDTAG-780</small><br>unreviewed"]
-    REQ_VIEWER_782["Map generates _map.html when the template _map_viewer.html is<br><small>REQ-VIEWER-782</small><br>unreviewed"]
-    REQ_VIEWER_783["_map.html is a self-contained, single-file copy of the<br><small>REQ-VIEWER-783</small><br>unreviewed"]
-    REQ_VIEWER_785["Absent the template, render_html emits nothing and returns<br><small>REQ-VIEWER-785</small><br>unreviewed"]
-    REQ_VIEWER_786["Map then still writes _map.md and _map.json, so<br><small>REQ-VIEWER-786</small><br>unreviewed"]
-    REQ_VIEWER_787["Render_html replaces the template's ‹!--REQMAP_DATA--› marker with a<br><small>REQ-VIEWER-787</small><br>unreviewed"]
-    REQ_VIEWER_788["That assignment carries the same (nodes, edges) graph<br><small>REQ-VIEWER-788</small><br>unreviewed"]
-    REQ_VIEWER_789["Render_html makes the injected graph HTML-safe for embedding<br><small>REQ-VIEWER-789</small><br>unreviewed"]
-    REQ_VIEWER_790["‹/ → ‹// — prevents ‹/script› from closing<br><small>REQ-VIEWER-790</small><br>unreviewed"]
-    REQ_VIEWER_791["‹!-- → ‹/!-- — prevents the HTML5 parser<br><small>REQ-VIEWER-791</small><br>unreviewed"]
-    REQ_VIEWER_792["--› → -/-› — prevents prematurely closing that<br><small>REQ-VIEWER-792</small><br>unreviewed"]
-    REQ_VIEWER_794["Render_html also escapes U+2028 and U+2029 to their<br><small>REQ-VIEWER-794</small><br>unreviewed"]
-    REQ_VIEWER_795["The viewer ranks nodes by longest dependency path<br><small>REQ-VIEWER-795</small><br>unreviewed"]
-    REQ_VIEWER_796["The viewer excludes a cycle-closing edge from that<br><small>REQ-VIEWER-796</small><br>unreviewed"]
-    REQ_VIEWER_797["No node ranks higher than the number of<br><small>REQ-VIEWER-797</small><br>unreviewed"]
-    REQ_VIEWER_798["A node carries the acceptance section twice: accept<br><small>REQ-VIEWER-798</small><br>unreviewed"]
-    REQ_VIEWER_799["The viewer renders accept — one line per<br><small>REQ-VIEWER-799</small><br>unreviewed"]
-    REQ_VIEWER_800["The viewer renders its own UI chrome in<br><small>REQ-VIEWER-800</small><br>unreviewed"]
-    REQ_VIEWER_801["A locale control in the viewer's top bar<br><small>REQ-VIEWER-801</small><br>unreviewed"]
-    REQ_VIEWER_802["Requirement content is never translated: id, title, intent<br><small>REQ-VIEWER-802</small><br>unreviewed"]
-    REQ_VIEWER_803["The engine's own vocabulary is never translated either<br><small>REQ-VIEWER-803</small><br>unreviewed"]
-    REQ_VIEWER_804["A chrome string with no entry in the<br><small>REQ-VIEWER-804</small><br>unreviewed"]
-    REQ_VIEWER_805["The reader's chosen locale is remembered on their<br><small>REQ-VIEWER-805</small><br>unreviewed"]
-    REQ_VLEVEL_806["A tested-by: tag may end with a verification<br><small>REQ-VLEVEL-806</small><br>unreviewed"]
-    REQ_VLEVEL_807["A level written on a tag applies to<br><small>REQ-VLEVEL-807</small><br>unreviewed"]
-    REQ_VLEVEL_808["A tested-by: tag carrying no level, or an<br><small>REQ-VLEVEL-808</small><br>unreviewed"]
-    REQ_VLEVEL_809["The engine reports, per requirement, each level it<br><small>REQ-VLEVEL-809</small><br>unreviewed"]
-    REQ_VLEVEL_810["The level scan stays separate from the member<br><small>REQ-VLEVEL-810</small><br>unreviewed"]
-    REQ_VLEVEL_811["The engine skips a levelled tag written inside<br><small>REQ-VLEVEL-811</small><br>unreviewed"]
-    REQ_VLEVEL_812["In a Python file the engine also skips<br><small>REQ-VLEVEL-812</small><br>unreviewed"]
-    REQ_VLEVEL_813["The gate warns when a confirmed need carries<br><small>REQ-VLEVEL-813</small><br>unreviewed"]
-    REQ_VLEVEL_814["The gate holds that need warning back until<br><small>REQ-VLEVEL-814</small><br>unreviewed"]
-    REQ_VLEVEL_815["The gate warns when a confirmed bus requirement's<br><small>REQ-VLEVEL-815</small><br>unreviewed"]
-    REQ_VLEVEL_816["The gate judges no requirement that has no<br><small>REQ-VLEVEL-816</small><br>unreviewed"]
-    REQ_VLEVEL_817["The gate applies the level-fit rule to the<br><small>REQ-VLEVEL-817</small><br>unreviewed"]
-    REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small><br>unreviewed"]
-    REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small><br>unreviewed"]
-  end
-  style REQ_ACVERIFY_233 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_234 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_235 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_236 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_237 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_238 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_239 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_240 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_241 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ACVERIFY_243 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_244 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_245 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_247 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_248 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_249 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_250 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_252 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_253 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_254 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_255 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ATOMICITY_256 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_257 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_258 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_259 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_260 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_261 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_262 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_263 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_264 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_265 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_266 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_267 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_268 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_269 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CANDIDATES_270 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_272 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_273 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_274 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_275 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_276 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_277 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_278 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_279 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_280 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_281 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_282 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_283 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_284 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_285 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_286 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_287 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_288 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_289 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_291 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_292 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_293 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_294 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_295 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_296 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_297 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_298 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_299 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_300 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_301 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_302 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_303 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CHECK_304 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_306 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_307 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_308 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_309 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_310 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CMDREGISTRY_311 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CONTEXT_312 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CONTEXT_313 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CONTEXT_314 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CONTEXT_316 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_CONTEXT_317 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_318 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_319 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_320 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_321 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_322 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_323 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_COVERAGE_326 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_328 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_329 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_330 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_331 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_332 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_333 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_334 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_335 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_336 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DECOMPOSE_338 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_339 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_340 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_341 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_343 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_200 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_201 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_202 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_203 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_204 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_205 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_206 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFT_207 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFTIMPACT_347 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFTIMPACT_348 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFTIMPACT_349 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DRIFTIMPACT_350 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_352 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_353 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_354 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_355 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_356 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_357 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_358 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_359 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_360 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_361 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_362 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_363 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_364 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_365 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_366 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_367 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_368 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_370 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_371 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_372 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXCALIDRAW_373 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_374 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_375 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_376 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_378 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_379 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_380 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_381 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_382 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_383 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_384 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_385 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_386 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_EXTRACT_387 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_388 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_389 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_390 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_391 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_392 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_393 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FANOUT_394 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_395 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_396 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_397 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_398 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_399 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_400 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_401 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_402 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_403 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_404 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_405 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_408 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_409 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_410 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_FINDINGS_411 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_413 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_414 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_415 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_416 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_417 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_418 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_419 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_420 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_421 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_422 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_423 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_HEALTH_424 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_425 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_426 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_427 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_428 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_429 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_430 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_431 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_432 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_433 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_434 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_INIT_435 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_436 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_437 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_438 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_439 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_440 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LEVEL_442 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_444 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_445 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_446 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_447 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_448 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_449 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_450 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_451 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_452 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_453 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_454 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINT_455 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_457 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_458 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_459 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_460 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_461 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_462 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_463 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_464 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_465 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_466 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_467 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_468 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_469 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_470 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_471 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_472 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_473 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_474 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_475 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_476 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_LINTCHECKS_477 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_476 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_478 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_479 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_480 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_481 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_483 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_484 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_485 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_486 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_487 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_488 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_489 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_490 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_491 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAP_493 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_494 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_495 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_496 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_497 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_498 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_499 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_501 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_502 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_503 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_504 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_505 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_506 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_507 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_508 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_509 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MAPDIAGRAMS_510 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_511 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_512 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_513 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_514 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_515 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_516 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_517 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_MEMBERDRIFT_518 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_519 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_520 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_521 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_522 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_523 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_524 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_525 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEW_526 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_527 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_528 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_529 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_530 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_531 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_532 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_533 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_534 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_535 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_536 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_537 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_538 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_539 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_540 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_541 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_542 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_543 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_544 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_545 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_546 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_547 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_548 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_NEXT_549 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_550 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_551 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_552 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_553 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_554 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PAGES_560 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PAGES_561 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PAGES_562 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_208 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_209 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_210 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_211 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_212 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_213 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_214 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_215 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_216 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PARSE_217 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PIPE_563 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PIPE_564 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PIPE_565 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PIPE_566 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_568 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_569 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_570 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_571 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_572 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_573 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_574 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_575 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_576 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_577 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_578 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_579 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_580 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_581 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_583 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_584 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_585 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_586 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_587 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_588 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_589 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_590 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_591 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_592 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_TODO_593 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_594 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_596 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_597 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_598 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_599 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_600 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_601 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROSE_602 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PYFLOOR_603 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PYFLOOR_604 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PYFLOOR_605 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PYFLOOR_606 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PYFLOOR_607 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_608 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_609 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_610 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_611 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_612 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_614 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_615 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REGISTRYLAG_616 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_618 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_619 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_620 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_621 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_622 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REPRO_623 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_624 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_625 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_626 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_627 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_628 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_REVIEW_630 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_632 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_633 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_634 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_635 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_636 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_637 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ROADMAP_638 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_218 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_219 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_220 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_221 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_222 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_223 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_224 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_225 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_226 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_228 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_229 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_230 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_231 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_232 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_640 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_641 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_642 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCAN_643 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCANCACHE_644 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCANCACHE_645 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCANCACHE_646 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCANCACHE_647 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SCANCACHE_648 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_650 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_651 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_652 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_653 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_654 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_655 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_656 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_657 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_658 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_659 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_660 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_661 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_662 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_663 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_664 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_665 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_666 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SEARCH_667 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_668 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_669 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_670 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_671 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_672 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SELFGATE_673 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_674 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_675 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_676 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_677 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_678 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_679 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_680 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_681 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_682 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_683 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_684 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_685 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SHOW_686 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_687 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_688 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_689 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_690 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_691 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_692 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_693 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_694 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_695 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_696 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_697 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_698 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_699 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_700 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_701 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SIMILAR_702 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_703 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_704 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_705 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_706 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_707 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SITE_708 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_709 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_710 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_712 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_713 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_714 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_715 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_716 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_717 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_718 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_719 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_STALEENGINE_720 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_721 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_722 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_723 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_724 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_725 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_726 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_727 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_728 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_729 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_730 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_731 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_SUGGESTVERIFIES_732 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_733 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_734 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_735 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_736 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_737 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_738 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_739 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_740 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_741 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_742 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_743 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_744 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_745 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_746 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_748 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TESTLINK_749 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_750 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_751 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_752 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_753 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_754 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_756 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_757 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_758 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACE_759 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACKED_760 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACKED_761 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACKED_762 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRACKED_763 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_765 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_766 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_767 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_768 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_769 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_770 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_771 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_772 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_773 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_TRANSLATE_774 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_775 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_776 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_777 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_778 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_779 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_UNSCANNEDTAG_780 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_782 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_783 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_785 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_786 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_787 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_788 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_789 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_790 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_791 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_792 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_794 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_795 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_796 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_797 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_798 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_799 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_800 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_801 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_802 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_803 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_804 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VIEWER_805 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_806 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_807 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_808 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_809 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_810 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_811 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_812 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_813 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_814 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_815 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_816 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_817 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_818 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_820 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-ACVERIFY-233 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-234 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-235 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-236 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-237 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-238 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-239 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-240 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-241 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ACVERIFY-243 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-244 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-245 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-247 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-248 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-249 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-250 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-252 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-253 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-254 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-255 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ATOMICITY-256 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-257 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-258 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-259 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-260 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-261 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-262 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-263 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-264 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-265 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-266 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-267 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-268 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-269 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CANDIDATES-270 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-272 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-273 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-274 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-275 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-276 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-277 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-278 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-279 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-280 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-281 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-282 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-283 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-284 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-285 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-286 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-287 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-288 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-289 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-291 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-292 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-293 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-294 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-295 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-296 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-297 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-298 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-299 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-300 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-301 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-302 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-303 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CHECK-304 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-306 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-307 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-308 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-309 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-310 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CMDREGISTRY-311 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CONTEXT-312 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CONTEXT-313 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CONTEXT-314 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CONTEXT-316 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-CONTEXT-317 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-318 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-319 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-320 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-321 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-322 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-323 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-COVERAGE-326 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-328 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-329 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-330 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-331 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-332 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-333 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-334 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-335 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-336 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DECOMPOSE-338 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-339 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-340 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-341 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-343 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-200 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-201 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-202 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-203 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-204 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-205 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-206 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFT-207 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFTIMPACT-347 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFTIMPACT-348 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFTIMPACT-349 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DRIFTIMPACT-350 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-352 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-353 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-354 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-355 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-356 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-357 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-358 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-359 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-360 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-361 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-362 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-363 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-364 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-365 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-366 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-367 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-368 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-370 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-371 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-372 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXCALIDRAW-373 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-374 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-375 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-376 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-378 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-379 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-380 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-381 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-382 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-383 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-384 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-385 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-386 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-EXTRACT-387 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-388 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-389 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-390 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-391 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-392 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-393 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FANOUT-394 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-395 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-396 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-397 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-398 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-399 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-400 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-401 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-402 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-403 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-404 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-405 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-408 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-409 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-410 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-FINDINGS-411 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-413 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-414 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-415 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-416 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-417 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-418 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-419 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-420 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-421 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-422 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-423 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-HEALTH-424 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-425 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-426 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-427 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-428 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-429 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-430 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-431 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-432 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-433 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-434 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-INIT-435 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-436 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-437 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-438 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-439 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-440 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LEVEL-442 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-444 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-445 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-446 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-447 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-448 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-449 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-450 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-451 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-452 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-453 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-454 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINT-455 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-457 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-458 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-459 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-460 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-461 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-462 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-463 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-464 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-465 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-466 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-467 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-468 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-469 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-470 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-471 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-472 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-473 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-474 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-475 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-476 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-LINTCHECKS-477 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-476 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-478 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-479 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-480 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-481 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-483 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-484 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-485 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-486 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-487 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-488 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-489 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-490 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-491 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAP-493 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-494 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-495 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-496 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-497 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-498 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-499 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-501 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-502 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-503 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-504 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-505 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-506 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-507 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-508 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-509 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MAPDIAGRAMS-510 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-511 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-512 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-513 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-514 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-515 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-516 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-517 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-MEMBERDRIFT-518 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-519 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-520 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-521 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-522 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-523 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-524 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-525 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEW-526 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-527 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-528 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-529 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-530 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-531 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-532 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-533 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-534 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-535 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-536 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-537 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-538 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-539 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-540 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-541 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-542 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-543 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-544 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-545 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-546 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-547 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-548 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-NEXT-549 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-550 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-551 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-552 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-553 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-554 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PAGES-560 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PAGES-561 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PAGES-562 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-208 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-209 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-210 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-211 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-212 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-213 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-214 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-215 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-216 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PARSE-217 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PIPE-563 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PIPE-564 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PIPE-565 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PIPE-566 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-568 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-569 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-570 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-571 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-572 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-573 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-574 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-575 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-576 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-577 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-578 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-579 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-580 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-581 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-583 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-584 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-585 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-586 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-587 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-588 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-589 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-590 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-591 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-592 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-TODO-593 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-594 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-596 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-597 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-598 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-599 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-600 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-601 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROSE-602 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PYFLOOR-603 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PYFLOOR-604 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PYFLOOR-605 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PYFLOOR-606 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PYFLOOR-607 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-608 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-609 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-610 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-611 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-612 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-614 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-615 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REGISTRYLAG-616 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-618 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-619 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-620 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-621 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-622 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REPRO-623 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-624 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-625 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-626 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-627 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-628 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-REVIEW-630 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-632 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-633 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-634 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-635 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-636 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-637 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ROADMAP-638 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-218 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-219 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-220 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-221 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-222 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-223 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-224 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-225 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-226 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-228 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-229 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-230 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-231 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-232 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-640 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-641 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-642 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCAN-643 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCANCACHE-644 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCANCACHE-645 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCANCACHE-646 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCANCACHE-647 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SCANCACHE-648 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-650 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-651 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-652 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-653 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-654 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-655 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-656 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-657 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-658 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-659 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-660 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-661 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-662 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-663 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-664 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-665 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-666 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SEARCH-667 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-668 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-669 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-670 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-671 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-672 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SELFGATE-673 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-674 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-675 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-676 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-677 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-678 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-679 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-680 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-681 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-682 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-683 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-684 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-685 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SHOW-686 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-687 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-688 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-689 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-690 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-691 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-692 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-693 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-694 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-695 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-696 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-697 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-698 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-699 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-700 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-701 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SIMILAR-702 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-703 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-704 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-705 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-706 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-707 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SITE-708 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-709 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-710 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-712 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-713 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-714 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-715 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-716 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-717 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-718 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-719 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-STALEENGINE-720 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-721 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-722 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-723 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-724 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-725 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-726 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-727 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-728 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-729 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-730 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-731 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-SUGGESTVERIFIES-732 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-733 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-734 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-735 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-736 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-737 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-738 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-739 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-740 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-741 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-742 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-743 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-744 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-745 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-746 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-748 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TESTLINK-749 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-750 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-751 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-752 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-753 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-754 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-756 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-757 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-758 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACE-759 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACKED-760 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACKED-761 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACKED-762 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRACKED-763 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-765 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-766 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-767 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-768 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-769 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-770 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-771 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-772 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-773 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-TRANSLATE-774 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-775 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-776 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-777 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-778 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-779 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-UNSCANNEDTAG-780 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-782 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-783 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-785 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-786 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-787 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-788 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-789 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-790 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-791 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-792 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-794 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-795 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-796 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-797 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-798 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-799 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-800 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-801 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-802 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-803 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-804 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VIEWER-805 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-806 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-807 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-808 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-809 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-810 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-811 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-812 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-813 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-814 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-815 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-816 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-817 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-818 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-820 | baseline | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

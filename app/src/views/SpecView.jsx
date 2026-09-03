@@ -10,7 +10,7 @@ import { useI18n, translatedText } from "../lib/i18n.jsx";
 // A cached translation is opt-in and unreviewed — this badge is the one thing
 // standing between "machine text" and "looks like the author wrote it".
 // Never render translated content without it (see i18n.jsx's module comment).
-function TranslatedBadge() {
+function TranslatedBadge() {  // implements: REQ-TRANSLATE-938
   return (
     <span className="i18n-badge" title="Machine-translated by `reqmap.py translate`; not reviewed by the author — the source .md is the artifact of record.">
       machine-translated, unreviewed
@@ -130,7 +130,7 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
         <div className="eyebrow">{t("Cases")} <span className="rule" /> {t("= tests")}{acceptance.isTranslated && <TranslatedBadge />}</div>
         {acceptance.isTranslated
           ? <div className="gwt">{acceptance.text.split("\n").map((ln,i)=><div key={i}>{ln}</div>)}</div>
-          : (r.gwt
+          : (r.gwt  // implements: REQ-VIEWER-942
             ? <div className="gwt">{r.gwt.split("\n").map((ln,i)=>(
                 <div key={i}>{ln}</div>))}</div>
             : <ul>{(r.acc||[]).map((a,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(a)}} />)}</ul>)}

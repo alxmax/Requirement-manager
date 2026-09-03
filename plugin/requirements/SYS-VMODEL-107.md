@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Placing a requirement in the V
 
 > As someone who wants to know whether a requirement is verified at the right depth, I 

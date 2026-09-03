@@ -278,11 +278,10 @@ honored by the scanner.
 
 ## Audience & writing level
 
-Write every requirement so a FIRST-YEAR ENGINEERING STUDENT can understand it without
-asking questions: someone who reads technical prose comfortably, but who may not program,
-and who knows nothing about this project. That is a lower baseline than "a developer new
-to the project", and it is deliberate — a requirement only anyone-who-already-knows can
-read is not a specification, it is a reminder. Rules:
+Write every requirement for a DEVELOPER NEW TO THE PROJECT: someone who programs, opens the
+requirement from a `# implements:` tag in code they do not understand, and knows nothing
+about this repo. File and function names are welcome (they say where to look); programming
+terms need no definition; project-specific terms still do. Rules:
 
 1. Define each project-specific term briefly, inline, on first use — e.g.
    "veto cascade (a fixed series of checks that can block or reroute the result)".
@@ -321,6 +320,14 @@ expected and acceptable.
 ## The gate (run at commit/merge — keep it non-optional)
 
 `python scripts/reqmap.py gate` is report-only: it verifies these syncs and exits non-zero on **link-sync errors only**. It **never** touches `_reqlock.json`. To advance the drift baseline after intentionally editing a requirement, use `sync` (with `--accept-drift` when a confirmed/implemented contract changed).
+
+**Rule codes and exemptions.** Every gate line carries the code of the rule that produced it
+(`WARN  RM018 AUTH-LOGIN-001: DRIFT — ...`), `gate --json` lists the same findings as
+`{rule, severity, rid, msg}` records, and a requirement can switch one rule off for itself
+with `gate_exempt: [RM013]` in its frontmatter — the same shape as `lint_exempt:`. Codes are
+permanent. Thresholds (`LINT_AC_MAX`, `SIMILAR_THRESHOLD`, `ORPHAN_CODE_MIN_LOC`, the fan-out
+bands, extra scanned extensions) can be set per repo in `requirements/_config.json`; an
+unknown or mistyped key is reported on stderr and ignored.
 
 | Check | Level | Effect on exit code |
 |---|---|---|

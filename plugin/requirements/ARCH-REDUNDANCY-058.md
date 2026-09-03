@@ -1,31 +1,57 @@
 ---
 id: ARCH-REDUNDANCY-058
 status: confirmed
-form: atomic
-level: system
+level: architecture
 layer: feature
 owner: Alex
 priority: should-have
-verification: automated test
-rationale: Decomposing several architecture requirements can mint the same obligation twice, and nothing in the engine noticed; a corpus that only ever grows covers the same code with more requirements each time.
-satisfies: [SYS-QUALITY-104]
 depends_on: [ARCH-NEXT-013, ARCH-SIMILAR-016]
-superseded_by:
+satisfies: [SYS-QUALITY-104]
 ---
 
 # Requirements that say the same thing
 
-> As someone whose corpus keeps growing, I want to be told when two requirements state the
-> same obligation word for word, so that the code ends up covered by as few requirements as
-> it takes rather than by as many as were ever written.
+## Description
+> Decomposing several architecture requirements can mint the same obligation twice, and
+> nothing in the engine noticed — a corpus that only ever grows covers the same code with
+> more requirements each time. `_redundant_groups` reports requirements whose Description
+> clauses are byte-identical once case and whitespace are normalised, so the corpus can be
+> folded back down instead of growing without bound.
 
-Scenario: two requirements carrying the same clause, and a folder full of fresh drafts
-  Given  a corpus where two or more requirements' Description clauses are identical once
-         case and whitespace are normalised, alongside scaffolded drafts that all still
-         carry the same `TODO:` placeholder
-  When   `sync` finishes, or `next` runs
-  Then   each duplicate group is reported once with the ids that share the contract and how
-         many could be folded away, the placeholder drafts are not reported as duplicates of
-         each other, `gate` says nothing about any of it, and no file is written
+Every bullet below is binding.
+- Two or more requirements whose Description clauses are identical once case and whitespace are normalised form one duplicate group.
+- Every scaffolded draft carries the same `TODO:` placeholder text, so draft-status requirements are excluded, or every draft would report as a duplicate of every other.
+- `next` reports each group once, naming its ids and how many could be folded away.
+- `gate` says nothing about redundancy — it runs on every commit, and corpus shape is not a commit-time concern.
+- The check is read-only: it never writes a file and never merges anything itself.
 
-## Members in code (auto)
+## Cases
+CASE-1 — identical Description clauses group together
+  Given  two requirements whose Description clause reads exactly "`x` does the thing." and a
+         third with a different clause
+  When   `_redundant_groups` runs
+  Then   it returns one group holding only the two matching ids
+
+CASE-2 — case and whitespace differences do not hide a duplicate
+  Given  one requirement's clause reading "`x` does   the thing." and another reading
+         "`X` DOES the thing."
+  When   `_redundant_groups` runs
+  Then   the two are still grouped as one duplicate
+
+CASE-3 — a genuinely different clause is not flagged
+  Given  two requirements whose clauses differ by more than case or whitespace
+  When   `_redundant_groups` runs
+  Then   it returns no group for them
+
+CASE-4 — draft placeholders sharing the same TODO text are not duplicates of each other
+  Given  two `status: draft` requirements both carrying the identical scaffolded
+         `TODO: the observed behavior.` clause
+  When   `_redundant_groups` runs
+  Then   it returns no group for them
+
+CASE-5 — next reports each group once and writes nothing; gate stays silent
+  Given  two confirmed requirements sharing one identical Description clause
+  When   `next` runs, and separately `gate` runs on the same corpus
+  Then   `next`'s output names both ids under one "Redundancy" finding and the directory's
+         file listing is unchanged afterward; `gate`'s output says nothing about redundancy
+

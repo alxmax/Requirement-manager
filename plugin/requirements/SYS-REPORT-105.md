@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Answering what is here and what to do next
 
 > As someone picking up the project, I want to ask where a capability lives, what is 

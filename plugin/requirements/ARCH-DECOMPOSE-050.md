@@ -1,13 +1,12 @@
 ---
 id: ARCH-DECOMPOSE-050
-status: confirmed    # draft | baseline | in-progress | implemented | confirmed | deprecated
-level: system
-layer: feature       # bus | feature | need | aggregate
+status: confirmed
+level: architecture
+layer: feature
 owner: Alex
 priority: could-have
 depends_on: [ARCH-ATOMICITY-049, ARCH-LINT-014, ARCH-NEW-004]
 satisfies: [SYS-AUTHOR-101]
-superseded_by:
 ---
 
 # Clause decomposition scaffold
@@ -18,38 +17,13 @@ superseded_by:
 > dependency by hand. This does the mechanical half on request. It never runs on its own,
 > because `lint` also runs inside the pre-commit hook and CI, where writing a new file
 > would break the very commit it was helping.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a reported clause   a Contract clause that `statement-size` named, per
-                         [[ARCH-ATOMICITY-049]].
-     the parent          the requirement whose Contract holds the reported clause.
-     a created draft     the new requirement file this command writes.
-     the default run     `lint` invoked without `--decompose`. -->
+- `lint` writes no file during the default run; only the opt-in `--decompose` flag creates one draft per reported `statement-size` clause, and no invocation site (the gate, the pre-commit hook, CI) ever passes it. [[REQ-DECOMPOSE-837]]
+- Each created draft carries `status: draft`, a `depends_on` entry naming its parent, the offending clause seeded verbatim, and an id that reuses the parent's area/name at the next free corpus number. [[REQ-DECOMPOSE-838]]
+- `lint --decompose` leaves the parent byte-identical, discloses that the split was chosen by word count and not by obligation, skips a clause already decomposed, and never scaffolds from an `ac-count-high` finding. [[REQ-DECOMPOSE-839]]
 
-**When the command writes**
-- `lint` writes no file during the default run, whatever `statement-size` or `ac-count-high` reports.
-- `lint --decompose` creates one draft requirement for each reported `statement-size` clause.
-- The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay read-only.
-
-**What a created draft holds**
-- Each created draft carries `status: draft` and a `depends_on` entry naming its parent.
-- The reported clause text is seeded into the created draft's Contract section.
-- The created id keeps the parent's area and name, and takes the next free corpus number.
-
-**What the command does not do**
-- `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
-- The command chooses the split by word count, never by obligation, and says so on stdout.
-- Each created draft records that its split point was chosen by word count alone.
-- `lint --decompose` scaffolds from `statement-size` findings only; an `ac-count-high` finding is reported and nothing is written for it.
-
-**Repeating and undoing**
-- Deleting a created draft restores the corpus exactly, because the parent was never edited.
-- `lint --decompose` skips a clause whose target file already exists, and reports the skip.
-
-## Verify intent (open questions for the human)
-- None — authored from stated intent, not reconstructed from code.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a corpus with one clause above the `statement-size` threshold
   When   `lint` runs without `--decompose`
@@ -79,7 +53,14 @@ CASE-7
   When   `lint --decompose` runs
   Then   the `ac-count-high` finding is printed and no file is created for it
 
-## Context (non-binding)
+## Context
+**Terms**
+- a reported clause   a Contract clause that `statement-size` named, per
+- [[ARCH-ATOMICITY-049]].
+- the parent          the requirement whose Contract holds the reported clause.
+- a created draft     the new requirement file this command writes.
+- the default run     `lint` invoked without `--decompose`.
+
 **Notes**
 - This exists because the author asked for it after the objection below was put to them,
   and reaffirmed it. The objection stands and is recorded here rather than dropped: a word
@@ -134,290 +115,146 @@ CASE-7
   `test_no_ac_count_high_decompose_symbols_remain` asserts neither symbol comes back, so
   re-adding one is a deliberate act that has to meet that bar first.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-DECOMPOSE-328
-status: baseline
-form: atomic
+id: REQ-DECOMPOSE-837
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
 ---
 
-# Lint writes no file during the default run
+# --decompose is opt-in; the default lint run never writes
 
-> `lint` writes no file during the default run, whatever `statement-size` reports.
+## Description
+> `lint` also runs inside the pre-commit hook and CI, where writing a new file mid-run would
+> break the very commit it was helping — the freshly-written draft would have no node in the
+> already-committed map, failing the next `map --check` step in the same hook run. So
+> scaffolding a draft only happens when a developer explicitly asks for it with
+> `--decompose`, never on a bare `lint`.
 
-Scenario: a default lint run reports the finding but writes no file
+Every bullet below is binding.
+- `lint` writes no file during the default run, whatever `statement-size` or `ac-count-high` reports.
+- `lint --decompose` creates one draft requirement for each reported `statement-size` clause.
+- The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay read-only.
+
+## Cases
+CASE-1 — a default lint run reports the finding but writes no file
   Given  a requirement carrying a clause over the `statement-size` word threshold
   When   `lint` runs without `--decompose`
   Then   stdout names the "statement-size" finding and the requirements directory
          holds no new file
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-329
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# Lint --decompose creates one draft requirement for each
-
-> `lint --decompose` creates one draft requirement for each reported clause.
-
-Scenario: --decompose creates exactly one draft file per reported clause
+CASE-2 — --decompose creates exactly one draft file per reported clause
   Given  a parent with one clause over the `statement-size` threshold
   When   `lint --decompose` runs
   Then   exactly one new file appears in the requirements directory
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-330
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# The gate, the pre-commit hook and CI never
-
-> The gate, the pre-commit hook and CI never pass `--decompose`, so those runs stay
-> read-only.
-
-Scenario: no invocation site passes --decompose
+CASE-3 — no invocation site passes --decompose
   Given  `.githooks/pre-commit` and `.github/workflows/ci.yml`
   When   their `lint` invocation lines are read
   Then   neither contains the `--decompose` flag
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-DECOMPOSE-331
-status: baseline
-form: atomic
+id: REQ-DECOMPOSE-838
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
 ---
 
-# Each created draft carries status: draft and a
+# A created draft's shape: status, parent link, seeded clause, id
 
-> Each created draft carries `status: draft` and a `depends_on` entry naming its parent.
+## Description
+> A word-count split cannot prove the clause it cut actually held two obligations, so the
+> created file is never trusted outright — it starts life as a `draft` naming its parent in
+> `depends_on`, carries the exact clause text so the author can judge it, and gets an id
+> that fits the corpus's existing naming scheme rather than a derived suffix.
 
-Scenario: the created draft carries status: draft and depends_on the parent
+Every bullet below is binding.
+- Each created draft carries `status: draft` and a `depends_on` entry naming its parent.
+- The reported clause text is seeded into the created draft's Contract section.
+- The created id keeps the parent's area and name, and takes the next free corpus number.
+
+## Cases
+CASE-1 — the created draft carries status: draft and depends_on the parent
   Given  `lint --decompose` creates a draft from `REQ-AUTH-012`
   When   the created file's frontmatter is read
   Then   it contains `status: draft` and `depends_on: [REQ-AUTH-012]`
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-332
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# The reported clause text is seeded into the
-
-> The reported clause text is seeded into the created draft's Contract section.
-
-Scenario: the offending clause's own text appears verbatim in the created draft
+CASE-2 — the offending clause's own text appears verbatim in the created draft
   Given  a parent clause of 155 repeated words flagged by `statement-size`
   When   `lint --decompose` creates the draft
   Then   the draft's Contract section contains that exact clause text
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-333
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# The created id keeps the parent's area and
-
-> The created id keeps the parent's area and name, and takes the next free corpus number.
-
-Scenario: the created id reuses the parent's area/name with the next free number
+CASE-3 — the created id reuses the parent's area/name with the next free number
   Given  parent `REQ-AUTH-012` in a corpus whose highest existing number is 049
   When   `lint --decompose` runs
   Then   the created file is named `REQ-AUTH-050.md`
 
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-DECOMPOSE-334
-status: baseline
-form: atomic
+id: REQ-DECOMPOSE-839
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
 ---
 
-# Lint --decompose leaves the parent unchanged, so no
+# The parent never changes, and the command knows its own limits
 
-> `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
+## Description
+> Rewriting a clause inside a `confirmed` requirement would change its contract hash and force
+> `sync --accept-drift` — too large a consequence for a warn-only lint finding. So the parent
+> is never touched, deleting a created draft restores the corpus exactly, a re-run skips a
+> clause it already scaffolded, and the command only ever acts on `statement-size` findings —
+> never on `ac-count-high`, a signal this corpus has no confirmed fire-rate evidence for.
 
-Scenario: the parent file is byte-identical after a decompose run
+Every bullet below is binding.
+- `lint --decompose` leaves the parent unchanged, so no confirmed contract drifts.
+- The command chooses the split by word count, never by obligation, and says so on stdout.
+- Each created draft records that its split point was chosen by word count alone.
+- `lint --decompose` scaffolds from `statement-size` findings only; an `ac-count-high` finding is reported and nothing is written for it.
+- Deleting a created draft restores the corpus exactly, because the parent was never edited.
+- `lint --decompose` skips a clause whose target file already exists, and reports the skip.
+
+## Cases
+CASE-1 — the parent file is byte-identical after a decompose run
   Given  the parent file's bytes captured before `lint --decompose` runs
   When   the run completes
   Then   the parent file's bytes are unchanged from the captured snapshot, so deleting the
          created draft restores the corpus exactly
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-335
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# The command chooses the split by word count
-
-> The command chooses the split by word count, never by obligation, and says so on stdout.
-
-Scenario: stdout discloses the split was by word count, not obligation
+CASE-2 — stdout discloses the split was by word count, not obligation
   Given  `lint --decompose` running on a flagged clause
   When   the run completes
   Then   stdout includes "word count, not by obligation"
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-336
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# Each created draft records that its split point
-
-> Each created draft records that its split point was chosen by word count alone.
-
-Scenario: the created draft's own text discloses the word-count-only split
+CASE-3 — the created draft's own text discloses the word-count-only split
   Given  a draft created by `lint --decompose`
   When   its file text is read
   Then   it contains "WORD COUNT, never by obligation"
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DECOMPOSE-338
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DECOMPOSE-050]
-superseded_by:
----
-
-# Lint --decompose skips a clause whose target file
-
-> `lint --decompose` skips a clause whose target file already exists, and reports the
-> skip.
-
-Scenario: a second decompose run skips the already-decomposed clause and reports it
+CASE-4 — a second decompose run skips the already-decomposed clause and reports it
   Given  a clause already decomposed by a prior `lint --decompose` run
   When   `lint --decompose` runs again
   Then   stdout reports "skipped" and no second file is created for that clause
 
-## Members in code (auto)
+CASE-5 — an ac-count-high finding is reported but never scaffolded
+  Given  a non-exempt requirement above `LINT_AC_MAX` acceptance criteria
+  When   `lint --decompose` runs
+  Then   the `ac-count-high` finding still prints and no file is created for it
+

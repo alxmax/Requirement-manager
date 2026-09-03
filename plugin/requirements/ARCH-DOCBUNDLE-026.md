@@ -1,14 +1,13 @@
 ---
 id: ARCH-DOCBUNDLE-026
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
 priority: should-have
+milestone: v1.17
 depends_on: [ARCH-CHECK-006, ARCH-SCAN-002]
 satisfies: [SYS-GATE-102]
-superseded_by:
-milestone: v1.17
 ---
 
 # Untagged doc-bundle warning
@@ -22,43 +21,11 @@ milestone: v1.17
 > lineage tag, so the author either links it (one tag, possibly a multi-id list)
 > or marks it intentionally out of scope. Without it, "the docs are in sync" is an
 > assumption the gate can neither confirm nor deny.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a doc bundle       a whole-system page written out of many requirements at once,
-                        such as an architecture or explainer page.
-     a lineage tag      a `generated-from:` comment naming the requirements a doc
-                        was built from.
-     the scan walk      the shared file walk every command uses. -->
+- The gate warns, without affecting its exit code, for each `docs/*.html` file at least `DOC_BUNDLE_MIN_BYTES` in size carrying no `generated-from:` tag — skipping engine outputs, `.reqmapignore`-matched files, and anything outside `docs/`. [[REQ-DOCBUNDLE-840]] details the behaviour.
 
-**What it warns about**
-- The gate warns for each file under `docs/` ending in `.html` that carries no
-  `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES`
-  in size.
-- The gate considers only files under `docs/`.
-
-**What it skips**
-- The check skips engine-generated outputs: a file whose basename starts with `_`,
-  and the published `map.html` viewer.
-- The engine owns those two and freshness-checks them separately.
-- The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
-  regenerable artifact out of scope rather than tag it.
-- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
-  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
-
-**Severity**
-- The check is warn-only and never changes the gate's exit code.
-
-## Verify intent (open questions for the human)
-- None — authored from known intent, not reconstructed from code.
-
-## Notes & known limitations (informative)
-- A byte-size threshold is a deterministic proxy for "generated bundle", not a
-  semantic one: a large hand-authored doc that legitimately has no requirement
-  lineage is silenced via `.reqmapignore`, not by the check guessing intent.
-- It asserts a lineage tag is *present*, not that the doc's content actually matches
-  the requirements it names — the same lexical-trust limitation as `tested-by`.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a `docs/` HTML file at or above the size threshold with no `generated-from:` tag
   When   the scan runs
@@ -84,161 +51,91 @@ CASE-6
   When   the gate runs
   Then   its output names the file and the missing `generated-from:` tag
 
-## Example — in practice (optional, non-binding)
+## Context
+**Terms**
+- a doc bundle       a whole-system page written out of many requirements at once,
+- such as an architecture or explainer page.
+- a lineage tag      a `generated-from:` comment naming the requirements a doc
+- was built from.
+- the scan walk      the shared file walk every command uses.
+
+**Notes**
+- A byte-size threshold is a deterministic proxy for "generated bundle", not a
+  semantic one: a large hand-authored doc that legitimately has no requirement
+  lineage is silenced via `.reqmapignore`, not by the check guessing intent.
+- It asserts a lineage tag is *present*, not that the doc's content actually matches
+  the requirements it names — the same lexical-trust limitation as `tested-by`.
+
+**Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana generates `docs/architecture.html` from a dozen requirements but forgets a
   lineage tag. `reqmap.py gate` warns that the bundle has no `generated-from:` tag.
   She adds `<!-- generated-from: ARCH-PARSE-001, ARCH-SCAN-002, ARCH-MAP-007 -->`, and
   from then on a contract drift in any of those three lists the doc to re-sync.
 
-## WHERE — Current implementation
+**Current implementation**
 - `untagged_doc_bundles`, `DOC_BUNDLE_MIN_BYTES` in `reqmap.py`, consumed by `cmd_check`
   — `untagged_doc_bundles` walks the code root (honoring `.reqmapignore`) for large
   `docs/*.html` files absent from the `generated-from:` member set and skipping engine
   outputs, and `cmd_check` emits one warn-only line per result.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
-
---------------------
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-DOCBUNDLE-339
-status: baseline
-form: atomic
+id: REQ-DOCBUNDLE-840
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
 ---
 
-# The gate warns for each file under docs/
+# Flagging a large, unlinked docs/ HTML bundle
 
-> The gate warns for each file under `docs/` ending in `.html` that carries no
-> `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES` in size.
+## Description
+> A generated architecture page can drift from the requirements it was built from for
+> days with nobody noticing, because drift detection only fires through tags it can see.
+> The gate warns on any large `docs/*.html` file with no `generated-from:` lineage tag —
+> skipping the engine's own generated outputs, anything `.reqmapignore` excludes, and
+> anything outside `docs/`, since a byte-size threshold is only a proxy for "generated
+> bundle", not proof of one.
 
-Scenario: a large untagged docs/ HTML file is flagged
+Every bullet below is binding.
+- The gate warns for each file under `docs/` ending in `.html` that carries no
+  `generated-from:` member tag, once that file is at least `DOC_BUNDLE_MIN_BYTES`
+  in size.
+- The gate considers only files under `docs/`.
+- The check skips engine-generated outputs: a file whose basename starts with `_`,
+  and the published `map.html` viewer.
+- The engine owns those two and freshness-checks them separately.
+- The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
+  regenerable artifact out of scope rather than tag it.
+- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
+  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
+- The check is warn-only and never changes the gate's exit code.
+
+## Cases
+CASE-1 — a large untagged docs/ HTML file is flagged
   Given  `docs/arch.html` at or above `DOC_BUNDLE_MIN_BYTES` with no `generated-from:` tag
   When   `untagged_doc_bundles` scans the repo
   Then   it returns `["docs/arch.html"]`, which `gate` folds into its warnings only —
          never an error, leaving the exit code unaffected
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-340
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The gate considers only files under docs/
-
-> The gate considers only files under `docs/`.
-
-Scenario: a large untagged HTML file outside docs/ is never flagged
+CASE-2 — a large untagged HTML file outside docs/ is never flagged
   Given  a large, untagged `top.html` at the repo root, outside `docs/`
   When   `untagged_doc_bundles` scans the repo
   Then   `top.html` is absent from the result
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-341
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check skips engine-generated outputs: a file whose
-
-> The check skips engine-generated outputs: a file whose basename starts with `_`, and the
-> published `map.html` viewer.
-
-Scenario: engine outputs are excluded even when large and untagged
+CASE-3 — engine outputs are excluded even when large and untagged
   Given  large, untagged `docs/map.html` and `docs/_x.html`
   When   `untagged_doc_bundles` scans the repo
   Then   neither file appears in the result, because the engine freshness-checks those
          two separately, on its own path
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-343
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check honors .reqmapignore and the standard scan
-
-> The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
-> regenerable artifact out of scope rather than tag it.
-
-Scenario: a .reqmapignore pattern suppresses the finding
+CASE-4 — a .reqmapignore pattern suppresses the finding
   Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`
   When   `untagged_doc_bundles` scans the repo
   Then   `docs/poster.html` is absent from the result
 
-## Members in code (auto)
-
-
-
-
---------------------

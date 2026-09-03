@@ -5,12 +5,9 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-depends_on: []
-superseded_by:
 milestone: v1.00
 lint_exempt: [ac-count-low]
 ---
-
 # Stakeholder need — specs and code stay in sync
 
 ## Description
@@ -22,9 +19,6 @@ lint_exempt: [ac-count-low]
 - The project keeps a single written source of truth for each capability, living next to the code.
 - Drift between a capability's description and its code is caught before it ships, not after.
 - A reader can navigate from any capability to the code that implements it and the tests that verify it.
-
-## Verify intent (open questions for the human)
-- None — authored from known intent, not reconstructed from code.
 
 ## Notes & known limitations (informative)
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
@@ -63,8 +57,6 @@ CASE-3
 ## WHERE — Current implementation
 - Not implemented by code — a stakeholder need is fulfilled by the requirements that declare `satisfies: SYS-SSOT-001` (the gate, the map, the dossier, and the traceability feature itself).
 
-## Links
-- Used by: (auto)
 ## Requirements in this system (auto)
 - `SYS-AUTHOR-101` — Authoring and evolving a requirement  (system)
 - `SYS-GATE-102` — Keeping code and specification in step  (system)

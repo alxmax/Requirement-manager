@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Keeping requirements readable
 
 > As someone who has to read the corpus a year from now, I want the engine to flag prose 

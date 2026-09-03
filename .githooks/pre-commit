@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# implements: ARCH-SELFGATE-039
+# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
 # requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)

@@ -1,13 +1,12 @@
 ---
 id: ARCH-LEVEL-051
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
 priority: should-have
 depends_on: [ARCH-PARSE-001, ARCH-CHECK-006]
 satisfies: [SYS-VMODEL-107]
-superseded_by:
 ---
 
 # Specification level
@@ -19,31 +18,11 @@ superseded_by:
 > whether a requirement describes a whole system, one architectural piece, or one unit of
 > code. Without it the two questions are answered by one field that can only answer the
 > first.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     a level        how abstract a requirement is: `system`, `architecture` or `code`.
-     a layer        the existing graph-position field: `bus`, `feature`, `need`,
-                    `aggregate`.
-     the gate       the pre-commit check that reports errors and warnings. -->
+- A requirement may carry an optional `level:` of `system`, `architecture` or `code`, independent of `layer:`; the gate accepts the three values, ignores an absent field, and errors on anything else, granting no implements-tag exemption. [[REQ-LEVEL-862]] details the behaviour.
 
-**What the field holds**
-- A requirement may carry a `level:` value of `system`, `architecture` or `code`.
-- The `level:` field is optional. A requirement without one is read exactly as before.
-- The `level:` axis is independent of `layer:`, and neither value constrains the other.
-
-**Why the two axes stay separate**
-- An `architecture` requirement owns code, so the gate keeps requiring an `implements:` member for it.
-- The `aggregate` layer stays exempt from that rule, because it owns no code of its own.
-- No `level:` value is added to the implementation-exemption set.
-
-**When the gate objects**
-- The gate reports an error for a `level:` value outside the three named ones.
-- The gate says nothing about a requirement that carries no `level:` at all.
-
-## Verify intent (open questions for the human)
-- None — authored from stated intent, not reconstructed from code.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a requirement carrying `level: architecture`
   When   the gate runs
@@ -61,7 +40,13 @@ CASE-4
   When   the gate runs
   Then   it still reports the missing-member error, because the level grants no exemption
 
-## Context (non-binding)
+## Context
+**Terms**
+- a level        how abstract a requirement is: `system`, `architecture` or `code`.
+- a layer        the existing graph-position field: `bus`, `feature`, `need`,
+- `aggregate`.
+- the gate       the pre-commit check that reports errors and warnings.
+
 **Notes**
 - The three values are the V-model's left arm, collapsed for a software-only tool: what
   ISO/IEC/IEEE and ASPICE separate into system requirements, system architecture, software
@@ -84,177 +69,68 @@ CASE-4
 - `VALID_LEVEL` in `reqmap.py` and the validation branch in `cmd_check`, which reports an
   error for an unrecognised value and stays silent when the field is absent.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)
-
-
-
 
 --------------------
 
 
 ---
-id: REQ-LEVEL-436
-status: baseline
-form: atomic
+id: REQ-LEVEL-862
+status: confirmed
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-LEVEL-051]
-superseded_by:
 ---
 
-# A requirement may carry a level: value of
+# The level field, validated independently of layer
 
-> A requirement may carry a `level:` value of `system`, `architecture` or `code`.
+## Description
+> `level:` and `layer:` answer different questions — how abstract a requirement is,
+> versus where it sits in the dependency graph — so the gate validates them separately
+> and never lets one imply the other. An `architecture`-level requirement still owns
+> code and still needs an `implements:` member; only `layer: aggregate` (owning no code
+> of its own) is exempt from that, regardless of level.
 
-Scenario: the gate accepts each of the three level values
+Every bullet below is binding.
+- A requirement may carry a `level:` value of `system`, `architecture` or `code`.
+- The `level:` field is optional. A requirement without one is read exactly as before.
+- The `level:` axis is independent of `layer:`, and neither value constrains the other.
+- An `architecture` requirement owns code, so the gate keeps requiring an `implements:` member for it.
+- The `aggregate` layer stays exempt from that rule, because it owns no code of its own.
+- No `level:` value is added to the implementation-exemption set.
+- The gate reports an error for a `level:` value outside the three named ones.
+- The gate says nothing about a requirement that carries no `level:` at all.
+
+## Cases
+CASE-1 — the gate accepts each of the three level values
   Given  three requirements carrying `level: system`, `level: architecture` and `level: code` respectively
   When   `gate` runs
   Then   it reports no level-related error for any of the three
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-437
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# The level: field is optional. A requirement without
-
-> The `level:` field is optional. A requirement without one is read exactly as before.
-
-Scenario: a requirement without level: reads exactly as before
+CASE-2 — a requirement without level: reads exactly as before
   Given  a corpus of requirements written before `level:` existed, none carrying the field
   When   `gate` runs
   Then   its output matches a run from before the field was introduced, with no
          level-related finding for any requirement
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-438
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# The level: axis is independent of layer:, and
-
-> The `level:` axis is independent of `layer:`, and neither value constrains the other.
-
-Scenario: level and layer combine freely without cross-validation
+CASE-3 — level and layer combine freely without cross-validation
   Given  a requirement carrying `level: system` and `layer: bus` together
   When   `gate` runs
   Then   it reports no error tying the two fields to each other
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-439
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# An architecture requirement owns code, so the gate
-
-> An `architecture` requirement owns code, so the gate keeps requiring an `implements:`
-> member for it.
-
-Scenario: an architecture-level requirement still needs an implements member
+CASE-4 — an architecture-level requirement still needs an implements member
   Given  a confirmed requirement carrying `level: architecture` and no `implements:` member
   When   `gate` runs
   Then   it reports the missing-member error, because no `level:` value is in the
          implementation-exemption set
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-440
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# The aggregate layer stays exempt from that rule
-
-> The `aggregate` layer stays exempt from that rule, because it owns no code of its own.
-
-Scenario: an aggregate-layer requirement stays exempt regardless of level
+CASE-5 — an aggregate-layer requirement stays exempt regardless of level
   Given  a confirmed `layer: aggregate` requirement carrying `level: architecture` and no `implements:` member
   When   `gate` runs
   Then   it reports no missing-member error
 
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-LEVEL-442
-status: baseline
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-LEVEL-051]
-superseded_by:
----
-
-# The gate reports an error for a level
-
-> The gate reports an error for a `level:` value outside the three named ones.
-
-Scenario: an invalid level value is a gate error
+CASE-6 — an invalid level value is a gate error
   Given  a requirement carrying `level: detailed`
   When   `gate` runs
   Then   it reports one error naming the invalid value and exits 1
 
-## Members in code (auto)

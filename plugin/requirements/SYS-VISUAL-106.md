@@ -6,12 +6,8 @@ level: system
 layer: need
 owner: Alex
 priority: must-have
-verification: inspection
 satisfies: [SYS-SSOT-001]
-depends_on: []
-superseded_by:
 ---
-
 # Seeing the system at a glance
 
 > As someone reviewing a change, I want the shape of the system as a picture I can open 

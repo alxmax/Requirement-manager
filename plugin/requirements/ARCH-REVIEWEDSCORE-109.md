@@ -1,13 +1,12 @@
 ---
 id: ARCH-REVIEWEDSCORE-109
 status: confirmed
-level: system
+level: architecture
 layer: feature
 owner: Alex
+milestone: v3.1
 depends_on: [ARCH-HEALTH-017]
 satisfies: [SYS-REPORT-105]
-superseded_by:
-milestone: v3.1
 ---
 
 # Reviewed-only health score
@@ -19,15 +18,8 @@ milestone: v3.1
 > drafts requirements from legacy code therefore reads near-zero health forever, and the one
 > number meant to show decay shows only that reviewing has not finished. This adds a second
 > number scored over the reviewed part alone, so the two readings separate.
+
 Every bullet below is binding.
-<!-- Words used below, in plain terms:
-     green            a requirement that passes every health axis at once, per
-                      [[ARCH-HEALTH-017]].
-     the headline     the existing `score`: green requirements over ALL requirements.
-     reviewed         a requirement whose status is `confirmed`. Not merely
-                      "not a draft": green requires `confirmed`, so any other
-                      status could enter the denominator but never the numerator.
-     a consumer       another repository that vendored this engine and reads its output. -->
 
 **What it computes**
 - The reviewed-only score is the percentage of green requirements among the reviewed ones.
@@ -51,25 +43,7 @@ Every bullet below is binding.
 - A reader who wants the old behaviour alone ignores the new key; its absence in the two
   cases above leaves an existing `--json` schema untouched.
 
-## Verify intent (open questions for the human)
-- None — authored from stated intent after the measurement below.
-
-## Notes & known limitations (informative)
-- Measured on this repo at commit `1eea8f1`, when the signal was added: the headline read
-  `10/100` while every one of the 71 confirmed requirements was green on every axis — the
-  detailed-design drafts [[ARCH-DECOMPOSE-050]] seeded were the whole difference. The
-  reviewed-only score read `100/100` there. This is a dated snapshot, not a live figure:
-  the corpus only grows ([[ARCH-DECOMPOSE-050]], ADR-0021), so run `health` for today's.
-- It shares the "absent, not zero" discipline with the untagged-code count
-  ([[ARCH-COVERAGE-029]]), which is the same shape of problem: a signal printed by `health`
-  that must not silently widen a consumer's JSON schema.
-- Redefining the headline's denominator was rejected instead of this: [[ARCH-HEALTH-017]]
-  CASE-2 binds an all-draft corpus to a score of zero, and consumer badges already read that
-  key, so moving it would change every published number without notice.
-- The score still says nothing about whether a draft *should* exist. A corpus can read
-  `100/100` reviewed while carrying hundreds of drafts nobody intends to finish.
-
-## Cases (= tests)
+## Cases
 CASE-1
   Given  a corpus of one green confirmed requirement and three drafts
   When   `health` runs
@@ -97,7 +71,31 @@ CASE-5
   Then   the reviewed-only score is 100 and its denominator is 1, because the fourth
          status is neither green nor counted against green
 
-## Context (non-binding)
+## Context
+**Terms**
+- green            a requirement that passes every health axis at once, per
+- [[ARCH-HEALTH-017]].
+- the headline     the existing `score`: green requirements over ALL requirements.
+- reviewed         a requirement whose status is `confirmed`. Not merely
+- "not a draft": green requires `confirmed`, so any other
+- status could enter the denominator but never the numerator.
+- a consumer       another repository that vendored this engine and reads its output.
+
+**Notes**
+- Measured on this repo at commit `1eea8f1`, when the signal was added: the headline read
+  `10/100` while every one of the 71 confirmed requirements was green on every axis — the
+  detailed-design drafts [[ARCH-DECOMPOSE-050]] seeded were the whole difference. The
+  reviewed-only score read `100/100` there. This is a dated snapshot, not a live figure:
+  the corpus only grows ([[ARCH-DECOMPOSE-050]], ADR-0021), so run `health` for today's.
+- It shares the "absent, not zero" discipline with the untagged-code count
+  ([[ARCH-COVERAGE-029]]), which is the same shape of problem: a signal printed by `health`
+  that must not silently widen a consumer's JSON schema.
+- Redefining the headline's denominator was rejected instead of this: [[ARCH-HEALTH-017]]
+  CASE-2 binds an all-draft corpus to a score of zero, and consumer badges already read that
+  key, so moving it would change every published number without notice.
+- The score still says nothing about whether a draft *should* exist. A corpus can read
+  `100/100` reviewed while carrying hundreds of drafts nobody intends to finish.
+
 **Example**
 - Ana vendors the engine into a legacy repo and runs `draft`, which seeds 400 requirements
   from existing code. `health` reads `2/100`, which looks alarming and is not: nothing has
@@ -109,6 +107,3 @@ CASE-5
 - The `reviewed_total` / `reviewed_score` block in `cmd_health` (`reqmap.py`), emitted into
   `data` and printed as the `reviewed only:` line under the conditions above.
 
-## Links
-- Used by: (auto)
-## Members in code (auto)

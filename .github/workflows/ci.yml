@@ -1,5 +1,5 @@
 name: ci
-# implements: ARCH-SELFGATE-039
+# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-916
 # implements: ARCH-PYFLOOR-040
 # implements: ARCH-REPRO-041
 
@@ -117,7 +117,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python: ["3.9", "3.12", "3.13"]
+        python: ["3.9", "3.12", "3.13"]  # implements: REQ-PYFLOOR-902
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -180,14 +180,14 @@ jobs:
       # plugin/requirements/_map.json, so the smoke runs against this repo's real
       # registry rather than a stand-in. Placed before the build: a render throw should
       # fail in seconds, not after a Vite build.
-      - name: Viewer SSR smoke
+      - name: Viewer SSR smoke  # implements: REQ-REPRO-905
         working-directory: app
         run: npm run sync && npm run smoke
-      - name: Rebuild the vendored viewer
+      - name: Rebuild the vendored viewer  # implements: REQ-REPRO-905
         working-directory: app
         run: npm run build:viewer
       # The build writes straight over the committed copy, so the diff IS the check.
-      - name: Vendored viewer matches app/
+      - name: Vendored viewer matches app/  # implements: REQ-REPRO-905
         run: |
           if ! git diff --exit-code -- plugin/scripts/_map_viewer.html; then
             echo "::error::plugin/scripts/_map_viewer.html is stale - rebuild it with \`cd app && npm run build:viewer\` and commit the result (see app/CLAUDE.md)."
@@ -196,7 +196,7 @@ jobs:
       # The diagram generator writes a .excalidraw next to its .html, and docs/*.excalidraw
       # is hard-blocked by .gitignore, so build into a temp dir and compare instead of
       # regenerating in place.
-      - name: Published architecture diagram matches its generator
+      - name: Published architecture diagram matches its generator  # implements: REQ-REPRO-905
         run: |
           out=$(mktemp -d)
           python -X utf8 plugin/skills/excalidraw-diagram/examples/make_full_architecture.py "$out"
@@ -317,7 +317,7 @@ jobs:
     # on Windows, on the declared floor, or ships a viewer that no longer matches
     # app/ must not become a tag consumers install. deploy-map stays on the gate
     # alone — it republishes docs/, which the gate already drift-checks.
-    needs: [gate-and-tests, tests, artifacts]
+    needs: [gate-and-tests, tests, artifacts]  # implements: REQ-REPRO-905
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
