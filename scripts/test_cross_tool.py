@@ -55,6 +55,55 @@ def cross_tool_feature():
 """.format(id=REQ_ID)
 
 
+BUS_ID = "TEST-BUS-002"
+
+BUS_MD = """\
+---
+id: {id}
+status: confirmed
+layer: bus
+owner: test
+---
+
+# A bus capability verified only end-to-end
+
+## Description
+- The bus helper returns its input unchanged.
+
+## Cases
+CASE-1
+  Given  any value
+  When   the helper runs
+  Then   the same value comes back
+""".format(id=BUS_ID)
+
+BUS_PY = "# implements: {id}\n\ndef bus_helper(x):\n    return x\n".format(id=BUS_ID)
+BUS_TEST_PY = "# tested-by: {id} @system\n\ndef test_bus_helper():\n    assert True\n".format(id=BUS_ID)
+
+
+def check_level_rung(tmpdir, req_dir):  # tested-by: ARCH-VLEVEL-037 @integration
+    """A confirmed `bus` requirement whose only levelled test link is `@system` must
+    draw the RM009 warning from a real `gate` run — the V-model rung rule exercised
+    through the CLI, not through a mocked context. Returns 0 on pass."""
+    with open(os.path.join(req_dir, BUS_ID + ".md"), "w", encoding="utf-8") as f:
+        f.write(BUS_MD)
+    with open(os.path.join(tmpdir, "bus.py"), "w", encoding="utf-8") as f:
+        f.write(BUS_PY)
+    with open(os.path.join(tmpdir, "test_bus.py"), "w", encoding="utf-8") as f:
+        f.write(BUS_TEST_PY)
+    result = subprocess.run([sys.executable, "scripts/reqmap.py", "gate"], cwd=tmpdir,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.returncode != 0:
+        print("FAIL [level rung] gate exited {}".format(result.returncode))
+        print(result.stdout.strip())
+        return 1
+    if "RM009" not in result.stdout or "verified only at @system" not in result.stdout:
+        print("FAIL [level rung] gate did not warn about the @system-only bus link")
+        print(result.stdout.strip())
+        return 1
+    return 0
+
+
 def run_cmd(args, cwd):
     result = subprocess.run(
         [sys.executable] + args,
@@ -118,6 +167,10 @@ def main():
 
         with open(map_json_path, encoding="utf-8") as f:
             data = json.load(f)
+
+        # 4. the level-rung rule, end to end (ARCH-VLEVEL-037 at @integration)
+        if check_level_rung(tmpdir, req_dir) != 0:
+            return 1
 
         for key in ("engine_version", "nodes", "edges"):
             if key not in data:

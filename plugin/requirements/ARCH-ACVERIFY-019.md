@@ -117,8 +117,7 @@ CASE-3 — partial verifies coverage produces one warning naming every gap
   Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5
          untagged
   When   `gate` runs
-  Then   it prints exactly one "automatable criteria" line naming "missing AC-2, AC-3,
-         AC-4, AC-5"
+  Then   it prints exactly one "automatable criteria" line naming "missing AC-2, AC-3, AC-4, AC-5"
 
 CASE-4 — the warning states the tagged-of-total count
   Given  a confirmed requirement with AC-1 and AC-2 labelled, only AC-1 tagged

@@ -22,33 +22,33 @@ Every bullet below is binding.
 - Five repo-root files — `ci.yml`, `check/action.yml`, both dev git hooks, and `sync_reqmap.sh` — each wire the gate into a real entry point (CI, a consumer's Action, a local commit/push, the cache-sync script), and each carries a member tag pointing back at this requirement. [[REQ-SELFGATE-916]]
 
 ## Cases
-CASE-1
+CASE-1  <!-- verifiable by: inspection -->
   Given  a push or pull request to this repo
   When   `ci.yml`'s `gate-and-tests` job runs
   Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs
 
-CASE-2
+CASE-2  <!-- verifiable by: inspection -->
   Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)
   When   `.githooks/pre-commit` runs
   Then   it fails the commit on the same errors CI would fail on, before the commit is created
 
-CASE-3
+CASE-3  <!-- verifiable by: inspection -->
   Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`
   When   their own CI runs that step
   Then   `check/action.yml` invokes the same gate this repo runs on itself
 
-CASE-4
+CASE-4  <!-- verifiable by: inspection -->
   Given  a local push attempt with the dev hook enabled and the target branch is `main`
   When   `.githooks/pre-push` runs
   Then   the push is blocked before it reaches the remote
 
-CASE-5
+CASE-5  <!-- verifiable by: inspection -->
   Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments
   When   it completes
   Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
          plugin cache and every named consumer repo matches this repo's current copy
 
-CASE-6
+CASE-6  <!-- verifiable by: inspection -->
   Given  a push to `main`, whether or not it bumps `plugin.json`
   When   the `release` job's alias step runs
   Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the
