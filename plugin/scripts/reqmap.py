@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.5"
+MAP_ENGINE_VERSION = "2026-09-03.6"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1737,17 +1737,6 @@ def _automatable_acs(body):  # implements: ARCH-ACVERIFY-019
 
 
 # ---------- hashing / drift ----------
-# A normative section heading: the canonical `## WHAT — Contract …` / `## HOW —
-# Acceptance …`, or a legacy bare `## Contract`/`## Acceptance`/`## Input`/`## Output`.
-# Anchored so the keyword must be the label (right after `## ` or after a WHAT/HOW —
-# prefix), NOT anywhere in the heading — otherwise a commentary heading like
-# `## Notes — contract caveats` would leak into the drift hash.
-# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
-# section detection agree on which heading is a normative section (see its docstring)
-_NORMATIVE_HEADING_RE = re.compile(
-    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
-    r"(?:description|contract|acceptan|input|output)", re.I)
-
 # The binding-clause section, current name first. `## Description` merged the standalone
 # `> WHY:` blockquote and `## WHAT — Contract (normative)` into one section: a reader met
 # the same capability described twice, once as rationale and once as obligation, under two
@@ -1762,6 +1751,24 @@ CONTRACT_LABELS = ("description", "contract")   # implements: ARCH-DESCRIPTION-0
 # identifier a tag points at, so dropping the old spelling would break every consumer tag
 # already written against it.
 ACCEPTANCE_LABELS = ("cases", "acceptan")       # implements: ARCH-DESCRIPTION-057
+
+# A normative section heading: the canonical `## Description` / `## Cases`, the older
+# `## WHAT — Contract …` / `## HOW — Acceptance …`, or a legacy bare
+# `## Contract`/`## Acceptance`/`## Input`/`## Output`. Anchored so the keyword must be
+# the label (right after `## ` or after a WHAT/HOW — prefix), NOT anywhere in the
+# heading — otherwise a commentary heading like `## Notes — contract caveats` would leak
+# into the drift hash.
+# Built FROM CONTRACT_LABELS/ACCEPTANCE_LABELS (plus the legacy input/output pair those
+# tuples never carry) rather than a hand-listed keyword set, so a label added to either
+# tuple is automatically recognised here too — a hand-maintained second copy is exactly
+# what let `## Cases` (the current spelling, most of this repo's own requirements) go
+# unrecognised as a normative heading and silently exclude its criteria from the drift hash.
+# prefix set MUST stay in lockstep with _heading_label_is so the drift hash and
+# section detection agree on which heading is a normative section (see its docstring)
+_NORMATIVE_HEADING_RE = re.compile(
+    r"^##\s+(?:(?:what|why|where|how)\s*[—–-]?\s*)?"
+    r"(?:" + "|".join(re.escape(n) for n in CONTRACT_LABELS + ACCEPTANCE_LABELS
+                       + ("input", "output")) + ")", re.I)
 
 
 def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
@@ -4520,32 +4527,38 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
+    # Iterates CONTRACT_LABELS (current `## Description` first, legacy `## Contract`
+    # still honoured) rather than the literal string "contract" — a hardcoded legacy
+    # label here left this check dead on every requirement using the current heading.
     seen_vague = set()
-    for ln in _lint_prose(body, "contract"):
-        bare = re.sub(r"`[^`]*`", " ", ln)
-        for w in _WORD_RE.findall(bare):
-            lw = w.lower()
-            if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
-                seen_vague.add(lw)
-                findings.append({
-                    "severity": "warn", "check": "vague-term",
-                    "detail": "vague word '{}' (no testable meaning): {}".format(
-                        w, _clip(ln))})
+    for name in CONTRACT_LABELS:
+        for ln in _lint_prose(body, name):
+            bare = re.sub(r"`[^`]*`", " ", ln)
+            for w in _WORD_RE.findall(bare):
+                lw = w.lower()
+                if lw in LINT_VAGUE_TERMS and lw not in seen_vague:
+                    seen_vague.add(lw)
+                    findings.append({
+                        "severity": "warn", "check": "vague-term",
+                        "detail": "vague word '{}' (no testable meaning): {}".format(
+                                w, _clip(ln))})
     # redundant modal (warn): "shall"/"must" on a Contract clause is either dead weight
     # (the section header already binds every line) or a stray English modal dropped into
     # a non-English clause. Same one-finding-per-distinct-term shape as vague-term, above.
+    # Same CONTRACT_LABELS iteration as vague-term, above, for the same reason.
     seen_modal = set()
-    for ln in _lint_prose(body, "contract"):
-        bare = re.sub(r"`[^`]*`", " ", ln)
-        for w in _WORD_RE.findall(bare):
-            lw = w.lower()
-            if lw in LINT_MODAL_WORDS and lw not in seen_modal:
-                seen_modal.add(lw)
-                findings.append({
-                    "severity": "warn", "check": "redundant-modal",
-                    "detail": "redundant modal '{}' (the Contract header already binds "
-                              "every line — use plain present tense): {}".format(
-                                  w, _clip(ln))})
+    for name in CONTRACT_LABELS:
+        for ln in _lint_prose(body, name):
+            bare = re.sub(r"`[^`]*`", " ", ln)
+            for w in _WORD_RE.findall(bare):
+                lw = w.lower()
+                if lw in LINT_MODAL_WORDS and lw not in seen_modal:
+                    seen_modal.add(lw)
+                    findings.append({
+                        "severity": "warn", "check": "redundant-modal",
+                        "detail": "redundant modal '{}' (the Contract header already binds "
+                                  "every line — use plain present tense): {}".format(
+                                      w, _clip(ln))})
     # file-spread (warn): a requirement whose implements members span many distinct FILES is
     # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
     # cannot see, since a tight contract can still be smeared across many files. Auto-off when

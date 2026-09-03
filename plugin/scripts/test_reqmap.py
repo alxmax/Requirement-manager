@@ -3039,6 +3039,24 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
         self.assertFalse(any(f["check"] == "redundant-modal" for f in fs))
 
+    # bug: vague-term/redundant-modal hardcoded the literal "contract" label instead of
+    # iterating CONTRACT_LABELS, so both checks were dead code on any requirement using
+    # the CURRENT `## Description` heading (self.CONTRACT/self.ACCEPT above are the
+    # legacy spelling, which is why the tests above never caught this).
+    def test_vague_term_fires_under_current_description_heading(self):
+        body = ("# T\n\n## Description\n- It shall be appropriate and user-friendly.\n\n"
+                "## Cases (= tests)\n- ok.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        vague = [f for f in fs if f["check"] == "vague-term"]
+        self.assertEqual(len(vague), 2)            # 'appropriate' + 'user-friendly'
+
+    def test_redundant_modal_fires_under_current_description_heading(self):
+        body = ("# T\n\n## Description\n- The system shall log the event and must retry once.\n\n"
+                "## Cases (= tests)\n- ok.\n")
+        fs = R.lint_requirement("REQ-X-001", self._req("confirmed", body))
+        modal = [f for f in fs if f["check"] == "redundant-modal"]
+        self.assertEqual(len(modal), 2)            # 'shall' + 'must'
+
 
 class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044
     RO_BODY = ("# Titlu în română\n\n"
@@ -7360,6 +7378,15 @@ class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
 
     def test_editing_a_clause_still_drifts(self):
         edited = self.CUR.replace("`x` does the thing.", "`x` does another thing.")
+        self.assertNotEqual(R.binding_hash(edited), R.binding_hash(self.CUR))
+
+    def test_editing_a_case_criterion_still_drifts(self):  # bug: cases-heading-excluded-from-drift-hash
+        # _NORMATIVE_HEADING_RE used to hand-list keywords instead of reading
+        # CONTRACT_LABELS/ACCEPTANCE_LABELS, and omitted "cases" — so `## Cases`
+        # (the current spelling) was silently excluded from the drift hash: editing a
+        # CASE-1 Then-line never tripped DRIFT under a confirmed requirement.
+        edited = self.CUR.replace("Then c", "Then z")
+        self.assertNotEqual(edited, self.CUR)
         self.assertNotEqual(R.binding_hash(edited), R.binding_hash(self.CUR))
 
     def test_the_intent_is_still_read_from_inside_the_section(self):
