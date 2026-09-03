@@ -45,9 +45,8 @@ Every bullet below is binding.
 **What it skips**
 - The check honors `.reqmapignore` and the standard scan walk, so a repo can
   mark generated or vendored code out of scope rather than tag it.
-- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
-  `requirements/` directory.
-- The check skips a file it cannot read.
+- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
+  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
 
 **Severity**
 - The check is warn-only and never changes the gate's exit code, including
@@ -123,6 +122,11 @@ CASE-6
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-ORPHANCODE-550
 status: draft
@@ -152,6 +156,11 @@ Scenario: an untagged file at the LOC threshold triggers the warning
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-ORPHANCODE-551
 status: draft
@@ -174,6 +183,11 @@ Scenario: only files on the program-extension list are considered
   Then   the `.go` file is reported as orphan code and the `.txt` file is not
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -211,6 +225,11 @@ Scenario: any of the four membership tags silences the warning
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-ORPHANCODE-553
 status: draft
@@ -233,6 +252,11 @@ Scenario: prose and config extensions are never checked for orphan code
   Then   neither is reported as orphan code
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -267,59 +291,3 @@ Scenario: a .reqmapignore pattern exempts a large untagged file
 
 
 --------------------
-
-
----
-id: REQ-ORPHANCODE-555
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# The scan walk prunes .git, node_modules, __pycache__ and
-
-> The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
-> directory.
-
-Scenario: files under pruned directories are never scanned for orphan code
-  Given  a large untagged `.py` file inside `node_modules/`
-  When   `gate` runs
-  Then   it is not reported as orphan code
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-ORPHANCODE-556
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-ORPHANCODE-034]
-superseded_by:
----
-
-# The check skips a file it cannot read
-
-> The check skips a file it cannot read.
-
-Scenario: an unreadable file is skipped rather than crashing the check
-  Given  a large program file the process cannot read
-  When   `gate` runs
-  Then   it completes without error and prints no orphan-code line for that file
-
-## Members in code (auto)
-
-
-
-

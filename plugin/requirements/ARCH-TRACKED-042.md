@@ -26,7 +26,7 @@ membership tag for some requirement.
 
 **What it does**
 - `untracked_members` lists the member files git does not track under the scan root.
-- `gate` reports those files in one warning naming up to five of them and the total count.
+- `gate` reports those untracked members in one warning, naming up to five paths and the total count.
 - The warning names the two remedies: commit the files, or exclude them in `.reqmapignore`.
 
 **What it never does**
@@ -119,7 +119,7 @@ superseded_by:
 
 # Gate reports those files in one warning naming
 
-> `gate` reports those files in one warning naming up to five of them and the total count.
+> `gate` reports those untracked members in one warning, naming up to five paths and the total count.
 
 Scenario: the gate warning caps the named files and reports the total
   Given  seven untracked member files

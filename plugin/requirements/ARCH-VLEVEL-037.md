@@ -56,7 +56,7 @@ Every bullet below is binding.
 - Both rules are warn-only. Neither changes the gate's exit code.
 
 **What `show` prints**
-- `show` prints the verification level beside a member whose `tested-by:` tag carries one.
+- How `show` renders a levelled member is [[ARCH-SHOW-015]]'s contract, not restated here.
 - `show` prints a member whose tag carries no level with no level marker.
 
 ## Verify intent (open questions for the human)
@@ -123,6 +123,11 @@ CASE-7
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-806
 status: draft
@@ -154,6 +159,11 @@ Scenario: scan_test_levels recognizes all three level suffixes
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-807
 status: draft
@@ -175,6 +185,11 @@ Scenario: one level suffix applies to every id in the list
   Then   both `REQ-A-001` and `REQ-B-002` report level `integration`
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -212,6 +227,11 @@ Scenario: a tag with no level, or an unrecognised one, still resolves as a plain
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-809
 status: draft
@@ -234,6 +254,11 @@ Scenario: scan_test_levels records the file:line that declares each level
   Then   `got["REQ-B-002"]["integration"]` equals `[("t_one.py", 3)]`
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -271,6 +296,11 @@ Scenario: a level suffix does not change the ordinary member tuple shape
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-811
 status: draft
@@ -294,6 +324,11 @@ Scenario: a backticked levelled-tag example does not count as coverage
   Then   `REQ-A-001` is absent from the result and `REQ-B-002` reports `{"unit"}`
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -331,6 +366,11 @@ Scenario: a levelled tag inside a docstring or string literal is not coverage
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-813
 status: draft
@@ -360,6 +400,11 @@ Scenario: an unvalidated confirmed need is named once the repo has opted in
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-814
 status: draft
@@ -382,6 +427,11 @@ Scenario: no validated-against tag anywhere keeps the rule silent
   Then   its output contains no mention of "validated-against"
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -419,6 +469,11 @@ Scenario: a bus requirement verified only at @system level warns
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-816
 status: draft
@@ -442,6 +497,11 @@ Scenario: a bus requirement with only an unlevelled tested-by link is never judg
   Then   its output contains no "verified only at @system" finding
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -479,6 +539,11 @@ Scenario: a feature requirement verified only at @system stays silent
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-VLEVEL-818
 status: draft
@@ -506,29 +571,6 @@ Scenario: the unvalidated-need and system-only-bus findings never bump the exit 
 
 
 --------------------
-
-
----
-id: REQ-VLEVEL-819
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-VLEVEL-037]
-superseded_by:
----
-
-# Show prints the verification level beside a member
-
-> `show` prints the verification level beside a member whose `tested-by:` tag carries one.
-
-Scenario: show annotates a levelled member with its level
-  Given  a `tested-by` member at `t.py:2` whose level map marks it `integration`
-  When   `show REQ-X-001` runs with that level data
-  Then   its output contains "@integration"
-
-## Members in code (auto)
 
 
 

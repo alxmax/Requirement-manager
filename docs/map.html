@@ -4718,8 +4718,7 @@
         "The check skips engine-generated outputs: a file whose basename starts with `_`, and the published `map.html` viewer.",
         "The engine owns those two and freshness-checks them separately.",
         "The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a regenerable artifact out of scope rather than tag it.",
-        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory.",
-        "The check skips a file it cannot read.",
+        "The walk itself — what it prunes, what it ignores, and how it treats a file it cannot read — is [[ARCH-SCAN-002]]'s contract, not restated here.",
         "The check is warn-only and never changes the gate's exit code."
       ],
       "verify": [
@@ -4756,9 +4755,7 @@
         "REQ-DOCBUNDLE-339",
         "REQ-DOCBUNDLE-340",
         "REQ-DOCBUNDLE-341",
-        "REQ-DOCBUNDLE-343",
-        "REQ-DOCBUNDLE-344",
-        "REQ-DOCBUNDLE-345"
+        "REQ-DOCBUNDLE-343"
       ],
       "members": [
         {
@@ -4907,82 +4904,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: a .reqmapignore pattern suppresses the finding Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html` When   `untagged_doc_bundles` scans the repo Then   `docs/poster.html` is absent from the result"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DOCBUNDLE-026"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DOCBUNDLE-344",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The scan walk prunes .git, node_modules, __pycache__ and",
-      "intent": "",
-      "contract": [
-        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: a large untagged HTML file under docs/node_modules/ is never walked Given  a large, untagged `docs/node_modules/pkg/index.html` When   `untagged_doc_bundles` scans the repo Then   the file is absent from the result, because `node_modules` is pruned before it is reached"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-DOCBUNDLE-026"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-DOCBUNDLE-345",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The check skips a file it cannot read",
-      "intent": "",
-      "contract": [
-        "The check skips a file it cannot read."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: a file that raises OSError on stat is skipped, not fatal Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it When   `untagged_doc_bundles` scans the repo Then   the scan completes without raising and `docs/broken.html` is absent from the result"
       ],
       "accept": "",
       "input": "",
@@ -14438,8 +14359,7 @@
         "A membership tag is one of `implements`, `tested-by`, `generated-from` and `validated-against`.",
         "The gate does not consider the prose, styling and config extensions (`.md .html .css .sql .yaml .yml`). Prose coverage is [[ARCH-DOCBUNDLE-026]]'s concern.",
         "The check honors `.reqmapignore` and the standard scan walk, so a repo can mark generated or vendored code out of scope rather than tag it.",
-        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory.",
-        "The check skips a file it cannot read.",
+        "The walk itself — what it prunes, what it ignores, and how it treats a file it cannot read — is [[ARCH-SCAN-002]]'s contract, not restated here.",
         "The check is warn-only and never changes the gate's exit code, including under `--strict`. <\!-- Rationale: the 2026-06-21 Senate audit on ARCH-COVERAGE-029 rejected coverage as a hard gate (hollow tags become the rational way to pass CI); this stays advisory at any flag combination. -\->",
         "An author silences a file by tagging it or by adding it to `.reqmapignore`.",
         "There is no separate exemption mechanism."
@@ -14480,9 +14400,7 @@
         "REQ-ORPHANCODE-551",
         "REQ-ORPHANCODE-552",
         "REQ-ORPHANCODE-553",
-        "REQ-ORPHANCODE-554",
-        "REQ-ORPHANCODE-555",
-        "REQ-ORPHANCODE-556"
+        "REQ-ORPHANCODE-554"
       ],
       "members": [
         {
@@ -14673,82 +14591,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: a .reqmapignore pattern exempts a large untagged file Given  a large untagged `.py` file matched by a `.reqmapignore` pattern When   `gate` runs Then   it is not reported as orphan code, with no separate exemption mechanism beyond tagging or `.reqmapignore`"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ORPHANCODE-034"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ORPHANCODE-555",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The scan walk prunes .git, node_modules, __pycache__ and",
-      "intent": "",
-      "contract": [
-        "The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/` directory."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: files under pruned directories are never scanned for orphan code Given  a large untagged `.py` file inside `node_modules/` When   `gate` runs Then   it is not reported as orphan code"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-ORPHANCODE-034"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-ORPHANCODE-556",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "The check skips a file it cannot read",
-      "intent": "",
-      "contract": [
-        "The check skips a file it cannot read."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: an unreadable file is skipped rather than crashing the check Given  a large program file the process cannot read When   `gate` runs Then   it completes without error and prints no orphan-code line for that file"
       ],
       "accept": "",
       "input": "",
@@ -25129,7 +24971,7 @@
       "intent": "A generated artifact this tool commits must depend only on files git tracks. When a member lives in a gitignored directory, the map records something a fresh checkout has no copy of — so the committed map cannot be regenerated anywhere but the machine that wrote it, and the failure lands in CI as a mysterious staleness error about a file the reader cannot find.",
       "contract": [
         "`untracked_members` lists the member files git does not track under the scan root.",
-        "`gate` reports those files in one warning naming up to five of them and the total count.",
+        "`gate` reports those untracked members in one warning, naming up to five paths and the total count.",
         "The warning names the two remedies: commit the files, or exclude them in `.reqmapignore`.",
         "`untracked_members` reports nothing and the gate stays silent when the scan root is not a git work tree, or git is unavailable.",
         "The warning never changes the exit code."
@@ -25234,7 +25076,7 @@
       "title": "Gate reports those files in one warning naming",
       "intent": "",
       "contract": [
-        "`gate` reports those files in one warning naming up to five of them and the total count."
+        "`gate` reports those untracked members in one warning, naming up to five paths and the total count."
       ],
       "verify": [],
       "notes": [],
@@ -25879,7 +25721,7 @@
       "intent": "A membership tag only counts when the scan reads the file it sits in. The scan reads a fixed list of extensions and basenames, so a tag in any other kind of file is silently invisible: the author believes the requirement has a member, the map says it has none, and nothing points at the gap. The first consumer run found two such files on the first try — a `Caddyfile` and a Prisma schema, both tagged, neither ever read.",
       "contract": [
         "`tagged_unscanned_files` lists the tracked, non-scannable files under the scan root that contain a membership tag.",
-        "`gate` reports those files in one warning naming up to five of them and the total count.",
+        "`gate` reports those unscanned-type files in one warning, naming up to five paths and the total count.",
         "The warning states that those files are not members, and names the remedy: move the tag into a scannable file, or ask for the file type to be added to the scan.",
         "The check skips paths matching `.reqmapignore`, files under the SSOT directory, files whose basename starts with `_`, `.git` or `.reqmap` (their comments quote tags as examples), and files larger than one megabyte. Any other dotfile, such as `.env`, is checked like any file.",
         "A file that is not valid UTF-8 text is skipped. Binary files never produce a warning.",
@@ -25988,7 +25830,7 @@
       "title": "Gate reports those files in one warning naming",
       "intent": "",
       "contract": [
-        "`gate` reports those files in one warning naming up to five of them and the total count."
+        "`gate` reports those unscanned-type files in one warning, naming up to five paths and the total count."
       ],
       "verify": [],
       "notes": [],
@@ -27253,7 +27095,7 @@
         "The gate judges no requirement that has no levelled link, because an unlevelled link is evidence of neither level.",
         "The gate applies the level-fit rule to the `bus` layer only. A feature may legitimately be covered end to end.",
         "Both rules are warn-only. Neither changes the gate's exit code.",
-        "`show` prints the verification level beside a member whose `tested-by:` tag carries one.",
+        "How `show` renders a levelled member is [[ARCH-SHOW-015]]'s contract, not restated here.",
         "`show` prints a member whose tag carries no level with no level marker."
       ],
       "verify": [
@@ -27304,7 +27146,6 @@
         "REQ-VLEVEL-816",
         "REQ-VLEVEL-817",
         "REQ-VLEVEL-818",
-        "REQ-VLEVEL-819",
         "REQ-VLEVEL-820"
       ],
       "members": [
@@ -27846,44 +27687,6 @@
       "current_impl": [],
       "acc": [
         "Scenario: the unvalidated-need and system-only-bus findings never bump the exit code Given  a confirmed need with no `validated-against:` tag, and separately a confirmed `bus` requirement verified only at `@system`, each in an opted-in repo When   `gate` runs on each Then   both runs warn and both return exit code 0"
-      ],
-      "accept": "",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-VLEVEL-037"
-      ],
-      "satisfied_by": [],
-      "members": [],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-VLEVEL-819",
-      "layer": "feature",
-      "level": "code",
-      "status": "draft",
-      "area": "REQ",
-      "title": "Show prints the verification level beside a member",
-      "intent": "",
-      "contract": [
-        "`show` prints the verification level beside a member whose `tested-by:` tag carries one."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "Scenario: show annotates a levelled member with its level Given  a `tested-by` member at `t.py:2` whose level map marks it `integration` When   `show REQ-X-001` runs with that level data Then   its output contains \"@integration\""
       ],
       "accept": "",
       "input": "",
@@ -29210,14 +29013,6 @@
       "ARCH-DOCBUNDLE-026"
     ],
     [
-      "REQ-DOCBUNDLE-344",
-      "ARCH-DOCBUNDLE-026"
-    ],
-    [
-      "REQ-DOCBUNDLE-345",
-      "ARCH-DOCBUNDLE-026"
-    ],
-    [
       "ARCH-DRIFT-003",
       "SYS-GATE-102"
     ],
@@ -30103,14 +29898,6 @@
     ],
     [
       "REQ-ORPHANCODE-554",
-      "ARCH-ORPHANCODE-034"
-    ],
-    [
-      "REQ-ORPHANCODE-555",
-      "ARCH-ORPHANCODE-034"
-    ],
-    [
-      "REQ-ORPHANCODE-556",
       "ARCH-ORPHANCODE-034"
     ],
     [
@@ -31303,10 +31090,6 @@
     ],
     [
       "REQ-VLEVEL-818",
-      "ARCH-VLEVEL-037"
-    ],
-    [
-      "REQ-VLEVEL-819",
       "ARCH-VLEVEL-037"
     ],
     [

@@ -28,7 +28,7 @@ Every bullet below is binding.
 **What it does**
 - `tagged_unscanned_files` lists the tracked, non-scannable files under the scan root that
   contain a membership tag.
-- `gate` reports those files in one warning naming up to five of them and the total count.
+- `gate` reports those unscanned-type files in one warning, naming up to five paths and the total count.
 - The warning states that those files are not members, and names the remedy: move the tag
   into a scannable file, or ask for the file type to be added to the scan.
 
@@ -139,7 +139,7 @@ superseded_by:
 
 # Gate reports those files in one warning naming
 
-> `gate` reports those files in one warning naming up to five of them and the total count.
+> `gate` reports those unscanned-type files in one warning, naming up to five paths and the total count.
 
 Scenario: the gate warning names up to five files and the total count
   Given  seven tracked non-scannable files each carrying a tag

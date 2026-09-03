@@ -42,9 +42,8 @@ Every bullet below is binding.
 - The engine owns those two and freshness-checks them separately.
 - The check honors `.reqmapignore` and the standard scan walk, so a repo can mark a
   regenerable artifact out of scope rather than tag it.
-- The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT
-  `requirements/` directory.
-- The check skips a file it cannot read.
+- The walk itself — what it prunes, what it ignores, and how it treats a file it cannot
+  read — is [[ARCH-SCAN-002]]'s contract, not restated here.
 
 **Severity**
 - The check is warn-only and never changes the gate's exit code.
@@ -108,6 +107,11 @@ CASE-6
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-DOCBUNDLE-339
 status: draft
@@ -138,6 +142,11 @@ Scenario: a large untagged docs/ HTML file is flagged
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-DOCBUNDLE-340
 status: draft
@@ -159,6 +168,11 @@ Scenario: a large untagged HTML file outside docs/ is never flagged
   Then   `top.html` is absent from the result
 
 ## Members in code (auto)
+
+
+
+
+--------------------
 
 
 
@@ -196,6 +210,11 @@ Scenario: engine outputs are excluded even when large and untagged
 --------------------
 
 
+
+
+--------------------
+
+
 ---
 id: REQ-DOCBUNDLE-343
 status: draft
@@ -223,55 +242,3 @@ Scenario: a .reqmapignore pattern suppresses the finding
 
 
 --------------------
-
-
----
-id: REQ-DOCBUNDLE-344
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The scan walk prunes .git, node_modules, __pycache__ and
-
-> The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
-> directory.
-
-Scenario: a large untagged HTML file under docs/node_modules/ is never walked
-  Given  a large, untagged `docs/node_modules/pkg/index.html`
-  When   `untagged_doc_bundles` scans the repo
-  Then   the file is absent from the result, because `node_modules` is pruned before it is reached
-
-## Members in code (auto)
-
-
-
-
---------------------
-
-
----
-id: REQ-DOCBUNDLE-345
-status: draft
-form: atomic
-level: code
-layer: feature
-owner: Alex
-satisfies: [ARCH-DOCBUNDLE-026]
-superseded_by:
----
-
-# The check skips a file it cannot read
-
-> The check skips a file it cannot read.
-
-Scenario: a file that raises OSError on stat is skipped, not fatal
-  Given  a `docs/broken.html` path that raises `OSError` when `os.path.getsize` reads it
-  When   `untagged_doc_bundles` scans the repo
-  Then   the scan completes without raising and `docs/broken.html` is absent from the result
-
-## Members in code (auto)

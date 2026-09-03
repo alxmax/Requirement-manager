@@ -1,6 +1,6 @@
 ---
-generated: 2026-09-03 14:40
-nodes: 646
+generated: 2026-09-03 14:53
+nodes: 641
 edges: 98
 ---
 
@@ -22,7 +22,7 @@ graph TD
   ARCH_COVERAGE_029[ARCH-COVERAGE-029<br/>7 code]
   ARCH_DECOMPOSE_050[ARCH-DECOMPOSE-050<br/>10 code]
   ARCH_DESCRIPTION_057[ARCH-DESCRIPTION-057<br/>0 code]
-  ARCH_DOCBUNDLE_026[ARCH-DOCBUNDLE-026<br/>6 code]
+  ARCH_DOCBUNDLE_026[ARCH-DOCBUNDLE-026<br/>4 code]
   ARCH_DRIFT_003[ARCH-DRIFT-003<br/>8 code]
   ARCH_DRIFTIMPACT_035[ARCH-DRIFTIMPACT-035<br/>4 code]
   ARCH_EXCALIDRAW_030[ARCH-EXCALIDRAW-030<br/>9 code]
@@ -42,7 +42,7 @@ graph TD
   ARCH_MODULEFILE_056[ARCH-MODULEFILE-056<br/>0 code]
   ARCH_NEW_004[ARCH-NEW-004<br/>8 code]
   ARCH_NEXT_013[ARCH-NEXT-013<br/>23 code]
-  ARCH_ORPHANCODE_034[ARCH-ORPHANCODE-034<br/>7 code]
+  ARCH_ORPHANCODE_034[ARCH-ORPHANCODE-034<br/>5 code]
   ARCH_PAGES_021[ARCH-PAGES-021<br/>3 code]
   ARCH_PARSE_001[ARCH-PARSE-001<br/>10 code]
   ARCH_PIPE_046[ARCH-PIPE-046<br/>4 code]
@@ -72,7 +72,7 @@ graph TD
   ARCH_TRANSLATE_044[ARCH-TRANSLATE-044<br/>10 code]
   ARCH_UNSCANNEDTAG_045[ARCH-UNSCANNEDTAG-045<br/>6 code]
   ARCH_VIEWER_007[ARCH-VIEWER-007<br/>22 code]
-  ARCH_VLEVEL_037[ARCH-VLEVEL-037<br/>15 code]
+  ARCH_VLEVEL_037[ARCH-VLEVEL-037<br/>14 code]
   ARCH_VRUNGS_054[ARCH-VRUNGS-054<br/>0 code]
   SYS_AUTHOR_101[[SYS-AUTHOR-101]]
   SYS_GATE_102[[SYS-GATE-102]]
@@ -334,8 +334,6 @@ graph LR
     REQ_DOCBUNDLE_340["The gate considers only files under docs/<br><small>REQ-DOCBUNDLE-340</small>"]
     REQ_DOCBUNDLE_341["The check skips engine-generated outputs: a file whose<br><small>REQ-DOCBUNDLE-341</small>"]
     REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small>"]
-    REQ_DOCBUNDLE_344["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-DOCBUNDLE-344</small>"]
-    REQ_DOCBUNDLE_345["The check skips a file it cannot read<br><small>REQ-DOCBUNDLE-345</small>"]
     REQ_DRIFT_200["Binding_hash computes a stable 12-character hex content hash<br><small>REQ-DRIFT-200</small>"]
     REQ_DRIFT_201["The normative sections are the Contract and Acceptance<br><small>REQ-DRIFT-201</small>"]
     REQ_DRIFT_202["Rationale, notes, verify-intent, links and the member list<br><small>REQ-DRIFT-202</small>"]
@@ -538,8 +536,6 @@ graph LR
     REQ_ORPHANCODE_552["A membership tag is one of implements, tested-by<br><small>REQ-ORPHANCODE-552</small>"]
     REQ_ORPHANCODE_553["The gate does not consider the prose, styling<br><small>REQ-ORPHANCODE-553</small>"]
     REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small>"]
-    REQ_ORPHANCODE_555["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-ORPHANCODE-555</small>"]
-    REQ_ORPHANCODE_556["The check skips a file it cannot read<br><small>REQ-ORPHANCODE-556</small>"]
     REQ_PAGES_560["When _map.html is generated AND a docs/ directory<br><small>REQ-PAGES-560</small>"]
     REQ_PAGES_561["Map --check (the no-write freshness gate) additionally flags<br><small>REQ-PAGES-561</small>"]
     REQ_PAGES_562["The freshness comparison reads the on-disk copy as<br><small>REQ-PAGES-562</small>"]
@@ -808,7 +804,6 @@ graph LR
     REQ_VLEVEL_816["The gate judges no requirement that has no<br><small>REQ-VLEVEL-816</small>"]
     REQ_VLEVEL_817["The gate applies the level-fit rule to the<br><small>REQ-VLEVEL-817</small>"]
     REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small>"]
-    REQ_VLEVEL_819["Show prints the verification level beside a member<br><small>REQ-VLEVEL-819</small>"]
     REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small>"]
   end
   subgraph sg_SYS["SYS"]
@@ -1120,10 +1115,6 @@ graph LR
   style REQ_DOCBUNDLE_341 fill:#eee,stroke:#bbb,color:#888
   REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small>"]
   style REQ_DOCBUNDLE_343 fill:#eee,stroke:#bbb,color:#888
-  REQ_DOCBUNDLE_344["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-DOCBUNDLE-344</small>"]
-  style REQ_DOCBUNDLE_344 fill:#eee,stroke:#bbb,color:#888
-  REQ_DOCBUNDLE_345["The check skips a file it cannot read<br><small>REQ-DOCBUNDLE-345</small>"]
-  style REQ_DOCBUNDLE_345 fill:#eee,stroke:#bbb,color:#888
   ARCH_DRIFT_003["Contract hashing & lock<br><small>ARCH-DRIFT-003</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_DRIFT_003 -->|generated-from| f_docs_full_architecture_html_4
@@ -1634,10 +1625,6 @@ graph LR
   style REQ_ORPHANCODE_553 fill:#eee,stroke:#bbb,color:#888
   REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small>"]
   style REQ_ORPHANCODE_554 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_555["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-ORPHANCODE-555</small>"]
-  style REQ_ORPHANCODE_555 fill:#eee,stroke:#bbb,color:#888
-  REQ_ORPHANCODE_556["The check skips a file it cannot read<br><small>REQ-ORPHANCODE-556</small>"]
-  style REQ_ORPHANCODE_556 fill:#eee,stroke:#bbb,color:#888
   ARCH_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>ARCH-PAGES-021</small>"]
   f_plugin_scripts_reqmap_py_4059_6884["plugin/scripts/reqmap.py:4059-6884"]
   ARCH_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_4059_6884
@@ -2403,8 +2390,6 @@ graph LR
   style REQ_VLEVEL_817 fill:#eee,stroke:#bbb,color:#888
   REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small>"]
   style REQ_VLEVEL_818 fill:#eee,stroke:#bbb,color:#888
-  REQ_VLEVEL_819["Show prints the verification level beside a member<br><small>REQ-VLEVEL-819</small>"]
-  style REQ_VLEVEL_819 fill:#eee,stroke:#bbb,color:#888
   REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small>"]
   style REQ_VLEVEL_820 fill:#eee,stroke:#bbb,color:#888
   ARCH_VRUNGS_054["Level-to-verification correspondence<br><small>ARCH-VRUNGS-054</small>"]
@@ -2439,7 +2424,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>62 caps</small>"]
-  a_REQ["REQ<br><small>575 caps</small>"]
+  a_REQ["REQ<br><small>570 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   style a_ARCH stroke-width:3px
 ```
@@ -2550,8 +2535,6 @@ graph LR
     REQ_DOCBUNDLE_340["The gate considers only files under docs/<br><small>REQ-DOCBUNDLE-340</small><br>unreviewed"]
     REQ_DOCBUNDLE_341["The check skips engine-generated outputs: a file whose<br><small>REQ-DOCBUNDLE-341</small><br>unreviewed"]
     REQ_DOCBUNDLE_343["The check honors .reqmapignore and the standard scan<br><small>REQ-DOCBUNDLE-343</small><br>unreviewed"]
-    REQ_DOCBUNDLE_344["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-DOCBUNDLE-344</small><br>unreviewed"]
-    REQ_DOCBUNDLE_345["The check skips a file it cannot read<br><small>REQ-DOCBUNDLE-345</small><br>unreviewed"]
     REQ_DRIFT_200["Binding_hash computes a stable 12-character hex content hash<br><small>REQ-DRIFT-200</small><br>unreviewed"]
     REQ_DRIFT_201["The normative sections are the Contract and Acceptance<br><small>REQ-DRIFT-201</small><br>unreviewed"]
     REQ_DRIFT_202["Rationale, notes, verify-intent, links and the member list<br><small>REQ-DRIFT-202</small><br>unreviewed"]
@@ -2754,8 +2737,6 @@ graph LR
     REQ_ORPHANCODE_552["A membership tag is one of implements, tested-by<br><small>REQ-ORPHANCODE-552</small><br>unreviewed"]
     REQ_ORPHANCODE_553["The gate does not consider the prose, styling<br><small>REQ-ORPHANCODE-553</small><br>unreviewed"]
     REQ_ORPHANCODE_554["The check honors .reqmapignore and the standard scan<br><small>REQ-ORPHANCODE-554</small><br>unreviewed"]
-    REQ_ORPHANCODE_555["The scan walk prunes .git, node_modules, __pycache__ and<br><small>REQ-ORPHANCODE-555</small><br>unreviewed"]
-    REQ_ORPHANCODE_556["The check skips a file it cannot read<br><small>REQ-ORPHANCODE-556</small><br>unreviewed"]
     REQ_PAGES_560["When _map.html is generated AND a docs/ directory<br><small>REQ-PAGES-560</small><br>unreviewed"]
     REQ_PAGES_561["Map --check (the no-write freshness gate) additionally flags<br><small>REQ-PAGES-561</small><br>unreviewed"]
     REQ_PAGES_562["The freshness comparison reads the on-disk copy as<br><small>REQ-PAGES-562</small><br>unreviewed"]
@@ -3023,7 +3004,6 @@ graph LR
     REQ_VLEVEL_816["The gate judges no requirement that has no<br><small>REQ-VLEVEL-816</small><br>unreviewed"]
     REQ_VLEVEL_817["The gate applies the level-fit rule to the<br><small>REQ-VLEVEL-817</small><br>unreviewed"]
     REQ_VLEVEL_818["Both rules are warn-only. Neither changes the gate's<br><small>REQ-VLEVEL-818</small><br>unreviewed"]
-    REQ_VLEVEL_819["Show prints the verification level beside a member<br><small>REQ-VLEVEL-819</small><br>unreviewed"]
     REQ_VLEVEL_820["Show prints a member whose tag carries no<br><small>REQ-VLEVEL-820</small><br>unreviewed"]
   end
   style REQ_ACVERIFY_233 fill:#fff3cd,stroke:#a66,color:#630
@@ -3125,8 +3105,6 @@ graph LR
   style REQ_DOCBUNDLE_340 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_DOCBUNDLE_341 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_DOCBUNDLE_343 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_344 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_DOCBUNDLE_345 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_DRIFT_200 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_DRIFT_201 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_DRIFT_202 fill:#fff3cd,stroke:#a66,color:#630
@@ -3329,8 +3307,6 @@ graph LR
   style REQ_ORPHANCODE_552 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_ORPHANCODE_553 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_ORPHANCODE_554 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_555 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_ORPHANCODE_556 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PAGES_560 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PAGES_561 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_PAGES_562 fill:#fff3cd,stroke:#a66,color:#630
@@ -3598,7 +3574,6 @@ graph LR
   style REQ_VLEVEL_816 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VLEVEL_817 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VLEVEL_818 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_VLEVEL_819 fill:#fff3cd,stroke:#a66,color:#630
   style REQ_VLEVEL_820 fill:#fff3cd,stroke:#a66,color:#630
 ```
 
@@ -3705,8 +3680,6 @@ graph LR
 | REQ-DOCBUNDLE-340 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-DOCBUNDLE-341 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-DOCBUNDLE-343 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-344 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-DOCBUNDLE-345 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-DRIFT-200 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-DRIFT-201 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-DRIFT-202 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
@@ -3909,8 +3882,6 @@ graph LR
 | REQ-ORPHANCODE-552 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-ORPHANCODE-553 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-ORPHANCODE-554 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-555 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-ORPHANCODE-556 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PAGES-560 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PAGES-561 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-PAGES-562 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
@@ -4178,5 +4149,4 @@ graph LR
 | REQ-VLEVEL-816 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VLEVEL-817 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VLEVEL-818 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-VLEVEL-819 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
 | REQ-VLEVEL-820 | draft | 0 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
