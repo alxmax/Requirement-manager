@@ -7395,13 +7395,42 @@ class FanOut(unittest.TestCase):  # tested-by: ARCH-FANOUT-052
         r = {"meta": {"status": "confirmed"}, "body": self._body()}
         return [f["check"] for f in R.lint_requirement("REQ-P-001", r, children=children)]
 
-    def test_too_few_children_is_reported(self):  # verifies: ARCH-FANOUT-052#CASE-1
+    def _level_checks(self, level, children):
+        r = {"meta": {"status": "confirmed", "level": level}, "body": self._body()}
+        return [f for f in R.lint_requirement("REQ-P-001", r, children=children)
+                if f["check"] == "fan-out"]
+
+    def test_too_few_children_is_reported_without_a_declared_level(self):
+        # The fallback band (5-20) still carries a floor: a repo that never adopts the
+        # `level:` axis must see exactly what it saw before (ADR-0019's doubly-opt-in rule).
         fs = [f for f in R.lint_requirement(
             "REQ-P-001", {"meta": {"status": "confirmed"}, "body": self._body()},
             children=3) if f["check"] == "fan-out"]
         self.assertEqual(len(fs), 1)
         self.assertEqual(fs[0]["severity"], "warn")
         self.assertIn("too few", fs[0]["detail"])
+
+    # Per-level ceilings, with no floor at either declared level. A blind review of all
+    # nine findings the old uniform floor produced confirmed 0 of 9 as real, and three of
+    # them had appeared *because* the corpus was correctly cleaned up — so the floor was
+    # dropped rather than retuned. See ARCH-FANOUT-052 and CHANGELOG v3.1.0.
+    def test_architecture_has_no_floor(self):  # verifies: ARCH-FANOUT-052#CASE-1
+        self.assertEqual(self._level_checks("architecture", 3), [])
+
+    def test_architecture_ceiling_is_thirty(self):  # verifies: ARCH-FANOUT-052#CASE-3
+        self.assertEqual(self._level_checks("architecture", 30), [])
+        fs = self._level_checks("architecture", 32)
+        self.assertEqual(len(fs), 1)
+        self.assertIn("too many", fs[0]["detail"])
+        self.assertIn("over 30", fs[0]["detail"])
+
+    def test_system_ceiling_is_lower_than_architecture(self):  # verifies: ARCH-FANOUT-052#CASE-6
+        self.assertEqual(self._level_checks("system", 10), [])
+        fs = self._level_checks("system", 12)
+        self.assertEqual(len(fs), 1)
+        self.assertIn("over 10", fs[0]["detail"])
+        # the same count is silent one level down — that is the point of per-level bands
+        self.assertEqual(self._level_checks("architecture", 12), [])
 
     def test_a_count_inside_the_band_is_silent(self):  # verifies: ARCH-FANOUT-052#CASE-2
         self.assertNotIn("fan-out", self._checks(8))

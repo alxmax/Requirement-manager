@@ -98,6 +98,40 @@ post-exempt**: six of 70 non-draft requirements exceed `LINT_AC_MAX`, and all si
 deliberately exempt. Every live finding it has ever produced was judged a false positive by
 its own author.
 
+## How the confirmation half is discharged
+
+The bar requires findings "confirmed real gaps by a human reader". Reading ten requirements
+from scratch for every proposed check is the cost that makes the rule easy to skip — which
+is how four of this repo's checks shipped without it. The discipline below keeps the
+confirmation real while making it affordable:
+
+- **An independent reviewer decides.** Not the agent or person who proposed the change. It
+  may be an AI: what separated the reliable judgements from the unreliable ones in the
+  2026-09-03 audit was not the species of the reviewer but two properties — independence
+  from the proposal, and verdicts grounded in executed output rather than reasoning. Three
+  senators reversed their own vote that day after running code; the single assertion that
+  proved false was the one nobody had measured, and its author retracted it.
+- **Every verdict cites what was executed** — a file:line, a command's output, a count —
+  not an argument.
+- **"False positive" must be a costless answer.** The reviewer is not told which verdict
+  ships the change.
+- **A person ratifies the batch.** The reviewer's verdicts and evidence go to a human, who
+  confirms or refuses. The ratification is what discharges the bar, not the reviewer's
+  opinion.
+- **The refusal rate is recorded.** If no ratification is ever refused, the step has become
+  a rubber stamp and the bar is decorative again — the same failure this ADR documents for
+  `ac-count-high`, and detectable the same way: by a number, after the fact.
+
+**First application, same day.** The `fan-out` recalibration (per-level ceilings, floor
+dropped) was confirmed under exactly this procedure. A blind reviewer, given the nine
+findings the old floor produced and told that any mix of verdicts was acceptable, returned
+**0 of 9 as real** — against the required 8 of 10 — and additionally caught two defects in
+the proposed change itself: a justification comment carrying a false measurement (it
+claimed seven findings where execution showed one, because zero-child parents cannot fire),
+and a floor of 2 that no corpus member could ever reach. Both were fixed before the change
+shipped. The author ratified. That the reviewer's most useful output was a correction to
+the proposal, not an endorsement of it, is the evidence the procedure has teeth.
+
 ## Consequences
 
 - The 575 leaves are cleaned by hand, by the pass already in flight, not by a check. That

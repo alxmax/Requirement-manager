@@ -156,6 +156,30 @@ LEVEL_TEST_PAIR = {"system": "system", "architecture": "integration", "code": "u
 # malformed parent, it is simply not a parent.
 LINT_FANOUT_MIN = 5
 LINT_FANOUT_MAX = 20
+# Per-level CEILINGS, keyed on the PARENT's `level:`. `None` means no floor at that level.
+# One band for the whole hierarchy was wrong in both directions: an architecture requirement
+# groups detailed design, where a dozen children is ordinary, while a system need groups
+# architecture, where ten is already a lot.
+#
+# The floor is gone because it had no evidence. A blind review of all 9 findings the uniform
+# 5-20 floor produced (2026-09-03) confirmed 0 of 9 as real — against ADR-0016's required
+# 8 of 10 — and named why: in this corpus a child count is a CLAUSE count, since the
+# `satisfies:` children were derived roughly one per Description bullet. It measures what
+# `ac-count-high` already measures on the other axis. Worse, the floor is anti-correlated
+# with corpus quality: three of the nine appeared *because* commits e254a34 and 72213fc
+# folded away leaves that should not have existed, dropping their parents from 5 to 4. A
+# check that gets louder as the corpus gets better is measuring the wrong thing. The
+# distribution has no natural floor to find either — 3:1, 4:6, 5:5, 6:8, 7:5, 8:9 is
+# continuous. ADR-0019 pre-committed the response: "the band is wrong for this shape of
+# corpus and should be widened or dropped — not lived with."
+#
+# The ceiling stays: the distribution DOES break at 19 -> 22 -> 23 -> 32, and the one
+# finding above it (ARCH-CHECK-006 at 32) is the single flag the review judged plausibly
+# real. Measured after this change: 1 finding over 72 lintable requirements.
+# A parent with no `level:` keeps the uniform 5-20 band — the level axis stays doubly
+# opt-in (ADR-0019), so a repo that never declares it sees exactly what it saw before, and
+# this corpus's evidence is not silently imposed on a corpus shaped differently.
+LINT_FANOUT_BANDS = {"system": (None, 10), "architecture": (None, 30)}
 MILESTONE_RE = re.compile(r"^v\d+(\.\d+)*$")  # roadmap milestone shape: v1, v1.0, v1.14 — validated (warn) in the gate
 ENFORCED = {"in-progress", "implemented", "confirmed"}
 # System Map declutter: hide depends_on edges into a node this many capabilities
@@ -185,7 +209,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.12"
+MAP_ENGINE_VERSION = "2026-09-03.13"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4559,14 +4583,20 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     # `depends_on` depth here maxes out at 3, so a band of 5-20 read against it would flag
     # every requirement in the corpus. A leaf (zero children) is skipped: it is not a
     # malformed parent, it is not a parent at all.
+    # The band depends on which level the parent sits at — see LINT_FANOUT_BANDS. A parent
+    # declaring no level keeps the uniform band it always had.
+    _lo, _hi = LINT_FANOUT_BANDS.get(r["meta"].get("level"), (LINT_FANOUT_MIN, LINT_FANOUT_MAX))
     if children:
-        if not (LINT_FANOUT_MIN <= children <= LINT_FANOUT_MAX):
+        if _lo is not None and children < _lo:
             findings.append({
                 "severity": "warn", "check": "fan-out",
-                "detail": "{} requirement(s) satisfy this one (outside {}-{}): {}".format(
-                    children, LINT_FANOUT_MIN, LINT_FANOUT_MAX,
-                    "too few to be a level" if children < LINT_FANOUT_MIN
-                    else "too many — split it")})
+                "detail": "{} requirement(s) satisfy this one (below {}): too few to be "
+                          "a level".format(children, _lo)})
+        elif children > _hi:
+            findings.append({
+                "severity": "warn", "check": "fan-out",
+                "detail": "{} requirement(s) satisfy this one (over {}): too many — "
+                          "split it".format(children, _hi)})
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.

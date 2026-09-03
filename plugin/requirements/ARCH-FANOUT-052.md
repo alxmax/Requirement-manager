@@ -21,7 +21,8 @@ Every bullet below is binding.
 <!-- Words used below, in plain terms:
      a child        a requirement that names this one in its `satisfies:` list.
      a parent       a requirement that has at least one child.
-     the band       `LINT_FANOUT_MIN` to `LINT_FANOUT_MAX`, default 5 to 20. -->
+     the ceiling    the largest child count a parent may carry before the check reports.
+                    It depends on the parent's `level:` — see the contract below. -->
 
 **What is counted**
 - The `fan-out` check counts, per requirement, how many requirements declare `satisfies:` it.
@@ -29,8 +30,13 @@ Every bullet below is binding.
 - A requirement with no children is skipped, because it is not a parent.
 
 **When it reports**
-- The `fan-out` check warns when a parent's child count falls outside the band.
-- The finding says whether the count is below the band or above it.
+- The `fan-out` check warns when a parent carries more children than its ceiling.
+- A `system` parent's ceiling is ten; an `architecture` parent's is thirty.
+- A parent declaring no `level:` keeps the older uniform band, five to twenty, so a
+  repo that never adopts the level axis sees what it saw before.
+- The check reports no floor at either declared level. A blind review of all nine
+  findings the old floor produced confirmed none of them as real, so the floor was
+  dropped rather than retuned.
 - The `fan-out` check is warn-only and never changes the gate's exit code.
 - `lint_exempt: [fan-out]` silences the check for one requirement.
 
@@ -39,17 +45,17 @@ Every bullet below is binding.
 
 ## Cases (= tests)
 CASE-1
-  Given  a requirement satisfied by three others
+  Given  an `architecture` requirement satisfied by three others
   When   `lint` runs
-  Then   one `fan-out` finding names it as below the band, and the exit code is unchanged
+  Then   no `fan-out` finding is reported for it, because that level carries no floor
 CASE-2
   Given  a requirement satisfied by eight others
   When   `lint` runs
   Then   no `fan-out` finding is reported for it
 CASE-3
-  Given  a requirement satisfied by twenty-five others
+  Given  an `architecture` requirement satisfied by thirty-two others
   When   `lint` runs
-  Then   one `fan-out` finding names it as above the band
+  Then   one `fan-out` finding names it as over its ceiling, and the exit code is unchanged
 CASE-4
   Given  a requirement that nothing satisfies
   When   `lint` runs
@@ -58,6 +64,11 @@ CASE-5
   Given  a corpus whose requirements all depend on one another but declare no `satisfies:`
   When   `lint` runs
   Then   no `fan-out` finding is reported at all
+CASE-6
+  Given  a `system` requirement satisfied by twelve others
+  When   `lint` runs
+  Then   one `fan-out` finding names it as over its ceiling, which is lower than an
+         architecture requirement's
 
 ## Context (non-binding)
 **Notes**
@@ -77,7 +88,9 @@ CASE-5
   export rather than reporting, and lifts those under a new sibling need.
 
 **Current implementation**
-- `LINT_FANOUT_MIN`/`LINT_FANOUT_MAX` and the `fan-out` block in `lint_requirement`, fed by
+- `LINT_FANOUT_BANDS` (per-level ceilings), `LINT_FANOUT_MIN`/`LINT_FANOUT_MAX` (the
+  fallback band for a parent with no `level:`) and the `fan-out` block in
+  `lint_requirement`, fed by
   the `kids` count `cmd_lint` builds from every requirement's `satisfies:` list.
 
 ## Links
