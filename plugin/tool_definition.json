@@ -503,6 +503,27 @@
   {
     "type": "function",
     "function": {
+      "name": "reqmap_design",
+      "description": "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "json": {
+            "type": "boolean",
+            "description": "Emit the findings as a JSON object {files, findings[]}."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "reqmap_coverage",
       "description": "Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability.",
       "parameters": {

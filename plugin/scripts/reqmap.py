@@ -19,6 +19,7 @@ Subcommands:
   draft             draft requirements from legacy code (status: draft, risk-scored)
   plan              read-only JSON capability-extraction plan (writes no .md)
   findings          aggregate open verify-intent items into requirements/_findings.md
+  design            advisory design candidates in the repo's code, any language (four OOP pillars + standards; never the gate)
   confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
   review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted quality review
   translate [--to ro|en]  manual, opt-in: cache a `claude -p` translation of the corpus's
@@ -221,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.20"
+MAP_ENGINE_VERSION = "2026-09-04.5"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -698,6 +699,26 @@ COMMANDS = {
                 "flag": "--detect",
                 "type": "bool",
                 "help": "Scan docs/ and print the suggested command — writes nothing.",
+            },
+        ],
+    },
+    "design": {
+        "summary": (
+            "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. "
+            "encapsulation (module state written from functions, long parameter lists, data "
+            "clumps), abstraction (long or deeply nested functions, prefix families), "
+            "inheritance (unrelated classes sharing methods, duplicated method bodies) and "
+            "polymorphism (isinstance chains, equality switches), standards (file and line "
+            "length, public definitions without a docstring, definitions per file). Read-only, "
+            "exit 0, never part of the gate; every threshold is tunable in requirements/_config.json."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "Emit the findings as a JSON object {files, findings[]}.",
             },
         ],
     },
@@ -4324,6 +4345,9 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
     data = _build_map_data(reqs, members, ac_cover)
     data["repo"] = _repo_name(root)
     data["todos"] = _parse_todos(root)
+    _design = _design_summary(root, reqs_dir)      # implements: REQ-DESIGN-954
+    if _design is not None:
+        data["design"] = _design
     _attach_translations(data, reqs, reqs_dir)
     return data
 
@@ -5663,6 +5687,10 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     # Roadmap signals (read-only): does TODO.md still track what shipped, and does every
     # section heading actually parse as a milestone. Absent (not empty) when the repo has
     # no TODO.md, so a repo that does not keep one sees nothing. implements: ARCH-ROADMAP-038
+    design = _design_summary(code_root, reqs_dir) if code_root else None   # implements: REQ-DESIGN-954
+    if design is not None:
+        data["design_score"] = design["score"]
+        data["design_files"] = design["files"]
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap is not None:
         newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
@@ -5705,6 +5733,9 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if gate_errors: print("  gate link-sync errors (not clean):{}".format(len(gate_errors)))
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
+    if design is not None:
+        print("  design (source files w/o candidate): {}/100  ({}/{}) — run `reqmap.py design`".format(
+            design["score"], design["clean_files"], design["files"]))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
     return 0
@@ -6507,6 +6538,9 @@ def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ
         "generated: {}".format(ts),
         "nodes: {}".format(len(data["nodes"])),
         "edges: {}".format(len(data["edges"])),
+    ] + (["design: {}/100 ({}/{} source files without a design candidate)".format(
+        data["design"]["score"], data["design"]["clean_files"], data["design"]["files"])]
+         if data.get("design") else []) + [
         "---",
         "",
         "# Requirement Map",
@@ -7057,7 +7091,7 @@ def _utf8_safe(text):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
 
 def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
     """The registry graph as a JSON string:
-    {engine_version, repo, nodes, edges, upstream_edges, todos}.
+    {engine_version, repo, nodes, edges, upstream_edges, todos[, design]}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
     no markup context to break out of — so no extra escaping is needed."""
     payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
@@ -7067,6 +7101,8 @@ def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-8
                # dependency axis and dropped the level axis on the floor.
                "upstream_edges": data.get("upstream_edges", []),
                "todos": data.get("todos", [])}
+    if data.get("design"):                      # implements: REQ-DESIGN-954
+        payload["design"] = data["design"]
     return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
@@ -7470,6 +7506,460 @@ def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022  # implements:
     return 0
 
 
+# ---------- design: advisory design review of the repo's code ----------
+# Reads the consumer's code and names candidates against the four OOP pillars plus a
+# few house standards. It is advice: read-only, never part of the gate, exit 0, and a
+# finding asserts a SHAPE worth a look ("these six functions share five parameters"),
+# never a defect. Python is read through `ast`; the brace languages (JS/TS, C/C++,
+# Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart, PHP) through heuristics over the
+# source with comments and strings masked out — the engine ships no parser for them
+# and must stay stdlib-only. Every threshold is a CONFIG_KEYS entry.
+DESIGN_FUNC_MAX_LINES = 80      # abstraction: a function longer than this is a split candidate
+DESIGN_NESTING_MAX = 4          # abstraction: blocks nested deeper than this
+DESIGN_PARAMS_MAX = 6           # encapsulation: a parameter list longer than this wants an object
+DESIGN_CLUMP_MIN = 3            # encapsulation: this many parameters travelling together ...
+DESIGN_CLUMP_FUNCS = 3          # ... through this many functions is a data clump
+DESIGN_PREFIX_GROUP = 6         # abstraction: top-level functions sharing a name prefix -> namespace
+DESIGN_SHARED_METHODS = 3       # inheritance: unrelated classes sharing this many method names
+DESIGN_ISINSTANCE_CHAIN = 3     # polymorphism: type tests on one name in one if/else-if chain
+DESIGN_BRANCH_CHAIN = 4         # polymorphism: `x == literal` branches (or switch cases) on one name
+DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
+DESIGN_LINE_MAX = 100           # standards: a physical line wider than this
+DESIGN_FILE_MAX_FUNCS = 30      # standards: top-level functions/classes in one file
+DESIGN_DOCSTRING_PUBLIC = 1     # standards (Python): 1 = public defs/classes need a docstring, 0 = off
+
+DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism", "standards")
+DESIGN_EXTS = ORPHAN_CODE_EXTS          # program-logic files; prose/config/styling are not reviewed
+DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
+                     ".c", ".cc", ".cpp", ".h", ".hpp", ".java", ".cs", ".go", ".rs",
+                     ".kt", ".kts", ".swift", ".scala", ".dart", ".php")
+_DESIGN_ADVICE = {
+    "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
+    "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
+    "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
+    "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
+    "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
+    "prefix-family": "functions sharing a prefix are a namespace: a class (or module) with that name makes the boundary explicit",
+    "shared-methods": "unrelated classes with the same method names describe one interface: name a base class or protocol",
+    "duplicate-method": "the same method body in two classes is one method: pull it up into a shared base",
+    "isinstance-chain": "a chain of type tests dispatches by hand: give each type the method and let the call dispatch",
+    "type-switch": "a chain of equality tests on one value is a dispatch table: a dict of handlers, or a method per case",
+    "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
+    "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
+    "missing-docstring": "a public name without a docstring makes every caller read the body: one sentence saying what it returns is enough",
+    "too-many-definitions": "this many top-level definitions in one file is a package, not a module: group them",
+}
+_DESIGN_PILLAR_OF = {
+    "global-state": "encapsulation", "long-parameter-list": "encapsulation", "data-clump": "encapsulation",
+    "long-function": "abstraction", "deep-nesting": "abstraction", "prefix-family": "abstraction",
+    "shared-methods": "inheritance", "duplicate-method": "inheritance",
+    "isinstance-chain": "polymorphism", "type-switch": "polymorphism",
+    "file-too-long": "standards", "line-too-long": "standards",
+    "missing-docstring": "standards", "too-many-definitions": "standards",
+}
+
+
+def _design_finding(kind, rel, line, name, detail):  # implements: ARCH-DESIGN-061
+    return {"pillar": _DESIGN_PILLAR_OF[kind], "kind": kind, "file": rel, "line": line,
+            "name": name, "detail": detail, "advice": _DESIGN_ADVICE[kind]}
+
+
+def _design_prefix(name):
+    """The family token of a function name: `_scan_tags` -> `scan`, `scanTags` -> `scan`."""
+    core = name.strip("_")
+    if "_" in core:
+        return core.split("_", 1)[0]
+    m = re.match(r"[a-z]{3,}(?=[A-Z])", core)
+    return m.group(0) if m else ""
+
+
+# ---- shared shape checks over abstract "function" and "class" records, so the Python
+# and the brace analyzers report the same kinds with the same thresholds.
+# fn record: {name, line, n_lines, depth, params:[names], top:bool}
+# class record: {name, line, bases:set, methods:{name: body_key}}
+def _design_shape_findings(rel, fns, classes):  # implements: REQ-DESIGN-950  # implements: REQ-DESIGN-951
+    out = []
+    for f in fns:
+        if len(f["params"]) > DESIGN_PARAMS_MAX:
+            out.append(_design_finding("long-parameter-list", rel, f["line"], f["name"],
+                                       "`{}` takes {} parameters (over {})".format(f["name"], len(f["params"]), DESIGN_PARAMS_MAX)))
+        if f["n_lines"] > DESIGN_FUNC_MAX_LINES:
+            out.append(_design_finding("long-function", rel, f["line"], f["name"],
+                                       "`{}` is {} lines (over {})".format(f["name"], f["n_lines"], DESIGN_FUNC_MAX_LINES)))
+        if f["depth"] > DESIGN_NESTING_MAX:
+            out.append(_design_finding("deep-nesting", rel, f["line"], f["name"],
+                                       "`{}` nests {} levels deep (over {})".format(f["name"], f["depth"], DESIGN_NESTING_MAX)))
+    seen = set()
+    plist = [(f, frozenset(f["params"])) for f in fns]
+    for i in range(len(plist)):
+        for j in range(i + 1, len(plist)):
+            common = plist[i][1] & plist[j][1]
+            if len(common) < DESIGN_CLUMP_MIN or common in seen:
+                continue
+            carriers = [f for f, ps in plist if common <= ps]
+            if len(carriers) >= DESIGN_CLUMP_FUNCS:
+                seen.add(common)
+                first = min(carriers, key=lambda f: f["line"])
+                out.append(_design_finding("data-clump", rel, first["line"], first["name"],
+                                           "{} travel together through {} functions: {}".format(
+                                               ", ".join(sorted(common)), len(carriers),
+                                               ", ".join(sorted(f["name"] for f in carriers)[:6]))))
+    families = {}
+    for f in fns:
+        if f["top"]:
+            p = _design_prefix(f["name"])
+            if p:
+                families.setdefault(p, []).append(f)
+    for prefix, group in sorted(families.items()):
+        if len(group) >= DESIGN_PREFIX_GROUP:
+            first = min(group, key=lambda f: f["line"])
+            out.append(_design_finding("prefix-family", rel, first["line"], prefix,
+                                       "{} top-level functions start with `{}`: {}".format(
+                                           len(group), prefix, ", ".join(sorted(f["name"] for f in group)[:6]))))
+    for i in range(len(classes)):
+        for j in range(i + 1, len(classes)):
+            a, b = classes[i], classes[j]
+            if a["bases"] & b["bases"] or a["name"] in b["bases"] or b["name"] in a["bases"]:
+                continue
+            shared = sorted(n for n in a["methods"] if n in b["methods"] and not n.startswith("__"))
+            if len(shared) >= DESIGN_SHARED_METHODS:
+                out.append(_design_finding("shared-methods", rel, a["line"], "{}/{}".format(a["name"], b["name"]),
+                                           "`{}` and `{}` share {} method names with no common base: {}".format(
+                                               a["name"], b["name"], len(shared), ", ".join(shared[:6]))))
+            for n in shared:
+                if a["methods"][n] == b["methods"][n]:
+                    out.append(_design_finding("duplicate-method", rel, b["line"], "{}.{}".format(b["name"], n),
+                                               "`{}.{}` is byte-for-byte `{}.{}`".format(b["name"], n, a["name"], n)))
+    return out
+
+
+def _design_chain_findings(rel, chains):  # implements: REQ-DESIGN-951
+    """chains: [(line, [(kind, name), ...])] where kind is 'type' or 'eq'."""
+    out = []
+    for line, tests in chains:
+        for kind, floor, label in (("type", DESIGN_ISINSTANCE_CHAIN, "isinstance-chain"),
+                                   ("eq", DESIGN_BRANCH_CHAIN, "type-switch")):
+            names = [n for k, n in tests if k == kind]
+            for name in sorted(set(names)):
+                if names.count(name) >= floor:
+                    out.append(_design_finding(label, rel, line, name,
+                                               "{} branches test `{}` in one chain".format(names.count(name), name)))
+    return out
+
+
+def _design_standards(rel, src, n_top, undocumented):  # implements: REQ-DESIGN-953
+    out = []
+    lines = src.split("\n")
+    base = os.path.basename(rel)
+    if len(lines) > DESIGN_FILE_MAX_LINES:
+        out.append(_design_finding("file-too-long", rel, 1, base,
+                                   "{} lines (over {})".format(len(lines), DESIGN_FILE_MAX_LINES)))
+    wide = [i for i, l in enumerate(lines, 1) if len(l.rstrip("\r")) > DESIGN_LINE_MAX]
+    if wide:
+        out.append(_design_finding("line-too-long", rel, wide[0], base,
+                                   "{} line(s) wider than {} columns, first at line {}".format(
+                                       len(wide), DESIGN_LINE_MAX, wide[0])))
+    if n_top > DESIGN_FILE_MAX_FUNCS:
+        out.append(_design_finding("too-many-definitions", rel, 1, base,
+                                   "{} top-level definitions (over {})".format(n_top, DESIGN_FILE_MAX_FUNCS)))
+    if DESIGN_DOCSTRING_PUBLIC and undocumented:
+        out.append(_design_finding("missing-docstring", rel, undocumented[0][1], undocumented[0][0],
+                                   "{} public definition(s) without a docstring: {}".format(
+                                       len(undocumented), ", ".join(n for n, _l in undocumented[:6]))))
+    return out
+
+
+# ---- Python, through ast
+def _design_py_params(fn):
+    a = fn.args
+    return [x.arg for x in a.posonlyargs + a.args + a.kwonlyargs if x.arg not in ("self", "cls")]
+
+
+def _design_py_nesting(node, depth=0):
+    best = depth
+    for child in ast.iter_child_nodes(node):
+        if isinstance(child, (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.AsyncFor, ast.AsyncWith)):
+            best = max(best, _design_py_nesting(child, depth + 1))
+        elif not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            best = max(best, _design_py_nesting(child, depth))
+    return best
+
+
+def _design_py_test(test):
+    """('type', name) for isinstance(name, ...), ('eq', name) for name == <constant>, else None."""
+    if (isinstance(test, ast.Call) and isinstance(test.func, ast.Name) and test.func.id == "isinstance"
+            and test.args and isinstance(test.args[0], ast.Name)):
+        return ("type", test.args[0].id)
+    if (isinstance(test, ast.Compare) and len(test.ops) == 1 and isinstance(test.ops[0], ast.Eq)
+            and isinstance(test.left, ast.Name) and isinstance(test.comparators[0], ast.Constant)):
+        return ("eq", test.left.id)
+    return None
+
+
+def _design_python(rel, src):  # implements: REQ-DESIGN-950  # implements: REQ-DESIGN-951
+    try:
+        tree = ast.parse(src)
+    except (SyntaxError, ValueError):
+        return []
+    out = []
+    top = {id(n) for n in tree.body}
+    fns, classes = [], []
+    for n in ast.walk(tree):
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            names = sorted({g for s in ast.walk(n) if isinstance(s, ast.Global) for g in s.names})
+            if names:
+                out.append(_design_finding("global-state", rel, n.lineno, n.name,
+                                           "`{}` writes module state: {}".format(n.name, ", ".join(names))))
+            end = getattr(n, "end_lineno", None) or n.lineno
+            fns.append({"name": n.name, "line": n.lineno, "n_lines": end - n.lineno + 1,
+                        "depth": _design_py_nesting(n), "params": _design_py_params(n), "top": id(n) in top})
+        elif isinstance(n, ast.ClassDef):
+            classes.append({"name": n.name, "line": n.lineno,
+                            "bases": {b.id if isinstance(b, ast.Name) else ast.dump(b) for b in n.bases},
+                            "methods": {m.name: ast.dump(m) for m in n.body
+                                        if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))}})
+    out += _design_shape_findings(rel, fns, classes)
+    chains, seen = [], set()
+    for n in ast.walk(tree):
+        if not isinstance(n, ast.If) or id(n) in seen:
+            continue
+        tests, node = [], n
+        while isinstance(node, ast.If):
+            seen.add(id(node))
+            t = _design_py_test(node.test)
+            if t:
+                tests.append(t)
+            node = node.orelse[0] if len(node.orelse) == 1 and isinstance(node.orelse[0], ast.If) else None
+        chains.append((n.lineno, tests))
+    out += _design_chain_findings(rel, chains)
+    defs = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+    undocumented = [(n.name, n.lineno) for n in defs if not n.name.startswith("_") and not ast.get_docstring(n)]
+    return out + _design_standards(rel, src, len(defs), undocumented)
+
+
+# ---- brace languages, through masked text
+_BRACE_KEYWORDS = frozenset(("if", "for", "while", "switch", "catch", "else", "return", "do", "try",
+                             "sizeof", "typeof", "new", "throw", "await", "yield", "defer", "match",
+                             "elif", "unless", "until", "foreach", "using", "lock", "synchronized"))
+_BRACE_FUNC_RE = re.compile(
+    r"(?<![\w.])(?:(?:async|static|public|private|protected|export|default|override|virtual|inline|"
+    r"constexpr|extern|final|abstract|unsafe|pub(?:\([^)]*\))?|func|fn|fun|function|def)\s+)*"
+    r"(?:[A-Za-z_][\w:<>\[\],*&?]*\s+[*&]*)?([A-Za-z_]\w*)\s*(?:<[^>()]*>)?\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)"
+    r"\s*(?:->\s*[\w:<>\[\],*&?.]+|:\s*[\w:<>\[\],*&?.|]+|const|override|noexcept|throws\s+[\w, ]+)?\s*\{")
+_BRACE_ARROW_RE = re.compile(r"(?<![\w.])(?:const|let|var|val)\s+([A-Za-z_]\w*)\s*(?::[^=]+)?=\s*(?:async\s*)?\(([^()]*)\)\s*(?::\s*[^=]+)?=>\s*\{")
+_BRACE_CLASS_RE = re.compile(r"(?<![\w.])(?:class|struct|interface)\s+([A-Za-z_]\w*)(?:\s*<[^>{]*>)?\s*([^{;]*)\{")
+_BRACE_IF_RE = re.compile(r"(?<![\w.])(else\s+)?if\s*\(")
+_BRACE_SWITCH_RE = re.compile(r"(?<![\w.])switch\s*\(\s*([A-Za-z_][\w.]*)\s*\)\s*\{")
+_BRACE_CASE_RE = re.compile(r"(?<![\w.])case\s+[^:]{1,60}:")
+_BRACE_TYPE_TEST_RE = re.compile(r"(?:([A-Za-z_]\w*)\s+instanceof\b|typeof\s+([A-Za-z_]\w*)\s*[!=]==?|"
+                                 r"dynamic_cast\s*<[^>]*>\s*\(\s*([A-Za-z_]\w*)|([A-Za-z_]\w*)\s+is\s+[A-Z]\w*)")
+_BRACE_EQ_TEST_RE = re.compile(r"(?<![\w.])([A-Za-z_][\w.]*)\s*[!=]==?\s*(?:\d+|[A-Z_][A-Z0-9_]{2,}|\w+::\w+)")
+
+
+def _design_mask(src):
+    """The source with comments and string/char literals replaced by spaces (newlines
+    kept), so brace matching and keyword searches never see text."""
+    out, i, n = [], 0, len(src)
+    while i < n:
+        c = src[i]
+        two = src[i:i + 2]
+        if two == "//":
+            j = src.find("\n", i)
+            j = n if j == -1 else j
+            out.append(" " * (j - i)); i = j
+        elif two == "/*":
+            j = src.find("*/", i + 2)
+            j = n if j == -1 else j + 2
+            out.append("".join("\n" if ch == "\n" else " " for ch in src[i:j])); i = j
+        elif c in "\"'`":
+            q, j = c, i + 1
+            while j < n and src[j] != q:
+                j += 2 if src[j] == "\\" else 1
+                if j < n and src[j] == "\n" and q != "`":
+                    break
+            j = min(j + 1, n)
+            out.append("".join("\n" if ch == "\n" else " " for ch in src[i:j])); i = j
+        else:
+            out.append(c); i += 1
+    return "".join(out)
+
+
+def _design_block_end(masked, open_idx):
+    """Index just past the `}` matching the `{` at open_idx (or len(masked))."""
+    depth, i, n = 0, open_idx, len(masked)
+    while i < n:
+        if masked[i] == "{":
+            depth += 1
+        elif masked[i] == "}":
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    return n
+
+
+def _design_param_names(params):
+    names = []
+    for p in params.split(","):
+        p = p.strip()
+        if not p or p in ("...", "void"):
+            continue
+        p = p.split("=", 1)[0]
+        if ":" in p:                      # TS / Kotlin / Swift: name: Type
+            p = p.split(":", 1)[0]
+        toks = re.findall(r"[A-Za-z_]\w*", p)
+        if toks:
+            names.append(toks[-1] if ":" not in p else toks[0])
+    return names
+
+
+def _design_brace(rel, src):  # implements: REQ-DESIGN-955
+    masked = _design_mask(src)
+    out, fns, classes = [], [], []
+    n_top = 0
+
+    def depth_at(idx):
+        return masked.count("{", 0, idx) - masked.count("}", 0, idx)
+
+    def add_fn(name, params, brace_idx, line):
+        end = _design_block_end(masked, brace_idx)
+        body = masked[brace_idx:end]
+        depth, best = 0, 0
+        for ch in body:
+            if ch == "{":
+                depth += 1; best = max(best, depth)
+            elif ch == "}":
+                depth -= 1
+        fns.append({"name": name, "line": line, "n_lines": body.count("\n") + 1,
+                    "depth": max(best - 1, 0), "params": _design_param_names(params),
+                    "top": depth_at(brace_idx) == 0, "end": end})
+    for m in _BRACE_FUNC_RE.finditer(masked):
+        if m.group(1) in _BRACE_KEYWORDS:
+            continue
+        add_fn(m.group(1), m.group(2), m.end() - 1, masked.count("\n", 0, m.start()) + 1)
+    for m in _BRACE_ARROW_RE.finditer(masked):
+        add_fn(m.group(1), m.group(2), m.end() - 1, masked.count("\n", 0, m.start()) + 1)
+    fns.sort(key=lambda f: f["line"])
+    n_top = sum(1 for f in fns if f["top"])
+    for m in _BRACE_CLASS_RE.finditer(masked):
+        start, end = m.end() - 1, _design_block_end(masked, m.end() - 1)
+        bases = set(re.findall(r"[A-Za-z_]\w*", re.sub(r"\b(?:extends|implements|public|private|protected|virtual|final|with)\b", " ", m.group(2))))
+        methods = {}
+        for f in fns:
+            if start < f["end"] <= end and f["name"] not in _BRACE_KEYWORDS:
+                fstart = masked.rfind(f["name"], start, f["end"])
+                methods[f["name"]] = re.sub(r"\s+", " ", src[fstart:f["end"]]).strip()
+        classes.append({"name": m.group(1), "line": masked.count("\n", 0, m.start()) + 1,
+                        "bases": bases, "methods": methods})
+        if depth_at(start) == 0:
+            n_top += 1
+    out += _design_shape_findings(rel, fns, classes)
+    chains, cur = [], None
+    for m in _BRACE_IF_RE.finditer(masked):
+        paren = m.end() - 1
+        depth, i = 0, paren
+        while i < len(masked):
+            if masked[i] == "(":
+                depth += 1
+            elif masked[i] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            i += 1
+        cond = masked[paren:i + 1]
+        tests = [("type", next(g for g in t if g)) for t in _BRACE_TYPE_TEST_RE.findall(cond)]
+        tests += [("eq", n) for n in _BRACE_EQ_TEST_RE.findall(cond)]
+        if m.group(1) and cur is not None:
+            cur[1].extend(tests)
+        else:
+            cur = (masked.count("\n", 0, m.start()) + 1, tests)
+            chains.append(cur)
+    for m in _BRACE_SWITCH_RE.finditer(masked):
+        body = masked[m.end() - 1:_design_block_end(masked, m.end() - 1)]
+        n_cases = len(_BRACE_CASE_RE.findall(body))
+        chains.append((masked.count("\n", 0, m.start()) + 1, [("eq", m.group(1))] * n_cases))
+    out += _design_chain_findings(rel, chains)
+    return out + _design_standards(rel, src, n_top, [])
+
+
+def _design_file(rel, src):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-950  # implements: REQ-DESIGN-951  # implements: REQ-DESIGN-953  # implements: REQ-DESIGN-955
+    """All findings for one source file, in source order: Python through `ast`, a brace
+    language through the masked-text heuristics, anything else standards only."""
+    low = rel.lower()
+    if low.endswith(".py"):
+        out = _design_python(rel, src)
+    elif low.endswith(DESIGN_BRACE_EXTS):
+        out = _design_brace(rel, src)
+    else:
+        out = _design_standards(rel, src, 0, [])
+    out.sort(key=lambda f: (f["line"], f["kind"]))
+    return out
+
+
+def _design_files(code_root, reqs_dir=None):
+    """(abs_path, rel) for every non-test program-logic file the scanner would walk."""
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        if rel.lower().endswith(DESIGN_EXTS) and not _is_test_path(rel):
+            yield fp, rel
+
+
+def _design_summary(code_root, reqs_dir=None):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-954
+    """The design health of the repo's code as one small record, or None when the tree
+    holds no non-test program-logic file: `files`, `clean_files` (no candidate at all),
+    `score` (clean files as a percentage — the same "green on every axis" reading `health`
+    uses for requirements), `candidates` (count per group). Deterministic, so it can live
+    in the committed `_map.json` and be checked for freshness."""
+    files = clean = 0
+    per = {p: 0 for p in DESIGN_PILLARS}
+    for fp, rel in _design_files(code_root, reqs_dir):
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                src = f.read()
+        except OSError:
+            continue
+        files += 1
+        found = _design_file(rel, src)
+        if not found:
+            clean += 1
+        for x in found:
+            per[x["pillar"]] += 1
+    if not files:
+        return None
+    return {"files": files, "clean_files": clean, "score": round(100 * clean / files), "candidates": per}
+
+
+def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-952
+    """Print (or emit as JSON) the design candidates found in every non-test program-logic
+    file under `code_root`, grouped by pillar. Read-only, always exit 0: this is advice a
+    reader weighs, not a gate a build fails on."""
+    findings, n_files = [], 0
+    for fp, rel in _design_files(code_root, reqs_dir):
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                src = f.read()
+        except OSError:
+            continue
+        n_files += 1
+        findings.extend(_design_file(rel, src))
+    if as_json:
+        print(json.dumps({"files": n_files, "findings": findings}, indent=2, ensure_ascii=False))
+        return 0
+    if not findings:
+        print("No design candidates in {} source file(s) at the current thresholds.".format(n_files))
+        return 0
+    for pillar in DESIGN_PILLARS:
+        mine = [f for f in findings if f["pillar"] == pillar]
+        if not mine:
+            continue
+        print("{} ({})".format(pillar.capitalize(), len(mine)))
+        for f in mine:
+            print("  {}:{}  {:<20} {}".format(f["file"], f["line"], f["kind"], f["detail"]))
+        print("  -> " + "; ".join(dict.fromkeys(_DESIGN_ADVICE[f["kind"]] for f in mine)) + "\n")
+    print("{} candidate(s) in {} source file(s). Advisory only: a candidate is a shape worth a "
+          "look, never a defect, and this never enters the gate.".format(len(findings), n_files))
+    return 0
+
+
 # ---------- per-repo configuration ----------
 # Every threshold above is a module constant, and a consumer could change none of them
 # without forking the engine. `requirements/_config.json` overrides the named ones —
@@ -7480,7 +7970,11 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "LINT_FILE_SPREAD_MAX", "LINT_FANOUT_MIN", "LINT_FANOUT_MAX", "LINT_FANOUT_BANDS",
                "LINT_STACKED_CONNECTORS", "LINT_CLAUSE_SENTENCES", "LINT_BUS_FANOUT_MIN",
                "SIMILAR_THRESHOLD", "ORPHAN_CODE_MIN_LOC", "DOC_BUNDLE_MIN_BYTES",
-               "SYSTEM_HUB_FANIN", "BUS_FANIN_THRESHOLD", "SPLIT_LOC_THRESHOLD")
+               "SYSTEM_HUB_FANIN", "BUS_FANIN_THRESHOLD", "SPLIT_LOC_THRESHOLD",
+               "DESIGN_FUNC_MAX_LINES", "DESIGN_NESTING_MAX", "DESIGN_PARAMS_MAX", "DESIGN_CLUMP_MIN",
+               "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
+               "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
+               "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC")
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
@@ -7598,7 +8092,7 @@ def main():
     ap.add_argument("--top", type=int, default=None,
                     help="search: max ranked matches to show (default 5); dupes: max pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
-                    help="check|health|coverage: emit structured JSON output (for CI/badge consumption)")
+                    help="check|health|coverage|design: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, color)")
     ap.add_argument("--update-lock", action="store_true")
@@ -7690,6 +8184,8 @@ def main():
                           getattr(a, "as_badge", False), code_root=code_root)
     if a.cmd == "coverage":
         return cmd_coverage(reqs, members, code_root, reqs_dir, a.as_json)
+    if a.cmd == "design":
+        return cmd_design(code_root, reqs_dir, as_json=a.as_json)
     if a.cmd == "gate":
         # report-only: link sync + drift + test-link; never touches the lock.
         return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,

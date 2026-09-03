@@ -8162,5 +8162,250 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertNotIn("REQ_A_002", out)
 
 
+class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
+    """`design`: advisory design candidates against the four pillars, never the gate."""
+
+    def _kinds(self, src):
+        # the pillar kinds only; the standards block has its own tests below
+        return [f["kind"] for f in R._design_file("m.py", src) if f["pillar"] != "standards"]
+
+    def test_global_state_and_long_parameter_list(self):  # verifies: REQ-DESIGN-950#CASE-1
+        src = ("COUNT = 0\n"
+               "def bump():\n    global COUNT\n    COUNT += 1\n"
+               "def wide(a, b, c, d, e, f, g):\n    return a\n")
+        kinds = self._kinds(src)
+        self.assertIn("global-state", kinds)
+        self.assertIn("long-parameter-list", kinds)
+
+    def test_data_clump_needs_three_carriers(self):  # verifies: REQ-DESIGN-950#CASE-2
+        two = "def f(host, port, user): pass\ndef g(host, port, user): pass\n"
+        self.assertNotIn("data-clump", self._kinds(two))
+        three = two + "def h(host, port, user, x): pass\n"
+        f = [x for x in R._design_file("m.py", three) if x["kind"] == "data-clump"]
+        self.assertEqual(len(f), 1)
+        self.assertIn("host, port, user", f[0]["detail"])
+        self.assertEqual(f[0]["pillar"], "encapsulation")
+
+    def test_long_function_and_deep_nesting(self):  # verifies: REQ-DESIGN-950#CASE-3
+        long_src = "def big():\n" + "".join("    x = {}\n".format(i) for i in range(90))
+        self.assertIn("long-function", self._kinds(long_src))
+        deep = ("def deep(a):\n    if a:\n        for i in a:\n            while i:\n"
+                "                with a:\n                    if i:\n                        pass\n")
+        self.assertIn("deep-nesting", self._kinds(deep))
+        self.assertNotIn("deep-nesting", self._kinds("def ok(a):\n    if a:\n        return 1\n"))
+
+    def test_prefix_family(self):  # verifies: REQ-DESIGN-950#CASE-4
+        src = "".join("def _scan_{}(): pass\n".format(i) for i in range(6))
+        f = [x for x in R._design_file("m.py", src) if x["kind"] == "prefix-family"]
+        self.assertEqual(len(f), 1)
+        self.assertEqual(f[0]["name"], "scan")
+        self.assertEqual(f[0]["pillar"], "abstraction")
+
+    def test_shared_methods_and_duplicate_method(self):  # verifies: REQ-DESIGN-951#CASE-1
+        src = ("class A:\n    def load(self): return 1\n    def save(self): return 2\n    def close(self): pass\n"
+               "class B:\n    def load(self): return 3\n    def save(self): return 2\n    def close(self): pass\n")
+        f = R._design_file("m.py", src)
+        kinds = [x["kind"] for x in f]
+        self.assertIn("shared-methods", kinds)
+        dup = [x for x in f if x["kind"] == "duplicate-method"]
+        self.assertEqual(sorted(x["name"] for x in dup), ["B.close", "B.save"])
+
+    def test_related_classes_are_not_reported(self):  # verifies: REQ-DESIGN-951#CASE-2
+        src = ("class Base:\n    pass\n"
+               "class A(Base):\n    def load(self): pass\n    def save(self): pass\n    def close(self): pass\n"
+               "class B(Base):\n    def load(self): pass\n    def save(self): pass\n    def close(self): pass\n")
+        self.assertNotIn("shared-methods", self._kinds(src))
+
+    def test_isinstance_chain_and_type_switch(self):  # verifies: REQ-DESIGN-951#CASE-3
+        src = ("def f(x, kind):\n"
+               "    if isinstance(x, int):\n        pass\n    elif isinstance(x, str):\n        pass\n"
+               "    elif isinstance(x, list):\n        pass\n"
+               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n"
+               "    elif kind == 'c':\n        pass\n    elif kind == 'd':\n        pass\n")
+        f = [x for x in R._design_file("m.py", src) if x["pillar"] != "standards"]
+        self.assertEqual([x["kind"] for x in f], ["isinstance-chain", "type-switch"])
+        self.assertEqual([x["name"] for x in f], ["x", "kind"])
+        self.assertTrue(all(x["pillar"] == "polymorphism" for x in f))
+
+    def test_short_chains_are_silent(self):  # verifies: REQ-DESIGN-951#CASE-4
+        src = ("def f(x, kind):\n    if isinstance(x, int):\n        pass\n    elif isinstance(x, str):\n        pass\n"
+               "    if kind == 'a':\n        pass\n    elif kind == 'b':\n        pass\n    elif kind == 'c':\n        pass\n")
+        self.assertEqual(self._kinds(src), [])
+
+    def test_report_groups_by_pillar_and_exits_zero(self):  # verifies: REQ-DESIGN-952#CASE-1  # verifies: ARCH-DESIGN-061#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
+            _write(os.path.join(d, "tests", "test_m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_design(d)
+            out = buf.getvalue()
+        self.assertEqual(code, 0)
+        self.assertIn("Encapsulation (1)", out)
+        self.assertIn("m.py:2  global-state", out)
+        self.assertNotIn("test_m.py", out)
+        self.assertIn("Advisory only", out)
+        self.assertIn("Standards (1)", out)   # `bump` is public and undocumented
+
+    def test_json_output_and_clean_tree(self):  # verifies: REQ-DESIGN-952#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), 'def ok():\n    """Returns one."""\n    return 1\n')
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_design(d, as_json=True)
+            data = json.loads(buf.getvalue())
+            self.assertEqual((code, data["files"], data["findings"]), (0, 1, []))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            self.assertIn("No design candidates", buf.getvalue())
+
+    def test_syntax_error_yields_nothing(self):  # verifies: REQ-DESIGN-952#CASE-3
+        self.assertEqual(R._design_file("m.py", "def (:\n"), [])
+
+    def test_standards_file_line_docstring_definitions(self):  # verifies: REQ-DESIGN-953#CASE-1
+        saved = (R.DESIGN_FILE_MAX_LINES, R.DESIGN_FILE_MAX_FUNCS)
+        self.addCleanup(lambda: (setattr(R, "DESIGN_FILE_MAX_LINES", saved[0]),
+                                 setattr(R, "DESIGN_FILE_MAX_FUNCS", saved[1])))
+        R.DESIGN_FILE_MAX_LINES, R.DESIGN_FILE_MAX_FUNCS = 5, 2
+        src = ("def a():\n    return 1\n" "def b():\n    return 2\n" "def c():\n    return 3\n"
+               "x = '" + "y" * 120 + "'\n")
+        f = R._design_file("m.py", src)
+        kinds = {x["kind"]: x for x in f}
+        self.assertIn("file-too-long", kinds)
+        self.assertIn("too-many-definitions", kinds)
+        self.assertEqual(kinds["line-too-long"]["line"], 7)
+        self.assertIn("1 line(s) wider than 100", kinds["line-too-long"]["detail"])
+        self.assertIn("3 public definition(s)", kinds["missing-docstring"]["detail"])
+        self.assertTrue(all(x["pillar"] == "standards" for x in f))
+
+    def test_standards_are_silent_on_a_documented_small_file(self):  # verifies: REQ-DESIGN-953#CASE-2
+        src = 'def a():\n    """Says a."""\n    return 1\n\ndef _helper():\n    return 2\n'
+        self.assertEqual(self._kinds(src), [])
+
+    def test_docstring_check_can_be_switched_off(self):  # verifies: REQ-DESIGN-953#CASE-3
+        saved = R.DESIGN_DOCSTRING_PUBLIC
+        self.addCleanup(setattr, R, "DESIGN_DOCSTRING_PUBLIC", saved)
+        src = "def a():\n    return 1\n"
+        kinds = lambda: [f["kind"] for f in R._design_file("m.py", src)]
+        self.assertEqual(kinds(), ["missing-docstring"])
+        R.apply_config({"DESIGN_DOCSTRING_PUBLIC": 0}, out=io.StringIO())
+        self.assertEqual(kinds(), [])
+
+    def test_standards_block_comes_last_in_the_report(self):  # verifies: REQ-DESIGN-953#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "m.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            out = buf.getvalue()
+        self.assertLess(out.index("Encapsulation (1)"), out.index("Standards (1)"))
+        self.assertIn("missing-docstring", out)
+
+    def test_design_summary_scores_clean_files(self):  # verifies: REQ-DESIGN-954#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R._design_summary(d))
+            _write(os.path.join(d, "clean.py"), 'def a():\n    """A."""\n    return 1\n')
+            _write(os.path.join(d, "dirty.py"), "COUNT = 0\ndef bump():\n    global COUNT\n    COUNT += 1\n")
+            _write(os.path.join(d, "tests", "test_x.py"), "def bump():\n    global COUNT\n")
+            s = R._design_summary(d)
+        self.assertEqual((s["files"], s["clean_files"], s["score"]), (2, 1, 50))
+        self.assertEqual(s["candidates"]["encapsulation"], 1)
+        self.assertEqual(s["candidates"]["standards"], 1)
+
+    def test_map_and_health_carry_the_design_score(self):  # verifies: REQ-DESIGN-954#CASE-2  # verifies: ARCH-DESIGN-061#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _write(os.path.join(rq, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
+            _write(os.path.join(d, "m.py"), 'def a():\n    """A."""\n    return 1\n')
+            reqs = R.load_requirements(rq)
+            data = R._assemble_map_data(reqs, {}, rq, d)
+            self.assertEqual(data["design"]["score"], 100)
+            self.assertIn("design: 100/100 (1/1 source files", R._build_md_text(dict(data, todos=[])))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(reqs, {}, rq, as_json=True, code_root=d)
+            self.assertEqual(json.loads(buf.getvalue())["design_score"], 100)
+
+    def test_no_program_logic_means_no_design_key(self):  # verifies: REQ-DESIGN-954#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _write(os.path.join(rq, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
+            _write(os.path.join(d, "site.css"), "body { margin: 0 }\n")
+            data = R._assemble_map_data(R.load_requirements(rq), {}, rq, d)
+            self.assertNotIn("design", data)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(R.load_requirements(rq), {}, rq, as_json=True, code_root=d)
+            self.assertNotIn("design_score", json.loads(buf.getvalue()))
+
+    def test_javascript_functions_classes_and_switch(self):  # verifies: REQ-DESIGN-955#CASE-1  # verifies: ARCH-DESIGN-061#CASE-5
+        src = (
+            "// comment with { brace and 'quote\n"
+            "function wide(a, b, c, d, e, f, g) { return a; }\n"
+            "const arrow = (x, y) => { return x + y; };\n"
+            "class Store { load() { return 1; } save() { return 2; } close() { } }\n"
+            "class Cache { load() { return 3; } save() { return 2; } close() { } }\n"
+            "function pick(kind, v) {\n"
+            "  switch (kind) { case 'a': return 1; case 'b': return 2; case 'c': return 3; case 'd': return 4; }\n"
+            "  if (v instanceof Foo) { } else if (v instanceof Bar) { } else if (v instanceof Baz) { }\n"
+            "}\n")
+        f = R._design_file("m.js", src)
+        kinds = {x["kind"] for x in f}
+        self.assertIn("long-parameter-list", kinds)
+        self.assertIn("shared-methods", kinds)
+        self.assertIn("duplicate-method", kinds)
+        self.assertIn("type-switch", kinds)
+        self.assertIn("isinstance-chain", kinds)
+        self.assertEqual([x["name"] for x in f if x["kind"] == "type-switch"], ["kind"])
+        self.assertEqual([x["name"] for x in f if x["kind"] == "isinstance-chain"], ["v"])
+        self.assertIn("Cache.save", [x["name"] for x in f if x["kind"] == "duplicate-method"])
+
+    def test_cpp_long_function_and_dynamic_cast_chain(self):  # verifies: REQ-DESIGN-955#CASE-2
+        body = "".join("    x += {};\n".format(i) for i in range(90))
+        src = ("#include <x>\n"
+               "int compute(const std::string& name, int n) {\n" + body + "    return x;\n}\n"
+               "void handle(Shape* s) {\n"
+               "    if (dynamic_cast<Circle*>(s)) { } else if (dynamic_cast<Square*>(s)) { }"
+               " else if (dynamic_cast<Tri*>(s)) { }\n}\n")
+        f = R._design_file("shapes.cpp", src)
+        kinds = [x["kind"] for x in f]
+        self.assertIn("long-function", kinds)
+        self.assertEqual([x["name"] for x in f if x["kind"] == "long-function"], ["compute"])
+        self.assertIn("isinstance-chain", kinds)
+        self.assertNotIn("missing-docstring", kinds)   # Python-only rule
+
+    def test_masking_hides_braces_in_strings_and_comments(self):  # verifies: REQ-DESIGN-955#CASE-3
+        src = ('function f() { const s = "{{{"; /* } */ return s; } // {\n'
+               "function g() { return 1; }\n")
+        f = R._design_file("m.js", src)
+        self.assertEqual([x for x in f if x["kind"] in ("long-function", "deep-nesting")], [])
+        masked = R._design_mask(src)
+        self.assertNotIn('"{{{"', masked)
+        self.assertEqual(masked.count("\n"), src.count("\n"))
+
+    def test_other_languages_get_standards_only(self):  # verifies: REQ-DESIGN-955#CASE-4
+        src = "def a\n  1\nend\n" + "x = '" + "y" * 120 + "'\n"
+        f = R._design_file("m.rb", src)
+        self.assertEqual([x["kind"] for x in f], ["line-too-long"])
+        self.assertEqual(R._design_file("m.rb", "def a\n  1\nend\n"), [])
+
+
+    def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
+        saved = R.DESIGN_PARAMS_MAX
+        self.addCleanup(setattr, R, "DESIGN_PARAMS_MAX", saved)
+        src = "def f(a, b, c): pass\n"
+        self.assertEqual(self._kinds(src), [])
+        R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
+        self.assertIn("long-parameter-list", self._kinds(src))
+
+    def test_design_is_in_the_registry_and_not_in_the_gate(self):  # verifies: ARCH-DESIGN-061#CASE-3
+        self.assertIn("design", R.COMMANDS)
+        self.assertNotIn("design", R.COMMANDS["gate"]["summary"])
+        self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
