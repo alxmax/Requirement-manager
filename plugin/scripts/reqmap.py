@@ -185,7 +185,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-03.8"
+MAP_ENGINE_VERSION = "2026-09-03.9"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2165,6 +2165,30 @@ def _impl_exempt(meta):  # implements: ARCH-TRACE-020
     exists to promote it — `SYS-SSOT-001` is `confirmed` here only because the file
     was hand-edited around `confirm`."""
     return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
+
+
+def _oversize(rid, r, threshold=None):  # implements: ARCH-DECOMPOSE-050  # implements: ARCH-NEXT-013
+    """True when a requirement is over the shared AC-count threshold and neither
+    scoped out by status nor exempted from the check.
+
+    One predicate, two callers (`cmd_next`'s Granularity bucket and
+    `lint_requirement`'s `ac-count-high` check) - they disagreed before: `next`
+    iterated every status with no exempt check, `lint` scoped to `LINT_STATUSES`
+    and honored `lint_exempt`, so the two commands could and did report different
+    sets for the same corpus. Scoped to `LINT_STATUSES` like every other lint
+    check (drafts are TODO stubs, not yet-scoped contracts - pinned down
+    explicitly per Control's mandatory dissent, not left to fall out of an
+    unscoped iteration by accident) and reads `lint_exempt` with the same
+    `_as_list` handling `lint_requirement` already uses, so a scalar-string
+    exemption behaves identically to a one-item list here too."""
+    meta = r.get("meta") or {}
+    if meta.get("status") not in LINT_STATUSES:
+        return False
+    if threshold is None:
+        threshold = LINT_AC_MAX
+    if _count_ac(r.get("body", "")) <= threshold:
+        return False
+    return "ac-count-high" not in set(_as_list(meta.get("lint_exempt")))
 
 
 def _test_link_problem(path):  # implements: ARCH-TESTLINK-018
@@ -4166,12 +4190,14 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
     pending = [(sig, label, sorted(buckets[sig], key=lambda x: (_priority_ord(x[0]), -x[1], x[0])))
                for sig, label in PLAN if buckets.get(sig)]
     untagged = _scan_untagged(code_root, reqs_dir) if code_root else []
-    # Granularity advisory: requirements with many ACs covering disjoint behaviors
-    AC_SPLIT_THRESHOLD = 5
+    # Granularity advisory: requirements with many ACs covering disjoint behaviors.
+    # Shares `_oversize` with lint's `ac-count-high` check (same threshold, same
+    # LINT_STATUSES scoping, same `lint_exempt` honoring) so `next` and `lint`
+    # can never report a different set for the same corpus.
     oversize = sorted(
         [(rid, _count_ac(r["body"]))
          for rid, r in reqs.items()
-         if _count_ac(r["body"]) >= AC_SPLIT_THRESHOLD],   # _count_ac handles AC-N labels too (unlike _bullets)
+         if _oversize(rid, r)],
         key=lambda x: (-x[1], x[0])
     )
     # The other direction of the same concern: covering the code with FEWER requirements.
@@ -4221,9 +4247,10 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         if not show_all and len(oversize) > top_n:
             print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
         print(
-            "  -> A requirement with >={} acceptance criteria covering disjoint behaviors "
-            "is a split candidate. Author two requirements, each with its own contract.\n"
-            .format(AC_SPLIT_THRESHOLD)
+            "  -> A requirement with more than {} acceptance criteria covering disjoint "
+            "behaviors is a split candidate. Author two requirements, each with its own "
+            "contract.\n"
+            .format(LINT_AC_MAX)
         )
     if redundant:
         spare = sum(len(g) - 1 for g in redundant)
@@ -4493,7 +4520,7 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "severity": "warn", "check": "ac-count-low",
                 "detail": "{} AC (< {}): requirement may be under-specified".format(
                     ac_n, LINT_AC_MIN)})
-        elif ac_n > LINT_AC_MAX:
+        elif _oversize(rid, r):
             findings.append({
                 "severity": "warn", "check": "ac-count-high",
                 "detail": "{} AC (> {}): consider splitting into two requirements".format(
@@ -4724,6 +4751,85 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: AR
     return new_id
 
 
+AC_COUNT_TRIAGE_TEMPLATE = """---
+id: {new_id}
+status: draft
+layer: {layer}
+owner: {owner}
+depends_on: [{parent}]
+superseded_by:
+---
+
+# Triage stub: {parent} has {n} acceptance criteria
+
+<!-- decomposed-from: {parent}#ac-count-high -->
+
+## Description
+> Scaffolded by `lint --decompose` because {parent} carries more than
+> LINT_AC_MAX acceptance criteria. THIS IS NOT A DECISION - a human must decide
+> which obligation each criterion below belongs to before this file (or
+> {parent}) means anything. Everything below is copied verbatim, not split by
+> obligation - the engine can count criteria, it cannot group them.
+
+Every acceptance criterion {parent} declares, copied here for triage:
+
+{criteria}
+
+## Verify intent (open questions for the human)
+- Which of the {n} criteria above are one obligation, and which are several?
+  This is not automatable (ARCH-ATOMICITY-049's reasoning for a clause applies
+  at the criterion level too) - read {parent} and decide.
+
+## Cases (= tests)
+CASE-1
+  Given  <precondition>
+  When   <action>
+  Then   <observable, pass/fail result>
+
+## Context (non-binding)
+**Notes**
+- SCAFFOLD, NOT A DECISION. `lint --decompose` copied ALL acceptance criteria of
+  {parent} here verbatim because {parent} is over LINT_AC_MAX. It does not choose
+  how to split them - only a human can decide which criteria belong together.
+- {parent} was not modified. Deleting this file restores the corpus exactly.
+- Confirming this file unedited does not clear {parent}'s `ac-count-high`
+  finding - {parent} still carries every one of its criteria until a human
+  actually re-partitions them.
+
+## Links
+- Used by: (auto)
+## Members in code (auto)
+"""
+
+
+def _decompose_ac_count_high(reqs_dir, parent_id, parent):  # implements: ARCH-DECOMPOSE-050
+    """Scaffold one 'triage stub' draft listing ALL of an over-threshold parent's
+    acceptance criteria verbatim - it never partitions them, because the engine
+    cannot decide which obligation each criterion belongs to (only a human can).
+    Keyed on a `#ac-count-high` marker distinct from `_decompose_clause`'s
+    `#<clause-n>` namespace, so the two paths can never collide. Re-running is a
+    no-op, the same guarantee `_decompose_clause` gives for statement-size."""
+    if _already_decomposed(reqs_dir, parent_id, "ac-count-high"):
+        return None
+    parts = parent_id.split("-")
+    stem = "-".join(parts[:-1]) if len(parts) >= 3 and parts[-1].isdigit() else parent_id
+    new_id = "{}-{:03d}".format(stem, _next_free_number(reqs_dir))
+    dest = os.path.join(reqs_dir, new_id + ".md")
+    if os.path.exists(dest):
+        return None
+    meta = parent["meta"]
+    criteria = _acc_items(parent["body"])
+    listed = "\n".join("- {}".format(c) for c in criteria)
+    text = AC_COUNT_TRIAGE_TEMPLATE.format(
+        new_id=new_id, parent=parent_id, n=len(criteria), criteria=listed,
+        layer=meta.get("layer", "feature") or "feature",
+        owner=meta.get("owner", "") or "")
+    os.makedirs(reqs_dir, exist_ok=True)
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write(text)
+    return new_id
+
+
 def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
@@ -4735,10 +4841,13 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     Requirements with `lint_exempt: [check-name]` frontmatter silently skip those checks;
     active exemptions are printed after the requirement header.
     The default run writes nothing. With `decompose` (the opt-in `--decompose` flag) each
-    `statement-size` finding also scaffolds one draft requirement from its clause. The gate,
-    the pre-commit hook and CI never pass it: .githooks/pre-commit runs gate -> lint --strict
-    -> map --check, so a file written during the lint step would fail the map --check step of
-    the same hook run (ARCH-DECOMPOSE-050)."""
+    `statement-size` finding scaffolds one draft requirement from its clause, and each
+    `ac-count-high` finding scaffolds one triage-stub draft listing every one of the
+    parent's criteria verbatim (a human decides how to split them - the engine only
+    counts, never partitions). The gate, the pre-commit hook and CI never pass it:
+    .githooks/pre-commit runs gate -> lint --strict -> map --check, so a file written
+    during the lint step would fail the map --check step of the same hook run
+    (ARCH-DECOMPOSE-050)."""
     # Checks promoted from warn→error in --strict mode (structural, not style).
     STRICT_PROMOTE = {"ac-count-high", "over-scoped"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
@@ -4774,15 +4883,22 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
             print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
         if decompose and reqs_dir:
             for f in fs:
-                if f["check"] != "statement-size":
-                    continue
-                made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
-                if made:
-                    created.append(made)
-                    print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
-                        made, f["clause_n"]))
-                else:
-                    print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
+                if f["check"] == "statement-size":
+                    made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
+                    if made:
+                        created.append(made)
+                        print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
+                            made, f["clause_n"]))
+                    else:
+                        print("  skipped  clause {} \u2014 already scaffolded".format(f["clause_n"]))
+                elif f["check"] == "ac-count-high":
+                    made = _decompose_ac_count_high(reqs_dir, rid, r)
+                    if made:
+                        created.append(made)
+                        print("  created  requirements/{}.md  (draft, triage stub \u2014 all "
+                              "criteria listed, not partitioned)".format(made))
+                    else:
+                        print("  skipped  ac-count-high \u2014 already scaffolded")
     print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
         len(targets), errors, warns))
     if created:

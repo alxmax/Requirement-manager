@@ -2498,18 +2498,22 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
         return {"meta": {"status": "confirmed"}, "body": body}
 
     def test_granularity_at_threshold_warns(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(5)}
+        # threshold unified with lint's LINT_AC_MAX (7, unchanged) via the shared
+        # _oversize predicate 2026-09-03 -- "at threshold" is now LINT_AC_MAX + 1
+        # (was a hardcoded 5 against the old, next-only AC_SPLIT_THRESHOLD).
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX + 1)}
         _, out = self._next(reqs, {})
         self.assertIn("consider splitting", out)
         self.assertIn("AREA-FOO-001", out)
 
     def test_granularity_below_threshold_no_warn(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(4)}
+        # exactly LINT_AC_MAX ACs does not exceed it, so this must stay silent.
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX)}
         _, out = self._next(reqs, {})
         self.assertNotIn("consider splitting", out)
 
     def test_granularity_above_threshold_warns(self):  # tested-by: ARCH-NEXT-013
-        reqs = {"AREA-FOO-001": self._req_with_acs(8)}
+        reqs = {"AREA-FOO-001": self._req_with_acs(R.LINT_AC_MAX + 5)}
         _, out = self._next(reqs, {})
         self.assertIn("consider splitting", out)
         self.assertIn("AREA-FOO-001", out)
@@ -2523,7 +2527,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013
         self.assertIn("consider splitting", out)
 
     def test_granularity_truncates_to_top_n(self):  # bug: next-granularity-no-topn-truncation
-        reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(6) for i in range(1, 6)}
+        reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(R.LINT_AC_MAX + 1) for i in range(1, 6)}
         _, out = self._next(reqs, {})
         self.assertEqual(out.count("consider splitting"), 3)
         self.assertIn("more — run `reqmap.py next --all`", out)
@@ -6322,11 +6326,15 @@ class BugHuntMutateAnalyze(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  #
             self.assertIn("[x] Widget", open(parent_todo, encoding="utf-8").read())
 
     def test_next_granularity_counts_labeled_acs(self):
-        # 5 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
-        # the advisory; _count_ac sees 5. Members are implements-only so the req has a
+        # 9 labelled AC-N criteria (no bullet dashes): _bullets saw 0 and suppressed
+        # the advisory; _count_ac sees 9. Members are implements-only so the req has a
         # pending ('untested') signal and execution reaches the granularity block.
+        # Bumped from 5 to 9 ACs: the Granularity threshold was unified with lint's
+        # LINT_AC_MAX (7, unchanged) via the shared `_oversize` predicate, so 5 no
+        # longer qualifies (2026-09-03, reqmap-oversize-unify) -- deliberate, see
+        # OversizeUnify below for the next/lint parity coverage this change needed.
         body = "# T\n\n## HOW — Acceptance\n" + "".join(
-            "AC-%d: criterion %d\n" % (i, i) for i in range(1, 6))
+            "AC-%d: criterion %d\n" % (i, i) for i in range(1, 10))
         reqs = {"CORE-FOO-001": {"meta": {"status": "confirmed", "layer": "feature"}, "body": body}}
         members = {"CORE-FOO-001": [("implements", "x.py", 1)]}
         buf = io.StringIO()
@@ -7122,6 +7130,146 @@ class Decompose(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
             f.write(b"\xff\xfe\x00bad utf-8 \x80\x81")
         # must not raise UnicodeDecodeError; simply skip the undecodable sibling
         self.assertFalse(R._already_decomposed(self.reqs_dir, "REQ-AUTH-012", 1))
+
+
+class OversizeUnify(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-NEXT-013
+    """The shared `_oversize` predicate: `next`'s Granularity bucket and
+    `lint_requirement`'s `ac-count-high` check must report the identical id set for the
+    same corpus -- same threshold (LINT_AC_MAX, unchanged), same LINT_STATUSES scope
+    (drafts excluded), same `lint_exempt: [ac-count-high]` honoring. Also covers
+    `--decompose`'s ac-count-high triage-stub path, extended alongside the predicate."""
+    ACCEPT = "## HOW — Acceptance (= tests)"
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.reqs_dir = os.path.join(self.tmp, "requirements")
+        os.makedirs(self.reqs_dir)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _body(self, n):
+        return "# T\n\n{}\n{}".format(
+            self.ACCEPT, "".join("- AC {}.\n".format(i) for i in range(n)))
+
+    def _granularity_ids(self, out):
+        m = re.search(r"Granularity \(\d+\)\n((?:  .+\n)+)", out)
+        ids = set()
+        if m:
+            for line in m.group(1).splitlines():
+                mm = re.match(r"  (\S+)   \(", line)
+                if mm:
+                    ids.add(mm.group(1))
+        return ids
+
+    def test_next_and_lint_agree_on_ac_count_high_set(self):
+        reqs = {}
+        for n in range(5, 10):
+            reqs["REQ-N{}-001".format(n)] = {
+                "meta": {"status": "confirmed", "layer": "feature"},
+                "body": self._body(n)}
+            reqs["REQ-N{}X-002".format(n)] = {
+                "meta": {"status": "confirmed", "layer": "feature",
+                         "lint_exempt": ["ac-count-high"]},
+                "body": self._body(n)}
+        members = {rid: [("implements", "x.py", 1), ("tested-by", "t.py", 1)] for rid in reqs}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_next(reqs, members, show_all=True)
+        next_ids = self._granularity_ids(buf.getvalue())
+        lint_ids = {rid for rid, r in reqs.items()
+                    if "ac-count-high" in [f["check"] for f in R.lint_requirement(rid, r)]}
+        self.assertEqual(next_ids, lint_ids)
+        # a bug that leaves both sets empty (or both wrong in the same way) would still
+        # pass the equality check above -- pin the actual expected members too.
+        self.assertEqual(lint_ids, {"REQ-N8-001", "REQ-N9-001"})
+
+    def test_oversize_predicate_excludes_draft_status(self):
+        r = {"meta": {"status": "draft", "layer": "feature"}, "body": self._body(9)}
+        self.assertFalse(R._oversize("REQ-DRAFT-001", r))
+        reqs = {"REQ-DRAFT-001": r}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_next(reqs, {}, show_all=True)
+        self.assertNotIn("Granularity", buf.getvalue())
+
+    def test_decompose_ac_count_high_writes_one_triage_stub_per_parent(self):  # verifies: ARCH-DECOMPOSE-050#CASE-7
+        body = self._body(8)
+        parent = os.path.join(self.reqs_dir, "REQ-BIG-012.md")
+        _write(parent, "---\nid: REQ-BIG-012\nstatus: confirmed\n---\n" + body)
+        reqs = {"REQ-BIG-012": {
+            "meta": {"status": "confirmed", "layer": "feature", "owner": "Ana"},
+            "body": body}}
+
+        def _lint():
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = R.cmd_lint(reqs, decompose=True, reqs_dir=self.reqs_dir)
+            return code, buf.getvalue()
+
+        def _created():
+            return sorted(f for f in os.listdir(self.reqs_dir) if f != "REQ-BIG-012.md")
+
+        _lint()
+        made = _created()
+        self.assertEqual(len(made), 1)
+        text = open(os.path.join(self.reqs_dir, made[0]), encoding="utf-8").read()
+        self.assertIn("status: draft", text)
+        self.assertIn("depends_on: [REQ-BIG-012]", text)
+        for i in range(8):
+            self.assertIn("AC {}.".format(i), text)   # every criterion, verbatim
+        self.assertIn("NOT A DECISION", text)          # honesty notice, mirrors DECOMPOSED_TEMPLATE
+
+        # re-running is a no-op: same one file, byte-identical
+        stamp = open(os.path.join(self.reqs_dir, made[0]), "rb").read()
+        _, out2 = _lint()
+        self.assertIn("skipped", out2)
+        self.assertEqual(_created(), made)
+        self.assertEqual(open(os.path.join(self.reqs_dir, made[0]), "rb").read(), stamp)
+
+    def test_ac_count_high_decompose_never_fires_on_exempt_parent(self):
+        real_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "requirements")
+        reqs = R.load_requirements(real_dir)
+        exempt_over = [rid for rid, r in reqs.items()
+                       if r["meta"].get("status") in R.LINT_STATUSES
+                       and R._count_ac(r["body"]) > R.LINT_AC_MAX
+                       and "ac-count-high" in set(R._as_list(r["meta"].get("lint_exempt")))]
+        self.assertGreaterEqual(len(exempt_over), 1,
+            "fixture assumption failed: expected at least one real exempt "
+            "over-LINT_AC_MAX requirement in the live corpus (e.g. ARCH-CHECK-006)")
+        for name in os.listdir(real_dir):
+            if name.endswith(".md") and not name.startswith("_"):
+                shutil.copy(os.path.join(real_dir, name), self.reqs_dir)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_lint(reqs, decompose=True, reqs_dir=self.reqs_dir)
+        for rid in exempt_over:
+            self.assertFalse(
+                R._already_decomposed(self.reqs_dir, rid, "ac-count-high"),
+                "{} produced a triage stub despite lint_exempt: [ac-count-high]".format(rid))
+
+
+class LiveCorpusReachability(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
+    """Skeptic-stage closure: the OversizeUnify tests above run against SYNTHETIC
+    corpora that manufacture a non-exempt over-threshold parent this repo does not
+    actually have, so they stay green even if ARCH-DECOMPOSE-050's prose overclaims
+    what `--decompose` reaches in THIS corpus. This test reads the real corpus and
+    pins the honest-narrowing sentence in place while the corpus cannot trigger the
+    ac-count-high decompose path -- it fails if that sentence is ever deleted without
+    the corpus actually becoming reachable."""
+
+    def test_arch_decompose_050_prose_matches_live_corpus_reachability(self):
+        real_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "requirements")
+        reqs = R.load_requirements(real_dir)
+        non_exempt_over = [rid for rid, r in reqs.items() if R._oversize(rid, r)]
+        text = open(os.path.join(real_dir, "ARCH-DECOMPOSE-050.md"), encoding="utf-8").read()
+        if non_exempt_over:
+            self.fail(
+                "the live corpus now has a non-exempt oversize requirement ({}) -- "
+                "ARCH-DECOMPOSE-050's 'not currently reachable' claim is stale; "
+                "re-check the prose against reality, this test's premise no longer "
+                "holds".format(non_exempt_over))
+        self.assertIn("not currently reachable", text)
 
 
 class SpecLevel(unittest.TestCase):  # tested-by: ARCH-LEVEL-051

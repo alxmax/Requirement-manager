@@ -42,6 +42,16 @@ Every bullet below is binding.
 - `next` surfaces exactly the actionable buckets: `unimplemented` (Orphans), `untested`
   (Needs tests), `unverified-intent` (Needs intent review), `unreviewed` (Drafts to review).
 - `next` prints those four buckets in that order, most urgent first.
+- `next` also prints two advisory buckets below the four action buckets: `Granularity` (a
+  requirement with more acceptance criteria than lint's `LINT_AC_MAX`) and `Redundancy`
+  (requirements whose Description states the same obligation, byte-identical once
+  normalized).
+- Granularity's set comes from `_oversize`, the one predicate `lint_requirement`'s
+  `ac-count-high` check also calls — the same threshold, the same `LINT_STATUSES` scope, and
+  the same `lint_exempt: [ac-count-high]` honoring, so `next` and `lint` never disagree on
+  which requirement is oversize.
+- Redundancy's set comes from `_redundant_groups`, the exact-match floor `dupes` also uses.
+- Neither advisory bucket changes `next`'s exit code.
 - `next` omits `blast-radius`, because that signal is a caution, not a task.
 - `next` surfaces every scannable file that carries no membership tag as an "Untagged files"
   bucket, ranked lowest of all.
@@ -85,6 +95,7 @@ Every bullet below is binding.
 - A reviewed requirement may legitimately appear in more than one bucket (e.g. a confirmed requirement both `untested` and `unverified-intent`) — these are two distinct actions, by design. A `draft` never double-lists, because its `unverified-intent` is suppressed at the source (subsumed by `unreviewed`).
 - `next` is the prioritized worklist; `findings` remains the exhaustive raw list of every open verify-intent bullet (including drafts). The two answer different questions — this divergence is intentional and documented, not drift.
 - `risk:` ordering only discriminates extract-authored drafts (hand-authored requirements have no `risk:` field → score 0, ordered by id).
+- `next` has printed Granularity and Redundancy since ADR-0020 shipped; this contract omitted both until 2026-09-03, when the gap was fixed alongside unifying Granularity's threshold with lint's `LINT_AC_MAX` — previously `next` used its own unscoped 5-AC threshold with no `lint_exempt` honoring, so `next` and `lint` could report different sets for the same corpus (`ARCH-DECOMPOSE-050`'s notes record the matching fix on lint's side).
 
 ## Cases (= tests)
 CASE-1
@@ -137,6 +148,16 @@ CASE-10
   Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one
   When   `next` runs with a `reqs_dir`
   Then   the Orphans bucket carries a note naming that member and `--code`
+
+CASE-11
+  Given  a confirmed requirement with more acceptance criteria than `LINT_AC_MAX`, not exempt
+  When   `next` runs
+  Then   it is listed under "Granularity" with its AC count and `requirements/<ID>.md`
+
+CASE-12
+  Given  two confirmed requirements whose Description states the same obligation, word for word
+  When   `next` runs
+  Then   they are listed together under "Redundancy" as one group
 
 ## Example — in practice (optional, non-binding)
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
