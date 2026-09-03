@@ -148,7 +148,7 @@ Every bullet below is binding.
 - `lint_exempt: [statement-size]` silences the check for one requirement.
 
 ## Cases
-CASE-1 — a clause stating two obligations is split, not shortened
+CASE-1 — a clause stating two obligations is split, not shortened  <!-- verifiable by: inspection -->
   Given  a clause covering both "the service issues a token on valid credentials" and
          "the service revokes it on logout"
   When   an author applies the atomicity rule during review

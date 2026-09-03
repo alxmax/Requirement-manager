@@ -46,7 +46,7 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
         return (_engine(Path(d) / "vendored.py", vendored_ver),
                 _engine(Path(d) / "reference.py", reference_ver))
 
-    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043  # verifies: REQ-STALEENGINE-925#CASE-1
+    def test_stale_warns_and_exits_zero(self):  # tested-by: ARCH-STALEENGINE-043  # verifies: REQ-STALEENGINE-925#CASE-1  # verifies: REQ-STALEENGINE-925#CASE-5
         """AC-1: the motivating case — an old vendored engine, named, without failing."""
         with tempfile.TemporaryDirectory() as d:
             v, r = self._pair(d, "2025-08-02", "2026-08-20.2")
@@ -149,6 +149,37 @@ class StalenessProbe(unittest.TestCase):  # tested-by: REQ-STALEENGINE-925  # te
                 with redirect_stdout(io.StringIO()):
                     ES.main(["--vendored", v, "--reference", r, "--mode", "warning"])
             self.assertEqual(cm.exception.code, 2)
+
+
+class StalenessActionWiring(unittest.TestCase):  # tested-by: ARCH-STALEENGINE-043  # tested-by: REQ-STALEENGINE-925
+    ACTION_YML = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "check", "action.yml")
+
+    def _text(self):
+        with open(self.ACTION_YML, encoding="utf-8") as f:
+            return f.read()
+
+    def test_action_wires_staleness_probe_as_a_step(self):  # verifies: REQ-STALEENGINE-925#CASE-2
+        text = self._text()
+        self.assertIn("engine_staleness.py", text)
+        self.assertIn("reqmap engine staleness", text)
+
+    def test_stale_engine_input_defaults_to_warn(self):  # verifies: REQ-STALEENGINE-925#CASE-3
+        text = self._text()
+        idx = text.index("stale-engine:")
+        next_input = text.find("\n  reqmap-repo:", idx)   # end of the stale-engine input block
+        chunk = text[idx: next_input if next_input != -1 else idx + 2000]
+        self.assertIn("default: 'warn'", chunk)
+
+    def test_stale_message_names_reseed_remedy(self):  # verifies: REQ-STALEENGINE-925#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            vendored = _engine(Path(d) / "vendored.py", "2025-08-02")
+            reference = _engine(Path(d) / "reference.py", "2026-08-20.2")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                code = ES.main(["--vendored", vendored, "--reference", reference, "--mode", "warn"])
+            self.assertEqual(code, 0)
+            self.assertIn("re-seed", buf.getvalue())
 
 
 if __name__ == "__main__":

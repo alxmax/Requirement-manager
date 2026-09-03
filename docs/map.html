@@ -136,11 +136,10 @@
       "acc": [
         "CASE-1 — — a verifies tag is mapped to its labelled criterion Given  a test file carrying `# verifies: AREA-A-001#CASE-1` and a requirement labelling CASE-1 and CASE-2 When   `gate` runs Then   it reports that 1 of the 2 automatable criteria carries a `verifies:` tag, naming CASE-2 as missing",
         "CASE-2 — — a verifies tag with no #AC-N suffix is not per-criterion coverage Given  a file carrying `# verifies: REQ-X-001` with no trailing `#AC-N` When   `scan_ac_verifies` scans it Then   it returns an empty mapping for `REQ-X-001`",
-        "CASE-3 — — partial verifies coverage produces one warning naming every gap Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5 untagged When   `gate` runs Then   it prints exactly one \"automatable criteria\" line naming \"missing AC-2, AC-3,",
-        "AC-4 — , AC-5\"",
+        "CASE-3 — — partial verifies coverage produces one warning naming every gap Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5 untagged When   `gate` runs Then   it prints exactly one \"automatable criteria\" line naming \"missing AC-2, AC-3, AC-4, AC-5\"",
         "CASE-4 — — the warning states the tagged-of-total count Given  a confirmed requirement with AC-1 and AC-2 labelled, only AC-1 tagged When   `gate` runs Then   its output contains \"1/2 automatable criteria\" --------------------"
       ],
-      "accept": "CASE-1 — a verifies tag is mapped to its labelled criterion\n  Given  a test file carrying `# verifies: AREA-A-001#CASE-1` and a requirement labelling CASE-1 and CASE-2\n  When   `gate` runs\n  Then   it reports that 1 of the 2 automatable criteria carries a `verifies:` tag, naming CASE-2 as missing\n\nCASE-2 — a verifies tag with no #AC-N suffix is not per-criterion coverage\n  Given  a file carrying `# verifies: REQ-X-001` with no trailing `#AC-N`\n  When   `scan_ac_verifies` scans it\n  Then   it returns an empty mapping for `REQ-X-001`\n\nCASE-3 — partial verifies coverage produces one warning naming every gap\n  Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5\n         untagged\n  When   `gate` runs\n  Then   it prints exactly one \"automatable criteria\" line naming \"missing AC-2, AC-3,\n         AC-4, AC-5\"\n\nCASE-4 — the warning states the tagged-of-total count\n  Given  a confirmed requirement with AC-1 and AC-2 labelled, only AC-1 tagged\n  When   `gate` runs\n  Then   its output contains \"1/2 automatable criteria\"\n\n\n--------------------",
+      "accept": "CASE-1 — a verifies tag is mapped to its labelled criterion\n  Given  a test file carrying `# verifies: AREA-A-001#CASE-1` and a requirement labelling CASE-1 and CASE-2\n  When   `gate` runs\n  Then   it reports that 1 of the 2 automatable criteria carries a `verifies:` tag, naming CASE-2 as missing\n\nCASE-2 — a verifies tag with no #AC-N suffix is not per-criterion coverage\n  Given  a file carrying `# verifies: REQ-X-001` with no trailing `#AC-N`\n  When   `scan_ac_verifies` scans it\n  Then   it returns an empty mapping for `REQ-X-001`\n\nCASE-3 — partial verifies coverage produces one warning naming every gap\n  Given  a confirmed requirement with five labelled criteria, `AC-1` tagged and AC-2..AC-5\n         untagged\n  When   `gate` runs\n  Then   it prints exactly one \"automatable criteria\" line naming \"missing AC-2, AC-3, AC-4, AC-5\"\n\nCASE-4 — the warning states the tagged-of-total count\n  Given  a confirmed requirement with AC-1 and AC-2 labelled, only AC-1 tagged\n  When   `gate` runs\n  Then   its output contains \"1/2 automatable criteria\"\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -164,9 +163,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for AC-4"
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "REQ-ACVERIFY-822",
@@ -419,6 +417,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7070"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9033"
         }
       ],
       "test_exempt": null,
@@ -449,14 +451,14 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — a clause stating two obligations is split, not shortened Given  a clause covering both \"the service issues a token on valid credentials\" and \"the service revokes it on logout\" When   an author applies the atomicity rule during review Then   the clause becomes two clauses, each stating one obligation and independently verifiable — trimming words alone would not satisfy the rule",
+        "CASE-1 — — a clause stating two obligations is split, not shortened   Given  a clause covering both \"the service issues a token on valid credentials\" and \"the service revokes it on logout\" When   an author applies the atomicity rule during review Then   the clause becomes two clauses, each stating one obligation and independently verifiable — trimming words alone would not satisfy the rule",
         "CASE-2 — — atomicity is a human judgment; the check never asserts it Given  a short clause under the word-count threshold that still states two obligations When   `lint` runs Then   it reports no finding for that clause — the threshold check has nothing to say about atomicity, only about length",
         "CASE-3 — — the default statement-size threshold is 150 words Given  the module constant `LINT_STATEMENT_WORDS` When   its value is read Then   it equals `150`",
         "CASE-4 — — a 155-word clause produces exactly one statement-size finding Given  a Contract clause of 155 plain words When   `lint_requirement` runs Then   exactly one finding names `check: \"statement-size\"` and `clause_n: 1`",
         "CASE-5 — — an over-threshold clause's finding carries warn severity, not error Given  a Contract clause of 155 plain words When   `lint_requirement` runs Then   the `statement-size` finding's `severity` reads `\"warn\"`, never `\"error\"`",
         "CASE-6 — — lint_exempt: [statement-size] silences an otherwise-reported finding Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]` When   `lint_requirement` runs Then   no `statement-size` finding appears, though it appears without the exemption --------------------"
       ],
-      "accept": "CASE-1 — a clause stating two obligations is split, not shortened\n  Given  a clause covering both \"the service issues a token on valid credentials\" and\n         \"the service revokes it on logout\"\n  When   an author applies the atomicity rule during review\n  Then   the clause becomes two clauses, each stating one obligation and independently\n         verifiable — trimming words alone would not satisfy the rule\n\nCASE-2 — atomicity is a human judgment; the check never asserts it\n  Given  a short clause under the word-count threshold that still states two obligations\n  When   `lint` runs\n  Then   it reports no finding for that clause — the threshold check has nothing to say\n         about atomicity, only about length\n\nCASE-3 — the default statement-size threshold is 150 words\n  Given  the module constant `LINT_STATEMENT_WORDS`\n  When   its value is read\n  Then   it equals `150`\n\nCASE-4 — a 155-word clause produces exactly one statement-size finding\n  Given  a Contract clause of 155 plain words\n  When   `lint_requirement` runs\n  Then   exactly one finding names `check: \"statement-size\"` and `clause_n: 1`\n\nCASE-5 — an over-threshold clause's finding carries warn severity, not error\n  Given  a Contract clause of 155 plain words\n  When   `lint_requirement` runs\n  Then   the `statement-size` finding's `severity` reads `\"warn\"`, never `\"error\"`\n\nCASE-6 — lint_exempt: [statement-size] silences an otherwise-reported finding\n  Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]`\n  When   `lint_requirement` runs\n  Then   no `statement-size` finding appears, though it appears without the exemption\n\n\n--------------------",
+      "accept": "CASE-1 — a clause stating two obligations is split, not shortened  <\!-- verifiable by: inspection -\->\n  Given  a clause covering both \"the service issues a token on valid credentials\" and\n         \"the service revokes it on logout\"\n  When   an author applies the atomicity rule during review\n  Then   the clause becomes two clauses, each stating one obligation and independently\n         verifiable — trimming words alone would not satisfy the rule\n\nCASE-2 — atomicity is a human judgment; the check never asserts it\n  Given  a short clause under the word-count threshold that still states two obligations\n  When   `lint` runs\n  Then   it reports no finding for that clause — the threshold check has nothing to say\n         about atomicity, only about length\n\nCASE-3 — the default statement-size threshold is 150 words\n  Given  the module constant `LINT_STATEMENT_WORDS`\n  When   its value is read\n  Then   it equals `150`\n\nCASE-4 — a 155-word clause produces exactly one statement-size finding\n  Given  a Contract clause of 155 plain words\n  When   `lint_requirement` runs\n  Then   exactly one finding names `check: \"statement-size\"` and `clause_n: 1`\n\nCASE-5 — an over-threshold clause's finding carries warn severity, not error\n  Given  a Contract clause of 155 plain words\n  When   `lint_requirement` runs\n  Then   the `statement-size` finding's `severity` reads `\"warn\"`, never `\"error\"`\n\nCASE-6 — lint_exempt: [statement-size] silences an otherwise-reported finding\n  Given  a 155-word clause on a requirement carrying `lint_exempt: [statement-size]`\n  When   `lint_requirement` runs\n  Then   no `statement-size` finding appears, though it appears without the exemption\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -478,15 +480,18 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7070"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9033"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 6,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1, CASE-3"
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "REQ-ATOMICITY-825",
@@ -538,6 +543,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7070"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9033"
         }
       ],
       "test_exempt": null,
@@ -545,8 +554,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 6,
-      "gap": "no `verifies:` tag for CASE-5"
+      "covered": 7
     },
     {
       "id": "ARCH-CANDIDATES-009",
@@ -657,6 +665,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6962"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9496"
         }
       ],
       "test_exempt": null,
@@ -815,6 +827,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6962"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9496"
         }
       ],
       "test_exempt": null,
@@ -822,8 +838,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 6,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 7
     },
     {
       "id": "ARCH-CHECK-006",
@@ -1015,6 +1030,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6518"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9453"
         }
       ],
       "test_exempt": null,
@@ -1147,6 +1166,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1557"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9453"
         }
       ],
       "test_exempt": null,
@@ -1154,8 +1177,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 6,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 7
     },
     {
       "id": "REQ-CHECK-830",
@@ -1319,6 +1341,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1351"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9453"
         }
       ],
       "test_exempt": null,
@@ -1326,8 +1352,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 3
     },
     {
       "id": "REQ-CHECK-833",
@@ -1436,6 +1461,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6179"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8706"
         }
       ],
       "test_exempt": null,
@@ -1505,6 +1534,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6179"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8706"
         }
       ],
       "test_exempt": null,
@@ -1512,8 +1545,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 5,
-      "gap": "no `verifies:` tag for CASE-6"
+      "covered": 6
     },
     {
       "id": "ARCH-CONFIG-060",
@@ -1678,6 +1710,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1673"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8665"
         }
       ],
       "test_exempt": null,
@@ -1729,6 +1765,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1673"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8665"
         }
       ],
       "test_exempt": null,
@@ -1736,8 +1776,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-1, CASE-5"
+      "covered": 5
     },
     {
       "id": "ARCH-COVERAGE-029",
@@ -1857,6 +1896,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3691"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9636"
         }
       ],
       "test_exempt": null,
@@ -1864,8 +1907,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3, CASE-5, CASE-7"
+      "covered": 7
     },
     {
       "id": "ARCH-DECOMPOSE-050",
@@ -1957,6 +1999,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7908"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9142"
         }
       ],
       "test_exempt": null,
@@ -2005,6 +2051,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7148"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9142"
         }
       ],
       "test_exempt": null,
@@ -2012,8 +2062,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 3
     },
     {
       "id": "REQ-DECOMPOSE-838",
@@ -2826,6 +2875,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6336"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8556"
         }
       ],
       "test_exempt": null,
@@ -2880,6 +2933,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6336"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8556"
         }
       ],
       "test_exempt": null,
@@ -2887,8 +2944,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-4"
+      "covered": 4
     },
     {
       "id": "REQ-DRIFT-842",
@@ -2939,6 +2995,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:133"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8556"
         }
       ],
       "test_exempt": null,
@@ -2946,8 +3006,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-DRIFTIMPACT-035",
@@ -2997,6 +3056,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:802"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9514"
         }
       ],
       "test_exempt": null,
@@ -3048,6 +3111,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:802"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9514"
         }
       ],
       "test_exempt": null,
@@ -3055,8 +3122,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 4
     },
     {
       "id": "ARCH-EXCALIDRAW-030",
@@ -3159,6 +3225,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:551"
         }
       ],
       "test_exempt": null,
@@ -3166,8 +3236,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-5"
+      "covered": 5
     },
     {
       "id": "REQ-EXCALIDRAW-845",
@@ -3218,6 +3287,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:551"
         }
       ],
       "test_exempt": null,
@@ -3225,8 +3298,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3, CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-EXCALIDRAW-031",
@@ -3408,6 +3480,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:99"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:636"
         }
       ],
       "test_exempt": null,
@@ -3415,8 +3491,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-EXCALIDRAW-032",
@@ -3610,6 +3685,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7002"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9294"
         }
       ],
       "test_exempt": null,
@@ -3657,6 +3736,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1071"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9294"
         }
       ],
       "test_exempt": null,
@@ -3664,8 +3747,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 3
     },
     {
       "id": "REQ-EXTRACT-850",
@@ -3714,6 +3796,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1071"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9294"
         }
       ],
       "test_exempt": null,
@@ -3721,8 +3807,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 5
     },
     {
       "id": "REQ-EXTRACT-851",
@@ -3767,6 +3852,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7002"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9294"
         }
       ],
       "test_exempt": null,
@@ -3774,8 +3863,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3"
+      "covered": 5
     },
     {
       "id": "ARCH-FANOUT-052",
@@ -3835,6 +3923,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7391"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9094"
         }
       ],
       "test_exempt": null,
@@ -3893,6 +3985,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7391"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9094"
         }
       ],
       "test_exempt": null,
@@ -3900,8 +3996,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 5,
-      "gap": "no `verifies:` tag for CASE-6, CASE-7"
+      "covered": 7
     },
     {
       "id": "ARCH-FINDINGS-010",
@@ -3985,6 +4080,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6685"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8738"
         }
       ],
       "test_exempt": null,
@@ -4031,6 +4130,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1289"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8738"
         }
       ],
       "test_exempt": null,
@@ -4038,8 +4141,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 3
     },
     {
       "id": "REQ-FINDINGS-854",
@@ -4273,6 +4375,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3828"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8906"
         }
       ],
       "test_exempt": null,
@@ -4319,6 +4425,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3574"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8906"
         }
       ],
       "test_exempt": null,
@@ -4326,8 +4436,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-4"
+      "covered": 4
     },
     {
       "id": "REQ-HEALTH-858",
@@ -4372,6 +4481,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3574"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8906"
         }
       ],
       "test_exempt": null,
@@ -4379,8 +4492,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 4
     },
     {
       "id": "REQ-HEALTH-859",
@@ -4424,6 +4536,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3574"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8906"
         }
       ],
       "test_exempt": null,
@@ -4431,8 +4547,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 4
     },
     {
       "id": "ARCH-INIT-012",
@@ -4555,6 +4670,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2567"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9889"
         }
       ],
       "test_exempt": null,
@@ -4562,8 +4681,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 5,
-      "gap": "no `verifies:` tag for CASE-6"
+      "covered": 6
     },
     {
       "id": "REQ-INIT-861",
@@ -4608,6 +4726,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2567"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9889"
         }
       ],
       "test_exempt": null,
@@ -4615,8 +4737,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 5
     },
     {
       "id": "ARCH-LEVEL-051",
@@ -4683,6 +4804,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7348"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9154"
         }
       ],
       "test_exempt": null,
@@ -4739,6 +4864,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7348"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9154"
         }
       ],
       "test_exempt": null,
@@ -4746,8 +4875,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 5,
-      "gap": "no `verifies:` tag for CASE-5"
+      "covered": 6
     },
     {
       "id": "ARCH-LINT-014",
@@ -4876,6 +5004,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2868"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9598"
         }
       ],
       "test_exempt": null,
@@ -4883,8 +5015,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2"
+      "covered": 6
     },
     {
       "id": "REQ-LINT-864",
@@ -4936,6 +5067,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2868"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9598"
         }
       ],
       "test_exempt": null,
@@ -4943,8 +5078,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3, CASE-5"
+      "covered": 6
     },
     {
       "id": "ARCH-LINTCHECKS-025",
@@ -5040,8 +5174,7 @@
       "priority": "",
       "risks": [],
       "clauses": 12,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4, CASE-5, CASE-6, CASE-7, CASE-8, CASE-9, CASE-10"
+      "covered": 12
     },
     {
       "id": "REQ-LINTCHECKS-865",
@@ -5491,6 +5624,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6867"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8645"
         }
       ],
       "test_exempt": null,
@@ -5498,8 +5635,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3"
+      "covered": 5
     },
     {
       "id": "REQ-MAP-870",
@@ -5857,6 +5993,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7598"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9548"
         }
       ],
       "test_exempt": null,
@@ -5864,8 +6004,7 @@
       "priority": "should-have",
       "risks": [],
       "clauses": 5,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3, CASE-4, CASE-5"
+      "covered": 5
     },
     {
       "id": "REQ-MAPDIAGRAMS-874",
@@ -5914,6 +6053,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7598"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9548"
         }
       ],
       "test_exempt": null,
@@ -5921,8 +6064,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 3
     },
     {
       "id": "REQ-MAPDIAGRAMS-875",
@@ -6140,6 +6282,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7598"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9548"
         }
       ],
       "test_exempt": null,
@@ -6147,8 +6293,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 3
     },
     {
       "id": "ARCH-MEMBERDRIFT-027",
@@ -6712,6 +6857,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7234"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6719,8 +6868,7 @@
       "priority": "",
       "risks": [],
       "clauses": 12,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4, CASE-5, CASE-6, CASE-7, CASE-8, CASE-9, CASE-10"
+      "covered": 12
     },
     {
       "id": "REQ-NEXT-883",
@@ -6763,6 +6911,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2421"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6770,8 +6922,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2, CASE-4"
+      "covered": 4
     },
     {
       "id": "REQ-NEXT-884",
@@ -6825,6 +6976,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2421"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6832,8 +6987,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-2, CASE-4, CASE-6"
+      "covered": 7
     },
     {
       "id": "REQ-NEXT-885",
@@ -6880,6 +7034,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2421"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6887,8 +7045,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 4
     },
     {
       "id": "REQ-NEXT-886",
@@ -6940,6 +7097,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:8052"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6947,8 +7108,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 5
     },
     {
       "id": "REQ-NEXT-887",
@@ -6991,6 +7151,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2421"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8410"
         }
       ],
       "test_exempt": null,
@@ -6998,8 +7162,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3, CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-ORPHANCODE-034",
@@ -7057,6 +7220,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:742"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9538"
         }
       ],
       "test_exempt": null,
@@ -7113,6 +7280,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:742"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9538"
         }
       ],
       "test_exempt": null,
@@ -7120,8 +7291,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 5
     },
     {
       "id": "ARCH-PAGES-021",
@@ -7396,6 +7566,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:52"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9919"
         }
       ],
       "test_exempt": null,
@@ -7403,8 +7577,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 3
     },
     {
       "id": "REQ-PARSE-891",
@@ -7687,6 +7860,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6400"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9364"
         }
       ],
       "test_exempt": null,
@@ -7739,6 +7916,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2339"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9364"
         }
       ],
       "test_exempt": null,
@@ -7746,8 +7927,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 4
     },
     {
       "id": "REQ-PROMOTE-895",
@@ -7792,6 +7972,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2339"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9364"
         }
       ],
       "test_exempt": null,
@@ -7799,8 +7983,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-5"
+      "covered": 5
     },
     {
       "id": "REQ-PROMOTE-896",
@@ -7843,6 +8026,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:2339"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9364"
         }
       ],
       "test_exempt": null,
@@ -7850,8 +8037,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3"
+      "covered": 4
     },
     {
       "id": "ARCH-PROMOTE-TODO-001",
@@ -7913,6 +8099,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6400"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9402"
         }
       ],
       "test_exempt": null,
@@ -7964,6 +8154,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4740"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9402"
         }
       ],
       "test_exempt": null,
@@ -7971,8 +8165,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 5
     },
     {
       "id": "REQ-PROMOTE-TODO-898",
@@ -8017,6 +8210,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4740"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9402"
         }
       ],
       "test_exempt": null,
@@ -8024,8 +8221,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4, CASE-5"
+      "covered": 5
     },
     {
       "id": "REQ-PROMOTE-TODO-899",
@@ -8070,6 +8266,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4740"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9402"
         }
       ],
       "test_exempt": null,
@@ -8077,8 +8277,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 3
     },
     {
       "id": "ARCH-PROSE-024",
@@ -8154,6 +8353,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6947"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8753"
         }
       ],
       "test_exempt": null,
@@ -8261,6 +8464,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1005"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8753"
         }
       ],
       "test_exempt": null,
@@ -8268,8 +8475,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-PYFLOOR-040",
@@ -8322,6 +8528,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:5998"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9168"
         }
       ],
       "test_exempt": null,
@@ -8384,6 +8594,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:5998"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9168"
         }
       ],
       "test_exempt": null,
@@ -8391,8 +8605,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 5
     },
     {
       "id": "ARCH-REDUNDANCY-058",
@@ -8553,6 +8766,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3710"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9710"
         }
       ],
       "test_exempt": null,
@@ -8560,8 +8777,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3"
+      "covered": 3
     },
     {
       "id": "REQ-REGISTRYLAG-904",
@@ -8608,6 +8824,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3710"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9710"
         }
       ],
       "test_exempt": null,
@@ -8615,8 +8835,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-5"
+      "covered": 5
     },
     {
       "id": "ARCH-REPRO-041",
@@ -8986,6 +9205,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6541"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9479"
         }
       ],
       "test_exempt": null,
@@ -9047,6 +9270,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6541"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9479"
         }
       ],
       "test_exempt": null,
@@ -9054,8 +9281,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 5,
-      "gap": "no `verifies:` tag for CASE-1, CASE-7"
+      "covered": 7
     },
     {
       "id": "ARCH-RULES-059",
@@ -9453,8 +9679,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 6,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 7
     },
     {
       "id": "REQ-SCAN-909",
@@ -9568,6 +9793,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1202"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8684"
         }
       ],
       "test_exempt": null,
@@ -9616,6 +9845,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1202"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8684"
         }
       ],
       "test_exempt": null,
@@ -9623,8 +9856,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2, CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-SCANCACHE-023",
@@ -9828,6 +10060,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3494"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8776"
         }
       ],
       "test_exempt": null,
@@ -9888,6 +10124,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3494"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8776"
         }
       ],
       "test_exempt": null,
@@ -9895,8 +10135,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4"
+      "covered": 5
     },
     {
       "id": "REQ-SEARCH-913",
@@ -9941,6 +10180,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3494"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8776"
         }
       ],
       "test_exempt": null,
@@ -9948,8 +10191,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3"
+      "covered": 5
     },
     {
       "id": "REQ-SEARCH-914",
@@ -9992,6 +10234,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3494"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8776"
         }
       ],
       "test_exempt": null,
@@ -9999,8 +10245,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-3, CASE-4"
+      "covered": 4
     },
     {
       "id": "REQ-SEARCH-915",
@@ -10041,6 +10286,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3494"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8776"
         }
       ],
       "test_exempt": null,
@@ -10048,8 +10297,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3"
+      "covered": 3
     },
     {
       "id": "ARCH-SELFGATE-039",
@@ -10081,7 +10329,7 @@
         "CASE-6 — Given  a push to `main`, whether or not it bumps `plugin.json` When   the `release` job's alias step runs Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the current `plugin.json` version, so `check@vN` resolves to the latest released content",
         "CASE-7 — Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN` When   `scripts/check_versions.py` runs in the `gate-and-tests` job Then   it exits 1 and names the file that disagrees, before the alias can be published"
       ],
-      "accept": "CASE-1\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nCASE-2\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created\n\nCASE-3\n  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`\n  When   their own CI runs that step\n  Then   `check/action.yml` invokes the same gate this repo runs on itself\n\nCASE-4\n  Given  a local push attempt with the dev hook enabled and the target branch is `main`\n  When   `.githooks/pre-push` runs\n  Then   the push is blocked before it reaches the remote\n\nCASE-5\n  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments\n  When   it completes\n  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local\n         plugin cache and every named consumer repo matches this repo's current copy\n\nCASE-6\n  Given  a push to `main`, whether or not it bumps `plugin.json`\n  When   the `release` job's alias step runs\n  Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the\n         current `plugin.json` version, so `check@vN` resolves to the latest released content\n\nCASE-7\n  Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN`\n  When   `scripts/check_versions.py` runs in the `gate-and-tests` job\n  Then   it exits 1 and names the file that disagrees, before the alias can be published",
+      "accept": "CASE-1  <\!-- verifiable by: inspection -\->\n  Given  a push or pull request to this repo\n  When   `ci.yml`'s `gate-and-tests` job runs\n  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs\n\nCASE-2  <\!-- verifiable by: inspection -\->\n  Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)\n  When   `.githooks/pre-commit` runs\n  Then   it fails the commit on the same errors CI would fail on, before the commit is created\n\nCASE-3  <\!-- verifiable by: inspection -\->\n  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`\n  When   their own CI runs that step\n  Then   `check/action.yml` invokes the same gate this repo runs on itself\n\nCASE-4  <\!-- verifiable by: inspection -\->\n  Given  a local push attempt with the dev hook enabled and the target branch is `main`\n  When   `.githooks/pre-push` runs\n  Then   the push is blocked before it reaches the remote\n\nCASE-5  <\!-- verifiable by: inspection -\->\n  Given  `sync_reqmap.sh` is run with zero or more consumer-repo paths as arguments\n  When   it completes\n  Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local\n         plugin cache and every named consumer repo matches this repo's current copy\n\nCASE-6  <\!-- verifiable by: inspection -\->\n  Given  a push to `main`, whether or not it bumps `plugin.json`\n  When   the `release` job's alias step runs\n  Then   the major-alias tag read from `check/action.yml` points at the commit tagged with the\n         current `plugin.json` version, so `check@vN` resolves to the latest released content\n\nCASE-7\n  Given  `check/action.yml`, `README.md` and `CLAUDE.md` do not all name the same `check@vN`\n  When   `scripts/check_versions.py` runs in the `gate-and-tests` job\n  Then   it exits 1 and names the file that disagrees, before the alias can be published",
       "input": "",
       "output": "",
       "desc": "",
@@ -10140,9 +10388,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 7,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4, CASE-5, CASE-6"
+      "clauses": 1,
+      "covered": 1
     },
     {
       "id": "REQ-SELFGATE-916",
@@ -10264,6 +10511,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3331"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8584"
         }
       ],
       "test_exempt": null,
@@ -10322,6 +10573,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3331"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8584"
         }
       ],
       "test_exempt": null,
@@ -10329,8 +10584,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-7"
+      "covered": 7
     },
     {
       "id": "REQ-SHOW-918",
@@ -10419,6 +10673,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3331"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8584"
         }
       ],
       "test_exempt": null,
@@ -10426,8 +10684,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 3
     },
     {
       "id": "ARCH-SIMILAR-016",
@@ -10519,6 +10776,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7024"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9176"
         }
       ],
       "test_exempt": null,
@@ -10564,6 +10825,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3413"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9176"
         }
       ],
       "test_exempt": null,
@@ -10571,8 +10836,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2"
+      "covered": 3
     },
     {
       "id": "REQ-SIMILAR-921",
@@ -10637,6 +10901,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:8052"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9176"
         }
       ],
       "test_exempt": null,
@@ -10644,8 +10912,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2, CASE-3, CASE-4, CASE-6, CASE-7"
+      "covered": 7
     },
     {
       "id": "REQ-SIMILAR-922",
@@ -10690,6 +10957,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3413"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9176"
         }
       ],
       "test_exempt": null,
@@ -10697,8 +10968,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 1,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2"
+      "covered": 3
     },
     {
       "id": "REQ-SIMILAR-923",
@@ -10745,6 +11015,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3413"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9176"
         }
       ],
       "test_exempt": null,
@@ -10752,8 +11026,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1, CASE-2"
+      "covered": 6
     },
     {
       "id": "ARCH-SITE-026",
@@ -11005,6 +11278,10 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_engine_staleness.py:49"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_engine_staleness.py:154"
         }
       ],
       "test_exempt": null,
@@ -11068,6 +11345,10 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_engine_staleness.py:26"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_engine_staleness.py:154"
         }
       ],
       "test_exempt": null,
@@ -11075,8 +11356,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3, CASE-4, CASE-5"
+      "covered": 7
     },
     {
       "id": "REQ-STALEENGINE-926",
@@ -11202,6 +11482,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4334"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9046"
         }
       ],
       "test_exempt": null,
@@ -11256,6 +11540,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4334"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9046"
         }
       ],
       "test_exempt": null,
@@ -11263,8 +11551,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-5"
+      "covered": 5
     },
     {
       "id": "REQ-SUGGESTVERIFIES-928",
@@ -11363,6 +11650,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4334"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9046"
         }
       ],
       "test_exempt": null,
@@ -11370,8 +11661,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 3
     },
     {
       "id": "ARCH-TESTLINK-018",
@@ -11448,6 +11738,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4257"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9121"
         }
       ],
       "test_exempt": null,
@@ -11550,6 +11844,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3902"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9121"
         }
       ],
       "test_exempt": null,
@@ -11557,8 +11855,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-1"
+      "covered": 5
     },
     {
       "id": "REQ-TESTLINK-932",
@@ -11660,6 +11957,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:4257"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9121"
         }
       ],
       "test_exempt": null,
@@ -11667,8 +11968,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-4"
+      "covered": 4
     },
     {
       "id": "ARCH-TRACE-020",
@@ -11988,6 +12288,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:5886"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9845"
         }
       ],
       "test_exempt": null,
@@ -11995,8 +12299,7 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3"
+      "covered": 4
     },
     {
       "id": "ARCH-TRANSLATE-044",
@@ -12394,6 +12697,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6886"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9783"
         }
       ],
       "test_exempt": null,
@@ -12401,8 +12708,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 3,
-      "gap": "no `verifies:` tag for CASE-2, CASE-3, CASE-5"
+      "covered": 6
     },
     {
       "id": "ARCH-VIEWER-007",
@@ -12588,6 +12894,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:6584"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8974"
         }
       ],
       "test_exempt": null,
@@ -12645,6 +12955,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:1451"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8974"
         }
       ],
       "test_exempt": null,
@@ -12652,8 +12966,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 4,
-      "gap": "no `verifies:` tag for CASE-3, CASE-4"
+      "covered": 6
     },
     {
       "id": "REQ-VIEWER-941",
@@ -12703,6 +13016,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:5939"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8974"
         }
       ],
       "test_exempt": null,
@@ -12710,8 +13027,7 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-1, CASE-3, CASE-4"
+      "covered": 5
     },
     {
       "id": "REQ-VIEWER-942",
@@ -12962,6 +13278,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:3403"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_cross_tool.py:84"
         }
       ],
       "test_exempt": null,
@@ -13119,6 +13439,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:274"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:9928"
         }
       ],
       "test_exempt": null,
@@ -13126,8 +13450,7 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 6,
-      "gap": "no `verifies:` tag for CASE-6"
+      "covered": 7
     },
     {
       "id": "ARCH-VRUNGS-054",
