@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.4"
+MAP_ENGINE_VERSION = "2026-09-04.5"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -7763,7 +7763,7 @@ def _design_mask(src):
     while i < n:
         c = src[i]
         two = src[i:i + 2]
-        if two == "//" or (c == "#" and src.lstrip()[:1] != "#" and False):
+        if two == "//":
             j = src.find("\n", i)
             j = n if j == -1 else j
             out.append(" " * (j - i)); i = j
@@ -7847,7 +7847,6 @@ def _design_brace(rel, src):  # implements: REQ-DESIGN-955
         methods = {}
         for f in fns:
             if start < f["end"] <= end and f["name"] not in _BRACE_KEYWORDS:
-                head = masked.rfind("\n", 0, masked.find("{", start)) if False else None
                 fstart = masked.rfind(f["name"], start, f["end"])
                 methods[f["name"]] = re.sub(r"\s+", " ", src[fstart:f["end"]]).strip()
         classes.append({"name": m.group(1), "line": masked.count("\n", 0, m.start()) + 1,
@@ -7855,7 +7854,7 @@ def _design_brace(rel, src):  # implements: REQ-DESIGN-955
         if depth_at(start) == 0:
             n_top += 1
     out += _design_shape_findings(rel, fns, classes)
-    chains, cur, last_end = [], None, -1
+    chains, cur = [], None
     for m in _BRACE_IF_RE.finditer(masked):
         paren = m.end() - 1
         depth, i = 0, paren

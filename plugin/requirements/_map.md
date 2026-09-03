@@ -1,5 +1,5 @@
 ---
-generated: 2026-09-04 00:38
+generated: 2026-09-04 00:42
 nodes: 209
 edges: 104
 design: 23/100 (7/30 source files without a design candidate)
@@ -485,8 +485,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_6179["plugin/scripts/test_reqmap.py:6179"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_6179
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_7981_8139["plugin/scripts/reqmap.py:7981-8139"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_7981_8139
+  f_plugin_scripts_reqmap_py_7980_8138["plugin/scripts/reqmap.py:7980-8138"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_7980_8138
   f_plugin_scripts_test_reqmap_py_8052["plugin/scripts/test_reqmap.py:8052"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_py_8052
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
@@ -512,8 +512,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_7767["plugin/scripts/test_reqmap.py:7767"]
   ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7767
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_scripts_reqmap_py_7562_7932["plugin/scripts/reqmap.py:7562-7932"]
-  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_7562_7932
+  f_plugin_scripts_reqmap_py_7562_7931["plugin/scripts/reqmap.py:7562-7931"]
+  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_7562_7931
   f_plugin_scripts_test_reqmap_py_8165["plugin/scripts/test_reqmap.py:8165"]
   ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_py_8165
   ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
@@ -640,8 +640,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_52_6289["plugin/scripts/test_reqmap.py:52-6289"]
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_52_6289
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_8263_8282["plugin/scripts/reqmap.py:8263-8282"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_8263_8282
+  f_plugin_scripts_reqmap_py_8262_8281["plugin/scripts/reqmap.py:8262-8281"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_8262_8281
   f_plugin_scripts_test_reqmap_py_7049["plugin/scripts/test_reqmap.py:7049"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_py_7049
   ARCH_PROMOTE_011["confirm<br><small>ARCH-PROMOTE-011</small>"]
@@ -667,8 +667,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_5998["plugin/scripts/test_reqmap.py:5998"]
   ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_5998
   ARCH_REDUNDANCY_058["Requirements that say the same thing<br><small>ARCH-REDUNDANCY-058</small>"]
-  f_plugin_scripts_reqmap_py_5244_8207["plugin/scripts/reqmap.py:5244-8207"]
-  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5244_8207
+  f_plugin_scripts_reqmap_py_5244_8206["plugin/scripts/reqmap.py:5244-8206"]
+  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5244_8206
   f_plugin_scripts_test_reqmap_py_7831["plugin/scripts/test_reqmap.py:7831"]
   ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7831
   ARCH_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>ARCH-REGISTRYLAG-035</small>"]
@@ -757,8 +757,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_3413_7024["plugin/scripts/test_reqmap.py:3413-7024"]
   ARCH_SIMILAR_016 -->|tested-by| f_plugin_scripts_test_reqmap_py_3413_7024
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
-  f_plugin_scripts_reqmap_py_5885_8235["plugin/scripts/reqmap.py:5885-8235"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_5885_8235
+  f_plugin_scripts_reqmap_py_5885_8234["plugin/scripts/reqmap.py:5885-8234"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_5885_8234
   f_plugin_scripts_test_reqmap_py_5619["plugin/scripts/test_reqmap.py:5619"]
   ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_5619
   ARCH_STALEENGINE_043["Stale vendored engine, reported in CI<br><small>ARCH-STALEENGINE-043</small>"]
