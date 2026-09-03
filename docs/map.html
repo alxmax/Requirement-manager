@@ -33639,6 +33639,138 @@
       "lane": "feature",
       "milestone": "v3",
       "done": true
+    },
+    {
+      "name": "`binding_hash`'s `_NORMATIVE_HEADING_RE` (line 1741) omits \"cases\" from its keyword list, so a `## Cases` section is silently excluded from the drift hash -- editing a CASE-N criterion never trips DRIFT",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`load_requirements` (line 909): a file's prose preamble block (before its first `---` block) can fall back to the filename for its id same as block 0 proper -- if the file is named after its real first requirement's id, the preamble wins the `rid in reqs` collision and the real requirement is silently dropped, with only a stderr warning",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_SH_TEST_NAME_RE` (line 2117, feeds `_test_link_problem`) requires a `._-` separator on both sides of \"test\", so a shell test file literally named `test.sh` or `tests.sh` fails the filename-convention check and gets a false test-link-integrity warning",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_check` under `--since` (lines 2259 and 2268): the implements/tested-by coverage check tests `rid in members` against the `--since`-FILTERED member dict instead of full coverage, so a confirmed requirement whose implements tag is untouched but whose tested-by file changed (or vice versa) gets a false ERROR (implements side, flips exit code) or false WARN (tested-by side)",
+      "lane": "ops",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_promote_todo`'s `layer:` frontmatter substitution (line 2734) has no success check, unlike the milestone/title anchor handling right below it -- a custom template whose layer line doesn't literally match `layer: feature` silently keeps the wrong layer while the success message reports the intended one",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_promote` (line 2865): EOL detection is \"any CRLF anywhere in the file\" then blanket-converts every remaining bare `\\n` to `\\r\\n`, so a file with mixed line endings gets its bare-LF lines silently rewritten -- contradicts the adjacent comment's promise to preserve the file's own line endings verbatim",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_py_facts` (lines 3104 and 3121) crashes with `IndexError` when a module/function/class docstring is non-empty but whitespace-only after `ast.get_docstring`'s cleanup -- aborts the whole `plan`/`candidates` run on one such .py file instead of degrading to empty facts as its own docstring promises",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_translate` (line 3901) and `_load_translations` (line 3953) both call `.get(...)`/`.items()` on a parsed i18n cache JSON without checking it's a dict first, unlike every other cache loader in the file (scancache, lock, memberlock, capmap all guard with `isinstance(data, dict)`) -- a malformed `_i18n/<locale>.json` crashes `translate`/`map`/`map --check`/`export` instead of failing open per entry as documented",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_next` (lines 4124 and 4166): the early \"Nothing pending\" return fires whenever the four risk buckets + untagged-files are empty, even though Granularity/Redundancy (computed later in the same function) may still be non-empty -- and when Granularity DOES print, it ignores `top_n` truncation that every sibling bucket applies",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`lint_requirement`'s vague-term and redundant-modal checks (lines 4496 and 4510) both call `_lint_prose(body, \"contract\")` with the literal legacy label instead of iterating `CONTRACT_LABELS` -- both checks are dead on every requirement using the current `## Description` heading",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_already_decomposed` (line 4639): `except OSError` when reading sibling requirement files doesn't catch `UnicodeDecodeError` (a `ValueError` subclass), unlike the same read pattern elsewhere in the file that deliberately catches `(OSError, ValueError)` -- one invalid-UTF-8 sibling crashes `lint --decompose` instead of being skipped",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_commits_since_reqs_touch` (line 5184) passes `reqs_dir` un-rooted to `git -C code_root log -- reqs_dir`, so under `--code ..` (this repo's own documented common invocation) the pathspec resolves relative to `code_root` instead of the original cwd and the registry-lag signal silently goes missing from `health`",
+      "lane": "ops",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_health` (line 5252): the \"healthy on every axis\" tally waives the tested-by requirement for `layer: need` (`has_test or is_need`) but not for `layer: aggregate`, even though `_impl_exempt` -- the one predicate CLAUDE.md documents as shared by gate/health/map/confirm -- waives both",
+      "lane": "ops",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_wipe` (lines 5382 and 5386, `init --wipe`) reads and rewrites tagged source files without `newline=\"\"`, unlike `cmd_promote`/`_mark_todo_done`/`_apply_verifies` which all deliberately pass it -- stripping one tag comment silently normalizes the ENTIRE file's line endings to the host platform's `os.linesep`",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_section` (line 5623) and `_bullets` (line 5668) use `lstrip(\"- \")` / `lstrip(\"> \")`, which strips a leading CHARACTER SET, not a two-character prefix, corrupting requirement content that itself starts with `-` or `>` (e.g. `- -1 means error`, `> >100 requests/sec`) -- feeds the committed `_map.json`'s `input`/`output`/`contract`/`desc` fields",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_emit_area_subgraphs` (line 5816): the per-area Mermaid subgraph label embeds the raw `area:` frontmatter string directly instead of passing it through `_mlabel` like the sibling `_mermaid_deps` does -- an area name containing a `\"` breaks the generated Mermaid syntax in the committed `_map.md`",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_mermaid_deps` (line 5902): area-level node ids (`a_{_safe_id(label)}`) have no collision guard, unlike `_emit_area_subgraphs` in the same file which explicitly disambiguates two area labels that sanitize to the same id -- two such areas collapse into one Mermaid node and a real inter-area dependency renders as a self-loop",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_LEGEND_MD` (line 6030) has 4 entries but `_build_md_text` now renders 5 diagrams (Specification Hierarchy was added as a new first diagram without a matching legend entry) -- every legend caption is shifted one diagram off and the last diagram (Risk & Unknowns) gets an empty legend",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_site` scaffold (`_render_region`, lines 6248 and 6256): the injected `nav`/`stats` regions wrap their content in `reqmap-nav`/`reqmap-stats` divs that match no selector in `SITE_TEMPLATE`'s CSS -- on a freshly scaffolded page the nav links render unstyled/uncrammed and the 5 stat cards stack vertically instead of the intended 6-column grid",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_apply_verifies` (line 6922): the idempotency check does substring containment (`if tag in line`) on the literal tag text, so an existing `CASE-11`/`AC-11` tag is mistaken for a proposed `CASE-1`/`AC-1` tag already being present -- the real, missing tag is silently never written",
+      "lane": "feature",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`_write_region` (line 761, used by `gen-integration` to patch SKILL.universal.md's command table) reads and writes its target file in default text mode with no `newline=\"\"`, so on POSIX it universal-newline-translates the WHOLE file CRLF -> LF on read and writes it back with no re-translation -- contradicts its own docstring's promise that \"prose outside is untouched\"",
+      "lane": "bus",
+      "milestone": "v3.1",
+      "done": false
+    },
+    {
+      "name": "`cmd_gen_integration` (line 768) writes `tool_definition.json` via the same bare text-mode open with no `newline` argument, so regenerating on a non-Windows box flips the whole committed CRLF file to LF even though the JSON content is unchanged",
+      "lane": "ops",
+      "milestone": "v3.1",
+      "done": false
     }
   ]
 };</script>
