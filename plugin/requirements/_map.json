@@ -4629,6 +4629,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:7252"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:7746"
         }
       ],
       "test_exempt": null,

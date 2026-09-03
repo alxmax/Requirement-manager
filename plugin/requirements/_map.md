@@ -1,5 +1,5 @@
 ---
-generated: 2026-09-03 11:38
+generated: 2026-09-03 12:05
 nodes: 691
 edges: 97
 ---
@@ -1140,8 +1140,8 @@ graph LR
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
   f_plugin_scripts_reqmap_py_2170_4833["plugin/scripts/reqmap.py:2170-4833"]
   ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2170_4833
-  f_plugin_scripts_test_reqmap_py_7049_7252["plugin/scripts/test_reqmap.py:7049-7252"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7049_7252
+  f_plugin_scripts_test_reqmap_py_7049_7746["plugin/scripts/test_reqmap.py:7049-7746"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7049_7746
   REQ_DECOMPOSE_328["Lint writes no file during the default run<br><small>REQ-DECOMPOSE-328</small>"]
   style REQ_DECOMPOSE_328 fill:#eee,stroke:#bbb,color:#888
   REQ_DECOMPOSE_329["Lint --decompose creates one draft requirement for each<br><small>REQ-DECOMPOSE-329</small>"]

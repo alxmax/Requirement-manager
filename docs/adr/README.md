@@ -30,6 +30,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0018](0018-no-contract-acceptance-traceability-marker-yet.md) | No Contract-to-Acceptance traceability marker, yet | Rejected |
 | [0019](0019-v-model-left-arm-adopted.md) | The V-model's left arm is adopted; its checks stay warn-only | Accepted |
 | [0020](0020-redundancy-signal-below-the-fire-rate-bar.md) | An exact-duplicate signal ships below ADR-0016's fire-rate bar | Accepted |
+| [0021](0021-corpus-grows-only-by-design.md) | The corpus grows only, and that asymmetry is intentional | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

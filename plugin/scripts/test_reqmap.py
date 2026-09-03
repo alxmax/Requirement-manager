@@ -7743,6 +7743,43 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
             self.assertNotIn("Redundancy", buf.getvalue())
 
 
+class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
+    """ADR-0021: the corpus grows only. Five paths create a requirement file
+    (`new`, `draft`, `init`, and `lint --decompose` on either of its two
+    triggers); none removes one. The single destructive path is `_wipe`, which
+    resets everything rather than pruning selectively.
+
+    This test is trivially green the day it is written — that is the point. It
+    fails the moment a second delete path appears, which routes the author back
+    to docs/adr/0021-corpus-grows-only-by-design.md to revisit the decision
+    deliberately instead of drifting past it."""
+
+    _DELETE_CALLS = ("os.remove", "os.unlink", "shutil.rmtree", "os.rename", "shutil.move")
+
+    def _enclosing_def(self, lines, idx):
+        """Name of the innermost top-level `def` above line *idx*, or None."""
+        for j in range(idx, -1, -1):
+            if lines[j].startswith("def "):
+                return lines[j][4:].split("(")[0]
+        return None
+
+    def test_delete_calls_live_only_in_wipe(self):
+        src = open(R.__file__, encoding="utf-8").read().split("\n")
+        offenders = []
+        for i, line in enumerate(src):
+            code = line.split("#", 1)[0]           # ignore mentions in comments
+            if not any(call + "(" in code for call in self._DELETE_CALLS):
+                continue
+            owner = self._enclosing_def(src, i)
+            if owner != "_wipe":
+                offenders.append("{}:{} in {}() -> {}".format(
+                    os.path.basename(R.__file__), i + 1, owner, line.strip()))
+        self.assertEqual(offenders, [], "\n".join(
+            ["a requirement-removing path appeared outside _wipe; ADR-0021 says the corpus",
+             "grows only. Adding one is allowed, but it supersedes that record — write the",
+             "new ADR first, then update this test:"] + offenders))
+
+
 # collected instead of 494, 16 silently skipped in the invocation
 # CLAUDE.md documents. CI runs `-m unittest`, which imports the whole
 # module first, so CI never saw the gap.
