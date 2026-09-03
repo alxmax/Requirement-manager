@@ -203,10 +203,10 @@ superseded_by:
 > `gate`, `sync`, `lint`, `map`, `export`, or the pre-commit hook. It is the only
 > subcommand that invokes an external `claude` CLI subprocess.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: translate never runs from any other command
+  Given  `subprocess.run` mocked to raise if `claude` is invoked
+  When   `gate`, `sync`, `lint`, `map` and `export` run
+  Then   none of them invoke `subprocess.run`, unlike `cmd_translate`
 
 ## Members in code (auto)
 
@@ -234,10 +234,10 @@ superseded_by:
 > signal; below that, whichever of a small RO/EN stopword list scores more hits wins. A
 > per-file `lang: ro|en` frontmatter value overrides detection for that file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: corpus_lang picks the majority language, override wins per file
+  Given  two Romanian requirements and one English requirement, one Romanian file marked `lang: en`
+  When   `corpus_lang` runs
+  Then   it returns `ro` as the majority, and the marked file's effective language is `en`
 
 ## Members in code (auto)
 
@@ -265,10 +265,10 @@ superseded_by:
 > results in `requirements/_i18n/<target>.json`, one file per target locale, keyed by
 > requirement id.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: translate caches one entry per requirement in the target locale file
+  Given  a Romanian-majority corpus and `translate --to en`
+  When   it runs
+  Then   `requirements/_i18n/en.json` gains one entry keyed by each translated requirement's id
 
 ## Members in code (auto)
 
@@ -296,10 +296,10 @@ superseded_by:
 > title-only edit also invalidates a cached translation, which reusing `binding_hash`
 > would miss.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a title-only edit invalidates the cached translation
+  Given  two bodies identical except for the `# ` title line
+  When   `translation_hash` runs on each, and `binding_hash` runs on each
+  Then   the `translation_hash` values differ while the `binding_hash` values stay equal
 
 ## Members in code (auto)
 
@@ -328,10 +328,10 @@ superseded_by:
 > (Given/When/Then). A mismatch skips the entry with a `WARN` and writes nothing for it —
 > it never partially caches a corrupted translation.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a dropped backtick or number blocks the cache write
+  Given  a translated string missing a backticked identifier the source has
+  When   `_translation_preserves_structure` compares them
+  Then   it returns false and `cmd_translate` writes no cache entry, printing a WARN
 
 ## Members in code (auto)
 
@@ -359,10 +359,10 @@ superseded_by:
 > translation that renames either is refused. The prompt states both rules, so a model
 > that translates them is answering a question nobody asked.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: renaming a criterion label or a Gherkin keyword blocks the cache write
+  Given  a translation that renames `CASE-1` to `CA-1`, or translates `Given` to `Dat fiind`
+  When   `_translation_preserves_structure` compares it with the source
+  Then   it returns false, refusing to cache the translation
 
 ## Members in code (auto)
 
@@ -389,10 +389,10 @@ superseded_by:
 > also skips that entry with a `WARN`. `translate` always exits 0 and never aborts the
 > batch on a single entry's failure — it is a report-and-cache tool, not a gate.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a missing claude CLI skips one entry without aborting the run
+  Given  `subprocess.run` raising because the `claude` CLI is absent
+  When   `cmd_translate` runs
+  Then   it prints a WARN naming the requirement, writes no cache entry, and exits 0
 
 ## Members in code (auto)
 
@@ -418,10 +418,10 @@ superseded_by:
 > A cache hit (stored hash matches current content) is skipped without invoking `claude` —
 > cost is proportional to what changed, not to corpus size.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unchanged requirement is a cache hit on the second run
+  Given  a cached translation whose source requirement is unedited
+  When   `cmd_translate` runs a second time
+  Then   it does not call `claude` for that requirement
 
 ## Members in code (auto)
 
@@ -451,10 +451,10 @@ superseded_by:
 > this is a file read, so `map --check` stays exactly as deterministic and `claude`-free
 > as before this capability existed.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map attaches a fresh cache entry without ever calling claude
+  Given  a `requirements/_i18n/en.json` entry whose hash matches the requirement's current content
+  When   `_build_map_data` runs with `subprocess.run` mocked to raise on any call
+  Then   the node carries `node.i18n.en` and no call to `claude` was made
 
 ## Members in code (auto)
 

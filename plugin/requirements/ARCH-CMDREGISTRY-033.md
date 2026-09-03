@@ -121,10 +121,10 @@ superseded_by:
 > Argparse choices are derived from `COMMANDS` at runtime; no hard-coded choices literal
 > is permitted.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: argparse choices trace back to COMMANDS with no hardcoded list
+  Given  the live argparse parser built from `COMMANDS`
+  When   `_cli_choices()` is called
+  Then   its return value equals `list(COMMANDS)` in insertion order
 
 ## Members in code (auto)
 
@@ -150,10 +150,10 @@ superseded_by:
 > `tool_definition.json` (the function-calling schema) is generated from `COMMANDS` by the
 > `gen-integration` command.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gen-integration derives tool_definition.json from COMMANDS
+  Given  a `COMMANDS` entry with a summary, a positional arg and a flag
+  When   `gen-integration` runs
+  Then   `tool_definition.json` carries a matching function-calling schema entry for that command
 
 ## Members in code (auto)
 
@@ -180,10 +180,10 @@ superseded_by:
 > and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is
 > never touched.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gen-integration rewrites only the marked command-table region
+  Given  `SKILL.universal.md` with hand-written prose outside `<!--##REQMAP:COMMANDS##-->`
+  When   `gen-integration` runs
+  Then   the region's table refreshes and the surrounding prose is byte-identical
 
 ## Members in code (auto)
 
@@ -209,10 +209,10 @@ superseded_by:
 > Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated
 > artifacts.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gen-integration omits internal commands from AI-facing output
+  Given  `COMMANDS` including the internal `gen-integration` entry itself
+  When   `gen-integration` runs
+  Then   `tool_definition.json` lists no `gen-integration` function
 
 ## Members in code (auto)
 
@@ -238,10 +238,10 @@ superseded_by:
 > The gate fails (exit non-zero) when a committed generated artifact is stale relative to
 > a fresh generation.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate fails on a stale generated artifact
+  Given  a committed `tool_definition.json` that differs from a fresh generation
+  When   `gate` runs
+  Then   it exits non-zero, naming the stale artifact
 
 ## Members in code (auto)
 
@@ -266,9 +266,9 @@ superseded_by:
 
 > All generators and the gate check are stdlib-only; no third-party imports are permitted.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the generator and gate-check code import no third-party module
+  Given  the source of `_generate_schema`, `_generate_command_table` and `_check_integration_fresh`
+  When   their imports are inspected
+  Then   every import resolves to the Python standard library
 
 ## Members in code (auto)

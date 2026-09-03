@@ -139,10 +139,10 @@ superseded_by:
 > The gate warns for each program file that carries no membership tag and no `verifies:`
 > tag, once that file is at least `ORPHAN_CODE_MIN_LOC` physical lines long.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an untagged file at the LOC threshold triggers the warning
+  Given  an untagged 400-line `.py` file with no `implements`/`verifies` tag
+  When   `gate` runs
+  Then   it prints a warn line naming that file as orphan code
 
 ## Members in code (auto)
 
@@ -168,10 +168,10 @@ superseded_by:
 > A program file is one ending in `.py .js .ts .tsx .jsx .c .cc .cpp .h .hpp .java .go
 > .rs`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: only files on the program-extension list are considered
+  Given  an untagged 400-line `.go` file and an untagged 400-line `.txt` file
+  When   `gate` runs
+  Then   the `.go` file is reported as orphan code and the `.txt` file is not
 
 ## Members in code (auto)
 
@@ -197,10 +197,11 @@ superseded_by:
 > A membership tag is one of `implements`, `tested-by`, `generated-from` and
 > `validated-against`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: any of the four membership tags silences the warning
+  Given  four large untagged files, each carrying one of `implements`, `tested-by`,
+         `generated-from`, `validated-against`
+  When   `gate` runs
+  Then   none of the four is reported as orphan code
 
 ## Members in code (auto)
 
@@ -226,10 +227,10 @@ superseded_by:
 > The gate does not consider the prose, styling and config extensions (`.md .html .css
 > .sql .yaml .yml`). Prose coverage is [[ARCH-DOCBUNDLE-026]]'s concern.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: prose and config extensions are never checked for orphan code
+  Given  a large untagged `.md` file and a large untagged `.yaml` file
+  When   `gate` runs
+  Then   neither is reported as orphan code
 
 ## Members in code (auto)
 
@@ -255,10 +256,10 @@ superseded_by:
 > The check honors `.reqmapignore` and the standard scan walk, so a repo can mark
 > generated or vendored code out of scope rather than tag it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a .reqmapignore pattern exempts a large untagged file
+  Given  a large untagged `.py` file matched by a `.reqmapignore` pattern
+  When   `gate` runs
+  Then   it is not reported as orphan code
 
 ## Members in code (auto)
 
@@ -284,10 +285,10 @@ superseded_by:
 > The scan walk prunes `.git`, `node_modules`, `__pycache__` and the SSOT `requirements/`
 > directory.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: files under pruned directories are never scanned for orphan code
+  Given  a large untagged `.py` file inside `node_modules/`
+  When   `gate` runs
+  Then   it is not reported as orphan code
 
 ## Members in code (auto)
 
@@ -312,10 +313,10 @@ superseded_by:
 
 > The check skips a file it cannot read.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unreadable file is skipped rather than crashing the check
+  Given  a large program file the process cannot read
+  When   `gate` runs
+  Then   it completes without error and prints no orphan-code line for that file
 
 ## Members in code (auto)
 

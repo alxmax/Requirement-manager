@@ -159,10 +159,10 @@ superseded_by:
 
 > `check/action.yml` runs the probe as a step of the published gate action.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate action wires the staleness probe as its own step
+  Given  `check/action.yml`
+  When   its steps are inspected
+  Then   one step invokes `engine_staleness.py` as part of the action's run
 
 ## Members in code (auto)
 
@@ -215,10 +215,10 @@ superseded_by:
 
 > The action's `stale-engine` input sets that mode and defaults to `warn`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the stale-engine input defaults to warn
+  Given  `check/action.yml` with no `stale-engine` input set by the caller
+  When   the action's inputs are read
+  Then   `stale-engine` resolves to `warn`
 
 ## Members in code (auto)
 
@@ -244,10 +244,10 @@ superseded_by:
 > A vendored engine older than the reference produces one message naming both versions and
 > the re-seed remedy.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the stale message names the re-seed remedy
+  Given  a vendored engine older than the reference engine
+  When   the probe reports it
+  Then   the message names the remedy of re-seeding the vendored copy
 
 ## Members in code (auto)
 
@@ -272,10 +272,10 @@ superseded_by:
 
 > In `warn` the message is a warning and the exit code stays 0.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: warn mode reports and stays green
+  Given  a stale vendored engine
+  When   the probe runs with `--mode warn`
+  Then   it prints a warning and the process exits 0
 
 ## Members in code (auto)
 
@@ -300,10 +300,10 @@ superseded_by:
 
 > In `error` the same condition exits 1.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: error mode turns the same staleness into a failure
+  Given  the same stale vendored engine
+  When   the probe runs with `--mode error`
+  Then   the process exits 1
 
 ## Members in code (auto)
 
@@ -329,10 +329,10 @@ superseded_by:
 > Under GitHub Actions the message is emitted as a `::warning::` workflow annotation, so
 > it surfaces on the run rather than only in the log.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: GitHub Actions gets an annotation, elsewhere a plain line
+  Given  a stale vendored engine, once with `GITHUB_ACTIONS` set and once without
+  When   the probe reports it
+  Then   the first prints a `::warning::` annotation and the second a plain `WARN` line
 
 ## Members in code (auto)
 
@@ -357,10 +357,10 @@ superseded_by:
 
 > `off` produces no output and exit 0.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: off mode is silent
+  Given  a stale vendored engine
+  When   the probe runs with `--mode off`
+  Then   it prints nothing and exits 0
 
 ## Members in code (auto)
 
@@ -385,10 +385,10 @@ superseded_by:
 
 > A vendored engine at or ahead of the reference version produces no warning.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an up-to-date or newer engine never warns
+  Given  a vendored engine at the same version as the reference, or newer
+  When   the probe runs in `warn` or `error` mode
+  Then   no staleness message appears and it exits 0
 
 ## Members in code (auto)
 
@@ -415,10 +415,10 @@ superseded_by:
 > reported as a skipped probe with exit 0, in every mode, because an unreadable version is
 > not evidence of staleness.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unreadable version is skipped, not treated as stale
+  Given  a vendored `reqmap.py` missing `MAP_ENGINE_VERSION`
+  When   the probe runs in `error` mode
+  Then   it reports the probe as skipped and exits 0
 
 ## Members in code (auto)
 
@@ -444,9 +444,9 @@ superseded_by:
 > An unexpected internal failure of the probe is reported the same way: a skipped probe,
 > exit 0. The probe is never itself the reason a gate run goes red.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an internal probe crash never fails the gate
+  Given  a probe run that raises an unexpected exception while comparing versions
+  When   the probe runs in `error` mode
+  Then   it reports the probe as skipped and exits 0 rather than propagating the exception
 
 ## Members in code (auto)

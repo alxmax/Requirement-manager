@@ -96,10 +96,10 @@ superseded_by:
 > test, prints a human-readable summary, and exits 0 on success. This is the CI
 > health-check entry point and is never shadowed by a new default verb.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: no-arg invocation runs the smoke test and exits 0
+  Given  no command-line arguments
+  When   `python excalidraw_builder.py` runs
+  Then   it prints a success summary line and exits 0
 
 ## Members in code (auto)
 
@@ -126,10 +126,10 @@ superseded_by:
 > `.excalidraw` file and writes a fresh self-contained `<basename>.html` viewer beside it
 > (or into `out_dir` when given). The source `.excalidraw` file is never modified.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: render rebuilds the HTML viewer without touching the source
+  Given  an existing `<scene>.excalidraw` file
+  When   `render <scene>.excalidraw` runs
+  Then   a fresh `<scene>.html` is written and the `.excalidraw` file's bytes are unchanged
 
 ## Members in code (auto)
 
@@ -157,10 +157,10 @@ superseded_by:
 > INTEGRATION / MODES / MODEL / DATA layers commented as scaffolds) to `out.py` (default:
 > `make_diagram.py`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: discover emits a runnable multi-layer stub
+  Given  a repository containing at least one source file
+  When   `discover <repo> out.py` runs
+  Then   `out.py` is written, imports `excalidraw_builder`, and runs without error
 
 ## Members in code (auto)
 
@@ -185,9 +185,9 @@ superseded_by:
 
 > Any unrecognised verb exits with code 2 and prints a usage message.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unknown verb exits 2 with usage
+  Given  the verb `frobnicate`
+  When   `python excalidraw_builder.py frobnicate` runs
+  Then   it exits with code 2 and prints a usage message
 
 ## Members in code (auto)

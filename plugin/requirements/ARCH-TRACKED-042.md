@@ -93,10 +93,10 @@ superseded_by:
 
 > `untracked_members` lists the member files git does not track under the scan root.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: untracked_members names a git-untracked member file
+  Given  a member file that git does not track under the scan root
+  When   `untracked_members` runs
+  Then   it returns that file's path in its result list
 
 ## Members in code (auto)
 
@@ -121,10 +121,10 @@ superseded_by:
 
 > `gate` reports those files in one warning naming up to five of them and the total count.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate warning caps the named files and reports the total
+  Given  seven untracked member files
+  When   `gate` runs inside a git work tree
+  Then   its warning names five of them by path and states the total count of 7
 
 ## Members in code (auto)
 
@@ -150,10 +150,10 @@ superseded_by:
 > The warning names the two remedies: commit the files, or exclude them in
 > `.reqmapignore`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the untracked warning names both fixes
+  Given  a gate run reporting an untracked member
+  When   the warning text is inspected
+  Then   it names committing the file and adding it to `.reqmapignore` as the two remedies
 
 ## Members in code (auto)
 
@@ -179,10 +179,10 @@ superseded_by:
 > `untracked_members` reports nothing and the gate stays silent when the scan root is not
 > a git work tree, or git is unavailable.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the check stays silent outside a git work tree
+  Given  a scan root that is not a git repository
+  When   `untracked_members` runs
+  Then   it returns nothing and `gate` prints no untracked-member warning
 
 ## Members in code (auto)
 

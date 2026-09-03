@@ -109,10 +109,10 @@ superseded_by:
 
 > A requirement may carry a `level:` value of `system`, `architecture` or `code`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate accepts each of the three level values
+  Given  three requirements carrying `level: system`, `level: architecture` and `level: code` respectively
+  When   `gate` runs
+  Then   it reports no level-related error for any of the three
 
 ## Members in code (auto)
 
@@ -137,10 +137,10 @@ superseded_by:
 
 > The `level:` field is optional. A requirement without one is read exactly as before.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a requirement without level: reads exactly as before
+  Given  a corpus of requirements written before `level:` existed, none carrying the field
+  When   `gate` runs
+  Then   its output matches a run from before the field was introduced
 
 ## Members in code (auto)
 
@@ -165,10 +165,10 @@ superseded_by:
 
 > The `level:` axis is independent of `layer:`, and neither value constrains the other.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: level and layer combine freely without cross-validation
+  Given  a requirement carrying `level: system` and `layer: bus` together
+  When   `gate` runs
+  Then   it reports no error tying the two fields to each other
 
 ## Members in code (auto)
 
@@ -194,10 +194,10 @@ superseded_by:
 > An `architecture` requirement owns code, so the gate keeps requiring an `implements:`
 > member for it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an architecture-level requirement still needs an implements member
+  Given  a confirmed requirement carrying `level: architecture` and no `implements:` member
+  When   `gate` runs
+  Then   it reports the missing-member error
 
 ## Members in code (auto)
 
@@ -222,10 +222,10 @@ superseded_by:
 
 > The `aggregate` layer stays exempt from that rule, because it owns no code of its own.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an aggregate-layer requirement stays exempt regardless of level
+  Given  a confirmed `layer: aggregate` requirement carrying `level: architecture` and no `implements:` member
+  When   `gate` runs
+  Then   it reports no missing-member error
 
 ## Members in code (auto)
 
@@ -278,10 +278,10 @@ superseded_by:
 
 > The gate reports an error for a `level:` value outside the three named ones.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an invalid level value is a gate error
+  Given  a requirement carrying `level: detailed`
+  When   `gate` runs
+  Then   it reports one error naming the invalid value and exits 1
 
 ## Members in code (auto)
 

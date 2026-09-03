@@ -113,10 +113,10 @@ superseded_by:
 > `tagged_unscanned_files` lists the tracked, non-scannable files under the scan root that
 > contain a membership tag.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a tagged Caddyfile is listed as unscannable
+  Given  a tracked `Caddyfile` containing `# implements: ARCH-EXAMPLE-001`
+  When   `tagged_unscanned_files` runs
+  Then   that file appears in its returned list
 
 ## Members in code (auto)
 
@@ -141,10 +141,10 @@ superseded_by:
 
 > `gate` reports those files in one warning naming up to five of them and the total count.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the gate warning names up to five files and the total count
+  Given  seven tracked non-scannable files each carrying a tag
+  When   `gate` runs
+  Then   it prints one warning naming five of them and stating the total of seven
 
 ## Members in code (auto)
 
@@ -170,10 +170,10 @@ superseded_by:
 > The warning states that those files are not members, and names the remedy: move the tag
 > into a scannable file, or ask for the file type to be added to the scan.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the warning states the remedy, not just the file names
+  Given  one tracked non-scannable file carrying a tag
+  When   `gate` runs
+  Then   the warning states the file counts as no member and names both remedies: move the tag, or ask for the type
 
 ## Members in code (auto)
 
@@ -201,10 +201,10 @@ superseded_by:
 > examples), and files larger than one megabyte. Any other dotfile, such as `.env`, is
 > checked like any file.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: ignored, SSOT, underscore-prefixed and oversized files are skipped
+  Given  a file matched by `.reqmapignore`, a file under `requirements/`, a `_scratch.txt` file, and a 2 MB file, each carrying a tag
+  When   `tagged_unscanned_files` runs
+  Then   none of the four appears in its returned list
 
 ## Members in code (auto)
 
@@ -229,10 +229,10 @@ superseded_by:
 
 > A file that is not valid UTF-8 text is skipped. Binary files never produce a warning.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a non-UTF-8 file is skipped without warning
+  Given  a tracked non-scannable binary file whose bytes are not valid UTF-8, containing a tag-like string
+  When   `tagged_unscanned_files` runs
+  Then   that file is absent from the returned list
 
 ## Members in code (auto)
 
@@ -258,10 +258,10 @@ superseded_by:
 > The check reports nothing and the gate stays silent when the scan root is not a git work
 > tree, or git is unavailable.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: outside a git work tree, the check stays silent
+  Given  a scan root that is not a git repository
+  When   `gate` runs
+  Then   it prints no unscanned-tag warning at all
 
 ## Members in code (auto)
 

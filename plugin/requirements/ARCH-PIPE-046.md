@@ -122,10 +122,10 @@ superseded_by:
 > `reqmap.py` treats `BrokenPipeError` and the Windows form of the same event (`OSError`
 > with `EPIPE` or `EINVAL`) alike.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: BrokenPipeError and its Windows OSError form are handled alike
+  Given  one run whose `print` raises `BrokenPipeError` and another whose `print` raises `OSError` with `errno` `EINVAL`
+  When   `_run_cli` runs each
+  Then   both return 0 without printing a traceback
 
 ## Members in code (auto)
 
@@ -151,10 +151,10 @@ superseded_by:
 > Any other `OSError` still propagates unchanged. The rule covers a closed reader, not
 > disk or permission errors.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an unrelated OSError still propagates
+  Given  a command whose `print` raises `OSError` with `errno` `EACCES` (permission denied)
+  When   `_run_cli` runs it
+  Then   that `OSError` propagates instead of being swallowed
 
 ## Members in code (auto)
 
@@ -180,9 +180,9 @@ superseded_by:
 > The rule lives in the command-line entry point (`_run_cli`), so every subcommand gets it
 > and none re-implements it.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the closed-pipe fix is centralized, not per-command
+  Given  `reqmap.py scan | head -1` and `reqmap.py dupes | head -1`, both closing early
+  When   each command runs
+  Then   both exit 0 with no traceback, from the one shared `_run_cli` handler
 
 ## Members in code (auto)

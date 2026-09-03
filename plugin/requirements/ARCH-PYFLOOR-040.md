@@ -96,10 +96,10 @@ superseded_by:
 
 > `MIN_PYTHON` names the oldest interpreter version the engine supports.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: MIN_PYTHON names a concrete required version
+  Given  the `reqmap.py` module
+  When   `MIN_PYTHON` is inspected
+  Then   it holds a specific version tuple such as `(3, 9)`, not a placeholder
 
 ## Members in code (auto)
 
@@ -125,10 +125,10 @@ superseded_by:
 > `MIN_PYTHON` equals the oldest version the CI test matrix runs, so the declared floor
 > and the proven floor are the same number.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: MIN_PYTHON matches the CI matrix's oldest entry
+  Given  `MIN_PYTHON` and `.github/workflows/ci.yml`'s `tests` job matrix
+  When   both are compared
+  Then   the matrix's lowest Python version equals `MIN_PYTHON`
 
 ## Members in code (auto)
 
@@ -154,10 +154,10 @@ superseded_by:
 > `reqmap.py` refuses to run on an interpreter below `MIN_PYTHON`, before any command
 > executes.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an interpreter below the floor is refused before any command runs
+  Given  `reqmap.py` started under an interpreter version below `MIN_PYTHON`
+  When   `main()` runs
+  Then   it refuses and returns before dispatching to any command
 
 ## Members in code (auto)
 
@@ -183,10 +183,11 @@ superseded_by:
 > `reqmap.py` exits 2 on refusal and prints one line naming the required version, the
 > running version, and the fix.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the refusal exits 2 and names both versions and the fix
+  Given  an interpreter below `MIN_PYTHON`
+  When   `reqmap.py` starts
+  Then   it prints one line naming `MIN_PYTHON`, the running version and the upgrade fix, then
+         exits 2
 
 ## Members in code (auto)
 
@@ -212,9 +213,10 @@ superseded_by:
 > `_python_floor_error` reports the refusal message for a caller-supplied version, so a
 > test pins the floor without spawning an old interpreter.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: _python_floor_error is testable without an old interpreter
+  Given  a caller-supplied version tuple below `MIN_PYTHON`
+  When   `_python_floor_error(version)` is called directly
+  Then   it returns the same refusal message `reqmap.py` would print, with no interpreter
+         spawned
 
 ## Members in code (auto)

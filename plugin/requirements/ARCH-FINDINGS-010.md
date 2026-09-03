@@ -141,10 +141,10 @@ superseded_by:
 > `findings` scans every requirement and collects the bullet items under each one's `##
 > WHAT — Verify intent` section.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings collects verify-intent bullets from every requirement
+  Given  two requirements, each with one non-placeholder Verify-intent bullet
+  When   `findings` runs
+  Then   `_findings.md` contains both bullets, one from each requirement
 
 ## Members in code (auto)
 
@@ -169,10 +169,10 @@ superseded_by:
 
 > `findings` writes them into a single `_findings.md` in the requirements directory.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings writes its report to a single file
+  Given  a requirement with one open Verify-intent bullet
+  When   `findings` runs
+  Then   the requirements directory gains one new file, `_findings.md`, holding that bullet
 
 ## Members in code (auto)
 
@@ -198,10 +198,10 @@ superseded_by:
 > `findings` excludes the "None — …" placeholder bullet. A requirement that recorded no
 > open question therefore contributes nothing.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings drops the None placeholder bullet
+  Given  a requirement whose Verify-intent section holds only the "None — …" bullet
+  When   `findings` runs
+  Then   that requirement contributes no bullets to `_findings.md`
 
 ## Members in code (auto)
 
@@ -226,10 +226,10 @@ superseded_by:
 
 > In raw mode, `findings` groups the findings by requirement.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: raw mode groups findings under their requirement
+  Given  two requirements each carrying one open Verify-intent bullet
+  When   `findings` runs in raw mode
+  Then   `_findings.md` lists each bullet nested under its own requirement's heading
 
 ## Members in code (auto)
 
@@ -254,10 +254,10 @@ superseded_by:
 
 > Each group and the document header carry a count.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: raw report prints a count per group and in the header
+  Given  a requirement with two open Verify-intent bullets
+  When   `findings` runs in raw mode
+  Then   the requirement's group heading and the document header both show the count 2
 
 ## Members in code (auto)
 
@@ -283,10 +283,10 @@ superseded_by:
 > With zero findings, `findings` still writes a well-formed file stating that none are
 > open.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings writes a clean report when nothing is open
+  Given  a corpus where every Verify-intent section holds only the "None —" placeholder
+  When   `findings` runs
+  Then   `_findings.md` is written and states that no findings are open
 
 ## Members in code (auto)
 
@@ -311,10 +311,10 @@ superseded_by:
 
 > With the raw flag set, `findings` ignores any sidecar and emits the raw grouped list.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: --raw ignores a present triage sidecar
+  Given  a `_findings_triage.json` sidecar and at least one open Verify-intent bullet
+  When   `findings` runs with `--raw`
+  Then   `_findings.md` shows the raw grouped list, not the sidecar's classified sections
 
 ## Members in code (auto)
 
@@ -339,10 +339,10 @@ superseded_by:
 
 > When the sidecar exists and raw mode is off, `findings` renders a classified view.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings renders a classified view when a sidecar exists
+  Given  a `_findings_triage.json` sidecar present and no `--raw` flag
+  When   `findings` runs
+  Then   `_findings.md` is organized into classified sections instead of the raw grouped list
 
 ## Members in code (auto)
 
@@ -368,10 +368,12 @@ superseded_by:
 > That view puts confirmed bugs first, ordered by severity from high to low, then
 > product/config decisions, then intentional, then false-positive.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: classified view orders sections by severity then class
+  Given  a sidecar classifying items REAL_BUG (high), REAL_BUG (low), USER_DECISION, INTENTIONAL
+         and FALSE_POSITIVE
+  When   `findings` runs without `--raw`
+  Then   the high-severity bug lists first, then the low-severity bug, then the decision, then
+         intentional, then false-positive
 
 ## Members in code (auto)
 
@@ -396,10 +398,10 @@ superseded_by:
 
 > A bug entry shows its location and its recommended fix when those are present.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a confirmed bug entry shows its location and fix
+  Given  a sidecar classifying one item REAL_BUG with a location and a recommended fix
+  When   `findings` runs without `--raw`
+  Then   that entry in `_findings.md` prints both the location and the fix
 
 ## Members in code (auto)
 
@@ -425,10 +427,10 @@ superseded_by:
 > `findings` emits an advisory staleness note when the count of raw verify-intent items
 > differs from the count of triaged items in the sidecar.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: findings warns when raw and triaged counts diverge
+  Given  three raw Verify-intent items but only one item recorded in the sidecar
+  When   `findings` runs
+  Then   `_findings.md` carries an advisory staleness note
 
 ## Members in code (auto)
 
@@ -510,10 +512,10 @@ superseded_by:
 > `map` rewrites `_findings.md` when that file already exists. `sync` runs `map`, so it
 > refreshes a committed report along with the map.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map refreshes an already-committed findings report
+  Given  a committed `_findings.md` and a requirement that gained a new Verify-intent item
+  When   `map` runs
+  Then   the regenerated `_findings.md` includes the new item
 
 ## Members in code (auto)
 
@@ -538,10 +540,10 @@ superseded_by:
 
 > `map` never creates `_findings.md`. Running `findings` once opts a repo in.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map never creates a findings report that does not exist yet
+  Given  no `_findings.md` file present in the requirements directory
+  When   `map` runs
+  Then   no `_findings.md` is created; only a subsequent `findings` run creates one
 
 ## Members in code (auto)
 
@@ -567,10 +569,12 @@ superseded_by:
 > `map --check` reports `_findings.md` stale when the committed copy differs from a fresh
 > render, the same way it judges `_map.md` and `_map.json`. An absent file is never stale.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: map --check flags a stale findings report but never an absent one
+  Given  a committed `_findings.md` that no longer matches the requirements, and separately a
+         repo with none committed
+  When   `map --check` runs in each case
+  Then   it reports the first `_findings.md` as stale and exits non-zero, and reports nothing
+         for the absent one
 
 ## Members in code (auto)
 
@@ -596,10 +600,10 @@ superseded_by:
 > The gate prints a non-error advisory line carrying the open-findings count, whenever
 > that count is greater than zero.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate prints the open-findings count as an advisory
+  Given  a requirement with one open Verify-intent item
+  When   `gate` runs
+  Then   its output includes a line naming the open-findings count
 
 ## Members in code (auto)
 

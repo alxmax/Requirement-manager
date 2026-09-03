@@ -148,10 +148,10 @@ superseded_by:
 > more-contract-than- acceptance), and a corpus `coverage_summary` (`total_requirements`,
 > `requirements_in_plan`).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan carries prose, structural anchors and a coverage summary
+  Given  one requirement in the corpus
+  When   `review <ID>` runs
+  Then   its JSON entry carries title, WHY, contract, acceptance, contract-clause count and acceptance count
 
 ## Members in code (auto)
 
@@ -180,10 +180,10 @@ superseded_by:
 > emitted, and severity is advisory-only (never `error`/`warn`, never carried in the
 > engine's severity vocabulary).
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan names the three AI categories and the finding contract
+  Given  the emitted review plan
+  When   it is inspected
+  Then   it names `untestable-contract`, `why-restates-title`, `acceptance-doesnt-cover-contract`, each requiring a `suggested_rewrite`
 
 ## Members in code (auto)
 
@@ -210,10 +210,10 @@ superseded_by:
 > LLM). No gate path (`gate`, `map --check`, the pre-commit hook, the CI action) reads,
 > writes, or regenerates the plan or any AI sidecar.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: the plan is byte-identical across runs and gate never reads it
+  Given  the same corpus and an absent `_ai_review.md` sidecar
+  When   `review` runs twice, then `gate` runs
+  Then   the two `review` outputs are byte-identical and `gate`'s output is unaffected by the sidecar's absence
 
 ## Members in code (auto)
 
@@ -239,10 +239,10 @@ superseded_by:
 > `gate` behaves identically whether or not an AI sidecar (`requirements/_ai_review.md`)
 > is present.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: gate ignores the AI sidecar file entirely
+  Given  `gate` run once with no `_ai_review.md` and once with one present
+  When   both runs complete
+  Then   their exit codes and printed output are byte-identical
 
 ## Members in code (auto)
 

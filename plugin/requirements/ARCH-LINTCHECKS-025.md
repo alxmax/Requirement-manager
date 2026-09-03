@@ -198,10 +198,10 @@ superseded_by:
 > The `statement-too-long` check warns on a Contract bullet spanning more than
 > `LINT_CLAUSE_SENTENCES` sentences, default 3.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: statement-too-long fires past the sentence ceiling
+  Given  a Contract bullet spanning four sentences, one more than `LINT_CLAUSE_SENTENCES`
+  When   `lint` runs
+  Then   it reports a `statement-too-long` warning naming that bullet
 
 ## Members in code (auto)
 
@@ -227,10 +227,10 @@ superseded_by:
 > The `stacked-conditions` check warns on a normative line that joins at least
 > `LINT_STACKED_CONNECTORS` clauses, default 3, with conjunctions.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: stacked-conditions fires at the connector ceiling
+  Given  a normative line joining three clauses with conjunctions, meeting `LINT_STACKED_CONNECTORS`
+  When   `lint` runs
+  Then   it reports a `stacked-conditions` warning naming that line
 
 ## Members in code (auto)
 
@@ -257,10 +257,10 @@ superseded_by:
 > on the line, because the section already makes the line binding and the authoring voice
 > writes no modal.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: stacked-conditions fires on Acceptance text too, with no modal verb
+  Given  an Acceptance criterion joining three clauses with conjunctions and no `shall`/`must`
+  When   `lint` runs
+  Then   it reports `stacked-conditions`, because any normative line counts, modal or not
 
 ## Members in code (auto)
 
@@ -286,10 +286,10 @@ superseded_by:
 > The `anonymous-subject` check warns on a Contract clause opening with a bare "It"
 > followed by a verb.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: anonymous-subject fires on a bare "It" opener
+  Given  a Contract clause reading "It logs the event."
+  When   `lint` runs
+  Then   it reports an `anonymous-subject` warning naming that clause
 
 ## Members in code (auto)
 
@@ -315,10 +315,10 @@ superseded_by:
 > `anonymous-subject` reads the Contract only. Acceptance prose may say "it" in a Then
 > clause and still read clearly.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: anonymous-subject ignores Acceptance prose
+  Given  an Acceptance Then clause reading "it exits non-zero"
+  When   `lint` runs
+  Then   it reports no `anonymous-subject` warning for that line
 
 ## Members in code (auto)
 
@@ -344,10 +344,10 @@ superseded_by:
 > The `ac-count-low` check warns on an Acceptance section holding fewer than
 > `LINT_AC_MIN`, default 3, criteria.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: ac-count-low fires under the minimum
+  Given  an Acceptance section holding two criteria, one under `LINT_AC_MIN`
+  When   `lint` runs
+  Then   it reports an `ac-count-low` warning
 
 ## Members in code (auto)
 
@@ -373,10 +373,10 @@ superseded_by:
 > The `ac-count-high` check warns on more than `LINT_AC_MAX`, default 7, criteria, counted
 > as `- ` bullets or `AC-N` labelled blocks.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: ac-count-high fires over the maximum, either counting style
+  Given  an Acceptance section holding eight `AC-N` blocks, one over `LINT_AC_MAX`
+  When   `lint` runs
+  Then   it reports `ac-count-high`; eight `- ` bullets trigger the same warning
 
 ## Members in code (auto)
 
@@ -402,10 +402,10 @@ superseded_by:
 > The `over-scoped` check warns on a requirement over both ceilings at once: more than
 > `LINT_CONTRACT_MAX` scope units, default 10, with more than `LINT_AC_MAX` criteria.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: over-scoped fires only when both ceilings are crossed
+  Given  a Contract with eleven scope units and an Acceptance section with eight criteria
+  When   `lint` runs
+  Then   it reports `over-scoped`; crossing only one ceiling reports none
 
 ## Members in code (auto)
 
@@ -432,10 +432,10 @@ superseded_by:
 > counts clauses when it does not. Writing one obligation per bullet multiplies clauses
 > without widening scope, so counting clauses alone would punish the authoring voice.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: over-scoped counts bold groups, not raw clauses
+  Given  a Contract holding thirty clauses under three bold group labels
+  When   `lint` runs
+  Then   it reports no `over-scoped`, because the scope-unit count is three groups, not thirty
 
 ## Members in code (auto)
 
@@ -461,10 +461,10 @@ superseded_by:
 > The `file-spread` check warns on a requirement whose `implements` members span at least
 > `LINT_FILE_SPREAD_MAX`, default 3, distinct files.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: file-spread fires at the distinct-file ceiling
+  Given  a requirement whose `implements:` members name three distinct files
+  When   `lint` runs with member data
+  Then   it reports a `file-spread` warning
 
 ## Members in code (auto)
 
@@ -490,10 +490,10 @@ superseded_by:
 > `file-spread` is an architectural-diffuseness signal and is skipped when no member data
 > is supplied.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: file-spread is silent without member data
+  Given  a requirement whose members span three files, but `lint` runs with no member data
+  When   `lint` runs
+  Then   it reports no `file-spread` warning
 
 ## Members in code (auto)
 
@@ -519,10 +519,10 @@ superseded_by:
 > The `layer-mismatch` check warns on a `layer: bus` requirement that nothing depends on
 > and that itself depends on at least `LINT_BUS_FANOUT_MIN`, default 3, requirements.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: layer-mismatch fires on a fan-out bus with no dependents
+  Given  a `layer: bus` requirement nothing depends on, itself depending on three others
+  When   `lint` runs with fan-in data
+  Then   it reports a `layer-mismatch` warning
 
 ## Members in code (auto)
 
@@ -547,10 +547,10 @@ superseded_by:
 
 > `layer-mismatch` is skipped when no fan-in data is supplied.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: layer-mismatch is silent without fan-in data
+  Given  the same fan-out bus requirement, but `lint` runs with no fan-in data supplied
+  When   `lint` runs
+  Then   it reports no `layer-mismatch` warning
 
 ## Members in code (auto)
 
@@ -576,10 +576,10 @@ superseded_by:
 > The `vague-term` check warns on a Contract bullet using a word from the closed
 > `LINT_VAGUE_TERMS` set — untestable quality words such as `appropriate`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: vague-term fires on a closed-set word
+  Given  a Contract bullet reading "logs an appropriate message"
+  When   `lint` runs
+  Then   it reports a `vague-term` warning naming "appropriate"
 
 ## Members in code (auto)
 
@@ -604,10 +604,10 @@ superseded_by:
 
 > Backticked code spans are stripped before the `vague-term` scan runs.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: vague-term ignores a backticked span
+  Given  a Contract bullet containing only the backticked identifier `` `appropriate_flag` ``
+  When   `lint` runs
+  Then   it reports no `vague-term` warning
 
 ## Members in code (auto)
 
@@ -632,10 +632,10 @@ superseded_by:
 
 > `vague-term` emits one finding per distinct term.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: vague-term reports each distinct term once
+  Given  a Contract bullet using "appropriate" twice and "user-friendly" once
+  When   `lint` runs
+  Then   it reports two `vague-term` findings, one per distinct term
 
 ## Members in code (auto)
 
@@ -661,10 +661,10 @@ superseded_by:
 > The `redundant-modal` check warns on a Contract bullet using `shall` or `must` — the
 > closed `LINT_MODAL_WORDS` set.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: redundant-modal fires on shall or must
+  Given  a Contract bullet reading "The system shall retry once."
+  When   `lint` runs
+  Then   it reports a `redundant-modal` warning naming "shall"
 
 ## Members in code (auto)
 
@@ -690,10 +690,10 @@ superseded_by:
 > Backticked code spans are stripped before the `redundant-modal` scan runs, same as
 > `vague-term`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: redundant-modal ignores a backticked span
+  Given  a Contract bullet containing only the backticked identifier `` `shall_retry` ``
+  When   `lint` runs
+  Then   it reports no `redundant-modal` warning
 
 ## Members in code (auto)
 
@@ -718,9 +718,9 @@ superseded_by:
 
 > `redundant-modal` emits one finding per distinct term.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: redundant-modal reports each distinct term once
+  Given  a Contract bullet reading "The system shall log the event and must retry once."
+  When   `lint` runs
+  Then   it reports two `redundant-modal` findings, one for "shall" and one for "must"
 
 ## Members in code (auto)

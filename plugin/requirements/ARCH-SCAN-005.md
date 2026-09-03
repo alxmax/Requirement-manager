@@ -121,10 +121,10 @@ superseded_by:
 > The listed ids are the union of the loaded requirements and the discovered members, in
 > sorted order.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: scan lists ids from both requirements and code tags, sorted
+  Given  a requirement with no code tag and a code tag pointing at a different, unlisted id
+  When   `scan` runs
+  Then   both ids appear in the output in sorted order
 
 ## Members in code (auto)
 
@@ -149,10 +149,10 @@ superseded_by:
 
 > A capability with no members prints `(no members found)`.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: a requirement with no members prints the no-members marker
+  Given  a requirement with no `implements`/`tested-by` tags anywhere in the code
+  When   `scan` runs
+  Then   its id is followed by `(no members found)`
 
 ## Members in code (auto)
 
@@ -178,9 +178,9 @@ superseded_by:
 > A tag pointing at an id with no requirement still appears in the listing, so orphan tags
 > and unimplemented requirements both surface.
 
-Scenario: TODO — state the observable that proves this
-  Given  <precondition>
-  When   <action>
-  Then   <observable, pass/fail result>
+Scenario: an orphan tag's id still appears in the listing
+  Given  a code tag `# implements: GHOST-001` where no requirement `GHOST-001` exists
+  When   `scan` runs
+  Then   `GHOST-001` appears in the listing with its member line
 
 ## Members in code (auto)
