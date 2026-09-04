@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.14"
+MAP_ENGINE_VERSION = "2026-09-04.15"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2491,6 +2491,40 @@ def _rule_viewer_fixture(ctx):  # implements: ARCH-VIEWER-007
         yield None, ("app/src/lib/data.js out of sync with {} requirement(s): {} — regenerate its "
                      "BAKED fixture or accept the drift is intentional for this fallback demo data."
                      .format(len(drifted), ", ".join(drifted)))
+
+
+@gate_rule("RM029", "warn")
+def _rule_translation_parity(ctx):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-967
+    """A cached translation carrying a field the requirement itself does not emit.
+
+    `translate` and the map both derive from the same requirement, and each was correct
+    against it: the map emits no intent when the quote IS the obligation, while the
+    translator had been handed the raw quote. Nothing compared the two, so a translated
+    document showed a section the untranslated one hides — invisible until a corpus had
+    both features populated at once. Fields the requirement has and the translation
+    lacks are NOT reported: a partial translation is a normal intermediate state."""
+    translations = _load_translations(ctx.reqs, ctx.reqs_dir)
+    if not translations:
+        return
+    for rid in sorted(translations):
+        r = ctx.reqs.get(rid)
+        if not r:
+            continue
+        body = r["body"]
+        source = {
+            "title": _req_title(body, rid),
+            "intent": _distinct_intent(body),
+            "contract": _from_any(_section_raw, body, CONTRACT_LABELS) or "",
+            "acceptance": _from_any(_section_raw, body, ACCEPTANCE_LABELS) or "",
+        }
+        for locale in sorted(translations[rid]):
+            entry = translations[rid][locale] or {}
+            extra = sorted(f for f, v in source.items()
+                           if not str(v).strip() and str(entry.get(f, "")).strip())
+            if extra:
+                yield rid, ("{}: translation `{}` carries {} the requirement does not emit — "
+                            "re-run `translate` so the two agree, or clear the field"
+                            .format(rid, locale, ", ".join("`" + f + "`" for f in extra)))
 
 
 @gate_rule("RM018", "warn", strict=True)

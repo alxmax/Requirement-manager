@@ -1,5 +1,18 @@
 # Changelog
 
+## plugin `v4.0.3` — 2026-09-04
+
+**RM029: a cached translation may not carry a field the requirement does not emit.** The gate
+names the requirement, the locale and the field. A field the *translation* lacks is never
+reported — a partial translation is a normal state.
+
+This closes the class of defect that produced the previous release's fix rather than the instance:
+two artifacts derived from one requirement, each correct against it, disagreeing with each other.
+`translate` read the raw quote while the map emits none when that quote IS the obligation, and
+nothing compared the two. The repository already checks one such pair — RM017, the viewer's baked
+fixture against the live registry — and the translation cache simply never got the equivalent.
+Tests of either side alone cannot see this shape; a comparison can.
+
 ## plugin `v4.0.2` — 2026-09-04
 
 **A requirement document leads with what it obliges.** `Description` sits above `Why — Intent`
