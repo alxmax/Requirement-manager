@@ -10021,7 +10021,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:115"
+          "loc": ".github/workflows/ci.yml:112"
         },
         {
           "role": "implements",
@@ -10421,23 +10421,23 @@
       "members": [
         {
           "role": "implements",
+          "loc": ".github/workflows/ci.yml:175"
+        },
+        {
+          "role": "implements",
           "loc": ".github/workflows/ci.yml:178"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:181"
+          "loc": ".github/workflows/ci.yml:182"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:185"
+          "loc": ".github/workflows/ci.yml:191"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:194"
-        },
-        {
-          "role": "implements",
-          "loc": ".github/workflows/ci.yml:315"
+          "loc": ".github/workflows/ci.yml:312"
         }
       ],
       "test_exempt": "pipeline wiring observed by the CI artifacts job, not by a unit test",
