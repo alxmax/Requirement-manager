@@ -70,13 +70,7 @@ const BAKED = [
 
   { id:"ARCH-CHECK-006", area:"REQ", title:"The gate", layer:"feature", status:"confirmed",
     intent:"Fail the build when code and requirements have fallen out of sync.",
-    contract:[
-      "`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.",
-      "`gate` warns (not errors) on contract drift against the lock, a confirmed requirement with no `tested-by:` link, or a confirmed requirement missing its `## Description`/`## Cases` section; `--strict` promotes most of these to errors. [[REQ-CHECK-829]] details the behaviour.",
-      "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.",
-      "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on an unvalidated confirmed need, a bus requirement tested only at `@system`, or a `depends_on` cycle. [[REQ-CHECK-831]] details the behaviour.",
-      "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.",
-      "With `--update-lock` — always passed by `sync`, opt-in for the deprecated `check` alias — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour." ],
+    contract:["`gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.", "`gate` warns (not errors) on contract drift against the lock, a confirmed requirement with no `tested-by:` link, or a confirmed requirement missing its `## Description`/`## Cases` section; `--strict` promotes most of these to errors. [[REQ-CHECK-829]] details the behaviour.", "`gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.", "`gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on an unvalidated confirmed need, a bus requirement tested only at `@system`, or a `depends_on` cycle. [[REQ-CHECK-831]] details the behaviour.", "`gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.", "With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour."],
     acc:[
       "A tag referencing a non-existent capability produces an `ERROR` and exit 1.",
       "A `confirmed` requirement with no `implements` member produces an `ERROR`.",
@@ -101,9 +95,7 @@ const BAKED = [
 
   { id:"ARCH-CANDIDATES-009", area:"REQ", title:"Capability candidates", layer:"feature", status:"confirmed",
     intent:"Stage 1 of AI extraction: emit a deterministic capability plan from legacy code, writing no requirement files.",
-    contract:[
-      "`plan` emits a single JSON object, to stdout or to `--out PATH`, shaped `{engine_version, bus[], candidates[]}`, and writes no `.md` files. [[REQ-CANDIDATES-826]]",
-      "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]" ],
+    contract:["`draft --plan` emits a single JSON object, to stdout or to `--out PATH`, shaped `{engine_version, bus[], candidates[]}`, and writes no `.md` files. [[REQ-CANDIDATES-826]]", "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]"],
     acc:[
       "Running `candidates` writes zero `.md` files and emits valid JSON.",
       "An import of a local module yields a `depends_on` edge to that module's candidate.",
@@ -114,11 +106,7 @@ const BAKED = [
 
   { id:"ARCH-FINDINGS-010", area:"REQ", title:"Open-findings report", layer:"feature", status:"confirmed",
     intent:"Roll up every requirement's open \"verify intent\" questions into one reviewable _findings.md.",
-    contract:[
-      "`findings` collects the bullet items under each requirement's `## Verify intent` section. [[REQ-FINDINGS-853]]",
-      "In raw mode, `findings` groups the collected findings by requirement and writes the raw report. [[REQ-FINDINGS-854]]",
-      "When a `_findings_triage.json` sidecar exists and raw mode is off, `findings` renders a classified view ordered by severity. [[REQ-FINDINGS-855]]",
-      "`findings` is deterministic and stdlib-only; `map` and `gate` fold its output in without ever classifying a finding themselves. [[REQ-FINDINGS-856]]" ],
+    contract:["`sync` collects the bullet items under each requirement's `## Verify intent` section. [[REQ-FINDINGS-853]]", "In raw mode, `sync` groups the collected findings by requirement and writes the raw report. [[REQ-FINDINGS-854]]", "When a `_findings_triage.json` sidecar exists and raw mode is off, `sync` renders a classified view ordered by severity. [[REQ-FINDINGS-855]]", "`sync` is deterministic and stdlib-only; `map` and `gate` fold its output in without ever classifying a finding themselves. [[REQ-FINDINGS-856]]"],
     gwt:"AC-1\n  Given  two requirements, one with two Verify-intent bullets and one with only the \"None —\" placeholder\n  When   findings runs in raw mode\n  Then   _findings.md lists the two bullets and reports \"2 open finding(s) across 1 requirement(s)\"",
     impl:["`cmd_findings`, `render_findings` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:911-998"},{role:"tested-by",loc:"scripts/test_reqmap.py:594-891"}],
@@ -126,11 +114,7 @@ const BAKED = [
 
   { id:"ARCH-MAP-007", area:"REQ", title:"Requirement graph (_map.json)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
-    contract:[
-      "`map` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`; `export` writes the same file alone. [[REQ-MAP-870]]",
-      "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]",
-      "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]",
-      "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]" ],
+    contract:["`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]", "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]", "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]", "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]"],
     acc:[
       "The generated files contain one node per requirement and one edge per `depends_on`.",
       "`_map.md` contains 4 Mermaid code blocks, each with a legend.",
@@ -246,6 +230,9 @@ export let REQ_BY_ID = {};
 // header falls back to a generic label.
 export let REPO = null;
 export let TODOS = [];
+// The CLI as data, straight off _map.json (generated from the engine's command
+// registry). Empty in the baked fallback: a map produced before v4.0.0 carries none.
+export let COMMANDS = [];
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -258,6 +245,9 @@ export function setRegistry(list) {
   REQUIREMENTS = list;
   derive();
 }
+
+/** Replace the documented command list (engine-emitted; absent on older maps). */
+export function setCommands(list) { COMMANDS = Array.isArray(list) ? list : []; }
 
 /** Set the owner/repo name the loaded map describes (engine-emitted). */
 export function setRepo(name) {

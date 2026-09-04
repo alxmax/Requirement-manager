@@ -1,17 +1,18 @@
 // implements: ARCH-VIEWER-007
+// implements: REQ-VIEWER-945
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect, Component } from "react";
-import { REQUIREMENTS, TODOS, REPO } from "./lib/data.js";
-import { rankRequirements } from "./lib/search.js";
+import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI } from "./lib/data.js";
+import { searchRequirements } from "./lib/search.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { useI18n, LOCALES } from "./lib/i18n.jsx";
 import { MapView } from "./views/MapView.jsx";
-import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
+import { ProblemsView, computeProblems, computeQuestions } from "./views/ProblemsView.jsx";
 import { SpecView, ENFORCED } from "./views/SpecView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 import { ExplorerView } from "./views/ExplorerView.jsx";
-import { FindingsView, computeFindings } from "./views/FindingsView.jsx";
+import { CommandsView } from "./views/CommandsView.jsx";
 
 /* `label` is the English source string, also the i18n dictionary key — see lib/i18n.jsx.
  * Explorer leads: at 685 requirements on three levels the outline is the only
@@ -19,11 +20,11 @@ import { FindingsView, computeFindings } from "./views/FindingsView.jsx";
  * canvas is a picture of a haystack — and is scoped to the non-code levels. */
 const NAV = [
   { key:"explorer",label:"Explorer", icon:"list-checks" },
-  { key:"findings",label:"Findings", icon:"circle-dot" },
   { key:"problems",label:"Problems", icon:"triangle-alert" },
   { key:"map",     label:"Map",      icon:"network" },
   { key:"spec",    label:"Spec",     icon:"file-text" },
   { key:"roadmap", label:"Roadmap",  icon:"list-checks" },
+  { key:"commands",label:"Commands", icon:"terminal" },
 ];
 
 /* Deep link: `#/req/<ID>` opens that requirement in the Explorer. Parsed and
@@ -38,11 +39,14 @@ function readHashId() {
 
 function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   const { t, locale, setLocale } = useI18n();
+  // The result list is tied to focus, not just to a non-empty query: left open
+  // on blur it sat over the document until the field was cleared by hand.
+  const [open, setOpen] = useState(false);
   const q = query.trim();
-  // Ranked relevance — the SAME TF-IDF model as the engine `search` command
-  // (ARCH-SEARCH-036), not a substring filter, so the viewer and CLI agree on
-  // what "matches" and in what order. Below the relevance floor -> no hits.
-  const hits = q ? rankRequirements(REQUIREMENTS, q, { top: 8 }) : [];
+  // The same three layers as the engine `search` command (ARCH-SEARCH-036): the id
+  // the query names, then a requirement whose text contains it verbatim — in any
+  // language the map carries — then the shared TF-IDF ranking for everything else.
+  const hits = q ? searchRequirements(REQUIREMENTS, q, { top: 8 }) : [];
   return (
     <header className="topbar">
       <div className="brand">
@@ -54,14 +58,20 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
       <div className="search">
         <span className="ico"><Icon name="search" size={15} /></span>
         <input className="search-inp" placeholder={t("Search id, title, contract…")}
-          value={query} onChange={e=>setQuery(e.target.value)} />
-        {q && (
+          value={query} onChange={e=>setQuery(e.target.value)}
+          onFocus={()=>setOpen(true)}
+          /* mousedown on a hit fires before blur, so picking still works */
+          onBlur={()=>setOpen(false)}
+          onKeyDown={e=>{ if (e.key === "Escape") { setQuery(""); e.currentTarget.blur(); } }} />
+        {q && open && (
           <div className="search-res">
             {hits.length ? hits.map(h=>(
               <div className="search-hit" key={h.req.id} onMouseDown={()=>onSearchPick(h.req.id)}>
                 <span className="hid">{h.req.id}</span>
                 <span className="htitle">{h.req.title}</span>
-                <span className="hscore">{h.score.toFixed(2)}</span>
+                <span className="hscore">
+                  {h.kind === "score" ? h.score.toFixed(2) : h.kind}
+                </span>
               </div>
             )) : <div className="search-empty">{t("no strong match")}</div>}
           </div>
@@ -79,22 +89,22 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   );
 }
 
-function Rail({ view, setView }) {
+function Rail({ view, setView, focus, setFocus }) {
   const { t } = useI18n();
   const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
   const todoCount = TODOS.filter(t => !t.done).length;
-  // A findings badge of `0` is a lie dressed as a metric — every `verify`
-  // bullet in the corpus today is the authored placeholder, which the engine
-  // does not count either. Hidden at zero (see the `!= null` guard below).
-  const findingCount = computeFindings().length;
+  // An author's open questions live in Problems since v4.0.0 (ADR-0028) but keep
+  // their own badge: a computed warning and a human writing down what they do not
+  // know are different news. `0` is not news at all, so the badge hides at zero.
+  const questionCount = computeQuestions().length;
   const counts = {
     explorer: REQUIREMENTS.length,
-    findings: findingCount || null,
     map: REQUIREMENTS.filter(r=>r.level!=="code").length,
     problems: problems.length,
     spec: REQUIREMENTS.length,
     roadmap: todoCount,
+    commands: CLI.length || null,
   };
 
   // registry stats derived from whatever data is loaded
@@ -116,20 +126,36 @@ function Rail({ view, setView }) {
         <div key={n.key} className={"nav-item"+(view===n.key?" active":"")} onClick={()=>setView(n.key)}>
           <Icon name={n.icon} size={17} className="ico" />
           {t(n.label)}
+          {/* A solid white-on-red badge fell to ~2.8:1 once the dark theme
+              brightened the reds; the tinted pair is readable in both. */}
           {n.key==="problems" && errCount>0
-            ? <span className="count" style={{color:"#fff",background:"var(--coral-600)",borderRadius:"var(--radius-pill)",padding:"1px 7px"}}>{counts[n.key]}</span>
-            : n.key==="findings"
-              ? (counts.findings != null && <span className="count" style={{color:"#fff",background:"var(--amber-600)",borderRadius:"var(--radius-pill)",padding:"1px 7px"}}>{counts.findings}</span>)
+            ? <span className="count" style={{color:"var(--status-error)",background:"var(--status-error-bg)",borderRadius:"var(--radius-pill)",padding:"1px 8px",fontWeight:600}}>{counts[n.key]}</span>
+            : n.key==="problems" && questionCount > 0
+              ? <span className="count" style={{color:"var(--status-drift)",background:"var(--status-drift-bg)",borderRadius:"var(--radius-pill)",padding:"1px 8px",fontWeight:600}}>{counts[n.key]}</span>
               : <span className="count">{counts[n.key]}</span>}
         </div>
       ))}
+      {/* The registry tally was five numbers you could read but not act on.
+          Each row is now the filter it describes: it opens the Explorer scoped to
+          that slice, and clicking the active row again clears the scope. */}
       <div className="rail-stat">
         <div className="rail-section" style={{paddingTop:0,paddingLeft:0}}>{t("Registry")}</div>
-        <div className="stat-row"><span className="sw" style={{background:"var(--status-confirmed)"}} />confirmed<span className="n">{confirmed}</span></div>
-        <div className="stat-row"><span className="sw" style={{background:"var(--status-drift)"}} />in-progress<span className="n">{inProgress}</span></div>
-        <div className="stat-row"><span className="sw" style={{background:"var(--status-draft)"}} />draft<span className="n">{draft}</span></div>
-        <div className="stat-row"><span className="sw" style={{background:"var(--status-error)"}} />orphan<span className="n">{orphan}</span></div>
-        <div className="stat-row"><span className="sw" style={{background:"var(--cov-exempt)"}} />deprecated<span className="n">{deprecated}</span></div>
+        {[
+          { key:"confirmed",   n:confirmed,  color:"var(--status-confirmed)" },
+          { key:"in-progress", n:inProgress, color:"var(--status-drift)" },
+          { key:"draft",       n:draft,      color:"var(--status-draft)" },
+          { key:"orphan",      n:orphan,     color:"var(--status-error)" },
+          { key:"deprecated",  n:deprecated, color:"var(--cov-exempt)" },
+        ].map(s=>(
+          <button type="button" key={s.key} className={"stat-row"+(focus===s.key?" on":"")}
+            aria-pressed={focus===s.key}
+            title={s.key==="orphan"
+              ? "enforced requirements with no implements: member \u2014 the gate's error condition"
+              : "show only "+s.key+" requirements"}
+            onClick={()=>setFocus(focus===s.key ? null : s.key)}>
+            <span className="sw" style={{background:s.color}} />{s.key}<span className="n">{s.n}</span>
+          </button>
+        ))}
         <div className="stat-row" style={{marginTop:6,borderTop:"1px solid var(--border-soft)",paddingTop:8}}>
           <Icon name="git-branch" size={14} className="ico" style={{color:"var(--fg-faint)"}} />
           <span style={{fontFamily:"var(--font-mono)",fontSize:11,color:"var(--fg-faint)"}}>{t("{n} members bound", { n: bound })}</span>
@@ -174,6 +200,8 @@ export default function App() {
   const [highlightId, setHighlightId] = useState(null);
   const [query, setQuery] = useState("");
   const [theme, setTheme] = useState("light");
+  // Which registry slice the Explorer is scoped to, driven from the rail tally.
+  const [focus, setFocus] = useState(null);
 
   useEffect(()=>{ document.documentElement.setAttribute("data-theme", theme); }, [theme]);
 
@@ -206,15 +234,17 @@ export default function App() {
       <TopBar query={query} setQuery={setQuery} theme={theme} setTheme={setTheme}
         onSearchPick={searchPick} />
       <div className="body">
-        <Rail view={view} setView={setView} />
+        <Rail view={view} setView={setView} focus={focus}
+          setFocus={(k)=>{ setFocus(k); setView("explorer"); }} />
         <ErrorBoundary key={view}>
-          {view==="explorer" && <ExplorerView selId={selId} setSelId={setSelId} />}
-          {view==="findings" && <FindingsView openSpec={openSpec} />}
+          {view==="explorer" && <ExplorerView selId={selId} setSelId={setSelId}
+            focus={focus} clearFocus={()=>setFocus(null)} />}
           {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
             highlightId={highlightId} setHighlightId={setHighlightId} />}
           {view==="problems" && <ProblemsView openSpec={openSpec} />}
           {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
           {view==="roadmap" && <RoadmapView openSpec={openSpec} />}
+          {view==="commands" && <CommandsView />}
         </ErrorBoundary>
       </div>
     </div>

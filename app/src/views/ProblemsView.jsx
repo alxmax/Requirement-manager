@@ -1,9 +1,28 @@
 // implements: ARCH-VIEWER-007
-/* ProblemsView — a linter-style inbox of everything the gate + risk pass flags. */
+// implements: REQ-VIEWER-966
+/* ProblemsView — every open signal about the corpus, in one inbox.
+ *
+ * Two kinds of row live here, and the difference is who said there was a problem:
+ *   - the engine's own risk signals, derived from the corpus state on every load
+ *     (an orphan, an untested requirement, partial per-criterion coverage, a draft
+ *     nobody has reviewed);
+ *   - an author's open `## Verify intent` question — a human writing down what they
+ *     did not resolve.
+ *
+ * They were two screens until v4.0.0, because Problems was then ~618 rows of draft
+ * review noise and a real question dropped in there was invisible. Two things ended
+ * that: the corpus folded to 224 requirements with no drafts at all, and the draft
+ * rows gained the collapse below, which treats the noise where it is rather than by
+ * evacuating everything else. What survives the merge is the distinction itself —
+ * origin is a first-class tab here, never a severity, so "what did a human flag?"
+ * stays one click away instead of being ranked among computed findings.
+ * See docs/adr/0028. */
 import { useState } from "react";
 import { REQUIREMENTS, coverageOf } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
+import { Pill, statusKind } from "../lib/ui.jsx";
 import { useI18n } from "../lib/i18n.jsx";
+import { openQuestions } from "../lib/tree.js";
 
 /* derive a flat problem list from the registry (exported so App can count it) */
 export function computeProblems() {
@@ -35,8 +54,24 @@ export function computeProblems() {
         loc:(r.members.find(m=>m.role==="tested-by")||{}).loc || "" });
     }
   });
-  const order = { ERROR:0, WARN:1, REVIEW:2 };
+  // an author's own open questions — the one kind of row nobody derived
+  REQUIREMENTS.forEach(r => {
+    const qs = openQuestions(r);
+    if (!qs.length) return;
+    out.push({ id:r.id, title:r.title, signal:"question", sev:"QUESTION",
+      status:r.status, questions:qs,
+      msg:`${qs.length} open verify-intent question(s).`,
+      fix:"Answer it, fold the answer into the Description, then delete the bullet.",
+      loc:"" });
+  });
+  // A question outranks an unreviewed draft: somebody wrote it down on purpose.
+  const order = { ERROR:0, WARN:1, QUESTION:2, REVIEW:3 };
   return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
+}
+
+/** Only the rows a human wrote — App's badge counts these separately. */
+export function computeQuestions() {
+  return computeProblems().filter(p => p.sev === "QUESTION");
 }
 
 /* The `unreviewed` signal on a `draft` is not a defect report — it is the
@@ -69,6 +104,7 @@ export function ProblemsView({ openSpec }) {
         <Tab k="ALL" label={t("All")} n={all.length} />
         <Tab k="ERROR" label={t("Errors")} n={counts.ERROR||0} />
         <Tab k="WARN" label={t("Warnings")} n={counts.WARN||0} />
+        <Tab k="QUESTION" label={t("Questions")} n={counts.QUESTION||0} />
         <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW||0} />
         <div className="tab-legend">
           {(counts.ERROR||0) > 0
@@ -86,14 +122,18 @@ export function ProblemsView({ openSpec }) {
           </button>
         )}
         {shown.map((p,i)=>(
-          <div className="prob-row" key={i} onClick={()=>p.id!=="—" && openSpec(p.id)}>
-            <span className={"prob-sev sev-"+p.sev}>{p.sev}</span>
+          <div className={"prob-row"+(p.sev==="QUESTION"?" question-row":"")} key={i}
+            onClick={()=>p.id!=="—" && openSpec(p.id)}>
+            <span className={"prob-sev sev-"+p.sev}>{p.sev==="QUESTION" ? t("ASKED") : p.sev}</span>
             <div className="prob-body">
               <div className="prob-head">
                 <span className="prob-id">{p.id}</span>
                 <span className="prob-title">{p.title}</span>
+                {p.status && <Pill kind={statusKind(p.status)}>{p.status}</Pill>}
               </div>
-              <div className="prob-msg">{p.msg}</div>
+              {p.questions
+                ? <ul className="finding-qs">{p.questions.map((q,j)=><li key={j}>{q}</li>)}</ul>
+                : <div className="prob-msg">{p.msg}</div>}
               <div className="prob-fix"><Icon name="arrow-right" size={13} /> {p.fix}</div>
             </div>
             {p.loc && <span className="prob-loc">{p.loc}</span>}
@@ -101,8 +141,17 @@ export function ProblemsView({ openSpec }) {
         ))}
         {shown.length===0 && (
           <div className="prob-empty">
-            <Icon name="shield-check" size={22} style={{color:"var(--status-confirmed)"}} />
-            <div>{t("Nothing here — no {kind} signals open.", { kind: filter.toLowerCase() })}</div>
+            <Icon name="shield-check" size={26} style={{color:"var(--cov-tested)"}} />
+            {/* `filter` is "ALL" on the default tab, which read as
+                "no all signals open." Say what is actually true instead. */}
+            <div>
+              <b>{filter==="ALL" ? t("Nothing to fix.") : t("Nothing in this tab.")}</b>
+              <div style={{marginTop:6,color:"var(--fg-muted)",font:"var(--text-small)",maxWidth:460}}>
+                {filter==="ALL"
+                  ? t("The gate reports no errors, warnings or review items for this registry.")
+                  : t("Other tabs may still have open items.")}
+              </div>
+            </div>
           </div>
         )}
       </div>

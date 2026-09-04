@@ -1,9 +1,10 @@
 // implements: ARCH-VIEWER-007
 // implements: ARCH-TRANSLATE-044
+// implements: REQ-VIEWER-944
 /* SpecView — a rendered requirement document (frontmatter → WHY → WHAT → HOW → WHERE). */
 import { Fragment } from "react";
 import { REQUIREMENTS, REQ_BY_ID, coverageDetail, exemptReason } from "../lib/data.js";
-import { Pill, statusKind } from "../lib/ui.jsx";
+import { Pill, statusKind, mdInline, reqLinkProps } from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
 
@@ -17,10 +18,6 @@ function TranslatedBadge() {  // implements: REQ-TRANSLATE-938
     </span>
   );
 }
-
-// HTML-escape before the backtick→<code> transform: the output feeds
-// dangerouslySetInnerHTML with untrusted requirement text from _map.json.
-function mdInlineSpec(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/`([^`]+)`/g,'<code>$1</code>'); }
 
 // The coverage strip shows a fraction ONLY when the engine measured one (the
 // requirement labels its criteria and at least one carries a `# verifies:` tag).
@@ -56,10 +53,10 @@ function CovStrip({ r }) {
 export const ENFORCED = { confirmed: true, "in-progress": true, implemented: true };
 
 const PRIORITY_COLOR = {
-  "must-have":    { bg: "#F38BA8", color: "#5c0011" },
-  "should-have":  { bg: "#F9E2AF", color: "#5c3d00" },
-  "could-have":   { bg: "#A6E3A1", color: "#1a4d17" },
-  "wont-have":    { bg: "#BAC2DE", color: "#3b3f5c" },
+  "must-have":    { bg: "var(--status-error-bg)",  color: "var(--status-error)" },
+  "should-have":  { bg: "var(--status-drift-bg)",  color: "var(--status-drift)" },
+  "could-have":   { bg: "var(--cov-tested-bg)",    color: "var(--cov-tested)" },
+  "wont-have":    { bg: "var(--status-draft-bg)",  color: "var(--fg-muted)" },
 };
 
 function PriorityBadge({ priority }) {
@@ -68,11 +65,60 @@ function PriorityBadge({ priority }) {
   return (
     <span style={{
       display: "inline-flex", alignItems: "center",
-      font: "var(--text-caption)", fontWeight: 600,
-      padding: "4px 10px", borderRadius: "var(--radius-pill)",
-      background: c.bg, color: c.color,
-      border: "1px solid transparent", whiteSpace: "nowrap",
+      font: "var(--text-caption)", fontSize: 12, fontWeight: 600,
+      padding: "3px 10px", borderRadius: "var(--radius-pill)",
+      background: c.bg, color: c.color, whiteSpace: "nowrap",
     }}>{priority}</span>
+  );
+}
+
+/* A cached translation arrives as one string that preserves the authored line
+ * structure: a `>` intent quote, then `- ` clauses. Rendering it in the monospace
+ * acceptance block made a paragraph of Romanian prose look like a code listing, with
+ * every `>` marker still on screen. This walks the lines back into the same shapes the
+ * untranslated document uses. Acceptance keeps the block form — there it IS a listing. */
+function TranslatedProse({ text, onNav, skipQuote = false }) {  // implements: REQ-TRANSLATE-938
+  const lines = String(text || "").split("\n");
+  const blocks = [];
+  lines.forEach((raw) => {
+    const line = raw.trim();
+    if (!line) return;
+    if (line.startsWith(">")) {
+      const body = line.replace(/^>\s?/, "");
+      const last = blocks[blocks.length - 1];
+      if (last && last.kind === "quote") last.lines.push(body);
+      else blocks.push({ kind: "quote", lines: [body] });
+      return;
+    }
+    if (line.startsWith("- ")) {
+      const body = line.slice(2);
+      const last = blocks[blocks.length - 1];
+      if (last && last.kind === "list") last.lines.push(body);
+      else blocks.push({ kind: "list", lines: [body] });
+      return;
+    }
+    const last = blocks[blocks.length - 1];
+    // a hanging-indent continuation belongs to the bullet above it
+    if (last && (last.kind === "list" || last.kind === "quote") && /^\s/.test(raw)) {
+      last.lines[last.lines.length - 1] += " " + line;
+      return;
+    }
+    blocks.push({ kind: "para", lines: [line] });
+  });
+  return (
+    <>
+      {blocks.map((b, i) => {
+        if (b.kind === "quote")
+          return skipQuote ? null : <p className="blockquote" key={i}>{b.lines.join(" ")}</p>;
+        if (b.kind === "list")
+          return (
+            <ul key={i} {...reqLinkProps(onNav)}>
+              {b.lines.map((l, j) => <li key={j} dangerouslySetInnerHTML={{ __html: mdInline(l) }} />)}
+            </ul>
+          );
+        return <p className="spec-para" key={i} dangerouslySetInnerHTML={{ __html: mdInline(b.lines[0]) }} />;
+      })}
+    </>
   );
 }
 
@@ -92,22 +138,33 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
     <div className="spec">
       <div className="spec-sheet">
       {head}
-      <div className="spec-fm">
-        <span className="fk">id:</span><span>{r.id}</span>
-        <span className="fk">status:</span><span>{r.status}</span>
-        <span className="fk">layer:</span><span>{r.layer}</span>
-        <span className="fk">owner:</span><span>Alex</span>
-        <span className="fk">depends_on:</span><span>[{r.deps.length ? r.deps.map((d,i)=>(
-          <Fragment key={d}>{i>0 ? ", " : ""}<button className="dep-link" onClick={()=>onNav && onNav(d)}>{d}</button></Fragment>
-        )) : ""}]</span>
-      </div>
-
       <div className="head-row">
         <Pill kind={statusKind(r.status)}>{r.status}</Pill>
         <Pill kind={r.layer}>{r.layer}</Pill>
         {r.priority && <PriorityBadge priority={r.priority} />}
       </div>
       <h1>{title.text}{title.isTranslated && <TranslatedBadge />}</h1>
+      {/* The frontmatter used to be reprinted here as a raw YAML block, `owner:`
+          included — a field the engine never exports, so every repo but this one
+          read someone else's name. What a reader needs beside the title is the id
+          and where it points; the rest is already in the pills above. */}
+      <div className="spec-meta">
+        <span className="mk-val">{r.id}</span>
+        <span className="mk-sep">|</span>
+        <span className="mk-key">{t("level")}</span>
+        <span className="mk-val">{r.level || "architecture"}</span>
+        {r.milestone && <>
+          <span className="mk-sep">|</span>
+          <span className="mk-key">{t("milestone")}</span>
+          <span className="mk-val">{r.milestone}</span>
+        </>}
+        {r.deps.length > 0 && <span className="mk-deps">
+          <span className="mk-key">{t("depends on")}</span>
+          <span className="mk-val">{r.deps.map((d,i)=>(
+            <Fragment key={d}>{i>0 ? ", " : ""}<button className="dep-link" onClick={()=>onNav && onNav(d)}>{d}</button></Fragment>
+          ))}</span>
+        </span>}
+      </div>
       {/* An atomic requirement's `>` quote IS its obligation, so the engine emits no
           separate intent for one (_distinct_intent). Drawing the block anyway left an
           empty blockquote under a "Why — Intent" heading on 91% of nodes. */}
@@ -122,8 +179,8 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
       <div className="sec">
         <div className="eyebrow">{t("Description")} <span className="rule" />{contract.isTranslated && <TranslatedBadge />}</div>
         {contract.isTranslated
-          ? <div className="gwt">{contract.text.split("\n").map((ln,i)=><div key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(ln)}} />)}</div>
-          : <ul>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(c)}} />)}</ul>}
+          ? <TranslatedProse text={contract.text} onNav={onNav} skipQuote />
+          : <ul {...reqLinkProps(onNav)}>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInline(c)}} />)}</ul>}
       </div>
 
       <div className="sec">
@@ -133,7 +190,7 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
           : (r.gwt  // implements: REQ-VIEWER-942
             ? <div className="gwt">{r.gwt.split("\n").map((ln,i)=>(
                 <div key={i}>{ln}</div>))}</div>
-            : <ul>{(r.acc||[]).map((a,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(a)}} />)}</ul>)}
+            : <ul {...reqLinkProps(onNav)}>{(r.acc||[]).map((a,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInline(a)}} />)}</ul>)}
       </div>
 
       <div className="sec">
@@ -162,7 +219,7 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
       {questions.length > 0 && (
         <div className="sec">
           <div className="eyebrow warn">{t("Open questions — verify intent")}</div>
-          <ul>{questions.map((q,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInlineSpec(q)}} />)}</ul>
+          <ul {...reqLinkProps(onNav)}>{questions.map((q,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInline(q)}} />)}</ul>
         </div>
       )}
 
@@ -215,9 +272,12 @@ export function SpecView({ selId, setSelId }) {
   return (
     <div className="main" style={{display:"grid",gridTemplateColumns:"220px 1fr",minHeight:0}}>
       <div style={{borderRight:"1px solid var(--border)",background:"var(--bg-raised)",overflow:"auto",padding:"14px 10px"}}>
-        <div className="rail-section" style={{paddingTop:0}}>CORE · bus</div>
-        {core.map(x=><Item key={x.id} x={x} />)}
-        <div className="rail-section">REQ · features</div>
+        {/* `area: CORE` is empty in a corpus that names its areas after commands —
+            an empty heading is furniture, so the group only draws when it holds rows. */}
+        {core.length > 0 && <>
+          <div className="rail-section" style={{paddingTop:0}}>CORE · bus</div>
+          {core.map(x=><Item key={x.id} x={x} />)}
+        </>}
         {req.map(x=><Item key={x.id} x={x} />)}
       </div>
       <div style={{overflow:"auto"}}><SpecDoc r={r} onNav={setSelId} /></div>
