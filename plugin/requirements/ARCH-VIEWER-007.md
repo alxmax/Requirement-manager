@@ -27,6 +27,7 @@ Every bullet below is binding.
 - The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
+- The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 
 ## Cases
 CASE-1
@@ -579,3 +580,63 @@ CASE-4 — the origin is offered as a filter, with the question text shown
   Given  an inbox holding a question row
   When   it is rendered
   Then   a tab for questions is offered and the question's own text is displayed
+--------------------
+
+
+---
+id: REQ-VIEWER-969
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Two engine-emitted readings in the rail
+
+## Description
+> `reqmap.py next` opens with two numbers — how much of the corpus is green, and how much
+> of the code is free of design candidates — and the viewer showed neither. They belong
+> where a reader already looks for the shape of the repo: the rail, under the navigation.
+> The viewer displays the records the map hands it; recomputing either one here is what
+> would let the terminal and the browser report different repos.
+
+Every bullet below is binding.
+- The rail renders one ring per reading, showing the score, its label and the fraction
+  behind it, from the `health` and `design` records the map carries.
+- The health ring is coloured by band, since it is a verdict: green while at or above 90,
+  amber down to 60, red below. The design ring stays in one neutral ink — that score is
+  advice the gate never enforces, and a red ring would read as a failure the repo does not
+  have.
+- The health ring opens the Problems inbox, where the reasons behind the score are listed.
+  The design ring is not a control, because there is no view to open.
+- A map carrying neither record renders no ring at all. An older map has neither key, and a
+  reading invented client-side would be worse than an absent one.
+- Both labels and both captions follow the chosen interface language, like the rest of the
+  chrome.
+
+## Cases
+CASE-1 — the rings show the numbers the engine emitted
+  Given  a map carrying a health record of 39 of 50 and a design record of 7 of 30
+  When   the rail renders
+  Then   both scores and both fractions appear as given, with nothing recomputed
+
+CASE-2 — the health band follows the score
+  Given  a health score of 78
+  When   the rail renders
+  Then   the health ring is drawn in the partial tone, not the green one
+
+CASE-3 — an older map renders no ring
+  Given  a map carrying neither a health nor a design record
+  When   the rail renders
+  Then   no gauge is present in the output
+
+CASE-4 — only the verdict is a control
+  Given  both records are present
+  When   the rail renders
+  Then   the design row is marked static and carries no click target, while the health row does
+
+CASE-5 — the labels follow the interface language
+  Given  the interface language is Romanian
+  When   a label and a caption are translated
+  Then   both come back in Romanian, numbers interpolated unchanged

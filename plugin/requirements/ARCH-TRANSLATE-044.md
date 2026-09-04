@@ -245,6 +245,10 @@ Every bullet below is binding.
   since the last `translate` run) is silently dropped, never served. Neither
   command calls `claude` — this is a file read, so `map --check` stays exactly as
   deterministic and `claude`-free as before this capability existed.
+- The `claude` executable is resolved through the platform's own name lookup before it
+  is run, so a CLI installed under a platform-specific extension (`claude.CMD` on
+  Windows) is found rather than reported missing. When the lookup finds nothing, no
+  process is started at all.
 - The viewer consumes `node.i18n` ONLY through `translatedText()` (i18n.jsx),
   which reports `isTranslated` alongside the text. Every caller that renders
   `isTranslated` text renders the "machine-translated, unreviewed" badge next to
@@ -284,6 +288,11 @@ CASE-6 — the same word in a sentence is prose, and translates
   When   the translation renders that word in the target language
   Then   the structural-fidelity check still passes, because only an indented
          line-opening keyword is an identifier
+
+CASE-7 — the CLI is located before it is run
+  Given  a `claude` CLI installed under a platform-specific extension, such as `claude.CMD`
+  When   a requirement is translated
+  Then   the resolved path is the program that runs, and a lookup that finds nothing starts no process
 ---
 id: REQ-TRANSLATE-967
 status: confirmed

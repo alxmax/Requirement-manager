@@ -31,7 +31,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, errno, fnmatch, hashlib, json, math, os, re, subprocess, sys
+import argparse, ast, errno, fnmatch, hashlib, json, math, os, re, shutil, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # Both tag patterns are BUILT from ROLES rather than repeating it. The three used to be
@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.17"
+MAP_ENGINE_VERSION = "2026-09-04.19"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4064,11 +4064,19 @@ def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lan
     prompt = _TRANSLATE_PROMPT.format(
         src=_LANG_NAMES[src_lang], dst=_LANG_NAMES[dst_lang],
         title=title, intent=intent, contract=contract, acceptance=acceptance)
+    # Resolve the name through PATH/PATHEXT rather than handing a bare "claude" to
+    # the OS: on Windows the CLI installs as `claude.CMD` and CreateProcess only ever
+    # appends `.exe`, so every entry failed with "CLI unavailable" against a CLI that
+    # was installed and on PATH. The resolved path is still passed as argv[0] — no
+    # shell, so nothing in a requirement can be read as a command.
+    exe = shutil.which("claude")
+    if exe is None:
+        return None
     try:
         # The prompt travels on stdin, not argv: a whole requirement in one argument
         # would hit Windows' ~32k command-line ceiling on a large corpus.
         proc = subprocess.run(
-            ["claude", "-p"], input=prompt,
+            [exe, "-p"], input=prompt,
             capture_output=True, text=True, encoding="utf-8", timeout=120,
         )
     except (OSError, subprocess.SubprocessError):
@@ -4240,6 +4248,9 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
     _design = _design_summary(root, reqs_dir)      # implements: REQ-DESIGN-954
     if _design is not None:
         data["design"] = _design
+    # The same record `next` prints its headline from, so the viewer reads the score
+    # rather than defining a second one.  # implements: REQ-HEALTH-968
+    data["health"] = _health_record(reqs, members, reqs_dir)
     _attach_translations(data, reqs, reqs_dir)
     return data
 
@@ -5525,24 +5536,17 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRY
         return None
 
 
-def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None,
-               headline_only=False):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
-    """Print a corpus coherence snapshot: a headline score plus component counts.
-    The score is transparent — the percentage of requirements green on EVERY axis
-    (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
-    verify-intent, not drifted vs the lock). A `layer: need` is covered by ≥1
-    `satisfies:` edge instead of code and its test axis is waived, mirroring how
-    `check` treats the need layer. `--json` emits the same numbers as a
-    parseable object for a CI badge. Read-only, always exit 0.
+def _health_record(reqs, members, reqs_dir):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-968
+    """The corpus coherence snapshot as a record, with no printing and no code
+    root: the headline `score` plus the component counts behind it. Split out of
+    `cmd_health` so the map can carry the same numbers the console prints instead
+    of a viewer recomputing them in JavaScript — two definitions of one score is
+    how the CLI and the UI come to disagree about how the repo is doing.
 
-    `gate_errors`/`gate_link_sync_clean` (informational, never enters `score`):
-    the count of `gate`'s own ERROR-level link-sync problems (dangling tags,
-    enforced-status requirements with no `implements:` member), so a 100/100
-    reading here can no longer coexist with an unseen `gate` failure — see
-    RM-6 (Senate run reqmap-health-gate-cleanliness). This does NOT detect a
-    value changed with no tag at all; that class of drift needs a sourced/
-    `validated-against:` convention on the changed file, which is out of
-    scope for this signal."""
+    Depends only on the requirements, their members and the lock, so it is as
+    deterministic as the rest of `_map.json` and can be checked for freshness.
+    Everything that needs a code root (untagged files, registry lag, the design
+    score) stays in `cmd_health`, which layers it on top of this record."""
     total = len(reqs)
     lock = load_lock(reqs_dir)
     satisfied = set()  # need ids with >=1 `satisfies:` edge (ARCH-TRACE-020)
@@ -5614,6 +5618,35 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if reviewed_score is not None:
         data["reviewed_score"] = reviewed_score
         data["reviewed_total"] = reviewed_total
+    return data
+
+
+def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None,
+               headline_only=False):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
+    """Print a corpus coherence snapshot: a headline score plus component counts.
+    The score is transparent — the percentage of requirements green on EVERY axis
+    (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
+    verify-intent, not drifted vs the lock). A `layer: need` is covered by ≥1
+    `satisfies:` edge instead of code and its test axis is waived, mirroring how
+    `check` treats the need layer. `--json` emits the same numbers as a
+    parseable object for a CI badge. Read-only, always exit 0.
+
+    `gate_errors`/`gate_link_sync_clean` (informational, never enters `score`):
+    the count of `gate`'s own ERROR-level link-sync problems (dangling tags,
+    enforced-status requirements with no `implements:` member), so a 100/100
+    reading here can no longer coexist with an unseen `gate` failure — see
+    RM-6 (Senate run reqmap-health-gate-cleanliness). This does NOT detect a
+    value changed with no tag at all; that class of drift needs a sourced/
+    `validated-against:` convention on the changed file, which is out of
+    scope for this signal."""
+    data = _health_record(reqs, members, reqs_dir)
+    score, total, healthy = data["score"], data["total"], data["healthy"]
+    confirmed, implemented = data["confirmed"], data["implemented"]
+    tested, drafts, orphans = data["tested"], data["drafts"], data["orphans"]
+    untested, open_intent = data["untested"], data["open_intent"]
+    drifted, gate_errors = data["drift"], data["gate_errors"]
+    reviewed_score = data.get("reviewed_score")
+    reviewed_total = data.get("reviewed_total")
     # Untagged-code coverage signal (read-only): count of scannable code files
     # carrying no membership tag — code traced to no requirement. Reuses
     # _scan_untagged (ARCH-NEXT-013). Informational only: it counts FILES, not
@@ -5652,7 +5685,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         # would fail on — this is the exact false-positive RM-6 closes.
         if gate_errors:
             color = "red"
-            message += " | gate:{}".format(len(gate_errors))
+            message += " | gate:{}".format(gate_errors)
         badge = {"schemaVersion": 1, "label": "requirements",
                  "message": message, "color": color}
         print(json.dumps(badge))
@@ -5684,7 +5717,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if untested:    print("  untested (code, no tests):        {}".format(untested))
     if open_intent: print("  open verify-intent:               {}".format(open_intent))
     if drifted:     print("  drift (contract changed vs lock): {}".format(drifted))
-    if gate_errors: print("  gate link-sync errors (not clean):{}".format(len(gate_errors)))
+    if gate_errors: print("  gate link-sync errors (not clean):{}".format(gate_errors))
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
     if design is not None:
@@ -7079,7 +7112,7 @@ def _utf8_safe(text):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
 
 def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
     """The registry graph as a JSON string:
-    {engine_version, repo, nodes, edges, upstream_edges, todos[, design]}.
+    {engine_version, repo, nodes, edges, upstream_edges, todos, commands[, design][, health]}.
     json.dumps neutralizes any hostile id/title/body by construction — there is
     no markup context to break out of — so no extra escaping is needed."""
     payload = {"engine_version": MAP_ENGINE_VERSION, "repo": data.get("repo"),
@@ -7093,6 +7126,8 @@ def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-8
                "commands": commands_manifest()}
     if data.get("design"):                      # implements: REQ-DESIGN-954
         payload["design"] = data["design"]
+    if data.get("health"):                      # implements: REQ-HEALTH-968
+        payload["health"] = data["health"]
     return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
 
 

@@ -22,6 +22,7 @@ Every bullet below is binding.
 - `next` prints a read-only coherence snapshot of the whole corpus, never writing a file. [[REQ-HEALTH-857]]
 - The headline score is the percentage of requirements that are green — passing status, coverage, a test signal, no open verify-intent question, and no drift, all at once. [[REQ-HEALTH-858]]
 - `next` prints component counts alongside the score (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift), matches them in `--json`, and always exits 0. [[REQ-HEALTH-859]]
+- The same snapshot is written into `_map.json` as a `health` record, so a viewer reads the score rather than defining a second one. [[REQ-HEALTH-968]]
 
 ## Cases
 CASE-1
@@ -234,4 +235,46 @@ CASE-4 — health exits zero even when the corpus scores below 100
   Given  a corpus containing orphans and drift, scoring under 100
   When   `next` runs
   Then   the process still exits 0
+--------------------
 
+
+---
+id: REQ-HEALTH-968
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-HEALTH-017]
+---
+
+# The health record travels with the map
+
+## Description
+> The map viewer showed a registry tally but not the headline number `next` opens with,
+> and the obvious fix — recomputing the score in JavaScript — is how two surfaces come to
+> disagree about how the repo is doing. The engine emits the record it already computes;
+> the viewer displays it and defines nothing.
+
+Every bullet below is binding.
+- `_health_record` computes the snapshot from the requirements, their members and the lock
+  alone, printing nothing. `cmd_health` reads it and layers on the signals that need a code
+  root, so there is one computation of the score and one place it is defined.
+- `_map.json` carries that record under a `health` key, beside the existing `design` record.
+- The record is a pure function of inputs the map already depends on, so a map carrying it
+  stays deterministic and `gate`'s freshness check keeps working unchanged.
+
+## Cases
+CASE-1 — the map carries the score the console prints
+  Given  any corpus
+  When   `map` writes `_map.json` and `next --json` runs over the same corpus
+  Then   the map's `health.score` equals the score in the JSON snapshot
+
+CASE-2 — the record needs no code root
+  Given  a caller with the requirements and members but no code root
+  When   `_health_record` runs
+  Then   it returns the score and component counts without raising
+
+CASE-3 — regenerating the map twice produces the same bytes
+  Given  an unchanged corpus and lock
+  When   `map` runs twice
+  Then   both runs write byte-identical `_map.json`, so freshness checks stay stable
