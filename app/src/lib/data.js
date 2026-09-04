@@ -36,7 +36,7 @@ const BAKED = [
       "Files starting with `_` are excluded from the result." ],
     impl:["`parse_frontmatter`, `load_requirements` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:73-128"},{role:"tested-by",loc:"scripts/test_reqmap.py:47-800"}],
-    deps:[], usedBy:["ARCH-CHECK-006","ARCH-FINDINGS-010","ARCH-MAP-007","ARCH-NEW-004","ARCH-PROMOTE-011","ARCH-SCAN-005"],
+    deps:[], usedBy:["ARCH-CHECK-006","ARCH-FINDINGS-010","ARCH-MAP-007","ARCH-NEW-004","ARCH-PROMOTE-011"],
     risks:[{signal:"blast-radius",advice:"High fan-in — many capabilities depend on this. Change it only behind its contract, run the full gate + dependents' tests."}] },
 
   { id:"ARCH-SCAN-002", area:"CORE", title:"Member discovery", layer:"bus", status:"confirmed",
@@ -50,7 +50,7 @@ const BAKED = [
       "An unreadable file is skipped without aborting the scan." ],
     impl:["`scan_members`, `_prune_dirs`, `load_ignore`, `TAG_RE` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:144-181"},{role:"tested-by",loc:"scripts/test_reqmap.py:146"}],
-    deps:[], usedBy:["ARCH-CANDIDATES-009","ARCH-CHECK-006","ARCH-EXTRACT-008","ARCH-MAP-007","ARCH-SCAN-005"],
+    deps:[], usedBy:["ARCH-CANDIDATES-009","ARCH-CHECK-006","ARCH-EXTRACT-008","ARCH-MAP-007"],
     risks:[{signal:"blast-radius",advice:"High fan-in — many capabilities depend on this. Treat it as shared foundation (bus)."}] },
 
   { id:"ARCH-DRIFT-003", area:"CORE", title:"Contract hashing & lock", layer:"bus", status:"confirmed",
@@ -146,16 +146,6 @@ const BAKED = [
     members:[{role:"implements",loc:"scripts/reqmap.py:446-461"},{role:"tested-by",loc:"scripts/test_reqmap.py:1114"}],
     deps:["ARCH-PARSE-001"], usedBy:[], risks:[] },
 
-  { id:"ARCH-SCAN-005", area:"REQ", title:"List members per capability", layer:"feature", status:"confirmed",
-    intent:"Show, for every capability, which code claims it — and which capabilities have no code.",
-    contract:[
-      "`scan` prints every capability id — from requirements and code tags alike, sorted — followed by its `role file:line` members, one per line, or `(no members found)`. [[REQ-SCAN-910]] details the behaviour." ],
-    acc:[
-      "A capability with two tags prints both `role file:line` lines under its id.",
-      "A requirement with no members prints `(no members found)`." ],
-    impl:["`cmd_scan` in `reqmap.py`."],
-    members:[{role:"implements",loc:"scripts/reqmap.py:260"},{role:"tested-by",loc:"scripts/test_reqmap.py:507"}],
-    deps:["ARCH-PARSE-001","ARCH-SCAN-002"], usedBy:[], risks:[] },
 
   { id:"ARCH-INIT-012", area:"REQ", title:"First-use bootstrap", layer:"feature", status:"confirmed",
     intent:"One command that turns a fresh repo into a tracked one — scaffold, draft, lock, map, and say what's next.",

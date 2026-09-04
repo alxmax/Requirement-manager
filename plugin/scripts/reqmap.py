@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.15"
+MAP_ENGINE_VERSION = "2026-09-04.16"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2099,15 +2099,6 @@ def _from_any(fn, body, names):  # implements: ARCH-DESCRIPTION-057
         if got:
             return got
     return fn(body, names[0])
-
-
-def cmd_scan(reqs, members):  # implements: ARCH-SCAN-005  # implements: REQ-SCAN-910
-    for cap in sorted(set(list(reqs) + list(members))):
-        print(cap)
-        for role, fp, ln in members.get(cap, []):
-            print(f"    {role:18} {fp}:{ln}")
-        if cap not in members:
-            print("    (no members found)")
 
 
 def _engine_version_at(path):
@@ -6444,7 +6435,7 @@ def _mermaid_req_to_code(data):  # implements: ARCH-MAPDIAGRAMS-055  # implement
 
 def _member_roles(members):
     """Roles of a node's members, tolerant of both member shapes in play: the raw
-    scan tuples (role, file, line) used by cmd_scan/cmd_check and the {role, loc}
+    scan tuples (role, file, line) used by cmd_check and the {role, loc}
     dicts attached to map data nodes."""
     roles = []
     for m in members or []:
@@ -7842,7 +7833,7 @@ def _retire_plan(reqs, members, cap_id):  # implements: ARCH-RETIRE-064  # imple
 
 
 def cmd_retire(reqs, members, reqs_dir, cap_id, delete=False, do_apply=False,
-               force=False, as_json=False):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
+               force=False, as_json=False, code_root=None):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
     """Take a requirement out of service. Without --apply this only reports the blast
     radius, so the destructive half is always preceded by a readable plan.
 
@@ -7922,7 +7913,8 @@ def cmd_retire(reqs, members, reqs_dir, cap_id, delete=False, do_apply=False,
             print("  next: reqmap.py sync")
         return 0
 
-    removed_tags = _strip_member_tags(reqs_dir, plan["members"], cap_id)
+    removed_tags = _strip_member_tags(code_root or os.path.dirname(reqs_dir) or ".",
+                                      plan["members"], cap_id)
     block_ok = _remove_requirement_block(reqs[cap_id])
     _drop_lock_entries(reqs_dir, cap_id)
     plan["applied"] = True
@@ -7950,11 +7942,13 @@ def _git_dirty(root):  # implements: REQ-RETIRE-961
         return False
 
 
-def _strip_member_tags(reqs_dir, mem, cap_id):  # implements: REQ-RETIRE-962
+def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
     """Remove `# implements: <id>` / `tested-by` / `verifies` tokens for one id from
     the files that carry them. Pure text: a line that carried ONLY this tag goes; a
     line that carried other tags too keeps them. Function bodies are never touched."""
-    root = os.path.dirname(reqs_dir) or "."
+    # `code_root`, not the requirements directory's parent: a member path is relative
+    # to the scan root, and `--code ..` makes those two different directories. Deriving
+    # one from the other built `plugin/plugin/scripts/...` and silently stripped nothing.
     by_file = {}
     for m in mem:
         by_file.setdefault(m["file"], []).append(m["line"])
@@ -7962,11 +7956,12 @@ def _strip_member_tags(reqs_dir, mem, cap_id):  # implements: REQ-RETIRE-962
     tag_re = re.compile(r"#\s*(?:implements|tested-by|verifies)\s*:\s*" + re.escape(cap_id) +
                         r"(?:#[A-Za-z]+-\d+)?\s*")
     for rel in sorted(by_file):
-        path = os.path.join(root, rel.replace("/", os.sep))
+        path = os.path.join(code_root or ".", rel.replace("/", os.sep))
         try:
             with open(path, encoding="utf-8", newline="") as f:
                 text = f.read()
-        except OSError:
+        except OSError as e:
+            print("  WARN  cannot read {} to strip its tag(s): {}".format(rel, e))
             continue
         lines = text.splitlines(keepends=True)
         out = []
@@ -8901,7 +8896,8 @@ def main():
         if not a.arg:
             print("usage: reqmap retire AREA-NAME-NNN [--delete] [--apply]"); return 2
         return cmd_retire(reqs, members, reqs_dir, a.arg, delete=a.delete,
-                          do_apply=a.do_apply, force=a.force, as_json=a.as_json)
+                          do_apply=a.do_apply, force=a.force, as_json=a.as_json,
+                          code_root=code_root)
     if a.cmd == "suggest-verifies":
         return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
                                     ac_cover=_ac_cover, apply_tags=a.do_apply)

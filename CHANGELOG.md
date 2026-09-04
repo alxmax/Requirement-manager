@@ -18,6 +18,14 @@ where a lead-paragraph face read as a headline for the section under it, so it n
 type — and its `code` spans render, which they never did: a backticked identifier in the intent
 printed its own backticks.
 
+**`scan` is gone from the corpus too, and `retire --delete` was wrong about where code lives.**
+`ARCH-SCAN-005` and `REQ-SCAN-910` are deleted, with `cmd_scan` and its two test classes — the
+verb went in `v4.0.0` and its code had been unreachable since. Dogfooding the deletion found the
+bug: `_strip_member_tags` derived the code root from the requirements directory's parent, which is
+only the same directory when `--code` is not used, so it built `plugin/plugin/scripts/...`,
+stripped nothing, and said "0 tag(s) stripped" while the gate reported the dangling tags a moment
+later. It takes the scan root now, and a file it cannot open is said out loud instead of skipped.
+
 **TODO:** ranking a Romanian query rather than matching it literally. The model indexes the
 English text, and the literal layer added in `v4.0.0` finds a query only when it appears verbatim
 — "acoperire per criteriu" misses what "Acoperire de test per criteriu" hits.

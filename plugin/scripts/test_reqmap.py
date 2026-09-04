@@ -1199,20 +1199,6 @@ class New(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-8
         self.assertNotIn("statement-size", checks)
 
 
-class Scan(unittest.TestCase):  # tested-by: ARCH-SCAN-005  # tested-by: REQ-SCAN-910
-    def test_scan_lists_members_and_flags_empty(self):  # verifies: REQ-SCAN-910#CASE-1  # verifies: REQ-SCAN-910#CASE-3
-        reqs = {"CORE-FOO-001": {}, "CORE-BAR-002": {}}
-        members = {"CORE-FOO-001": [("implements", "src/foo.py", 12)]}
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_scan(reqs, members)
-        out = buf.getvalue()
-        self.assertIn("CORE-FOO-001", out)
-        self.assertIn("implements", out)
-        self.assertIn("src/foo.py:12", out)
-        self.assertIn("(no members found)", out)  # CORE-BAR-002 has none
-
-
 class Candidates(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009  # tested-by: REQ-CANDIDATES-826  # tested-by: REQ-CANDIDATES-827
     def _plan(self, d):
         reqs_dir = os.path.join(d, "requirements")
@@ -8703,28 +8689,6 @@ class CasesContext(unittest.TestCase):  # tested-by: ARCH-CONTEXT-048  # tested-
         body_b = ("# T\n\n## Description\n- shall do X.\n\n"
                  "## Context (non-binding)\n**Notes**\n- an entirely different note\n")
         self.assertEqual(R.binding_hash(body_a), R.binding_hash(body_b))
-
-
-class CasesScan(unittest.TestCase):  # tested-by: ARCH-SCAN-005  # tested-by: REQ-SCAN-910
-    def test_scan_lists_ids_from_reqs_and_tags_sorted(self):  # verifies: REQ-SCAN-910#CASE-2
-        reqs = {"ZZZ-FOO-001": {}}
-        members = {"AAA-BAR-002": [("implements", "x.py", 1)]}
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_scan(reqs, members)
-        out = buf.getvalue()
-        self.assertIn("ZZZ-FOO-001", out)
-        self.assertIn("AAA-BAR-002", out)
-        self.assertLess(out.index("AAA-BAR-002"), out.index("ZZZ-FOO-001"))
-
-    def test_orphan_tag_id_still_appears(self):  # verifies: REQ-SCAN-910#CASE-4
-        members = {"GHOST-001": [("implements", "x.py", 1)]}
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            R.cmd_scan({}, members)
-        out = buf.getvalue()
-        self.assertIn("GHOST-001", out)
-        self.assertIn("x.py:1", out)
 
 
 class CasesCmdRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-834

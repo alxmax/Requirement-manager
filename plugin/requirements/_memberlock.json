@@ -9,7 +9,7 @@
     },
     "ARCH-VIEWER-007": {
       "app/scripts/install-viewer.mjs": "87088a30e7653b152155ea32d146f8f34f3542e949b22c9a2654317f5dbdda69",
-      "app/src/lib/data.js": "4172abdfdad0c5eb2240cbdcad272743e937ed92534c5202143cef3357ffeb40",
+      "app/src/lib/data.js": "ed3b45bf9f9eac3bc6914954e78981ce37753ac77d6a2871427ea6329d5cb3f3",
       "app/src/lib/icons.jsx": "6b4eb4b3b97949401faf5859d20593fac59f5951111307469c1844e127671b4d",
       "app/src/lib/tree.js": "2e2cf87a4c2bc1f2ea63e45c8458d9d81b06203158ed7c9fbd0fb5c5ff01e676",
       "app/src/lib/useDragPan.js": "067a9371a97063eb0a5a38b4a257e8522cbd0fa6e85d2d487175868f3260d6b1",
