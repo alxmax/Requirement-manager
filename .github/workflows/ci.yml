@@ -76,21 +76,16 @@ jobs:
         run: python -X utf8 scripts/test_check_engine_bump.py
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
-      - name: Requirement drift gate
+      # One verdict since v4.0.0: link sync + drift + test links, requirement
+      # readability (the clarity rules from SKILL.md, error-severity only), and
+      # committed-map freshness. They ran as three steps here for two years and
+      # never once independently.
+      - name: Requirement gate (links, drift, lint, map freshness)
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py gate --code ..
-      # Clarity rules (SKILL.md "Audience & writing level") made blocking. Without
-      # this step `lint` was mechanised but never executed, so 28 readability
-      # warnings accumulated unseen. --strict fails on error-severity findings
-      # (missing Contract/Acceptance section) and promotes ac-count-high +
-      # over-scoped to errors; a requirement that is genuinely one behaviour opts
-      # out per check via `lint_exempt:` with the reason recorded in its Notes.
       - name: Requirement clarity lint
         working-directory: plugin
         run: python -X utf8 scripts/reqmap.py lint --strict --code ..
-      - name: Map freshness
-        working-directory: plugin
-        run: python -X utf8 scripts/reqmap.py map --check --code ..
       - name: Engine regression tests
         working-directory: plugin/scripts
         run: python -X utf8 -m unittest test_reqmap -v

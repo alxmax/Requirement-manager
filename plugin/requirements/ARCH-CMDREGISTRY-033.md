@@ -20,6 +20,7 @@ satisfies: [SYS-SHIP-108]
 
 Every bullet below is binding.
 - A `COMMANDS` dict is the single source of truth for the CLI's commands: argparse's choices, the generated `tool_definition.json`, and the `SKILL.universal.md` command table all derive from it, and the gate fails when a generated artifact goes stale. [[REQ-CMDREGISTRY-834]]
+- The registry is also emitted as data on the map, so a surface can document the CLI without running it. [[REQ-CMDREGISTRY-963]]
 
 ## Cases
 CASE-1
@@ -120,3 +121,45 @@ CASE-6 — the generator and gate-check code import no third-party module
   When   their imports are inspected
   Then   every import resolves to the Python standard library
 
+---
+id: REQ-CMDREGISTRY-963
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CMDREGISTRY-033]
+---
+
+# The command registry as data on the map
+
+## Description
+> A command reference kept by hand goes stale the first time a verb is renamed — which is exactly
+> what `v4.0.0` did to eleven of them. Emitting the registry onto `_map.json` means the reference
+> a reader sees was generated from the same table the parser was built from, so a command that
+> exists is documented and one that was removed disappears on the next `sync`.
+
+Every bullet below is binding.
+- The map payload carries a `commands` list generated from the command registry, one entry per
+  user-facing command, with its name, its positional argument, its summary and its flags.
+- Each entry names the moment of work it belongs to — authoring, building or reading — from a
+  grouping declared once beside the registry rather than restated per surface.
+- A command marked internal is absent from the list, exactly as it is absent from the generated
+  schema and the command table.
+- A map produced before this field existed carries no `commands` key, and every reader treats its
+  absence as "no reference available" rather than as an error.
+
+## Cases
+CASE-1 — every user-facing command appears
+  Given  the command registry
+  When   the manifest is generated
+  Then   it holds one entry per non-internal command, and none for an internal one
+
+CASE-2 — an entry carries what a reader needs
+  Given  a command that takes an argument and two flags
+  When   its manifest entry is read
+  Then   the entry carries its name, argument, summary and both flags with their help text
+
+CASE-3 — each command is placed in a group
+  Given  the manifest
+  When   its entries are inspected
+  Then   every entry names one of the declared groups

@@ -18,30 +18,30 @@ satisfies: [SYS-REPORT-105]
 > judgement calls, and false alarms. Without it, the open questions stay buried and never get answered.
 
 Every bullet below is binding.
-- `findings` collects the bullet items under each requirement's `## Verify intent` section. [[REQ-FINDINGS-853]]
-- In raw mode, `findings` groups the collected findings by requirement and writes the raw report. [[REQ-FINDINGS-854]]
-- When a `_findings_triage.json` sidecar exists and raw mode is off, `findings` renders a classified view ordered by severity. [[REQ-FINDINGS-855]]
-- `findings` is deterministic and stdlib-only; `map` and `gate` fold its output in without ever classifying a finding themselves. [[REQ-FINDINGS-856]]
+- `sync` collects the bullet items under each requirement's `## Verify intent` section. [[REQ-FINDINGS-853]]
+- In raw mode, `sync` groups the collected findings by requirement and writes the raw report. [[REQ-FINDINGS-854]]
+- When a `_findings_triage.json` sidecar exists and raw mode is off, `sync` renders a classified view ordered by severity. [[REQ-FINDINGS-855]]
+- `sync` is deterministic and stdlib-only; `map` and `gate` fold its output in without ever classifying a finding themselves. [[REQ-FINDINGS-856]]
 
 ## Cases
 CASE-1
   Given  two requirements, one with two Verify-intent bullets and one with only the "None —" placeholder
-  When   `findings` runs in raw mode
+  When   `sync` runs in raw mode
   Then   `_findings.md` lists the two bullets under the first requirement and the summary reports "2 open finding(s) across 1 requirement(s)"
 
 CASE-2
   Given  a `_findings_triage.json` sidecar classifying one item REAL_BUG (high) and one USER_DECISION
-  When   `findings` runs without `--raw`
+  When   `sync` runs without `--raw`
   Then   the "Confirmed bugs" section precedes "Your call", the bug shows a HIGH badge with its location, and the summary reports "1 confirmed bug(s)"
 
 CASE-3
   Given  a sidecar is present
-  When   `findings` runs with `--raw`
+  When   `sync` runs with `--raw`
   Then   the sidecar is ignored and the raw grouped list is written
 
 CASE-4
   Given  three raw verify-intent items but only one triaged item in the sidecar
-  When   `findings` runs
+  When   `sync` runs
   Then   `_findings.md` carries a staleness warning advising a re-run of the triage pass
 
 CASE-5
@@ -97,33 +97,43 @@ satisfies: [ARCH-FINDINGS-010]
 # Collecting open verify-intent bullets
 
 ## Description
-> `findings` is the only place that reads a requirement's `## Verify intent` bullets back out —
+> `sync` is the only place that reads a requirement's `## Verify intent` bullets back out —
 > everywhere else they are write-only notes an author leaves for later. Without this collection
 > step, an open question buried in file #40 of 60 never surfaces again.
 
 Every bullet below is binding.
-- `findings` scans every requirement and collects the bullet items under each one's
+- `sync` scans every requirement and collects the bullet items under each one's
   `## Verify intent` section.
-- `findings` writes them into a single `_findings.md` in the requirements directory.
-- `findings` excludes the "None — …" placeholder bullet. A requirement that recorded no open
+- `sync` writes them into a single `_findings.md` in the requirements directory.
+- `sync` excludes the "None — …" placeholder bullet. A requirement that recorded no open
   question therefore contributes nothing.
+- `sync` excludes anything below a line in that section declaring itself a non-binding
+  authoring hint — the scaffold's own list of a source file's headings is context, not a
+  question. Every verify-intent reader goes through the one collection step, so the viewer,
+  the CLI and the gate summary cannot report different counts.
 
 ## Cases
 CASE-1 — findings collects verify-intent bullets from every requirement
   Given  two requirements, each with one non-placeholder Verify-intent bullet
-  When   `findings` runs
+  When   `sync` runs
   Then   `_findings.md` contains both bullets, one from each requirement
 
 CASE-2 — findings writes its report to a single file
   Given  a requirement with one open Verify-intent bullet
-  When   `findings` runs
+  When   `sync` runs
   Then   the requirements directory gains one new file, `_findings.md`, holding that
          bullet, and no other file appears
 
 CASE-3 — findings drops the None placeholder bullet
   Given  a requirement whose Verify-intent section holds only the "None — …" bullet
-  When   `findings` runs
+  When   `sync` runs
   Then   that requirement contributes no bullets to `_findings.md`
+
+CASE-4 — findings drops the scaffold's own authoring hint
+  Given  a requirement whose Verify-intent section holds one open question followed by a
+         line reading "authoring hint, not the contract" and a list of source headings
+  When   `sync` runs
+  Then   only the open question is reported, and none of the headings below that line are
 
 
 --------------------
@@ -141,35 +151,35 @@ satisfies: [ARCH-FINDINGS-010]
 # The raw findings report
 
 ## Description
-> The raw report is the fallback view: it exists so `findings` produces a useful `_findings.md`
+> The raw report is the fallback view: it exists so `sync` produces a useful `_findings.md`
 > even before any AI triage pass has run. It groups by requirement because that is how an author
 > will go fix them — one file at a time.
 
 Every bullet below is binding.
-- In raw mode, `findings` groups the findings by requirement.
+- In raw mode, `sync` groups the findings by requirement.
 - Each group and the document header carry a count.
-- With zero findings, `findings` still writes a well-formed file stating that none are open.
-- With the raw flag set, `findings` ignores any sidecar and emits the raw grouped list.
+- With zero findings, `sync` still writes a well-formed file stating that none are open.
+- With the raw flag set, `sync` ignores any sidecar and emits the raw grouped list.
 
 ## Cases
 CASE-1 — raw mode groups findings under their requirement
   Given  two requirements each carrying one open Verify-intent bullet
-  When   `findings` runs in raw mode
+  When   `sync` runs in raw mode
   Then   `_findings.md` lists each bullet nested under its own requirement's heading
 
 CASE-2 — raw report prints a count per group and in the header
   Given  a requirement with two open Verify-intent bullets
-  When   `findings` runs in raw mode
+  When   `sync` runs in raw mode
   Then   the requirement's group heading and the document header both show the count 2
 
 CASE-3 — findings writes a clean report when nothing is open
   Given  a corpus where every Verify-intent section holds only the "None —" placeholder
-  When   `findings` runs
+  When   `sync` runs
   Then   `_findings.md` is written and states that no findings are open
 
 CASE-4 — --raw ignores a present triage sidecar
   Given  a `_findings_triage.json` sidecar and at least one open Verify-intent bullet
-  When   `findings` runs with `--raw`
+  When   `sync` runs with `--raw`
   Then   `_findings.md` shows the raw grouped list, not the sidecar's classified sections
 
 
@@ -191,38 +201,38 @@ satisfies: [ARCH-FINDINGS-010]
 > Once an AI triage pass has classified each finding into a bug, a decision, or noise,
 > re-reading `_findings.md` requirement-by-requirement is the wrong order — a developer wants
 > the confirmed bugs first. The classified view is that reordering, and it renders only the
-> classes the sidecar itself assigned, never a classification `findings` computes on its own.
+> classes the sidecar itself assigned, never a classification `sync` computes on its own.
 
 Every bullet below is binding.
-- When the sidecar exists and raw mode is off, `findings` renders a classified view.
+- When the sidecar exists and raw mode is off, `sync` renders a classified view.
 - That view puts confirmed bugs first, ordered by severity from high to low, then
   product/config decisions, then intentional, then false-positive.
 - A bug entry shows its location and its recommended fix when those are present.
-- `findings` emits an advisory staleness note when the count of raw verify-intent items
+- `sync` emits an advisory staleness note when the count of raw verify-intent items
   differs from the count of triaged items in the sidecar.
 
 ## Cases
 CASE-1 — findings renders a classified view when a sidecar exists
   Given  a `_findings_triage.json` sidecar present and no `--raw` flag
-  When   `findings` runs
+  When   `sync` runs
   Then   `_findings.md` is organized into classified sections using only the classes the
-         sidecar already assigned, never ones `findings` computes itself
+         sidecar already assigned, never ones `sync` computes itself
 
 CASE-2 — classified view orders sections by severity then class
   Given  a sidecar classifying items REAL_BUG (high), REAL_BUG (low), USER_DECISION, INTENTIONAL
          and FALSE_POSITIVE
-  When   `findings` runs without `--raw`
+  When   `sync` runs without `--raw`
   Then   the high-severity bug lists first, then the low-severity bug, then the decision, then
          intentional, then false-positive
 
 CASE-3 — a confirmed bug entry shows its location and fix
   Given  a sidecar classifying one item REAL_BUG with a location and a recommended fix
-  When   `findings` runs without `--raw`
+  When   `sync` runs without `--raw`
   Then   that entry in `_findings.md` prints both the location and the fix
 
 CASE-4 — findings warns when raw and triaged counts diverge
   Given  three raw Verify-intent items but only one item recorded in the sidecar
-  When   `findings` runs
+  When   `sync` runs
   Then   `_findings.md` carries an advisory staleness note
 
 
@@ -241,17 +251,17 @@ satisfies: [ARCH-FINDINGS-010]
 # Findings integration with map and gate
 
 ## Description
-> `findings` deliberately does no judgement of its own — classification is an AI's job, done
+> `sync` deliberately does no judgement of its own — classification is an AI's job, done
 > out-of-band and handed back through the sidecar. `map` and `gate` treat `_findings.md` the same
 > way they treat the other generated artifacts: refreshed when it already exists, checked for
 > staleness, and never silently created.
 
 Every bullet below is binding.
-- `findings` is deterministic and stdlib-only. It never classifies a finding itself.
-- `findings` writes no file other than `_findings.md`.
+- `sync` is deterministic and stdlib-only. It never classifies a finding itself.
+- `sync` writes no file other than `_findings.md`.
 - `map` rewrites `_findings.md` when that file already exists. `sync` runs `map`, so it
   refreshes a committed report along with the map.
-- `map` never creates `_findings.md`. Running `findings` once opts a repo in.
+- `map` never creates `_findings.md`. Running `sync` once opts a repo in.
 - `map --check` reports `_findings.md` stale when the committed copy differs from a fresh
   render, the same way it judges `_map.md` and `_map.json`. An absent file is never stale.
 - The gate prints a non-error advisory line carrying the open-findings count, whenever that
@@ -267,7 +277,7 @@ CASE-1 — map refreshes an already-committed findings report
 CASE-2 — map never creates a findings report that does not exist yet
   Given  no `_findings.md` file present in the requirements directory
   When   `map` runs
-  Then   no `_findings.md` is created; only a subsequent `findings` run creates one
+  Then   no `_findings.md` is created; only a subsequent `sync` run creates one
 
 CASE-3 — map --check flags a stale findings report but never an absent one
   Given  a committed `_findings.md` that no longer matches the requirements, and separately a

@@ -26,6 +26,7 @@ Every bullet below is binding.
 - `search` prints every match together with its cosine score, so a weak match never carries a strong match's authority. [[REQ-SEARCH-913]]
 - `search` applies a relevance floor (`0.05` by default) and reports plainly, in a message distinct from an empty query, when nothing clears it. [[REQ-SEARCH-914]]
 - `search` always exits zero from a well-formed invocation; only a usage error (a missing query) exits non-zero. [[REQ-SEARCH-915]]
+- `search` answers a query that names an id, and a query that appears literally in a requirement's text, before it falls back to ranking wording. [[REQ-SEARCH-965]]
 
 ## Cases
 CASE-1
@@ -289,4 +290,65 @@ CASE-3 — an empty corpus still exits zero
   Given  no requirements carry any contract text to search
   When   `search` runs
   Then   it prints "No requirements with contract text to search." and exits 0
+---
+id: REQ-SEARCH-965
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SEARCH-036]
+---
 
+# Finding a requirement by its id, and by its literal text
+
+## Description
+> The bag of words a requirement is ranked on is its title, its intent and its clauses — its id is
+> in none of them. So searching this corpus for `ARCH-CHECK-006` returned `REQ-ORPHANCODE-888` and
+> not the requirement named, because "arch" and "check" were matched as ordinary prose. An id is
+> the primary key here, and a phrase that appears verbatim in a requirement is stronger evidence
+> than a partial token overlap with a different one — neither is a question about wording, and the
+> ranking model cannot answer either.
+
+Every bullet below is binding.
+- A query equal to a requirement id returns that requirement, alone, ahead of every ranked result.
+- A query that prefixes or occurs inside ids returns those requirements ahead of the ranked
+  results, capped so a common word cannot crowd the ranking out.
+- A query that occurs literally in a requirement's title, description or cases returns that
+  requirement ahead of the ranked results. `## Context` is excluded, exactly as it is from
+  the ranking bag: commentary is not what a requirement is about.
+- The literal search also reads a requirement's cached translation, so a query in the language the
+  reader is being shown finds the requirement even though the ranking model indexes one language.
+- The ranking model itself is unchanged by all of this: the id and literal layers select
+  requirements, and the ranked layer fills what they leave, so the score a hit carries still means
+  exactly what it meant before.
+
+## Cases
+CASE-1 — an exact id returns its own requirement first
+  Given  a corpus holding `AREA-X-001` and requirements whose prose mentions "area" and "x"
+  When   `search "AREA-X-001"` runs
+  Then   `AREA-X-001` is the first result, marked as an id match
+
+CASE-2 — a partial id returns the ids it names
+  Given  a corpus holding `AREA-X-001` and `AREA-X-002`
+  When   `search "AREA-X"` runs
+  Then   both are returned ahead of any ranked result
+
+CASE-3 — a phrase inside a case is found
+  Given  a requirement whose only mention of "ghost tag" is inside one of its cases
+  When   `search "ghost tag"` runs
+  Then   that requirement is returned, marked as a text match
+
+CASE-6 — a phrase living only in Context is not a match
+  Given  a requirement whose only mention of a word is inside its `## Context`
+  When   `search` runs on that word
+  Then   the requirement is not returned by the literal layer
+
+CASE-4 — a query in the cached translation's language finds the requirement
+  Given  a requirement with a cached translation containing a phrase absent from its English text
+  When   `search` runs on that phrase
+  Then   the requirement is returned
+
+CASE-5 — the ranked model is untouched
+  Given  a query naming no id and appearing literally nowhere
+  When   `search` runs
+  Then   every result comes from the ranking model, with the same scores as before

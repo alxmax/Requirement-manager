@@ -1,6 +1,6 @@
 ---
 id: ARCH-SCAN-005
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -64,7 +64,7 @@ CASE-3
 
 ---
 id: REQ-SCAN-910
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

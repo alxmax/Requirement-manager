@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.5"
+MAP_ENGINE_VERSION = "2026-09-04.13"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -323,15 +323,6 @@ COMMANDS = {
             },
         ],
     },
-    "scan": {
-        "summary": (
-            "List which code files belong to which requirement, grouped by capability. "
-            "Shows all code members (implements:, generated-from:, validated-against:, "
-            "tested-by:) discovered by scanning the repo."
-        ),
-        "arg": None,
-        "params": [],
-    },
     "gate": {
         "summary": (
             "Run the commit/CI gate (report-only): verify every code tag resolves to a "
@@ -395,77 +386,6 @@ COMMANDS = {
             },
         ],
     },
-    "check": {
-        "summary": (
-            "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). "
-            "Preserved for backward compatibility with consumer hooks, CI, and the "
-            "GitHub Action. Will be removed in v4.0.0 — use 'gate' or "
-            "'sync' instead."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "type": "bool",
-                "help": "Promote drift and test-link integrity warnings to errors.",
-            },
-            {
-                "name": "json",
-                "flag": "--json",
-                "type": "bool",
-                "help": "Emit structured JSON output (for CI/badge consumption).",
-            },
-            {
-                "name": "since",
-                "flag": "--since",
-                "type": "str",
-                "help": "Scope the gate to requirements whose member files changed since this git ref.",
-            },
-            {
-                "name": "update_lock",
-                "flag": "--update-lock",
-                "type": "bool",
-                "help": "Also regenerate the lock and map (mirrors legacy 'sync' behavior).",
-            },
-        ],
-    },
-    "map": {
-        "summary": (
-            "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json "
-            "(graph with nodes, edges, todos), and requirements/_map.html (a "
-            "self-contained React viewer). The viewer is only emitted when "
-            "scripts/_map_viewer.html is vendored beside the engine."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "check_fresh",
-                "flag": "--check",
-                "type": "bool",
-                "help": (
-                    "Freshness gate: rebuild the map in memory and exit non-zero if the "
-                    "committed _map.* is stale. Use in CI alongside gate."
-                ),
-            },
-        ],
-    },
-    "export": {
-        "summary": (
-            "Write requirements/_map.json (the graph with engine_version, nodes, edges) "
-            "for feeding an external front-end. Same output as map, without rebuilding "
-            "_map.md and _map.html."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "out",
-                "flag": "--out",
-                "type": "str",
-                "help": "Output path override. Use '-' for stdout (--out -); omit for requirements/_map.json.",
-            },
-        ],
-    },
     "next": {
         "summary": (
             "Show what to do next: a prioritized, actionable list of risk buckets "
@@ -479,30 +399,6 @@ COMMANDS = {
                 "flag": "--all",
                 "type": "bool",
                 "help": "Expand all buckets to show every item instead of just the top few.",
-            },
-        ],
-    },
-    "lint": {
-        "summary": (
-            "Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), "
-            "contract clauses with an unnamed 'It' subject, over-long contract clauses, "
-            "missing Contract or Acceptance sections. Read-only unless --decompose is "
-            "passed; exit-neutral by default."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "type": "bool",
-                "help": "Exit non-zero on error-severity findings (warnings remain advisory).",
-            },
-            {
-                "name": "decompose",
-                "flag": "--decompose",
-                "type": "bool",
-                "help": ("Scaffold one draft requirement per statement-size finding. Opt-in and "
-                         "never used by the gate, the hook or CI \u2014 the only lint mode that writes."),
             },
         ],
     },
@@ -549,29 +445,6 @@ COMMANDS = {
             },
         ],
     },
-    "health": {
-        "summary": (
-            "Print a corpus coherence snapshot: a headline score (percentage of "
-            "requirements fully green on every axis: confirmed + member + tested + no "
-            "open questions + not drifted) plus component counts. Use for a CI badge "
-            "with --json."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "json",
-                "flag": "--json",
-                "type": "bool",
-                "help": "Emit parseable JSON for a CI badge (--json).",
-            },
-            {
-                "name": "badge",
-                "flag": "--badge",
-                "type": "bool",
-                "help": "Emit Shields.io endpoint JSON (schemaVersion, label, message, color).",
-            },
-        ],
-    },
     "draft": {
         "summary": (
             "Draft one requirement per untagged file (code and prose). Input is existing "
@@ -582,49 +455,6 @@ COMMANDS = {
         "arg": None,
         "params": [],
     },
-    "plan": {
-        "summary": (
-            "Read-only JSON capability-extraction plan: emit a capability map from "
-            "legacy code without writing any .md files. Safer than draft — a human "
-            "authors and confirms each candidate. Use before draft to preview what would "
-            "be extracted."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "out",
-                "flag": "--out",
-                "type": "str",
-                "help": "Write plan JSON here ('-' or omit = stdout).",
-            },
-            {
-                "name": "md_glob",
-                "flag": "--md-glob",
-                "type": "str",
-                "help": (
-                    "Also discover .md files matching this glob (repeatable; "
-                    "comma-separated ok). Off unless given. "
-                    "e.g. --md-glob 'prompts/**' --md-glob 'modes/**'."
-                ),
-            },
-        ],
-    },
-    "findings": {
-        "summary": (
-            "Aggregate open 'Verify intent' items across all requirements into "
-            "requirements/_findings.md. Surfaces every open human-review question in "
-            "one place."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "raw",
-                "flag": "--raw",
-                "type": "bool",
-                "help": "Ignore the triage sidecar and emit the raw grouped list.",
-            },
-        ],
-    },
     "confirm": {
         "summary": (
             "Mark a reviewed requirement as confirmed — the human sign-off step. Flips "
@@ -634,6 +464,51 @@ COMMANDS = {
         ),
         "arg": "ID",
         "params": [],
+    },
+    "clarify": {
+        "summary": (
+            "Ask what a requirement has not answered yet: vague terms with no threshold, "
+            "numbers with no unit, unbounded quantities, clauses with no case, a missing "
+            "failure path. Read-only, always exit 0, never a gate rule. Run it before "
+            "implementing so the ambiguity is resolved in the requirement, not guessed in code."
+        ),
+        "arg": "AREA-NAME-NNN",
+        "params": [
+            {"name": "as_json", "flag": "--json", "type": "bool",
+             "help": "Emit the questions as JSON for an agent to answer."},
+        ],
+    },
+    "implement": {
+        "summary": (
+            "Emit the brief for implementing one requirement in code: its obligations, its "
+            "cases, the exact tags the new code must carry, where similar code already lives, "
+            "and the command that proves the work landed. Writes no code and no file."
+        ),
+        "arg": "AREA-NAME-NNN",
+        "params": [
+            {"name": "as_json", "flag": "--json", "type": "bool",
+             "help": "Emit the brief as JSON for a coding agent."},
+        ],
+    },
+    "retire": {
+        "summary": (
+            "Take a requirement out of service. Prints the blast radius first — dependents, "
+            "children, members, and the files where it was the only tagged requirement. "
+            "Refuses while dependents exist unless --force. Deprecates by default (reversible); "
+            "--delete also removes the block, its lock entries and its membership tags, never a "
+            "function body. Nothing is written without --apply."
+        ),
+        "arg": "AREA-NAME-NNN",
+        "params": [
+            {"name": "delete", "flag": "--delete", "type": "bool",
+             "help": "Remove the requirement outright instead of marking it deprecated."},
+            {"name": "do_apply", "flag": "--apply", "type": "bool",
+             "help": "Actually perform the retirement; without it nothing is written."},
+            {"name": "force", "flag": "--force", "type": "bool",
+             "help": "Proceed despite dependents, or on a dirty working tree."},
+            {"name": "as_json", "flag": "--json", "type": "bool",
+             "help": "Emit the plan (and what was applied) as JSON."},
+        ],
     },
     "review": {
         "summary": (
@@ -668,40 +543,6 @@ COMMANDS = {
             },
         ],
     },
-    "site": {
-        "summary": (
-            "Inject or refresh engine-owned regions (nav links + stats counts) into a "
-            "project presentation page. Scaffolds a full page if the target does not "
-            "exist. Run after map to keep the page current."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "attach",
-                "flag": "--attach",
-                "type": "str",
-                "help": "Target HTML page to inject engine-owned regions into (scaffolds it if absent).",
-            },
-            {
-                "name": "regions",
-                "flag": "--regions",
-                "type": "str",
-                "help": "Comma-separated list of regions to inject (nav,stats). Default: nav.",
-            },
-            {
-                "name": "diagram",
-                "flag": "--diagram",
-                "type": "str",
-                "help": "Relative path (from the page) to an Excalidraw HTML viewer; linked only if it exists.",
-            },
-            {
-                "name": "detect",
-                "flag": "--detect",
-                "type": "bool",
-                "help": "Scan docs/ and print the suggested command — writes nothing.",
-            },
-        ],
-    },
     "design": {
         "summary": (
             "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. "
@@ -722,22 +563,6 @@ COMMANDS = {
             },
         ],
     },
-    "coverage": {
-        "summary": (
-            "Read-only report of untagged-code coverage signal: lists source files that "
-            "carry no implements: tag, grouped by directory. Use to identify gaps in "
-            "requirement traceability."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "json",
-                "flag": "--json",
-                "type": "bool",
-                "help": "Emit structured JSON output (for CI consumption).",
-            },
-        ],
-    },
     "suggest-verifies": {
         "summary": (
             "Propose `# verifies: <id>#CASE-N` tags for tests already named after the "
@@ -753,15 +578,6 @@ COMMANDS = {
                 "help": "Write the proposed tags into the test files (ambiguous matches are never written).",
             },
         ],
-    },
-    "gen-integration": {
-        "summary": (
-            "Regenerate the multi-AI integration artifacts (tool_definition.json) from "
-            "the command registry."
-        ),
-        "arg": None,
-        "params": [],
-        "internal": True,
     },
 }
 
@@ -792,6 +608,40 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
             "parameters": {"type": "object", "properties": props, "required": []},
         }})
     return json.dumps(tools, indent=2, ensure_ascii=False) + "\n"
+
+
+# Which moment of the workflow each verb belongs to. The registry is the CLI's
+# single source of truth, so the grouping the help text and the viewer both show is
+# declared here once rather than restated in each surface.
+COMMAND_GROUPS = (
+    ("author", ("init", "new", "draft", "clarify", "confirm")),
+    ("build", ("implement", "gate", "sync", "retire")),
+    ("read", ("next", "show", "search", "dupes", "design", "review",
+              "suggest-verifies", "translate")),
+)
+
+
+def commands_manifest():  # implements: ARCH-CMDREGISTRY-033  # implements: REQ-CMDREGISTRY-963
+    """The command registry as data, for any surface that documents the CLI without
+    running it — the map viewer's command reference is the first. Derived from
+    COMMANDS, so a command that exists is documented and one that does not, is not."""
+    group_of = {}
+    for group, names in COMMAND_GROUPS:
+        for n in names:
+            group_of[n] = group
+    out = []
+    for name, spec in COMMANDS.items():
+        if spec.get("internal"):
+            continue
+        out.append({
+            "name": name,
+            "group": group_of.get(name, "read"),
+            "summary": " ".join(spec["summary"].split()),
+            "arg": spec.get("arg"),
+            "flags": [{"flag": p["flag"], "help": " ".join(p["help"].split())}
+                      for p in spec["params"]],
+        })
+    return out
 
 
 def _generate_command_table():  # implements: REQ-CMDREGISTRY-834
@@ -2948,7 +2798,10 @@ Every bullet below is binding.
   fallback, magic constant, unreachable branch>. Intended, or a bug to fix?
 
 ## Cases (= tests)
-<!-- Keep Given/When/Then concrete and self-explanatory; spell out any term the
+<!-- Write at least one case from the CALLER's side, not the implementation's: the
+     cases an author reaches for first vary the quality of one kind of input and
+     never its kind. `clarify` names that shape (case-monoculture).
+     Keep Given/When/Then concrete and self-explanatory; spell out any term the
      Description introduced. -->
 CASE-1  <!-- verifiable by: automated test | manual | inspection | load test -->
   Given  <precondition>
@@ -3330,11 +3183,13 @@ def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: ARCH-EXTRACT
                             "intent, do not copy the prose).\n\n"
                             "## Verify intent (open questions for the human)\n"
                             "- TODO: which source sections are normative vs illustrative?\n\n"
-                            "Source sections detected (authoring hint, not the contract):\n"
-                            "{hint}\n\n"
                             "## Cases (= tests)\n"
                             "- TODO: Given/When/Then checks for the contract above.\n\n"
-                            "## Context (non-binding)\n**Current implementation**\n- {rel}\n".format(
+                            # the hint belongs in Context: bullets under Verify intent
+                            # are read back as open questions by `findings`
+                            "## Context (non-binding)\n**Current implementation**\n- {rel}\n\n"
+                            "**Source sections detected (authoring hint, not the contract)**\n"
+                            "{hint}\n".format(
                                 cap=cap, title=(title or os.path.splitext(fn)[0]),
                                 rel=rel, hint=hint))
             else:
@@ -3703,7 +3558,7 @@ def collect_findings(reqs):  # implements: ARCH-FINDINGS-010  # implements: REQ-
     out = []
     for rid in sorted(reqs):
         body = reqs[rid]["body"]
-        items = [b for b in _bullets(body, "verify intent")
+        items = [b for b in _verify_bullets(body)
                  if b and not b.lstrip("*_ ").lower().startswith("none")]
         if items:
             out.append((rid, _req_title(body, rid), items))
@@ -3878,7 +3733,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
             "intent": _distinct_intent(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS),
-            "verify": _bullets(r["body"], "verify intent"),
+            "verify": _verify_bullets(r["body"]),
             # legacy per-topic heading first; ADR-0017's consolidated Context section
             # (bold **Notes**/**Current implementation** sub-groups) is the fallback,
             # never both at once in one file, so this never masks real content.
@@ -3905,7 +3760,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
                  "members": members.get(rid, []),
-                 "verify": _bullets(r["body"], "verify intent"), "test_exempt": m.get("test_exempt")})],
+                 "verify": _verify_bullets(r["body"]), "test_exempt": m.get("test_exempt")})],
         })
         _attach_ac_coverage(data["nodes"][-1], r["body"], (ac_cover or {}).get(rid, {}))
     for rid, r in reqs.items():
@@ -4103,7 +3958,8 @@ def _structural_signature(text):  # implements: ARCH-TRANSLATE-044  # implements
     exactly. Used to gate a cache write: a translation that drops a backticked identifier
     or a number is a mistranslation of normative text, not a style choice.
 
-    The last two are identifiers, not prose, and the first three checks are blind to both:
+    The last two are identifiers WHERE THEY OPEN A LINE, and the first three checks are
+    blind to both:
     `AC-1` -> `CA-1` keeps the same digit and is neither heading nor bullet, and
     `Given` -> `Dat fiind` touches nothing at all. But `AC-N` is what a test points at
     (`# verifies: <ID>#AC-N`), and Given/When/Then are engine vocabulary the viewer
@@ -4113,7 +3969,14 @@ def _structural_signature(text):  # implements: ARCH-TRANSLATE-044  # implements
     numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
     markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
     labels = tuple(re.findall(r"^\s*((?:CASE|AC)-\d+)\b", text, flags=re.MULTILINE))
-    keywords = tuple(sorted(re.findall(r"\b(?:Given|When|Then)\b", text)))
+    # A Gherkin keyword is an identifier where it OPENS AN INDENTED LINE, which is what a
+    # step inside a Cases block looks like ("  Given  a repo with no requirements/").
+    # The same word in a sentence is ordinary English that a translation must translate,
+    # and counting those rejected correct work: measured over this corpus, all 3091 real
+    # step keywords are indented and inside the acceptance block, all 7 line-opening prose
+    # occurrences are flush left and outside it, with no exception either way; a further 79
+    # occurrences sit mid-sentence. Indentation separates the two exactly.
+    keywords = tuple(sorted(re.findall(r"(?m)^[ \t]+(Given|When|Then)\b", text)))
     return (backticks, numbers, markers, labels, keywords)
 
 
@@ -4440,7 +4303,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         m = r["meta"]
         node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
                 "members": members.get(rid, []),
-                "verify": _bullets(r["body"], "verify intent"), "test_exempt": m.get("test_exempt")}
+                "verify": _verify_bullets(r["body"]), "test_exempt": m.get("test_exempt")}
         for sig in _risk_signals(node):
             buckets.setdefault(sig, []).append((rid, _risk_score(m)))
     # Action buckets, MOST-URGENT FIRST: an unimplemented contract outranks an
@@ -5195,7 +5058,7 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  
     else:
         print("  (none tagged)")
 
-    verify = [b for b in _bullets(body, "verify intent")
+    verify = [b for b in _verify_bullets(body)
               if b and not b.lstrip("*_ ").lower().startswith("none")]
     if verify:
         print("\nOpen verify-intent:")
@@ -5203,7 +5066,7 @@ def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  
             print("  - " + b)
 
     node = {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"), "members": mem,
-            "verify": _bullets(body, "verify intent"), "test_exempt": m.get("test_exempt")}
+            "verify": _verify_bullets(body), "test_exempt": m.get("test_exempt")}
     signals = _risk_signals(node)
     if signals:
         print("\nRisk signals:")
@@ -5410,14 +5273,71 @@ SEARCH_FLOOR = 0.05
 SEARCH_TOP = 5
 
 
-def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR):  # implements: ARCH-SEARCH-036  # implements: REQ-SEARCH-912  # implements: REQ-SEARCH-913  # implements: REQ-SEARCH-914  # implements: REQ-SEARCH-915
+# Searching a requirement browser for `ARCH-CHECK-006` used to return
+# REQ-ORPHANCODE-888 and not the requirement itself: the bag of words is title +
+# intent + clauses, and an id is in none of them, so "arch" and "check" were matched
+# as ordinary prose. An id is the primary key of this corpus; a query that names one
+# is not asking to be ranked.
+SEARCH_ID_MAX = 3          # substring id hits shown before the lexical ranking
+
+
+def _id_matches(reqs, query):  # implements: ARCH-SEARCH-036  # implements: REQ-SEARCH-965
+    """Requirement ids the query names, best first: an exact id, then ids it prefixes,
+    then ids that contain it. An exact hit is alone and unconditional; the looser two
+    are capped so a common word like `map` cannot crowd out the lexical ranking."""
+    q = (query or "").strip().upper()
+    if len(q) < 3:
+        return []
+    if q in reqs:
+        return [q]
+    prefix = sorted(rid for rid in reqs if rid.upper().startswith(q))
+    inner = sorted(rid for rid in reqs if q in rid.upper() and rid not in prefix)
+    return (prefix + inner)[:SEARCH_ID_MAX]
+
+
+def _text_matches(reqs, query, translations=None, skip=()):  # implements: REQ-SEARCH-965
+    """Requirements whose title, description or cases plainly contain the query, plus any
+    cached translation of them.
+
+    Scoped to exactly what the reader is asking about: the normative text and the cases
+    that prove it. `## Context` is deliberately excluded, for the same reason the ranking
+    bag excludes it — a word that appears only in commentary is not what the requirement
+    is about, and REQ-SEARCH-912 already decided that.
+
+    This is also the layer that answers a query in the language the reader is being
+    shown: the ranking model weights one language's tokens, so a translated requirement
+    is invisible to it. Substring, not ranked, and it only fills the slots the model
+    left empty."""
+    q = (query or "").strip().lower()
+    if len(q) < 3:
+        return []
+    out = []
+    for rid in sorted(reqs):
+        if rid in skip:
+            continue
+        body = reqs[rid]["body"]
+        hay = "\n".join([
+            _req_title(body, rid),
+            _from_any(_section_raw, body, CONTRACT_LABELS) or "",
+            _from_any(_section_raw, body, ACCEPTANCE_LABELS) or "",
+        ]).lower()
+        for entry in ((translations or {}).get(rid) or {}).values():
+            if isinstance(entry, dict):
+                hay += "\n" + "\n".join(str(v).lower() for v in entry.values())
+        if q in hay:
+            out.append(rid)
+    return out
+
+
+def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR, reqs_dir=None):  # implements: ARCH-SEARCH-036  # implements: REQ-SEARCH-912  # implements: REQ-SEARCH-913  # implements: REQ-SEARCH-914  # implements: REQ-SEARCH-915
     """Rank requirements by lexical relevance to `query` (cosine over TF-IDF of the
     same title + intent + Contract text `dupes` compares on). Read-only, always exit
     zero. Prints each hit's cosine score so a weak match is visible as weak, and emits
     an explicit no-strong-match line when the best score is below `floor` — so a
     lexical near-miss is never dressed up as an answer."""
+    ids = _id_matches(reqs, query)
     qtok = _sim_tokens(query or "")
-    if not qtok:
+    if not qtok and not ids:
         print("No searchable terms in {!r} (need a word of 3+ letters that is not a "
               "stopword). Nothing to rank.".format(query or ""))
         return 0
@@ -5433,15 +5353,27 @@ def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR):  # implements: 
     qv = vecs["\x00query"]
     scored = sorted(((_cosine(qv, vecs[rid]), rid) for rid in docs),
                     key=lambda x: (-x[0], x[1]))
-    hits = [(s, rid) for s, rid in scored if s >= floor][:top]
-    if not hits:
-        print("No strong match for {!r} (best {:.3f} is below the {:.2f} floor). "
-              "This is lexical search — try different words, or `dupes`/grep.".format(
-                  query, scored[0][0], floor))
+    # Order: id, then literal text, then the ranked model. A document that CONTAINS the
+    # query is stronger evidence than a partial token overlap with it -- a phrase that
+    # appears verbatim inside a case used to lose to a 0.10 cosine somewhere else.
+    translations = _load_translations(reqs, reqs_dir) if reqs_dir else {}
+    text = _text_matches(reqs, query, translations, skip=set(ids))[:max(0, top - len(ids))]
+    seen = set(ids) | set(text)
+    lexical = [(s, rid) for s, rid in scored
+               if s >= floor and rid not in seen][:max(0, top - len(seen))]
+    if not (ids or lexical or text):
+        print("No match for {!r}: no id, no literal text, and the best lexical (cosine) "
+              "score {:.3f} is below the {:.2f} floor. Try different words, or "
+              "`dupes`/grep.".format(
+                  query, scored[0][0] if scored else 0.0, floor))
         return 0
-    print("{} match(es) for {!r} — cosine score, lexical (not synonym-aware):\n".format(
-        len(hits), query))
-    for s, rid in hits:
+    print("{} match(es) for {!r} — id, then literal text, then cosine score (lexical, "
+          "not synonym-aware):\n".format(len(ids) + len(lexical) + len(text), query))
+    for rid in ids:
+        print("  {:>6}  {}  {}".format("id", rid, _req_title(reqs[rid]["body"], rid)))
+    for rid in text:
+        print("  {:>6}  {}  {}".format("text", rid, _req_title(reqs[rid]["body"], rid)))
+    for s, rid in lexical:
         print("  {:.3f}  {}  {}".format(s, rid, _req_title(reqs[rid]["body"], rid)))
     return 0
 
@@ -5581,7 +5513,8 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRY
         return None
 
 
-def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
+def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None,
+               headline_only=False):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
@@ -5623,7 +5556,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         is_confirmed = status == "confirmed"
         open_now = status != "draft" and any(
             b and not b.lstrip("*_ ").lower().startswith("none")
-            for b in _bullets(body, "verify intent"))
+            for b in _verify_bullets(body))
         old = lock.get(rid)
         is_drifted = bool(old) and old != binding_hash(body) and is_confirmed
         confirmed += is_confirmed
@@ -5716,6 +5649,15 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
         print(json.dumps(data, indent=2))
         return 0
     print("Requirement health: {}/100  ({}/{} green on every axis)".format(score, healthy, total))
+    if headline_only:
+        # `next` opens with the score and then lists what to do about it; the component
+        # breakdown below would push the actionable part off the first screen. The design
+        # score rides along because it is the other half of "how is this repo doing" and
+        # folding `health` into `next` had quietly dropped it from every text surface.
+        if design is not None:
+            print("Design OOP:         {}/100  ({}/{} source files with no candidate)".format(
+                design["score"], design["clean_files"], design["files"]))
+        return 0
     # Say what the headline cannot: a draft caps `score` by construction, so a low
     # reading over a draft-heavy corpus means "not reviewed yet", not "rotting".
     # Printed only when drafts actually pull the two numbers apart.
@@ -5916,6 +5858,7 @@ def _strip_generated(text):
     forks/clones — comparing it would make `map --check` spuriously fail on a fork."""
     return "\n".join(l for l in text.splitlines()
                      if not l.startswith("generated: ")
+                     and not l.startswith("engine: ")
                      and not l.lstrip().startswith('"repo":')
                      and not l.lstrip().startswith('"engine_version":'))
 
@@ -6151,6 +6094,35 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
             # so multi-line clauses are not truncated to their first physical line.
             out[-1] = (out[-1] + " " + s).strip()
     return out
+
+
+# `draft` scaffolds a prose capability with the source file's own headings listed
+# under this marker as an authoring hint. Until now it printed them INSIDE
+# `## Verify intent`, and they are bullets, so every heading was read back as an
+# open question: a 21-draft repository reported 103 findings, 82 of them the
+# tool's own hint. The scaffold now writes the hint into `## Context`; this cut
+# keeps files that were drafted before that fix honest.
+_VERIFY_HINT_RE = re.compile(r"authoring hint,\s*not the contract", re.I)
+
+
+def _verify_bullets(body):  # implements: ARCH-FINDINGS-010  # implements: REQ-FINDINGS-853
+    """The open questions in `## Verify intent` — the section's bullets, minus
+    anything below a line that declares itself a non-binding authoring hint.
+
+    The single reader every verify-intent consumer goes through (`findings`, the
+    map export, `next`, `health`), so the count in the viewer, the CLI and the
+    gate summary cannot disagree."""
+    section = _section_raw(body, "verify intent")
+    if not section:
+        return []
+    kept = []
+    for line in section.splitlines():
+        if _VERIFY_HINT_RE.search(line):
+            break
+        kept.append(line)
+    # re-parse through _bullets so bullet shape, fences, label lines and
+    # hanging-indent continuations are handled in exactly one place
+    return _bullets("## Verify intent\n" + "\n".join(kept), "verify intent")
 
 
 def _context_group(body, label):  # implements: ARCH-CONTEXT-048  # implements: REQ-CONTEXT-835
@@ -6519,7 +6491,6 @@ _LEGEND_MD = [
 
 def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-874
     from datetime import datetime
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     dep_count = {n["id"]: 0 for n in data["nodes"]}
     for _, b in data["edges"]:
@@ -6535,10 +6506,15 @@ def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ
 
     lines = [
         "---",
-        "generated: {}".format(ts),
+        # The header is derived from content only. It used to carry a wall-clock
+        # timestamp, which rewrote one line on every regeneration: two branches that
+        # produced an identical graph still conflicted here, and the resolution was
+        # always "regenerate", never "merge". Git already records when.
+        "generated: {}".format(datetime.now().strftime("%Y-%m-%d")),
+        "engine: {}".format(MAP_ENGINE_VERSION),
         "nodes: {}".format(len(data["nodes"])),
         "edges: {}".format(len(data["edges"])),
-    ] + (["design: {}/100 ({}/{} source files without a design candidate)".format(
+    ] + (["design OOP: {}/100 ({}/{} source files without a design candidate)".format(
         data["design"]["score"], data["design"]["clean_files"], data["design"]["files"])]
          if data.get("design") else []) + [
         "---",
@@ -7100,7 +7076,9 @@ def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-8
                # ARCH-TRACE-020 and, until now, discarded here: the graph carried the
                # dependency axis and dropped the level axis on the floor.
                "upstream_edges": data.get("upstream_edges", []),
-               "todos": data.get("todos", [])}
+               "todos": data.get("todos", []),
+               # the CLI, as data: the viewer documents the verbs it was generated by
+               "commands": commands_manifest()}
     if data.get("design"):                      # implements: REQ-DESIGN-954
         payload["design"] = data["design"]
     return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
@@ -7447,6 +7425,609 @@ def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, appl
     elif proposals:
         print("re-run with --apply to write them (ambiguous ones are never written).")
     return 0
+
+
+# ---------- clarify: the questions a requirement has not answered yet ----------
+# Deterministic and read-only, like every other advisory surface here: it names a
+# shape that is under-specified, never a defect, and never blocks. The point is the
+# moment BEFORE code exists -- an author writes "the gate reports errors quickly",
+# nobody asks what quickly means, and the ambiguity is discovered by the reader of
+# the failing test three weeks later.
+CLARIFY_HEDGES = (
+    "appropriate", "appropriately", "properly", "reasonable", "reasonably", "efficient",
+    "efficiently", "robust", "user-friendly", "intuitive", "quickly", "fast", "slow",
+    "soon", "as needed", "if necessary", "where possible", "and/or", "etc.", "and so on",
+    "optimal", "best-effort", "gracefully", "large", "small", "many", "several", "various",
+)
+# A case mentioning any of these is exercising a failure path. Absence of ALL of them
+# across every case is the signal -- a requirement whose acceptance is pure happy path.
+CLARIFY_FAILURE_WORDS = (
+    "invalid", "missing", "empty", "absent", "error", "fails", "failure", "refuse",
+    "refuses", "reject", "rejects", "corrupt", "malformed", "unreadable", "not found",
+    "timeout", "conflict", "duplicate", "unknown", "no ", "none", "cannot", "without",
+)
+CLARIFY_LIMIT_WORDS = ("at most", "up to", "no more than", "maximum", "max ", "limit",
+                       "capped", "bounded", "first ", "top ")
+CLARIFY_UNIT_RE = re.compile(
+    r"^(ms|s|sec|secs|second|seconds|min|mins|minute|minutes|hour|hours|day|days|"
+    r"kb|mb|gb|b|%|percent|char|chars|character|characters|line|lines|file|files|"
+    r"byte|bytes|request|requests|item|items|entry|entries|pair|pairs|clause|clauses|"
+    r"criterion|criteria|px|em|rem|x)$", re.I)
+# A bare number in a clause. Excluded by construction: anything glued to a word or a
+# dot (`v4.0.0`, `CASE-2`, `utf-8`), because those are identifiers, not quantities.
+_CLARIFY_NUM_RE = re.compile(r"(?<![\w.\-#])(\d+(?:\.\d+)?)\s*([A-Za-z%]*)")
+
+
+# Every case of ARCH-SEARCH-036 described its input as prose to be matched: terms that
+# match, terms that do not, terms that tokenize to nothing, more matches than --top. The
+# author varied the QUALITY of one kind of input and never its KIND, so nobody asked what
+# happens when the query is an id -- and the answer, for two years, was "the wrong
+# requirement". A gate cannot catch that: the code did what the contract said. This asks.
+CLARIFY_MONOCULTURE_MIN = 3     # cases needed before the shape means anything
+CLARIFY_MONOCULTURE_SHARE = 0.75
+CLARIFY_DOMAIN_SHARE = 0.10     # a Given-head this common across the corpus IS the domain
+CLARIFY_DOMAIN_MIN = 30         # ...but "common across the corpus" needs a corpus to be common in
+_GIVEN_RE = re.compile(r"^\s+Given\s+(.*)$", re.M)
+_CLARIFY_ARTICLES = frozenset((
+    "a", "an", "the", "one", "two", "three", "no", "any", "some", "its", "their",
+    "new", "old", "same", "other", "first", "second", "empty", "valid", "invalid",
+    "single", "confirmed", "draft", "deprecated", "stale", "fresh", "missing", "real",
+))
+
+
+def _given_head(text):
+    """The kind of thing a Given starts from: its first word that is not an article or a
+    leading adjective. Crude on purpose -- it only has to be stable across cases."""
+    for w in re.findall(r"[A-Za-z_`][\w`.-]*", text.lower()):
+        w = w.strip("`")
+        if len(w) < 3 or w in _CLARIFY_ARTICLES:
+            continue
+        return w
+    return ""
+
+
+def _given_heads(body):
+    return [h for h in (_given_head(g) for g in
+                        _GIVEN_RE.findall(_from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""))
+            if h]
+
+
+def _domain_heads(reqs):
+    """Words that open Givens across the whole corpus are that corpus's subject, not a
+    narrow focus: in this repository every other case starts "a requirement ...". Flagging
+    those would fire on 18% of the corpus and say nothing."""
+    counts = {}
+    total = 0
+    for r in (reqs or {}).values():
+        for h in _given_heads(r["body"]):
+            counts[h] = counts.get(h, 0) + 1
+            total += 1
+    # Below a real sample every word looks dominant: in a two-requirement corpus the one
+    # noun under examination is 75% of all Given heads and would exclude itself.
+    if total < CLARIFY_DOMAIN_MIN:
+        return frozenset()
+    return frozenset(w for w, c in counts.items() if c / float(total) >= CLARIFY_DOMAIN_SHARE)
+
+
+def _clarify_questions(rid, r, reqs=None):  # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
+    """The open questions one requirement has not answered, as records:
+    {rule, severity, where, quote, question, suggest}. Deterministic -- the same
+    requirement always yields the same list, in the same order. `blocking` means the
+    requirement cannot be implemented as written; everything else is advice."""
+    body = r["body"]
+    clauses = _from_any(_bullets, body, CONTRACT_LABELS)
+    cases_raw = _from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""
+    cases_low = cases_raw.lower()
+    n_cases = _count_ac(body)
+    out = []
+
+    def ask(rule, severity, where, quote, question, suggest):
+        out.append({"rule": rule, "severity": severity, "where": where,
+                    "quote": quote, "question": question, "suggest": suggest})
+
+    if not clauses:
+        ask("no-contract", "blocking", "Description", "",
+            "What is this requirement's binding obligation? The Description carries no clause.",
+            "Write one statement per obligation, present tense, naming the subject.")
+    if n_cases == 0:
+        ask("no-cases", "blocking", "Cases", "",
+            "What observable behaviour proves this requirement holds? No labelled case is present.",
+            "Add `CASE-1` with Given / When / Then, one per clause.")
+
+    for i, c in enumerate(clauses, 1):
+        low = c.lower()
+        where = "clause {}".format(i)
+        for w in CLARIFY_HEDGES:
+            if w in low:
+                ask("vague-term", "advisory", where, c,
+                    'What is the measurable threshold behind "{}"?'.format(w.strip()),
+                    "Replace it with a number and a unit, or with the observable condition it stands for.")
+                break                                   # one hedge per clause is enough to start the conversation
+        m = _CLARIFY_NUM_RE.search(c)
+        if m and not CLARIFY_UNIT_RE.match(m.group(2) or ""):
+            ask("number-without-unit", "advisory", where, c,
+                'What unit is "{}" in?'.format(m.group(1)),
+                "State the unit beside the number so a test can assert it.")
+        if (" all " in " " + low or low.startswith("all ") or " every " in low or " any " in low) \
+                and not any(w in low for w in CLARIFY_LIMIT_WORDS):
+            ask("unbounded-quantity", "advisory", where, c,
+                "Is there an upper bound, and what happens when it is reached?",
+                "Name the limit, or say explicitly that there is none.")
+        if low.startswith("it ") or " the system " in low:
+            ask("ambiguous-actor", "advisory", where, c,
+                "Who performs this -- which command or component?",
+                "Name the subject the title names, so the clause reads on its own.")
+
+    if clauses and n_cases and len(clauses) > n_cases:
+        for i in range(n_cases + 1, len(clauses) + 1):
+            if len(out) > 24:                            # a wall of questions is not a conversation
+                break
+            ask("clause-without-case", "advisory", "clause {}".format(i), clauses[i - 1],
+                "What case proves this clause? There are {} clauses and {} cases.".format(
+                    len(clauses), n_cases),
+                "Add a `CASE-{}` exercising it, or fold the clause into an existing case.".format(i))
+
+    if n_cases and not any(w in cases_low for w in CLARIFY_FAILURE_WORDS):
+        ask("no-failure-case", "advisory", "Cases", "",
+            "What happens on the failure path -- missing input, invalid value, nothing to do?",
+            "Add one case for the way this can go wrong; it is the case implementations skip.")
+
+    heads = _given_heads(body)
+    if len(heads) >= CLARIFY_MONOCULTURE_MIN:
+        counts = {}
+        for h in heads:
+            counts[h] = counts.get(h, 0) + 1
+        common = max(sorted(counts), key=lambda k: counts[k])
+        share = counts[common] / float(len(heads))
+        if share >= CLARIFY_MONOCULTURE_SHARE and common not in _domain_heads(reqs):
+            ask("case-monoculture", "advisory", "Cases", "",
+                'Every case starts from the same kind of input ("{}"). What is the other kind '
+                'a caller would supply?'.format(common),
+                "Add one case written from the caller's side, not the implementation's.")
+
+    if len(clauses) > LINT_AC_MAX:
+        ask("over-scoped", "advisory", "Description", "",
+            "This requirement carries {} clauses (advisory limit {}). Which of them is a separate "
+            "requirement?".format(len(clauses), LINT_AC_MAX),
+            "Split the ones that could change for a different reason.")
+    return out
+
+
+def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-957
+    """Print the open questions for one requirement (or the whole corpus's blocking
+    ones when no id is given). Advisory: always exit 0, writes nothing, and is never
+    a gate rule -- an unanswered question is a conversation, not a build failure."""
+    if cap_id and cap_id not in reqs:
+        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+        return 1
+    ids = [cap_id] if cap_id else sorted(reqs)
+    items = []
+    for rid in ids:
+        qs = _clarify_questions(rid, reqs[rid], reqs)
+        if not cap_id:
+            qs = [q for q in qs if q["severity"] == "blocking"]
+        if qs:
+            items.append({"id": rid, "title": _req_title(reqs[rid]["body"], rid), "questions": qs})
+    if as_json:
+        print(json.dumps({"engine_version": MAP_ENGINE_VERSION,
+                          "advisory": ("Deterministic open questions. Answer them in the requirement, "
+                                       "not in code; nothing here is a gate rule."),
+                          "requirements": items}, indent=2, ensure_ascii=False))
+        return 0
+    if not items:
+        print("{}: nothing unclear that this check can see.".format(cap_id or "corpus"))
+        print("  next: reqmap.py implement {}".format(cap_id or "<ID>"))
+        return 0
+    for it in items:
+        blocking = [q for q in it["questions"] if q["severity"] == "blocking"]
+        print("{} · {}".format(it["id"], it["title"]))
+        print("{} open question(s){}".format(
+            len(it["questions"]), " — {} blocking".format(len(blocking)) if blocking else ""))
+        n = 0
+        for sev in ("blocking", "advisory"):
+            group = [q for q in it["questions"] if q["severity"] == sev]
+            if not group:
+                continue
+            print("\n{}".format(sev.upper()))
+            for q in group:
+                n += 1
+                print(" {:>2}. [{}] {}".format(n, q["rule"], q["where"]))
+                if q["quote"]:
+                    print("     \"{}\"".format(_ellipsis(q["quote"], 92)))
+                print("     {}".format(q["question"]))
+                print("     -> {}".format(q["suggest"]))
+        print("")
+    if cap_id:
+        print("Answer them in {}.md, then: reqmap.py implement {}".format(cap_id, cap_id))
+    return 0
+
+
+def _ellipsis(s, n):
+    s = " ".join(str(s).split())
+    return s if len(s) <= n else s[:n - 1] + "\u2026"
+
+
+# ---------- implement: the brief a coding agent needs, and nothing more ----------
+def _neighbours(reqs, members, rid, k=2):  # implements: ARCH-IMPLEMENT-063  # implements: REQ-IMPLEMENT-959
+    """The k requirements most similar to `rid` that already have code, by the same
+    TF-IDF cosine `search` and `dupes` rank on. Similar prose almost always means
+    neighbouring code, so this answers "where does this kind of thing live here?"
+    without the engine knowing anything about the host project."""
+    docs = {q: _sim_tokens(_sim_text(rr["body"])) for q, rr in reqs.items()}
+    docs = {q: toks for q, toks in docs.items() if toks}
+    if rid not in docs:
+        return []
+    vecs = _tfidf(docs)
+    scored = []
+    for other in docs:
+        if other == rid or not members.get(other):
+            continue
+        scored.append((_cosine(vecs[rid], vecs[other]), other))
+    scored.sort(key=lambda x: (-x[0], x[1]))
+    return [{"id": q, "score": round(s, 3),
+             "files": sorted({fp for _role, fp, _ln in members.get(q, [])})}
+            for s, q in scored[:k] if s > 0]
+
+
+def cmd_implement(reqs, members, cap_id, as_json=False):  # implements: ARCH-IMPLEMENT-063  # implements: REQ-IMPLEMENT-958
+    """Emit the brief for implementing one requirement in code: its obligations, its
+    cases, the tags the new code must carry, where similar code already lives, and the
+    command that proves the work landed. The engine writes no code -- it states the
+    contract and then verifies it, which is the only half a deterministic tool can own."""
+    r = reqs.get(cap_id)
+    if not r:
+        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+        return 1
+    body, meta = r["body"], r["meta"]
+    clauses = _from_any(_bullets, body, CONTRACT_LABELS)
+    cases_raw = _from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""
+    labels = [b["label"] for b in _acc_blocks(body) if b.get("label")]
+    mem = sorted(members.get(cap_id, []))
+    questions = _clarify_questions(cap_id, r, reqs)
+    blocking = [q for q in questions if q["severity"] == "blocking"]
+    brief = {
+        "engine_version": MAP_ENGINE_VERSION,
+        "id": cap_id,
+        "title": _req_title(body, cap_id),
+        "status": meta.get("status", "draft"),
+        "level": meta.get("level", ""),
+        "layer": meta.get("layer", "feature"),
+        "intent": _distinct_intent(body),
+        "contract": clauses,
+        "cases": cases_raw,
+        "case_labels": labels,
+        "members": [{"role": role, "file": fp, "line": ln} for role, fp, ln in mem],
+        "depends_on": _as_list(meta.get("depends_on")),
+        "open_questions": questions,
+        "neighbours": _neighbours(reqs, members, cap_id),
+        "tags": {
+            "implements": "# implements: {}".format(cap_id),
+            "tested_by": "# tested-by: {}".format(cap_id),
+            "verifies": ["# verifies: {}#{}".format(cap_id, lb) for lb in labels],
+        },
+        "verify": ["reqmap.py gate", "reqmap.py sync"],
+        "contract_note": ("Write the code and the tests, carry the tags verbatim, then run verify. "
+                          "Do not edit the requirement to match the code -- if the contract is wrong, "
+                          "change it deliberately and run sync --accept-drift."),
+    }
+    if as_json:
+        print(json.dumps(brief, indent=2, ensure_ascii=False))
+        return 0
+    print("{} · {} · {}".format(cap_id, brief["status"], brief["layer"]))
+    print(brief["title"])
+    if brief["intent"]:
+        print("  " + brief["intent"])
+    if blocking:
+        print("\nBLOCKING — {} question(s) unanswered; implementing now guesses the contract:"
+              .format(len(blocking)))
+        for q in blocking:
+            print("  - [{}] {}".format(q["rule"], q["question"]))
+        print("  run: reqmap.py clarify {}".format(cap_id))
+    print("\nObligations ({}):".format(len(clauses)))
+    for i, c in enumerate(clauses, 1):
+        print("  {}. {}".format(i, c))
+    if cases_raw:
+        print("\nCases:")
+        for line in cases_raw.splitlines():
+            print("  " + line)
+    print("\nAlready implemented by ({}):".format(len(mem)))
+    for role, fp, ln in mem:
+        print("  {:12} {}:{}".format(role, fp, ln))
+    if not mem:
+        print("  (nothing yet — this is new code)")
+    if brief["neighbours"]:
+        print("\nSimilar requirements, for where this kind of code lives here:")
+        for n in brief["neighbours"]:
+            print("  {} ({:.2f})".format(n["id"], n["score"]))
+            for f in n["files"][:6]:
+                print("      " + f)
+    print("\nTags the new code must carry:")
+    print("  " + brief["tags"]["implements"] + "        (on the implementing file/function)")
+    print("  " + brief["tags"]["tested_by"] + "         (on the test file)")
+    for v in brief["tags"]["verifies"]:
+        print("  " + v)
+    if not labels:
+        print("  (no labelled case — add CASE-N labels to get per-criterion coverage)")
+    print("\nThen: reqmap.py gate   (and reqmap.py sync once it passes)")
+    return 0
+
+
+# ---------- retire: take a requirement out of service, code included ----------
+def _retire_plan(reqs, members, cap_id):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-960
+    """Everything that points at `cap_id`, computed before anything is touched:
+    dependents, children, members by file, the files where it is the ONLY tagged
+    requirement (whose code is now unreferenced), and its cross-references in prose.
+
+    The blast radius is the whole point. A requirement nobody depends on is a local
+    edit; one with three dependents is a conversation, and the caller is told which."""
+    r = reqs.get(cap_id)
+    mem = sorted(members.get(cap_id, []))
+    mine = {fp for _role, fp, _ln in mem}
+    others = set()
+    for rid, ms in members.items():
+        if rid == cap_id:
+            continue
+        for _role, fp, _ln in ms:
+            if fp in mine:
+                others.add(fp)
+    refs = sorted(rid for rid, rr in reqs.items()
+                  if rid != cap_id and ("[[{}]]".format(cap_id)) in rr["body"])
+    # `depends_on` runs consumer -> foundation: a button declares the capability it
+    # needs, never the reverse. So retiring a consumer cannot break anything downstream,
+    # but it CAN stand a capability down: if this requirement was the last thing pointing
+    # at one of its dependencies, that dependency now has no consumer, and its code is a
+    # dead-code candidate. Nothing else in the engine notices that, because the tag is
+    # still there and the gate is satisfied.
+    stranded = []
+    for dep in _as_list(r["meta"].get("depends_on")) if r else []:
+        if dep not in reqs:
+            continue
+        remaining = [rid for rid, rr in reqs.items()
+                     if rid != cap_id and dep in _as_list(rr["meta"].get("depends_on"))]
+        if not remaining:
+            stranded.append(dep)
+    return {
+        "id": cap_id,
+        "title": _req_title(r["body"], cap_id) if r else "",
+        "status": (r["meta"].get("status") if r else None),
+        "path": (r.get("path") if r else None),
+        "dependents": sorted(rid for rid, rr in reqs.items()
+                             if cap_id in _as_list(rr["meta"].get("depends_on"))),
+        "children": sorted(rid for rid, rr in reqs.items()
+                           if cap_id in _as_list(rr["meta"].get("satisfies"))),
+        "members": [{"role": role, "file": fp, "line": ln} for role, fp, ln in mem],
+        "exclusive_files": sorted(mine - others),
+        "shared_files": sorted(mine & others),
+        "referenced_by": refs,
+        "leaves_unused": sorted(stranded),
+    }
+
+
+def cmd_retire(reqs, members, reqs_dir, cap_id, delete=False, do_apply=False,
+               force=False, as_json=False):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
+    """Take a requirement out of service. Without --apply this only reports the blast
+    radius, so the destructive half is always preceded by a readable plan.
+
+    Deprecating is the default and is reversible: the requirement stays in the corpus,
+    exempt from the gates, and its code keeps working. --delete removes the block, its
+    lock entries and its membership TAGS -- never a function body: deciding which code
+    is now dead needs to understand the code, which this engine deliberately cannot do.
+    The plan names the files where the removed tag was the only one, which is exactly
+    the list a human or an agent needs for that second half."""
+    if cap_id not in reqs:
+        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+        return 1
+    plan = _retire_plan(reqs, members, cap_id)
+    plan["mode"] = "delete" if delete else "deprecate"
+    plan["applied"] = False
+    blockers = plan["dependents"] + plan["children"]
+
+    if not as_json:
+        print("{} · {} · retire ({})".format(cap_id, plan["status"], plan["mode"]))
+        print(plan["title"])
+        print("\nDepended on by: " + (", ".join(plan["dependents"]) or "(none)"))
+        print("Satisfied by (children): " + (", ".join(plan["children"]) or "(none)"))
+        print("Referenced in prose by: " + (", ".join(plan["referenced_by"]) or "(none)"))
+        print("\nMembers in code ({}):".format(len(plan["members"])))
+        for m in plan["members"]:
+            print("  {:12} {}:{}".format(m["role"], m["file"], m["line"]))
+        if plan["exclusive_files"]:
+            print("\nFiles where this was the ONLY tagged requirement — their code is "
+                  "unreferenced once it goes:")
+            for f in plan["exclusive_files"]:
+                print("  " + f)
+        if plan["shared_files"]:
+            print("\nFiles shared with other requirements — only the tag line goes:")
+            for f in plan["shared_files"]:
+                print("  " + f)
+        if plan["leaves_unused"]:
+            print("\nLeft with no consumer once this goes — check whether their code is "
+                  "still reached:")
+            for dep in plan["leaves_unused"]:
+                print("  " + dep)
+
+    if blockers and not force:
+        msg = ("refusing: {} still has {} dependent(s)/child(ren) — {}. Retire or re-point them "
+               "first, or pass --force once you have decided.".format(
+                   cap_id, len(blockers), ", ".join(blockers)))
+        if as_json:
+            plan["refused"] = msg
+            print(json.dumps(plan, indent=2, ensure_ascii=False))
+        else:
+            print("\n" + msg)
+        return 1
+
+    if not do_apply:
+        plan["note"] = ("plan only — nothing was changed. Re-run with --apply to {} it."
+                        .format(plan["mode"]))
+        if as_json:
+            print(json.dumps(plan, indent=2, ensure_ascii=False))
+        else:
+            print("\n" + plan["note"])
+        return 0
+
+    if not force and _git_dirty(os.path.dirname(reqs_dir) or "."):
+        print("\nrefusing: the working tree has uncommitted changes. Commit or stash first so "
+              "this is one reviewable diff, or pass --force.")
+        return 1
+
+    if not delete:
+        ok, msg = _apply_status(reqs[cap_id], "deprecated")
+        print("\n" + msg)
+        if not ok:
+            return 1
+        plan["applied"] = True
+        if as_json:
+            print(json.dumps(plan, indent=2, ensure_ascii=False))
+        else:
+            print("  its code and tags are untouched; a deprecated requirement is exempt from the gates.")
+            print("  next: reqmap.py sync")
+        return 0
+
+    removed_tags = _strip_member_tags(reqs_dir, plan["members"], cap_id)
+    block_ok = _remove_requirement_block(reqs[cap_id])
+    _drop_lock_entries(reqs_dir, cap_id)
+    plan["applied"] = True
+    plan["tags_removed"] = removed_tags
+    if as_json:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+        return 0
+    print("\ndeleted {}: {} tag(s) stripped, requirement {}, lock entries dropped.".format(
+        cap_id, removed_tags, "block removed" if block_ok else "NOT removed (see above)"))
+    if plan["exclusive_files"]:
+        print("  the files listed above now hold code nothing points at — delete what is dead.")
+    print("  next: reqmap.py sync")
+    return 0
+
+
+def _git_dirty(root):  # implements: REQ-RETIRE-961
+    """True when the working tree has uncommitted changes. Fails OPEN (False) when
+    git is absent or this is not a repository: a missing safety net must not block a
+    legitimate operation, and the plan was printed before this point either way."""
+    try:
+        out = subprocess.run(["git", "status", "--porcelain"], cwd=root or ".",
+                             capture_output=True, text=True, timeout=20)
+        return out.returncode == 0 and bool(out.stdout.strip())
+    except Exception:
+        return False
+
+
+def _strip_member_tags(reqs_dir, mem, cap_id):  # implements: REQ-RETIRE-962
+    """Remove `# implements: <id>` / `tested-by` / `verifies` tokens for one id from
+    the files that carry them. Pure text: a line that carried ONLY this tag goes; a
+    line that carried other tags too keeps them. Function bodies are never touched."""
+    root = os.path.dirname(reqs_dir) or "."
+    by_file = {}
+    for m in mem:
+        by_file.setdefault(m["file"], []).append(m["line"])
+    removed = 0
+    tag_re = re.compile(r"#\s*(?:implements|tested-by|verifies)\s*:\s*" + re.escape(cap_id) +
+                        r"(?:#[A-Za-z]+-\d+)?\s*")
+    for rel in sorted(by_file):
+        path = os.path.join(root, rel.replace("/", os.sep))
+        try:
+            with open(path, encoding="utf-8", newline="") as f:
+                text = f.read()
+        except OSError:
+            continue
+        lines = text.splitlines(keepends=True)
+        out = []
+        for line in lines:
+            if not tag_re.search(line):
+                out.append(line)
+                continue
+            removed += len(tag_re.findall(line))
+            stripped = tag_re.sub("", line)
+            # a line that was nothing but this tag (in whatever comment syntax) goes
+            if re.fullmatch(r"[\s/*#<!\-]*", stripped.replace("\r", "").replace("\n", "")):
+                continue
+            out.append(stripped)
+        try:
+            with open(path, "w", encoding="utf-8", newline="") as f:
+                f.write("".join(out))
+        except OSError:
+            continue
+    return removed
+
+
+def _remove_requirement_block(r):  # implements: REQ-RETIRE-962
+    """Delete one requirement from its file: the whole file when it is the only block,
+    otherwise just its block, leaving every sibling byte-identical."""
+    path = r["path"]
+    try:
+        with open(path, encoding="utf-8-sig", newline="") as f:
+            raw = f.read()
+    except OSError:
+        return False
+    eol = "\r\n" if "\r\n" in raw else "\n"
+    text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
+    blocks = split_requirement_blocks(text)
+    if len(blocks) <= 1:
+        try:
+            os.remove(path)
+            return True
+        except OSError:
+            return False
+    idx = r.get("block", 0)
+    if idx >= len(blocks):
+        return False
+    del blocks[idx]
+    new_text = "".join(blocks)
+    if eol == "\r\n":
+        new_text = new_text.replace("\n", "\r\n")
+    try:
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write(new_text)
+        return True
+    except OSError:
+        return False
+
+
+def _drop_lock_entries(reqs_dir, cap_id):  # implements: REQ-RETIRE-962
+    """Drop the retired id from the contract lock and from the member sidecar, so the
+    next gate does not carry a baseline for a requirement that no longer exists."""
+    lock = load_lock(reqs_dir)
+    if cap_id in lock:
+        del lock[cap_id]
+        save_lock(reqs_dir, lock)
+    ml = load_memberlock(reqs_dir)
+    if cap_id in ml:
+        del ml[cap_id]
+        save_memberlock(reqs_dir, ml)
+
+
+def _apply_status(r, status):  # implements: REQ-RETIRE-961  # implements: REQ-PROMOTE-894
+    """Rewrite one requirement's `status:` in place, preserving the file's own line
+    endings and every sibling block in a module file. Returns (ok, message).
+
+    Extracted so `confirm` and `retire` cannot drift apart on the mechanics of editing
+    a requirement in a file that may hold several."""
+    cur = r["meta"].get("status")
+    if cur == status:
+        return True, "{} is already {}.".format(r["meta"].get("id", "?"), status)
+    with open(r["path"], encoding="utf-8-sig", newline="") as f:
+        raw = f.read()
+    orig_lines = raw.splitlines(keepends=True)
+    line_eols = [ln[len(ln.rstrip("\r\n")):] for ln in orig_lines]
+    eol = "\r\n" if "\r\n" in raw else "\n"
+    text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
+    blocks = split_requirement_blocks(text)
+    if len(blocks) > 1:
+        idx = r.get("block", 0)
+        blocks[idx], n = _set_frontmatter_status(blocks[idx], status)
+        new_text = "".join(blocks)
+    else:
+        new_text, n = _set_frontmatter_status(text, status)
+    if n == 0:
+        return False, "could not find a `status:` line in {}".format(r["path"])
+    new_lines = new_text.splitlines()
+    if len(new_lines) == len(line_eols):
+        new_text = "".join(nl + le for nl, le in zip(new_lines, line_eols))
+    elif eol == "\r\n":
+        new_text = new_text.replace("\n", "\r\n")
+    with open(r["path"], "w", encoding="utf-8", newline="") as f:
+        f.write(new_text)
+    return True, "{}: {} -> {}".format(r["meta"].get("id", "?"), cur or "(unset)", status)
 
 
 def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022  # implements: REQ-REVIEW-906
@@ -8049,22 +8630,22 @@ def main():
         prog="reqmap",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "Everyday:\n"
+            "Author:\n"
             "  init                 bootstrap a repo (scaffold + draft + lock + map)\n"
-            "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID: from a TODO.md item)\n"
-            "  draft                derive draft requirements from untagged CODE\n"
+            "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID)\n"
+            "  draft                derive draft requirements from untagged code (--plan: JSON, writes nothing)\n"
+            "  clarify ID           the questions this requirement has not answered\n"
             "  confirm ID           validate a reviewed requirement -> status confirmed\n"
-            "  sync                 rescan + regenerate map + advance drift baseline (use --accept-drift on confirmed edits)\n"
-            "  gate                 the commit/CI gate: link sync + drift + test-link (report-only)\n"
-            "  next                 what to do next (counted risk buckets)\n"
+            "\nBuild:\n"
+            "  implement ID         the brief for writing its code (tags, cases, neighbours)\n"
+            "  gate                 the whole verdict: link sync + drift + readability + map freshness\n"
+            "  sync                 rebuild everything derived: lock, map, findings, site, integration\n"
+            "  retire ID            take a requirement out of service (plan first, --apply to act)\n"
+            "\nRead:\n"
+            "  next                 what to do next (--json/--badge: health, --untagged: files with no tag)\n"
             "  show ID              one-requirement dossier\n"
-            "  search \"query\"        rank requirements by lexical relevance to a query\n"
-            "\nAdvanced:\n"
-            "  plan                 read-only extraction plan (writes nothing)\n"
-            "  dupes                flag requirement pairs with overlapping contracts\n"
-            "  scan / map / export / site / findings / lint / review / health\n"
-            "\nDeprecated:\n"
-            "  check                alias for 'gate' (removed in v4.0.0)\n"
+            "  search \"query\"       rank requirements by lexical relevance\n"
+            "  dupes / design / review / suggest-verifies / translate\n"
         ),
     )
     ap.add_argument("cmd", choices=_cli_choices())
@@ -8084,6 +8665,21 @@ def main():
     ap.add_argument("--strict", action="store_true",
                     help="lint: exit non-zero on errors. check: promote drift and "
                          "test-link integrity from warn to error.")
+    ap.add_argument("--no-lint", dest="no_lint", action="store_true",
+                    help="gate: skip the requirement readability check")
+    ap.add_argument("--no-map-check", dest="no_map_check", action="store_true",
+                    help="gate: skip the committed-map freshness check")
+    ap.add_argument("--findings", action="store_true",
+                    help="sync: also create requirements/_findings.md the first time "
+                         "(it is refreshed automatically once it exists)")
+    ap.add_argument("--untagged", action="store_true",
+                    help="next: list the source files carrying no implements: tag")
+    ap.add_argument("--plan", action="store_true",
+                    help="draft: emit the JSON extraction plan and write no requirement")
+    ap.add_argument("--delete", action="store_true",
+                    help="retire: remove the requirement outright instead of deprecating it")
+    ap.add_argument("--force", action="store_true",
+                    help="retire: proceed despite dependents, or on a dirty working tree")
     ap.add_argument("--decompose", action="store_true",
                     help="lint: scaffold one draft requirement per statement-size finding "
                          "(opt-in; the only lint mode that writes files)")
@@ -8127,7 +8723,7 @@ def main():
                     help="site: print docs/ findings + the suggested command; writes nothing")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
-    ap.add_argument("--apply", dest="apply_tags", action="store_true",
+    ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="suggest-verifies: write the proposed `verifies:` tags into the test files")
     ap.add_argument("--to", dest="translate_to", default=None, choices=["ro", "en"],
                     help="translate: target locale (default: the other of ro/en from "
@@ -8151,20 +8747,22 @@ def main():
         return cmd_new(reqs_dir, tmpl, a.arg)
     if a.cmd == "init":
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
-    if a.cmd == "gen-integration":
-        return cmd_gen_integration(reqs_dir, code_root)
 
     reqs = load_requirements(reqs_dir)
-    # One walk for the commands that need coverage too (gate/sync/check); the rest only
-    # ever asked for members. --cache stays on scan_members, the only scanner that
-    # implements it — see scan_all's docstring for why it is not duplicated there.
+    # One walk for the commands that need coverage too (gate/sync); the rest only ever
+    # asked for members. --cache stays on scan_members, the only scanner that implements
+    # it - see scan_all's docstring for why it is not duplicated there.
     members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir, cache=a.cache)
-    if a.cmd == "scan":
-        cmd_scan(reqs, members); return 0
     if a.cmd == "next":
+        if a.as_badge:
+            return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
+        if a.as_json:
+            return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
+        if a.untagged:
+            return cmd_coverage(reqs, members, code_root, reqs_dir, False)
+        cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
+                   headline_only=True)
         return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
-    if a.cmd == "lint":
-        return cmd_lint(reqs, a.strict, members, decompose=a.decompose, reqs_dir=reqs_dir)
     if a.cmd == "show":
         if not a.arg:
             print("usage: reqmap show <ID>"); return 2
@@ -8178,20 +8776,32 @@ def main():
     if a.cmd == "search":
         if not a.arg:
             print("usage: reqmap search \"<query>\"   [--top N]"); return 2
-        return cmd_search(reqs, a.arg, a.top if a.top is not None else SEARCH_TOP)
-    if a.cmd == "health":
-        return cmd_health(reqs, members, reqs_dir, a.as_json,
-                          getattr(a, "as_badge", False), code_root=code_root)
-    if a.cmd == "coverage":
-        return cmd_coverage(reqs, members, code_root, reqs_dir, a.as_json)
+        return cmd_search(reqs, a.arg, a.top if a.top is not None else SEARCH_TOP,
+                          reqs_dir=reqs_dir)
     if a.cmd == "design":
         return cmd_design(code_root, reqs_dir, as_json=a.as_json)
     if a.cmd == "gate":
-        # report-only: link sync + drift + test-link; never touches the lock.
-        return cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
-                         getattr(a, "since", None),
-                         ac_cover=_ac_cover, level_cover=_level_cover)
+        # The whole verdict, in the order every hook and CI already ran it: link sync +
+        # drift + test-link, then requirement readability, then map freshness. They were
+        # three commands because they were written on three days, not because a caller
+        # ever wanted one without the others (the published Action defaults both extras
+        # to on). Report-only throughout: never touches the lock, never writes a map.
+        rc = cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
+                       getattr(a, "since", None),
+                       ac_cover=_ac_cover, level_cover=_level_cover)
+        if a.as_json:
+            return rc                      # one machine-readable document, not three
+        if not a.no_lint:
+            rc = cmd_lint(reqs, strict=True, members=members, reqs_dir=reqs_dir) or rc
+        if not a.no_map_check:
+            rc = cmd_map(reqs, members, reqs_dir, code_root, True, ac_cover=_ac_cover) or rc
+        return rc
     if a.cmd == "sync":
+        # Before the gate, not after: the generated integration artifacts are derived
+        # from the command registry, and RM028 reports them stale. Regenerating them
+        # downstream of a check that fails ON them can never converge.
+        if _is_source_repo(code_root):
+            cmd_gen_integration(reqs_dir, code_root)
         # rescan + regenerate map + advance the drift baseline (guarded). Members were
         # already scanned above; cmd_check rewrites the lock unless confirmed drift is
         # detected without --accept-drift, then map regenerates only on success.
@@ -8200,6 +8810,18 @@ def main():
                        ac_cover=_ac_cover, level_cover=_level_cover)
         if rc == 0:
             cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
+            # Everything derived is rebuilt in one place: there is no state of the world
+            # in which regenerating the map but not the findings digest, the presentation
+            # page or (in this repository) the generated integration artifacts is what the
+            # caller wanted. Each step below is a no-op when its target does not exist.
+            # `map` already refreshes an existing digest; this is the create path,
+            # kept opt-in so a consumer repo never gains a file it did not ask for.
+            if a.findings and not os.path.exists(os.path.join(reqs_dir, "_findings.md")):
+                cmd_findings(reqs, reqs_dir, raw=False)
+            _site_page = a.attach or _site_default_target(code_root)
+            if _site_page and os.path.isfile(_site_page):
+                cmd_site(reqs, members, code_root, attach=_site_page,
+                         regions=["nav", "stats"], diagram=None, detect=False)
             # Deliberately here and not in cmd_check: `gate` runs on every commit via the
             # hook, and a corpus-shape advisory there is noise on work that is already
             # correct. `sync` is the moment the corpus was just rewritten, which is when
@@ -8217,40 +8839,34 @@ def main():
             print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
                   "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
         return rc
-    if a.cmd == "check":
-        # deprecated alias for `gate` (report) / `sync` (regenerate). Preserves the
-        # legacy behavior verbatim so consumer hooks/CI/Action keep working.
-        print("reqmap: 'check' is deprecated — use 'gate' (report) or 'sync' (regenerate "
-              "lock+map). Forwarding to legacy behavior; the alias is removed in v4.0.0.",
-              file=sys.stderr)
-        rc = cmd_check(reqs, members, reqs_dir, a.update_lock, code_root, a.strict, a.as_json,
-                       getattr(a, "since", None), accept_drift=getattr(a, "accept_drift", False),
-                       ac_cover=_ac_cover, level_cover=_level_cover)
-        if a.update_lock and rc == 0:        # mirror sync: don't regen the map on a failing gate
-            cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
-        return rc
-    if a.cmd == "map":
-        return cmd_map(reqs, members, reqs_dir, code_root, a.check_fresh, ac_cover=_ac_cover)
-    if a.cmd == "site":  # implements: ARCH-SITE-026
-        regions = [x.strip() for x in (a.regions or "").split(",") if x.strip()]
-        return cmd_site(reqs, members, code_root,
-                        attach=a.attach, regions=regions, diagram=a.diagram, detect=a.detect)
-    if a.cmd == "export":
-        return cmd_export(reqs, members, reqs_dir, code_root, a.out, ac_cover=_ac_cover)
     if a.cmd == "draft":
+        if a.plan:
+            md_globs = []
+            for g in (a.md_glob or []):
+                md_globs += [x.strip() for x in g.split(",") if x.strip()]
+            return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
         return cmd_extract(reqs, members, code_root, reqs_dir)
-    if a.cmd == "plan":
-        md_globs = []
-        for g in (a.md_glob or []):
-            md_globs += [x.strip() for x in g.split(",") if x.strip()]
-        return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
-    if a.cmd == "findings":
-        return cmd_findings(reqs, reqs_dir, a.raw)
     if a.cmd == "review":
         return cmd_review(reqs, a.arg)
+    if a.cmd == "clarify":
+        if a.decompose:
+            # scaffolding a clause into its own requirement is the write half of the
+            # same question clarify asks about an over-scoped requirement
+            return cmd_lint(reqs, strict=False, members=members, decompose=True,
+                            reqs_dir=reqs_dir)
+        return cmd_clarify(reqs, a.arg, as_json=a.as_json)
+    if a.cmd == "implement":
+        if not a.arg:
+            print("usage: reqmap implement AREA-NAME-NNN"); return 2
+        return cmd_implement(reqs, members, a.arg, as_json=a.as_json)
+    if a.cmd == "retire":
+        if not a.arg:
+            print("usage: reqmap retire AREA-NAME-NNN [--delete] [--apply]"); return 2
+        return cmd_retire(reqs, members, reqs_dir, a.arg, delete=a.delete,
+                          do_apply=a.do_apply, force=a.force, as_json=a.as_json)
     if a.cmd == "suggest-verifies":
         return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
-                                    ac_cover=_ac_cover, apply_tags=a.apply_tags)
+                                    ac_cover=_ac_cover, apply_tags=a.do_apply)
     if a.cmd == "translate":
         return cmd_translate(reqs, reqs_dir, target=a.translate_to)
     if a.cmd == "confirm":

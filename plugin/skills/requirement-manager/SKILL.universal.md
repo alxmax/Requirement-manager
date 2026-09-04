@@ -209,7 +209,7 @@ clause count substitutes for that test.
 
 If two behaviors live in the same file but can break in isolation (e.g. a veto path and a majority-vote path in an aggregator), they are **two capabilities** — give each its own requirement file. "One file per capability" means one *behavior per file*, not one *file per class*.
 
-1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
+1. **Before implementing**, run `reqmap.py sync` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
 2. **A requirement is its contract.** Fill `Description` (the normative,
@@ -228,6 +228,16 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     `reqmap.py next` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
+
+3c. **Write one case from the caller's side.** The cases an author reaches for first
+    are the ones the implementation suggests: the input that matches, the input that
+    does not, the input that is empty. Those all vary the *quality* of one kind of
+    input and never its *kind*, and a contract can be complete inside that frame and
+    blind outside it. `search` shipped four such cases and, for two years, answered a
+    query naming a requirement id with a different requirement entirely — the gate was
+    green, per-criterion coverage was 100%, and nothing was wrong except that nobody
+    had asked what a caller would type. `reqmap.py clarify` names this shape
+    (`case-monoculture`); the fix is one case written from outside the implementation.
 
 3b. **Merge heuristic — the same smell from the other side.** A corpus only ever
     grows unless something says so. If two requirements state the same obligation,
@@ -368,7 +378,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v2
+      - uses: alxmax/requirement-manager/check@v3
 ```
 
 Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.
@@ -385,27 +395,20 @@ Creation verbs (pick by input, not by outcome):
 |---|---|---|
 | `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code/prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. Run once per repo to get started. | `--wipe`, `--no-site` |
 | `new` | Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
-| `scan` | List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo. | — |
 | `gate` | Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI. | `--strict`, `--json`, `--since` |
 | `sync` | Rescan code members, advance the drift baseline, and regenerate the map in one step (a committed _findings.md is refreshed too). Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed. | `--accept-drift`, `--strict` |
-| `check` | Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in v4.0.0 — use 'gate' or 'sync' instead. | `--strict`, `--json`, `--since`, `--update-lock` |
-| `map` | Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine. | `--check` |
-| `export` | Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html. | `--out` |
 | `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
-| `lint` | Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default. | `--strict`, `--decompose` |
 | `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
 | `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
 | `search` | Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware. | `--top` |
-| `health` | Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with --json. | `--json`, `--badge` |
 | `draft` | Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones. | — |
-| `plan` | Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted. | `--out`, `--md-glob` |
-| `findings` | Aggregate open 'Verify intent' items across all requirements into requirements/_findings.md. Surfaces every open human-review question in one place. | `--raw` |
 | `confirm` | Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming. | — |
+| `clarify` | Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. Run it before implementing so the ambiguity is resolved in the requirement, not guessed in code. | `--json` |
+| `implement` | Emit the brief for implementing one requirement in code: its obligations, its cases, the exact tags the new code must carry, where similar code already lives, and the command that proves the work landed. Writes no code and no file. | `--json` |
+| `retire` | Take a requirement out of service. Prints the blast radius first — dependents, children, members, and the files where it was the only tagged requirement. Refuses while dependents exist unless --force. Deprecates by default (reversible); --delete also removes the block, its lock entries and its membership tags, never a function body. Nothing is written without --apply. | `--delete`, `--apply`, `--force`, `--json` |
 | `review` | Emit a JSON review plan (intent, contract, acceptance criteria, structural anchors) for all requirements or one. Used as an AI feed for semantic quality review. Read-only. | — |
 | `translate` | Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook. | `--to` |
-| `site` | Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current. | `--attach`, `--regions`, `--diagram`, `--detect` |
 | `design` | Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json. | `--json` |
-| `coverage` | Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability. | `--json` |
 | `suggest-verifies` | Propose `# verifies: <id>#CASE-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags. | `--apply` |
 <!--##/REQMAP:COMMANDS##-->
 

@@ -228,10 +228,10 @@ satisfies: [ARCH-TRANSLATE-044]
 > silently wrong translation served back.
 
 Every bullet below is binding.
-- The `AC-N` labels and the Gherkin keywords are identifiers, not prose: a test names a
-  criterion (`# verifies: <ID>#AC-N`) and the viewer highlights the keywords, so a
-  translation that renames either is refused. The prompt states both rules, so a model
-  that translates them is answering a question nobody asked.
+- The `AC-N` labels and the Gherkin keywords are identifiers where they open a line — the
+  label at the margin, the step keyword indented under it, which is the shape of a Cases
+  block. The same words in a sentence are ordinary English, and are translated like any
+  other word.
 - A missing/erroring `claude` CLI, a timeout, or a malformed (missing-marker)
   response also skips that entry with a `WARN`. `translate` always exits 0 and
   never aborts the batch on a single entry's failure — it is a report-and-cache
@@ -277,3 +277,9 @@ CASE-5 — a stale cache entry is dropped, never served
   When   `_load_translations` runs
   Then   that entry is absent from the result, so `map`/`export` never attach it to the node
 
+CASE-6 — the same word in a sentence is prose, and translates
+  Given  a clause or an intent whose text uses the English word "when", mid-sentence
+         or opening an unindented line
+  When   the translation renders that word in the target language
+  Then   the structural-fidelity check still passes, because only an indented
+         line-opening keyword is an identifier

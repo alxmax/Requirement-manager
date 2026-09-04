@@ -9,19 +9,14 @@
     },
     "ARCH-VIEWER-007": {
       "app/scripts/install-viewer.mjs": "87088a30e7653b152155ea32d146f8f34f3542e949b22c9a2654317f5dbdda69",
-      "app/src/App.jsx": "696b41461c83f808e56ea949753252daa714bf243b313e5602784f3036e2c6b0",
-      "app/src/lib/data.js": "f2b0130bc664d4f99595406b2ee584fd274114c657ec1a4809f40787cd42a3d2",
+      "app/src/lib/data.js": "4172abdfdad0c5eb2240cbdcad272743e937ed92534c5202143cef3357ffeb40",
       "app/src/lib/icons.jsx": "6b4eb4b3b97949401faf5859d20593fac59f5951111307469c1844e127671b4d",
       "app/src/lib/tree.js": "2e2cf87a4c2bc1f2ea63e45c8458d9d81b06203158ed7c9fbd0fb5c5ff01e676",
-      "app/src/lib/ui.jsx": "90fa575fa35638b09b5dd5f342a24a9950d9737fa62f8dc0c47f470876b3fa5c",
       "app/src/lib/useDragPan.js": "067a9371a97063eb0a5a38b4a257e8522cbd0fa6e85d2d487175868f3260d6b1",
       "app/src/main.jsx": "8885b344ea6e788cbe6b42620ce7162acd016f5cd412ca01f5d7ef48ee7e4062",
-      "app/src/styles/app.css": "be034906589319ca3f9ea9b3a54b1951ce7e15ca0ceb2fd7a39fd0ac482c4cd6",
-      "app/src/styles/colors_and_type.css": "3cbe4baad40046b946283376e20a41d43ee77cd7ebd9b138e31e4c7ea3342a04",
-      "app/src/views/ExplorerView.jsx": "2e0b24c2822ddfa6f4cc01b732d87302e3c9769abea4619ffd75c90969b72bc9",
-      "app/src/views/FindingsView.jsx": "10d407a2bcf242236db5d5502e87c4776d9c79491947e21e1a6030c08e15f67e",
-      "app/src/views/MapView.jsx": "256cce24d0638bb71dc5ad2fd85a01cae4e883bcd563a5bb20359e2c864db28b",
-      "app/src/views/ProblemsView.jsx": "0db01cc7f7c398ea6f8fd14f4c4cdcf639bacfe95cc0907c6f00df66f0459ab2",
+      "app/src/styles/app.css": "ccbf37f4df98be6d2c9ac8294053d3f4b8b3d49b9220e7e0ba9c9512595f6e38",
+      "app/src/styles/colors_and_type.css": "d9ddcb927eb46a8d742efb8439535ad2b49b01e555d058c0b9f25710942b8c9e",
+      "app/src/views/MapView.jsx": "fccbff5df0b0c181fa00d026d5e96077557a88de6401208ee79fd92db356d480",
       "app/src/views/RoadmapView.jsx": "b6458cdc828ffdfd13eb39fe581f902ec96b5366b257aa215fc6eef71339884b",
       "app/vite.viewer.config.js": "0cdcb9953b91d24d45dc42ea5d3ab06dcacf40a12309ef1c2bdbc4dd9eb1b5f9"
     }

@@ -60,23 +60,6 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_scan",
-      "description": "List which code files belong to which requirement, grouped by capability. Shows all code members (implements:, generated-from:, validated-against:, tested-by:) discovered by scanning the repo.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_gate",
       "description": "Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI.",
       "parameters": {
@@ -131,81 +114,6 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_check",
-      "description": "Deprecated alias for 'gate' (report-only) / 'sync' (with --update-lock). Preserved for backward compatibility with consumer hooks, CI, and the GitHub Action. Will be removed in v4.0.0 — use 'gate' or 'sync' instead.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "strict": {
-            "type": "boolean",
-            "description": "Promote drift and test-link integrity warnings to errors."
-          },
-          "json": {
-            "type": "boolean",
-            "description": "Emit structured JSON output (for CI/badge consumption)."
-          },
-          "since": {
-            "type": "string",
-            "description": "Scope the gate to requirements whose member files changed since this git ref."
-          },
-          "update_lock": {
-            "type": "boolean",
-            "description": "Also regenerate the lock and map (mirrors legacy 'sync' behavior)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_map",
-      "description": "Generate requirements/_map.md (4 Mermaid diagrams), requirements/_map.json (graph with nodes, edges, todos), and requirements/_map.html (a self-contained React viewer). The viewer is only emitted when scripts/_map_viewer.html is vendored beside the engine.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "check_fresh": {
-            "type": "boolean",
-            "description": "Freshness gate: rebuild the map in memory and exit non-zero if the committed _map.* is stale. Use in CI alongside gate."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_export",
-      "description": "Write requirements/_map.json (the graph with engine_version, nodes, edges) for feeding an external front-end. Same output as map, without rebuilding _map.md and _map.html.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "out": {
-            "type": "string",
-            "description": "Output path override. Use '-' for stdout (--out -); omit for requirements/_map.json."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_next",
       "description": "Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action.",
       "parameters": {
@@ -218,31 +126,6 @@
           "show_all": {
             "type": "boolean",
             "description": "Expand all buckets to show every item instead of just the top few."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_lint",
-      "description": "Readability and structure check on non-draft requirements: stacked conditions (3+ and/or joins in one normative line), contract clauses with an unnamed 'It' subject, over-long contract clauses, missing Contract or Acceptance sections. Read-only unless --decompose is passed; exit-neutral by default.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "strict": {
-            "type": "boolean",
-            "description": "Exit non-zero on error-severity findings (warnings remain advisory)."
-          },
-          "decompose": {
-            "type": "boolean",
-            "description": "Scaffold one draft requirement per statement-size finding. Opt-in and never used by the gate, the hook or CI — the only lint mode that writes."
           }
         },
         "required": []
@@ -319,31 +202,6 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_health",
-      "description": "Print a corpus coherence snapshot: a headline score (percentage of requirements fully green on every axis: confirmed + member + tested + no open questions + not drifted) plus component counts. Use for a CI badge with --json.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "json": {
-            "type": "boolean",
-            "description": "Emit parseable JSON for a CI badge (--json)."
-          },
-          "badge": {
-            "type": "boolean",
-            "description": "Emit Shields.io endpoint JSON (schemaVersion, label, message, color)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_draft",
       "description": "Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones.",
       "parameters": {
@@ -352,52 +210,6 @@
           "root": {
             "type": "string",
             "description": "Repo root where requirements/ lives; defaults to the current directory."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_plan",
-      "description": "Read-only JSON capability-extraction plan: emit a capability map from legacy code without writing any .md files. Safer than draft — a human authors and confirms each candidate. Use before draft to preview what would be extracted.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "out": {
-            "type": "string",
-            "description": "Write plan JSON here ('-' or omit = stdout)."
-          },
-          "md_glob": {
-            "type": "string",
-            "description": "Also discover .md files matching this glob (repeatable; comma-separated ok). Off unless given. e.g. --md-glob 'prompts/**' --md-glob 'modes/**'."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_findings",
-      "description": "Aggregate open 'Verify intent' items across all requirements into requirements/_findings.md. Surfaces every open human-review question in one place.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "raw": {
-            "type": "boolean",
-            "description": "Ignore the triage sidecar and emit the raw grouped list."
           }
         },
         "required": []
@@ -419,6 +231,93 @@
           "arg": {
             "type": "string",
             "description": "ID"
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_clarify",
+      "description": "Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. Run it before implementing so the ambiguity is resolved in the requirement, not guessed in code.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "AREA-NAME-NNN"
+          },
+          "as_json": {
+            "type": "boolean",
+            "description": "Emit the questions as JSON for an agent to answer."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_implement",
+      "description": "Emit the brief for implementing one requirement in code: its obligations, its cases, the exact tags the new code must carry, where similar code already lives, and the command that proves the work landed. Writes no code and no file.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "AREA-NAME-NNN"
+          },
+          "as_json": {
+            "type": "boolean",
+            "description": "Emit the brief as JSON for a coding agent."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "reqmap_retire",
+      "description": "Take a requirement out of service. Prints the blast radius first — dependents, children, members, and the files where it was the only tagged requirement. Refuses while dependents exist unless --force. Deprecates by default (reversible); --delete also removes the block, its lock entries and its membership tags, never a function body. Nothing is written without --apply.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "arg": {
+            "type": "string",
+            "description": "AREA-NAME-NNN"
+          },
+          "delete": {
+            "type": "boolean",
+            "description": "Remove the requirement outright instead of marking it deprecated."
+          },
+          "do_apply": {
+            "type": "boolean",
+            "description": "Actually perform the retirement; without it nothing is written."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Proceed despite dependents, or on a dirty working tree."
+          },
+          "as_json": {
+            "type": "boolean",
+            "description": "Emit the plan (and what was applied) as JSON."
           }
         },
         "required": []
@@ -470,39 +369,6 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_site",
-      "description": "Inject or refresh engine-owned regions (nav links + stats counts) into a project presentation page. Scaffolds a full page if the target does not exist. Run after map to keep the page current.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "attach": {
-            "type": "string",
-            "description": "Target HTML page to inject engine-owned regions into (scaffolds it if absent)."
-          },
-          "regions": {
-            "type": "string",
-            "description": "Comma-separated list of regions to inject (nav,stats). Default: nav."
-          },
-          "diagram": {
-            "type": "string",
-            "description": "Relative path (from the page) to an Excalidraw HTML viewer; linked only if it exists."
-          },
-          "detect": {
-            "type": "boolean",
-            "description": "Scan docs/ and print the suggested command — writes nothing."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_design",
       "description": "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json.",
       "parameters": {
@@ -515,27 +381,6 @@
           "json": {
             "type": "boolean",
             "description": "Emit the findings as a JSON object {files, findings[]}."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_coverage",
-      "description": "Read-only report of untagged-code coverage signal: lists source files that carry no implements: tag, grouped by directory. Use to identify gaps in requirement traceability.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "json": {
-            "type": "boolean",
-            "description": "Emit structured JSON output (for CI consumption)."
           }
         },
         "required": []

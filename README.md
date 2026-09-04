@@ -41,7 +41,7 @@ $ python scripts/reqmap.py sync
   lock update: AREA-DEMO-999 hash changed (new->703e565f)
 lock updated.
 WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
-info  1 open verify-intent finding(s) — run `reqmap.py findings`
+info  1 open verify-intent finding(s) — run `reqmap.py sync`
 
 1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 1 warnings.
 wrote .\requirements\_map.md
@@ -51,7 +51,7 @@ wrote .\requirements\_map.json
 $ python scripts/reqmap.py gate
 WARN  AREA-DEMO-999: confirmed but no tested-by: tag — acceptance tests not linked
 WARN  AREA-DEMO-999: DRIFT — contract changed since lock; re-check 1 member(s): scripts/_demo_hello.py:2
-info  1 open verify-intent finding(s) — run `reqmap.py findings`
+info  1 open verify-intent finding(s) — run `reqmap.py sync`
 
 1 requirements (1 confirmed, 0 legacy-schema), 1 members, 0 errors, 2 warnings.
 ```
@@ -82,7 +82,7 @@ tool turns the spec into a real file that lives **next to the code** and is
 3. **The gate keeps them honest.** `reqmap.py gate` verifies that every tag
    points to a real requirement, every requirement has code, and nothing has
    silently changed. Run it before every commit (and in CI).
-4. **The map shows the big picture.** `reqmap.py map` generates diagrams and a
+4. **The map shows the big picture.** `reqmap.py sync` generates diagrams and a
    double-click-to-open HTML viewer of how requirements and code connect.
 
 ## Try it in 2 minutes
@@ -92,7 +92,7 @@ Copy the engine into any project, then:
 ```bash
 python scripts/reqmap.py init     # scaffold + draft requirements from your existing code
 python scripts/reqmap.py gate     # are code and specs in sync? (report-only)
-python scripts/reqmap.py map      # build the visual map → open requirements/_map.html
+python scripts/reqmap.py sync      # build the visual map → open requirements/_map.html
 ```
 
 `init` is the friendly starting point — it sets everything up and tells you the
@@ -171,7 +171,7 @@ cp /path/to/plugin/scripts/reqmap.py scripts/reqmap.py
 # then from your repo root:
 python scripts/reqmap.py init
 python scripts/reqmap.py gate
-python scripts/reqmap.py map
+python scripts/reqmap.py sync
 ```
 
 ### Claude Code plugin (most integrated)
@@ -283,7 +283,7 @@ hand-drawn-look and fully editable, not a screenshot.
 - `.html` — double-click to open; has a built-in "Download .excalidraw" button.
   Loads Excalidraw from a CDN, so the first open needs a network connection.
 
-**Linking a diagram to your project page:** `reqmap.py site --attach docs/architecture.html --diagram <rel-path-to.html>` adds a live link to the diagram in the engine-owned nav region of your project page.
+**Linking a diagram to your project page:** `reqmap.py sync --attach docs/architecture.html --diagram <rel-path-to.html>` adds a live link to the diagram in the engine-owned nav region of your project page.
 
 The full builder API (shapes, auto-layout helpers, quality gates) is documented in
 [`plugin/skills/excalidraw-diagram/SKILL.md`](plugin/skills/excalidraw-diagram/SKILL.md).
@@ -305,7 +305,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v2
+      - uses: alxmax/requirement-manager/check@v3
 ```
 
 The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`

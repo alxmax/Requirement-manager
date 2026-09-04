@@ -5,7 +5,7 @@
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
 # `<dir>/action.yml`, so this file is consumed as:
 #
-#     uses: alxmax/requirement-manager/check@v2
+#     uses: alxmax/requirement-manager/check@v3
 #
 # Usage (in a consumer repo that has vendored scripts/reqmap.py per the skill setup):
 #
@@ -18,7 +18,7 @@
 #         runs-on: ubuntu-latest
 #         steps:
 #           - uses: actions/checkout@v4
-#           - uses: alxmax/requirement-manager/check@v2
+#           - uses: alxmax/requirement-manager/check@v3
 #
 # Versioning: `@vN` is a MAJOR-ALIAS tag naming the action's interface line, not a
 # release. The `uses:` reference above IS its source of truth — there is no separate
@@ -111,6 +111,45 @@ runs:
     # Warn-only by default — a new step that could newly fail a green build would be a
     # breaking change for an existing @v2 pin. Fails open (exit 0) when either version
     # is unreadable; see check/engine_staleness.py.
+    - name: reqmap engine staleness  # implements: REQ-STALEENGINE-925
+      if: ${{ inputs.stale-engine != 'off' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # The `|| status=$?` dance is what makes "warn-only" true of the STEP and not just
+      # of the script: in warn mode nothing here — a probe that isn't where we expect it,
+      # a python that won't start — may turn a previously green build red, because that
+      # would be a breaking change for a pin that did not move. `error` opted into loud.
+      run: |
+        probe="$GITHUB_ACTION_PATH/engine_staleness.py"
+        status=0
+        if [ ! -f "$probe" ]; then
+          echo "NOTE  engine staleness probe skipped: $probe not found"
+          exit 0
+        fi
+        python -X utf8 "$probe" \
+          --vendored "${{ inputs.reqmap-path }}" \
+          --mode "${{ inputs.stale-engine }}" || status=$?
+        if [ "$status" -ne 0 ] && [ "${{ inputs.stale-engine }}" != "error" ]; then
+          echo "NOTE  engine staleness probe skipped: exited $status"
+          exit 0
+        fi
+        exit "$status"
+    - name: reqmap gate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # One verdict since engine v4.0.0: link sync + drift + test links, requirement
+      # readability, committed-map freshness. The `lint` and `map-check` inputs stay,
+      # and now switch the corresponding half of `gate` off — so a caller's existing
+      # `lint: 'false'` keeps meaning what it meant.
+      run: |
+        set -e
+        FLAGS=""
+        if [ "${{ inputs.lint }}" != "true" ]; then FLAGS="$FLAGS --no-lint"; fi
+        if [ "${{ inputs.map-check }}" != "true" ]; then FLAGS="$FLAGS --no-map-check"; fi
+        if [ -n "${{ inputs.reqmap-repo }}" ]; then
+          export REQMAP_REPO="${{ inputs.reqmap-repo }}"
+        fi
+        python -X utf8 "${{ inputs.reqmap-path }}" gate $FLAGS
     - name: reqmap engine staleness  # implements: REQ-STALEENGINE-925
       if: ${{ inputs.stale-engine != 'off' }}
       shell: bash
