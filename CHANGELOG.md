@@ -1,5 +1,12 @@
 # Changelog
 
+## plugin `v4.0.4` — 2026-09-04
+
+**`cmd_export` is gone.** The `export` verb folded into `sync` in `v4.0.0` and the function has
+been unreachable ever since — dead code kept alive by three tests calling it directly. Those tests
+assert the JSON payload, which is live behaviour, so they moved to the surviving writer rather
+than being deleted with it. `ARCH-MAP-007` stops describing a command that no longer exists.
+
 ## plugin `v4.0.3` — 2026-09-04
 
 **RM029: a cached translation may not carry a field the requirement does not emit.** The gate

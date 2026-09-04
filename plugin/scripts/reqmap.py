@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.16"
+MAP_ENGINE_VERSION = "2026-09-04.17"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4190,7 +4190,7 @@ def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044  # imp
 
 def _attach_translations(data, reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
     """Mutate data['nodes'] in place, adding node['i18n'] = {locale: {...}} for
-    any node with a fresh cached translation. Shared by cmd_map and cmd_export
+    any node with a fresh cached translation. Shared by cmd_map
     so both emit the same graph — no `claude` call here, file reads only."""
     i18n = _load_translations(reqs, reqs_dir)
     for node in data["nodes"]:
@@ -4242,23 +4242,6 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
         data["design"] = _design
     _attach_translations(data, reqs, reqs_dir)
     return data
-
-
-def cmd_export(reqs, members, reqs_dir, root=".", out=None, ac_cover=None):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
-    """Emit the registry graph as JSON for an external front-end to consume.
-    Same {nodes, edges} shape that drives the map; '-' = stdout, --out PATH, or
-    requirements/_map.json by default."""
-    data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
-    text = _build_json_text(data)
-    target = out if out else os.path.join(reqs_dir, "_map.json")
-    if target == "-":
-        print(text)
-        return 0
-    os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
-    with open(target, "w", encoding="utf-8") as f:
-        f.write(text)
-    print("wrote {} ({} nodes, {} edges)".format(target, len(data["nodes"]), len(data["edges"])))
-    return 0
 
 
 def _risk_score(meta):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-885
