@@ -8115,7 +8115,9 @@ class GateRules(unittest.TestCase):  # tested-by: ARCH-RULES-059  # tested-by: R
             "impl.py": tag("AREA-A-001") + "\n",
         }
         _code, out = self._run(files)
-        self.assertNotIn("RM004", out)
+        # the RULE must not fire; a bare substring search would also match RM030 quoting
+        # the exempted code back in its own message ("`gate_exempt: [RM004]` silences...")
+        self.assertNotIn("RM004 AREA-A-001", out)
         self.assertIn("RM007 AREA-A-001: confirmed but no tested-by", out)
 
 
@@ -8230,6 +8232,158 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         out = R._mermaid_req_to_code(data)
         self.assertIn("ARCH_A_001", out)
         self.assertNotIn("REQ_A_002", out)
+
+
+class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-AUDIT-970  # tested-by: REQ-AUDIT-971  # tested-by: REQ-AUDIT-972  # tested-by: REQ-AUDIT-973
+    """`audit` runs every discovery pass and reports; only the gate reaches the exit code."""
+
+    def _req(self, status="confirmed", level=None, exempt=None, body_extra="", satisfies=None):
+        meta = {"status": status, "layer": "feature", "owner": "Alex"}
+        if level:
+            meta["level"] = level
+        if exempt:
+            meta["lint_exempt"] = exempt
+        if satisfies:
+            meta["satisfies"] = satisfies
+        return {"meta": meta,
+                "body": "# T\n\n## Description\n- It holds.\n\n"
+                        "## Cases\nCASE-1\n  Then it holds\n" + body_extra}
+
+    def _run(self, reqs, members, **kw):
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            rc = R.cmd_audit(reqs, members, d, d, **kw)
+        return rc, buf.getvalue()
+
+    def _gate_rc(self, reqs, members):
+        """The gate's own verdict on the same corpus, which is what the audit must echo."""
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            return R.cmd_check(reqs, members, d, False, d)
+
+    def _green(self):
+        reqs = {"REQ-A-001": self._req()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        return reqs, members
+
+    # ---- the report ------------------------------------------------------
+    def test_every_section_runs(self):  # verifies: REQ-AUDIT-970#CASE-1
+        _, out = self._run(*self._green())
+        for section in ("Gate", "Risk", "Duplicates", "Design", "Tag coverage",
+                        "Exemptions in force", "Corpus shape"):
+            self.assertIn(section, out)
+
+    def test_advisory_findings_never_fail_the_run(self):  # verifies: REQ-AUDIT-970#CASE-2
+        """Two requirements with byte-identical contracts and a flat corpus: plenty to
+        advise about. The audit's verdict must be the GATE's verdict on the same corpus,
+        which is the contract — asserting a bare 0 would instead assert that this
+        developer's tree happens to be clean."""
+        reqs, members = self._green()
+        reqs["REQ-B-002"] = self._req()
+        members["REQ-B-002"] = [("implements", "y.py", 1), ("tested-by", "t.py", 2)]
+        self.assertTrue(R._redundant_groups(reqs))       # there IS advice to give
+        rc, _ = self._run(reqs, members)
+        self.assertEqual(rc, self._gate_rc(reqs, members))
+
+    def test_a_gate_error_fails_the_audit(self):  # verifies: REQ-AUDIT-970#CASE-3
+        # a confirmed requirement with no `implements:` member is the gate's own error
+        rc, out = self._run({"REQ-A-001": self._req()}, {})
+        self.assertEqual(rc, 1)
+        self.assertIn("Corpus shape", out)          # the advisory half still printed
+
+    def test_a_raising_section_is_reported_not_fatal(self):  # verifies: REQ-AUDIT-970#CASE-4
+        def boom():
+            raise RuntimeError("pass exploded")
+        title, remedy, text, rc = R._audit_section("Boom", "reqmap.py boom", boom)
+        self.assertIn("pass exploded", text)
+        self.assertEqual(rc, 0)
+
+    def test_json_carries_every_signal(self):  # verifies: REQ-AUDIT-970#CASE-5
+        _, out = self._run(*self._green(), as_json=True)
+        data = json.loads(out)
+        for key in ("gate", "health", "exemptions", "shape"):
+            self.assertIn(key, data)
+
+    # ---- exemptions ------------------------------------------------------
+    def test_exemption_with_a_recorded_reason_is_clean(self):  # verifies: REQ-AUDIT-971#CASE-1
+        r = self._req(exempt=["file-spread"],
+                      body_extra="\n## Context\n- `file-spread` is the capability here.\n")
+        self.assertTrue(R._exemption_reason_recorded(r["body"], "file-spread"))
+        self.assertEqual([e for e in R._exemptions_in_force({"REQ-A-001": r})
+                          if not e["reason"]], [])
+
+    def test_bare_exemption_is_a_warning(self):  # verifies: REQ-AUDIT-971#CASE-2
+        reqs = {"REQ-A-001": self._req(exempt=["ac-count-high"])}
+        members = {"REQ-A-001": [("implements", "x.py", 1)]}
+        with tempfile.TemporaryDirectory() as d:
+            ctx = R.GateContext(reqs, members, d, d, full_members=members, update_lock=False)
+            found = list(R._rule_exemption_without_reason(ctx))
+        self.assertEqual(len(found), 1)
+        rid, msg = found[0]
+        self.assertEqual(rid, "REQ-A-001")
+        self.assertIn("lint_exempt", msg)
+        self.assertIn("ac-count-high", msg)
+
+    def test_exemption_rule_is_never_promoted_by_strict(self):  # verifies: REQ-AUDIT-971#CASE-3
+        rule = R.gate_rule_by_id("RM030")
+        self.assertEqual(rule.severity, "warn")
+        self.assertFalse(rule.strict)
+
+    def test_oversize_findings_name_the_tool_that_splits(self):  # verifies: REQ-AUDIT-971#CASE-4
+        body = "# T\n\n## Description\n" + "".join(
+            "- Clause {}.\n".format(i) for i in range(3)) + "\n## Cases\n" + "".join(
+            "CASE-{}\n  Then it holds\n".format(i) for i in range(1, R.LINT_AC_MAX + 3))
+        found = R.lint_requirement("REQ-A-001", {"meta": {"status": "confirmed"}, "body": body})
+        detail = " ".join(f["detail"] for f in found if f["check"] == "ac-count-high")
+        self.assertIn("clarify REQ-A-001 --decompose", detail)
+
+    # ---- corpus shape ----------------------------------------------------
+    def test_a_levelled_corpus_is_not_called_flat(self):  # verifies: REQ-AUDIT-972#CASE-1
+        reqs = {"REQ-A-001": self._req(level="code", satisfies=["ARCH-B-002"]),
+                "ARCH-B-002": self._req(level="architecture")}
+        shape = R._corpus_shape(reqs)
+        self.assertFalse(shape["flat"])
+        self.assertEqual(shape["levels"], {"code": 1, "architecture": 1})
+        self.assertEqual(shape["satisfies_edges"], 1)
+
+    def test_a_corpus_with_no_levels_is_flat(self):  # verifies: REQ-AUDIT-972#CASE-2
+        reqs = {"REQ-{}-00{}".format(c, i): self._req() for i, c in enumerate("ABCDEFGHIJK")}
+        shape = R._corpus_shape(reqs)
+        self.assertTrue(shape["flat"])
+        self.assertEqual(shape["levelled"], 0)
+        _, out = self._run(reqs, {rid: [("implements", "x.py", 1)] for rid in reqs})
+        self.assertIn("the corpus is flat", out)
+
+    def test_a_flat_corpus_does_not_change_the_verdict(self):  # verifies: REQ-AUDIT-972#CASE-3
+        reqs, members = self._green()
+        self.assertTrue(R._corpus_shape(reqs)["flat"])
+        rc, _ = self._run(reqs, members)
+        self.assertEqual(rc, self._gate_rc(reqs, members))
+
+    # ---- the sync tail ---------------------------------------------------
+    def test_sync_tail_names_an_unclean_signal(self):  # verifies: REQ-AUDIT-973#CASE-1
+        reqs = {"REQ-A-001": self._req(exempt=["ac-count-high"], level="code")}
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            R._audit_summary(reqs, {}, d, d)
+        out = buf.getvalue()
+        self.assertIn("no reason recorded", out)
+        self.assertIn("reqmap.py audit", out)
+
+    def test_sync_tail_is_silent_on_a_clean_corpus(self):  # verifies: REQ-AUDIT-973#CASE-2
+        reqs = {"REQ-A-001": self._req(level="code")}
+        buf = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
+            R._audit_summary(reqs, {}, d, d)   # empty tree: no design, no untagged, no TODO
+        self.assertEqual(buf.getvalue(), "")
+
+    def test_sync_tail_writes_nothing(self):  # verifies: REQ-AUDIT-973#CASE-3
+        reqs = {"REQ-A-001": self._req(exempt=["ac-count-high"])}
+        with tempfile.TemporaryDirectory() as d:
+            before = sorted(os.listdir(d))
+            with redirect_stdout(io.StringIO()):
+                R._audit_summary(reqs, {}, d, d)
+            self.assertEqual(sorted(os.listdir(d)), before)
 
 
 class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955

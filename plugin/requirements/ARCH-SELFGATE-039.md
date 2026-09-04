@@ -70,6 +70,9 @@ CASE-8
 
 ## Context
 **Notes**
+- `lint_exempt: ac-count-high` — the capability is "the gate runs at every entry point", and
+  each case is one of those entry points. They cannot fail independently of the obligation
+  they share, which is the test for whether a clause deserves its own requirement.
 - This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own
   behavior — that contract lives in [[ARCH-CHECK-006]].
 - `lint_exempt: file-spread` — spanning CI, the composite action, both dev hooks and the sync
@@ -156,3 +159,8 @@ CASE-6 — sync_reqmap.sh propagates the engine to the local cache and named con
   Then   `plugin/scripts/reqmap.py` (and the vendored viewer template, if present) in the local
          plugin cache and every named consumer repo matches this repo's current copy
 
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the five files ARE this requirement. Spanning CI, the
+  composite action, both dev hooks and the sync script is the capability, not a sign it is
+  diffuse; a version of it that touched one file would assert nothing.

@@ -1,5 +1,43 @@
 # Changelog
 
+## plugin `v4.2.0` — 2026-09-04
+
+**`audit`: every pass that discovers a problem, in one report.** The engine grew one verb per
+question — is it linked, is it drifted, is it duplicated, is it tagged, is the design rotting —
+and answering "how is this repo doing" came to mean remembering all of them, so a reader who
+does not already know the command list never meets most of the answers. `audit` runs the gate,
+`next`, `dupes`, `design` and tag coverage together, prints a summary naming what each found and
+the verb that produces it, then each section's own output. Read-only, and the exit code is the
+**gate's alone**: advice that can fail a build stops being read and starts being suppressed.
+
+**An exemption nobody justified is now a finding (RM030).** `lint_exempt:` was the cheapest thing
+in the tool to reach for — one frontmatter token silences a check permanently, nobody has to say
+why, and nothing mentions it again. So "split this requirement" and "add one word here" cost a
+reader the same, and the wrong one kept winning. Three changes, together:
+
+- `audit` lists **every** exemption in force with its requirement and the check it silences.
+- `gate` warns when the requirement's own prose never mentions the check it exempts itself from.
+  Warn-only and never promoted by `--strict`: the point is to make silencing cost a sentence a
+  reviewer can argue with, not to make it impossible.
+- the `ac-count-high` and `over-scoped` findings now name `clarify <ID> --decompose`, which
+  scaffolds the extra clause out. They used to say only "consider splitting", while the skill
+  contract advertised the exemption as a one-line fix.
+
+The six exemptions in this repo's own corpus that carried no reason now carry one.
+
+**`audit` says whether the corpus has a shape at all.** `level:` ships commented out in the
+template, so a corpus never gains the V-model axis by itself and every surface that reads a level
+quietly defaults it — a repo can run the engine for months with every requirement on one rung and
+nothing ever mentioning the other two. The report states the spread across the rungs, and when
+almost nothing is levelled it says the corpus is flat and names the three rungs and the
+`satisfies:` edge that builds the pyramid. Nothing about this warns or fails: adopting a level
+axis is a decision, not a defect.
+
+**`sync` ends by saying what it found.** One line per signal that is not clean — unjustified
+exemptions, a flat corpus, design candidates, untagged code, and a `TODO.md` whose newest
+milestone is behind the requirements' — and nothing at all when they are all clean, so a line
+that appears is news. It changes neither what `sync` writes nor its exit code.
+
 ## plugin `v4.1.0` — 2026-09-04
 
 **The two numbers `next` opens with now travel with the map.** `_map.json` gained a `health`

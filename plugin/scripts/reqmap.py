@@ -31,7 +31,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, errno, fnmatch, hashlib, json, math, os, re, shutil, subprocess, sys
+import argparse, ast, contextlib, errno, fnmatch, hashlib, io, json, math, os, re, shutil, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # Both tag patterns are BUILT from ROLES rather than repeating it. The three used to be
@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.19"
+MAP_ENGINE_VERSION = "2026-09-04.20"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -411,6 +411,23 @@ COMMANDS = {
         ),
         "arg": "ID",
         "params": [],
+    },
+    "audit": {
+        "summary": (
+            "Run every pass that discovers a problem and print one report: the gate, "
+            "corpus risk, duplicate contracts, design candidates, tag coverage, the "
+            "exemptions in force and the shape of the corpus. Read-only; the exit code "
+            "comes from the gate alone, because everything else is advice."
+        ),
+        "arg": None,
+        "params": [
+            {
+                "name": "strict",
+                "flag": "--strict",
+                "type": "bool",
+                "help": "Promote the gate's drift and test-link warnings to errors, as `gate --strict` does.",
+            },
+        ],
     },
     "dupes": {
         "summary": (
@@ -616,7 +633,7 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
 COMMAND_GROUPS = (
     ("author", ("init", "new", "draft", "clarify", "confirm")),
     ("build", ("implement", "gate", "sync", "retire")),
-    ("read", ("next", "show", "search", "dupes", "design", "review",
+    ("read", ("audit", "next", "show", "search", "dupes", "design", "review",
               "suggest-verifies", "translate")),
 )
 
@@ -2251,6 +2268,11 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
     `--since` may have narrowed; `full_members` is always the whole scan, because an
     existence check ("does an implements tag exist AT ALL") must never be answered
     from a filtered view."""
+    # Set by `cmd_check` when a full scan already hashed every member; any other
+    # caller of run_gate_rules leaves it None and the member-drift rule hashes
+    # for itself. Defaulted here so a second caller cannot trip over its absence.
+    full_member_hashes = None
+
 
     def __init__(self, reqs, members, reqs_dir, code_root, since=None,
                  ac_cover=None, level_cover=None, full_members=None, update_lock=False):
@@ -2516,6 +2538,24 @@ def _rule_translation_parity(ctx):  # implements: ARCH-TRANSLATE-044  # implemen
                 yield rid, ("{}: translation `{}` carries {} the requirement does not emit — "
                             "re-run `translate` so the two agree, or clear the field"
                             .format(rid, locale, ", ".join("`" + f + "`" for f in extra)))
+
+
+@gate_rule("RM030", "warn")  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971
+def _rule_exemption_without_reason(ctx):
+    """An exemption whose check is never mentioned in the requirement's own prose.
+
+    Warn-only, and never promoted under `--strict`: the point is to make silencing a
+    finding cost a sentence, not to make it impossible. A shape that is genuinely
+    deliberate is one line away from clean; a shape that was silenced to make a run
+    green has nobody willing to write that line."""
+    for rid in sorted(ctx.reqs):
+        r = ctx.reqs[rid]
+        for field in ("lint_exempt", "gate_exempt"):
+            for check in _as_list(r["meta"].get(field)):
+                if not _exemption_reason_recorded(r["body"], check):
+                    yield rid, ("{}: `{}: [{}]` silences a finding with no reason recorded "
+                                "\u2014 say why in the requirement's prose, or drop the "
+                                "exemption and fix what it hides".format(rid, field, check))
 
 
 @gate_rule("RM018", "warn", strict=True)
@@ -4683,8 +4723,13 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
         elif _oversize(rid, r):
             findings.append({
                 "severity": "warn", "check": "ac-count-high",
-                "detail": "{} AC (> {}): consider splitting into two requirements".format(
-                    ac_n, LINT_AC_MAX)})
+                # Name the remedy. The finding used to say only "consider splitting",
+                # while `lint_exempt:` was documented as the one-line escape hatch — so the
+                # cheapest visible action was to silence it, and that is what readers (and
+                # assistants) reached for. `clarify --decompose` scaffolds the clause out.
+                "detail": "{} AC (> {}): several capabilities in one requirement \u2014 split it "
+                          "with `reqmap.py clarify {} --decompose`".format(
+                              ac_n, LINT_AC_MAX, rid)})
     # atomic bullet/Then parity (warn, --strict-promotable): the atomic form's `>` story
     # quote may enumerate up to LINT_ATOMIC_STORY_BULLETS_MAX facts, but every existing
     # signal is blind to whether each one is actually proven — `_count_ac` counts the ONE
@@ -4734,9 +4779,9 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
             findings.append({
                 "severity": "warn", "check": "over-scoped",
                 "detail": "{} contract {} + {} AC (both over {}/{}): likely several "
-                          "capabilities — consider splitting".format(
+                          "capabilities \u2014 split it with `reqmap.py clarify {} --decompose`".format(
                               contract_n, "groups" if groups else "clauses",
-                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
+                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX, rid)})
     # fan-out (warn): a parent in the `satisfies:` hierarchy normally carries 5-20 children.
     # Too few and the level buys no grouping; too many and it is a bucket, not a level.
     # Counted on the satisfies graph, NOT on `depends_on` — the two are different axes, and
@@ -5127,6 +5172,58 @@ def _placeholder_contract(body):  # implements: ARCH-SIMILAR-016
     return bool(bullets) and all(b.strip().upper().startswith("TODO") for b in bullets)
 
 
+def _exemption_reason_recorded(body, check):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971
+    """True when the requirement's own prose mentions the check it exempts itself from.
+
+    Deliberately the crudest possible test: the check's name appearing anywhere in the
+    body. It cannot judge whether the reason is a GOOD one — no mechanical test can —
+    and it is not trying to. It only makes the exemption cost one sentence a reviewer
+    can argue with, instead of one frontmatter token nobody ever reads."""
+    return check.lower() in (body or "").lower()
+
+
+def _exemptions_in_force(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971
+    """Every `lint_exempt:`/`gate_exempt:` entry in the corpus, as records carrying the
+    requirement, the field, the silenced check and whether a reason is recorded.
+
+    An exemption is a finding somebody decided not to see. Listing them is what keeps
+    "silenced" from becoming "invisible": a corpus that exempted forty checks shows
+    forty lines here, and the count is the debt."""
+    out = []
+    for rid in sorted(reqs):
+        r = reqs[rid]
+        meta, body = r["meta"], r["body"]
+        for field in ("lint_exempt", "gate_exempt"):
+            for check in _as_list(meta.get(field)):
+                out.append({"id": rid, "field": field, "check": check,
+                            "reason": _exemption_reason_recorded(body, check)})
+    return out
+
+
+def _corpus_shape(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-972
+    """How the corpus sits on the V-model's left arm: how many requirements declare a
+    `level:`, how they spread across the rungs, and how many `satisfies:` edges hold the
+    pyramid together.
+
+    `level:` is opt-in (the template ships it commented out) so an existing corpus keeps
+    its behaviour, and the consequence is that a repo can run the engine for months with
+    every requirement on one rung and nothing ever mentioning the other two. This says it
+    once, in `audit`, and never in the gate: adopting a level axis is a decision, not a
+    defect."""
+    total = len(reqs)
+    levels, edges = {}, 0
+    for r in reqs.values():
+        meta = r["meta"]
+        lv = meta.get("level")
+        if lv:
+            levels[lv] = levels.get(lv, 0) + 1
+        edges += len(_as_list(meta.get("satisfies")))
+    levelled = sum(levels.values())
+    return {"total": total, "levelled": levelled, "levels": levels,
+            "satisfies_edges": edges,
+            "flat": bool(total) and levelled * 10 < total}
+
+
 def _redundant_groups(reqs):  # implements: ARCH-REDUNDANCY-058
     """Requirements whose Description clauses are IDENTICAL once case and whitespace are
     normalised, grouped, each group sorted and the groups ordered by their first id.
@@ -5402,6 +5499,187 @@ def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR, reqs_dir=None): 
 
 
 # ---------- health (corpus coherence snapshot) ----------
+def _audit_section(title, remedy, fn):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
+    """Run one discovery pass with its output captured, so the summary can be printed
+    before the detail it summarises. Returns (title, remedy, text, rc)."""
+    buf = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(buf):
+            rc = fn()
+    except Exception as e:                      # a section is advice, never a crash
+        return (title, remedy, "  (section failed: {})".format(e), 0)
+    return (title, remedy, buf.getvalue().rstrip(), rc or 0)
+
+
+def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
+    """The one-line-per-signal tail `sync` prints: what `audit` would report, without
+    running the passes that cost a second walk of the tree. Silent about anything that
+    is clean, so a healthy repo sees nothing and the lines that do appear are news."""
+    lines = []
+    exemptions = _exemptions_in_force(reqs)
+    unexplained = [e for e in exemptions if not e["reason"]]
+    if unexplained:
+        lines.append("{} exemption(s) silence a check with no reason recorded".format(
+            len(unexplained)))
+    shape = _corpus_shape(reqs)
+    if shape["flat"]:
+        lines.append("{} of {} requirements declare no `level:` - the corpus is flat".format(
+            shape["total"] - shape["levelled"], shape["total"]))
+    design = _design_summary(code_root, reqs_dir) if code_root else None
+    if design is not None and design["clean_files"] < design["files"]:
+        lines.append("design {}/100 - {} of {} source files carry a candidate".format(
+            design["score"], design["files"] - design["clean_files"], design["files"]))
+    untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
+    if untagged:
+        lines.append("{} code file(s) traced to no requirement".format(len(untagged)))
+    roadmap = _roadmap_signals(code_root) if code_root else None
+    if roadmap:
+        newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
+                          if m.get("milestone")), key=_version_key, default=None)
+        if roadmap["newest_milestone"] and newest_req and \
+                _version_key(roadmap["newest_milestone"]) < _version_key(newest_req):
+            lines.append("TODO.md stops at {} while the requirements reach {} - the roadmap "
+                         "is behind".format(roadmap["newest_milestone"], newest_req))
+        if roadmap["unversioned_headings"]:
+            lines.append("{} TODO.md heading(s) are not milestones, so their items never "
+                         "reach the roadmap".format(len(roadmap["unversioned_headings"])))
+    if not lines:
+        return
+    print("")
+    for ln in lines:
+        print("info  {}".format(ln))
+    print("info  run `reqmap.py audit` for the full report")
+
+
+def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
+              ac_cover=None, level_cover=None):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
+    """Run every pass that discovers a problem, and print one report.
+
+    The engine grew one verb per question — is it linked, is it drifted, is it
+    duplicated, is it tagged, is the design rotting — and answering "how is this repo
+    doing" meant remembering all of them. This runs them together and prints a summary
+    of what each found, then each section's own output underneath.
+
+    Read-only. The exit code comes from the gate alone: everything else here is advice,
+    and advice must not be able to fail a build. Two sections have no verb of their own
+    because they only make sense in this report: the exemptions in force, and the shape
+    of the corpus on the V-model's left arm."""
+    exemptions = _exemptions_in_force(reqs)
+    unexplained = [e for e in exemptions if not e["reason"]]
+    shape = _corpus_shape(reqs)
+    health = _health_record(reqs, members, reqs_dir)
+    design = _design_summary(code_root, reqs_dir) if code_root else None
+    untagged = _scan_untagged(code_root, reqs_dir) if code_root else None
+
+    if as_json:
+        out = {"health": health, "shape": shape, "exemptions": exemptions,
+               "redundant_groups": [sorted(g) for g in _redundant_groups(reqs)]}
+        if design is not None:
+            out["design"] = design
+        if untagged is not None:
+            out["untagged"] = len(untagged)
+        errs, warns = run_gate_rules(
+            GateContext(reqs, members, reqs_dir, code_root, ac_cover=ac_cover,
+                        level_cover=level_cover, full_members=members, update_lock=False),
+            strict=strict)
+        out["gate"] = {"errors": len(errs), "warnings": len(warns),
+                       "findings": [dict(f) for f in list(errs) + list(warns)]}
+        print(json.dumps(out, indent=2, ensure_ascii=False))
+        return 1 if errs else 0
+
+    sections = [
+        _audit_section("Gate", "reqmap.py gate", lambda: cmd_check(
+            reqs, members, reqs_dir, False, code_root, strict=strict,
+            ac_cover=ac_cover, level_cover=level_cover)),
+        _audit_section("Risk", "reqmap.py next", lambda: cmd_next(
+            reqs, members, False, code_root=code_root, reqs_dir=reqs_dir)),
+        _audit_section("Duplicates", "reqmap.py dupes",
+                       lambda: cmd_similar(reqs, SIMILAR_THRESHOLD, members)),
+        _audit_section("Design", "reqmap.py design",
+                       lambda: cmd_design(code_root, reqs_dir)),
+        _audit_section("Tag coverage", "reqmap.py next --untagged",
+                       lambda: cmd_coverage(reqs, members, code_root, reqs_dir, False)),
+    ]
+    gate_rc = sections[0][3]
+
+    print("AUDIT  {} requirement(s) - engine {}".format(len(reqs), MAP_ENGINE_VERSION))
+    print("")
+    verdict = "FAIL" if gate_rc else "clean"
+    rows = [("Gate", verdict, "reqmap.py gate"),
+            ("Health", "{}/100 ({}/{} green on every axis)".format(
+                health["score"], health["healthy"], health["total"]), "reqmap.py next")]
+    if design is not None:
+        rows.append(("Design OOP", "{}/100 ({}/{} files with no candidate)".format(
+            design["score"], design["clean_files"], design["files"]), "reqmap.py design"))
+    if untagged is not None:
+        rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),
+                     "reqmap.py next --untagged"))
+    dups = _redundant_groups(reqs)
+    if dups:
+        rows.append(("Redundancy", "{} group(s) share an identical contract".format(len(dups)),
+                     "reqmap.py dupes"))
+    rows.append(("Exemptions", "{} in force, {} with no recorded reason".format(
+        len(exemptions), len(unexplained)), "see below"))
+    rows.append(("Corpus shape", "{}/{} carry a `level:`{}".format(
+        shape["levelled"], shape["total"], " - the corpus is flat" if shape["flat"] else ""),
+        "see below"))
+    width = max(len(r[0]) for r in rows)
+    vwidth = max(len(r[1]) for r in rows)
+    for name, value, remedy in rows:
+        print("  {}  {}  {}".format(name.ljust(width), value.ljust(vwidth), remedy))
+    print("")
+
+    for title, remedy, text, _rc in sections:
+        print("-" * 72)
+        print("{}   ({})".format(title, remedy))
+        print("-" * 72)
+        print(text if text else "  nothing to report")
+        print("")
+
+    # ---- the two sections with no verb of their own -------------------------
+    print("-" * 72)
+    print("Exemptions in force")
+    print("-" * 72)
+    if not exemptions:
+        print("  none - no requirement silences a check.")
+    else:
+        for e in exemptions:
+            mark = " " if e["reason"] else "!"
+            print("  {} {:<22} {}: [{}]{}".format(
+                mark, e["id"], e["field"], e["check"],
+                "" if e["reason"] else "   <- no reason recorded"))
+        print("")
+        print("  An exemption is a finding somebody decided not to see. It is legitimate")
+        print("  when the shape is deliberate and the reason is written down; it is not a")
+        print("  way to make a run green. For an over-scoped requirement the fix is")
+        print("  `reqmap.py clarify <ID> --decompose`, which scaffolds the extra clause out.")
+    print("")
+
+    print("-" * 72)
+    print("Corpus shape - the V-model's left arm")
+    print("-" * 72)
+    if shape["levelled"]:
+        for lv in ("system", "architecture", "code"):
+            if lv in shape["levels"]:
+                print("  {:<14} {}".format(lv, shape["levels"][lv]))
+        for lv in sorted(k for k in shape["levels"] if k not in ("system", "architecture", "code")):
+            print("  {:<14} {}   (not one of the three rungs)".format(lv, shape["levels"][lv]))
+        print("  satisfies:     {} edge(s)".format(shape["satisfies_edges"]))
+    if shape["flat"]:
+        print("  {} of {} requirements declare no `level:`, so every one of them reads as".format(
+            shape["total"] - shape["levelled"], shape["total"]))
+        print("  the same rung. `level:` is opt-in - the template ships it commented out - so")
+        print("  a corpus never gains the axis by itself. The three rungs are:")
+        print("    system        a stakeholder need, satisfied by architecture, not by code")
+        print("    architecture  one capability: a command, or a shared engine facility")
+        print("    code          one behaviour group, 3-7 labelled cases, tested per case")
+        print("  The edge that builds the pyramid is `satisfies:` (the level axis), not")
+        print("  `depends_on:` (the composition axis). Adopting it is a decision, not a")
+        print("  defect: nothing here fails because a corpus is flat.")
+    print("")
+    return gate_rc
+
+
 def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
     """Per-directory coverage report: how many scannable files in each top-level
     directory carry at least one membership tag vs. total scannable files.
@@ -8822,6 +9100,9 @@ def main():
         # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
         levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
         return cmd_show(reqs, members, a.arg, levels)
+    if a.cmd == "audit":
+        return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
+                         as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
     if a.cmd == "dupes":
         return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members, top=a.top)
     if a.cmd == "search":
@@ -8882,6 +9163,12 @@ def main():
                 print("info  {} group(s) of requirements share an identical contract "
                       "({} could be folded away) — run `reqmap.py next` to see them"
                       .format(len(_dups), sum(len(g) - 1 for g in _dups)))
+            # Everything the engine can discover, named in one place at the moment the
+            # corpus was just rewritten. `sync` regenerates what is derived; until now it
+            # said nothing about what is WRONG beyond the gate, so a repo could sync for
+            # months without ever meeting `dupes`, `design`, the exemption list or the
+            # fact that its corpus is flat.  # implements: REQ-AUDIT-973
+            _audit_summary(reqs, members, reqs_dir, code_root)
         else:
             # The lock may still have advanced above (it is written unless CONFIRMED
             # drift was refused), while the map was not regenerated — the two then

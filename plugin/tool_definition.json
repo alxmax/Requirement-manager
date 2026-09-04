@@ -156,6 +156,27 @@
   {
     "type": "function",
     "function": {
+      "name": "reqmap_audit",
+      "description": "Run every pass that discovers a problem and print one report: the gate, corpus risk, duplicate contracts, design candidates, tag coverage, the exemptions in force and the shape of the corpus. Read-only; the exit code comes from the gate alone, because everything else is advice.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "strict": {
+            "type": "boolean",
+            "description": "Promote the gate's drift and test-link warnings to errors, as `gate --strict` does."
+          }
+        },
+        "required": []
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
       "name": "reqmap_dupes",
       "description": "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate.",
       "parameters": {

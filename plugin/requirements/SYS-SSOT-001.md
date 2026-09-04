@@ -21,6 +21,9 @@ lint_exempt: [ac-count-low]
 - A reader can navigate from any capability to the code that implements it and the tests that verify it.
 
 ## Notes & known limitations (informative)
+- `lint_exempt: ac-count-low` — a stakeholder need is verified by the requirements that
+  satisfy it, not by cases of its own, so the floor that catches an under-specified
+  capability measures the wrong thing here.
 - A `need` is a stakeholder requirement, not a capability: it is satisfied by other requirements (see "Satisfied by"), not implemented or tested by code directly, so the gate exempts it from the implements/tested-by checks.
 
 ## Cases (= tests)
