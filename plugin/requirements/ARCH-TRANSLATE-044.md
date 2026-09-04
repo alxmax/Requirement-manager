@@ -26,6 +26,7 @@ lint_exempt: [ac-count-high, file-spread]
 Every bullet below is binding.
 - `translate` is reached ONLY by typing `reqmap.py translate` — never by `gate`, `sync`, `lint`, `map`, `export`, or the pre-commit hook — and is the only subcommand that invokes an external `claude` CLI subprocess, caching results keyed by a hash wider than `binding_hash`. [[REQ-TRANSLATE-937]]
 - A structural-fidelity check refuses to cache a translation that drops a backtick/number, renames an `AC-N`/`CASE-N` label, or translates a Gherkin keyword — both are identifiers, not prose. Every failure mode (missing CLI, stale cache, malformed cache) fails open without aborting the batch. [[REQ-TRANSLATE-938]]
+- The gate reports a cached translation that carries a field the requirement itself does not emit. [[REQ-TRANSLATE-967]]
 
 ## Cases
 CASE-1
@@ -283,3 +284,47 @@ CASE-6 — the same word in a sentence is prose, and translates
   When   the translation renders that word in the target language
   Then   the structural-fidelity check still passes, because only an indented
          line-opening keyword is an identifier
+---
+id: REQ-TRANSLATE-967
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-TRANSLATE-044]
+---
+
+# A translation may not carry a field the requirement does not
+
+## Description
+> `translate` and the map both derive from the same requirement, and each was right about it: the
+> map emits no intent when the quote IS the obligation, while the translator was handed the raw
+> quote. Nothing compared the two, so a translated document showed a `Why — Intent` section the
+> untranslated one hides — on eight requirements, invisible until a corpus carried both features
+> at once. Two correct parts, wrong together, is a shape a gate can catch and a test of either
+> part alone cannot.
+
+Every bullet below is binding.
+- The gate warns when a cached translation carries a field whose source in the requirement is
+  empty, naming the requirement, the locale and the field.
+- A field the requirement has and the translation does not is never reported: a partial or
+  in-progress translation is a normal state, not a defect.
+- The check reads the caches already on disk and calls nothing external, so it costs a file read
+  and stays as deterministic as the rest of the gate.
+- A repository with no translation cache raises nothing at all.
+
+## Cases
+CASE-1 — a translated field the requirement does not emit is reported
+  Given  a requirement whose quote is its only clause, so the map emits no intent, and a cache
+         entry for it carrying an `intent`
+  When   `gate` runs
+  Then   it warns once, naming that requirement, the locale and `intent`
+
+CASE-2 — a field the translation has not reached yet is not a finding
+  Given  a requirement with an intent and a cache entry whose `intent` is empty
+  When   `gate` runs
+  Then   no warning is raised for it
+
+CASE-3 — a corpus with no cache raises nothing
+  Given  a requirements directory with no `_i18n` at all
+  When   `gate` runs
+  Then   the check contributes no finding

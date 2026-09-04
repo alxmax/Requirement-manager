@@ -186,7 +186,10 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
       {intent.text && r.intent && (
         <div className="sec why-sec">
           <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
-          <p className="blockquote">{intent.text}</p>
+          {/* the same inline markup every other section gets: a backticked
+              identifier printed its own backticks here until now */}
+          <p className="blockquote" {...reqLinkProps(onNav)}
+            dangerouslySetInnerHTML={{__html: mdInline(intent.text)}} />
         </div>
       )}
 

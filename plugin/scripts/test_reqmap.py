@@ -10515,5 +10515,61 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
+
+class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-967
+    """Two derived artifacts, each correct against the requirement, disagreeing with each
+    other. RM017 checks one such pair (the viewer's baked fixture); this is the other."""
+
+    ATOMIC = ("---\nid: AREA-T-001\nstatus: confirmed\nlayer: feature\n---\n\n# T\n\n"
+              "## Description\n> the story IS the obligation.\n\n"
+              "Every bullet below is binding.\n- the story IS the obligation.\n\n"
+              "## Cases\nCASE-1\n  Given  x\n  When   y\n  Then   z\n")
+
+    def _cache(self, rd, entry):
+        reqs = R.load_requirements(rd)
+        body = reqs["AREA-T-001"]["body"]
+        os.makedirs(os.path.join(rd, "_i18n"), exist_ok=True)
+        entry = dict(entry, hash=R.translation_hash(body, R._title(body)))
+        with open(os.path.join(rd, "_i18n", "ro.json"), "w", encoding="utf-8") as f:
+            json.dump({"AREA-T-001": entry}, f)
+
+    def _findings(self, d):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(reqs, R.scan_members(d, d), rd, False, d)
+        return buf.getvalue()
+
+    def test_translated_field_the_map_does_not_emit_is_reported(self):  # verifies: REQ-TRANSLATE-967#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
+            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
+            self._cache(rd, {"title": "T", "intent": "un motiv pe care harta nu il emite",
+                             "contract": "- povestea", "acceptance": "CASE-1"})
+            out = self._findings(d)
+        self.assertIn("RM029", out)
+        self.assertIn("AREA-T-001", out)
+        self.assertIn("intent", out)
+
+    def test_a_field_the_translation_lacks_is_not_a_finding(self):  # verifies: REQ-TRANSLATE-967#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
+            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
+            self._cache(rd, {"title": "T", "intent": "", "contract": "- povestea", "acceptance": "CASE-1"})
+            out = self._findings(d)
+        self.assertNotIn("RM029", out)
+
+    def test_no_cache_raises_nothing(self):  # verifies: REQ-TRANSLATE-967#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-T-001.md"), self.ATOMIC)
+            _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
+            out = self._findings(d)
+        self.assertNotIn("RM029", out)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

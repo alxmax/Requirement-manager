@@ -540,3 +540,18 @@
       <!-- MEDIUM. `plugin/skills/requirement-manager/SKILL.universal.md` is committed CRLF with no `.gitattributes` eol pin; three OTHER read-modify-write pairs in this same file (lines ~2768/2783, 2848/2866, 6911/6929) all deliberately pass `newline=""` for exactly this reason -- this one omits it. No test exercises the actual write path. -->
 - [x] `cmd_gen_integration` (line 768) writes `tool_definition.json` via the same bare text-mode open with no `newline` argument, so regenerating on a non-Windows box flips the whole committed CRLF file to LF even though the JSON content is unchanged | lane: ops  <!-- fixed 5f19eec -->
       <!-- LOW -- cosmetic but produces a large false diff on every POSIX regeneration; same root-cause pattern as the `_write_region` finding above, kept separate since it's a different function and a different target file. -->
+## v4.1
+- [ ] Rank a Romanian query, not just match it literally | lane: feature
+      <!-- The ranking model (TF-IDF, ARCH-SEARCH-036) is built from the English title +
+           intent + clauses, so a query in the language the viewer is showing scores zero
+           against every requirement. v4.0.0 added a literal layer over the cached
+           translation, which finds a query only when it appears VERBATIM: "Acoperire de
+           test per criteriu" hits, "acoperire per criteriu" and "acoperirea testelor" do
+           not — different word order or a different inflection and the reader gets
+           nothing. Options, cheapest first: (a) index the cached translation alongside
+           the English text so the same cosine ranks both languages — changes every
+           score, so the CLI/viewer golden fixture has to move with it; (b) token-subset
+           matching in the literal layer (all query tokens present, any order), which
+           needs no model change and no fixture move; (c) per-locale corpora, ranked
+           separately and merged. Romanian is also inflected, so any of them wants at
+           least diacritic-insensitive matching. -->
