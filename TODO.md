@@ -541,6 +541,23 @@
 - [x] `cmd_gen_integration` (line 768) writes `tool_definition.json` via the same bare text-mode open with no `newline` argument, so regenerating on a non-Windows box flips the whole committed CRLF file to LF even though the JSON content is unchanged | lane: ops  <!-- fixed 5f19eec -->
       <!-- LOW -- cosmetic but produces a large false diff on every POSIX regeneration; same root-cause pattern as the `_write_region` finding above, kept separate since it's a different function and a different target file. -->
 ## v4.1
+- [ ] Regenerate SKILL.md's command list from the COMMANDS registry | lane: ops
+      <!-- The verb-cut refactor renamed the command list in
+           plugin/skills/requirement-manager/SKILL.md with a blanket substitution, so the
+           shipped contract now documents commands under the wrong names. Measured against
+           `COMMANDS` today: `scan` is documented and no longer exists; five entries all
+           begin `python scripts/reqmap.py sync` but describe sync, map, site, export and
+           findings; `gate` appears twice, the second describing the lint; `next` appears
+           three times (next, health, coverage); `draft` twice (draft and plan). Five real
+           verbs are documented nowhere at all: clarify, implement, retire, review, search.
+           This is the file an assistant reads when it meets the engine on a fresh repo, so
+           a wrong name there is a wrong action there — it is the same class of problem as
+           the exemption reflex ARCH-AUDIT-065 addresses, one layer up.
+           The fix is not another hand-edit: `gen-integration` already generates the command
+           table in SKILL.universal.md from the registry and RM028 keeps it fresh. Do the
+           same for SKILL.md's list — one generated region, marker-delimited, with the
+           hand-written prose around it untouched — so the two can never diverge again.
+           Then the alias/consumer sections stay hand-authored as they are. -->
 - [ ] Rank a Romanian query, not just match it literally | lane: feature
       <!-- The ranking model (TF-IDF, ARCH-SEARCH-036) is built from the English title +
            intent + clauses, so a query in the language the viewer is showing scores zero
