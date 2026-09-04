@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v4.0.1` — 2026-09-04
+
+**The Action's major alias tracks the plugin's major** ([ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md)).
+`check@v4` ships with plugin `4.x`. It was a third, independent version axis until now — which is
+why `@v2` lived across 2.x through 3.4, and why `v4.0.0` shipped advertised as `@v3`. The
+reasoning held (an alias that moves for reasons unrelated to its own interface forces a re-pin for
+nothing) and the cost was a third number to hold, visible to the one person least equipped to
+know the rule: the consumer copying a `uses:` line out of a README.
+
+`check_versions.py` now asserts the two agree, so a mismatch is a failed build rather than
+something a reader has to notice — with the falsifying case pinned by two tests
+(`ARCH-SELFGATE-039` CASE-8). `@v1`, `@v2` and `@v3` stay where they point: a consumer pinned to
+one keeps the engine that was current then.
+
 ## plugin `v4.0.0` — 2026-09-04
 
 **Breaking: 25 commands become 17, and three of them are new.** The CLI had grown one verb per

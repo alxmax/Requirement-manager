@@ -6,7 +6,10 @@ layer: feature
 owner: Alex
 depends_on: [ARCH-CHECK-006]
 satisfies: [SYS-SHIP-108]
-lint_exempt: [file-spread]
+lint_exempt: [file-spread, ac-count-high]
+# ac-count-high: eight cases, one root cause — this repository gating itself across CI, the
+# two hooks, the published action and the version checks. Splitting by surface would give
+# five requirements that fail together and are read together.
 test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-testable behavior of its own; correctness is observed by CI/the hook actually running, per CASE-1/CASE-2. CASE-7's alias-coherence check is the one exception and IS unit-tested, in scripts/test_check_versions.py (repo-local dev tooling, outside the scanned engine)
 ---
 
@@ -33,7 +36,7 @@ CASE-2  <!-- verifiable by: inspection -->
   Then   it fails the commit on the same errors CI would fail on, before the commit is created
 
 CASE-3  <!-- verifiable by: inspection -->
-  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v3`
+  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v4`
   When   their own CI runs that step
   Then   `check/action.yml` invokes the same gate this repo runs on itself
 
@@ -59,6 +62,12 @@ CASE-7
   When   `scripts/check_versions.py` runs in the `gate-and-tests` job
   Then   it exits 1 and names the file that disagrees, before the alias can be published
 
+CASE-8
+  Given  every documented `check@vN` agrees, but names a major other than `plugin.json`'s
+  When   `scripts/check_versions.py` runs in the `gate-and-tests` job
+  Then   it exits 1 and says the alias must track the plugin's major, so `v4.0.0` cannot
+         ship advertised as `@v3`
+
 ## Context
 **Notes**
 - This requirement exists to give these 5 files a member tag, not to re-describe `gate`'s own
@@ -74,6 +83,7 @@ CASE-7
 - `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`, `.githooks/pre-push`,
   `sync_reqmap.sh` (all repo root).
 - The alias axis is asserted by `scripts/check_versions.py` (`ACTION_REF_FILES`), covered by
+- The alias major equals the plugin's major, and the same check refuses a release where they disagree.
   `scripts/test_check_versions.py`.
 
 

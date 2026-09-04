@@ -15,9 +15,10 @@ Three independent axes are checked:
               different purpose (staleness compare); it is only sanity-checked for
               valid YYYY-MM-DD shape, with an optional `.N` (N>=1) same-day revision
               suffix, never compared against the semver.
-  - action  — the published GitHub Action's major-alias tag (`.../check@vN`). It is a
-              THIRD axis, tied to neither of the above: it names the action's interface
-              line, and the release job force-moves it onto each released commit. The
+  - action  — the published GitHub Action's major-alias tag (`.../check@vN`). It tracks
+              the PLUGIN's major since ADR-0029 (`check@v4` ships with plugin 4.x), and the
+              release job force-moves it onto each released commit. It was a third,
+              independent axis until then: sound in itself, and a third number to hold. The
               documented `uses:` reference IS the source of truth (there is no separate
               version file to fall out of step with the docs), so every occurrence
               across check/action.yml, README.md, CLAUDE.md and the two requirement-manager
@@ -146,7 +147,8 @@ def main(argv=None) -> int:
             errors.append(f"  reqmap.py: MAP_ENGINE_VERSION {engine!r} is not a valid YYYY-MM-DD date "
                           f"with an optional .N (N>=1) same-day revision")
 
-    # Action alias — a third axis. Every documented `uses:` reference must name one major.
+    # Action alias — tracks the plugin's major (ADR-0029). Every documented `uses:`
+    # reference must name one major, and that major must be the plugin's.
     action_major, action_refs = None, []
     for rel in ACTION_REF_FILES:
         path = REPO_ROOT / rel
@@ -165,6 +167,13 @@ def main(argv=None) -> int:
             if major != action_major:
                 errors.append(f"  {rel}: action alias {major!r} != {action_major!r} in "
                               f"{action_refs[0][0]}")
+        # ADR-0029: the alias is the plugin's major. A rule only documented is a rule that
+        # drifts — this is what makes `v4.0.0` shipping as `@v3` a failed build rather than
+        # something a reader has to notice.
+        plugin_major = "v" + canonical.split(".")[0]
+        if action_major != plugin_major:
+            errors.append(f"  action alias {action_major!r} != plugin major {plugin_major!r} "
+                          f"(ADR-0029: the alias tracks the plugin's major)")
 
     if errors:
         print("FAIL  version drift detected:")
