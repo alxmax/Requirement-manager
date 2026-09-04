@@ -1385,7 +1385,7 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
                    REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_export(R.load_requirements(rd), {}, rd)
+                R.cmd_map(R.load_requirements(rd), {}, rd, d)
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
             self.assertEqual(doc["engine_version"], R.MAP_ENGINE_VERSION)
             self.assertEqual(len(doc["nodes"]), 1)
@@ -1399,7 +1399,7 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             _write(os.path.join(d, "TODO.md"), "## v1.14\n- [ ] Ship it | lane: feature\n")
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_export(R.load_requirements(rd), {}, rd, root=d)
+                R.cmd_map(R.load_requirements(rd), {}, rd, d)
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
             self.assertEqual([t["name"] for t in doc["todos"]], ["Ship it"])
 
@@ -8661,7 +8661,7 @@ class CasesMap(unittest.TestCase):  # tested-by: ARCH-MAP-007
             reqs = R.load_requirements(rd)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                R.cmd_export(reqs, {}, rd)
+                R.cmd_map(reqs, {}, rd, d)
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
             for key in ("engine_version", "repo", "nodes", "edges", "todos"):
                 self.assertIn(key, doc)
