@@ -305,7 +305,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v3
+      - uses: alxmax/requirement-manager/check@v4
 ```
 
 The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`

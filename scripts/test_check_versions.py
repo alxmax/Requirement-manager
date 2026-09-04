@@ -105,6 +105,20 @@ class CheckVersions(unittest.TestCase):
             _setup(d, action_majors=("v2", "v2", "v2", "v1", "v2"))
             self.assertEqual(self._run(d), 1)
 
+    def test_action_alias_not_tracking_plugin_major_fails(self):  # verifies: ARCH-SELFGATE-039#CASE-8
+        """ADR-0029: the alias IS the plugin's major. Agreement across the documented
+        files is no longer enough — `v4.0.0` advertised as `@v3` reads like a mistake at
+        every glance, so it is one."""
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugin_ver="3.0.0", market_ver="3.0.0", plug_ver="3.0.0")  # alias defaults to v2
+            self.assertEqual(self._run(d), 1)
+
+    def test_action_alias_tracking_plugin_major_passes(self):  # verifies: ARCH-SELFGATE-039#CASE-8
+        with tempfile.TemporaryDirectory() as d:
+            _setup(d, plugin_ver="3.0.0", market_ver="3.0.0", plug_ver="3.0.0",
+                   action_majors=("v3",) * len(CV.ACTION_REF_FILES))
+            self.assertEqual(self._run(d), 0)
+
     def test_action_alias_missing_reference_fails(self):
         with tempfile.TemporaryDirectory() as d:
             _setup(d, action_majors=("v2", None, "v2"))

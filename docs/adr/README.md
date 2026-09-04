@@ -37,6 +37,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0025](0025-three-levels-restored-corpus-folded-to-two-hundred.md) | Three levels restored, the corpus folded from 644 to ~200, and the lean requirement form | Accepted |
 | [0026](0026-gate-rule-registry-and-config-file.md) | The gate is a rule registry; thresholds come from a config file | Accepted |
 | [0028](0028-one-inbox-for-every-open-signal.md) | One inbox for every open signal, with origin as a tab | Accepted |
+| [0029](0029-action-alias-tracks-the-plugin-major.md) | The Action's major alias tracks the plugin's major | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
