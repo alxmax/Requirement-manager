@@ -1501,42 +1501,42 @@
     "acceptance": "",
     "contract": "",
     "hash": "7376a67c39b1",
-    "intent": "Ca cineva care scrie ce trebuie să facă sistemul, vreau o comandă pentru a schela o cerință și una pentru a o promova odată ce codul o susține, astfel încât corpusul crește într-o formă pe care motorul o poate citi, în loc de a copia manual un șablon.",
+    "intent": "",
     "title": "Redactarea și evoluția unei cerințe"
   },
   "SYS-GATE-102": {
     "acceptance": "",
     "contract": "",
     "hash": "520e3f2ebfca",
-    "intent": "Ca cineva care face un commit la o schimbare, vreau ca motorul să-mi spună când codul și cerințele s-au îndepărtat unele de altele, astfel încât un spec pe care nimeni nu-l respectă încetează să treacă drept documentație.",
+    "intent": "",
     "title": "Menținerea codului și a specificației în pas"
   },
   "SYS-QUALITY-104": {
     "acceptance": "",
     "contract": "",
     "hash": "4dd8cd2360e2",
-    "intent": "Ca cineva care trebuie să citească corpusul peste un an, vreau ca motorul să semnaleze proza greu de urmărit sau domeniul care a crescut în tăcere, astfel încât o cerință rămâne ceva pe care un nou-venit poate acționa.",
+    "intent": "",
     "title": "Menținerea cerințelor lizibile"
   },
   "SYS-READ-103": {
     "acceptance": "",
     "contract": "",
     "hash": "ca113125454a",
-    "intent": "Ca motorul, vreau să citesc cerințele unui repository și să găsesc fiecare loc unde codul pretinde una, astfel încât fiecare altă comandă lucrează dintr-o singură imagine descoperită, în loc de o listă întreținută manual.",
+    "intent": "",
     "title": "Citirea unui repository"
   },
   "SYS-REPORT-105": {
     "acceptance": "",
     "contract": "",
     "hash": "165ee0146ed9",
-    "intent": "Ca cineva care preia proiectul, vreau să întreb unde trăiește o capacitate, ce este neterminat și ce merită atenție prioritar, astfel încât să pot acționa fără să citesc fiecare fișier.",
+    "intent": "",
     "title": "Răspunzând ce este aici și ce urmează"
   },
   "SYS-SHIP-108": {
     "acceptance": "",
     "contract": "",
     "hash": "10a99534d0e9",
-    "intent": "Ca cineva care aduce motorul într-un repository, sau lansează o versiune nouă a lui, vreau ca bootstrap-ul, gărzile de versiune și artefactele publicate să fie de acord, astfel încât un consumator preia o schimbare în loc să păstreze în tăcere o copie veche.",
+    "intent": "",
     "title": "Adoptarea și livrarea motorului"
   },
   "SYS-SSOT-001": {
@@ -1550,14 +1550,14 @@
     "acceptance": "",
     "contract": "",
     "hash": "7f197b212f1a",
-    "intent": "Ca cineva care revizuiește o schimbare, vreau forma sistemului ca o imagine pe care o pot deschide fără unelte, astfel încât o dependență pe care aș fi ratat-o într-o listă devine evidentă.",
+    "intent": "",
     "title": "Văzând sistemul dintr-o privire"
   },
   "SYS-VMODEL-107": {
     "acceptance": "",
     "contract": "",
     "hash": "65d3e27da2ef",
-    "intent": "Ca cineva care vrea să știe dacă o cerință este verificată la profunzimea potrivită, vreau ca fiecare să declare cât de abstractă este și ce nivel de test o discharge, astfel încât o promisiune la nivel de sistem răspunsă doar de un test unitar încetează să arate acoperită.",
+    "intent": "",
     "title": "Plasarea unei cerințe în V"
   }
 }
