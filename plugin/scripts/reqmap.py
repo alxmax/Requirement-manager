@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.13"
+MAP_ENGINE_VERSION = "2026-09-04.14"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4088,7 +4088,11 @@ def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-04
         if _effective_lang(r) != src:
             continue   # already in the target language (or undetermined) - leave it
         title = _title(r["body"])
-        intent = _first_quote(r["body"])
+        # `_distinct_intent`, not `_first_quote`: the map emits no intent for a
+        # requirement whose quote IS its obligation (91% of the corpus at the time
+        # that rule was written), and translating the raw quote put a `Why — Intent`
+        # block in the Romanian document that the English one correctly hides.
+        intent = _distinct_intent(r["body"])
         contract = _from_any(_section_raw, r["body"], CONTRACT_LABELS)
         acceptance = _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS)
         h = translation_hash(r["body"], title)

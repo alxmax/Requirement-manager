@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v4.0.2` — 2026-09-04
+
+**A requirement document leads with what it obliges.** `Description` sits above `Why — Intent`
+now: a requirement is read to find out what it binds, and the rationale supports that answer
+rather than preceding it. The authored `.md` still keeps its quote at the top of the Description
+section — this is the reading order, not the file's.
+
+**The cached translation stopped showing a section English hides.** `translate` read
+`_first_quote` while the map emits `_distinct_intent`, which is empty when the quote IS the
+obligation — the atomic form of the eight `SYS-*` needs, where the story and the single clause are
+the same sentence character for character. The Romanian document printed it twice. `translate` now
+reads the same field the map does, the viewer will not render a section the engine hid whatever a
+cache carries, and the eight stale entries are cleared. The other 217 requirements, whose quote
+does say something the clauses do not, are unaffected in either language.
+
 ## plugin `v4.0.1` — 2026-09-04
 
 **The Action's major alias tracks the plugin's major** ([ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md)).

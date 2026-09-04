@@ -165,23 +165,30 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
           ))}</span>
         </span>}
       </div>
-      {/* An atomic requirement's `>` quote IS its obligation, so the engine emits no
-          separate intent for one (_distinct_intent). Drawing the block anyway left an
-          empty blockquote under a "Why — Intent" heading on 91% of nodes. */}
-      {intent.text && (
-        <div className="sec why-sec">
-          <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
-          <p className="blockquote">{intent.text}</p>
-        </div>
-      )}
       <CovStrip r={r} />
 
+      {/* Obligation first, reason under it: a requirement is read to find out what it
+          binds, and the rationale is what supports that answer rather than what
+          precedes it. The authored .md keeps the quote at the top of its Description
+          section — this is the reading order, not the file's. */}
       <div className="sec">
         <div className="eyebrow">{t("Description")} <span className="rule" />{contract.isTranslated && <TranslatedBadge />}</div>
         {contract.isTranslated
           ? <TranslatedProse text={contract.text} onNav={onNav} skipQuote />
           : <ul {...reqLinkProps(onNav)}>{r.contract.map((c,i)=><li key={i} dangerouslySetInnerHTML={{__html: mdInline(c)}} />)}</ul>}
       </div>
+
+      {/* An atomic requirement's `>` quote IS its obligation, so the engine emits no
+          separate intent for one (_distinct_intent). Drawing the block anyway left an
+          empty blockquote under a "Why — Intent" heading on 91% of nodes. */}
+      {/* `r.intent` is the engine's verdict on whether the quote says anything the
+          clauses do not; a cached translation must not put back a section it hid. */}
+      {intent.text && r.intent && (
+        <div className="sec why-sec">
+          <div className="eyebrow">{t("Why — Intent")} <span>{r.layer === "bus" ? "foundation" : "feature"}{intent.isTranslated && <TranslatedBadge />}</span></div>
+          <p className="blockquote">{intent.text}</p>
+        </div>
+      )}
 
       <div className="sec">
         <div className="eyebrow">{t("Cases")} <span className="rule" /> {t("= tests")}{acceptance.isTranslated && <TranslatedBadge />}</div>
