@@ -26,7 +26,7 @@ Every bullet below is binding.
 - `design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]
 - `design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]
 - `design` reports house standards per file: length, wide lines, public definitions without a docstring, definitions per file. [[REQ-DESIGN-953]]
-- The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header and `health`. [[REQ-DESIGN-954]]
+- The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 
 ## Cases
@@ -290,7 +290,7 @@ CASE-1 — the score counts clean files
 CASE-2 — the map header and health carry the score
   Given  a corpus and one clean module
   When   the map data is assembled and `health --json` runs
-  Then   `_map.json` carries `design.score` 100, the `_map.md` header names it, and the JSON carries `design_score` 100
+  Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design OOP:`) names it, and the JSON carries `design_score` 100
 
 CASE-3 — no program logic, no key
   Given  a repo whose only code is a stylesheet

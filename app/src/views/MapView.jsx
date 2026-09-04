@@ -4,7 +4,7 @@
  * hand-tuned coordinates — so it renders any repo's requirements, not a fixture. */
 import { useState, useMemo } from "react";
 import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
-import { Pill, Btn, statusKind } from "../lib/ui.jsx";
+import { Pill, Btn, statusKind, mdInline, reqLinkProps } from "../lib/ui.jsx";
 import { Icon, LocateGlyph } from "../lib/icons.jsx";
 import { computeLayout, colorFor, buildEdgePath, NODE_W, NODE_CY } from "../lib/layout.js";
 import { useI18n } from "../lib/i18n.jsx";
@@ -79,15 +79,6 @@ function Canvas({ width, height, minHeight, onClear, children }) {
   );
 }
 
-/* tiny inline-markdown: HTML-escape first, then `code` → <code>. Escaping is
- * mandatory: the output feeds dangerouslySetInnerHTML and the text is untrusted
- * requirement markdown carried verbatim from _map.json. */
-function mdInline(s) {
-  return String(s)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/`([^`]+)`/g, "<code>$1</code>");
-}
-
 function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
   const { t } = useI18n();
   if (!r) return null;
@@ -108,12 +99,12 @@ function DetailPanel({ r, onClose, onLocate, onOpenSpec }) {
       </>}
 
       <div className="lbl">{t("Description")}</div>
-      <ul>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>
+      <ul {...reqLinkProps(onOpenSpec)}>{r.contract.map((c, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(c) }} />)}</ul>
 
       <div className="lbl">{t("Cases")}</div>
       {r.gwt
         ? <div className="gwt-mini members" style={{ whiteSpace: "pre-wrap" }}>{r.gwt}</div>
-        : <ul>{(r.acc || []).map((a, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(a) }} />)}</ul>}
+        : <ul {...reqLinkProps(onOpenSpec)}>{(r.acc || []).map((a, i) => <li key={i} dangerouslySetInnerHTML={{ __html: mdInline(a) }} />)}</ul>}
 
       <div className="lbl">{t("Where — Members in code")}</div>
       <div className="members">
@@ -182,7 +173,7 @@ export function MapView({ selId, setSelId, openSpec, highlightId, setHighlightId
   }, [NODES]);
 
   const legend = {
-    system: <><span className="pdot" style={{ width: 9, height: 9, borderRadius: 0, border: "3px solid var(--ink-0)", display: "inline-block" }} /> bus · arrows = depends_on · edge colour = source</>,
+    system: <><span className="pdot" style={{ width: 10, height: 10, borderRadius: 3, background: "var(--status-bus-bg)", border: "1.5px solid var(--status-bus)", display: "inline-block" }} /> bus · arrows = depends_on · edge colour = source</>,
     reqcode: <>requirement → its code · <span style={{ color: "var(--accent)" }}>implements</span> / tested-by</>,
     deps: <>area-level coupling · arrow A→B = A depends on B</>,
     risk: <>only requirements with ≥1 open risk signal</>,

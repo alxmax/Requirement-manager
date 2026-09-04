@@ -33,7 +33,7 @@ CASE-2  <!-- verifiable by: inspection -->
   Then   it fails the commit on the same errors CI would fail on, before the commit is created
 
 CASE-3  <!-- verifiable by: inspection -->
-  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v2`
+  Given  a consumer repo referencing `uses: alxmax/requirement-manager/check@v3`
   When   their own CI runs that step
   Then   `check/action.yml` invokes the same gate this repo runs on itself
 

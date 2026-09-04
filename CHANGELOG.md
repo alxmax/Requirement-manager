@@ -1,5 +1,141 @@
 # Changelog
 
+## plugin `v4.0.0` — 2026-09-04
+
+**Breaking: 25 commands become 17, and three of them are new.** The CLI had grown one verb per
+artifact; it now has one verb per moment of work — author, build, read. Nothing this release
+removes is unreachable: five verbs were aliases, debug prints or dry runs of another verb, and
+six more were folded into the command that already ran beside them every single time.
+`MAP_ENGINE_VERSION` `2026-09-04.8`. The published Action moves to **`@v3`** — its steps changed
+shape, so a caller pinned to `@v2` will not silently pick this up.
+
+**Three new commands, the author → code → retirement half of the loop** (`ARCH-CLARIFY-062`,
+`ARCH-IMPLEMENT-063`, `ARCH-RETIRE-064`, 8 code-level children, 32 cases, 30 tests):
+
+- **`clarify <ID>`** asks what a requirement has not answered: a hedge word with no threshold, a
+  bare number with no unit, an "all/every" with no bound, a clause whose subject is "It", a clause
+  with no case, an acceptance that never mentions a failure path. Blocking questions (no
+  obligation at all, no labelled case) are separated from advice. Read-only, always exit 0, never
+  a gate rule — the point is to resolve the ambiguity in the requirement instead of guessing it in
+  code three weeks later.
+- **`implement <ID>`** emits the brief a coding agent otherwise reconstructs by reading the repo:
+  obligations, cases as authored, existing members, the still-open questions, the literal tag lines
+  the new code must carry (one `implements:`, one `tested-by:`, one `verifies:` per labelled case),
+  and — by the same TF-IDF the search uses — the two most similar requirements that already have
+  code, with their files, which is the honest answer to "where does this kind of thing live here?".
+  It writes no code: a deterministic tool can own the contract and the verdict, never the authorship.
+- **`retire <ID>`** takes a requirement out of service, blast radius first: dependents, children,
+  members, prose cross-references, the files where it was the only tagged requirement — and the
+  dependencies it was the last consumer of, which is the dead-code question nothing else answered.
+  It refuses while anything still depends on it unless `--force`, deprecates by default
+  (reversible), and only `--delete` removes the block, the lock entries and the membership tags.
+  Never a function body: deciding what code is now dead needs to understand the code.
+  [ADR-0027](docs/adr/0027-retiring-a-requirement-supersedes-grow-only.md) supersedes ADR-0021's
+  "the corpus grows only" and records the four rules that make the deletion safe.
+
+**Three merges — one verb per moment, not per artifact:**
+
+- **`gate` is the whole verdict.** It runs link sync + drift + test links, then requirement
+  readability, then committed-map freshness. Those were `gate`, `lint --strict` and `map --check`:
+  three commands that CI, the dev hook and the shipped consumer hook have run in that exact order,
+  together, every time — and the published Action already defaulted both extras to on. `--no-lint`
+  and `--no-map-check` opt out; the Action's `lint:` and `map-check:` inputs now switch them.
+- **`sync` rebuilds everything derived**: the lock, `_map.*`, `docs/map.html`, an existing
+  `_findings.md` (`--findings` creates it the first time), the presentation page's engine-owned
+  regions, and — in this repository — the generated integration artifacts. `map`, `findings`,
+  `site` and `gen-integration` are gone as verbs; there was no state of the world in which
+  regenerating one of them and not the others was what the caller wanted.
+- **`next` opens with the health score.** `health` is gone as a verb: `next --json` and
+  `next --badge` emit exactly what `health --json`/`--badge` did, and `next --untagged` is the old
+  `coverage` listing.
+
+**Five verbs removed:** `check` (the deprecated `gate` alias, scheduled for removal here since
+v3.0.0), `export` (`sync` writes `_map.json` anyway), `plan` (now `draft --plan`), `coverage` (now
+`next --untagged`), `scan` (a debug print of the member table; `show` gives one requirement's
+members, `gate --json` gives them all). `ARCH-SCAN-005` and its child are `deprecated`, not
+deleted — they stay visible in the map with their history intact.
+
+**`_map.md` no longer conflicts on every branch.** Its header carried a wall-clock timestamp, so
+every regeneration rewrote one line that no content had changed: two branches that produced an
+identical graph still collided there, and the resolution was always "regenerate", never "merge".
+The header is content-derived now (`generated:` carries the date, `engine:` the engine version),
+so two runs over the same corpus produce byte-identical files. `.gitattributes` additionally marks
+every generated artifact `merge=ours`, so a merge never stops on one; the gate's freshness check
+then tells you to run `sync`, which is the loud, self-correcting signal.
+
+**The viewer, redesigned** (`ARCH-VIEWER-007`, new children `REQ-VIEWER-944`, `REQ-VIEWER-945`):
+
+- **One paper surface, one accent.** The slab-serif display face and the four-brand palette
+  (indigo + amber + magenta + coral) are gone. What is left reads like a printed manual: warm paper
+  for the chrome, a lighter page for the document sheet, warm near-black ink — and in dark mode the
+  same book at night, a browned ground under off-white ink rather than neutral greys. One deep
+  ink-blue accent. Saturated colour now means something: requirement status, coverage and severity,
+  nothing else. Token *names* are unchanged, so every `var(--...)` reference still resolves.
+- **No webfont.** Type is the platform UI stack with a mono for ids. The Google Fonts `@import` is
+  gone — the self-contained `_map.html` is opened by double-click from `file://`, where that
+  request silently fell back mid-paint.
+- **The document reads as a document.** ALL-CAPS tracked eyebrows are sentence-case headings, the
+  intent quote is the lead paragraph, clauses wrap at 72ch, and the raw YAML frontmatter block is
+  one quiet metadata line.
+- **`[[REQ-CHECK-828]]` is a link.** A cross-reference in requirement prose renders as the bare id
+  and opens that requirement (click or keyboard) when the map holds it; a dangling one is struck
+  through rather than hidden. Escaping still runs first.
+- **The registry tally is the filter it describes.** Clicking `draft` in the rail scopes the
+  outline to drafts; `orphan` scopes to the gate's own error condition. The applied scope is a chip
+  you can clear, and it is part of the first render.
+- **Bugs fixed.** The spec header printed `owner: Alex` on every requirement in every repo — a
+  field the engine has never exported. Problems' empty state read "Nothing here — no all signals
+  open."; Findings' legend named a section renamed in v3.2.0, and its rows collapsed into the
+  76px severity column, one word per line. A collapsed parent said "1 clauses". Search results
+  stayed open over the document after blur. The nav error badge was white-on-red at ~2.8:1 in
+  dark. `Spec`'s rail drew an empty "CORE · bus" heading. The map legend's bus swatch had lost
+  its colour.
+
+**The CLI documents itself, in the reader's language** (`REQ-CMDREGISTRY-963`,
+`REQ-VIEWER-964`). `_map.json` now carries a `commands` list generated from the command registry,
+and the viewer renders it as a reference grouped by the moment of work — authoring, building,
+reading — with each verb's invocation, summary and flags. A verb that is removed disappears from
+the reference on the next `sync`, which is the only way a command list stays true. Summaries are
+translated; flag names never are, because `--accept-drift` is a literal you type.
+
+**The Romanian corpus.** Every requirement's title, intent, Description and Cases are cached in
+`requirements/_i18n/ro.json` and served by the viewer's EN/RO toggle behind the
+"machine-translated, unreviewed" badge, with the `.md` file remaining the artifact of record. A
+translated Description is now rendered as the section it is — a quote and a bullet list — instead
+of in the monospace block the acceptance criteria use.
+
+**The structural-fidelity check no longer rejects correct Romanian.** It counted the English
+words "given", "when" and "then" wherever they appeared, so a faithful rendering of "When no
+requirement scores above the floor…" looked like a dropped identifier. A Gherkin keyword is an
+identifier where it opens an *indented* line — the shape of a step inside a Cases block. Measured
+over this corpus: all 3091 real step keywords are indented and inside the acceptance block, all 7
+line-opening prose occurrences are flush left and outside it, no exception either way, plus 79
+mid-sentence occurrences. The narrower rule took the corpus's rejection count from 19 to 0.
+
+**`findings` no longer reports the tool's own authoring hint** (`REQ-FINDINGS-853` CASE-4).
+`draft` scaffolds a prose capability with the source file's headings listed under "authoring hint,
+not the contract" — inside `## Verify intent`, as bullets, so every heading was collected as an
+open question: a 21-draft repository reported 103 findings, 82 of them the hint. The scaffold now
+writes that list into `## Context`, and a new `_verify_bullets` cut keeps files drafted before the
+fix honest. All seven verify-intent readers go through it, so the viewer, the CLI and the gate
+summary cannot report different counts.
+
+Corpus: 221 requirements (9 SYS, 65 ARCH, 147 REQ), 2 deprecated.
+
+## plugin `v3.5.0` — superseded, never released
+
+**The map viewer is redesigned, and a `[[ID]]` cross-reference is now navigation** (`ARCH-VIEWER-007`, new child `REQ-VIEWER-944`). Engine untouched — `MAP_ENGINE_VERSION` stays `2026-09-04.5`; the change ships as a rebuilt `_map_viewer.html`.
+
+- **One paper surface, one accent.** The slab-serif display face and the four-brand palette (indigo + amber + magenta + coral) are gone. What is left reads like a printed manual: warm paper for the chrome, a lighter page for the document sheet, warm near-black ink — and in dark mode the same book at night, a browned ground under off-white ink rather than neutral greys. One deep ink-blue accent. Saturated colour now means something: requirement status, coverage and severity, nothing else. Token *names* are unchanged, so every `var(--...)` reference still resolves.
+- **No webfont.** Type is the platform UI stack (SF Pro / Segoe UI Variable) with a mono for ids. The Google Fonts `@import` is gone — the self-contained `_map.html` is opened by double-click from `file://`, where that request silently fell back mid-paint.
+- **The document reads as a document.** ALL-CAPS tracked eyebrows are sentence-case headings, the intent quote is the lead paragraph, clauses wrap at 72ch, and the raw YAML frontmatter block is one quiet metadata line.
+- **`[[REQ-CHECK-828]]` is a link.** A cross-reference in requirement prose renders as the bare id and opens that requirement (click or keyboard) when the map holds it; a dangling one is struck through rather than hidden. Escaping still runs first — the XSS regression checks are unchanged and a fourth case set now covers the transform.
+- **Bugs fixed.** The spec header printed `owner: Alex` on every requirement in every repo — a field the engine has never exported. Problems' empty state read "Nothing here — no all signals open."; it now states what is true. Findings' legend named `## WHAT — Verify intent`, a section renamed in v3.2.0. A collapsed parent said "1 clauses". The search results stayed open over the document after blur (Escape clears them). The nav error badge was white-on-red at ~2.8:1 in dark. `Spec`'s rail drew an empty "CORE · bus" heading. The map legend's bus swatch had lost its colour.
+- **The registry tally is now the filter it describes** (`REQ-VIEWER-945`). Clicking `draft` in the rail scopes the outline to drafts and opens it; `orphan` scopes to the gate's own error condition (enforced, no `implements:` member), which is a computed state rather than a status. The applied scope is drawn as an active chip you can clear, and it is part of the first render, not applied by an effect afterwards.
+- **`findings` no longer reports the tool's own authoring hint** (`REQ-FINDINGS-853` CASE-4, `MAP_ENGINE_VERSION` `2026-09-04.6`). `draft` scaffolds a prose capability with the source file's headings listed under "authoring hint, not the contract" — inside `## Verify intent`, as bullets, so every heading was collected as an open question: a 21-draft repository reported 103 findings, 82 of them the hint. The scaffold now writes that list into `## Context`, and the new `_verify_bullets` cut keeps files drafted before the fix honest. All seven verify-intent readers go through it, so the viewer, the CLI and the gate summary cannot report different counts.
+- **A findings row is readable again.** `.finding-row` carries no severity cell, and under `.prob-row`'s `76px 1fr auto` template its whole body landed in the 76px column, one word per line. Both selectors are a single class and `.prob-row` is declared later, so it won; the override is now `.prob-row.finding-row`.
+- Quality floor: visible `:focus-visible` rings, `prefers-reduced-motion` honoured, thin scrollbars, and the narrow layout keeps the problem rows readable. Corpus: 210 requirements.
+
 ## plugin `v3.4.0` — 2026-09-04
 
 **New command `design`: an advisory review of the repo's code, in any program-logic language, against the four OOP pillars and a set of house standards** (`ARCH-DESIGN-061`, satisfies `SYS-READ-103`). Python is read through `ast`; JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP through brace-matching heuristics over the source with comments and strings masked out, feeding the same shape checks. It names shapes worth a look — module state written from functions, long parameter lists and data clumps (encapsulation); long or deeply nested functions and prefix families of top-level functions (abstraction); unrelated classes sharing method names or byte-identical method bodies (inheritance); `isinstance` chains and equality switches on one value (polymorphism). A fifth block, standards, reports per file: over `DESIGN_FILE_MAX_LINES` (500), lines wider than `DESIGN_LINE_MAX` (100), public definitions without a docstring, more than `DESIGN_FILE_MAX_FUNCS` (30) top-level definitions — one finding per file per rule. Grouped by block with one advice sentence each, `--json` for tools, exit 0 always, never a gate rule. Every threshold (`DESIGN_*`) is a `CONFIG_KEYS` entry. The same analysis folds into a **design score** — the percentage of non-test Python files with no candidate — that rides in `_map.json` as `design`, in `_map.md`'s header and in `health` (`design_score`), absent when a repo has no Python. Run on this repo it reports the engine's own long functions honestly — the list is advice, not a defect count. `MAP_ENGINE_VERSION` `2026-09-04.5`.

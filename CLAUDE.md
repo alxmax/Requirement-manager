@@ -8,43 +8,42 @@ All commands run from `plugin/` (the engine resolves paths relative to its worki
 
 ```bash
 python scripts/reqmap.py init               # first-use bootstrap: scaffold + draft from code + lock + map + next-steps
-python scripts/reqmap.py gate --code ..     # gate: link sync + drift + test-link integrity (warn) — run before every commit; report-only, never touches the lock
-python scripts/reqmap.py sync --code ..     # rescan + advance drift baseline + regen map (+ a committed _findings.md) in one step; use --accept-drift when a confirmed/implemented contract changed
-python scripts/reqmap.py map --code ..      # generate _map.md (Mermaid) + _map.json (graph) + _map.html (viewer, if template vendored)
-python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats   # inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. init runs this best-effort.
-python scripts/reqmap.py export             # emit requirements/_map.json for an external front-end (also: --out -)
-python scripts/reqmap.py scan               # list code members per capability
+
+# --- author ---------------------------------------------------------------
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
-python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold a requirement draft from a TODO.md item; --mark-done flips the item to [x]
-python scripts/reqmap.py next               # 'what should I do next': counted, actionable risk buckets (incl. Granularity/Redundancy)
-python scripts/reqmap.py lint --code ..     # readability/structure check on non-draft requirements (--strict fails on errors)
+python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold from a TODO.md item
+python scripts/reqmap.py draft              # draft requirements from untagged legacy code (--plan: JSON dry run, writes nothing)
+python scripts/reqmap.py clarify AREA-NAME-NNN  # the questions this requirement has not answered (--json; --decompose scaffolds an over-scoped clause out)
+python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a reviewed requirement (requires an implements: member); run sync after
+
+# --- build ----------------------------------------------------------------
+python scripts/reqmap.py implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
+python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
+python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, docs/map.html, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
+python scripts/reqmap.py retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
+
+# --- read -----------------------------------------------------------------
+python scripts/reqmap.py next               # what to do next: health score + counted risk buckets (--json/--badge: the health numbers; --untagged: files with no implements: tag)
 python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
-python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
 python scripts/reqmap.py search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
-python scripts/reqmap.py coverage           # list source files carrying no implements: tag, grouped by directory (--json)
-python scripts/reqmap.py health             # corpus coherence score + component counts (--json for a CI badge)
-python scripts/reqmap.py draft              # draft requirements from untagged legacy code (input: existing code)
-python scripts/reqmap.py plan               # JSON capability-extraction plan, writes no files (AI-assist; use before draft)
-python scripts/reqmap.py findings           # aggregate open verify-intent items
-python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a draft/baseline requirement (requires an implements: member); run sync after
-python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors) for all or one requirement
-python scripts/reqmap.py design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars (encapsulation, abstraction, inheritance, polymorphism) plus house standards (file/line length, docstrings, definitions per file); read-only, exit 0, never the gate; thresholds in _config.json; its score rides in _map.json (`design`), the _map.md header and `health`
+python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars plus house standards; read-only, exit 0, never the gate; thresholds in _config.json
+python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors)
 python scripts/reqmap.py suggest-verifies    # propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion; --apply writes them
-python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in only: cache a `claude -p` translation of the corpus's majority-language requirements into requirements/_i18n/<locale>.json. Never called by gate/sync/lint/map/the pre-commit hook. A structural-fidelity check refuses to cache a translation that alters backticks, numbers, markdown markers, `CASE-N` labels or the Gherkin keywords (the last two are identifiers a `verifies:` tag points at, not prose).
-python scripts/reqmap.py gen-integration    # regenerate tool_definition.json + the SKILL.universal.md command table from the COMMANDS registry
+python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in: cache a `claude -p` translation of the corpus into requirements/_i18n/<locale>.json, read by the viewer's EN/RO toggle. Never called by gate/sync/the hook. A structural-fidelity check refuses a translation that alters backticks, numbers, markdown markers, `CASE-N` labels or the Gherkin keywords.
 ```
 
-**`gate`/`sync`/`lint`/`map` above already carry `--code ..`** so the scan reaches the repo root
+**`gate` and `sync` above already carry `--code ..`** so the scan reaches the repo root
 (`docs/`, `.github/`, `.githooks/`, root-level `scripts/`), per a NEW repo-root `.reqmapignore`
 (kept separate from `plugin/.reqmapignore` — see that file's own comment for why). This is not
-optional for these four: the *committed* `_reqlock.json`/`_map.json`/`_map.md`/`docs/map.html`
+optional for these two: the *committed* `_reqlock.json`/`_map.json`/`_map.md`/`docs/map.html`
 are generated from the widened scan (member `loc` paths are `code_root`-relative, so a copy
 generated without `--code ..` reports every existing member's path one level off and fails
 freshness checks against the real committed files). `.githooks/pre-commit` already runs from
 the repo root, so it passes `--code .` instead of `--code ..` — same target, different starting
-cwd. Read-only exploration commands with no committed-artifact freshness concern (`scan`, `show`,
-`search`, `next`, `health`, `coverage`, `dupes`, `findings`, `review`) are unaffected either way
-and can be run with or without `--code ..` depending on what you want to inspect.
+cwd. Read-only exploration commands with no committed-artifact freshness concern (`show`,
+`search`, `next`, `dupes`, `review`, `clarify`, `implement`) are unaffected either way and can be
+run with or without `--code ..` depending on what you want to inspect.
 
 **A `confirmed` requirement whose members all live outside `plugin/`** (e.g. `ARCH-SELFGATE-039`,
 whose 5 members are `.github/workflows/ci.yml`, `check/action.yml`, `.githooks/pre-commit`,
@@ -60,7 +59,7 @@ Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8`
 ```bash
 python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
 python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
-python scripts/reqmap.py map --check --code ..                     # fails if committed _map.* (or docs/map.html) is stale
+python scripts/reqmap.py gate --code ..                            # includes the freshness check: fails if committed _map.* (or docs/map.html) is stale
 ```
 
 From the **repo root** (not `plugin/`) — the packaging/release side:
@@ -82,10 +81,10 @@ CI has **two** test surfaces, don't confuse them: `gate-and-tests` (ubuntu, `3.x
 
 A third, non-authoritative job — `quality` — measures the engine rather than verifying it: `coverage` over `test_reqmap.py` (92% at the time of writing) and `ruff`, both published to the run's job summary. Only `ruff --select E9,F` (syntax errors, undefined names) can fail it; every other rule is advisory, because several ruff complaints describe deliberate choices here (`except Exception: return None` IS the fail-open contract in a dozen places). It is the only job that installs from PyPI, both tools pinned, and it is deliberately **not** in `release`'s `needs` — the authoritative verdicts stay dependency-free. There is no coverage floor yet, on purpose: publish the number first.
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` → `reqmap.py lint --strict --code ..` → `reqmap.py map --check --code ..` → `test_reqmap.py` → excalidraw builder + tests. (`check` is a deprecated alias for `gate` — kept through `v3.0.0`, removed in `v4.0.0`.)
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` (which since `v4.0.0` *is* the lint and the map-freshness check as well) → `test_reqmap.py` → excalidraw builder + tests.
 
 **Hooks — two different files, don't confuse them:**
-- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `check_engine_bump.py --staged` → `gate` → `lint --strict` → `map --check`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
+- `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `check_engine_bump.py --staged` → `gate`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
 - `plugin/hooks/pre-commit` is the hook **shipped to consumer repos** — editing it changes consumer behaviour and needs a semver bump.
 
 `sync_reqmap.sh` propagates `plugin/scripts/reqmap.py` (+ the vendored viewer template) into the local plugin cache and any consumer repos passed as args; it only refreshes an *existing* vendored engine, never seeds one.
@@ -174,9 +173,9 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v2`. The `@vN` alias is a third version axis, independent of the plugin semver and of `MAP_ENGINE_VERSION`. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). Bump the major by editing those five references in one commit, and only for a change that breaks an existing caller — adding a default-on step counts, which is why `@v1` (gate-only, frozen at v2.1.0 content) was left in place rather than re-pointed. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v3`. The `@vN` alias is a third version axis, independent of the plugin semver and of `MAP_ENGINE_VERSION`. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). Bump the major by editing those five references in one commit, and only for a change that breaks an existing caller — adding a default-on step counts, which is why `@v1` (gate-only, frozen at v2.1.0 content) was left in place rather than re-pointed. Consumer repos use it as:
 ```yaml
-- uses: alxmax/requirement-manager/check@v2
+- uses: alxmax/requirement-manager/check@v3
 ```
 
 The action also ships `check/engine_staleness.py` (`ARCH-STALEENGINE-043`): it compares the

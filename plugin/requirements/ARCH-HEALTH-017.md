@@ -19,44 +19,44 @@ satisfies: [SYS-REPORT-105]
 > stays invisible until it is expensive to fix.
 
 Every bullet below is binding.
-- `health` prints a read-only coherence snapshot of the whole corpus, never writing a file. [[REQ-HEALTH-857]]
+- `next` prints a read-only coherence snapshot of the whole corpus, never writing a file. [[REQ-HEALTH-857]]
 - The headline score is the percentage of requirements that are green — passing status, coverage, a test signal, no open verify-intent question, and no drift, all at once. [[REQ-HEALTH-858]]
-- `health` prints component counts alongside the score (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift), matches them in `--json`, and always exits 0. [[REQ-HEALTH-859]]
+- `next` prints component counts alongside the score (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift), matches them in `--json`, and always exits 0. [[REQ-HEALTH-859]]
 
 ## Cases
 CASE-1
   Given  a corpus where every requirement is confirmed, implemented, tested, intent-clean, and undrifted
-  When   `health` runs
+  When   `next` runs
   Then   the score is 100
 
 CASE-2
   Given  an all-draft corpus
-  When   `health` runs
+  When   `next` runs
   Then   the score is zero
 
 CASE-3
   Given  `--json`
-  When   `health` runs
+  When   `next` runs
   Then   the output parses as JSON and carries the `score` and `total` keys
 
 CASE-4
   Given  a confirmed requirement with no `implements` member
-  When   `health` runs
+  When   `next` runs
   Then   it is counted under orphans and not under green
 
 CASE-5
   Given  an empty corpus
-  When   `health` runs
+  When   `next` runs
   Then   the score is zero and the exit code is zero
 
 CASE-6
   Given  a confirmed `need` satisfied by at least one requirement in an otherwise green corpus
-  When   `health` runs
+  When   `next` runs
   Then   the score is 100 and the orphan count is zero
 
 CASE-7
   Given  a confirmed `need` that no requirement satisfies
-  When   `health` runs
+  When   `next` runs
   Then   it is counted under orphans and not under green
 
 ## Context
@@ -99,34 +99,34 @@ satisfies: [ARCH-HEALTH-017]
 # health is a read-only snapshot of the whole corpus
 
 ## Description
-> `health` boils dozens of slowly-rotting requirements down to one report: it walks every
+> `next` boils dozens of slowly-rotting requirements down to one report: it walks every
 > requirement, classifies each against a fixed set of axes, and prints the result. It never
 > writes a file — not the lock, not a requirement — so running it carries no risk and needs
 > no confirmation.
 
 Every bullet below is binding.
-- `health` prints a coherence snapshot of the whole requirement corpus.
-- `health` writes nothing. It only reads and prints.
+- `next` prints a coherence snapshot of the whole requirement corpus.
+- `next` writes nothing. It only reads and prints.
 
 ## Cases
 CASE-1 — health prints a snapshot covering the whole corpus
   Given  a corpus of several requirements in mixed states
-  When   `health` runs
+  When   `next` runs
   Then   it prints one coherence snapshot summarizing every requirement, not a subset
 
 CASE-2 — health runs without writing any file
   Given  any corpus
-  When   `health` runs
+  When   `next` runs
   Then   no requirement file or lock file changes, and output goes only to stdout
 
 CASE-3 — the headline score is the percentage that are green
   Given  a ten-requirement corpus where six pass every axis
-  When   `health` runs
+  When   `next` runs
   Then   the printed score is 60
 
 CASE-4 — an open verify-intent question excludes a requirement from green
   Given  a confirmed, implemented, tested, undrifted requirement carrying one open verify-intent question
-  When   `health` runs
+  When   `next` runs
   Then   that requirement is excluded from the green count though every other axis passes
 
 
@@ -152,7 +152,7 @@ satisfies: [ARCH-HEALTH-017]
 > not by code, and is otherwise an orphan.
 
 Every bullet below is binding.
-- `health` computes a headline score: the percentage of requirements that are green.
+- `next` computes a headline score: the percentage of requirements that are green.
 - The axes are status `confirmed`, coverage, a test signal, no open verify-intent question,
   and no drift from the lock.
 - For a `bus` or `feature` requirement, coverage means an `implements` member.
@@ -164,22 +164,22 @@ Every bullet below is binding.
 ## Cases
 CASE-1 — a bus requirement without an implements member is uncovered
   Given  a `layer: bus` requirement with no `implements` member
-  When   `health` runs
+  When   `next` runs
   Then   that requirement fails the coverage axis
 
 CASE-2 — a test_exempt reason satisfies the test axis without a tested-by member
   Given  a `layer: feature` requirement with no `tested-by` member but a recorded `test_exempt` reason
-  When   `health` runs
+  When   `next` runs
   Then   that requirement passes the test axis and its green status is unaffected
 
 CASE-3 — a satisfied need passes its test axis without code
   Given  a `layer: need` requirement satisfied by one other requirement's `satisfies:`
-  When   `health` runs
+  When   `next` runs
   Then   the need is counted covered and its test axis passes without any code member
 
 CASE-4 — an unsatisfied confirmed need is an orphan
   Given  a confirmed `layer: need` requirement that no requirement's `satisfies:` names
-  When   `health` runs
+  When   `next` runs
   Then   it is counted under orphans and excluded from green
 
 
@@ -198,40 +198,40 @@ satisfies: [ARCH-HEALTH-017]
 # Component counts, --json parity, and an always-zero exit
 
 ## Description
-> The headline score alone does not say WHAT to fix, so `health` also prints the counts
+> The headline score alone does not say WHAT to fix, so `next` also prints the counts
 > behind it — confirmed, implemented, tested, drafts, orphans, untested, open verify-intent,
 > drift. `--json` emits the identical numbers so a CI badge and the console view can never
 > disagree, and the command always exits 0: it reports on the corpus, it is not a gate.
 
 Every bullet below is binding.
-- `health` prints component counts alongside the score: confirmed, implemented, tested,
+- `next` prints component counts alongside the score: confirmed, implemented, tested,
   drafts, orphans, untested, open verify-intent, and drift.
-- `health` prints the reviewed-only score defined by [[ARCH-REVIEWEDSCORE-109]] when that
+- `next` prints the reviewed-only score defined by [[ARCH-REVIEWEDSCORE-109]] when that
   requirement's conditions hold.
 - `--json` emits the same numbers as a JSON object, so the console output and a CI badge
   never disagree.
-- On an empty corpus `health` prints a score of zero, with no error and nothing to divide by
+- On an empty corpus `next` prints a score of zero, with no error and nothing to divide by
   zero.
-- `health` always returns zero. The snapshot is a report, not a gate.
+- `next` always returns zero. The snapshot is a report, not a gate.
 
 ## Cases
 CASE-1 — the printed counts cover every named category
   Given  a corpus containing at least one draft, one orphan, and one drifted requirement
-  When   `health` runs
+  When   `next` runs
   Then   it prints counts for confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, and drift
 
 CASE-2 — --json and the console report the same numbers
   Given  any corpus
-  When   `health` runs once plainly and once with `--json`
+  When   `next` runs once plainly and once with `--json`
   Then   the score and counts in both outputs match exactly
 
 CASE-3 — an empty corpus reports a score of zero without error
   Given  a `requirements/` directory with no requirement files
-  When   `health` runs
+  When   `next` runs
   Then   it prints a score of zero, and the run does not raise a division-by-zero error
 
 CASE-4 — health exits zero even when the corpus scores below 100
   Given  a corpus containing orphans and drift, scoring under 100
-  When   `health` runs
+  When   `next` runs
   Then   the process still exits 0
 

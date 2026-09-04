@@ -23,6 +23,10 @@ Every bullet below is binding.
 - `render_html` makes the injected graph HTML-safe for embedding inside `<script>` by applying three escapes in order, each a V8 no-op that reads the same after parsing. [[REQ-VIEWER-941]]
 - The viewer ranks nodes by longest dependency path so `depends_on` edges flow one way, and renders a node's acceptance criteria as the author wrote them, not folded to one line. [[REQ-VIEWER-942]]
 - The viewer renders its own UI chrome in a chosen language while requirement content and engine vocabulary stay exactly as authored. [[REQ-VIEWER-943]]
+- The viewer turns a requirement's `[[ID]]` cross-references into navigation, and states only header fields the export actually carries. [[REQ-VIEWER-944]]
+- The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]
+- The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
+- The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 
 ## Cases
 CASE-1
@@ -389,4 +393,189 @@ CASE-5 — requirement content stays in the author's language under any locale
 CASE-6 — engine vocabulary stays literal under any locale
   Given  the Romanian locale selected and a requirement's spec rendered
   Then   its `status` value appears as the literal engine string, not a translated word
+---
+id: REQ-VIEWER-944
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
 
+# Cross-references and header fields in a rendered spec
+
+## Description
+> Authors write `[[REQ-CHECK-828]]` in a clause to point at the requirement that details it.
+> Rendered literally, that is a pair of brackets that leads nowhere — on this corpus every
+> architecture requirement carries several. The same document also used to print a frontmatter
+> block including `owner:`, a field the engine has never exported, so every repo but the one it
+> was hard-coded from read someone else's name.
+
+Every bullet below is binding.
+- A `[[ID]]` cross-reference in requirement prose renders as the bare id, without its brackets.
+- When the loaded map holds that id, the reference is an activatable control that opens that
+  requirement; keyboard activation does the same thing as a click.
+- When the loaded map does not hold it, the id renders as marked text that navigates nowhere —
+  a dangling reference is reported, not hidden.
+- Requirement prose is HTML-escaped before either transform runs, so no authored text can reach
+  the DOM as markup.
+- A rendered document states only header fields the export carries; a field the engine does not
+  emit is absent rather than invented.
+
+## Cases
+CASE-1 — a resolvable cross-reference becomes a control
+  Given  a clause containing `[[ID]]` and a registry holding that id
+  When   the requirement's document is rendered
+  Then   the id appears as an activatable link carrying that id, and the brackets are gone
+
+CASE-2 — a dangling cross-reference is marked, not linked
+  Given  a clause containing `[[ID]]` and a registry that does not hold that id
+  When   the requirement's document is rendered
+  Then   the id appears as marked text with no link control
+
+CASE-3 — escaping still wins over both transforms
+  Given  a clause containing HTML markup alongside a cross-reference
+  When   the requirement's document is rendered
+  Then   the markup appears escaped and only the cross-reference is a control
+
+CASE-4 — the header invents no field
+  Given  a requirement rendered from an engine export, which carries no `owner`
+  When   its document header is rendered
+  Then   no owner is shown
+---
+id: REQ-VIEWER-945
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Scoping the outline from the registry tally
+
+## Description
+> The rail's registry tally answers "how many are drafts?" and then leaves you to find them by
+> hand. The number and the rows behind it are the same query, so the number is the natural place
+> to ask for them — as long as what it applied stays visible, or a reader is left with a filtered
+> list and no idea why.
+
+Every bullet below is binding.
+- Each row of the registry tally scopes the outline to the slice it counts, and opens the outline
+  if another surface was showing.
+- The `orphan` row scopes to the gate's own error condition — an enforced requirement with no
+  `implements:` member — which is a computed state, not a status value.
+- An applied scope is rendered as an active filter chip, and clearing that chip, or clicking the
+  same tally row again, restores the full outline.
+- The scope applies to the first render, not only after one — the outline is never painted
+  unfiltered when a scope was requested.
+
+## Cases
+CASE-1 — a tally row narrows the outline
+  Given  the outline rendered with the `draft` slice requested
+  When   its rows are counted
+  Then   fewer rows are shown than with no slice requested
+
+CASE-2 — the orphan row scopes to the gate's condition, not a status
+  Given  a registry in which every enforced requirement has an `implements:` member
+  When   the outline is rendered with the `orphan` slice requested
+  Then   no row matches, and the empty state says so
+
+CASE-3 — the applied scope is visible and clearable
+  Given  the outline rendered with a slice requested
+  When   its filter row is drawn
+  Then   the chip naming that slice is drawn active
+
+---
+id: REQ-VIEWER-964
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# The command reference, in the reader's language
+
+## Description
+> Someone reading the map to understand a repository is one question away from "how do I run this?"
+> — and the answer used to live only in a README they would have to go and find. The viewer shows
+> the commands themselves, grouped by the moment of work they belong to.
+
+Every bullet below is binding.
+- The viewer renders one entry per command the map carries, grouped by authoring, building and
+  reading, showing the invocation, its summary and each flag with its help text.
+- A command's summary is shown in the reader's chosen language, falling back to the engine's own
+  English when that language has no entry for it.
+- Flag names are never translated: they are literals the reader types.
+- A map carrying no command list renders a named empty state saying how to regenerate one, never a
+  blank page.
+
+## Cases
+CASE-1 — the commands are listed with their flags
+  Given  a map carrying a command list
+  When   the command reference is rendered
+  Then   each command appears with its invocation, its summary and one row per flag
+
+CASE-2 — the summary follows the chosen language
+  Given  the Romanian locale and a command with a Romanian summary
+  When   the reference is rendered
+  Then   the Romanian summary is shown and the English one is not
+
+CASE-3 — an untranslated command falls back to English
+  Given  a locale with no entry for one command
+  When   the reference is rendered
+  Then   that command shows the engine's English summary rather than blank
+
+CASE-4 — a map with no command list says so
+  Given  a map produced before the list existed
+  When   the reference is rendered
+  Then   a named empty state appears naming the command that regenerates it
+---
+id: REQ-VIEWER-966
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# One inbox, with the origin of a signal as a tab
+
+## Description
+> Two inboxes stood side by side because one of them used to be six hundred rows of draft noise,
+> and a question a human had written down was invisible in there. That corpus is gone, and the
+> noise is collapsed where it occurs. What is worth keeping is not the second screen but the
+> distinction it protected: a warning the engine computed and a question a person wrote are
+> different news, and a reader should be able to ask for one without reading the other.
+> See [ADR-0028](../../docs/adr/0028-one-inbox-for-every-open-signal.md).
+
+Every bullet below is binding.
+- A requirement's open `## Verify intent` questions appear in the problems inbox as rows of their
+  own kind, carrying the question text and the step that closes it.
+- The authored placeholder is not a question, exactly as it is not one for the engine's own
+  digest: a requirement that recorded nothing contributes no row.
+- The inbox offers the origin as a filter of its own, so "what did a human ask?" is one click and
+  never a severity ranked among computed signals.
+- A question sorts above an unreviewed draft and below an error or a warning.
+- The rail badge for authored questions is hidden at zero rather than rendered as a proud `0`.
+
+## Cases
+CASE-1 — an authored question is a row in the inbox
+  Given  a requirement carrying one real Verify-intent question
+  When   the problems inbox is computed
+  Then   it holds a row for that requirement, of the question kind
+
+CASE-2 — the placeholder is still not a question
+  Given  a requirement whose Verify-intent section holds only the authored placeholder
+  When   the inbox is computed
+  Then   no question row is raised for it, whatever else its state raises
+
+CASE-3 — authored questions are counted apart from computed signals
+  Given  an inbox holding both kinds of row
+  When   the questions are counted for the rail badge
+  Then   only the authored ones are counted
+
+CASE-4 — the origin is offered as a filter, with the question text shown
+  Given  an inbox holding a question row
+  When   it is rendered
+  Then   a tab for questions is offered and the question's own text is displayed

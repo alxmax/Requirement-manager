@@ -33,7 +33,7 @@ CASE-2
 
 CASE-3
   Given  an absent `--attach` target
-  When   `site` runs
+  When   `sync` runs
   Then   it scaffolds a full page with the regions + the placeholder-hero marker
 
 CASE-4
@@ -85,14 +85,14 @@ Every bullet below is binding.
   (`nav`, `stats`; default `nav`) into the page, replacing only the bytes between each
   region's paired markers and preserving all other (authored) content. A re-run with no
   underlying change produces a byte-identical file (idempotent).
-- When the `--attach` target does not exist, `site` scaffolds a self-contained default
+- When the `--attach` target does not exist, `sync` scaffolds a self-contained default
   page (the inline `SITE_TEMPLATE`) with the regions filled and an authored placeholder hero.
 - The `nav` region emits a link only when its target resolves: Live Map when a sibling
   `map.html` exists, Diagram when `--diagram <rel>` names an existing file, GitHub when a git
   remote resolves. A missing git remote, missing artifact, or non-checkout never raises.
 - The engine never imports or executes the excalidraw skill's builder; the Diagram entry
   is a link only.
-- `init`, unless `--no-site` is given, runs a best-effort `site` step after `map`:
+- `init`, unless `--no-site` is given, runs a best-effort `sync` step after `map`:
   refreshes `nav`+`stats` in `docs/architecture.html` if it exists, else scaffolds it plus a
   Pages signal (`.nojekyll` + an `index.html` redirect). A failure in this step does not
   abort `init`.

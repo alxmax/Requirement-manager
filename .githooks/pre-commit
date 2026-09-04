@@ -25,17 +25,7 @@ if ! "$PY" -X utf8 scripts/check_engine_bump.py --staged; then
 fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin --code .; then
   echo "" >&2
-  echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
-  exit 1
-fi
-if ! "$PY" -X utf8 plugin/scripts/reqmap.py lint --strict --root plugin --code .; then
-  echo "" >&2
-  echo "reqmap: requirement lint failed — fix the errors above, add 'lint_exempt:' where the" >&2
-  echo "        shape is deliberate (with the reason in Notes), or commit with --no-verify." >&2
-  exit 1
-fi
-if ! "$PY" -X utf8 plugin/scripts/reqmap.py map --check --root plugin --code .; then
-  echo "" >&2
-  echo "reqmap: committed map is stale — run 'python plugin/scripts/reqmap.py map --root plugin --code .' and stage it." >&2
+  echo "reqmap: the gate failed — fix the ERRORs above, or run 'python plugin/scripts/reqmap.py" >&2
+  echo "        sync --root plugin --code .' when the committed map is merely stale." >&2
   exit 1
 fi

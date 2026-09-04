@@ -13,3 +13,17 @@ plugin/hooks/pre-commit text eol=lf
 app/viewer.html text eol=lf
 plugin/scripts/_map_viewer.html text eol=lf
 docs/full_architecture.html text eol=lf
+
+# GENERATED artifacts: never merged, always regenerated. Two branches that both ran
+# `sync` produce two versions of the same derived file, and the only correct resolution
+# is to re-derive it from the merged corpus — never to reconcile the marker hunks by
+# hand. `merge=ours` keeps the current branch's copy so the merge itself never stops on
+# them; the gate's map-freshness check then fails until `sync` is re-run, which is the
+# loud, self-correcting signal. (The header of _map.md is content-derived since
+# v4.0.0, so identical graphs no longer differ at all.)
+plugin/requirements/_map.md merge=ours
+plugin/requirements/_map.json merge=ours
+plugin/requirements/_findings.md merge=ours
+plugin/requirements/_reqlock.json merge=ours
+plugin/requirements/_memberlock.json merge=ours
+docs/map.html merge=ours

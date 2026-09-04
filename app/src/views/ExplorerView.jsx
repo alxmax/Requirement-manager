@@ -1,4 +1,5 @@
 // implements: ARCH-VIEWER-007
+// implements: REQ-VIEWER-945
 /* ExplorerView — the module explorer (the DOORS shape).
  *
  * A persistent outline of the whole registry on the left, one row per
@@ -15,7 +16,7 @@
  * No virtualisation: fully expanded is 685 plain rows, measured cheap. */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
-import { SpecDoc } from "./SpecView.jsx";
+import { SpecDoc, ENFORCED } from "./SpecView.jsx";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import {
@@ -24,6 +25,14 @@ import {
 } from "../lib/tree.js";
 
 const STATUSES = ["confirmed", "in-progress", "draft", "deprecated"];
+
+/* The gate's own error condition, not a status: an ENFORCED requirement with no
+ * `implements:` member. Kept identical to the rail's tally so the count you click
+ * and the rows you get are the same set. */
+function isOrphan(r) {
+  return !!ENFORCED[r.status] && r.layer !== "need" && r.layer !== "aggregate"
+    && !(r.members || []).some((m) => m.role === "implements");
+}
 
 function statusDot(s) {
   return s === "confirmed" ? "var(--status-confirmed)"
@@ -45,7 +54,11 @@ function Row({ row, selected, onSelect, onToggle }) {
   const r = row.r;
   const lvl = levelOf(r);
   const cls = ["ex-row", selected ? "sel" : "", row.context ? "ctx" : ""].join(" ").trim();
-  const chip = row.codeChildren === row.childCount ? `${row.childCount} clauses` : `${row.childCount} children`;
+  // "1 clauses" is the kind of detail that makes a tool look unfinished.
+  const n = row.childCount;
+  const chip = row.codeChildren === n
+    ? `${n} ${n === 1 ? "clause" : "clauses"}`
+    : `${n} ${n === 1 ? "child" : "children"}`;
   return (
     <div className={cls} data-req-row={r.id} style={{ paddingLeft: 6 + row.depth * 16 }}
       onClick={() => onSelect(r.id)}>
@@ -86,31 +99,45 @@ function LinkGroup({ label, ids, count, onNav, emptyLabel }) {
   );
 }
 
-export function ExplorerView({ selId, setSelId }) {
+export function ExplorerView({ selId, setSelId, focus = null, clearFocus }) {
   const { t } = useI18n();
   const h = useMemo(() => buildHierarchy(REQUIREMENTS), [REQUIREMENTS]);
   const [expanded, setExpanded] = useState(() => defaultExpanded(h));
   const [levelFilter, setLevelFilter] = useState({});   // {} = no level filter
-  const [statusFilter, setStatusFilter] = useState({});
+  // Seeded from `focus` rather than applied by the effect below alone: effects do
+  // not run during server rendering, so an effect-only wiring would leave the very
+  // first paint (and the SSR smoke) showing an unfiltered outline.
+  const [statusFilter, setStatusFilter] = useState(
+    () => (focus && focus !== "orphan") ? { [focus]: true } : {});
   const [onlyQuestions, setOnlyQuestions] = useState(false);
+  const [onlyOrphans, setOnlyOrphans] = useState(focus === "orphan");
   const listRef = useRef(null);
 
   // Re-seed the expansion when the registry itself is replaced (loadData()
   // swaps the baked fallback for the engine export after first paint).
   useEffect(() => { setExpanded(defaultExpanded(h)); }, [h]);
 
+  // A registry row clicked in the rail sets the filters it names; the chips stay
+  // the visible, clearable truth, so the two controls never disagree.
+  useEffect(() => {
+    if (focus === "orphan") { setOnlyOrphans(true); setStatusFilter({}); }
+    else if (focus) { setOnlyOrphans(false); setStatusFilter({ [focus]: true }); }
+    else { setOnlyOrphans(false); setStatusFilter({}); }
+  }, [focus]);
+
   const anyLevel = Object.keys(levelFilter).some((k) => levelFilter[k]);
   const anyStatus = Object.keys(statusFilter).some((k) => statusFilter[k]);
-  const filtering = anyLevel || anyStatus || onlyQuestions;
+  const filtering = anyLevel || anyStatus || onlyQuestions || onlyOrphans;
 
   const matched = useMemo(() => {
     if (!filtering) return null;
     return REQUIREMENTS.filter((r) =>
       (!anyLevel || levelFilter[levelOf(r)]) &&
       (!anyStatus || statusFilter[r.status]) &&
-      (!onlyQuestions || hasOpenQuestions(r))
+      (!onlyQuestions || hasOpenQuestions(r)) &&
+      (!onlyOrphans || isOrphan(r))
     ).map((r) => r.id);
-  }, [REQUIREMENTS, filtering, anyLevel, anyStatus, onlyQuestions, levelFilter, statusFilter]);
+  }, [REQUIREMENTS, filtering, anyLevel, anyStatus, onlyQuestions, onlyOrphans, levelFilter, statusFilter]);
 
   const keep = useMemo(() => (matched ? keepSetFor(h, matched) : null), [h, matched]);
   const rows = useMemo(() => flattenTree(h, { expanded, keep }), [h, expanded, keep]);
@@ -198,8 +225,12 @@ export function ExplorerView({ selId, setSelId }) {
           <div className="ex-filter-row">
             <span className="ex-flabel">{t("Status")}</span>
             {STATUSES.map((s) => (
-              <Chip key={s} on={!!statusFilter[s]} onClick={() => flipStatus(s)}>{s}</Chip>
+              <Chip key={s} on={!!statusFilter[s]}
+                onClick={() => { if (clearFocus) clearFocus(); flipStatus(s); }}>{s}</Chip>
             ))}
+            <Chip on={onlyOrphans}
+              title="enforced requirements with no implements: member"
+              onClick={() => { if (clearFocus) clearFocus(); setOnlyOrphans((v) => !v); }}>orphan</Chip>
           </div>
           <div className="ex-filter-row">
             <Chip on={onlyQuestions} onClick={() => setOnlyQuestions((v) => !v)}

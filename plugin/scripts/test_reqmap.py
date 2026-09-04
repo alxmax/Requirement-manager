@@ -1312,6 +1312,26 @@ class Findings(unittest.TestCase):  # tested-by: ARCH-FINDINGS-010  # tested-by:
             self.assertIn("0 open finding(s)", out)
             self.assertIn("_No open findings._", md)
 
+    def test_skips_the_scaffolds_own_authoring_hint(self):  # verifies: REQ-FINDINGS-853#CASE-4
+        """`draft` used to list a prose file's headings under Verify intent as an
+        authoring hint. They are bullets, so each heading was collected as an open
+        question -- 21 drafted files reported 103 findings, 82 of them the hint."""
+        with tempfile.TemporaryDirectory() as d:
+            body = (
+                "---\nid: AREA-H-001\nstatus: baseline\nlayer: feature\n---\n\n# Cap\n\n"
+                "## Description\n- shall do the thing.\n\n"
+                "## Verify intent (open questions for the human)\n"
+                "- TODO: which source sections are normative vs illustrative?\n\n"
+                "Source sections detected (authoring hint, not the contract):\n"
+                "  - Serverul\n  - Primul contact\n  - Swap\n\n"
+                "## Cases\nCASE-1\n")
+            _write(os.path.join(d, "requirements", "AREA-H-001.md"), body)
+            md, out = self._run(d)
+            self.assertIn("1 open finding(s) across 1 requirement(s)", out)
+            self.assertIn("which source sections are normative", md)
+            self.assertNotIn("Serverul", md)
+            self.assertNotIn("Primul contact", md)
+
     def test_triage_sidecar_orders_confirmed_bugs_first(self):  # verifies: REQ-FINDINGS-855#CASE-1  # verifies: REQ-FINDINGS-855#CASE-2  # verifies: REQ-FINDINGS-855#CASE-3
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "requirements", "AREA-X-001.md"),
@@ -3524,7 +3544,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
                 "REQ-MAP-002": self._req("Map", "render mermaid diagrams of the requirement graph")}
         code, out = self._search(reqs, "photosynthesis quarterly dividend wombat")
         self.assertEqual(code, 0)
-        self.assertIn("No strong match", out)
+        self.assertIn("No match for", out)
         # the failure mode being guarded: NO spurious ranked result below the floor
         self.assertNotIn("REQ-DRIFT-001", out)
         self.assertNotIn("REQ-MAP-002", out)
@@ -3534,7 +3554,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         code, out = self._search(reqs, "the and for with")
         self.assertEqual(code, 0)
         self.assertIn("No searchable terms", out)
-        self.assertNotIn("No strong match", out)
+        self.assertNotIn("No match for", out)
 
     def test_top_caps_result_count(self):  # AC-4
         reqs = {"REQ-DUP-00{}".format(i): self._req("Doc" + str(i),
@@ -3568,7 +3588,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         _, out = self._search(reqs, "contract changed against the lock hash")
         self.assertRegex(self._score_lines(out)[0].strip(), r"^0\.411\s+REQ-DRIFT-001\b")
         _, none = self._search(reqs, "banana photosynthesis wombat")
-        self.assertIn("No strong match", none)
+        self.assertIn("No match for", none)
 
 
 class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109  # tested-by: REQ-HEALTH-857  # tested-by: REQ-HEALTH-858  # tested-by: REQ-HEALTH-859
@@ -5789,18 +5809,16 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026  # tested-by: REQ-SIT
             open(page, "w", encoding="utf-8").write(tampered)
             self.assertEqual(R._map_check(data, reqs, d), 1)        # stale stats -> exit 1
 
-    def test_cli_site_detect_runs(self):
+    def test_site_detect_runs(self):
+        """`site` folded into `sync` in v4.0.0; detect mode stays as a function, and
+        `sync` refreshes an existing page through the same call."""
         import contextlib
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
-            argv = ["reqmap", "site", "--detect", "--root", d]
+            reqs = R.load_requirements(os.path.join(d, "requirements"))
             buf = io.StringIO()
-            old = sys.argv; sys.argv = argv
-            try:
-                with contextlib.redirect_stdout(buf):
-                    rc = R.main()
-            finally:
-                sys.argv = old
+            with contextlib.redirect_stdout(buf):
+                rc = R.cmd_site(reqs, {}, d, detect=True)
             self.assertEqual(rc, 0)
             self.assertIn("suggested:", buf.getvalue())
 
@@ -6065,13 +6083,16 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertNotIn("lock updated", r.stdout)  # gate never touches the lock
 
-    def test_check_alias_warns_and_forwards(self):
+    def test_removed_verbs_are_unknown(self):
+        """v4.0.0 cut five verbs and folded six more into gate/sync/next. A removed
+        verb must fail loudly at the parser, never fall through to a silent no-op."""
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
-            r = self._run("check", "--root", d, cwd=d)
-            self.assertEqual(r.returncode, 0, r.stderr)
-            self.assertIn("deprecated", r.stderr.lower())
-            self.assertIn("gate", r.stderr.lower())
+            for verb in ("check", "map", "lint", "health", "scan", "export",
+                         "plan", "coverage", "site", "findings", "gen-integration"):
+                r = self._run(verb, "--root", d, cwd=d)
+                self.assertNotEqual(r.returncode, 0, "{} still dispatches".format(verb))
+                self.assertIn("invalid choice", r.stderr.lower())
 
 
     def test_new_verbs_dispatch(self):
@@ -6080,10 +6101,10 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             for verb in ("draft", "dupes"):
                 r = self._run(verb, "--root", d, cwd=d)
                 self.assertEqual(r.returncode, 0, f"{verb}: {r.stderr}")
-            # plan (cmd_candidates) always prints its extraction plan to stdout — a
-            # non-empty stdout proves the branch is wired, not falling through the
-            # dispatch chain to a no-op return (which would print nothing).
-            r = self._run("plan", "--root", d, cwd=d)
+            # `draft --plan` (cmd_candidates) always prints its extraction plan to
+            # stdout — a non-empty stdout proves the branch is wired, not falling through
+            # the dispatch chain to a no-op return (which would print nothing).
+            r = self._run("draft", "--plan", "--root", d, cwd=d)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertTrue(r.stdout.strip(), "plan produced no output — branch not wired")
 
@@ -6099,8 +6120,9 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
         with tempfile.TemporaryDirectory() as d:
             r = self._run("--help", cwd=d)
             self.assertEqual(r.returncode, 0)
-            self.assertIn("Everyday", r.stdout)
-            self.assertIn("Advanced", r.stdout)
+            self.assertIn("Author:", r.stdout)
+            self.assertIn("Build:", r.stdout)
+            self.assertIn("Read:", r.stdout)
             self.assertIn("gate", r.stdout)
             self.assertIn("sync", r.stdout)
 
@@ -6274,9 +6296,10 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
             tj = os.path.join(dst, "tool_definition.json")
             with open(tj, "wb") as f:
                 f.write(b"[]\n")             # pre-existing LF-only committed convention
-            r = subprocess.run([sys.executable, "-X", "utf8", os.path.join(dst, "scripts", "reqmap.py"),
-                                "gen-integration"], cwd=dst, capture_output=True, text=True)
-            self.assertEqual(r.returncode, 0, r.stderr)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_gen_integration(os.path.join(dst, "requirements"), dst)
+            self.assertEqual(rc, 0)
             with open(tj, "rb") as f:
                 data = f.read()
             self.assertNotIn(b"\r\n", data,
@@ -7905,11 +7928,11 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
             self.assertNotIn("Redundancy", buf.getvalue())
 
 
-class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
-    """ADR-0021: the corpus grows only. Five paths create a requirement file
-    (`new`, `draft`, `init`, and `lint --decompose` on either of its two
-    triggers); none removes one. The single destructive path is `_wipe`, which
-    resets everything rather than pruning selectively.
+class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-RETIRE-064
+    """ADR-0027 (superseding ADR-0021): the corpus may shrink, through exactly two
+    sanctioned paths — `_wipe`, which resets everything, and `_remove_requirement_block`,
+    which `retire --delete` calls after printing the blast radius and refusing while
+    anything still depends on the requirement.
 
     This test is trivially green the day it is written — that is the point. It
     fails the moment a second delete path appears, which routes the author back
@@ -7933,13 +7956,14 @@ class NoShrinkVerb(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050
             if not any(call + "(" in code for call in self._DELETE_CALLS):
                 continue
             owner = self._enclosing_def(src, i)
-            if owner != "_wipe":
+            if owner not in ("_wipe", "_remove_requirement_block"):   # ADR-0027
                 offenders.append("{}:{} in {}() -> {}".format(
                     os.path.basename(R.__file__), i + 1, owner, line.strip()))
         self.assertEqual(offenders, [], "\n".join(
-            ["a requirement-removing path appeared outside _wipe; ADR-0021 says the corpus",
-             "grows only. Adding one is allowed, but it supersedes that record — write the",
-             "new ADR first, then update this test:"] + offenders))
+            ["a third requirement-removing path appeared; ADR-0027 sanctions exactly two",
+             "(_wipe and _remove_requirement_block). Adding one is allowed, but it",
+             "supersedes that record — write the new ADR first, then update this test:"]
+            + offenders))
 
 
 # collected instead of 494, 16 silently skipped in the invocation
@@ -8322,7 +8346,7 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
             reqs = R.load_requirements(rq)
             data = R._assemble_map_data(reqs, {}, rq, d)
             self.assertEqual(data["design"]["score"], 100)
-            self.assertIn("design: 100/100 (1/1 source files", R._build_md_text(dict(data, todos=[])))
+            self.assertIn("design OOP: 100/100 (1/1 source files", R._build_md_text(dict(data, todos=[])))
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_health(reqs, {}, rq, as_json=True, code_root=d)
@@ -8820,7 +8844,7 @@ class CasesSearch036(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested
             code = R.cmd_search(reqs, "xylophone")
         out = buf.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn("No strong match", out)
+        self.assertIn("No match for", out)
         self.assertNotIn("REQ-A-001", out)
 
     def test_rarer_shared_term_outweighs_common_one(self):  # verifies: REQ-SEARCH-912#CASE-4
@@ -8879,7 +8903,7 @@ class CasesSearch036(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested
         with redirect_stdout(buf):
             R.cmd_search(reqs, "completely unrelated wombat quokka")
         out = buf.getvalue()
-        self.assertIn("No strong match", out)
+        self.assertIn("No match for", out)
         self.assertIn("lexical", out.lower())
 
     def test_missing_query_argument_exits_nonzero(self):  # verifies: REQ-SEARCH-915#CASE-2
@@ -9959,6 +9983,536 @@ class CasesVlevel037(unittest.TestCase):  # tested-by: REQ-VLEVEL-946
         code, out = self._check(files)
         self.assertEqual(code, 0)
         self.assertIn("@system", out)
+
+
+
+# ---------------------------------------------------------------------------
+# clarify / implement / retire — the author -> code -> retirement half of the CLI
+# ---------------------------------------------------------------------------
+_SPEC_TMPL = ("---\nid: {id}\nstatus: {status}\nlevel: code\nlayer: feature\n"
+              "{extra}---\n\n# {title}\n\n"
+              "## Description\nEvery bullet below is binding.\n{clauses}\n\n"
+              "## Cases\n{cases}\n")
+
+
+def _spec(rid, clauses, cases=("CASE-1 — c\n  Given x\n  When y\n  Then z",),
+          status="confirmed", extra="", title="T"):
+    """A minimal well-formed requirement: Description clauses + labelled cases."""
+    return _SPEC_TMPL.format(
+        id=rid, status=status, extra=extra, title=title,
+        clauses="\n".join("- " + c for c in clauses),
+        cases="\n\n".join(cases))
+
+
+def _rules(qs):
+    return [q["rule"] for q in qs]
+
+
+class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956  # tested-by: REQ-CLARIFY-957
+    def _qs(self, clauses, cases=("CASE-1 — c\n  Given x\n  When y\n  Then z",)):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-Q-001.md"), _spec("AREA-Q-001", clauses, cases))
+            reqs = R.load_requirements(d)
+            return R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
+
+    def _run(self, d, rid=None, as_json=False):
+        reqs = R.load_requirements(os.path.join(d, "requirements"))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_clarify(reqs, rid, as_json=as_json)
+        return code, buf.getvalue()
+
+    def test_hedge_word_is_named(self):  # verifies: REQ-CLARIFY-956#CASE-1
+        qs = self._qs(["`gate` reports errors quickly and refuses an invalid tag."])
+        vague = [q for q in qs if q["rule"] == "vague-term"]
+        self.assertTrue(vague)
+        self.assertIn("quickly", vague[0]["question"])
+
+    def test_bare_number_asked_identifier_not(self):  # verifies: REQ-CLARIFY-956#CASE-2
+        numbered = self._qs(["`gate` retries 3 times before it fails."])
+        ident = self._qs(["`gate` emits CASE-2 for v4.0.0 when the input is invalid."])
+        self.assertIn("number-without-unit", _rules(numbered))
+        self.assertNotIn("number-without-unit", _rules(ident))
+
+    def test_happy_path_only_asks_about_failure(self):  # verifies: REQ-CLARIFY-956#CASE-3
+        happy = self._qs(["`gate` writes the lock."],
+                         cases=("CASE-1 — ok\n  Given a repo\n  When it runs\n  Then it writes",))
+        sad = self._qs(["`gate` writes the lock."],
+                       cases=("CASE-1 — bad\n  Given an invalid lock\n  When it runs\n  Then it refuses",))
+        self.assertIn("no-failure-case", _rules(happy))
+        self.assertNotIn("no-failure-case", _rules(sad))
+
+    def test_no_clause_or_no_case_is_blocking(self):  # verifies: REQ-CLARIFY-956#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-E-001.md"),
+                   "---\nid: AREA-E-001\nstatus: confirmed\nlayer: feature\n---\n\n# T\n")
+            reqs = R.load_requirements(d)
+            qs = R._clarify_questions("AREA-E-001", reqs["AREA-E-001"], reqs)
+        blocking = [q for q in qs if q["severity"] == "blocking"]
+        self.assertEqual({"no-contract", "no-cases"}, {q["rule"] for q in blocking})
+
+    def test_unbounded_and_ambiguous_actor(self):  # verifies: REQ-CLARIFY-956#CASE-1
+        qs = self._qs(["It scans all files when the input is missing."])
+        self.assertIn("unbounded-quantity", _rules(qs))
+        self.assertIn("ambiguous-actor", _rules(qs))
+
+    def test_cases_all_from_one_input_kind_are_questioned(self):  # verifies: REQ-CLARIFY-956#CASE-5
+        """The shape that let `search` ship: four cases, four qualities of one input kind."""
+        cases = tuple(
+            "CASE-{n} \u2014 c{n}\n  Given  a query that is {w}\n  When   it runs\n  Then   it answers"
+            .format(n=n, w=w) for n, w in enumerate(("matching", "unmatched", "empty"), 1))
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-Q-001.md"),
+                   _spec("AREA-Q-001", ["`search` ranks by wording."], cases=cases))
+            _write(os.path.join(d, "AREA-P-002.md"),
+                   _spec("AREA-P-002", ["`map` draws the graph."],
+                         cases=("CASE-1 \u2014 c\n  Given  a diagram\n  When   it runs\n  Then   ok",)))
+            reqs = R.load_requirements(d)
+            qs = R._clarify_questions("AREA-Q-001", reqs["AREA-Q-001"], reqs)
+        mono = [q for q in qs if q["rule"] == "case-monoculture"]
+        self.assertTrue(mono, _rules(qs))
+        self.assertIn("query", mono[0]["question"])
+
+    def test_the_corpus_own_subject_is_not_that_signal(self):  # verifies: REQ-CLARIFY-956#CASE-6
+        """A corpus of requirements about requirements starts every case the same way; that
+        is the domain, not a narrow focus, and flagging it would fire on 17% and say nothing."""
+        cases = tuple(
+            "CASE-{n} \u2014 c{n}\n  Given  a requirement that is {w}\n  When   it runs\n  Then   it answers"
+            .format(n=n, w=w) for n, w in enumerate(("confirmed", "drafted", "retired"), 1))
+        with tempfile.TemporaryDirectory() as d:
+            # a real sample: the exclusion is a statement about the corpus, so it needs one
+            for n in range(12):
+                rid = "AREA-{}-{:03d}".format(chr(ord("A") + n), n + 1)
+                _write(os.path.join(d, rid + ".md"),
+                       _spec(rid, ["`gate` reads it."], cases=cases))
+            reqs = R.load_requirements(d)
+            qs = R._clarify_questions("AREA-A-001", reqs["AREA-A-001"], reqs)
+        self.assertNotIn("case-monoculture", _rules(qs))
+
+    def test_output_carries_rule_quote_and_suggestion(self):  # verifies: REQ-CLARIFY-957#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-Q-001.md"),
+                   _spec("AREA-Q-001", ["`gate` reports errors quickly."]))
+            code, out = self._run(d, "AREA-Q-001")
+        self.assertEqual(0, code)
+        self.assertIn("vague-term", out)
+        self.assertIn("quickly", out)
+        self.assertIn("->", out)
+
+    def test_corpus_view_reports_blocking_only(self):  # verifies: REQ-CLARIFY-957#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-B-001.md"),
+                   "---\nid: AREA-B-001\nstatus: confirmed\nlayer: feature\n---\n\n# B\n")
+            _write(os.path.join(rd, "AREA-A-001.md"),
+                   _spec("AREA-A-001", ["`gate` reports errors quickly."]))
+            code, out = self._run(d)
+        self.assertEqual(0, code)
+        self.assertIn("AREA-B-001", out)
+        self.assertNotIn("AREA-A-001", out)
+
+    def test_json_carries_the_records(self):  # verifies: REQ-CLARIFY-957#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-Q-001.md"),
+                   _spec("AREA-Q-001", ["`gate` reports errors quickly."]))
+            code, out = self._run(d, "AREA-Q-001", as_json=True)
+        data = json.loads(out)
+        self.assertEqual(0, code)
+        self.assertEqual("AREA-Q-001", data["requirements"][0]["id"])
+        self.assertTrue(data["requirements"][0]["questions"])
+
+    def test_unknown_id_errors_clean_requirement_passes(self):  # verifies: REQ-CLARIFY-957#CASE-4  # verifies: ARCH-CLARIFY-062#CASE-1  # verifies: ARCH-CLARIFY-062#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "requirements", "AREA-C-001.md"),
+                   _spec("AREA-C-001",
+                         ["`gate` writes the lock file."],
+                         cases=("CASE-1 — ok\n  Given an invalid lock\n  When `gate` runs\n  Then it refuses",)))
+            missing, _ = self._run(d, "NOPE-X-001")
+            clean, out = self._run(d, "AREA-C-001")
+        self.assertEqual(1, missing)
+        self.assertEqual(0, clean)
+        self.assertIn("nothing unclear", out)
+
+    def test_questions_are_deterministic(self):  # verifies: ARCH-CLARIFY-062#CASE-2
+        clauses = ["It scans all files quickly, retrying 3 times."]
+        self.assertEqual(self._qs(clauses), self._qs(clauses))
+
+
+class Implement(unittest.TestCase):  # tested-by: ARCH-IMPLEMENT-063  # tested-by: REQ-IMPLEMENT-958  # tested-by: REQ-IMPLEMENT-959
+    def _seed(self, d, rid="AREA-I-001", clauses=("`gate` writes the lock file.",), cases=None, code=True):
+        rd = os.path.join(d, "requirements")
+        cases = cases or ("CASE-1 — a\n  Given x\n  When y\n  Then z",
+                          "CASE-2 — b\n  Given an invalid lock\n  When y\n  Then it refuses")
+        _write(os.path.join(rd, rid + ".md"), _spec(rid, list(clauses), cases))
+        if code:
+            _write(os.path.join(d, "mod.py"), tag(rid) + "\ndef f():\n    return 1\n")
+        return rd
+
+    def _run(self, d, rid, as_json=False):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_implement(reqs, members, rid, as_json=as_json)
+        return code, buf.getvalue()
+
+    def test_tags_are_emitted_verbatim_one_per_case(self):  # verifies: ARCH-IMPLEMENT-063#CASE-1  # verifies: REQ-IMPLEMENT-958#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            _code, out = self._run(d, "AREA-I-001")
+        self.assertIn(tag("AREA-I-001"), out)
+        self.assertIn("# verifies: AREA-I-001#CASE-1", out)
+        self.assertIn("# verifies: AREA-I-001#CASE-2", out)
+        self.assertEqual(2, out.count("# verifies: AREA-I-001#"))
+
+    def test_blocking_question_opens_the_brief(self):  # verifies: ARCH-IMPLEMENT-063#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-N-001.md"),
+                   "---\nid: AREA-N-001\nstatus: confirmed\nlayer: feature\n---\n\n"
+                   "# N\n\n## Description\nEvery bullet below is binding.\n- `gate` runs.\n")
+            _code, out = self._run(d, "AREA-N-001")
+        self.assertIn("BLOCKING", out)
+        self.assertIn("clarify AREA-N-001", out)
+
+    def test_brief_writes_nothing(self):  # verifies: ARCH-IMPLEMENT-063#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            before = {f: open(os.path.join(rd, f), encoding="utf-8").read() for f in os.listdir(rd)}
+            self._run(d, "AREA-I-001")
+            after = {f: open(os.path.join(rd, f), encoding="utf-8").read() for f in os.listdir(rd)}
+        self.assertEqual(before, after)
+
+    def test_a_requirement_with_no_code_says_so(self):  # verifies: REQ-IMPLEMENT-958#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, code=False)
+            _code, out = self._run(d, "AREA-I-001")
+        self.assertIn("nothing yet", out)
+
+    def test_json_brief_carries_the_fields(self):  # verifies: REQ-IMPLEMENT-958#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            code, out = self._run(d, "AREA-I-001", as_json=True)
+        data = json.loads(out)
+        self.assertEqual(0, code)
+        for field in ("contract", "cases", "members", "tags", "open_questions"):
+            self.assertIn(field, data)
+
+    def test_nearest_implemented_neighbour_is_offered(self):  # verifies: REQ-IMPLEMENT-959#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-I-001.md"),
+                   _spec("AREA-I-001", ["the lock file records the contract hash baseline."]))
+            _write(os.path.join(rd, "AREA-J-002.md"),
+                   _spec("AREA-J-002", ["the lock file records the contract hash baseline exactly."]))
+            _write(os.path.join(d, "neighbour.py"), tag("AREA-J-002") + "\ndef g():\n    return 2\n")
+            _code, out = self._run(d, "AREA-I-001")
+        self.assertIn("AREA-J-002", out)
+        self.assertIn("neighbour.py", out)
+
+    def test_at_most_two_neighbours_are_offered(self):  # verifies: REQ-IMPLEMENT-959#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            clause = "the lock file records the contract hash baseline"
+            _write(os.path.join(rd, "AREA-I-001.md"), _spec("AREA-I-001", [clause + "."]))
+            for n in range(5):
+                rid = "AREA-N-01{}".format(n)
+                _write(os.path.join(rd, rid + ".md"), _spec(rid, ["{} exactly {}.".format(clause, n)]))
+                _write(os.path.join(d, "n{}.py".format(n)), tag(rid) + "\ndef f():\n    return 1\n")
+            _code, out = self._run(d, "AREA-I-001")
+        self.assertEqual(2, sum(1 for line in out.splitlines() if line.startswith("  AREA-N-01")))
+
+    def test_no_neighbour_when_nothing_is_implemented(self):  # verifies: REQ-IMPLEMENT-959#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-I-001.md"), _spec("AREA-I-001", ["the lock file records the hash."]))
+            _write(os.path.join(rd, "AREA-J-002.md"), _spec("AREA-J-002", ["the lock file records the hash."]))
+            _code, out = self._run(d, "AREA-I-001")
+        self.assertNotIn("Similar requirements", out)
+
+
+class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-960  # tested-by: REQ-RETIRE-961  # tested-by: REQ-RETIRE-962
+    def _seed(self, d, extra_files=True):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-R-001.md"), _spec("AREA-R-001", ["`gate` writes the lock file."]))
+        if extra_files:
+            _write(os.path.join(d, "only.py"), tag("AREA-R-001") + "\ndef dead():\n    return 1\n")
+            _write(os.path.join(d, "shared.py"),
+                   tag("AREA-R-001") + "  " + tag("AREA-S-002") + "\ndef kept():\n    return 2\n")
+            _write(os.path.join(rd, "AREA-S-002.md"), _spec("AREA-S-002", ["`sync` advances the baseline."]))
+        return rd
+
+    def _run(self, d, rid="AREA-R-001", **kw):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        members = R.scan_members(d, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_retire(reqs, members, rd, rid, **kw)
+        return code, buf.getvalue()
+
+    def _plan(self, d, rid="AREA-R-001"):
+        rd = os.path.join(d, "requirements")
+        return R._retire_plan(R.load_requirements(rd), R.scan_members(d, d), rid)
+
+    def test_plan_comes_before_any_change(self):  # verifies: ARCH-RETIRE-064#CASE-1  # verifies: REQ-RETIRE-961#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            before = open(os.path.join(rd, "AREA-R-001.md"), encoding="utf-8").read()
+            code, out = self._run(d)
+            after = open(os.path.join(rd, "AREA-R-001.md"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertEqual(before, after)
+        self.assertIn("only.py", out)
+
+    def test_a_dependent_stops_the_operation(self):  # verifies: ARCH-RETIRE-064#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            _write(os.path.join(rd, "AREA-D-003.md"),
+                   _spec("AREA-D-003", ["`map` draws the graph."], extra="depends_on: [AREA-R-001]\n"))
+            code, out = self._run(d, do_apply=True)
+        self.assertEqual(1, code)
+        self.assertIn("AREA-D-003", out)
+        self.assertIn("refusing", out)
+
+    def test_deprecating_leaves_the_code_alone(self):  # verifies: ARCH-RETIRE-064#CASE-3  # verifies: REQ-RETIRE-961#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            code, _out = self._run(d, do_apply=True)
+            spec = open(os.path.join(rd, "AREA-R-001.md"), encoding="utf-8").read()
+            only = open(os.path.join(d, "only.py"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertIn("status: deprecated", spec)
+        self.assertIn(tag("AREA-R-001"), only)
+
+    def test_plan_names_dependents_and_children(self):  # verifies: REQ-RETIRE-960#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            _write(os.path.join(rd, "AREA-D-003.md"),
+                   _spec("AREA-D-003", ["`map` draws."], extra="depends_on: [AREA-R-001]\n"))
+            _write(os.path.join(rd, "AREA-C-004.md"),
+                   _spec("AREA-C-004", ["`map` draws too."], extra="satisfies: [AREA-R-001]\n"))
+            plan = self._plan(d)
+        self.assertEqual(["AREA-D-003"], plan["dependents"])
+        self.assertEqual(["AREA-C-004"], plan["children"])
+
+    def test_plan_separates_exclusive_from_shared_files(self):  # verifies: REQ-RETIRE-960#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            plan = self._plan(d)
+        self.assertEqual(["only.py"], plan["exclusive_files"])
+        self.assertEqual(["shared.py"], plan["shared_files"])
+
+    def test_plan_finds_a_prose_cross_reference(self):  # verifies: REQ-RETIRE-960#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            _write(os.path.join(rd, "AREA-P-005.md"),
+                   _spec("AREA-P-005", ["`map` draws, see [[AREA-R-001]] for the rule."]))
+            plan = self._plan(d)
+        self.assertEqual(["AREA-P-005"], plan["referenced_by"])
+
+    def test_plan_names_a_dependency_left_with_no_consumer(self):  # verifies: REQ-RETIRE-960#CASE-4
+        """depends_on runs consumer -> foundation: retiring the consumer cannot break the
+        capability, but it can leave it with no caller at all."""
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-E-007.md"), _spec("AREA-E-007", ["`scan` walks the tree."]))
+            _write(os.path.join(rd, "AREA-R-001.md"),
+                   _spec("AREA-R-001", ["`gate` writes."], extra="depends_on: [AREA-E-007]\n"))
+            plan = self._plan(d)
+        self.assertEqual(["AREA-E-007"], plan["leaves_unused"])
+
+    def test_force_overrides_the_dependent_refusal(self):  # verifies: REQ-RETIRE-961#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            _write(os.path.join(rd, "AREA-D-003.md"),
+                   _spec("AREA-D-003", ["`map` draws."], extra="depends_on: [AREA-R-001]\n"))
+            code, _out = self._run(d, do_apply=True, force=True)
+            spec = open(os.path.join(rd, "AREA-R-001.md"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertIn("status: deprecated", spec)
+
+    def test_delete_keeps_the_sibling_block(self):  # verifies: REQ-RETIRE-962#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            two = _spec("AREA-R-001", ["`gate` writes."]) + "\n" + _spec("AREA-T-006", ["`sync` writes."])
+            _write(os.path.join(rd, "MODULE.md"), two)
+            code, _out = self._run(d, delete=True, do_apply=True)
+            left = open(os.path.join(rd, "MODULE.md"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertIn("AREA-T-006", left)
+        self.assertNotIn("id: AREA-R-001", left)
+
+    def test_delete_strips_the_tag_and_keeps_a_shared_line(self):  # verifies: REQ-RETIRE-962#CASE-2  # verifies: REQ-RETIRE-962#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            code, _out = self._run(d, delete=True, do_apply=True)
+            only = open(os.path.join(d, "only.py"), encoding="utf-8").read()
+            shared = open(os.path.join(d, "shared.py"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertNotIn("AREA-R-001", only)
+        self.assertIn("def dead():", only)              # the body is never removed on a tag
+        self.assertNotIn("AREA-R-001", shared)
+        self.assertIn("AREA-S-002", shared)
+
+    def test_delete_drops_the_lock_entry(self):  # verifies: REQ-RETIRE-962#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            R.save_lock(rd, {"AREA-R-001": "abc123", "AREA-S-002": "def456"})
+            self._run(d, delete=True, do_apply=True)
+            lock = R.load_lock(rd)
+        self.assertNotIn("AREA-R-001", lock)
+        self.assertIn("AREA-S-002", lock)
+
+    def test_unknown_id_exits_one(self):  # verifies: REQ-RETIRE-961#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d)
+            code, _out = self._run(d, rid="NOPE-X-001")
+        self.assertEqual(1, code)
+
+
+
+class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
+    """The CLI, emitted as data for any surface that documents it without running it."""
+
+    def test_one_entry_per_user_facing_command(self):  # verifies: REQ-CMDREGISTRY-963#CASE-1
+        names = [c["name"] for c in R.commands_manifest()]
+        public = [n for n, spec in R.COMMANDS.items() if not spec.get("internal")]
+        self.assertEqual(sorted(names), sorted(public))
+        self.assertEqual(len(names), len(set(names)))
+
+    def test_entry_carries_argument_summary_and_flags(self):  # verifies: REQ-CMDREGISTRY-963#CASE-2
+        entry = next(c for c in R.commands_manifest() if c["name"] == "retire")
+        self.assertTrue(entry["summary"])
+        self.assertEqual(entry["arg"], R.COMMANDS["retire"]["arg"])
+        flags = {f["flag"] for f in entry["flags"]}
+        self.assertIn("--delete", flags)
+        self.assertIn("--apply", flags)
+        self.assertTrue(all(f["help"] for f in entry["flags"]))
+
+    def test_every_command_is_placed_in_a_group(self):  # verifies: REQ-CMDREGISTRY-963#CASE-3
+        groups = {g for g, _names in R.COMMAND_GROUPS}
+        for c in R.commands_manifest():
+            self.assertIn(c["group"], groups, c["name"])
+
+    def test_manifest_rides_on_the_map_payload(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-M-001.md"),
+                   REQ.format(id="AREA-M-001", status="confirmed", layer="feature", extra="", title="T"))
+            reqs = R.load_requirements(rd)
+            data = R._build_map_data(reqs, {})
+            payload = json.loads(R._build_json_text(data))
+        self.assertTrue(payload["commands"])
+        self.assertIn("gate", [c["name"] for c in payload["commands"]])
+
+
+
+class TranslationProseKeyword(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-938
+    """A Gherkin keyword is an identifier where it OPENS a line; the same word inside a
+    sentence is English prose, and a translation that leaves it in English is the wrong
+    one. Counting both rejected 79 correct translations over this corpus."""
+
+    def test_prose_keyword_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
+        src = "- When no requirement scores above the floor, `search` says so."
+        ro = "- C\u00e2nd nicio cerin\u021b\u0103 nu trece pragul, `search` o spune."
+        self.assertTrue(R._translation_preserves_structure(src, ro))
+
+    def test_prose_keyword_opening_a_line_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
+        src = "When you point this tool at an old codebase, this is the first step."
+        ro = "C\u00e2nd îndrepți acest instrument spre un cod vechi, acesta e primul pas."
+        self.assertTrue(R._translation_preserves_structure(src, ro))
+
+    def test_step_keyword_may_not_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-1
+        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
+        ro = "CASE-1 \u2014 t\n  Dat fiind  un repo\n  C\u00e2nd   ruleaz\u0103\n  Atunci   se opre\u0219te"
+        self.assertFalse(R._translation_preserves_structure(src, ro))
+
+    def test_step_keyword_kept_passes(self):  # verifies: REQ-TRANSLATE-938#CASE-6
+        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
+        ro = "CASE-1 \u2014 t\n  Given  un repo\n  When   ruleaz\u0103\n  Then   se opre\u0219te"
+        self.assertTrue(R._translation_preserves_structure(src, ro))
+
+
+
+class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ-SEARCH-965
+    """The id is this corpus's primary key and was not in the index at all: searching
+    for `ARCH-CHECK-006` returned REQ-ORPHANCODE-888 and never the requirement named."""
+
+    def _corpus(self, d):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-X-001.md"), _spec("AREA-X-001", ["`gate` writes the lock."]))
+        _write(os.path.join(rd, "AREA-X-002.md"), _spec("AREA-X-002", ["`sync` advances the baseline."]))
+        _write(os.path.join(rd, "AREA-Y-003.md"),
+               _spec("AREA-Y-003", ["the scanner walks the tree."],
+                     cases=("CASE-1 \u2014 c\n  Given  a tag `GHOST-CAP-001` nothing defines\n"
+                            "  When   it runs\n  Then   it reports a dangling tag",)))
+        return rd
+
+    def _run(self, d, query, top=5):
+        rd = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = R.cmd_search(reqs, query, top=top, reqs_dir=rd)
+        return code, buf.getvalue()
+
+    def test_exact_id_is_the_first_result(self):  # verifies: REQ-SEARCH-965#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d)
+            _code, out = self._run(d, "AREA-X-001")
+        first = [l for l in out.splitlines() if l.startswith("  ")][0]
+        self.assertIn("AREA-X-001", first)
+        self.assertIn("id", first)
+
+    def test_partial_id_returns_the_ids_it_names(self):  # verifies: REQ-SEARCH-965#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d)
+            _code, out = self._run(d, "AREA-X")
+        self.assertIn("AREA-X-001", out)
+        self.assertIn("AREA-X-002", out)
+
+    def test_a_phrase_inside_a_case_is_found(self):  # verifies: REQ-SEARCH-965#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d)
+            _code, out = self._run(d, "GHOST-CAP-001")
+        self.assertIn("AREA-Y-003", out)
+
+    def test_a_phrase_from_the_cached_translation_is_found(self):  # verifies: REQ-SEARCH-965#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._corpus(d)
+            reqs = R.load_requirements(rd)
+            body = reqs["AREA-X-001"]["body"]
+            os.makedirs(os.path.join(rd, "_i18n"), exist_ok=True)
+            with open(os.path.join(rd, "_i18n", "ro.json"), "w", encoding="utf-8") as f:
+                json.dump({"AREA-X-001": {
+                    "title": "t", "intent": "i",
+                    "contract": "- `gate` scrie fisierul de blocare unic",
+                    "acceptance": "a",
+                    "hash": R.translation_hash(body, R._title(body))}}, f)
+            _code, out = self._run(d, "fisierul de blocare unic")
+        self.assertIn("AREA-X-001", out)
+
+    def test_a_phrase_only_in_context_is_not_a_match(self):  # verifies: REQ-SEARCH-965#CASE-6
+        """Commentary is not what a requirement is about — the same reason the ranking
+        bag excludes it. Two existing tests caught this the moment the literal layer
+        searched the whole document."""
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            body = _spec("AREA-Z-009", ["`gate` writes the lock."])
+            body += "\n## Context\n**Notes**\n- the word xylophone appears only here.\n"
+            _write(os.path.join(rd, "AREA-Z-009.md"), body)
+            _code, out = self._run(d, "xylophone")
+        self.assertNotIn("AREA-Z-009", out)
+
+    def test_a_plain_query_still_comes_from_the_model(self):  # verifies: REQ-SEARCH-965#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            self._corpus(d)
+            _code, out = self._run(d, "baseline advances")
+        rows = [l for l in out.splitlines() if l.startswith("  ") and l.strip()]
+        self.assertTrue(rows)
+        self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
 if __name__ == "__main__":

@@ -16,26 +16,12 @@
 if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
 # -X utf8 belt-and-suspenders: the engine self-reconfigures stdout to UTF-8, but the
 # flag guarantees the WARN/info lines (em-dashes) print on legacy Windows codepages.
+# One verdict since v4.0.0: link sync + drift + test links, then requirement
+# readability, then committed-map freshness. `--no-lint` / `--no-map-check` opt out
+# of the last two; a repo that tracks no map passes that half silently.
 if ! "$PY" -X utf8 scripts/reqmap.py gate; then
   echo "" >&2
-  echo "reqmap: drift gate failed — fix the ERRORs above, or commit with --no-verify." >&2
-  exit 1
-fi
-# Clarity lint: readability/structure rules on non-draft requirements. --strict
-# fails only on error-severity findings (a confirmed requirement missing its
-# Contract or Acceptance section) plus the promoted structural checks. Style
-# warnings stay advisory and never block. A requirement that is genuinely one
-# behaviour opts a check out with `lint_exempt: [check-name]` in its frontmatter.
-if ! "$PY" -X utf8 scripts/reqmap.py lint --strict; then
-  echo "" >&2
-  echo "reqmap: requirement lint failed — fix the errors above, add 'lint_exempt:' where the" >&2
-  echo "        shape is deliberate, or commit with --no-verify." >&2
-  exit 1
-fi
-# Map freshness: if you track requirements/_map.* , a code/requirement edit that
-# shifts them must be regenerated before commit. No committed map -> passes silently.
-if ! "$PY" -X utf8 scripts/reqmap.py map --check; then
-  echo "" >&2
-  echo "reqmap: committed map is stale — run 'reqmap.py map' and stage it, or commit with --no-verify." >&2
+  echo "reqmap: the gate failed — fix the ERRORs above (or run 'reqmap.py sync' if the" >&2
+  echo "        committed map is merely stale), or commit with --no-verify." >&2
   exit 1
 fi

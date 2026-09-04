@@ -1,84 +1,84 @@
 /* implements: ARCH-VIEWER-007 */
 /* ============================================================================
    REQUIREMENT MANAGER — colors_and_type.css
-   Single source of visual truth. WARM-CREAM default (light), editorial palette:
-   deep indigo-navy + amber + raspberry-magenta + coral, on a cream canvas.
-   Slab-serif display, clean grotesque UI, mono code. Dark navy-indigo variant
-   via <html data-theme="dark">.
+   Single source of visual truth. A printed-documentation palette: warm paper
+   for the chrome, a lighter page for the document sheets, ONE accent (a deep
+   ink blue). Saturated colour is spent only on meaning — requirement status and
+   test coverage — never on chrome. The paper stays warm in dark mode too: the
+   greys are browned, not neutral, so the two themes read as one book.
+   Dark variant via <html data-theme="dark">.
 
-   Load order in a page:
-     <link rel="preconnect" href="https://fonts.googleapis.com">
-     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-     <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Geist:wght@300..600&family=Geist+Mono:wght@400..500&display=swap" rel="stylesheet">
-     <link rel="stylesheet" href="colors_and_type.css">
+   Type is the platform UI stack, deliberately: no webfont is downloaded, so the
+   self-contained _map.html renders identically opened by double-click, offline,
+   from file:// — where a Google Fonts @import silently fell back mid-paint.
+   Token NAMES are kept from the previous editorial palette (indigo/amber/
+   magenta/coral) because JSX inline styles reference them; only values moved.
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@500;600;700&family=Geist:wght@300..600&family=Geist+Mono:wght@400..500&display=swap');
-
 :root {
-  /* ---- RAW PALETTE · warm cream neutrals (default / light) -------------- */
-  --paper-0:  #f1ede3;  /* page — warm cream */
-  --paper-1:  #f6f3ea;  /* raised page / rails */
-  --paper-2:  #fbfaf4;  /* cards, surfaces (near-white warm) */
-  --paper-3:  #ece6d8;  /* surface hover */
-  --line-1:   #e7e1d2;  /* hairline divider */
-  --line-2:   #d9d2c0;  /* border */
-  --line-3:   #c3bba6;  /* strong border / focus track */
-  --ink-3:    #9a9aa6;  /* faint / disabled text */
-  --ink-2:    #6e7085;  /* muted body text */
-  --ink-1:    #45465f;  /* secondary text */
-  --ink-0:    #23243f;  /* primary text (deep indigo-ink) */
+  /* ---- RAW PALETTE · warm paper (default / light) ----------------------- */
+  --paper-0:  #f2ead8;  /* page / chrome ground — the board the page sits on */
+  --paper-1:  #f8f2e5;  /* rails, raised chrome */
+  --paper-2:  #fdf8ed;  /* document sheets — the printed page */
+  --paper-3:  #eae1cc;  /* surface hover */
+  --line-1:   #e9e0cb;  /* hairline divider */
+  --line-2:   #dcd2b8;  /* border */
+  --line-3:   #c3b89b;  /* strong border / focus track */
+  --ink-3:    #a29a87;  /* faint / disabled text */
+  --ink-2:    #827a68;  /* muted body text */
+  --ink-1:    #4e483c;  /* secondary text */
+  --ink-0:    #24201a;  /* primary text — warm near-black, ink on paper */
 
-  /* ---- BRAND · indigo-navy (primary / confirmed) ----------------------- */
-  --indigo-700: #163f86;
-  --indigo-600: #1b53a6;
-  --indigo-500: #2160c6;  /* PRIMARY accent — brand, verified, links, focus */
-  --indigo-400: #5586d8;
-  --indigo-300: #a6c2ea;
-  --indigo-tint:#e6eef9;
+  /* ---- ACCENT · ink blue (the only brand hue) -------------------------- */
+  --indigo-700: #073a76;
+  --indigo-600: #0a54a8;
+  --indigo-500: #0d64c8;  /* PRIMARY accent — links, selection, focus */
+  --indigo-400: #3f8ada;
+  --indigo-300: #9cc2ea;
+  --indigo-tint:#e4edf9;
 
-  /* ---- BRAND · amber (secondary / drift) ------------------------------- */
-  --amber-700: #9a6a0c;
-  --amber-600: #c9870f;
-  --amber-500: #f5a623;
-  --amber-400: #f8bb52;
-  --amber-tint:#faedd3;
+  /* ---- ORANGE · drift / warning ---------------------------------------- */
+  --amber-700: #85480a;   /* readable as text on paper */
+  --amber-600: #ab5f10;
+  --amber-500: #e08a12;
+  --amber-400: #eeae4d;
+  --amber-tint:#f7e7c6;
 
-  /* ---- BRAND · raspberry-magenta (bus / punch) ------------------------- */
-  --magenta-700: #8e1853;
-  --magenta-600: #b01f63;
-  --magenta-500: #c0206a;
-  --magenta-400: #d8559a;
-  --magenta-tint:#f6dbe9;
+  /* ---- PURPLE · bus layer ---------------------------------------------- */
+  --magenta-700: #55287f;
+  --magenta-600: #743ba8;
+  --magenta-500: #9d54d2;
+  --magenta-400: #b781e0;
+  --magenta-tint:#eee4f6;
 
-  /* ---- BRAND · coral (error / late) ------------------------------------ */
-  --coral-600: #cf2f4c;
-  --coral-500: #e8526a;
-  --coral-tint:#fbe0e3;
+  /* ---- RED · error ------------------------------------------------------ */
+  --coral-600: #b3110f;
+  --coral-500: #de392c;
+  --coral-tint:#f8e1db;
 
   /* ---- STATUS · the requirement lifecycle ------------------------------ */
   --status-confirmed:    var(--indigo-500);
   --status-confirmed-bg: var(--indigo-tint);
-  --status-confirmed-ln: #c4c5e2;
-  --status-drift:        var(--amber-700);   /* readable amber on cream */
+  --status-confirmed-ln: #c6dbf1;
+  --status-drift:        var(--amber-700);
   --status-drift-bg:     var(--amber-tint);
-  --status-drift-ln:     #ecd29a;
+  --status-drift-ln:     #e9d2a0;
   --status-error:        var(--coral-600);
   --status-error-bg:     var(--coral-tint);
-  --status-error-ln:     #f0b6bf;
+  --status-error-ln:     #edc3ba;
   --status-draft:        var(--ink-2);
-  --status-draft-bg:     #efeade;
+  --status-draft-bg:     #ebe3d2;
   --status-draft-ln:     var(--line-2);
-  --status-bus:          var(--magenta-600); /* shared foundation */
+  --status-bus:          var(--magenta-600);
   --status-bus-bg:       var(--magenta-tint);
-  --status-bus-ln:       #e6abca;
-  --signal-gold:         #e89b16;            /* locate crosshair / highlight */
-  --signal-gold-hi:      #fbe7c4;
+  --status-bus-ln:       #dbc9ec;
+  --signal-gold:         #a1600a;            /* locate crosshair / highlight */
+  --signal-gold-hi:      #f5e1b3;
 
   /* ---- COVERAGE · computed per-clause health (separate axis from status) */
-  --cov-tested:    #2e8f63;  /* every contract clause has a live test */
-  --cov-tested-bg: #e3f1ea;
-  --cov-tested-ln: #b1d8c3;
+  --cov-tested:    #2c6b3a;  /* every contract clause has a live test */
+  --cov-tested-bg: #e3eedd;
+  --cov-tested-ln: #b9d6b3;
   --cov-partial:   var(--amber-700);  /* some clauses uncovered */
   --cov-untested:  var(--coral-600);  /* no live test, or stale ref */
   --cov-exempt:    var(--ink-3);      /* deprecated — skipped */
@@ -100,123 +100,132 @@
   --accent-soft:  var(--indigo-tint);
   --accent-2:     var(--amber-500);
   --on-accent:    #ffffff;
-  --focus-ring:   color-mix(in oklch, var(--indigo-500) 32%, transparent);
+  --focus-ring:   color-mix(in oklch, var(--indigo-500) 30%, transparent);
+  --chrome-glass: rgba(248,242,229,0.82);   /* translucent bar over the page */
 
-  /* ---- TYPE FAMILIES --------------------------------------------------- */
-  --font-serif: "Roboto Slab", "Roboto Serif", Georgia, serif;
-  --font-sans:  "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono:  "Geist Mono", ui-monospace, "SF Mono", monospace;
+  /* ---- TYPE FAMILIES ---------------------------------------------------- */
+  /* One family. `--font-serif` is kept as an alias so existing selectors and
+     the [data-voice] switch below still resolve — there is no display serif. */
+  --font-sans:  -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                "Segoe UI Variable Text", "Segoe UI", system-ui, Roboto,
+                "Helvetica Neue", Arial, sans-serif;
+  --font-serif: var(--font-sans);
+  --font-mono:  ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono",
+                "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
 
   /* ---- TYPE SCALE ------------------------------------------------------ */
-  --text-display: 700 46px/1.06 var(--font-serif);
-  --text-h1:      700 31px/1.14 var(--font-serif);
-  --text-h2:      600 24px/1.22 var(--font-serif);
-  --text-h3:      600 20px/1.28 var(--font-sans);
-  --text-title:   600 16px/1.35 var(--font-sans);
-  --text-body:    400 15px/1.6  var(--font-sans);
-  --text-small:   400 13px/1.55 var(--font-sans);
-  --text-caption: 500 11px/1.4  var(--font-sans);
-  --text-code:    450 13px/1.55 var(--font-mono);
+  --text-display: 700 34px/1.08 var(--font-sans);
+  --text-h1:      700 28px/1.16 var(--font-sans);
+  --text-h2:      600 22px/1.22 var(--font-sans);
+  --text-h3:      600 17px/1.32 var(--font-sans);
+  --text-title:   600 15px/1.35 var(--font-sans);
+  --text-body:    400 14.5px/1.62 var(--font-sans);
+  --text-small:   400 13px/1.5  var(--font-sans);
+  --text-caption: 500 11.5px/1.35 var(--font-sans);
+  --text-code:    400 12.5px/1.55 var(--font-mono);
   --text-id:      500 12px/1.3  var(--font-mono);
 
-  --track-tight:  -0.01em;
+  --track-tight:  -0.021em;
   --track-normal:  0em;
-  --track-caps:    0.1em;
+  --track-caps:    0.06em;
 
   /* ---- SPACING · 4px grid ---------------------------------------------- */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
 
-  /* ---- RADII · soft, rounded ------------------------------------------- */
-  --radius-1: 8px; --radius-2: 12px; --radius-3: 16px;
+  /* ---- RADII ------------------------------------------------------------ */
+  --radius-1: 7px; --radius-2: 11px; --radius-3: 15px;
   --radius-pill: 999px; --radius-circle: 50%;
 
-  /* ---- ELEVATION · soft on cream --------------------------------------- */
-  --shadow-1: 0 1px 2px rgba(35,36,63,0.06);
-  --shadow-2: 0 6px 20px -8px rgba(35,36,63,0.16), 0 1px 0 rgba(35,36,63,0.03);
-  --shadow-pop: 0 16px 42px -12px rgba(35,36,63,0.24);
+  /* ---- ELEVATION · separation by tone, not by shadow -------------------- */
+  --shadow-1: 0 1px 2px rgba(60,45,15,0.06);
+  --shadow-2: 0 4px 16px -4px rgba(60,45,15,0.14);
+  --shadow-pop: 0 12px 36px -8px rgba(60,45,15,0.22);
   --ring-soft: 0 0 0 1px var(--border-soft);
 
   /* ---- MOTION ---------------------------------------------------------- */
-  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-fast: 120ms;
   --dur: 200ms;
 
-  /* texture: faint dotted grid (matches the reference) */
-  --dot-color: rgba(35,36,63,0.05);
+  /* texture: faint dotted grid on the map canvas */
+  --dot-color: rgba(70,52,18,0.07);
 }
 
 /* ============================================================================
    DARK THEME — opt-in via <html data-theme="dark">
-   Deep navy-indigo canvas; same amber/magenta/coral accents, brightened.
+   The same book read at night: the ground is browned rather than neutral and
+   the ink warms to an off-white, every hue brightened enough to keep its
+   meaning at 4.5:1 on a dark surface.
    ========================================================================== */
 [data-theme="dark"] {
-  --paper-0:  #14152a;
-  --paper-1:  #191b32;
-  --paper-2:  #20223e;
-  --paper-3:  #2a2c4d;
-  --line-1:   #262842;
-  --line-2:   #343761;
-  --line-3:   #454979;
-  --ink-3:    #6f7197;
-  --ink-2:    #9a9cc0;
-  --ink-1:    #c3c4e0;
-  --ink-0:    #edecf7;
+  --paper-0:  #17140f;
+  --paper-1:  #1e1a14;
+  --paper-2:  #26211a;
+  --paper-3:  #322c23;
+  --line-1:   #2a251c;
+  --line-2:   #3a3427;
+  --line-3:   #4e4634;
+  --ink-3:    #7a7160;
+  --ink-2:    #9d9482;
+  --ink-1:    #c9c1ae;
+  --ink-0:    #f3ede0;
 
-  --indigo-700: #5b8fe0;
-  --indigo-600: #6f9fe8;
-  --indigo-500: #84afef;   /* brightened for dark bg */
-  --indigo-400: #a3c4f4;
-  --indigo-300: #c2d6f8;
-  --indigo-tint:#1a2f55;
+  --indigo-700: #7dbcff;
+  --indigo-600: #5aa6fb;
+  --indigo-500: #3d92f5;
+  --indigo-400: #6fb0fa;
+  --indigo-300: #9ac8fb;
+  --indigo-tint:#152a3f;
 
-  --amber-700: #f3b052;
-  --amber-600: #f7b13f;
-  --amber-500: #f5a623;
-  --amber-400: #f8bb52;
-  --amber-tint:#3a2c10;
+  --amber-700: #f0b95e;
+  --amber-600: #e6a437;
+  --amber-500: #e6a437;
+  --amber-400: #f2c882;
+  --amber-tint:#382b12;
 
-  --magenta-700: #ef72ab;
-  --magenta-600: #e85a9a;
-  --magenta-500: #d8559a;
-  --magenta-400: #e07cb0;
-  --magenta-tint:#3a1d36;
+  --magenta-700: #d6a7ef;
+  --magenta-600: #bd76e8;
+  --magenta-500: #bd76e8;
+  --magenta-400: #cf9bef;
+  --magenta-tint:#2a1c36;
 
-  --coral-600: #f0697e;
-  --coral-500: #ef5a72;
-  --coral-tint:#3a1c22;
+  --coral-600: #f4796b;
+  --coral-500: #e8564a;
+  --coral-tint:#371a14;
 
-  --status-confirmed:    var(--indigo-400);
+  --status-confirmed:    var(--indigo-600);
   --status-confirmed-bg: var(--indigo-tint);
-  --status-confirmed-ln: #3a3d72;
-  --status-drift:        var(--amber-500);
+  --status-confirmed-ln: #24405c;
+  --status-drift:        var(--amber-700);
   --status-drift-bg:     var(--amber-tint);
-  --status-drift-ln:     #5c4519;
-  --status-error:        var(--coral-500);
+  --status-drift-ln:     #55431c;
+  --status-error:        var(--coral-600);
   --status-error-bg:     var(--coral-tint);
-  --status-error-ln:     #5c2c33;
+  --status-error-ln:     #57291f;
   --status-draft:        var(--ink-2);
-  --status-draft-bg:     #20223e;
+  --status-draft-bg:     #2c271e;
   --status-draft-ln:     var(--line-2);
   --status-bus:          var(--magenta-600);
   --status-bus-bg:       var(--magenta-tint);
-  --status-bus-ln:       #5a2a4d;
-  --signal-gold:         #f5be4a;
-  --signal-gold-hi:      #3e310f;
+  --status-bus-ln:       #43305a;
+  --signal-gold:         #f0b95e;
+  --signal-gold-hi:      #3d2f11;
 
-  --cov-tested:    #4cc08a;
-  --cov-tested-bg: #143226;
-  --cov-tested-ln: #2c5a3f;
-  --cov-partial:   var(--amber-500);
-  --cov-untested:  var(--coral-500);
+  --cov-tested:    #62c97e;
+  --cov-tested-bg: #17271a;
+  --cov-tested-ln: #2d5436;
+  --cov-partial:   var(--amber-700);
+  --cov-untested:  var(--coral-600);
   --cov-exempt:    var(--ink-3);
 
-  --on-accent: #14152a;
-  --shadow-1: 0 1px 2px rgba(0,0,0,0.3);
-  --shadow-2: 0 6px 22px -8px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.03) inset;
-  --shadow-pop: 0 18px 48px -14px rgba(0,0,0,0.7);
-  --focus-ring: color-mix(in oklch, var(--indigo-400) 45%, transparent);
-  --dot-color: rgba(255,255,255,0.05);
+  --on-accent: #0f1a26;
+  --chrome-glass: rgba(25,22,16,0.78);
+  --shadow-1: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-2: 0 4px 18px -4px rgba(0,0,0,0.65);
+  --shadow-pop: 0 14px 40px -10px rgba(0,0,0,0.8);
+  --focus-ring: color-mix(in oklch, var(--indigo-500) 45%, transparent);
+  --dot-color: rgba(243,237,224,0.07);
 }
 
 /* ============================================================================
@@ -228,14 +237,11 @@
 }
 .rm-display { font: var(--text-display); letter-spacing: var(--track-tight); color: var(--fg); }
 .rm-h1 { font: var(--text-h1); letter-spacing: var(--track-tight); color: var(--fg); }
-.rm-h2 { font: var(--text-h2); color: var(--fg); }
+.rm-h2 { font: var(--text-h2); letter-spacing: var(--track-tight); color: var(--fg); }
 .rm-h3 { font: var(--text-h3); color: var(--fg); }
 .rm-title { font: var(--text-title); color: var(--fg); }
 .rm-body { font: var(--text-body); color: var(--fg-secondary); }
 .rm-small { font: var(--text-small); color: var(--fg-muted); }
-.rm-eyebrow {
-  font: var(--text-caption); letter-spacing: var(--track-caps);
-  text-transform: uppercase; color: var(--accent); font-weight: 600;
-}
+.rm-eyebrow { font: var(--text-title); font-size: 13px; color: var(--fg-muted); }
 .rm-code { font: var(--text-code); color: var(--fg); }
 .rm-id { font: var(--text-id); color: var(--fg); }

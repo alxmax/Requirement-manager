@@ -1,5 +1,6 @@
 // tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
-// tested-by: ARCH-SEARCH-036
+// tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
+// tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -8,15 +9,16 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import App from "../src/App.jsx";
-import { rankRequirements } from "../src/lib/search.js";
+import { rankRequirements, searchRequirements } from "../src/lib/search.js";
 import { setRegistry, REQUIREMENTS } from "../src/lib/data.js";
 import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
-import { ProblemsView } from "../src/views/ProblemsView.jsx";
+import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
-import { FindingsView, computeFindings } from "../src/views/FindingsView.jsx";
+import { CommandsView } from "../src/views/CommandsView.jsx";
+import { setCommands } from "../src/lib/data.js";
 import { I18nProvider, translate } from "../src/lib/i18n.jsx";
 import { computeLayout } from "../src/lib/layout.js";
 import {
@@ -37,7 +39,6 @@ const cases = {
   RoadmapView: <RoadmapView openSpec={noop} />,
   SpecView: <SpecView selId="ARCH-MAP-007" setSelId={noop} />,
   ExplorerView: <ExplorerView selId="ARCH-MAP-007" setSelId={noop} />,
-  FindingsView: <FindingsView openSpec={noop} />,
 };
 
 let failures = 0;
@@ -103,6 +104,30 @@ const xssChecks = [
   ["SpecView escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
 ];
 for (const [label, ok] of xssChecks) test(label, ok);
+
+// ---- cross-references and header fields (REQ-VIEWER-944) -------------------
+// `[[ID]]` is how an author points one requirement at another. Rendered
+// literally it was a pair of brackets leading nowhere, on every architecture
+// requirement in the corpus.
+setRegistry([
+  adaptNode({ id: "LINK-SRC-001", title: "source", area: "LINK", layer: "feature", status: "confirmed",
+    intent: "i", contract: ['see [[LINK-DST-002]] and [[LINK-GONE-999]] <b>x</b>'],
+    acc: [], members: [], deps: [], used_by: [] }),
+  adaptNode({ id: "LINK-DST-002", title: "target", area: "LINK", layer: "feature", status: "confirmed",
+    intent: "i", contract: ["a clause"], acc: [], members: [], deps: [], used_by: [] }),
+]);
+const linkSpec = renderToString(<SpecView selId="LINK-SRC-001" setSelId={noop} />);
+const linkChecks = [
+  ["links: a resolvable cross-reference renders as a control carrying the id",  // verifies: REQ-VIEWER-944#CASE-1
+    linkSpec.includes('data-req="LINK-DST-002"') && !linkSpec.includes("[[LINK-DST-002]]")],
+  ["links: a dangling cross-reference is marked, not linked",  // verifies: REQ-VIEWER-944#CASE-2
+    linkSpec.includes("wikilink off") && !linkSpec.includes('data-req="LINK-GONE-999"')],
+  ["links: markup beside a cross-reference stays escaped",  // verifies: REQ-VIEWER-944#CASE-3
+    linkSpec.includes("&lt;b&gt;") && !linkSpec.includes("<b>x</b>")],
+  ["links: the header states no owner, a field the export never carried",  // verifies: REQ-VIEWER-944#CASE-4
+    !linkSpec.includes("owner")],
+];
+for (const [label, ok] of linkChecks) test(label, ok);
 
 // i18n: the toggle must translate UI CHROME and leave requirement content alone.
 // Rendered inside the provider with the locale forced, since the provider's own
@@ -255,7 +280,7 @@ const treeChecks = [
   ["findings: a real verify bullet IS a finding",
     openQuestions({ verify: ["Is a stale tested-by range an error or a warning?"] }).length === 1],
   ["findings: the live corpus reports zero open questions",
-    computeFindings().length === 0],
+    computeQuestions().length === 0],
 ];
 for (const [label, ok] of treeChecks) test(label, ok);
 
@@ -263,17 +288,122 @@ for (const [label, ok] of treeChecks) test(label, ok);
 // outline still renders, and the Explorer must not throw on that registry.
 const fallbackLevel = adaptNode({ id: "NOLEVEL-001", title: "t" }).level;
 const explorerHtml = renderToString(<ExplorerView selId="ARCH-MAP-007" setSelId={noop} />);
-const findingsHtml = renderToString(<FindingsView openSpec={noop} />);
 const explorerChecks = [
   ["explorer: a node with no level defaults to architecture", fallbackLevel === "architecture"],
   ["explorer: the outline renders the root of the trace", explorerHtml.includes("SYS-SSOT-001")],
   ["explorer: the selected requirement's document renders beside it",
     explorerHtml.includes("ARCH-MAP-007") && explorerHtml.includes("Links — traceability")],
   ["explorer: a collapsed parent advertises its clause count", explorerHtml.includes("clauses")],
-  ["findings: zero findings renders the named empty state, not a badge",
-    findingsHtml.includes("No open questions.")],
+  ["problems: an empty inbox renders the named empty state, not a badge",
+    renderToString(<ProblemsView openSpec={noop} />).includes("Nothing to fix.")],
 ];
 for (const [label, ok] of explorerChecks) test(label, ok);
+
+// ---- registry tally scopes the outline (REQ-VIEWER-945) ---------------------
+setRegistry(json.nodes.map(adaptNode));
+const unscoped = renderToString(<ExplorerView selId="ARCH-MAP-007" setSelId={noop} />);
+const scopedDraft = renderToString(
+  <ExplorerView selId="ARCH-MAP-007" setSelId={noop} focus="draft" clearFocus={noop} />);
+const scopedOrphan = renderToString(
+  <ExplorerView selId="ARCH-MAP-007" setSelId={noop} focus="orphan" clearFocus={noop} />);
+const rowsOf = (html) => {
+  const m = /(\d+) of (\d+) shown/.exec(html.replace(/<[^>]+>/g, ""));
+  return m ? Number(m[1]) : -1;
+};
+const focusChecks = [
+  ["focus: a status slice narrows the outline on the first render",  // verifies: REQ-VIEWER-945#CASE-1
+    rowsOf(scopedDraft) >= 0 && rowsOf(scopedDraft) < rowsOf(unscoped)],
+  ["focus: the active slice is shown as a chip that can clear it",  // verifies: REQ-VIEWER-945#CASE-3
+    scopedDraft.includes("ex-chip on")],
+  ["focus: orphan scopes to the gate's condition, not to a status",  // verifies: REQ-VIEWER-945#CASE-2
+    rowsOf(scopedOrphan) === 0 && scopedOrphan.includes("No requirement matches these filters.")],
+];
+for (const [label, ok] of focusChecks) test(label, ok);
+
+// ---- the command reference (REQ-VIEWER-964) --------------------------------
+const CLI_FIXTURE = [
+  { name: "gate", group: "build", summary: "Run the commit/CI gate.", arg: null,
+    flags: [{ flag: "--strict", help: "promote warnings to errors" }] },
+  // deliberately a name the Romanian dictionary does not carry, so the fallback is exercised
+  { name: "wibble", group: "read", summary: "A command no dictionary knows.",
+    arg: "AREA-NAME-NNN", flags: [] },
+];
+setCommands(CLI_FIXTURE);
+const cmdsEn = renderToString(<I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
+const cmdsRo = renderToString(<I18nProvider initialLocale="ro"><CommandsView /></I18nProvider>);
+setCommands([]);
+const cmdsEmpty = renderToString(<I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
+setCommands(CLI_FIXTURE);
+const cmdChecks = [
+  ["commands: each verb is listed with its invocation and flags",  // verifies: REQ-VIEWER-964#CASE-1
+    cmdsEn.includes("reqmap.py gate") && cmdsEn.includes("--strict")
+    && cmdsEn.includes("reqmap.py wibble AREA-NAME-NNN")],
+  ["commands: the summary follows the chosen language",  // verifies: REQ-VIEWER-964#CASE-2
+    cmdsRo.includes("Verdictul complet") && !cmdsRo.includes("Run the commit/CI gate.")],
+  ["commands: an untranslated command falls back to the engine's English",  // verifies: REQ-VIEWER-964#CASE-3
+    cmdsRo.includes("A command no dictionary knows.")],
+  ["commands: a map with no list renders the named empty state",  // verifies: REQ-VIEWER-964#CASE-4
+    cmdsEmpty.includes("No command list in this map.")],
+  ["commands: flag names are never translated",
+    cmdsRo.includes("--strict")],
+];
+for (const [label, ok] of cmdChecks) test(label, ok);
+
+// ---- id and literal-text search (REQ-SEARCH-965) ---------------------------
+// The id is the primary key of this corpus and is in none of the ranked text: the
+// viewer used to answer `ARCH-CHECK-006` with a different requirement entirely.
+const SEARCH_LAYERS = [
+  { id: "AREA-X-001", title: "Locking", intent: "why", contract: ["`gate` writes the lock."],
+    acc: [], i18n: { ro: { title: "Blocare", intent: "de ce",
+                           contract: "- `gate` scrie fisierul de blocare unic",
+                           acceptance: "" } } },
+  { id: "AREA-X-002", title: "Sync", intent: "why", contract: ["`sync` advances the baseline."],
+    acc: ["CASE-1 a tag `GHOST-CAP-001` nothing defines"] },
+];
+const byId = searchRequirements(SEARCH_LAYERS, "AREA-X-001");
+const byText = searchRequirements(SEARCH_LAYERS, "GHOST-CAP-001");
+const byRo = searchRequirements(SEARCH_LAYERS, "fisierul de blocare unic");
+const byWords = searchRequirements(SEARCH_LAYERS, "baseline advances");
+const layerChecks = [
+  ["search: an exact id is the first hit, marked as an id match",  // verifies: REQ-SEARCH-965#CASE-1
+    byId[0] && byId[0].req.id === "AREA-X-001" && byId[0].kind === "id"],
+  ["search: a phrase inside a case is found as a text match",  // verifies: REQ-SEARCH-965#CASE-3
+    byText[0] && byText[0].req.id === "AREA-X-002" && byText[0].kind === "text"],
+  ["search: a phrase from the cached translation is found",  // verifies: REQ-SEARCH-965#CASE-4
+    byRo[0] && byRo[0].req.id === "AREA-X-001"],
+  ["search: a plain query still comes from the ranked model",  // verifies: REQ-SEARCH-965#CASE-5
+    byWords.length > 0 && byWords.every((h) => h.kind === "score")],
+];
+for (const [label, ok] of layerChecks) test(label, ok);
+
+// ---- author questions live in Problems (REQ-VIEWER-966) --------------------
+// Two screens until v4.0.0: Problems was ~618 rows of draft review noise and a real
+// question dropped in there was invisible. What survives the merge is the
+// distinction — origin is a tab, never a severity.
+setRegistry([
+  adaptNode({ id: "Q-ASKED-001", title: "asked", area: "Q", layer: "feature", status: "confirmed",
+    intent: "i", contract: ["a clause"], acc: [], members: [{ role: "implements", loc: "a.py:1" }],
+    verify: ["Is a stale tested-by range an error or a warning?"], deps: [], used_by: [] }),
+  adaptNode({ id: "Q-QUIET-002", title: "quiet", area: "Q", layer: "feature", status: "confirmed",
+    intent: "i", contract: ["a clause"], acc: [], members: [{ role: "implements", loc: "b.py:1" }],
+    verify: ["None — authored from known intent."], deps: [], used_by: [] }),
+]);
+const merged = computeProblems();
+const asked = computeQuestions();
+const mergedHtml = renderToString(<ProblemsView openSpec={noop} />);
+const mergeChecks = [
+  ["problems: an author's open question is a row here",  // verifies: REQ-VIEWER-966#CASE-1
+    merged.some((p) => p.id === "Q-ASKED-001" && p.sev === "QUESTION")],
+  // it may still raise a computed WARN (confirmed, no tested-by) — what it must not
+  // raise is a QUESTION, because no human asked anything
+  ["problems: the placeholder verify bullet is still not a question",  // verifies: REQ-VIEWER-966#CASE-2
+    !merged.some((p) => p.id === "Q-QUIET-002" && p.sev === "QUESTION")],
+  ["problems: questions are counted apart from computed signals",  // verifies: REQ-VIEWER-966#CASE-3
+    asked.length === 1 && asked[0].id === "Q-ASKED-001"],
+  ["problems: the question tab is offered, and the question text is shown",  // verifies: REQ-VIEWER-966#CASE-4
+    mergedHtml.includes("Questions") && mergedHtml.includes("stale tested-by range")],
+];
+for (const [label, ok] of mergeChecks) test(label, ok);
 
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 

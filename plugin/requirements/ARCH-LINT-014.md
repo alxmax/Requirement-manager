@@ -19,29 +19,29 @@ satisfies: [SYS-QUALITY-104]
 > degrades until the documents stop being worth opening.
 
 Every bullet below is binding.
-- `lint` reports readability problems and structure problems in requirement files, scoped to non-draft requirements, and writes no file. [[REQ-LINT-863]]
+- `gate` reports readability problems and structure problems in requirement files, scoped to non-draft requirements, and writes no file. [[REQ-LINT-863]]
 - The prose checks read the Contract and the Acceptance sections and no other section, skipping non-prose lines; `--strict` fails only on an error-severity finding. [[REQ-LINT-864]]
 
 ## Cases
 CASE-1
   Given  a confirmed requirement whose body has no `## Cases` heading
-  When   `lint` runs
+  When   `gate` runs
   Then   it reports a `missing-section` error for that requirement
 
 CASE-2
   Given  a draft requirement with a long sentence
-  When   `lint` runs
+  When   `gate` runs
   Then   it reports nothing for that requirement, because drafts are out of scope
 
 CASE-3
   Given  a requirement whose `## Cases` heading is present but has no criteria beneath it
-  When   `lint` runs
+  When   `gate` runs
   Then   it reports an `empty-section` warning
 
 CASE-4
   Given  a normative line with four conjunctions inside a fenced code block in the
          Acceptance section
-  When   `lint` runs
+  When   `gate` runs
   Then   it reports no `stacked-conditions` finding for that line
 
 CASE-5
@@ -67,7 +67,7 @@ CASE-6
 **Notes**
 - The individual warn checks (stacked-conditions, statement-too-long,
   ac-count, over-scoped, file-spread, vague-term, redundant-modal) are a separate
-  capability — [[ARCH-LINTCHECKS-025]] — running under the same `lint` command.
+  capability — [[ARCH-LINTCHECKS-025]] — running under the same `gate` command.
 - Jargon-before-definition detection is intentionally out of scope for this version.
   Without a dictionary of project terms, any heuristic for "undefined jargon" produces
   too many false positives on prose that carries code references. It may arrive later
@@ -101,16 +101,16 @@ satisfies: [ARCH-LINT-014]
 # What lint checks and skips
 
 ## Description
-> `lint` is read-only: it never edits a requirement, only reports on it, so running it carries
+> `gate` is read-only: it never edits a requirement, only reports on it, so running it carries
 > no risk of losing work. Drafts are excluded because they are TODO stubs nobody has reviewed
 > yet — linting them would produce noise about prose that is expected to be rough.
 
 Every bullet below is binding.
-- `lint` reports readability problems and structure problems in requirement files.
-- `lint` writes no file. It only reads and prints.
-- `lint` checks non-draft requirements only — status `baseline`, `in-progress`,
+- `gate` reports readability problems and structure problems in requirement files.
+- `gate` writes no file. It only reads and prints.
+- `gate` checks non-draft requirements only — status `baseline`, `in-progress`,
   `implemented` or `confirmed`. Drafts are TODO stubs, so linting them would only add noise.
-- `lint` gives each finding one of two severities. A structural check reports an `error`;
+- `gate` gives each finding one of two severities. A structural check reports an `error`;
   a prose check or a scope check reports a `warn`.
 - The `missing-section` check reports an `error` when a non-draft requirement has no
   `## Description` section, or no `## Cases` section.
@@ -175,9 +175,9 @@ Every bullet below is binding.
 - The "Notes & limitations" section is exempt: only deep readers reach it, and it may stay dense.
 - The prose checks skip lines that are not prose — headings, table rows, blockquotes, and any
   line inside a fenced code block.
-- `lint` strips a bullet's leading marker before the checks read its text.
-- `lint` returns zero by default, whatever it found.
-- With `--strict`, `lint` returns non-zero when at least one finding has `error` severity.
+- `gate` strips a bullet's leading marker before the checks read its text.
+- `gate` returns zero by default, whatever it found.
+- With `--strict`, `gate` returns non-zero when at least one finding has `error` severity.
 - A warning never changes the exit code.
 
 ## Cases

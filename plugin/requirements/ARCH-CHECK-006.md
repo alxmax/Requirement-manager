@@ -23,7 +23,7 @@ Every bullet below is binding.
 - `gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.
 - `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on an unvalidated confirmed need, a bus requirement tested only at `@system`, or a `depends_on` cycle. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
-- With `--update-lock` — always passed by `sync`, opt-in for the deprecated `check` alias — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
+- With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
 
 ## Cases
 CASE-1

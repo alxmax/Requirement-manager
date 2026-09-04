@@ -18,7 +18,7 @@ satisfies: [SYS-VISUAL-106]
 > publishes a picture reads this file; nothing draws from the corpus directly.
 
 Every bullet below is binding.
-- `map` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`; `export` writes the same file alone. [[REQ-MAP-870]]
+- `sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]
 - `_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]

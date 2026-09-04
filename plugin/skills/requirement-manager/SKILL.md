@@ -226,7 +226,7 @@ can tell a terse-but-complete obligation from a fragment (see
 [ADR-0022](../../../docs/adr/0022-no-minimum-requirement-size-check.md), which measured the
 attempt and rejected it).
 
-1. **Before implementing**, run `reqmap.py map` or read `requirements/` and check
+1. **Before implementing**, run `reqmap.py sync` or read `requirements/` and check
    whether a capability already covers the task. If yes, extend/reuse it — do not
    reimplement. Especially check the bus.
 2. **A requirement is its contract.** Fill `Description` (the normative,
@@ -245,6 +245,16 @@ attempt and rejected it).
     `reqmap.py next` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
+
+3c. **Write one case from the caller's side.** The cases an author reaches for first
+    are the ones the implementation suggests: the input that matches, the input that
+    does not, the input that is empty. Those all vary the *quality* of one kind of
+    input and never its *kind*, and a contract can be complete inside that frame and
+    blind outside it. `search` shipped four such cases and, for two years, answered a
+    query naming a requirement id with a different requirement entirely — the gate was
+    green, per-criterion coverage was 100%, and nothing was wrong except that nobody
+    had asked what a caller would type. `reqmap.py clarify` names this shape
+    (`case-monoculture`); the fix is one case written from outside the implementation.
 
 3b. **Merge heuristic — the same smell from the other side.** A corpus only ever
     grows unless something says so. If two requirements state the same obligation,
@@ -390,8 +400,8 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
 python -X utf8 scripts/reqmap.py gate || exit 1
-python -X utf8 scripts/reqmap.py lint --strict || exit 1
-python -X utf8 scripts/reqmap.py map --check
+python -X utf8 scripts/reqmap.py gate || exit 1
+python -X utf8 scripts/reqmap.py gate
 EOF
 chmod +x .git/hooks/pre-commit
 ```
@@ -422,7 +432,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v2
+      - uses: alxmax/requirement-manager/check@v3
         # with:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives
@@ -440,8 +450,8 @@ If you prefer not to depend on
 the action, run the engine directly instead of the `uses:` line:
 ```yaml
       - run: python -X utf8 scripts/reqmap.py gate
-      - run: python -X utf8 scripts/reqmap.py lint --strict
-      - run: python -X utf8 scripts/reqmap.py map --check
+      - run: python -X utf8 scripts/reqmap.py gate
+      - run: python -X utf8 scripts/reqmap.py gate
 ```
 
 The hook and the CI job are independent — wire both so the gate runs locally
@@ -461,20 +471,20 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py sync`              — rescan + advance the drift baseline + regenerate the map (and a committed `_findings.md`) in one step. Use after editing requirement files or tagging new code members. **Drift guard:** if a `confirmed` or `implemented` contract changed, `sync` refuses and exits non-zero unless you pass `--accept-drift` (which explicitly advances the baseline for that contract).
 - `python scripts/reqmap.py gate`              — run the commit/CI gate (report-only): link sync + drift + test-link integrity. **Never** touches `_reqlock.json`. Use `gate --strict` to promote drift + test-link warnings to errors.
 - `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (draft `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list. Two further advisories close the list, and they point in opposite directions: **Granularity** names a requirement with >=5 acceptance criteria (a split candidate), and **Redundancy** groups requirements whose Description clauses are identical once case and whitespace are normalised — an exact match, no threshold, so a group is a duplicate by construction rather than a judgement call. `sync` prints a one-line count of the same thing; `gate` deliberately says nothing, because corpus shape is not a commit-time concern. Both report only and never rewrite a requirement. Run `dupes` for the near-matches an exact match cannot see.
-- `python scripts/reqmap.py lint`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks span structure (`missing-section` [error], `empty-section`), prose readability (`stacked-conditions`, `statement-too-long`), scope/cohesion (`ac-count-low`, `ac-count-high`, `over-scoped`, `file-spread`), and testability (`vague-term`) — full contract in `ARCH-LINTCHECKS-025`. Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings **and** promotes the structural `ac-count-high` and `over-scoped` checks to errors, so those two can fail CI under `--strict`.
+- `python scripts/reqmap.py gate`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks span structure (`missing-section` [error], `empty-section`), prose readability (`stacked-conditions`, `statement-too-long`), scope/cohesion (`ac-count-low`, `ac-count-high`, `over-scoped`, `file-spread`), and testability (`vague-term`) — full contract in `ARCH-LINTCHECKS-025`. Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings **and** promotes the structural `ac-count-high` and `over-scoped` checks to errors, so those two can fail CI under `--strict`.
 - `python scripts/reqmap.py show <ID>`         — print a consolidated, human-readable dossier for one requirement: header (id · status · layer · milestone), intent, Contract bullets, dependencies both directions (`depends_on` + reverse `Depended on by`), code members grouped by role with `file:line`, open `## Verify intent` questions (the `findings` "None" filter applied), and risk signals with advice (same `_risk_signals` source as `next`). Answers "what does this do / where is X" in one command. Read-only; returns non-zero on an unknown id so a typo is visible to CI.
 - `python scripts/reqmap.py dupes`             — flag requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. Stdlib TF-IDF (smoothed idf) + cosine over each requirement's title + intent + Contract bullets (Notes excluded as noise); prints pairs most-similar-first with their score and top shared terms. `--threshold T` overrides the default `0.35`. Read-only, always exit 0 (advisory — a human decides if a flagged pair is a real duplicate). Lexical, not semantic: it surfaces likely duplicates, it does not prove duplication. Requirement-to-requirement only; untagged-code-to-requirement matching stays with `plan`.
-- `python scripts/reqmap.py health`            — print a corpus coherence snapshot: a headline score (the percentage of requirements green on EVERY axis — `confirmed` + an `implements` member + tested-or-`test_exempt` + no open verify-intent + not drifted) plus the component counts (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift). `--json` emits the same numbers as a parseable object for a CI badge. Read-only, always exit 0 (a report, not a gate). The score is strict by design: one open question or one drifted contract drops a requirement out of the green count.
-- `python scripts/reqmap.py map`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## Verify intent` item).
-- `python scripts/reqmap.py site --attach docs/architecture.html --regions nav,stats` — inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. `init` runs this best-effort.
-- `python scripts/reqmap.py export`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
+- `python scripts/reqmap.py next`            — print a corpus coherence snapshot: a headline score (the percentage of requirements green on EVERY axis — `confirmed` + an `implements` member + tested-or-`test_exempt` + no open verify-intent + not drifted) plus the component counts (confirmed, implemented, tested, drafts, orphans, untested, open verify-intent, drift). `--json` emits the same numbers as a parseable object for a CI badge. Read-only, always exit 0 (a report, not a gate). The score is strict by design: one open question or one drifted contract drops a requirement out of the green count.
+- `python scripts/reqmap.py sync`               — generate `requirements/_map.md` (4 Mermaid diagrams) + `requirements/_map.json` (the `{engine_version, nodes, edges, todos}` registry graph) + `requirements/_map.html` (a self-contained, double-click-openable React viewer with this repo's data inlined — emitted only when `scripts/_map_viewer.html` is vendored beside the engine). The viewer has 4 tabs: **Map · Problems · Spec · Roadmap**. The Roadmap tab renders a Gantt chart using the optional `milestone: vX.Y` frontmatter field on each node and a `todos` array parsed from `TODO.md` at the repo root. The Risk diagram/table also flags `untested` (has `implements` but no `tested-by` — silence per-requirement with `test_exempt: <reason>` in frontmatter) and `unverified-intent` (an open `## Verify intent` item).
+- `python scripts/reqmap.py sync --attach docs/architecture.html --regions nav,stats` — inject/refresh engine-owned regions (links + counts) into a presentation page; scaffolds one if absent. `init` runs this best-effort.
+- `python scripts/reqmap.py sync`            — write just `requirements/_map.json` (or `--out PATH`, or `--out -` for stdout) — the same graph `map` emits, for feeding an external front-end.
 - `python scripts/reqmap.py translate [--to ro|en]` — **manual, opt-in only** — the one subcommand that shells out to `claude -p`. Detects the corpus's majority language (a per-file `lang: ro|en` frontmatter overrides detection), then caches a translation of every requirement written in that language into `requirements/_i18n/<target>.json`, keyed by a content hash over title+WHY+Contract+Acceptance (deliberately not `binding_hash`, which excludes the title). A structural-fidelity check (backticked spans, numbers, heading/bullet markers must match) gates every cache write; a missing/erroring `claude` CLI or a failed check skips that entry with a `WARN` instead of aborting the batch. `map`/`export` inline the cache into the graph **read-only** — no `claude` call — so `gate`/`sync`/`lint`/`map --check`/the pre-commit hook and CI stay exactly as `claude`-free as before this command existed. Re-run after editing a translated requirement or bumping the translation prompt (`TRANSLATOR_VERSION`).
 - `python scripts/reqmap.py draft`             — draft one requirement per untagged file. Input: **existing untagged code** (and prose). Covers **code** and **prose** (`.md`/`.html`) by default. Prose is bucketed by `classify_prose`: meta/boilerplate (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `CONTRIBUTING.md`, `SKILL.md`, `TODO.md`, `CHANGELOG.md`, `LICENSE*`, `_`-prefixed) is ignored; `README*`, everything under `docs/`, and every `*.html` are **sync-only** (never drafted — tag them `generated-from: <ID>` to drift- and semantic-check them); everything else (prompts/specs) is drafted as `draft`. An explicit tag on any file is always honored.
-- `python scripts/reqmap.py plan`              — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `draft`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
-- `python scripts/reqmap.py findings`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view. Once the file exists, `map`/`sync` keep it fresh and `map --check` flags it stale
+- `python scripts/reqmap.py draft --plan`              — read-only extraction plan: emit a JSON capability map from legacy code without writing any `.md` files (use before authoring, safer than `draft`). Add `--md-glob 'prompts/**' --md-glob 'modes/**'` to also discover capabilities in authoritative **non-code** files (prompt/spec markdown) — advisory only (writes no `.md`), allowlist-bounded, off unless a glob is given. A human authors + confirms each candidate; the source file is then tagged `generated-from:`/`implements:` and the drift hash anchors on the **authored** Contract+Acceptance, never the source prose (so the prompt may drift freely). The plan carries `coverage_summary` so an unfilled plan can't masquerade as coverage.
+- `python scripts/reqmap.py sync`          — aggregate open verify-intent items across all requirements into `requirements/_findings.md`; accepts an AI-triage sidecar (`_findings_triage.json`) for a classified view. Once the file exists, `map`/`sync` keep it fresh and `map --check` flags it stale
 - `python scripts/reqmap.py design`            — advisory design review of the repo's code, any program-logic language (Python through `ast`; JS/TS, C/C++, Java, C#, Go, Rust and the other brace languages through heuristics over masked source): the four OOP pillars plus house standards (file length, line width, public definitions without a docstring, definitions per file; `DESIGN_FILE_MAX_LINES`, `DESIGN_LINE_MAX`, `DESIGN_FILE_MAX_FUNCS`, `DESIGN_DOCSTRING_PUBLIC`). The pillars: module state written from functions, long parameter lists and data clumps (encapsulation); long or deeply nested functions and prefix families (abstraction); unrelated classes sharing method names or bodies (inheritance); `isinstance` chains and equality switches (polymorphism). Grouped by pillar with one advice line each, `--json` for tools, test files skipped, exit 0 always, never part of the gate. Thresholds (`DESIGN_*`) are tunable in `requirements/_config.json`.
 - `python scripts/reqmap.py suggest-verifies`  — propose `# verifies: <ID>#CASE-N` tags for tests already NAMED after the criterion they check (`test_ac3_…`), the cheap way to adopt per-criterion coverage on an existing corpus. Searches only the requirement's own `tested-by` files, and refuses to guess: a file shared by several requirements needs a distinctive id token in the test's own name (never its class, never a fixture parameter), a name carrying another requirement's number belongs to that one, and two candidates for one criterion are reported as ambiguous and never written. Read-only; `--apply` writes the tags, idempotently.
-- `python scripts/reqmap.py coverage`          — per-directory membership-tag coverage report: scannable files tagged vs. total, grouped by top-level directory, to spot traceability gaps. `--json` for CI. Read-only, exit 0.
+- `python scripts/reqmap.py next --untagged`          — per-directory membership-tag coverage report: scannable files tagged vs. total, grouped by top-level directory, to spot traceability gaps. `--json` for CI. Read-only, exit 0.
 
 **`check` is a deprecated alias for `gate`** (removed in `v4.0.0`; it survived `v3.0.0`). It still works — consumer pre-commit hooks and CI that call `reqmap.py check` keep functioning unchanged. Migrate at leisure: `sed -i 's/reqmap.py check/reqmap.py gate/' <hook>`.
 
@@ -487,7 +497,7 @@ python scripts/reqmap.py sync
 python scripts/reqmap.py sync --accept-drift
 ```
 
-`reqmap.py map --check` is the freshness gate (no write): it rebuilds the map in
+`reqmap.py gate` is the freshness gate (no write): it rebuilds the map in
 memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
 edit shifted it). Wire it next to `gate` in your pre-commit hook / CI so a stale
 map can't be committed. A repo that doesn't track a map passes silently.
@@ -505,7 +515,7 @@ as the skill.
 2. Ask the user **which target** — an existing `docs/architecture.html`, an
    `index.html`, a bring-your-own HTML path, or scaffold a new page — and **which regions**
    (`nav` for the top links only, or `nav,stats`).
-3. Run `python scripts/reqmap.py site --attach <path> --regions <nav|nav,stats> [--diagram <rel>]`.
+3. Run `python scripts/reqmap.py sync --attach <path> --regions <nav|nav,stats> [--diagram <rel>]`.
    - Attach mode refreshes only the marked regions (`<!--##REQMAP:NAV##-->…<!--##/REQMAP:NAV##-->`,
      `…:STATS…`); your prose is untouched.
    - If `<path>` does not exist, `site` **scaffolds** a full default page (theme + regions +

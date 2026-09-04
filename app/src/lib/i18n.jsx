@@ -55,6 +55,18 @@ const RO = {  // implements: REQ-VIEWER-943
   "Problems": "Probleme",
   "Spec": "Specificații",
   "Roadmap": "Plan",
+  "Commands": "Comenzi",
+  "Author": "Autorare",
+  "Build": "Construire",
+  "Read": "Citire",
+  "writing and evolving a requirement": "scrierea și evoluția unei cerințe",
+  "turning it into code, and proving it": "transformarea ei în cod, și dovada",
+  "asking the corpus questions": "Întrebări puse corpusului",
+  "Every verb the engine exposes, generated from its own command registry.":
+    "Fiecare verb pe care motorul îl expune, generat din propriul lui registru de comenzi.",
+  "No command list in this map.": "Harta nu conține lista de comenzi.",
+  "Regenerate it with a current engine — `reqmap.py sync` writes the command reference into _map.json.":
+    "Regenereaz-o cu un motor actual — `reqmap.py sync` scrie referința de comenzi în _map.json.",
   "Explorer": "Explorator",
   "Findings": "Constatări",
   "{n} members bound": "{n} membri legați",
@@ -81,7 +93,7 @@ const RO = {  // implements: REQ-VIEWER-943
   "system + architecture · {n} code-level hidden":
     "sistem + arhitectură · {n} de nivel cod ascunse",
   // findings
-  "open `## WHAT — Verify intent` questions": "întrebări `## WHAT — Verify intent` deschise",
+  "open verify-intent questions": "întrebări de verificare deschise",
   "No open questions.": "Nicio întrebare deschisă.",
   "Every requirement's Verify-intent section is either empty or still carries the authored placeholder, which the engine does not count as a finding either.":
     "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
@@ -102,6 +114,9 @@ const RO = {  // implements: REQ-VIEWER-943
   "Cases": "Cazuri",
   "Where — Members in code": "Unde — Membri în cod",
   "Depends on": "Depinde de",
+  "depends on": "depinde de",
+  "level": "nivel",
+  "milestone": "reper",
   "Used by": "Folosit de",
   "Risk — recommended action": "Risc — acțiune recomandată",
   "Open full spec": "Deschide specificația completă",
@@ -120,15 +135,44 @@ const RO = {  // implements: REQ-VIEWER-943
   "All": "Toate",
   "Errors": "Erori",
   "Warnings": "Avertismente",
+  "Questions": "Întrebări",
+  "ASKED": "NOTAT",
   "Review": "De revizuit",
   "gate passes": "poarta trece",
   "gate blocks the build — {n} error": "poarta blochează build-ul — {n} erori",
-  "Nothing here — no {kind} signals open.": "Nimic aici — niciun semnal {kind} deschis.",
+  "Nothing to fix.": "Nimic de reparat.",
+  "Nothing in this tab.": "Nimic în această filtrare.",
+  "The gate reports no errors, warnings or review items for this registry.":
+    "Poarta nu raportează erori, avertismente sau elemente de revizuit pentru acest registru.",
+  "Other tabs may still have open items.": "Celelalte file pot avea încă elemente deschise.",
   // roadmap
   "done": "gata",
   "progress": "în lucru",
   "draft": "schiță",
   "planned": "planificat",
+};
+
+/* The CLI's own description of itself is chrome, not an artifact under review, so
+ * it translates. Flags stay literal: `--accept-drift` is something you type. A
+ * command with no entry here falls back to the registry's English summary. */
+const COMMAND_RO = {  // implements: REQ-VIEWER-964
+  "init": "Prima rulare: creează requirements/ și .reqmapignore dacă lipsesc, scoate cerințe-schiță din codul existent, construiește lock-ul și harta, apoi tipărește pașii următori. Idempotentă.",
+  "new": "Schelet de cerință nouă din șablon. Cu --from-todo și --id o pre-umple dintr-un item din TODO.md.",
+  "draft": "O cerință-schiță pentru fiecare fișier netaggat, cod sau proză. Cu --plan emite doar planul JSON și nu scrie nimic.",
+  "clarify": "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, numere fără unitate, cantități nemărginite, clauze fără caz, lipsa căii de eșec. Doar citește, iese mereu cu 0.",
+  "confirm": "Semnătura umană: trece starea în confirmed. Refuză dacă cerința nu are membru implements:.",
+  "implement": "Brieful pentru scrierea codului: obligațiile, cazurile, membrii existenți, întrebările deschise, tag-urile exacte și unde stă cod asemănător. Nu scrie cod.",
+  "gate": "Verdictul complet: legăturile tag-urilor, driftul, legătura cu testele, apoi lizibilitatea cerințelor și prospețimea hărții comise. Doar raportează.",
+  "sync": "Reconstruiește tot ce e derivat: lock-ul, harta, digestul de constatări, regiunile paginii de prezentare. --accept-drift când un contract confirmat chiar s-a schimbat.",
+  "retire": "Scoate o cerință din uz. Tipărește întâi raza de explozie și refuză cât există dependenți. Depreciază implicit; --delete o șterge, --apply e obligatoriu ca să scrie ceva.",
+  "next": "Ce urmează: scorul de coerență și gălețile de risc. --json/--badge dau numerele, --untagged listează fișierele fără tag.",
+  "show": "Dosarul unei cerințe: intenție, clauze, dependențe în ambele sensuri, membri cu fișier:linie, întrebări deschise, semnale de risc.",
+  "search": "Clasare după relevanță lexicală, cu scor. Spune explicit când nimic nu trece pragul.",
+  "dupes": "Semnalează perechi de cerințe cu contracte care se suprapun, ca să prinzi o reimplementare divergentă înainte să intre.",
+  "design": "Recenzie de design pe cod: cei patru piloni OOP plus standardele casei. Doar citește, iese cu 0, nu intră niciodată în gate.",
+  "review": "Plan JSON pentru o trecere de calitate semantică făcută de un AI.",
+  "suggest-verifies": "Propune tag-uri `# verifies: <id>#CASE-N` pentru teste deja numite după criteriul pe care îl verifică. --apply le scrie.",
+  "translate": "Manuală, opțională: pune în cache o traducere a corpusului în requirements/_i18n/<locale>.json. Nu e chemată niciodată de gate sau de hook.",
 };
 
 const DICT = { ro: RO };
@@ -182,6 +226,12 @@ export function I18nProvider({ children, initialLocale }) {  // implements: REQ-
   }, [locale]);
   const value = { locale, setLocale, t: (s, params) => translate(locale, s, params) };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
+
+/** A command's summary in `locale`, falling back to the engine's own English. */
+export function commandSummary(cmd, locale) {  // implements: REQ-VIEWER-964
+  const ro = locale === "ro" && cmd && COMMAND_RO[cmd.name];
+  return ro || (cmd && cmd.summary) || "";
 }
 
 export function useI18n() { return useContext(Ctx); }
