@@ -223,6 +223,14 @@ export let TODOS = [];
 // The CLI as data, straight off _map.json (generated from the engine's command
 // registry). Empty in the baked fallback: a map produced before v4.0.0 carries none.
 export let COMMANDS = [];
+/* The engine's own `health` and `design` records, verbatim. Deliberately NOT
+ * recomputed here: `next` already prints these two numbers, and a second
+ * definition in JavaScript is how the CLI and the viewer come to disagree
+ * about how the repo is doing. Null until a map carrying them is loaded —
+ * an older map has neither key, and the rail then shows nothing rather than
+ * an invented zero.  implements: REQ-VIEWER-969 */
+export let HEALTH = null;
+export let DESIGN = null;
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -234,6 +242,12 @@ derive();
 export function setRegistry(list) {
   REQUIREMENTS = list;
   derive();
+}
+
+/** Adopt the engine's health + design records (both absent on older maps). */
+export function setScores(health, design) {          // implements: REQ-VIEWER-969
+  HEALTH = (health && typeof health.score === "number") ? health : null;
+  DESIGN = (design && typeof design.score === "number") ? design : null;
 }
 
 /** Replace the documented command list (engine-emitted; absent on older maps). */

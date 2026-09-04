@@ -1,6 +1,6 @@
 // tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
 // tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
-// tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965
+// tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -18,7 +18,7 @@ import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
 import { CommandsView } from "../src/views/CommandsView.jsx";
-import { setCommands } from "../src/lib/data.js";
+import { setCommands, setScores } from "../src/lib/data.js";
 import { I18nProvider, translate } from "../src/lib/i18n.jsx";
 import { computeLayout } from "../src/lib/layout.js";
 import {
@@ -404,6 +404,32 @@ const mergeChecks = [
     mergedHtml.includes("Questions") && mergedHtml.includes("stale tested-by range")],
 ];
 for (const [label, ok] of mergeChecks) test(label, ok);
+
+// ---- the rail's two engine-emitted readings (REQ-VIEWER-969) ---------------
+setRegistry(json.nodes.map(adaptNode));
+const SCORES = [{ score: 78, healthy: 39, total: 50 },
+                { score: 23, clean_files: 7, files: 30 }];
+setScores(...SCORES);
+const railHtml = renderToString(<App />);
+setScores(null, null);                       // an older map carries neither key
+const railBare = renderToString(<App />);
+setScores(...SCORES);
+const gaugeChecks = [
+  ["rail: both readings render the engine's own numbers",  // verifies: REQ-VIEWER-969#CASE-1
+    railHtml.includes("39/50 green") && railHtml.includes("7/30 files clean")
+    && railHtml.includes(">78<") && railHtml.includes(">23<")],
+  ["rail: a mid-band score takes the partial tone, not the green one",  // verifies: REQ-VIEWER-969#CASE-2
+    railHtml.includes('stroke="var(--cov-partial)"')
+    && !railHtml.includes('stroke="var(--cov-tested)"')],
+  ["rail: a map with neither record shows no gauge at all",  // verifies: REQ-VIEWER-969#CASE-3
+    !railBare.includes("rail-gauges") && !railBare.includes("gauge-row")],
+  ["rail: health is a control, the advisory design score is not",  // verifies: REQ-VIEWER-969#CASE-4
+    railHtml.includes("gauge-row static")],
+  ["rail: the labels follow the chosen language",  // verifies: REQ-VIEWER-969#CASE-5
+    translate("ro", "Health") === "Sănătate"
+    && translate("ro", "{a}/{b} green", { a: 39, b: 50 }) === "39/50 verzi"],
+];
+for (const [label, ok] of gaugeChecks) test(label, ok);
 
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 

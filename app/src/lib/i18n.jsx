@@ -51,6 +51,15 @@ const RO = {  // implements: REQ-VIEWER-943
   // rail
   "Workspace": "Spațiu de lucru",
   "Registry": "Registru",
+  "Signals": "Indicatori",
+  "Health": "Sănătate",
+  "Design OOP": "Design OOP",
+  "{a}/{b} green": "{a}/{b} verzi",
+  "{a}/{b} files clean": "{a}/{b} fișiere curate",
+  "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
+    "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări deschise, fără drift",
+  "Source files with no OOP or house-standard candidate — advisory, never part of the gate":
+    "Fișiere sursă fără semnalări OOP sau de standarde — consultativ, niciodată parte din gate",
   "Map": "Hartă",
   "Problems": "Probleme",
   "Spec": "Specificații",

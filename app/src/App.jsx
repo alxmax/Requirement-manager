@@ -2,7 +2,7 @@
 // implements: REQ-VIEWER-945
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
 import { useState, useEffect, Component } from "react";
-import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI } from "./lib/data.js";
+import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI, HEALTH, DESIGN } from "./lib/data.js";
 import { searchRequirements } from "./lib/search.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
@@ -26,6 +26,20 @@ const NAV = [
   { key:"roadmap", label:"Roadmap",  icon:"list-checks" },
   { key:"commands",label:"Commands", icon:"terminal" },
 ];
+
+/* One reading as a ring: the arc is the score, the track behind it is the rest.
+ * Static on purpose — a rail that animates on every view switch is decoration. */
+function Gauge({ pct, tone, size = 28 }) {   // implements: REQ-VIEWER-969
+  const r = (size - 4) / 2, c = 2 * Math.PI * r, mid = size / 2;
+  const on = c * Math.max(0, Math.min(100, pct)) / 100;
+  return (
+    <svg className="gauge" width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <circle cx={mid} cy={mid} r={r} fill="none" stroke="var(--line-2)" strokeWidth="3" />
+      <circle cx={mid} cy={mid} r={r} fill="none" stroke={tone} strokeWidth="3" strokeLinecap="round"
+              strokeDasharray={`${on} ${c}`} transform={`rotate(-90 ${mid} ${mid})`} />
+    </svg>
+  );
+}
 
 /* Deep link: `#/req/<ID>` opens that requirement in the Explorer. Parsed and
  * written defensively — the viewer also runs from file:// and under SSR. */
@@ -135,6 +149,39 @@ function Rail({ view, setView, focus, setFocus }) {
               : <span className="count">{counts[n.key]}</span>}
         </div>
       ))}
+      {/* The two headline numbers `reqmap.py next` opens with, as the engine
+          computed them (lib/data.js explains why they are not recomputed here).
+          Health is a verdict and carries the status colours; design is advice the
+          gate never enforces, so it stays in one neutral ink — a red ring for an
+          advisory score reads as a failure the repo does not have. */}
+      {(HEALTH || DESIGN) && (
+        <div className="rail-gauges">
+          <div className="rail-section" style={{paddingTop:0,paddingLeft:0}}>{t("Signals")}</div>
+          {HEALTH && (
+            <button type="button" className="gauge-row"
+              title={t("Requirements green on every axis — confirmed, implemented, tested, no open question, no drift")}
+              onClick={()=>setView("problems")}>
+              <Gauge pct={HEALTH.score}
+                tone={HEALTH.score >= 90 ? "var(--cov-tested)"
+                    : HEALTH.score >= 60 ? "var(--cov-partial)" : "var(--cov-untested)"} />
+              <span className="gauge-txt">
+                <span className="gauge-name">{t("Health")}<b>{HEALTH.score}</b></span>
+                <span className="gauge-sub">{t("{a}/{b} green", { a: HEALTH.healthy, b: HEALTH.total })}</span>
+              </span>
+            </button>
+          )}
+          {DESIGN && (
+            <div className="gauge-row static"
+              title={t("Source files with no OOP or house-standard candidate — advisory, never part of the gate")}>
+              <Gauge pct={DESIGN.score} tone="var(--fg-secondary)" />
+              <span className="gauge-txt">
+                <span className="gauge-name">{t("Design OOP")}<b>{DESIGN.score}</b></span>
+                <span className="gauge-sub">{t("{a}/{b} files clean", { a: DESIGN.clean_files, b: DESIGN.files })}</span>
+              </span>
+            </div>
+          )}
+        </div>
+      )}
       {/* The registry tally was five numbers you could read but not act on.
           Each row is now the filter it describes: it opens the Explorer scoped to
           that slice, and clicking the active row again clears the scope. */}

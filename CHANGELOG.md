@@ -1,5 +1,29 @@
 # Changelog
 
+## plugin `v4.1.0` — 2026-09-04
+
+**The two numbers `next` opens with now travel with the map.** `_map.json` gained a `health`
+record beside the existing `design` one, and the viewer's rail renders both as rings under
+the navigation — the corpus score and the advisory design score, each with the fraction
+behind it. The record is computed once, by `_health_record` in the engine: the viewer
+displays what it is handed and computes nothing, because a score defined twice is a score
+the terminal and the browser will eventually disagree about.
+
+The health ring is coloured by band and opens the Problems inbox. The design ring stays in
+one neutral ink and is not a control — that score is advice the gate never enforces, and a
+red ring would read as a failure the repo does not have. A map with neither record renders
+no ring at all, so an older `_map.json` degrades to what it always showed.
+
+**Scrollbars are 15px wide instead of 9px**, with a thumb you can hit without aiming.
+
+**`translate` never worked on Windows.** The CLI installs as `claude.CMD`, and CreateProcess
+only ever appends `.exe` to a bare program name — so every entry was reported as an
+unavailable CLI against a CLI that was installed and on PATH. The name is now resolved
+through the platform's own lookup before it is run, still as `argv[0]` and still with no
+shell. The suite missed this because its tests mocked `subprocess.run` and nothing else, so
+they passed on a machine with no `claude` at all; the CLI's presence is now mocked
+explicitly, and the Romanian cache went from 211 to 224 of 226 requirements.
+
 ## plugin `v4.0.4` — 2026-09-04
 
 **`cmd_export` is gone.** The `export` verb folded into `sync` in `v4.0.0` and the function has

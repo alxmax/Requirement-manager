@@ -3147,6 +3147,9 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         self.assertEqual(len(modal), 2)            # 'shall' + 'must'
 
 
+FAKE_CLAUDE = "/usr/bin/claude"   # a `claude` on PATH, so the subprocess mocks are reached
+
+
 class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-937  # tested-by: REQ-TRANSLATE-938
     RO_BODY = ("# Titlu în română\n\n"
                "> Aici explicăm de ce această cerință există și ce problemă rezolvă.\n\n"
@@ -3246,7 +3249,8 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
     def test_cmd_translate_fails_open_when_cli_missing(self):  # verifies: ARCH-TRANSLATE-044#CASE-5  # verifies: REQ-TRANSLATE-938#CASE-2
         reqs_dir = self._tmp_reqs_dir()
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        with mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
+        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
+             mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
             buf = io.StringIO()
             with redirect_stdout(buf):
                 rc = R.cmd_translate(reqs, reqs_dir)
@@ -3265,7 +3269,8 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
                           "===ACCEPTANCE===\n- Given a total of 10\n  When it is shown\n  "
                           "Then it reads 10.00\n")
         fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m:
+        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
+             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m:
             rc = R.cmd_translate(reqs, reqs_dir, target="en")
         self.assertEqual(rc, 0)
         self.assertEqual(m.call_count, 1)
@@ -3276,9 +3281,33 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         self.assertEqual(cache["REQ-A-001"]["title"], "English title")
 
         # re-run with unchanged content: cache hit, claude is NOT called again
-        with mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m2:
+        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
+             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m2:
             R.cmd_translate(reqs, reqs_dir, target="en")
         self.assertEqual(m2.call_count, 0)
+
+    def test_resolved_executable_is_what_runs(self):  # verifies: REQ-TRANSLATE-938#CASE-7
+        """On Windows the CLI installs as `claude.CMD`, and CreateProcess only ever
+        appends `.exe` to a bare name — so every entry was reported as an unavailable
+        CLI against a CLI that was installed and on PATH."""
+        captured = {}
+
+        def fake_run(argv, **kw):
+            captured["argv"] = argv
+            return mock.Mock(returncode=0, stdout="===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
+
+        with mock.patch.object(R.shutil, "which", return_value="C:\\bin\\claude.CMD"), \
+             mock.patch.object(R.subprocess, "run", side_effect=fake_run):
+            out = R._run_claude_translate("T", "I", "C", "A", "ro", "en")
+        self.assertIsNotNone(out)
+        self.assertEqual(captured["argv"][0], "C:\\bin\\claude.CMD")
+
+    def test_cli_absent_from_path_never_spawns(self):  # verifies: REQ-TRANSLATE-938#CASE-7
+        with mock.patch.object(R.shutil, "which", return_value=None), \
+             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
+                 "must not spawn when the CLI is not on PATH")) as m:
+            self.assertIsNone(R._run_claude_translate("T", "I", "C", "A", "ro", "en"))
+        self.assertEqual(m.call_count, 0)
 
     def test_map_never_invokes_claude(self):  # verifies: ARCH-TRANSLATE-044#CASE-7  # verifies: REQ-TRANSLATE-937#CASE-1  # verifies: REQ-TRANSLATE-938#CASE-4
         # `map`/`export` must stay fully deterministic and claude-free — they only
@@ -3292,7 +3321,8 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
             json.dump({"REQ-A-001": {"hash": h, "title": "English title", "intent": "I",
                                       "contract": "C", "acceptance": "A"}}, f)
         reqs = {"REQ-A-001": self._req(body)}
-        with mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
+        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
+             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
                 "map must never shell out to claude")):
             data = R._build_map_data(reqs, {})
             R._attach_translations(data, reqs, reqs_dir)
@@ -3319,7 +3349,8 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         fake_response = ("===TITLE===\nEnglish title\n===INTENT===\nI\n===CONTRACT===\nC\n"
                           "===ACCEPTANCE===\nA\n")
         fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.subprocess, "run", return_value=fake_proc):
+        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
+             mock.patch.object(R.subprocess, "run", return_value=fake_proc):
             rc = R.cmd_translate(reqs, reqs_dir, target="en")
         self.assertEqual(rc, 0)
 
@@ -3577,7 +3608,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         self.assertIn("No match for", none)
 
 
-class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109  # tested-by: REQ-HEALTH-857  # tested-by: REQ-HEALTH-858  # tested-by: REQ-HEALTH-859
+class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109  # tested-by: REQ-HEALTH-857  # tested-by: REQ-HEALTH-858  # tested-by: REQ-HEALTH-859  # tested-by: REQ-HEALTH-968
     def _health(self, reqs, members, as_json=False):
         buf = io.StringIO()
         with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
@@ -3593,6 +3624,35 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARC
         code, out = self._health({"REQ-A-001": self._green()}, members)
         self.assertEqual(code, 0)
         self.assertIn("100/100", out)
+
+    def test_map_carries_the_score_the_console_prints(self):  # verifies: REQ-HEALTH-968#CASE-1
+        """The map's `health.score` and `next --json`'s score come from one computation."""
+        reqs = {"REQ-A-001": self._green()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        _, out = self._health(reqs, members, as_json=True)
+        with tempfile.TemporaryDirectory() as d:
+            data = R._assemble_map_data(reqs, members, d, d)
+            payload = json.loads(R._build_json_text(data))
+        self.assertEqual(payload["health"]["score"], json.loads(out)["score"])
+        self.assertEqual(payload["health"]["total"], len(reqs))
+
+    def test_record_needs_no_code_root(self):  # verifies: REQ-HEALTH-968#CASE-2
+        """Everything needing a code root stays in cmd_health, so the record is portable."""
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            rec = R._health_record({"REQ-A-001": self._green()}, members, d)
+        self.assertEqual(rec["score"], 100)
+        self.assertNotIn("untagged", rec)
+        self.assertNotIn("design_score", rec)
+
+    def test_map_json_is_byte_stable_across_runs(self):  # verifies: REQ-HEALTH-968#CASE-3
+        """A health record that moved between runs would make every map look stale."""
+        reqs = {"REQ-A-001": self._green()}
+        members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
+        with tempfile.TemporaryDirectory() as d:
+            first = R._build_json_text(R._assemble_map_data(reqs, members, d, d))
+            second = R._build_json_text(R._assemble_map_data(reqs, members, d, d))
+        self.assertEqual(first, second)
 
     def test_all_draft_is_zero(self):
         reqs = {"REQ-A-001": {"meta": {"status": "draft"}, "body": "# T\n"}}

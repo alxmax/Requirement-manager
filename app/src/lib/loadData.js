@@ -7,7 +7,7 @@
  * the app's requirement shape; on any miss it leaves the baked fallback in
  * place, so the app always renders. */
 
-import { setRegistry, setRepo, setTodos, setCommands } from "./data.js";
+import { setRegistry, setRepo, setTodos, setCommands, setScores } from "./data.js";
 
 /** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
 export function adaptNode(n) {
@@ -83,6 +83,7 @@ export async function loadData() {
     setRepo(inl.repo);
     setTodos(inl.todos || []);
     setCommands(inl.commands);
+    setScores(inl.health, inl.design);
     return { source: "inline", engineVersion: inl.engine_version || null, count: inl.nodes.length };
   }
   // 2. fetched export (only meaningful over http; file:// will throw → fallback)
@@ -95,6 +96,7 @@ export async function loadData() {
     setRepo(json.repo);
     setTodos(json.todos || []);
     setCommands(json.commands);
+    setScores(json.health, json.design);
     return { source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length };
   } catch {
     return { source: "baked" };
