@@ -293,6 +293,12 @@ CASE-7 — the CLI is located before it is run
   Given  a `claude` CLI installed under a platform-specific extension, such as `claude.CMD`
   When   a requirement is translated
   Then   the resolved path is the program that runs, and a lookup that finds nothing starts no process
+
+## Context
+**Notes**
+- `lint_exempt: file-spread` — the cache is written by the engine and read by the viewer,
+  so this contract is the handshake across that boundary. Both halves have to be named for
+  the obligation to mean anything.
 ---
 id: REQ-TRANSLATE-967
 status: confirmed

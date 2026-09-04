@@ -98,6 +98,9 @@ CASE-12
 - code_root       the directory `next` walks to find files; a caller may omit it.
 
 **Notes**
+- `lint_exempt: ac-count-high` — the twelve cases are twelve buckets of ONE report, not twelve
+  capabilities. `next` prints a single output and each case pins one line of it; splitting
+  it would mint a requirement per bucket for a command that has one behaviour.
 - Each bucket is truncated independently, so a higher-priority bucket is never hidden below a longer lower-priority one.
 - The dedup of a draft's intent question lives inside the shared `_risk_signals` source, which is why `next` and the Risk tab report the same signals for the same requirement.
 - The untagged-files scan is skipped when no `code_root` is supplied — the usual case for unit-test callers.

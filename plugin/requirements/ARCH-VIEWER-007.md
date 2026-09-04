@@ -336,7 +336,11 @@ CASE-5 — the reader sees the authored Given/When/Then lines, not the folded on
 
 --------------------
 
-
+## Context
+**Notes**
+- `lint_exempt: file-spread` — ranking and acceptance rendering are one obligation about
+  what the map export hands the viewer, and it is enforced where the data is built and again
+  where it is drawn. The spread is the trace of one rule, not several.
 ---
 id: REQ-VIEWER-943
 status: confirmed

@@ -414,9 +414,23 @@ out-of-date map or an uncommitted lock from merging.
 links are real, not that the requirement is readable. Left un-wired, the clarity rules
 are documentation nobody runs. `--strict` blocks only on error-severity findings (a
 `confirmed` requirement missing its Contract or Acceptance section) plus the promoted
-structural checks; style warnings stay advisory. A requirement whose shape is deliberate
-opts a check out with `lint_exempt: [check-name]` and records the reason in its Notes —
-an exemption a reviewer can argue with beats a warning everyone learns to scroll past.
+structural checks; style warnings stay advisory.
+
+**Never exempt a check, and never pass `--no-lint`, to make a run green.** An exemption is
+a finding somebody decided not to see, and it is the cheapest thing in this tool to reach
+for: one frontmatter token, no explanation, and nothing mentions it again. That is exactly
+why it must not be the reflex. When a requirement is reported as over-scoped or as carrying
+too many acceptance criteria, the answer is to split it — `reqmap.py clarify <ID>
+--decompose` scaffolds the extra clause out into its own requirement, and the finding names
+that command.
+
+An exemption IS legitimate when the shape is deliberate: a capability whose five files are
+the capability, a stakeholder need with no cases of its own. Then write `lint_exempt:
+[check-name]` and say why in the requirement's own prose, naming the check. `gate` warns
+(RM030) on an exemption with no reason recorded, and `reqmap.py audit` lists every
+exemption in force with its requirement — silenced is not invisible, and the count is the
+debt. An exemption a reviewer can argue with beats a warning everyone learns to scroll past;
+an exemption nobody wrote a sentence for is neither.
 
 **GitHub Actions** (enforces the gate for the whole team) — use the published
 action, pinned to `@v2`:
@@ -470,6 +484,7 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py scan`              — list code members per capability
 - `python scripts/reqmap.py sync`              — rescan + advance the drift baseline + regenerate the map (and a committed `_findings.md`) in one step. Use after editing requirement files or tagging new code members. **Drift guard:** if a `confirmed` or `implemented` contract changed, `sync` refuses and exits non-zero unless you pass `--accept-drift` (which explicitly advances the baseline for that contract).
 - `python scripts/reqmap.py gate`              — run the commit/CI gate (report-only): link sync + drift + test-link integrity. **Never** touches `_reqlock.json`. Use `gate --strict` to promote drift + test-link warnings to errors.
+- `python scripts/reqmap.py audit`             — run every pass that discovers a problem and print one report: the gate, corpus risk, duplicate contracts, design candidates and tag coverage, plus two sections no other verb produces — the **exemptions in force** (marking any that records no reason) and the **shape of the corpus** on the V-model's left arm (how many requirements declare a `level:`, with the three rungs named when almost none do). Read-only; the exit code is the gate's alone, because advice that can fail a build stops being read. Use it after `update-engine`, after a big merge, or whenever "how is this repo doing" is the question. `sync` ends with a one-line summary of the same signals and says nothing when they are all clean.
 - `python scripts/reqmap.py next`              — terminal "what should I do next": a progress header (`N · X confirmed · Y tested · Z drafts`) then the Risk tab's actionable signals as counted buckets, most-urgent-first (Orphans · Needs tests · Needs intent review · Drafts to review). Each bucket shows the top few items (draft `REVIEW`-flagged first, each naming `requirements/<ID>.md`) with `--all` to expand. Read-only, always exit 0 (advice, not a gate). It shares `_risk_signals` with the Risk tab (a draft's intent question is folded into "Drafts to review", so counts are honest); `findings` remains the exhaustive raw verify-intent list. Two further advisories close the list, and they point in opposite directions: **Granularity** names a requirement with >=5 acceptance criteria (a split candidate), and **Redundancy** groups requirements whose Description clauses are identical once case and whitespace are normalised — an exact match, no threshold, so a group is a duplicate by construction rather than a judgement call. `sync` prints a one-line count of the same thing; `gate` deliberately says nothing, because corpus shape is not a commit-time concern. Both report only and never rewrite a requirement. Run `dupes` for the near-matches an exact match cannot see.
 - `python scripts/reqmap.py gate`             — make the "Audience & writing level" rules mechanical: report readability/structure violations on **non-draft** requirements, scoped to the Contract + Acceptance sections (Notes may stay dense). Checks span structure (`missing-section` [error], `empty-section`), prose readability (`stacked-conditions`, `statement-too-long`), scope/cohesion (`ac-count-low`, `ac-count-high`, `over-scoped`, `file-spread`), and testability (`vague-term`) — full contract in `ARCH-LINTCHECKS-025`. Read-only and exit-neutral by default; `--strict` exits non-zero on error-severity findings **and** promotes the structural `ac-count-high` and `over-scoped` checks to errors, so those two can fail CI under `--strict`.
 - `python scripts/reqmap.py show <ID>`         — print a consolidated, human-readable dossier for one requirement: header (id · status · layer · milestone), intent, Contract bullets, dependencies both directions (`depends_on` + reverse `Depended on by`), code members grouped by role with `file:line`, open `## Verify intent` questions (the `findings` "None" filter applied), and risk signals with advice (same `_risk_signals` source as `next`). Answers "what does this do / where is X" in one command. Read-only; returns non-zero on an unknown id so a typo is visible to CI.
