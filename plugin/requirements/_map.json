@@ -15449,7 +15449,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/SpecView.jsx:197"
+          "loc": "app/src/views/SpecView.jsx:200"
         }
       ],
       "test_exempt": null,
@@ -18555,6 +18555,12 @@
       "lane": "ops",
       "milestone": "v3.1",
       "done": true
+    },
+    {
+      "name": "Rank a Romanian query, not just match it literally",
+      "lane": "feature",
+      "milestone": "v4.1",
+      "done": false
     }
   ],
   "commands": [

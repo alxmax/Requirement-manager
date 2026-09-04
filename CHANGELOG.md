@@ -13,6 +13,15 @@ nothing compared the two. The repository already checks one such pair — RM017,
 fixture against the live registry — and the translation cache simply never got the equivalent.
 Tests of either side alone cannot see this shape; a comparison can.
 
+**The intent reads like the rest of the document.** It sits below the obligation since `v4.0.2`,
+where a lead-paragraph face read as a headline for the section under it, so it now uses the body
+type — and its `code` spans render, which they never did: a backticked identifier in the intent
+printed its own backticks.
+
+**TODO:** ranking a Romanian query rather than matching it literally. The model indexes the
+English text, and the literal layer added in `v4.0.0` finds a query only when it appears verbatim
+— "acoperire per criteriu" misses what "Acoperire de test per criteriu" hits.
+
 ## plugin `v4.0.2` — 2026-09-04
 
 **A requirement document leads with what it obliges.** `Description` sits above `Why — Intent`
