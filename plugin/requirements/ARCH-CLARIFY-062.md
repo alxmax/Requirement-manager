@@ -64,8 +64,12 @@ Every bullet below is binding.
 - A clause quantified over "all", "every" or "any" with no stated limit raises a question about
   the upper bound.
 - A clause whose subject is "It" or "the system" raises a question asking which component acts.
-- A requirement with more clauses than cases raises one question per uncovered clause, and one
-  whose cases never mention a failure path raises a question about it.
+- A requirement with more clauses than cases raises ONE question naming how many are
+  uncovered, and saying that a count cannot tell which. It never accuses a clause by
+  position: it compares two numbers and never reads a case, so pointing at the tail
+  clauses was a guess — wrong whenever an early clause is the uncovered one, such as a
+  clause that delegates its cases to another requirement. A requirement whose cases never
+  mention a failure path raises a question about that.
 - A requirement whose cases nearly all start from the same kind of input raises one question
   about the kind that is missing, unless that kind is the corpus's own subject.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every

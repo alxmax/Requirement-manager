@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-05
-engine: 2026-09-05.6
+engine: 2026-09-05.7
 nodes: 231
 edges: 117
 design OOP: 23/100 (7/31 source files without a design candidate)
@@ -520,18 +520,18 @@ graph LR
   f_plugin_scripts_test_reqmap_py_144_9453["plugin/scripts/test_reqmap.py:144-9453"]
   ARCH_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_144_9453
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_scripts_reqmap_py_7725_7809["plugin/scripts/reqmap.py:7725-7809"]
-  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_py_7725_7809
-  f_plugin_scripts_test_reqmap_py_9986_10600["plugin/scripts/test_reqmap.py:9986-10600"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_py_9986_10600
+  f_plugin_scripts_reqmap_py_7725_7817["plugin/scripts/reqmap.py:7725-7817"]
+  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_py_7725_7817
+  f_plugin_scripts_test_reqmap_py_9986_10684["plugin/scripts/test_reqmap.py:9986-10684"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_py_9986_10684
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_262_649["plugin/scripts/reqmap.py:262-649"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_262_649
   f_plugin_scripts_test_reqmap_py_6043_10350["plugin/scripts/test_reqmap.py:6043-10350"]
   ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_6043_10350
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_8778_8976["plugin/scripts/reqmap.py:8778-8976"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_8778_8976
+  f_plugin_scripts_reqmap_py_8786_8984["plugin/scripts/reqmap.py:8786-8984"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_8786_8984
   f_plugin_scripts_test_reqmap_py_7950["plugin/scripts/test_reqmap.py:7950"]
   ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_py_7950
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
@@ -557,8 +557,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_7662["plugin/scripts/test_reqmap.py:7662"]
   ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7662
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_scripts_reqmap_py_8360_8729["plugin/scripts/reqmap.py:8360-8729"]
-  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_8360_8729
+  f_plugin_scripts_reqmap_py_8368_8737["plugin/scripts/reqmap.py:8368-8737"]
+  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_8368_8737
   f_plugin_scripts_test_reqmap_py_8215["plugin/scripts/test_reqmap.py:8215"]
   ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_py_8215
   ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
@@ -614,8 +614,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_3446_8934["plugin/scripts/test_reqmap.py:3446-8934"]
   ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_py_3446_8934
   ARCH_IMPLEMENT_063["The brief for implementing a requirement<br><small>ARCH-IMPLEMENT-063</small>"]
-  f_plugin_scripts_reqmap_py_7864_7885["plugin/scripts/reqmap.py:7864-7885"]
-  ARCH_IMPLEMENT_063 -->|implements| f_plugin_scripts_reqmap_py_7864_7885
+  f_plugin_scripts_reqmap_py_7872_7893["plugin/scripts/reqmap.py:7872-7893"]
+  ARCH_IMPLEMENT_063 -->|implements| f_plugin_scripts_reqmap_py_7872_7893
   f_plugin_scripts_test_reqmap_py_10116["plugin/scripts/test_reqmap.py:10116"]
   ARCH_IMPLEMENT_063 -->|tested-by| f_plugin_scripts_test_reqmap_py_10116
   ARCH_INIT_012["First-use bootstrap<br><small>ARCH-INIT-012</small>"]
@@ -690,8 +690,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_51_6187["plugin/scripts/test_reqmap.py:51-6187"]
   ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_51_6187
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_9125_9144["plugin/scripts/reqmap.py:9125-9144"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_9125_9144
+  f_plugin_scripts_reqmap_py_9133_9152["plugin/scripts/reqmap.py:9133-9152"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_9133_9152
   f_plugin_scripts_test_reqmap_py_6944["plugin/scripts/test_reqmap.py:6944"]
   ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_py_6944
   ARCH_PROMOTE_011["Confirmation is a human's answer, and an edit takes it back<br><small>ARCH-PROMOTE-011</small>"]
@@ -717,8 +717,8 @@ graph LR
   f_plugin_scripts_test_reqmap_py_5853_9196["plugin/scripts/test_reqmap.py:5853-9196"]
   ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_5853_9196
   ARCH_REDUNDANCY_058["Requirements that say the same thing<br><small>ARCH-REDUNDANCY-058</small>"]
-  f_plugin_scripts_reqmap_py_5115_9096["plugin/scripts/reqmap.py:5115-9096"]
-  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5115_9096
+  f_plugin_scripts_reqmap_py_5115_9104["plugin/scripts/reqmap.py:5115-9104"]
+  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5115_9104
   f_plugin_scripts_test_reqmap_py_7726["plugin/scripts/test_reqmap.py:7726"]
   ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7726
   ARCH_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>ARCH-REGISTRYLAG-035</small>"]
@@ -730,13 +730,13 @@ graph LR
   f__github_workflows_ci_yml_4[".github/workflows/ci.yml:4"]
   ARCH_REPRO_041 -->|implements| f__github_workflows_ci_yml_4
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_scripts_reqmap_py_7969_8020["plugin/scripts/reqmap.py:7969-8020"]
-  ARCH_RETIRE_064 -->|implements| f_plugin_scripts_reqmap_py_7969_8020
+  f_plugin_scripts_reqmap_py_7977_8028["plugin/scripts/reqmap.py:7977-8028"]
+  ARCH_RETIRE_064 -->|implements| f_plugin_scripts_reqmap_py_7977_8028
   f_plugin_scripts_test_reqmap_py_7803_10210["plugin/scripts/test_reqmap.py:7803-10210"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_py_7803_10210
   ARCH_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>ARCH-REVIEW-022</small>"]
-  f_plugin_scripts_reqmap_py_8250["plugin/scripts/reqmap.py:8250"]
-  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_8250
+  f_plugin_scripts_reqmap_py_8258["plugin/scripts/reqmap.py:8258"]
+  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_8258
   f_plugin_scripts_test_reqmap_py_4683["plugin/scripts/test_reqmap.py:4683"]
   ARCH_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_py_4683
   f_plugin_skills_requirement_quality_review_SKILL_md_6["plugin/skills/requirement-quality-review/SKILL.md:6"]

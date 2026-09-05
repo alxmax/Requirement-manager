@@ -11,7 +11,7 @@
      <script>window.__REQMAP_DATA__ = { ...this repo's _map.json... }</script>
      It must run before the app module, so loadData() finds the inlined data. -->
 <script>window.__REQMAP_DATA__={
-  "engine_version": "2026-09-05.6",
+  "engine_version": "2026-09-05.7",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -938,7 +938,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9106"
+          "loc": "plugin/scripts/reqmap.py:9114"
         },
         {
           "role": "tested-by",
@@ -1932,7 +1932,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7809"
+          "loc": "plugin/scripts/reqmap.py:7817"
         },
         {
           "role": "tested-by",
@@ -1941,6 +1941,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:10600"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:10684"
         }
       ],
       "test_exempt": null,
@@ -1971,7 +1975,7 @@
         "A bare number in a clause with no unit beside it raises a question asking for the unit; an identifier such as a version or a case label is not a bare number.",
         "A clause quantified over \"all\", \"every\" or \"any\" with no stated limit raises a question about the upper bound.",
         "A clause whose subject is \"It\" or \"the system\" raises a question asking which component acts.",
-        "A requirement with more clauses than cases raises one question per uncovered clause, and one whose cases never mention a failure path raises a question about it.",
+        "A requirement with more clauses than cases raises ONE question naming how many are uncovered, and saying that a count cannot tell which. It never accuses a clause by position: it compares two numbers and never reads a case, so pointing at the tail clauses was a guess — wrong whenever an early clause is the uncovered one, such as a clause that delegates its cases to another requirement. A requirement whose cases never mention a failure path raises a question about that.",
         "A requirement whose cases nearly all start from the same kind of input raises one question about the kind that is missing, unless that kind is the corpus's own subject.",
         "A requirement with no clause, or with no labelled case, raises a blocking question; every other question is advisory."
       ],
@@ -2004,6 +2008,10 @@
         {
           "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap.py:9986"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:10684"
         }
       ],
       "test_exempt": null,
@@ -2011,15 +2019,7 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6,
-      "i18n": {
-        "ro": {
-          "title": "Detectarea a ceea ce o cerință lasă deschis",
-          "intent": "Fiecare detector codifică o întrebare pe care un recenzent o pune din reflex. Sunt în mod deliberat superficiale — lexicale, per clauză, fără un model al sensului — pentru că o întrebare ocazional inutilă costă o propoziție, în timp ce o ambiguitate ratată costă o rescriere.",
-          "contract": "> Fiecare detector codifică o întrebare pe care un recenzent o pune din reflex. Sunt în mod\n> deliberat superficiale — lexicale, per clauză, fără un model al sensului — pentru că o întrebare\n> ocazional inutilă costă o propoziție, în timp ce o ambiguitate ratată costă o rescriere.\n\nFiecare punct de mai jos este obligatoriu.\n- O clauză care conține un cuvânt evaziv fără un prag măsurabil ridică o întrebare care numește acel cuvânt.\n- Un număr fără unitate într-o clauză, fără o unitate alături de el, ridică o întrebare care cere unitatea; un\n  identificator precum o versiune sau o etichetă de caz nu este un număr fără unitate.\n- O clauză cuantificată prin „toate\", „fiecare\" sau „oricare\" fără o limită declarată ridică o întrebare despre\n  limita superioară.\n- O clauză al cărei subiect este „El\" sau „sistemul\" ridică o întrebare care cere să se precizeze care componentă acționează.\n- O cerință cu mai multe clauze decât cazuri ridică o întrebare pentru fiecare clauză neacoperită, iar una\n  ale cărei cazuri nu menționează niciodată o cale de eșec ridică o întrebare despre aceasta.\n- O cerință ale cărei cazuri pornesc aproape toate de la același fel de intrare ridică o întrebare\n  despre felul care lipsește, cu excepția cazului în care acel fel este însuși subiectul corpusului.\n- O cerință fără nicio clauză, sau fără niciun caz etichetat, ridică o întrebare blocantă; orice\n  altă întrebare este consultativă.",
-          "acceptance": "CASE-1 — un cuvânt evaziv este chestionat pe nume\n  Given  o clauză care spune „poarta raportează erorile rapid\"\n  When   detectoarele rulează\n  Then   o întrebare numește „rapid\" și cere pragul măsurabil\n\nCASE-2 — un număr fără unitate este chestionat, un identificator nu\n  Given  o clauză care spune „reîncearcă de 3 ori\" și una care spune „emite CASE-2 pentru v4.0.0\"\n  When   detectoarele rulează\n  Then   prima ridică o întrebare despre unitatea lipsă, iar a doua nu ridică niciuna\n\nCASE-3 — o acceptare doar pe calea fericită ridică întrebarea despre eșec\n  Given  o cerință ale cărei cazuri nu menționează nicio intrare invalidă, lipsă sau eșuată\n  When   detectoarele rulează\n  Then   o întrebare cere ce se întâmplă pe calea de eșec\n\nCASE-4 — lipsa unei clauze sau a unui caz este blocantă\n  Given  o cerință cu o secțiune Description goală și una fără niciun caz etichetat\n  When   detectoarele rulează pe fiecare\n  Then   fiecare ridică o întrebare cu severitatea blocantă\n\nCASE-5 — cazurile care pornesc toate de la un singur fel de intrare sunt chestionate\n  Given  o cerință al cărei fiecare caz se deschide cu același substantiv și un corpus în care acel\n         substantiv nu este subiectul de la care pornește orice altă cerință\n  When   detectoarele rulează\n  Then   o întrebare numește acel substantiv și cere ce alt fel ar furniza un apelant\n\nCASE-6 — subiectul propriu al corpusului nu este acest semnal\n  Given  un corpus în care aproape fiecare caz al fiecărei cerințe pornește de la același substantiv\n  When   detectoarele rulează pe una dintre ele\n  Then   nu se ridică nicio întrebare despre aceasta, pentru că substantivul este domeniul, nu o focalizare îngustă"
-        }
-      }
+      "covered": 6
     },
     {
       "id": "REQ-CLARIFY-957",
@@ -2057,7 +2057,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7809"
+          "loc": "plugin/scripts/reqmap.py:7817"
         },
         {
           "role": "tested-by",
@@ -2407,15 +2407,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8778"
+          "loc": "plugin/scripts/reqmap.py:8786"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8788"
+          "loc": "plugin/scripts/reqmap.py:8796"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8976"
+          "loc": "plugin/scripts/reqmap.py:8984"
         },
         {
           "role": "tested-by",
@@ -2473,11 +2473,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8778"
+          "loc": "plugin/scripts/reqmap.py:8786"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8788"
+          "loc": "plugin/scripts/reqmap.py:8796"
         },
         {
           "role": "tested-by",
@@ -3211,19 +3211,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8360"
+          "loc": "plugin/scripts/reqmap.py:8368"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8683"
+          "loc": "plugin/scripts/reqmap.py:8691"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8704"
+          "loc": "plugin/scripts/reqmap.py:8712"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8729"
+          "loc": "plugin/scripts/reqmap.py:8737"
         },
         {
           "role": "tested-by",
@@ -3283,15 +3283,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8378"
+          "loc": "plugin/scripts/reqmap.py:8386"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8497"
+          "loc": "plugin/scripts/reqmap.py:8505"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8683"
+          "loc": "plugin/scripts/reqmap.py:8691"
         },
         {
           "role": "tested-by",
@@ -3351,19 +3351,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8378"
+          "loc": "plugin/scripts/reqmap.py:8386"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8434"
+          "loc": "plugin/scripts/reqmap.py:8442"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8497"
+          "loc": "plugin/scripts/reqmap.py:8505"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8683"
+          "loc": "plugin/scripts/reqmap.py:8691"
         },
         {
           "role": "tested-by",
@@ -3423,7 +3423,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8729"
+          "loc": "plugin/scripts/reqmap.py:8737"
         },
         {
           "role": "tested-by",
@@ -3482,11 +3482,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8448"
+          "loc": "plugin/scripts/reqmap.py:8456"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8683"
+          "loc": "plugin/scripts/reqmap.py:8691"
         },
         {
           "role": "tested-by",
@@ -3556,7 +3556,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8704"
+          "loc": "plugin/scripts/reqmap.py:8712"
         },
         {
           "role": "tested-by",
@@ -3615,11 +3615,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8614"
+          "loc": "plugin/scripts/reqmap.py:8622"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8683"
+          "loc": "plugin/scripts/reqmap.py:8691"
         },
         {
           "role": "tested-by",
@@ -5890,11 +5890,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7864"
+          "loc": "plugin/scripts/reqmap.py:7872"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7885"
+          "loc": "plugin/scripts/reqmap.py:7893"
         },
         {
           "role": "tested-by",
@@ -5953,7 +5953,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7885"
+          "loc": "plugin/scripts/reqmap.py:7893"
         },
         {
           "role": "tested-by",
@@ -6009,7 +6009,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7864"
+          "loc": "plugin/scripts/reqmap.py:7872"
         },
         {
           "role": "tested-by",
@@ -9541,11 +9541,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9125"
+          "loc": "plugin/scripts/reqmap.py:9133"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9144"
+          "loc": "plugin/scripts/reqmap.py:9152"
         },
         {
           "role": "tested-by",
@@ -9592,7 +9592,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9144"
+          "loc": "plugin/scripts/reqmap.py:9152"
         },
         {
           "role": "tested-by",
@@ -9736,7 +9736,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8216"
+          "loc": "plugin/scripts/reqmap.py:8224"
         },
         {
           "role": "tested-by",
@@ -10429,7 +10429,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8832"
+          "loc": "plugin/scripts/reqmap.py:8840"
         },
         {
           "role": "tested-by",
@@ -10500,7 +10500,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9096"
+          "loc": "plugin/scripts/reqmap.py:9104"
         },
         {
           "role": "tested-by",
@@ -10892,11 +10892,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7969"
+          "loc": "plugin/scripts/reqmap.py:7977"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8020"
+          "loc": "plugin/scripts/reqmap.py:8028"
         },
         {
           "role": "tested-by",
@@ -10960,7 +10960,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:7969"
+          "loc": "plugin/scripts/reqmap.py:7977"
         },
         {
           "role": "tested-by",
@@ -11018,15 +11018,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8020"
+          "loc": "plugin/scripts/reqmap.py:8028"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8117"
+          "loc": "plugin/scripts/reqmap.py:8125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8216"
+          "loc": "plugin/scripts/reqmap.py:8224"
         },
         {
           "role": "tested-by",
@@ -11085,15 +11085,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8129"
+          "loc": "plugin/scripts/reqmap.py:8137"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8170"
+          "loc": "plugin/scripts/reqmap.py:8178"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8203"
+          "loc": "plugin/scripts/reqmap.py:8211"
         },
         {
           "role": "tested-by",
@@ -11160,7 +11160,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8250"
+          "loc": "plugin/scripts/reqmap.py:8258"
         },
         {
           "role": "tested-by",
@@ -11231,7 +11231,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8250"
+          "loc": "plugin/scripts/reqmap.py:8258"
         },
         {
           "role": "tested-by",

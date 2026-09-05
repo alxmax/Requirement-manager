@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.6"
+MAP_ENGINE_VERSION = "2026-09-05.7"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -7772,13 +7772,21 @@ def _clarify_questions(rid, r, reqs=None):  # implements: ARCH-CLARIFY-062  # im
                 "Name the subject the title names, so the clause reads on its own.")
 
     if clauses and n_cases and len(clauses) > n_cases:
-        for i in range(n_cases + 1, len(clauses) + 1):
-            if len(out) > 24:                            # a wall of questions is not a conversation
-                break
-            ask("clause-without-case", "advisory", "clause {}".format(i), clauses[i - 1],
-                "What case proves this clause? There are {} clauses and {} cases.".format(
-                    len(clauses), n_cases),
-                "Add a `CASE-{}` exercising it, or fold the clause into an existing case.".format(i))
+        # ONE question about the gap, not one per tail clause. The count is all this
+        # check knows: it compares two numbers and never reads a case to see which
+        # clause it proves. Accusing clauses n_cases+1.. by position was therefore a
+        # guess dressed as a finding, and a wrong one whenever an early clause is the
+        # uncovered one — e.g. a clause that delegates its cases to another
+        # requirement, which the counter cannot see. It sent the reader to rewrite a
+        # clause that already had its case.
+        gap = len(clauses) - n_cases
+        ask("clause-without-case", "advisory", "Cases", "",
+            "{} clause(s) have no case: there are {} clauses and {} cases. This check "
+            "counts, it does not read, so it cannot say WHICH — that is the part only "
+            "you can do.".format(gap, len(clauses), n_cases),
+            "Walk the clauses and find the one no case proves. Add a case for it, fold "
+            "it into an existing case, or move it out of the binding list if another "
+            "requirement already carries its cases.")
 
     if n_cases and not any(w in cases_low for w in CLARIFY_FAILURE_WORDS):
         ask("no-failure-case", "advisory", "Cases", "",

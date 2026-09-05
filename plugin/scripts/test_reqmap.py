@@ -10681,5 +10681,43 @@ class SeparatorIsNotContract(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  #
         self.assertEqual(R.binding_hash(alone), R.binding_hash(with_neighbour))
 
 
+class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956
+    """The counter compares two numbers and never reads a case, so it may not
+    accuse a clause by position — it says how many are uncovered, not which."""
+
+    def _req(self, n_clauses, n_cases):
+        body = ["---", "id: AREA-G-001", "status: draft", "level: code",
+                "layer: feature", "owner: A", "---", "", "# Titled", "",
+                "## Description", "> Why.", "", "Every bullet below is binding."]
+        for i in range(1, n_clauses + 1):
+            body.append("- Clause number %d does a thing." % i)
+        body += ["", "## Cases"]
+        for i in range(1, n_cases + 1):
+            body += ["CASE-%d" % i, "  Given  a", "  When   b", "  Then   c", ""]
+        return "\n".join(body) + "\n"
+
+    def _questions(self, n_clauses, n_cases):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-G-001.md"), self._req(n_clauses, n_cases))
+            reqs = R.load_requirements(d)
+            return [q for q in R._clarify_questions("AREA-G-001", reqs["AREA-G-001"], reqs)
+                    if q["rule"] == "clause-without-case"]
+
+    def test_five_clauses_two_cases_raise_one_question_not_three(self):
+        qs = self._questions(5, 2)
+        self.assertEqual(len(qs), 1)
+        self.assertIn("3 clause(s) have no case", qs[0]["question"])
+        self.assertIn("5 clauses and 2 cases", qs[0]["question"])
+
+    def test_the_question_does_not_accuse_a_clause(self):
+        qs = self._questions(4, 3)
+        self.assertEqual(qs[0]["where"], "Cases")
+        self.assertEqual(qs[0]["quote"], "")          # no clause is quoted as the culprit
+        self.assertIn("cannot say WHICH", qs[0]["question"])
+
+    def test_a_case_per_clause_raises_nothing(self):
+        self.assertEqual(self._questions(3, 3), [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
