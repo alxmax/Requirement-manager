@@ -1,5 +1,74 @@
 # Changelog
 
+## plugin `v5.8.0` — 2026-09-06
+
+**`sync` now reports readability, and how much of the pyramid is still the engine's
+guess.** Lint had exactly one enforcing caller — the `gate` branch — so nothing unreadable
+could ever be committed (the pre-commit hook runs `gate`). That was never a hole in
+enforcement; it was a hole in *timing*. `sync` is the moment the corpus was just
+rewritten, which is when a finding is cheapest to act on and when the author still has the
+clause in mind; at commit time the same finding arrives as an obstacle. The engine already
+reasons this way for corpus shape — its own comment says the shape advisory belongs at
+`sync` and not in the gate for exactly that reason — and readability simply never got the
+same argument.
+
+Errors only. A style warning never breaks the tail's silence: this repo carries two
+long-standing ones, so a line keyed on warnings would fire on every sync forever, which is
+the habit ADR-0016 rejected. `sync`'s exit code is unchanged and still comes from the gate
+alone.
+
+The second line answers a question ADR-0030 created. A corpus can now be *fully* levelled
+and still be nothing but the engine's own proposals, in which case every other number in
+the shape report reads as healthy. `_corpus_shape` gained an `auto` count, and the tail
+says `N of M levelled requirement(s) still carry the rung the engine proposed` — which is
+ADR-0030's revisit trigger, made visible on every sync instead of waiting for someone to
+go looking.
+
+**The pyramid was already verified at `sync`**, and this was checked rather than assumed:
+deleting an auto-generated architecture node without re-pointing its children makes `sync`
+print two `RM005 ... upstream trace dangling` warnings. Warn-level is right — an error
+there would block a commit in the middle of exactly the triage the tool is asking for.
+
+**`init` now drafts a pyramid instead of a flat field.** The tool's premise is a
+stakeholder need, satisfied by capabilities, satisfied by behaviour groups — and
+extraction produced the opposite: one flat `layer: feature` draft per source file, no
+`level:`, no `satisfies:`. [ADR-0030](docs/adr/0030-the-engine-drafts-the-pyramid.md)
+reverses ADR-0019 on exactly one sentence, the one forbidding the engine to infer the
+axis, and this ships it.
+
+The three rungs are not equally knowable from source, so the engine treats them
+differently and says which is which:
+
+- **`code` is asserted.** Every draft extracted from a source file carries `level: code`.
+  A draft describes that file's behaviour; that *is* the code rung. No guess.
+- **`architecture` is proposed.** One draft per source directory that produced code
+  drafts, its id built from the last two path segments, its body stating in its own words
+  that a directory is not a capability and asking to be renamed, merged or deleted.
+- **`system` is a named hole.** One `layer: need` placeholder titled `NAME THIS NEED`,
+  which every architecture draft satisfies. A stakeholder need is not in the source, so
+  the engine refuses to invent one.
+
+**Everything it invented carries `level_source: auto`**, the parallel of the existing
+`owner: auto`. That marker is the load-bearing half of the change, not an annotation on
+it: ADRs are not shipped inside `plugin/`, so it is the only part of the record that
+reaches a consumer — and without it `LINT_FANOUT_BANDS` and `LEVEL_TEST_PAIR` would read a
+machine guess as a human decision.
+
+Measured before deciding, and the reason the middle rung is a proposal rather than a
+claim: directory inference on this repo would mint capabilities named `scripts`,
+`app/src/lib`, `app/src/views` and `check`. None is a capability. A wrong name that says
+it is a guess is recoverable; a wrong name that looks decided is not.
+
+Nothing is enforced. Every node minted is `status: draft`, which the gate never touches,
+and a second `init` overwrites nothing. On a three-file fixture the result is `1 system /
+2 architecture / 3 code` with 5 `satisfies:` edges and a clean gate.
+
+The audit that preceded this was MODIFY (GO 1 / MODIFY 6 / STOP 2) and blocked automatic
+assignment. Three of the blocking objections are answered in ADR-0030 on their own terms;
+**Deming's STOP is recorded unanswered** — whether the three-level shape pays is still
+calibrated on one corpus, this one. This changes what `init` produces, not what is known
+about whether the shape is worth producing.
+
 ## plugin `v5.7.0` — 2026-09-06
 
 **The skill contract now says the specification-level axis exists — and that a flat

@@ -4,8 +4,12 @@
   band** Decision and Consequence are superseded by
   [ADR-0023](0023-fan-out-per-level-ceilings-no-floor.md) (2026-09-03), which replaces the
   uniform 5–20 band with per-level ceilings and no floor, and withdraws the claim below that
-  the band's seven findings were confirmed real. Everything else here stands; the reasoning
-  is left exactly as decided.
+  the band's seven findings were confirmed real. Its sentence that the pairing works
+  "onto an axis the author declares rather than one the engine infers" is superseded by
+  [ADR-0030](0030-the-engine-drafts-the-pyramid.md) (2026-09-06), which has the engine
+  draft all three rungs and mark every one it invents. Everything else here stands,
+  including the warn-only posture and the revisit below; the reasoning is left exactly
+  as decided.
 - **Decided:** 2026-09-03 (`ARCH-LEVEL-051`, `ARCH-FANOUT-052`, `ARCH-VRUNGS-054`, `ARCH-ATOMICFORM-053`, `ARCH-MODULEFILE-056`)
 - **Evidence:** `CHANGELOG.md` `v2.32.0`; the nine-senator audit
   `runs/senate/2026-09-02_201621-senate-reqmap-vmodel-req-size-and-3-classes.json` and `runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json` (advisory; the earlier `2026-09-02_*-v-model*.json` glob printed here matched no file); this repo's own corpus, 52 files → 689
@@ -54,6 +58,8 @@ produces exactly the output `v2.31.0` produced. This is [ADR-0002](0002-error-ve
 applied unchanged: the layer-to-level pairing table ADR-0007 rejected would have flagged 36 of 40
 requirements, and nothing here has made that measurement wrong — it has only moved the pairing
 onto an axis the author declares rather than one the engine infers.
+(Superseded 2026-09-06 by [ADR-0030](0030-the-engine-drafts-the-pyramid.md): the engine
+now drafts all three rungs, and marks each one it invented with `level_source: auto`.)
 
 ## Consequences
 

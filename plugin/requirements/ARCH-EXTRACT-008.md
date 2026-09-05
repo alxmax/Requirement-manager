@@ -1,6 +1,6 @@
 ---
 id: ARCH-EXTRACT-008
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -23,6 +23,7 @@ Every bullet below is binding.
 - `draft` walks every untagged scannable code file, skipping tagged and `.reqmapignore`-matched ones. [[REQ-EXTRACT-849]] details the behaviour.
 - `draft` proposes one `requirements/DRAFT-*.md` per remaining file, marked `status: draft` with a TODO contract. [[REQ-EXTRACT-850]] details the behaviour.
 - `draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size, and never overwrites an existing draft. [[REQ-EXTRACT-851]] details the behaviour.
+- Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.
 
 ## Cases
 CASE-1
@@ -245,3 +246,55 @@ CASE-5 — the extracted surface never leaks into the Contract
   When   the proposal's Contract section is inspected
   Then   it is still the TODO placeholder, unchanged by what WHERE captured
 
+---
+id: REQ-EXTRACT-981
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-EXTRACT-008]
+---
+
+# The three rungs extraction drafts
+
+## Description
+> The tool's premise is a pyramid — a need, satisfied by capabilities, satisfied by
+> behaviour groups — and extraction produced the opposite: one flat draft per file. The
+> three rungs are not equally knowable from source, so the engine asserts the one it can
+> know, proposes the one it can only guess from a directory, and refuses to guess the one
+> that is not in the code at all. What it invented, it marks. See
+> [ADR-0030](../../docs/adr/0030-the-engine-drafts-the-pyramid.md).
+
+Every bullet below is binding.
+- A draft extracted from a source file carries `level: code`. A draft describes that file's behaviour, so the rung is asserted rather than inferred.
+- Each source directory that produced at least one code draft gets one architecture draft, whose id is built from the last two path segments and whose body states that a directory is not a capability.
+- Every code draft declares `satisfies:` its directory's architecture draft, and every architecture draft declares `satisfies:` the system placeholder.
+- One `level: system`, `layer: need` placeholder is written when at least one architecture draft exists, titled so a reader sees it is a hole the engine refused to fill.
+- Everything extraction writes about the level axis carries `level_source: auto`, the parallel of `owner: auto`, so a rung the engine invented stays distinguishable from one a human decided.
+- Every node extraction mints is `status: draft`, which the gate never enforces, and an existing file of the same id is never overwritten.
+
+## Cases
+CASE-1 — the asserted rung
+  Given  a repo with one untagged source file
+  When   `init` runs
+  Then   the file's draft carries `level: code` and `level_source: auto`
+
+CASE-2 — the proposed rung
+  Given  a repo whose code sits in two directories
+  When   `init` runs
+  Then   two architecture drafts exist, each satisfied by the code drafts of its own directory
+
+CASE-3 — the refused rung
+  Given  the same repo
+  When   `init` runs
+  Then   exactly one `layer: need` placeholder exists, every architecture draft satisfies it, and its title says a human must name it
+
+CASE-4 — nothing is overwritten
+  Given  a corpus already carrying an architecture draft for a directory
+  When   `init` runs again
+  Then   that file is left byte-identical and no duplicate is written
+
+## Context
+**Notes**
+- The directory names will often be wrong: measured on this repo before the decision, directory inference proposes capabilities called `scripts` and `app/src/lib`. That is why the architecture node is a `draft` whose own body tells the reader to rename, merge or delete it. A wrong name that says it is a guess is recoverable; a wrong name that looks decided is not.
+- `level_source: auto` is the only part of ADR-0030 that reaches a consumer — the ADR set is not shipped inside `plugin/`. It is therefore the load-bearing half of the record, not an annotation on it.
