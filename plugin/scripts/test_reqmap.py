@@ -3171,8 +3171,10 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
             json.dump({"REQ-A-001": {"hash": h, "title": "English title", "intent": "I",
                                       "contract": "C", "acceptance": "A"}}, f)
         reqs = {"REQ-A-001": self._req(body)}
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
+        # `shutil` left the engine with the translate writer that used it to find the
+        # CLI. Patching subprocess alone is now the whole assertion, and a stronger one:
+        # nothing in the engine can start a process at all.
+        with mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
                 "map must never shell out to claude")):
             data = R._build_map_data(reqs, {})
             R._attach_translations(data, reqs, reqs_dir)

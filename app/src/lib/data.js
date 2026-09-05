@@ -142,10 +142,7 @@ const BAKED = [
       "**An edited confirmed contract goes back to `draft`.** When `sync` finds that a `confirmed` or `implemented` requirement's binding content no longer matches the lock, it writes `draft` into that requirement and advances the baseline. [[REQ-PROMOTE-974]] details the behaviour.",
       "**`--accept-drift` is the escape hatch, and it is a human saying so:** it keeps the status and advances the baseline. It exists because \"I edited it and it is still valid\" is a real answer — it just has to be given, not assumed.",
       "**The invariant that a confirmed requirement points at code is enforced by the gate, not by a command.** `RM006` is an error, so a status written by hand with no `implements:` member fails at the next run." ],
-    gwt:"CASE-1
-  Given  a confirmed requirement whose contract has just been edited
-  When   sync runs without --accept-drift
-  Then   its frontmatter reads status: draft, the run says so by name, and the lock advances",
+    gwt:"CASE-1\n  Given  a confirmed requirement whose contract has just been edited\n  When   sync runs without --accept-drift\n  Then   its frontmatter reads status: draft, the run says so by name, and the lock advances",
     impl:["`_write_frontmatter_status` and the demotion branch of `cmd_check` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:446-461"},{role:"tested-by",loc:"scripts/test_reqmap.py:1114"}],
     deps:["ARCH-PARSE-001"], usedBy:[], risks:[] },
