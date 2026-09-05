@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.11"
+MAP_ENGINE_VERSION = "2026-09-05.12"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -896,6 +896,8 @@ def gate_rule(rule_id, severity, strict=False, only_source_repo=False):  # imple
 
 
 def gate_rule_by_id(rule_id):
+    """The registered rule with this code, or None — how a caller resolves the
+    `RMnnn` in a finding back to the rule that produced it."""
     for r in GATE_RULES:
         if r.id == rule_id:
             return r
@@ -999,6 +1001,10 @@ def split_requirement_blocks(text):  # implements: ARCH-MODULEFILE-056
 
 
 def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: ARCH-MODULEFILE-056  # implements: REQ-PARSE-890  # implements: REQ-PARSE-892
+    """Every requirement in the directory, keyed by id: `{id: {meta, body, path, ...}}`.
+    One file may hold several blocks (ARCH-MODULEFILE-056); an unreadable or
+    id-less file is skipped rather than raising, so one bad file cannot blind
+    the whole corpus."""
     reqs = {}
     if not os.path.isdir(reqs_dir):
         return reqs
@@ -2000,10 +2006,13 @@ def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMIC
 
 
 def lock_path(reqs_dir):  # implements: ARCH-DRIFT-003  # implements: REQ-DRIFT-842
+    """The path of the drift baseline, `requirements/_reqlock.json`."""
     return os.path.join(reqs_dir, "_reqlock.json")
 
 
 def load_lock(reqs_dir):  # implements: ARCH-DRIFT-003  # implements: REQ-DRIFT-842
+    """The drift baseline as `{id: hash}`, or an empty dict when it is missing or
+    unreadable — a corpus with no lock yet must still gate."""
     p = lock_path(reqs_dir)
     if os.path.exists(p):
         try:
@@ -2021,6 +2030,7 @@ def load_lock(reqs_dir):  # implements: ARCH-DRIFT-003  # implements: REQ-DRIFT-
 
 
 def save_lock(reqs_dir, lock):  # implements: ARCH-DRIFT-003  # implements: REQ-DRIFT-842
+    """Write the drift baseline, creating the directory if needed."""
     os.makedirs(reqs_dir, exist_ok=True)
     with open(lock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(lock, f, indent=2, sort_keys=True)
@@ -2057,6 +2067,9 @@ def load_memberlock(reqs_dir):  # implements: ARCH-MEMBERDRIFT-027  # implements
 
 
 def save_memberlock(reqs_dir, member_hashes):  # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
+    """Write the member-hash sidecar for reverse-direction drift, versioned by
+    `_schema` and kept out of `_reqlock.json` so that file stays a byte-stable
+    cross-repo contract an older seeded engine still reads."""
     os.makedirs(reqs_dir, exist_ok=True)
     payload = {"_schema": MEMBERLOCK_SCHEMA, "members": member_hashes}
     with open(_memberlock_path(reqs_dir), "w", encoding="utf-8") as f:
@@ -2087,6 +2100,7 @@ def load_clarifylock(reqs_dir):  # implements: REQ-CLARIFY-975
 
 
 def save_clarifylock(reqs_dir, snapshot):  # implements: REQ-CLARIFY-975
+    """Write the `clarify` answer snapshot, versioned by `_schema`."""
     os.makedirs(reqs_dir, exist_ok=True)
     payload = {"_schema": CLARIFYLOCK_SCHEMA, "questions": snapshot}
     with open(_clarifylock_path(reqs_dir), "w", encoding="utf-8") as f:
@@ -3122,6 +3136,8 @@ def _warn_number_collision(reqs_dir, cap_id):  # implements: ARCH-NEW-004
 
 
 def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: ARCH-NEW-004  # implements: REQ-NEW-881  # implements: REQ-NEW-882
+    """Scaffold one blank requirement from the template and return an exit code;
+    refuses rather than overwriting a file that already exists."""
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
         print(f"exists: {dest}"); return 1
@@ -4188,6 +4204,9 @@ def _attach_translations(data, reqs, reqs_dir):  # implements: ARCH-TRANSLATE-04
 
 
 def cmd_map(ws, root=".", check=False):  # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-870
+    """Regenerate every derived view of the corpus — `_map.md`, `_map.json`, the
+    single-file viewer and the published `docs/map.html` — or, with `check`,
+    write nothing and return non-zero when the committed copies are stale."""
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
     ac_cover = ws.ac_cover
     data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
@@ -6815,6 +6834,7 @@ def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ
 
 
 def render_md(data, reqs_dir):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-874
+    """Write `_map.md`, the four Mermaid diagrams that render without JavaScript."""
     out = os.path.join(reqs_dir, "_map.md")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -7353,6 +7373,8 @@ def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-8
 
 
 def render_json(data, reqs_dir):  # implements: ARCH-MAP-007  # implements: REQ-MAP-870
+    """Write `_map.json`, the registry graph the viewer and any external front-end
+    read."""
     out = os.path.join(reqs_dir, "_map.json")
     os.makedirs(reqs_dir, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
@@ -8393,8 +8415,15 @@ DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
 DESIGN_LINE_MAX = 100           # standards: a physical line wider than this
 DESIGN_FILE_MAX_FUNCS = 30      # standards: top-level functions/classes in one file
 DESIGN_DOCSTRING_PUBLIC = 1     # standards (Python): 1 = public defs/classes need a docstring, 0 = off
+# Chidamber & Kemerer, per class, Python only (see `_design_metrics` for why three of
+# the six are absent). C&K proposed the metrics and no thresholds; these are the
+# conventional ones, and like every other number here they are tunable per repo.
+DESIGN_WMC_MAX = 20             # metrics: methods in one class (C&K WMC, unweighted)
+DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it calls (C&K RFC)
+DESIGN_LCOM_MAX = 20            # metrics: LCOM1 — method pairs sharing no field, less those that do
 
-DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism", "standards")
+DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism",
+                  "metrics", "standards")
 DESIGN_EXTS = ORPHAN_CODE_EXTS          # program-logic files; prose/config/styling are not reviewed
 DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
                      ".c", ".cc", ".cpp", ".h", ".hpp", ".java", ".cs", ".go", ".rs",
@@ -8402,6 +8431,9 @@ DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts
 _DESIGN_ADVICE = {
     "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
     "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
+    "god-class": "a class with this many methods is several classes sharing one name: split it along the fields its methods actually touch",
+    "high-response": "a class that reaches this many distinct methods is hard to test alone, because its collaborators are part of its interface: narrow them",
+    "low-cohesion": "methods that share no field are not one object: the groups that touch the same fields are the classes hiding in here",
     "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
     "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
     "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
@@ -8417,6 +8449,7 @@ _DESIGN_ADVICE = {
 }
 _DESIGN_PILLAR_OF = {
     "global-state": "encapsulation", "long-parameter-list": "encapsulation", "data-clump": "encapsulation",
+    "god-class": "metrics", "high-response": "metrics", "low-cohesion": "metrics",
     "long-function": "abstraction", "deep-nesting": "abstraction", "prefix-family": "abstraction",
     "shared-methods": "inheritance", "duplicate-method": "inheritance",
     "isinstance-chain": "polymorphism", "type-switch": "polymorphism",
@@ -8562,6 +8595,102 @@ def _design_py_test(test):
     return None
 
 
+def _design_py_fields(cls):  # implements: REQ-DESIGN-978
+    """The class's real instance fields: every name assigned through `self.<name>`,
+    plus whatever `__slots__` declares. Only these count as state — a class whose
+    state lives somewhere else (a `dict` subclass keys its own data) has no field for
+    two methods to share, and is skipped rather than scored as maximally incohesive."""
+    out = set()
+    for n in ast.walk(cls):
+        targets = []
+        if isinstance(n, ast.Assign):
+            targets = list(n.targets)
+        elif isinstance(n, (ast.AnnAssign, ast.AugAssign)):
+            targets = [n.target]
+        for t in targets:
+            if isinstance(t, ast.Tuple):
+                targets.extend(t.elts)
+            elif (isinstance(t, ast.Attribute) and isinstance(t.value, ast.Name)
+                    and t.value.id == "self"):
+                out.add(t.attr)
+    for st in cls.body:
+        if not (isinstance(st, ast.Assign)
+                and any(isinstance(t, ast.Name) and t.id == "__slots__" for t in st.targets)):
+            continue
+        if isinstance(st.value, (ast.Tuple, ast.List)):
+            out |= {e.value for e in st.value.elts
+                    if isinstance(e, ast.Constant) and isinstance(e.value, str)}
+    return out
+
+
+def _design_lcom(methods, fields):  # implements: REQ-DESIGN-978
+    """LCOM1: pairs of methods sharing no instance field, minus the pairs that do,
+    floored at zero. Zero means every pair of methods has some state in common."""
+    touched = []
+    for m in methods:
+        touched.append({n.attr for n in ast.walk(m)
+                        if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
+                        and n.value.id == "self" and n.attr in fields})
+    apart = together = 0
+    for i in range(len(touched)):
+        for j in range(i + 1, len(touched)):
+            if touched[i] & touched[j]:
+                together += 1
+            else:
+                apart += 1
+    return max(0, apart - together)
+
+
+def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-978
+    """Chidamber & Kemerer per class, for the three of the six that say something here.
+
+    WMC (methods), RFC (own methods plus the distinct methods they call) and LCOM1
+    (methods sharing no field) each name a shape the function-level checks cannot see:
+    they measure a CLASS, where everything else in this review measures a function or a
+    file. DIT and NOC are left out because they measure an inheritance tree, and a repo
+    that composes instead of subclassing has none to measure — they would report zero
+    forever and teach a reader to ignore the pillar. CBO is left out because resolving
+    which class a Python name refers to needs type inference this engine does not do,
+    and a coupling number that is wrong is worse than no coupling number.
+
+    Python only: these count methods and field access, which the brace-language
+    heuristics cannot identify without parsing."""
+    out = []
+    for cls in [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]:
+        methods = [m for m in cls.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        if not methods:
+            continue
+        if len(methods) > DESIGN_WMC_MAX:
+            out.append(_design_finding("god-class", rel, cls.lineno, cls.name,
+                                       "`{}` has {} methods (over {})".format(
+                                           cls.name, len(methods), DESIGN_WMC_MAX)))
+        called = set()
+        for m in methods:
+            for n in ast.walk(m):
+                if not isinstance(n, ast.Call):
+                    continue
+                f = n.func
+                nm = f.attr if isinstance(f, ast.Attribute) else getattr(f, "id", None)
+                if nm:
+                    called.add(nm)
+        rfc = len(methods) + len(called)
+        if rfc > DESIGN_RFC_MAX:
+            out.append(_design_finding("high-response", rel, cls.lineno, cls.name,
+                                       "`{}` reaches {} methods (over {}): {} of its own "
+                                       "plus {} it calls".format(cls.name, rfc, DESIGN_RFC_MAX,
+                                                                 len(methods), len(called))))
+        fields = _design_py_fields(cls)
+        if not fields or len(methods) < 2:
+            continue          # no shared state to lack — see `_design_py_fields`
+        lcom = _design_lcom(methods, fields)
+        if lcom > DESIGN_LCOM_MAX:
+            out.append(_design_finding("low-cohesion", rel, cls.lineno, cls.name,
+                                       "`{}` scores LCOM {} (over {}) across {} methods "
+                                       "and {} field(s)".format(cls.name, lcom, DESIGN_LCOM_MAX,
+                                                                len(methods), len(fields))))
+    return out
+
+
 def _design_python(rel, src):  # implements: REQ-DESIGN-950  # implements: REQ-DESIGN-951
     try:
         tree = ast.parse(src)
@@ -8585,6 +8714,7 @@ def _design_python(rel, src):  # implements: REQ-DESIGN-950  # implements: REQ-D
                             "methods": {m.name: ast.dump(m) for m in n.body
                                         if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))}})
     out += _design_shape_findings(rel, fns, classes)
+    out += _design_metrics(rel, tree)
     chains, seen = [], set()
     for n in ast.walk(tree):
         if not isinstance(n, ast.If) or id(n) in seen:
@@ -8857,7 +8987,8 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_FUNC_MAX_LINES", "DESIGN_NESTING_MAX", "DESIGN_PARAMS_MAX", "DESIGN_CLUMP_MIN",
                "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
-               "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC")
+               "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
+               "DESIGN_WMC_MAX", "DESIGN_RFC_MAX", "DESIGN_LCOM_MAX")
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
@@ -8911,6 +9042,8 @@ def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: R
 
 
 def main():
+    """Parse the command line, load the workspace once, and dispatch to the verb.
+    Returns the process exit code."""
     # Refuse an interpreter below the declared floor before anything else runs, so the
     # user gets one readable line instead of an AttributeError from some stdlib call
     # that did not exist yet.

@@ -90,6 +90,8 @@ def _fix(canonical: str) -> int:
 
 
 def main(argv=None) -> int:
+    """Assert that every manifest agrees on the version (or rewrite them under
+    `--fix`), and return an exit code."""
     ap = argparse.ArgumentParser(description="Assert (or --fix) version coherence across the manifests.")
     ap.add_argument("--fix", action="store_true",
                     help="rewrite marketplace.json to match plugin.json's version, then verify")

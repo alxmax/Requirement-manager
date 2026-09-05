@@ -29,6 +29,7 @@ Every bullet below is binding.
 - The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 - The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
+- A `metrics` pillar measures each Python class with the three Chidamber & Kemerer metrics that apply here — WMC, RFC and LCOM. [[REQ-DESIGN-978]]
 
 ## Cases
 CASE-1
@@ -392,3 +393,62 @@ CASE-4 — deterministic
   Given  a repo whose code did not change
   When   `map` runs twice
   Then   both runs write the same `design` block
+
+---
+id: REQ-DESIGN-978
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DESIGN-061]
+---
+
+# Class metrics, the C&K half that applies
+
+## Description
+> Every other check in this review measures a function or a file, so the one shape it
+> could never name is the class that quietly became several: `Scene` carries 62 methods
+> over 14 fields and each individual method looks reasonable. Chidamber & Kemerer measure
+> the class itself, and three of their six say something about code shaped like this one.
+> The pillar reports those three and deliberately omits the rest.
+
+Every bullet below is binding.
+- `_design_metrics` reports `god-class` when a class declares more than `DESIGN_WMC_MAX` methods (C&K WMC, unweighted).
+- `_design_metrics` reports `high-response` when a class's own methods plus the distinct method names they call exceed `DESIGN_RFC_MAX` (C&K RFC).
+- `_design_metrics` reports `low-cohesion` when LCOM1 exceeds `DESIGN_LCOM_MAX`. LCOM1 counts the method pairs sharing no instance field, less the pairs that share one.
+- A class's instance fields are the names assigned through `self.<name>` plus those `__slots__` declares; a class with no such field is skipped for cohesion, because a `dict` subclass keys its state elsewhere and would otherwise score as maximally incohesive.
+- The pillar reads Python only, through `ast`, since counting methods and field access needs a parser rather than the brace-language heuristics.
+- DIT, NOC and CBO are not reported. Their absence is a decision, not a gap: the first two measure an inheritance tree a composing codebase does not have. The third needs type inference this engine does not do.
+- The three thresholds are `CONFIG_KEYS` entries, so a repo can retune them like every other number in the review; it stays advisory and never enters the gate.
+
+## Cases
+CASE-1 — a wide class is named
+  Given  a Python class with more methods than `DESIGN_WMC_MAX`
+  When   `design` runs
+  Then   a `god-class` candidate is reported under Metrics, naming the class and its method count
+
+CASE-2 — a dict subclass is not accused of incohesion
+  Given  a class subclassing `dict` with several methods and no `self.<name>` assignment
+  When   `design` runs
+  Then   no `low-cohesion` candidate is reported for it
+
+CASE-3 — split state is reported
+  Given  a class whose methods touch two disjoint groups of fields, scoring LCOM over the limit
+  When   `design` runs
+  Then   a `low-cohesion` candidate names the class, its LCOM, its method count and its field count
+
+CASE-4 — the thresholds are per repo
+  Given  a `requirements/_config.json` setting `DESIGN_WMC_MAX` to 1
+  When   `design` runs over a two-method class
+  Then   that class is reported as a `god-class`
+
+CASE-5 — a cohesive class is silent
+  Given  a small class whose every method pair shares a field
+  When   `design` runs
+  Then   it reports no metrics candidate for that class
+
+## Context
+**Notes**
+- LCOM1 has a known blind spot this engine does not correct: a constructor that assigns every field pairs with every other method, so a class with two otherwise disjoint halves scores zero as soon as its `__init__` touches both. The metric still finds the shape it was added for — `Scene`, whose 62 methods spread over 14 fields score 1409 — but a low LCOM is weaker evidence than a high one.
+- WMC is unweighted here. C&K define it as the sum of a per-method complexity weight; counting each method as 1 is the conventional simplification, and it is the reading `god-class` reports.
+- These numbers are advisory like every other candidate. `Scene` is reported and nothing gates on it; splitting it would change the public builder API, which is a semver decision rather than a lint fix.

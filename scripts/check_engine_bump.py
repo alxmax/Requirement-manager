@@ -39,6 +39,8 @@ def _engine_diff(diff_args, cwd):
 
 
 def main(argv=None, cwd=None) -> int:
+    """Compare the engine against the chosen baseline and return an exit code:
+    non-zero when reqmap.py changed and MAP_ENGINE_VERSION did not."""
     ap = argparse.ArgumentParser(
         description="Fail when plugin/scripts/reqmap.py changed but MAP_ENGINE_VERSION did not.")
     mode = ap.add_mutually_exclusive_group(required=True)

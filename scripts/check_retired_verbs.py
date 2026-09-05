@@ -35,6 +35,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The engine is the source of truth for what exists; anything else that looks
 # like a verb in an invocation is retired by definition.
 def live_verbs():
+    """The verbs the engine currently registers, read from its COMMANDS registry."""
     src = io.open(os.path.join(ROOT, "plugin", "scripts", "reqmap.py"),
                   encoding="utf-8").read()
     block = re.search(r"^COMMANDS = \{(.*?)^\}", src, re.M | re.S)
@@ -78,6 +79,7 @@ INVOCATION = re.compile(
 
 
 def candidate_files():
+    """The instruction files to scan — the ones a human or an assistant follows."""
     for rel in INSTRUCTION_FILES:
         p = os.path.join(ROOT, rel)
         if os.path.exists(p):
@@ -92,6 +94,8 @@ def candidate_files():
 
 
 def main():
+    """Scan the instruction files for a verb the engine no longer has, and return
+    an exit code — non-zero when one is named."""
     live = live_verbs()
     bad = []
     for rel, path in candidate_files():

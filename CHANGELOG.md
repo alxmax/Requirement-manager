@@ -1,5 +1,35 @@
 # Changelog
 
+## plugin `v5.2.0` — 2026-09-05
+
+**A `metrics` pillar: the half of Chidamber & Kemerer that says something about this
+codebase.** Every other check in the design review measures a function or a file, so the
+one shape it could never name is the class that quietly became several — `Scene` carries
+62 methods over 14 fields and each individual method looks reasonable. The pillar reports
+three C&K metrics per Python class: `god-class` (WMC, methods), `high-response` (RFC, own
+methods plus the distinct ones they call) and `low-cohesion` (LCOM1, method pairs sharing
+no field). Run on this repo it finds exactly one class, `Scene`, on all three counts.
+
+**Three of the six are deliberately absent, and that is recorded rather than left to be
+noticed.** DIT and NOC measure an inheritance tree, and a codebase that composes instead
+of subclassing has none — they would report zero forever and teach a reader to ignore the
+pillar. CBO needs type inference to resolve which class a Python name refers to, and a
+coupling number that is wrong is worse than no coupling number. A TODO item asks the
+`senate` skill to argue that decision, including whether silence on DIT/NOC reads as
+"clean" on a consumer repo where it means "not measured".
+
+**Cohesion is measured over real fields.** A class's state is what `self.<name> = ...`
+assigns plus what `__slots__` declares; a class with no such field — a `dict` subclass
+keys its data elsewhere — is skipped rather than scored as maximally incohesive, which is
+what a naive LCOM does to `Requirement` and `Finding`. LCOM1's own blind spot is recorded
+in the requirement's Context: a constructor touching every field pairs with every method,
+so a low score is weaker evidence than a high one.
+
+**Every public definition in the engine now carries a docstring.** The standards check
+asked for one sentence saying what a caller gets back, and twelve definitions in
+`reqmap.py` plus eight across the repo's tooling scripts had none. `missing-docstring` is
+now zero across the whole repo.
+
 ## plugin `v5.1.0` — 2026-09-05
 
 **The design candidates are in the map, in a tab of their own.** `_map.json` carried the
