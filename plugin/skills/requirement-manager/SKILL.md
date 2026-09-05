@@ -369,6 +369,7 @@ unknown or mistyped key is reported on stderr and ignored.
 | untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
 | tag in a file type the scan never reads (not a member) | **WARN** | exit 0 |
 | orphan code (150+-line program file with no membership tag) | **WARN** (never strict-promoted) | exit 0 |
+| `layer: aggregate` claiming the coverage exemption with an empty `depends_on` | **WARN** | exit 0 |
 
 Use `gate --strict` to promote test-link integrity and drift to errors (useful in CI
 for a corpus where all requirements are confirmed and lock is current).

@@ -1,5 +1,30 @@
 # Changelog
 
+## plugin `v5.6.0` — 2026-09-05
+
+**RM031 — the guard that left with the `confirm` verb.** `gate --audit` was run against
+this repo's own corpus and reported a coverage gap on `REQ-TRACE-935`. Chasing it found
+that the criterion described a command that no longer exists: until `v5.0.0`, the `confirm`
+verb refused to promote a `layer: aggregate` requirement whose `depends_on` was empty. The
+verb was folded away and **nothing replaced the guard.**
+
+That matters because `aggregate` is exempt from the implements and tested-by rules on one
+stated promise — it is covered *downward* by its dependencies. An empty list claims the
+exemption and supplies nothing to be covered by. Reproduced before fixing: a confirmed
+aggregate with `depends_on: []` passed the gate at **0 errors, 0 warnings**, exempt from
+every coverage rule and covered by nothing. RM031 now warns on it (advisory, never a build
+failure), `REQ-TRACE-935`'s CASE-2 describes the rule instead of the removed verb, and
+`_impl_exempt`'s docstring no longer names `confirm` as a caller.
+
+**Three smaller findings from the same self-audit, all introduced in this session:**
+`REQ-VIEWER-977` was confirmed with no `tested-by:` member — the SSR smoke carried its
+`verifies:` tags but never declared membership; a `verifies:` tag still pointed at
+`REQ-DESIGN-978#CASE-7` after that requirement was renumbered to four cases; and the same
+renumbering left CASE-4 printed above CASE-3.
+
+The audit is the point: every one of these was made by the same hand that wrote the checks,
+and the checks found them.
+
 ## plugin `v5.5.0` — 2026-09-05
 
 **`lint_requirement` was 241 lines and is now 26.** It was a flat run of twelve check

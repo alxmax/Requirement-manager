@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.15"
+MAP_ENGINE_VERSION = "2026-09-05.16"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2329,11 +2329,11 @@ IMPL_EXEMPT_LAYERS = ("need", "aggregate")
 def _impl_exempt(meta):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-935
     """True when a requirement is exempt from the "confirmed code must exist" rule.
 
-    One predicate, four callers (gate link-sync, `health`, the risk signals, and
-    `confirm`). They disagreed before: three exempted `layer: need` and `confirm` did
-    not, so the layer's own reference case could not be promoted by the command that
-    exists to promote it — `SYS-SSOT-001` is `confirmed` here only because the file
-    was hand-edited around `confirm`."""
+    One predicate, three callers (gate link-sync, `health`, the risk signals). They
+    disagreed before, when `confirm` was a verb and a fourth caller: it alone did not
+    exempt `layer: need`, so the layer's own reference case could not be promoted by
+    the command that existed to promote it. `confirm` was removed in v5.0.0; the
+    exemption it granted is now guarded by RM031 instead."""
     return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
 
 
@@ -2507,6 +2507,23 @@ def _rule_frontmatter(ctx):  # implements: ARCH-ATOMICFORM-053  # implements: AR
             yield rid, f"{rid}: invalid level {_lvl!r} (expected one of {sorted(VALID_LEVEL)})"
         if m.get("layer") not in VALID_LAYER:
             yield rid, f"{rid}: invalid layer {m.get('layer')!r}"
+
+
+@gate_rule("RM031", "warn")
+def _rule_uncovered_aggregate(ctx):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-935
+    """An `aggregate` is exempt from the implements and tested-by rules because it is
+    covered downward by its `depends_on`. An empty list is therefore not a small
+    omission: it claims the exemption and supplies nothing to be covered by."""
+    for rid in sorted(ctx.cap_ids):
+        r = ctx.req(rid)
+        meta = r["meta"]
+        if meta.get("layer") != "aggregate" or meta.get("status") not in ENFORCED:
+            continue
+        if _as_list(meta.get("depends_on")) or not ctx.in_scope(rid):
+            continue
+        yield rid, ("{}: layer: aggregate with an empty `depends_on` — it is exempt "
+                    "from the implements and tested-by rules because its dependencies "
+                    "cover it, and it has none".format(rid))
 
 
 @gate_rule("RM003", "error")
