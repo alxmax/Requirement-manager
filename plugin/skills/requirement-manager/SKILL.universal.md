@@ -171,6 +171,18 @@ plugin present.
   - **Every layer** requires `## Description` and `## Cases` at
     `confirmed` status. Bus capabilities are not exempt — unspecified bus
     contracts are the most expensive to discover late.
+- **A second, optional axis: `level:`.** Where `layer:` is a requirement's position
+  in the graph, `level:` is its rung on the V-model's left arm — `level: system` (a
+  stakeholder need), `level: architecture` (one capability), `level: code` (one
+  behaviour group).
+  The edge that builds that pyramid is `satisfies:`, not `depends_on:`.
+  **It is off by default and a flat corpus is a supported end state, not a
+  waypoint.** The template ships the field commented out, nothing infers it, and a
+  corpus that declares no `level:` gates exactly as it did before the field existed.
+  It earns itself only once a flat list stops explaining itself — the rungs were
+  added here at ~52 requirements, to give a clause somewhere to say *why* it exists.
+  Below that, adopting it is cost with no reader. `reqmap.py gate --audit` reports
+  where your corpus stands and says the same thing in its own words.
 - **The thread**: code declares membership with a tag, by role:
   - `implements: <ID>`       — hand-written logic (reviewed + tested on change)
   - `generated-from: <ID>`   — derived artifact (regenerated on change)

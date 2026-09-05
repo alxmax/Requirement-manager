@@ -1,5 +1,70 @@
 # Changelog
 
+## plugin `v5.7.0` — 2026-09-06
+
+**The skill contract now says the specification-level axis exists — and that a flat
+corpus is a supported end state, not a waypoint.** A nine-senator audit asked why the
+engine does not produce a three-rung corpus on a consumer repo. The verdict was MODIFY
+(GO 1 / MODIFY 6 / STOP 2) and every code candidate was refused. What survived was
+documentation, and the audit corrected the proposal that raised it.
+
+**What the audit found, verified by running it:** the read-only advisory the proposal
+wanted to build **already ships**. On a throwaway three-file repo with no prior
+requirement-manager, `gate --audit` prints `0/3 carry a level: - the corpus is flat`,
+names all three rungs, names `satisfies:` as the edge that builds the pyramid, and
+states that adopting the axis is a decision and not a defect. The claim that no CLI
+surface mentions levels was true only of `--help` text.
+
+**And the charge of overselling did not land where it was aimed.**
+`plugin/skills/requirement-manager/SKILL.md` — the contract that actually reaches a
+consumer — mentioned the axis zero times, and `CLAUDE.md` is not inside the shipped
+`plugin/` package at all. The gap was not between the tool and its consumers; it was
+that a consumer was never told the field exists.
+
+So: both SKILL files gain one paragraph naming `level: system` / `architecture` / `code`,
+saying it is off by default, that nothing infers it, that a corpus declaring none gates
+exactly as it did before the field existed, and that it earns itself only once a flat
+list stops explaining itself — the rungs were added here at roughly 52 requirements.
+`CLAUDE.md`'s three-level section now reads as a description of this corpus rather than a
+target, cites ADR-0019's dated review (**2027-03-03**, whose pre-committed remedy is
+*removal*, not more documentation), and carries current counts (68/159/236, not
+62/126/197).
+
+**One correction to the record:** ADR-0019's Evidence line cited
+`runs/senate/2026-09-02_*-v-model*.json`, a glob matching no file. It now names the two
+real bundles. The decision is untouched — only the citation was wrong.
+
+Nothing in the engine changed. No new verb, no new flag, no new gate rule.
+
+## plugin `v5.6.2` — 2026-09-06
+
+**Three deep-nesting findings gone, and one silent inconsistency with them.**
+`scan_ac_verifies` and `scan_test_levels` were the same twenty lines twice — same prune,
+same sort, same read, same Python string-masking — differing only in what they did with a
+masked line. Both nested six deep because the per-line work sat at the bottom of four
+enclosing loops. They now share `_walk_code_lines`, which yields `(rel, lineno, line)`
+already masked.
+
+They also disagreed on one thing, silently: `scan_ac_verifies` passed the ignore patterns
+to `_prune_dirs` and `scan_test_levels` did not, so the level scanner descended into
+directories the coverage scanner skipped — including, in a repo with agent worktrees, a
+full second copy of itself. It filtered them out per file afterwards, so the answers
+matched, but it walked the copy to do it. The shared walk prunes.
+
+**`parse_frontmatter` separated finding the block from reading it.** It nested six deep
+because the key/value reader sat inside the block detection: two `if`s to locate the `---`
+fences, then the reader's own loop and its per-shape branches on top. Now
+`_parse_meta_lines` takes the lines between the fences and never has to know where the
+block began. 40 lines → 13, with a 32-line helper.
+
+**Both proved neutral, not assumed neutral**, as `TODO.md` requires: the two scanners were
+run old-versus-new over two code roots — identical output, 193 and 1 capability keys — and
+the parser over all 283 frontmatter blocks in the corpus plus seven hand-made edge cases
+(unclosed inline list, empty block list, BOM, no frontmatter, unterminated fence, a `#`
+inside a quoted value): **0 differing**.
+
+reqmap.py deep-nesting findings 15 → 13; repo-wide 119 → 117.
+
 ## plugin `v5.6.1` — 2026-09-05
 
 **The published Action was broken, and the guard that exists to catch this said OK.**

@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.17"
+MAP_ENGINE_VERSION = "2026-09-06.1"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -936,44 +936,53 @@ def _clean_item(s):  # implements: ARCH-PARSE-001  # implements: REQ-PARSE-891
     return _scalar_value(s)
 
 
+def _parse_meta_lines(lines):  # implements: ARCH-PARSE-001  # implements: REQ-PARSE-891
+    """The frontmatter key/value reader: scalars, inline `[a, b]` lists, and the
+    block form (`key:` then indented `- item` lines). Takes the lines between the
+    fences, so it never has to know where the block began."""
+    meta = {}
+    i = 0
+    while i < len(lines):
+        line = lines[i]; i += 1
+        s = line.strip()
+        if not s or s.startswith("#") or ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        k, v = k.strip(), v.strip()
+        if v.startswith("["):
+            # inline list; tolerate a missing `]` (lenient) — a '#' inside
+            # the brackets is data, a '#' after the close is a comment
+            inner = v[1:v.index("]")] if "]" in v else v[1:]
+            meta[k] = [x for x in (_clean_item(x) for x in inner.split(",")) if x]
+        elif not v:
+            # block-style list: consume following indented `- item` lines.
+            # No items -> keep the empty scalar (e.g. an unset superseded_by).
+            items = []
+            while i < len(lines) and lines[i].lstrip().startswith("- "):
+                items.append(_clean_item(lines[i].lstrip()[2:]))
+                i += 1
+            meta[k] = [x for x in items if x] if items else ""
+        else:
+            # A quoted value keeps an inner '#' verbatim; a bare value treats
+            # '#' as a comment only at the start or after whitespace (so
+            # "issue#123" is preserved). See _scalar_value.
+            meta[k] = _scalar_value(v)
+    return meta
+
+
 def parse_frontmatter(text):  # implements: ARCH-PARSE-001  # implements: REQ-PARSE-891  # implements: REQ-PARSE-892
     """Return (meta_dict, body). Minimal YAML: scalars, inline [a, b] lists, and the
     block form (`key:` then indented `- item` lines). An inline list missing its
     closing `]` is parsed leniently rather than silently kept as a literal string."""
     meta, body = {}, text.lstrip("﻿")  # tolerate a stray UTF-8 BOM
-    if body.startswith("---"):
-        end = body.find("\n---", 3)
-        if end != -1:
-            block = body[3:end]
-            body = body[end + 4:].lstrip("\r\n")   # tolerate a CRLF close (\r\n--- )
-            lines = block.splitlines()
-            i = 0
-            while i < len(lines):
-                line = lines[i]; i += 1
-                s = line.strip()
-                if not s or s.startswith("#") or ":" not in line:
-                    continue
-                k, v = line.split(":", 1)
-                k, v = k.strip(), v.strip()
-                if v.startswith("["):
-                    # inline list; tolerate a missing `]` (lenient) — a '#' inside
-                    # the brackets is data, a '#' after the close is a comment
-                    inner = v[1:v.index("]")] if "]" in v else v[1:]
-                    meta[k] = [x for x in (_clean_item(x) for x in inner.split(",")) if x]
-                elif not v:
-                    # block-style list: consume following indented `- item` lines.
-                    # No items -> keep the empty scalar (e.g. an unset superseded_by).
-                    items = []
-                    while i < len(lines) and lines[i].lstrip().startswith("- "):
-                        items.append(_clean_item(lines[i].lstrip()[2:]))
-                        i += 1
-                    meta[k] = [x for x in items if x] if items else ""
-                else:
-                    # A quoted value keeps an inner '#' verbatim; a bare value treats
-                    # '#' as a comment only at the start or after whitespace (so
-                    # "issue#123" is preserved). See _scalar_value.
-                    meta[k] = _scalar_value(v)
-    return meta, body
+    if not body.startswith("---"):
+        return meta, body
+    end = body.find("\n---", 3)
+    if end == -1:
+        return meta, body
+    block = body[3:end]
+    body = body[end + 4:].lstrip("\r\n")   # tolerate a CRLF close (\r\n--- )
+    return _parse_meta_lines(block.splitlines()), body
 
 
 # A requirement file may hold SEVERAL requirements, one per frontmatter block — a module
@@ -1642,60 +1651,16 @@ def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: ARCH-OR
     return sorted(out)
 
 
-def scan_ac_verifies(code_root, reqs_dir=None):  # implements: ARCH-ACVERIFY-019  # implements: REQ-ACVERIFY-821
-    """Walk the code for `# verifies: REQ-X#AC-N` tags and return
-    `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
-    covers. Same walk discipline as `scan_members` (respects .reqmapignore, prunes
-    .git/node_modules). Empty when no `verifies:` tag exists anywhere."""
-    cover = {}  # cap_id -> {ac_label -> [(file, line)]}
+def _walk_code_lines(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
+    """Yield `(rel_path, lineno, line)` for every scannable line under `code_root`.
+
+    The one walk the tag scanners share: it prunes the same directories, honours the
+    same `.reqmapignore`, descends in the same sorted order, and — for `.py` — masks
+    string-literal content so a tag inside a docstring is not read as a real tag. A
+    caller receives lines already masked and only has to say what a tag means."""
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
-        dirs.sort()                  # deterministic descent (cross-platform stable), mirrors scan_members
-        for fn in sorted(files):
-            if not _is_code_file(fn):
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    lines = f.readlines()
-            except OSError:
-                continue
-            # For .py, mask string-literal content (mirrors _scan_file_tags) so a
-            # `verifies:` inside a docstring/string is not counted as real coverage;
-            # other file types keep the raw scan.
-            is_py = fp.endswith(".py")
-            in_triple = None
-            for i, line in enumerate(lines, 1):
-                s = line
-                if is_py:
-                    s = s.rstrip("\n\r")
-                    if in_triple is not None:
-                        idx = s.find(in_triple)
-                        if idx == -1:
-                            continue
-                        s = s[idx + len(in_triple):]
-                        in_triple = None
-                    s, in_triple = _strip_py_strings(s)
-                for cap, ac in AC_VERIFY_RE.findall(s):
-                    cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
-    return cover
-
-
-def scan_test_levels(code_root, reqs_dir=None):  # implements: ARCH-VLEVEL-037  # implements: REQ-VLEVEL-944  # implements: REQ-VLEVEL-945
-    """Walk the code for `# tested-by: REQ-X @level` tags and return
-    `{cap_id: {level: [(file, line)]}}` — at which V-model level each requirement is
-    verified. Kept separate from `scan_members` on purpose: folding the level into the
-    member tuples would change the `(role, file, line)` shape that `_map.json` and every
-    member consumer depend on. Same walk discipline as `scan_ac_verifies` (respects
-    .reqmapignore, prunes .git/node_modules). Empty when no levelled tag exists."""
-    cover = {}  # cap_id -> {level -> [(file, line)]}
-    ignore = load_ignore(code_root, reqs_dir)
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
         dirs.sort()                  # deterministic descent, mirrors scan_members
         for fn in sorted(files):
             if not _is_code_file(fn):
@@ -1709,29 +1674,51 @@ def scan_test_levels(code_root, reqs_dir=None):  # implements: ARCH-VLEVEL-037  
                     lines = f.readlines()
             except OSError:
                 continue
-            # For .py, mask string-literal content (mirrors _scan_file_tags) so a levelled
-            # tag inside a docstring is not counted as real coverage.
             is_py = fp.endswith(".py")
             in_triple = None
             for i, line in enumerate(lines, 1):
-                s = line
+                masked = line
                 if is_py:
-                    s = s.rstrip("\n\r")
+                    masked = masked.rstrip("\n\r")
                     if in_triple is not None:
-                        idx = s.find(in_triple)
+                        idx = masked.find(in_triple)
                         if idx == -1:
-                            continue
-                        s = s[idx + len(in_triple):]
+                            continue          # still inside the literal
+                        masked = masked[idx + len(in_triple):]
                         in_triple = None
-                    s, in_triple = _strip_py_strings(s)
-                # Strip backticked spans before the search, the same phantom-member guard
-                # `_scan_file_tags` applies: a documented EXAMPLE of a levelled tag must not
-                # register as real coverage. Without it this scanner matches the example in
-                # its own constant's comment.
-                s = _BACKTICK_RE.sub("", s)
-                for idlist, level in TEST_LEVEL_RE.findall(s):
-                    for cap in _ID_RE.findall(idlist):
-                        cover.setdefault(cap, {}).setdefault(level, []).append((rel, i))
+                    masked, in_triple = _strip_py_strings(masked)
+                yield rel, i, masked
+
+
+def scan_ac_verifies(code_root, reqs_dir=None):  # implements: ARCH-ACVERIFY-019  # implements: REQ-ACVERIFY-821
+    """Walk the code for `# verifies: REQ-X#AC-N` tags and return
+    `{cap_id: {ac_label: [(file, line)]}}` — which labelled criterion each test
+    covers. Same walk discipline as `scan_members` (respects .reqmapignore, prunes
+    .git/node_modules). Empty when no `verifies:` tag exists anywhere."""
+    cover = {}  # cap_id -> {ac_label -> [(file, line)]}
+    for rel, i, line in _walk_code_lines(code_root, reqs_dir):
+        for cap, ac in AC_VERIFY_RE.findall(line):
+            cover.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
+    return cover
+
+
+def scan_test_levels(code_root, reqs_dir=None):  # implements: ARCH-VLEVEL-037  # implements: REQ-VLEVEL-944  # implements: REQ-VLEVEL-945
+    """Walk the code for `# tested-by: REQ-X @level` tags and return
+    `{cap_id: {level: [(file, line)]}}` — at which V-model level each requirement is
+    verified. Kept separate from `scan_members` on purpose: folding the level into the
+    member tuples would change the `(role, file, line)` shape that `_map.json` and every
+    member consumer depend on. Shares `_walk_code_lines` with `scan_ac_verifies`, so both honour the same
+    `.reqmapignore` and the same string-masking. Empty when no levelled tag exists."""
+    cover = {}  # cap_id -> {level -> [(file, line)]}
+    for rel, i, line in _walk_code_lines(code_root, reqs_dir):
+        # Strip backticked spans before the search, the same phantom-member guard
+        # `_scan_file_tags` applies: a documented EXAMPLE of a levelled tag must not
+        # register as real coverage. Without it this scanner matches the example in
+        # its own constant's comment.
+        line = _BACKTICK_RE.sub("", line)
+        for idlist, level in TEST_LEVEL_RE.findall(line):
+            for cap in _ID_RE.findall(idlist):
+                cover.setdefault(cap, {}).setdefault(level, []).append((rel, i))
     return cover
 
 
