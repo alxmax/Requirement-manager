@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.9"
+MAP_ENGINE_VERSION = "2026-09-05.10"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -5509,7 +5509,6 @@ def cmd_audit(ws, strict=False, as_json=False):  # implements: ARCH-AUDIT-065  #
     because they only make sense in this report: the exemptions in force, and the shape
     of the corpus on the V-model's left arm."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
-    ac_cover, level_cover = ws.ac_cover, ws.level_cover
     exemptions = _exemptions_in_force(reqs)
     unexplained = [e for e in exemptions if not e["reason"]]
     shape = _corpus_shape(reqs)
