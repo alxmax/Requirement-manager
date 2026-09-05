@@ -28,7 +28,7 @@ knows the rule but the consumer copying a `uses:` line out of a README.
 
 ## Decision
 
-**The Action's alias is the plugin's major.** `check@v4` ships with plugin `4.x`, `check@v5`
+**The Action's alias is the plugin's major.** `check@v5` ships with plugin `4.x`, `check@v5`
 with `5.x`, and so on. The alias moves on every plugin major, whether or not the Action's own
 interface changed that release.
 

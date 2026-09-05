@@ -378,7 +378,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v4
+      - uses: alxmax/requirement-manager/check@v5
 ```
 
 Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.
