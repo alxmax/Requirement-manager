@@ -583,6 +583,19 @@
            1 of 1 and the reviewer was the author. Tacitus's blocking finding is that this
            repo has retracted an author-graded finding set twice in four days. -->
 - [x] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
+- [ ] Engine: the nine long functions still over 80 lines | lane: ops
+      <!-- v5.5.0 split the two with the clearest seams and proved each neutral:
+           lint_requirement 241 -> 26 (six check families, 236 requirements compared
+           old-vs-new with 0 differing findings) and cmd_next 128 -> 78 (analysis split
+           from report, byte-identical output). Still over 80, in descending order:
+           cmd_check 146, _build_parser 133, cmd_audit 124, cmd_candidates 108,
+           cmd_health 105, cmd_retire 97, cmd_extract 93, _scan_file_tags 90,
+           _clarify_questions 90, _health_record 83, cmd_implement 82.
+           Do them ONE AT A TIME, each with an equivalence check against the pre-split
+           engine — the two done here both had a real bug caught that way (a floor check
+           that returned an exit code from a parser factory, and a local left on the wrong
+           side of the cut). A batch of six would hide one. cmd_check is the gate's core
+           and should go last, or not at all. -->
       <!-- Musk's request, recorded not actioned: RFC's formula is `len(methods) + len(called)`,
            so WMC is literally a term inside it, and LCOM1's raw pair count grows mechanically
            with method count. On this repo all three fire on the same single class and have

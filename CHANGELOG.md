@@ -1,5 +1,31 @@
 # Changelog
 
+## plugin `v5.5.0` — 2026-09-05
+
+**`lint_requirement` was 241 lines and is now 26.** It was a flat run of twelve check
+blocks appending to one list, so reading any single check meant scrolling past the eleven
+around it. The blocks already clustered — the comments said so — and each cluster reads a
+different part of the requirement: `_lint_sections` (are the load-bearing sections there
+and non-empty), `_lint_readability` (joins per line, anonymous subjects, sentence and
+clause length), `_lint_acceptance` (criteria count, atomic-form parity), `_lint_shape`
+(over-scoped, fan-out), `_lint_terms` (vague words, redundant modals) and `_lint_graph`
+(file spread, layer mismatch). Every block moved verbatim.
+
+**`cmd_next` was 128 lines and is now 78**, with the analysis in `_next_pending`. It mixed
+working out what is pending with printing it, so the ranking rules were read through the
+formatting and vice versa.
+
+**Both splits are proved neutral, not assumed neutral.** `lint_requirement` was run
+old-versus-new over all 236 requirements: **0 differing findings**. `cmd_next`'s output was
+captured from both engines and compared: **byte-identical**. That check earned its keep
+twice in this session — it is how a floor check that had started returning an exit code
+from a function contracted to return a parser was caught, and how a local left on the wrong
+side of a cut was caught. A batch of six splits would have hidden one.
+
+Engine long-function findings 13 → 11; repo-wide design findings 121 → 119. The nine
+functions still over 80 lines are listed in `TODO.md`, to be done one at a time with the
+same equivalence check — `cmd_check` is the gate's core and is deliberately last.
+
 ## plugin `v5.4.0` — 2026-09-05
 
 **The metrics pillar was calibrated, independently reviewed, and is now one metric
