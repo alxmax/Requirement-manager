@@ -30,7 +30,9 @@ Every bullet below is binding.
 - The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
 - The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
-- A `metrics` pillar measures each Python class with the three Chidamber & Kemerer metrics that apply here — WMC, RFC and LCOM. [[REQ-DESIGN-978]]
+- A `metrics` pillar measures each Python class with the one Chidamber & Kemerer metric that survived calibration — RFC. [[REQ-DESIGN-978]]
+- The metrics that did not survive were measured, reviewed and removed on the evidence, and the measurement is on the record. [[REQ-DESIGN-980]]
+- The review reports how many classes it could not measure for cohesion, on every surface, so an absent finding is never read as a measured pass. [[REQ-DESIGN-979]]
 
 ## Cases
 CASE-1
@@ -414,50 +416,36 @@ satisfies: [ARCH-DESIGN-061]
 > The pillar reports those three and deliberately omits the rest.
 
 Every bullet below is binding.
-- `_design_metrics` reports `wide-class` when a class declares more than `DESIGN_WMC_MAX` methods (C&K WMC, unweighted).
 - `_design_metrics` reports `high-response` when a class's own methods plus the distinct method names they call exceed `DESIGN_RFC_MAX` (C&K RFC).
-- `_design_metrics` reports `low-field-sharing` when LCOM1 exceeds `DESIGN_LCOM_MAX`. LCOM1 counts the method pairs sharing no instance field, less the pairs that share one.
 - A class's instance fields are the names assigned through `self.<name>`, those `__slots__` declares, and those a class-body annotation declares — the form `@dataclass`, attrs and Pydantic use, whose assignment happens in a synthesised `__init__` the tree never contains.
 - A class with no field at all is skipped for cohesion. A `dict` subclass keys its state elsewhere, so it has no field two methods could share.
 - The output names what the pillar did not measure whenever it renders, and when the review renders empty. An absent finding therefore never reads as a measured pass on DIT, NOC or CBO.
 - The pillar reads Python only, through `ast`, since counting methods and field access needs a parser rather than the brace-language heuristics.
 - DIT, NOC and CBO are not reported. Their absence is a decision, not a gap: the first two measure an inheritance tree a composing codebase does not have. The third needs type inference this engine does not do.
-- The three thresholds are `CONFIG_KEYS` entries, so a repo can retune them like every other number in the review; it stays advisory and never enters the gate.
+- `DESIGN_RFC_MAX` is a `CONFIG_KEYS` entry, so a repo can retune it like every other number in the review; the pillar stays advisory and never enters the gate.
+- The pillar names its own known weakness where it prints: RFC counts every distinct method name a class calls, including library calls, so it over-reports routers, GUI callback classes and builder DSLs.
 
 ## Cases
-CASE-1 — a wide class is named
-  Given  a Python class with more methods than `DESIGN_WMC_MAX`
-  When   `design` runs
-  Then   a `wide-class` candidate is reported under Metrics, naming the class and its method count
 
-CASE-2 — a dict subclass is not accused of incohesion
-  Given  a class subclassing `dict` with several methods and no field of any form
+CASE-1 — a class that reaches too far is named
+  Given  a Python class whose own methods plus the distinct method names they call exceed `DESIGN_RFC_MAX`
   When   `design` runs
-  Then   no `low-field-sharing` candidate is reported for it
+  Then   a `high-response` candidate is reported under Metrics, naming both counts
 
-CASE-6 — a declarative class is measured, not skipped
-  Given  a `@dataclass` whose fields are class-body annotations and whose methods split
-         across two disjoint field groups
-  When   `design` runs
-  Then   its fields are detected and its cohesion is scored, rather than silently skipped
+CASE-2 — the threshold is per repo
+  Given  a `requirements/_config.json` setting `DESIGN_RFC_MAX` to 2
+  When   `design` runs over a small class
+  Then   that class is reported as `high-response`
 
-CASE-3 — split state is reported
-  Given  a class whose methods touch two disjoint groups of fields, scoring LCOM over the limit
-  When   `design` runs
-  Then   a `low-field-sharing` candidate names the class, its LCOM, its method count and its field count
 
-CASE-7 — the pillar says what it did not measure
+CASE-4 — the pillar says what it did not measure
   Given  any repo
   When   `design` renders the metrics pillar, or reports no candidate at all
-  Then   the output names DIT, NOC and CBO as not measured
+  Then   the output names the metrics it does not compute, and its own over-reporting shapes
 
-CASE-4 — the thresholds are per repo
-  Given  a `requirements/_config.json` setting `DESIGN_WMC_MAX` to 1
-  When   `design` runs over a two-method class
-  Then   that class is reported as a `wide-class`
 
-CASE-5 — a cohesive class is silent
-  Given  a small class whose every method pair shares a field
+CASE-3 — a small class is silent
+  Given  a class with two methods calling almost nothing
   When   `design` runs
   Then   it reports no metrics candidate for that class
 
@@ -469,3 +457,101 @@ CASE-5 — a cohesive class is silent
 - The thresholds 20/50/20 are the conventional textbook numbers and are UNTUNED: C&K (1994) proposed the metrics and no thresholds, so there is no primary source to cite. They have not been calibrated against any corpus and are `CONFIG_KEYS` entries a consumer is expected to retune.
 - Fire rate on this repo, published rather than asserted: 1 of 9 non-test classes carries a candidate (11.1%); the same run is 3 of 121 design findings (2.5%) and 1 of 31 files (3.2%). ADR-0016's 5-40% band has no defined denominator for a code-level check — every prior application measured the requirement corpus `lint` visits — so the band is cited here as context, not as a passed bar. The confirmation sample is 1 of 1 and was made by this pillar's own author, which ADR-0022 does not accept as independent; that obligation is open and tracked in TODO.md.
 - Audited by the Senate on 2026-09-05 (`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`, verdict MODIFY, GO 4 / MODIFY 4 / STOP 1). Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and Musk's request to delete WMC and LCOM1 as redundant with RFC.
+
+---
+id: REQ-DESIGN-979
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DESIGN-061]
+---
+
+# What the review could not measure
+
+## Description
+> A zero in a report means one of two very different things: measured and clean, or
+> never measured. The metrics pillar reads Python classes only, reports three of C&K's
+> six, and cannot see the state of a class that keeps it somewhere `ast` cannot follow.
+> Every one of those produces the same silence, and silence in a report is read as
+> good news. The review therefore counts what it could not measure and says so.
+
+Every bullet below is binding.
+- `_design_cohesion_skipped` counts the classes in a parsed tree that declare two or more methods and no field the engine can see, which are exactly the classes whose cohesion was not measured.
+- `design` prints that count under the metrics pillar and again when it reports no candidate at all, in both cases naming it as unmeasured rather than clean.
+- `design --json` carries `metrics_scope` and `cohesion_skipped` beside `findings`, so a machine reading the output receives the same caveats as a human reading the text.
+- A file that does not parse contributes zero to the count rather than raising, because a design review is advisory and never fails on a file the rest of the engine tolerates.
+
+## Cases
+CASE-1 — the count finds the unmeasurable
+  Given  a module with a `dict` subclass carrying three methods and no `self.<name>` assignment
+  When   `_design_cohesion_skipped` runs over it
+  Then   it returns 1
+
+CASE-2 — a measurable class is not counted
+  Given  a module whose only class assigns a field in `__init__` and has two methods
+  When   `_design_cohesion_skipped` runs over it
+  Then   it returns 0
+
+CASE-3 — the machine surface carries the caveats
+  Given  any repo with at least one Python file
+  When   `design --json` runs
+  Then   its object carries `metrics_scope` naming DIT, NOC and CBO, and a `cohesion_skipped` count
+
+CASE-4 — an unparseable file is tolerated
+  Given  a file that is not valid Python
+  When   the count runs over its source
+  Then   it returns 0 and nothing is raised
+
+## Context
+**Notes**
+- The count is deliberately not a finding. It is a property of the run, like the file count, and promoting it to a candidate would report a class for the crime of being unreadable to this engine.
+
+---
+id: REQ-DESIGN-980
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DESIGN-061]
+---
+
+# The metrics that did not survive calibration
+
+## Description
+> The pillar shipped with three C&K metrics on the strength of one repo and no review.
+> A Senate audit refused that, so all three were measured over seven Python corpora and
+> every flag was judged by a reviewer who had not written them. Two metrics failed:
+> across 65 unique classes neither WMC nor LCOM1 ever fired without RFC, and the
+> independent reviewer confirmed none of their flags. They are gone. This requirement
+> records the measurement, because a number nobody can find is a number nobody can
+> challenge.
+
+Every bullet below is binding.
+- `_design_lcom` counts only the methods that touch at least one instance field. A method touching none has no state to share, and counting it as disjoint from every sibling adds one pair per sibling while measuring nothing.
+- Cohesion is not computed for a class with fewer than two fields, because a single field admits no grouping for methods to be split across.
+- `wide-class` and `low-field-sharing` are not reported, and their thresholds are gone from `CONFIG_KEYS`. RFC's own detail line still names the class's method count, so nothing a reader saw is lost.
+- `_design_lcom` and `_design_py_fields` remain, tested, because the cohesion-coverage count reads the fields and a future cohesion variant starts from this reading rather than from nothing.
+
+## Cases
+CASE-1 — a field-less helper does not create incohesion
+  Given  a class with one field, one method using it and six helpers touching no field
+  When   `_design_lcom` runs over it
+  Then   it returns 0, where counting the helpers as disjoint returned 26
+
+CASE-2 — one field is not a grouping
+  Given  a class with a single field and several methods
+  When   `design` runs
+  Then   no cohesion candidate is reported for it
+
+CASE-3 — the dropped kinds are gone
+  Given  any repo
+  When   `design --json` runs
+  Then   no finding carries kind `wide-class` or `low-field-sharing`
+
+## Context
+**Notes**
+- The measurement, reproducible from `plugin/scripts/reqmap.py` over any set of Python trees: 65 unique classes across 7 corpora after collapsing 8 byte-identical copies and excluding `archive/`, `old/` and `backup/` directories, which hold successive saved versions of the same file rather than independent classes. 14 classes flagged, a fire rate of 21.5%.
+- The independent review: 10 of 14 flags confirmed, 4 refused — 71%, below the 8-in-10 an independent confirmation is expected to clear. Per metric before the repair: `wide-class` 0 confirmed of 2, `high-response` 10 of 14, `low-field-sharing` 2 of 5. After excluding field-less methods `low-field-sharing` stopped firing on both classes it was right about and kept firing on the two it was wrong about.
+- RFC's own precision is 10 of 14 and it is kept anyway, with its weakness printed rather than hidden: all four refusals are classes whose call count is library calls — a request router delegating to free functions, a GUI callback class, and a builder DSL over one shared accumulator. A reader who meets one of those three shapes can dismiss the flag in seconds, which is the most an advisory signal at 71% can honestly ask for.
+- Six of the ten confirmed flags are copies of three distinct classes across corpora, so the distinct-finding count is nearer three. The reviewer also noted that all ten sit in throwaway analysis scripts. Both facts are recorded here rather than netted out of the headline.
