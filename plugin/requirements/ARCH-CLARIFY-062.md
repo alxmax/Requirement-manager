@@ -157,3 +157,58 @@ CASE-4 — an unknown id is an error, an answered requirement is not
   Given  an id that does not exist, and a requirement with no detectable question
   When   `clarify` runs on each
   Then   the first exits 1 and the second exits 0
+
+
+--------------------
+
+
+---
+id: REQ-CLARIFY-975
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CLARIFY-062]
+---
+
+# An answer can raise a question the old text never had
+
+## Description
+> Clarifying a requirement means editing it, and an edit is new text: a clause that
+> answers one question can introduce an unbounded quantity, a number with no unit, or a
+> case with no failure path. Nobody re-reads the whole corpus after an edit, so the new
+> question sits unread. `sync` runs after every edit anyway, which makes it the one place
+> the comparison costs nothing.
+
+Every bullet below is binding.
+- `sync` records, per requirement, the RULES of its blocking open questions, in
+  `requirements/_clarifylock.json`. **Requirements with no questions are recorded too**,
+  so "absent from the snapshot" means "never seen" and nothing else. Otherwise a
+  requirement going from zero questions to one would be mistaken for a new file and
+  silenced, which is the case this check exists to catch.
+- On the next `sync`, a rule present now and absent from the snapshot is reported as a
+  NEW question, named with its requirement.
+- **The rule is the fingerprint, not the prose.** Rewording a clause that still has the
+  same defect is the same question, not a new one.
+- **A requirement absent from the snapshot is not reported.** A newly-added requirement
+  has no previous state, so all its questions would read as new, which is noise.
+- The sidecar fails open: absent, corrupt, or written by a newer schema, it reads as
+  empty and the run reports nothing rather than crashing.
+- This is advisory. It never changes an exit code, because an unanswered question is a
+  conversation, not a build failure.
+
+## Cases
+CASE-1 — an edit that raises a new question is reported
+  Given  a requirement synced once, then edited so a new blocking rule fires
+  When   `sync` runs
+  Then   it names that requirement and the new rule, and the exit code is unchanged
+
+CASE-2 — an unchanged question is not re-reported
+  Given  a requirement whose blocking questions are the same as at the last sync
+  When   `sync` runs
+  Then   nothing is reported as new
+
+CASE-3 — a new requirement's questions are not reported as new
+  Given  a requirement that has never been in the snapshot
+  When   `sync` runs
+  Then   its questions are not reported as new

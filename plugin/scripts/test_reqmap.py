@@ -10597,5 +10597,89 @@ class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
             self.assertEqual(self._status(rq), "status: confirmed")
 
 
+class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-975
+    """Clarifying one requirement can raise a question its old text never had."""
+
+    HEAD = ("---\n"
+            "id: AREA-Q-001\n"
+            "status: confirmed\n"
+            "level: code\n"
+            "layer: feature\n"
+            "owner: A\n"
+            "---\n"
+            "\n"
+            "# Titled\n"
+            "\n"
+            "## Description\n"
+            "> Why.\n"
+            "\n"
+            "Every bullet below is binding.\n")
+    CASES = ("\n## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+
+    def _write_req(self, rq, clauses):
+        _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + clauses + self.CASES)
+
+    def _sync(self, d):
+        rq = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rq)
+        members = R.scan_members(d, rq)
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            R.cmd_check(reqs, members, rq, True, d, accept_drift=True)
+        return buf.getvalue()
+
+    def _seed(self, d, clauses):
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        self._write_req(rq, clauses)
+        _write(os.path.join(d, "m.py"), tag("AREA-Q-001") + "\ndef f():\n    return 1\n")
+        return rq
+
+    def test_a_new_blocking_question_is_reported(self):  # verifies: REQ-CLARIFY-975#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            self._sync(d)                                  # snapshot
+            self._write_req(rq, "- It does one thing.\n")  # unchanged body, then break it
+            # remove the Cases section entirely -> the `no-cases` blocking rule fires
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            out = self._sync(d)
+            self.assertIn("New open question(s)", out)
+            self.assertIn("AREA-Q-001", out)
+
+    def test_an_unchanged_question_is_not_re_reported(self):  # verifies: REQ-CLARIFY-975#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            self._sync(d)                                  # first sight of the question
+            out = self._sync(d)                            # same question, second run
+            self.assertNotIn("New open question(s)", out)
+
+    def test_a_brand_new_requirement_is_not_reported(self):  # verifies: REQ-CLARIFY-975#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            out = self._sync(d)                            # never been in the snapshot
+            self.assertNotIn("New open question(s)", out)
+
+
+class SeparatorIsNotContract(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: REQ-DRIFT-841
+    """Adding a requirement to a module file must not change its neighbour's hash."""
+
+    ONE = ("---\nid: AREA-S-001\nstatus: confirmed\nlevel: code\nlayer: feature\n"
+           "owner: A\n---\n\n# One\n\n## Description\n> Why.\n\n"
+           "Every bullet below is binding.\n- It does one thing.\n\n"
+           "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+    TWO = ("\n\n--------------------\n\n\n"
+           "---\nid: AREA-S-002\nstatus: draft\nlevel: code\nlayer: feature\n"
+           "owner: A\n---\n\n# Two\n\n## Description\n> Why.\n\n"
+           "Every bullet below is binding.\n- It does another thing.\n\n"
+           "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+
+    def test_appending_a_block_leaves_the_first_hash_alone(self):
+        alone = R.split_requirement_blocks(self.ONE)[0]
+        with_neighbour = R.split_requirement_blocks(self.ONE + self.TWO)[0]
+        self.assertEqual(R.binding_hash(alone), R.binding_hash(with_neighbour))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

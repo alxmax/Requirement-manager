@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.4"
+MAP_ENGINE_VERSION = "2026-09-05.5"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1948,6 +1948,9 @@ def _atomic_scenario_then_count(scen_lines):  # implements: ARCH-ATOMICFORM-053
     return sum(1 for line in scen_lines if _ATOMIC_THEN_RE.match(line.strip()))
 
 
+_BLOCK_SEP_RE = re.compile(r"^-{3,}$")
+
+
 def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053  # implements: REQ-DRIFT-841
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
@@ -1973,6 +1976,14 @@ def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMIC
                 # in the frontmatter and out of the span. No requirement carried a
                 # blockquote inside a normative section when this was added, so no
                 # existing hash changes.
+                continue
+            if _BLOCK_SEP_RE.match(line.strip()):
+                # The `--------------------` that separates two requirements in a module
+                # file rides along on the block BEFORE it, so it landed inside that
+                # block's normative span. Adding a requirement to a module file then
+                # changed the PREVIOUS one's hash — a phantom edit that now costs its
+                # confirmation (REQ-PROMOTE-974). A separator is structure, never an
+                # obligation.
                 continue
             # rstrip (not strip): leading indent is structure — unnesting a sub-clause
             # is a real change and must drift.
@@ -2050,6 +2061,51 @@ def save_memberlock(reqs_dir, member_hashes):  # implements: ARCH-MEMBERDRIFT-02
     payload = {"_schema": MEMBERLOCK_SCHEMA, "members": member_hashes}
     with open(_memberlock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, sort_keys=True)
+
+
+CLARIFYLOCK_SCHEMA = 1
+
+
+def _clarifylock_path(reqs_dir):  # implements: REQ-CLARIFY-975
+    return os.path.join(reqs_dir, "_clarifylock.json")
+
+
+def load_clarifylock(reqs_dir):  # implements: REQ-CLARIFY-975
+    """Return {rid: [rule, ...]} of the blocking questions each requirement had at the
+    last sync, or {} when absent/corrupt or written by a NEWER schema — fail open, the
+    same way the other sidecars do, so a forward-incompatible file degrades to
+    'everything looks new' rather than crashing."""
+    try:
+        with open(_clarifylock_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict) or data.get("_schema", 0) > CLARIFYLOCK_SCHEMA:
+        return {}
+    got = data.get("questions")
+    return got if isinstance(got, dict) else {}
+
+
+def save_clarifylock(reqs_dir, snapshot):  # implements: REQ-CLARIFY-975
+    os.makedirs(reqs_dir, exist_ok=True)
+    payload = {"_schema": CLARIFYLOCK_SCHEMA, "questions": snapshot}
+    with open(_clarifylock_path(reqs_dir), "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+
+def blocking_question_rules(reqs):  # implements: REQ-CLARIFY-975
+    """{rid: sorted [rule]} for EVERY requirement, empty list included.
+
+    The RULE is the fingerprint, not the prose: two runs of the same defect are the
+    same question, and rewording a clause does not invent a new one.
+
+    Requirements with no questions are recorded too, on purpose. Otherwise "absent
+    from the snapshot" would mean both "never seen" and "seen, and clean", so a
+    requirement going from zero questions to one would be mistaken for a brand-new
+    file and silenced — which is exactly the case this check exists to catch."""
+    return {rid: sorted({q["rule"] for q in _clarify_questions(rid, r, reqs)
+                         if q["severity"] == "blocking"})
+            for rid, r in reqs.items()}
 
 
 def untracked_locks(reqs_dir):  # implements: ARCH-CHECK-006  # implements: REQ-CHECK-830
@@ -2851,6 +2907,22 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                              if ctx.full_member_hashes is not None
                              else compute_member_hashes(code_root, full_members))
             print("lock updated.")
+        # Clarifying one requirement can raise questions the previous text never had —
+        # a new clause with an unbounded quantity, a case with no failure path. Nobody
+        # re-reads the whole corpus after an edit, so the diff is reported here, where
+        # every edit already passes.  # implements: REQ-CLARIFY-975
+        _q_now = blocking_question_rules(reqs)
+        _q_before = load_clarifylock(reqs_dir)
+        _fresh = sorted((rid, sorted(set(rules) - set(_q_before.get(rid, []))))
+                        for rid, rules in _q_now.items())
+        _fresh = [(rid, rules) for rid, rules in _fresh if rules and rid in _q_before]
+        if _fresh:
+            print("")
+            print("New open question(s) since the last sync — an edit raised them:")
+            for rid, rules in _fresh:
+                print("  %s: %s" % (rid, ", ".join(rules)))
+            print("  Read them with `reqmap.py clarify <ID>`.")
+        save_clarifylock(reqs_dir, _q_now)
 
     # Integration-artifact freshness (this repo's generated tool_definition.json + the
     # SKILL.universal.md command table); skipped silently when the artifacts don't exist.
