@@ -98,7 +98,7 @@ satisfies: [ARCH-MAP-007]
 
 ## Description
 > Everything that draws or publishes a picture of the corpus reads `_map.json`; nothing draws
-> from the requirement files directly. `map` writes it alongside the diagrams and viewer;
+> from the requirement files directly. `map` writes it alongside the diagrams and viewer.
 
 Every bullet below is binding.
 - `map` generates `_map.json` under `requirements/`.
@@ -111,10 +111,10 @@ Every bullet below is binding.
   by construction — there is no markup context for it to break out of.
 
 ## Cases
-CASE-1 — map and export both produce _map.json
+CASE-1 — map produces _map.json
   Given  a corpus of requirements
-  When   `map` runs, and separately `export` runs
-  Then   both write `requirements/_map.json`, and `export` writes no other file
+  When   `map` runs
+  Then   it writes `requirements/_map.json`
 
 CASE-2 — the graph has one node per requirement and one edge per dependency
   Given  a corpus of N requirements carrying a total of M `depends_on` links

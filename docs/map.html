@@ -704,7 +704,15 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": []
+      "risks": [],
+      "i18n": {
+        "ro": {
+          "title": "Un singur raport cu tot ce poate descoperi motorul",
+          "intent": "Motorul a căpătat câte un verb per întrebare — este legat, a derivat, este duplicat, este etichetat, putrezește designul — iar a răspunde la „cum stă acest repo\" a ajuns să însemne să ți le amintești pe toate. Un cititor care nu cunoaște deja lista de comenzi nu întâlnește niciodată majoritatea răspunsurilor. `audit` rulează acele treceri împreună și tipărește un singur raport, iar la final aduce cele două lucruri pe care niciun verb nu le raportează, fiindcă au sens doar aici: ce constatări a amuțit cineva și dacă corpusul are, în general, o formă.",
+          "contract": "> Motorul a căpătat câte un verb per întrebare — este legat, a derivat, este duplicat, este\n> etichetat, putrezește designul — iar a răspunde la „cum stă acest repo\" a ajuns să însemne\n> să ți le amintești pe toate. Un cititor care nu cunoaște deja lista de comenzi nu întâlnește\n> niciodată majoritatea răspunsurilor. `audit` rulează acele treceri împreună și tipărește un\n> singur raport, iar la final aduce cele două lucruri pe care niciun verb nu le raportează,\n> fiindcă au sens doar aici: ce constatări a amuțit cineva și dacă corpusul are, în general, o formă.\n\nFiecare punct de mai jos este obligatoriu.\n- `audit` rulează fiecare trecere de descoperire și tipărește un singur raport, luându-și codul de ieșire doar de la poartă. [[REQ-AUDIT-970]]\n- Fiecare exceptare în vigoare este listată, iar una care nu consemnează niciun motiv este ea însăși un avertisment. [[REQ-AUDIT-971]]\n- Raportul spune cum stă corpusul pe brațul stâng al modelului V și o spune fără a eșua. [[REQ-AUDIT-972]]\n- `sync` se încheie numind ceea ce ar raporta auditul, astfel încât momentul în care corpusul se schimbă este momentul în care ies la iveală problemele lui. [[REQ-AUDIT-973]]",
+          "acceptance": "CASE-1\n  Given  un corpus cu o poartă curată\n  When   rulează `audit`\n  Then   iese cu 0, iar raportul său numește fiecare secțiune pe care a rulat-o\n\nCASE-2\n  Given  un corpus a cărui poartă raportează o eroare\n  When   rulează `audit`\n  Then   iese cu cod diferit de zero, iar secțiunile consultative apar în continuare integral\n\nCASE-3\n  Given  orice corpus\n  When   rulează `audit --json`\n  Then   ieșirea se parsează ca JSON și poartă înregistrările pentru poartă, sănătate, exceptări și formă"
+        }
+      }
     },
     {
       "id": "REQ-AUDIT-970",
@@ -760,7 +768,15 @@
       "priority": "",
       "risks": [],
       "clauses": 5,
-      "covered": 5
+      "covered": 5,
+      "i18n": {
+        "ro": {
+          "title": "Fiecare pas de descoperire, un singur raport, un singur cod de ieșire",
+          "intent": "Rularea manuală a cinci comenzi pentru a afla ce este în neregulă cu un repo înseamnă că patru dintre ele nu sunt rulate niciodată. Raportul își pune rezumatul primul — o linie per semnal, fiecare numind verbul care l-a produs — apoi, dedesubt, rezultatul propriu al fiecărei secțiuni, astfel încât un cititor poate acționa pe baza rezumatului sau poate citi detaliul fără a rula nimic a doua oară.",
+          "contract": "> Rularea manuală a cinci comenzi pentru a afla ce este în neregulă cu un repo înseamnă că patru\n> dintre ele nu sunt rulate niciodată. Raportul își pune rezumatul primul — o linie per semnal,\n> fiecare numind verbul care l-a produs — apoi, dedesubt, rezultatul propriu al fiecărei secțiuni,\n> astfel încât un cititor poate acționa pe baza rezumatului sau poate citi detaliul fără a rula\n> nimic a doua oară.\n\nFiecare punct de mai jos este obligatoriu.\n- `audit` rulează gate-ul, raportul de risc al corpusului, scanarea de contracte duplicate,\n  analiza de design și raportul de acoperire cu tag-uri și tipărește rezultatul fiecăruia sub\n  propriul titlu.\n- Raportul se deschide cu un rezumat care numește, pentru fiecare semnal, ce a fost găsit și ce\n  comandă îl produce pe cont propriu.\n- Codul de ieșire este cel al gate-ului. Orice altă secțiune este consultativă și nu îl poate\n  schimba niciodată.\n- O secțiune care ridică o excepție este raportată ca secțiune eșuată, iar restul raportului tot\n  se tipărește. Un raport parțial valorează mai mult decât un traceback.\n- `--json` emite constatările gate-ului, înregistrarea de sănătate, înregistrarea de design,\n  numărul de elemente fără tag, exceptările și forma corpusului ca un singur obiect.",
+          "acceptance": "CASE-1 — o singură comandă le rulează pe toate\n  Given  un corpus cu cerințe și cod\n  When   rulează `audit`\n  Then   rezultatul conține o secțiune pentru gate, risc, duplicate, design și acoperirea cu tag-uri\n\nCASE-2 — doar gate-ul decide codul de ieșire\n  Given  un corpus al cărui gate este curat, dar care are contracte duplicate și candidați de design\n  When   rulează `audit`\n  Then   iese cu 0\n\nCASE-3 — un gate care eșuează face auditul să eșueze\n  Given  un corpus cu un tag de apartenență orfan\n  When   rulează `audit`\n  Then   iese cu un cod diferit de zero\n\nCASE-4 — o secțiune care ridică o excepție nu doboară raportul\n  Given  un pas de descoperire care ridică o excepție\n  When   rulează `audit`\n  Then   acea secțiune raportează eșecul și fiecare altă secțiune tot se tipărește\n\nCASE-5 — forma structurată poartă aceleași semnale\n  Given  orice corpus\n  When   rulează `audit --json`\n  Then   obiectul parsat conține `gate`, `health`, `exemptions` și `shape`"
+        }
+      }
     },
     {
       "id": "REQ-AUDIT-971",
@@ -818,7 +834,15 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4
+      "covered": 4,
+      "i18n": {
+        "ro": {
+          "title": "O derogare pe care nimeni nu a justificat-o este ea însăși o constatare",
+          "intent": "O derogare este o constatare pe care cineva a decis să nu o vadă. A fost totodată lucrul cel mai ieftin la care se putea recurge: un singur token în frontmatter reduce la tăcere o verificare permanent, nimeni nu trebuie să spună de ce, iar nimic nu o mai menționează vreodată — așa că „împarte această cerință” și „adaugă un cuvânt aici” costă cititorul la fel, iar varianta greșită a câștigat. Listarea fiecărei derogări împiedică lucrurile reduse la tăcere să devină invizibile, iar avertizarea asupra uneia neexplicate face ca derogarea să coste o frază cu care un recenzent poate polemiza.",
+          "contract": "> O derogare este o constatare pe care cineva a decis să nu o vadă. A fost totodată lucrul\n> cel mai ieftin la care se putea recurge: un singur token în frontmatter reduce la tăcere o\n> verificare permanent, nimeni nu trebuie să spună de ce, iar nimic nu o mai menționează\n> vreodată — așa că „împarte această cerință” și „adaugă un cuvânt aici” costă cititorul la\n> fel, iar varianta greșită a câștigat. Listarea fiecărei derogări împiedică lucrurile reduse\n> la tăcere să devină invizibile, iar avertizarea asupra uneia neexplicate face ca derogarea\n> să coste o frază cu care un recenzent poate polemiza.\n\nFiecare punct de mai jos este obligatoriu.\n- Raportul listează fiecare intrare `lint_exempt:` și `gate_exempt:` din corpus, împreună cu\n  cerința sa și verificarea pe care o reduce la tăcere.\n- Un motiv este considerat consemnat atunci când proza cerinței însăși menționează pe nume\n  verificarea redusă la tăcere. Testul nu poate judeca dacă motivul este unul bun și nici nu\n  încearcă: face ca derogarea să coste o frază, nimic mai mult.\n- Poarta avertizează o dată pentru fiecare derogare nejustificată. Constatarea este doar de\n  tip avertisment și nu este niciodată promovată sub `--strict` — scopul este ca reducerea la\n  tăcere să coste ceva, nu ca ea să devină imposibilă.\n- Raportul indică `clarify <ID> --decompose` drept ceea ce trebuie făcut în schimb cu o\n  cerință supradimensionată, iar constatările `ac-count-high` și `over-scoped` îl indică și ele.",
+          "acceptance": "CASE-1 — o derogare cu un motiv scris este curată\n  Given  o cerință care poartă `lint_exempt: [file-spread]` a cărei proză explică de ce\n  When   rulează poarta\n  Then   nu se emite niciun avertisment de derogare pentru ea\n\nCASE-2 — o derogare neexplicată este un avertisment\n  Given  o cerință care poartă `lint_exempt: [ac-count-high]` și nu o mai menționează niciodată\n  When   rulează poarta\n  Then   un avertisment numește cerința, câmpul și verificarea redusă la tăcere\n\nCASE-3 — avertismentul de derogare nu face niciodată să eșueze o construcție\n  Given  un corpus a cărui singură constatare este o derogare nejustificată\n  When   rulează `gate --strict`\n  Then   constatarea este în continuare un avertisment, iar rularea se încheie tot cu 0\n\nCASE-4 — constatările privind împărțirea numesc unealta care împarte\n  Given  o cerință cu mai multe criterii de acceptare decât plafonul\n  When   linterul o raportează\n  Then   constatarea numește `clarify <ID> --decompose`"
+        }
+      }
     },
     {
       "id": "REQ-AUDIT-972",
@@ -866,7 +890,15 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3
+      "covered": 3,
+      "i18n": {
+        "ro": {
+          "title": "Dacă corpusul are sau nu o formă",
+          "intent": "`level:` este livrat comentat în șablon, astfel încât un corpus existent își păstrează comportamentul, iar unul nou nu dobândește niciodată axa de la sine. Consecința despre care nimeni nu a fost înștiințat: un repo poate rula motorul luni de zile cu fiecare cerință pe aceeași treaptă, iar fiecare suprafață care citește un nivel îi atribuie tacit valoarea implicită. Raportul spune asta o dată și spune care sunt cele trei trepte, pentru că un cititor care nu a văzut niciodată piramida nu o poate cere.",
+          "contract": "> `level:` este livrat comentat în șablon, astfel încât un corpus existent își păstrează\n> comportamentul, iar unul nou nu dobândește niciodată axa de la sine. Consecința despre care\n> nimeni nu a fost înștiințat: un repo poate rula motorul luni de zile cu fiecare cerință pe\n> aceeași treaptă, iar fiecare suprafață care citește un nivel îi atribuie tacit valoarea\n> implicită. Raportul spune asta o dată și spune care sunt cele trei trepte, pentru că un\n> cititor care nu a văzut niciodată piramida nu o poate cere.\n\nFiecare punct de mai jos este obligatoriu.\n- Raportul indică câte cerințe declară un `level:`, cum se distribuie acestea pe\n  trepte și câte muchii `satisfies:` există.\n- Un corpus în care mai puțin de o zecime dintre cerințe declară un nivel este numit plat, iar\n  raportul numește atunci cele trei trepte și muchia `satisfies:` care construiește piramida.\n- Nimic din toate acestea nu eșuează și nu avertizează în gate. Adoptarea unei axe de nivel este o decizie, iar\n  un corpus care a decis altfel nu este defect.",
+          "acceptance": "CASE-1 — un corpus cu niveluri este descris, nu consiliat\n  Given  un corpus în care fiecare cerință declară un nivel\n  When   rulează `audit`\n  Then   sunt afișate numărătorile pe trepte și nu apare niciun sfat privind corpusul plat\n\nCASE-2 — un corpus plat este numit ca fiind plat\n  Given  un corpus în care nicio cerință nu declară un nivel\n  When   rulează `audit`\n  Then   raportul spune că acest corpus este plat și numește cele trei trepte\n\nCASE-3 — forma nu ajunge niciodată la codul de ieșire\n  Given  un corpus plat cu un gate curat\n  When   rulează `audit`\n  Then   iese cu 0"
+        }
+      }
     },
     {
       "id": "REQ-AUDIT-973",
@@ -918,7 +950,15 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3
+      "covered": 3,
+      "i18n": {
+        "ro": {
+          "title": "Sync spune ce a găsit",
+          "intent": "`sync` este momentul în care corpusul tocmai a fost rescris, iar până acum raporta doar ce a regenerat. Un repo putea rula sync luni întregi fără să întâlnească vreodată scanarea de duplicate, revizuirea de design, lista de excepții sau faptul că fișierul său TODO a încetat să mai urmărească ce a fost livrat. Sync se încheie acum cu o linie pentru fiecare semnal care nu este curat, și cu absolut nimic atunci când totul este curat.",
+          "contract": "> `sync` este momentul în care corpusul tocmai a fost rescris, iar până acum raporta doar ce\n> a regenerat. Un repo putea rula sync luni întregi fără să întâlnească vreodată scanarea de\n> duplicate, revizuirea de design, lista de excepții sau faptul că fișierul său TODO a încetat\n> să mai urmărească ce a fost livrat. Sync se încheie acum cu o linie pentru fiecare semnal\n> care nu este curat, și cu absolut nimic atunci când totul este curat.\n\nFiecare punct de mai jos este obligatoriu.\n- După un `sync` reușit, se afișează câte o linie pentru fiecare semnal care nu este curat:\n  excepții nejustificate, un corpus plat, candidați de design, cod fără etichete și un fișier TODO\n  al cărui cel mai recent milestone este în urma celui al cerințelor.\n- Un repo în care fiecare dintre acestea este curat nu vede nicio ieșire suplimentară, astfel încât o linie care chiar apare\n  este o noutate, nu zgomot.\n- Coada indică spre `audit` pentru raportul complet și nu schimbă nici ce scrie `sync`,\n  nici codul său de ieșire.",
+          "acceptance": "CASE-1 — un semnal care nu este curat este numit\n  Given  un corpus cu o excepție nejustificată\n  When   `sync` se finalizează\n  Then   ieșirea sa numește acel semnal și indică spre `audit`\n\nCASE-2 — un corpus curat rămâne tăcut\n  Given  un corpus în care fiecare semnal auditat este curat\n  When   `sync` se finalizează\n  Then   nu se afișează nicio coadă consultativă\n\nCASE-3 — coada este doar de raportare\n  Given  orice corpus\n  When   `sync` se finalizează\n  Then   codul de ieșire și fișierele scrise sunt exact cele care erau fără coadă"
+        }
+      }
     },
     {
       "id": "ARCH-CANDIDATES-009",
@@ -2201,7 +2241,15 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7
+      "covered": 7,
+      "i18n": {
+        "ro": {
+          "title": "Un singur dicționar COMMANDS conduce argparse, schema și documentația",
+          "intent": "`tool_definition.json` și tabelul de comenzi din `SKILL.universal.md` erau oglinzi ale CLI-ului întreținute manual, care divergeau în tăcere ori de câte ori o comandă era adăugată sau redenumită. Derivarea opțiunilor argparse, a schemei generate de function-calling și a tabelului din documentație dintr-un singur dicționar `COMMANDS` — plus o verificare în gate care eșuează la învechire — face imposibil ca acest tip de divergență să treacă neobservat.",
+          "contract": "> `tool_definition.json` și tabelul de comenzi din `SKILL.universal.md` erau oglinzi ale CLI-ului\n> întreținute manual, care divergeau în tăcere ori de câte ori o comandă era adăugată sau\n> redenumită. Derivarea opțiunilor argparse, a schemei generate de function-calling și a\n> tabelului din documentație dintr-un singur dicționar `COMMANDS` — plus o verificare în gate\n> care eșuează la învechire — face imposibil ca acest tip de divergență să treacă neobservat.\n\nFiecare punct de mai jos este obligatoriu.\n- Un dicționar `COMMANDS` este sursa unică de adevăr pentru setul de comenzi al CLI-ului; niciun alt loc nu poate enumera comenzile în mod autoritar.\n- Opțiunile argparse sunt derivate din `COMMANDS` în timpul execuției; niciun literal de opțiuni scris în cod nu este permis.\n- `tool_definition.json` (schema de function-calling) este generat din `COMMANDS` de comanda `gen-integration`.\n- Tabelul de comenzi din `SKILL.universal.md` este generat din `COMMANDS` de `gen-integration` și scris în regiunea `<\!--##REQMAP:COMMANDS##-\->`; textul din afara acelei regiuni nu este atins niciodată.\n- Lista de comenzi din `SKILL.md` este generată în același mod, în același marcaj de regiune, ca listă grupată cu puncte. Este contractul pe care un asistent îl citește pe un repo nou, așa că un verb care există este documentat acolo, iar unul care nu există, nu este.\n- Comenzile interne (de ex. `gen-integration`) sunt excluse din artefactele generate destinate AI-ului.\n- Gate-ul eșuează (cod de ieșire diferit de zero) când un artefact generat și comis este învechit față de o generare proaspătă.\n- Toate generatoarele și verificarea din gate folosesc doar biblioteca standard; niciun import terț nu este permis.",
+          "acceptance": "CASE-1 — opțiunile argparse se trasează înapoi la COMMANDS, fără listă scrisă în cod\n  Given  parserul argparse activ, construit din `COMMANDS`\n  When   este apelat `_cli_choices()`\n  Then   valoarea sa de retur este egală cu `list(COMMANDS)` în ordinea inserării\n\nCASE-2 — gen-integration derivă tool_definition.json din COMMANDS\n  Given  o intrare `COMMANDS` cu un rezumat, un argument pozițional și un flag\n  When   rulează `gen-integration`\n  Then   `tool_definition.json` conține o intrare de schemă function-calling corespunzătoare acelei comenzi\n\nCASE-3 — gen-integration rescrie doar regiunea marcată a tabelului de comenzi\n  Given  `SKILL.universal.md` cu text scris manual în afara `<\!--##REQMAP:COMMANDS##-\->`\n  When   rulează `gen-integration`\n  Then   tabelul regiunii se reîmprospătează, iar textul din jur este identic la nivel de octeți\n\nCASE-4 — gen-integration omite comenzile interne din ieșirea destinată AI-ului\n  Given  `COMMANDS` incluzând însăși intrarea internă `gen-integration`\n  When   rulează `gen-integration`\n  Then   `tool_definition.json` nu listează nicio funcție `gen-integration`\n\nCASE-5 — gate-ul eșuează pe un artefact generat învechit\n  Given  un `tool_definition.json` comis care diferă de o generare proaspătă\n  When   rulează `gate`\n  Then   iese cu cod diferit de zero, numind artefactul învechit\n\nCASE-6 — codul generatorului și al verificării din gate nu importă niciun modul terț\n  Given  sursa lui `_generate_schema`, `_generate_command_table` și `_check_integration_fresh`\n  When   importurile lor sunt inspectate\n  Then   fiecare import se rezolvă la biblioteca standard Python\n\nCASE-7 — SKILL.md documentează exact registrul\n  Given  fișierul `SKILL.md` comis\n  When   regiunea sa de comenzi este comparată cu o randare proaspătă din `COMMANDS`\n  Then   ele coincid, fiecare verb non-intern apare exact o dată și niciun alt verb nu apare"
+        }
+      }
     },
     {
       "id": "REQ-CMDREGISTRY-963",
@@ -5657,7 +5705,15 @@
       "priority": "",
       "risks": [],
       "clauses": 4,
-      "covered": 4
+      "covered": 4,
+      "i18n": {
+        "ro": {
+          "title": "Numărători pe componente, paritate --json și o ieșire mereu zero",
+          "intent": "Scorul principal singur nu spune CE trebuie reparat, așa că `next` afișează și numărătorile din spatele lui — confirmate, implementate, testate, ciorne, orfane, netestate, verify-intent deschise, drift. `--json` emite exact aceleași numere, astfel încât un badge de CI și consola să nu se poată contrazice niciodată, iar comanda iese întotdeauna cu 0: raportează despre corpus, nu este un gate.",
+          "contract": "> Scorul principal singur nu spune CE trebuie reparat, așa că `next` afișează și numărătorile\n> din spatele lui — confirmate, implementate, testate, ciorne, orfane, netestate, verify-intent deschise,\n> drift. `--json` emite exact aceleași numere, astfel încât un badge de CI și consola să nu se\n> poată contrazice niciodată, iar comanda iese întotdeauna cu 0: raportează despre corpus, nu este un gate.\n\nFiecare punct de mai jos este obligatoriu.\n- `next` afișează numărătorile pe componente alături de scor: confirmate, implementate, testate,\n  ciorne, orfane, netestate, verify-intent deschise și drift.\n- `next` afișează scorul doar-pentru-revizuite definit de [[ARCH-REVIEWEDSCORE-109]] atunci când\n  condițiile acelei cerințe sunt îndeplinite.\n- `--json` emite aceleași numere ca obiect JSON, astfel încât ieșirea din consolă și un badge de CI\n  să nu se contrazică niciodată.\n- Pe un corpus gol `next` afișează un scor de zero, fără eroare și fără nimic de împărțit la\n  zero.\n- `next` returnează întotdeauna zero. Instantaneul este un raport, nu un gate.",
+          "acceptance": "CASE-1 — numărătorile afișate acoperă fiecare categorie numită\n  Given  un corpus care conține cel puțin o ciornă, o cerință orfană și una cu drift\n  When   rulează `next`\n  Then   afișează numărători pentru confirmate, implementate, testate, ciorne, orfane, netestate, verify-intent deschise și drift\n\nCASE-2 — --json și consola raportează aceleași numere\n  Given  orice corpus\n  When   `next` rulează o dată simplu și o dată cu `--json`\n  Then   scorul și numărătorile din ambele ieșiri coincid exact\n\nCASE-3 — un corpus gol raportează un scor de zero fără eroare\n  Given  un director `requirements/` fără fișiere de cerințe\n  When   rulează `next`\n  Then   afișează un scor de zero, iar rularea nu ridică o eroare de împărțire la zero\n\nCASE-4 — health iese cu zero chiar și când corpusul are un scor sub 100\n  Given  un corpus care conține orfane și drift, cu scor sub 100\n  When   rulează `next`\n  Then   procesul iese totuși cu 0\n--------------------"
+        }
+      }
     },
     {
       "id": "REQ-HEALTH-968",
@@ -7115,7 +7171,7 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Generating _map.json's node graph",
-      "intent": "Everything that draws or publishes a picture of the corpus reads `_map.json`; nothing draws from the requirement files directly. `map` writes it alongside the diagrams and viewer;",
+      "intent": "Everything that draws or publishes a picture of the corpus reads `_map.json`; nothing draws from the requirement files directly. `map` writes it alongside the diagrams and viewer.",
       "contract": [
         "`map` generates `_map.json` under `requirements/`.",
         "`_map.json` is a derived view. It is regenerated, never edited.",
@@ -7127,14 +7183,14 @@
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — map and export both produce _map.json Given  a corpus of requirements When   `map` runs, and separately `export` runs Then   both write `requirements/_map.json`, and `export` writes no other file",
+        "CASE-1 — — map produces _map.json Given  a corpus of requirements When   `map` runs Then   it writes `requirements/_map.json`",
         "CASE-2 — — the graph has one node per requirement and one edge per dependency Given  a corpus of N requirements carrying a total of M `depends_on` links When   `map` runs Then   `_map.json` holds exactly N nodes and M edges",
         "CASE-3 — — a node carries its full requirement metadata Given  a requirement with an id, layer, status, area, title, Contract clauses and members When   `map` runs Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals",
         "CASE-4 — — acc lists one entry per criterion in either acceptance form Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance When   `map` runs Then   each node's `acc` list has exactly one entry per criterion, in both requirements",
         "CASE-5 — — repo resolves to the git remote's owner/repo Given  a git checkout whose remote `origin` points at `owner/repo` When   `map` runs Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project for display in the viewer header",
         "CASE-6 — — a hostile id or title round-trips as inert data Given  a requirement whose id contains `<\/script>` and whose title contains a raw quote When   `map` runs Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup break-out --------------------"
       ],
-      "accept": "CASE-1 — map and export both produce _map.json\n  Given  a corpus of requirements\n  When   `map` runs, and separately `export` runs\n  Then   both write `requirements/_map.json`, and `export` writes no other file\n\nCASE-2 — the graph has one node per requirement and one edge per dependency\n  Given  a corpus of N requirements carrying a total of M `depends_on` links\n  When   `map` runs\n  Then   `_map.json` holds exactly N nodes and M edges\n\nCASE-3 — a node carries its full requirement metadata\n  Given  a requirement with an id, layer, status, area, title, Contract clauses and members\n  When   `map` runs\n  Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals\n\nCASE-4 — acc lists one entry per criterion in either acceptance form\n  Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance\n  When   `map` runs\n  Then   each node's `acc` list has exactly one entry per criterion, in both requirements\n\nCASE-5 — repo resolves to the git remote's owner/repo\n  Given  a git checkout whose remote `origin` points at `owner/repo`\n  When   `map` runs\n  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project\n         for display in the viewer header\n\nCASE-6 — a hostile id or title round-trips as inert data\n  Given  a requirement whose id contains `<\/script>` and whose title contains a raw quote\n  When   `map` runs\n  Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup\n         break-out\n\n\n--------------------",
+      "accept": "CASE-1 — map produces _map.json\n  Given  a corpus of requirements\n  When   `map` runs\n  Then   it writes `requirements/_map.json`\n\nCASE-2 — the graph has one node per requirement and one edge per dependency\n  Given  a corpus of N requirements carrying a total of M `depends_on` links\n  When   `map` runs\n  Then   `_map.json` holds exactly N nodes and M edges\n\nCASE-3 — a node carries its full requirement metadata\n  Given  a requirement with an id, layer, status, area, title, Contract clauses and members\n  When   `map` runs\n  Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals\n\nCASE-4 — acc lists one entry per criterion in either acceptance form\n  Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance\n  When   `map` runs\n  Then   each node's `acc` list has exactly one entry per criterion, in both requirements\n\nCASE-5 — repo resolves to the git remote's owner/repo\n  Given  a git checkout whose remote `origin` points at `owner/repo`\n  When   `map` runs\n  Then   `_map.json`'s top-level `repo` field reads `owner/repo`, identifying the project\n         for display in the viewer header\n\nCASE-6 — a hostile id or title round-trips as inert data\n  Given  a requirement whose id contains `<\/script>` and whose title contains a raw quote\n  When   `map` runs\n  Then   `_map.json` stores both values unchanged as ordinary JSON strings, with no markup\n         break-out\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -7183,7 +7239,15 @@
       "priority": "",
       "risks": [],
       "clauses": 6,
-      "covered": 6
+      "covered": 6,
+      "i18n": {
+        "ro": {
+          "title": "Generarea grafului de noduri din _map.json",
+          "intent": "Tot ce desenează sau publică o imagine a corpusului citește `_map.json`; nimic nu desenează direct din fișierele de cerințe. `map` îl scrie alături de diagrame și de viewer.",
+          "contract": "> Tot ce desenează sau publică o imagine a corpusului citește `_map.json`; nimic nu desenează\n> direct din fișierele de cerințe. `map` îl scrie alături de diagrame și de viewer.\n\nFiecare punct de mai jos este obligatoriu.\n- `map` generează `_map.json` sub `requirements/`.\n- `_map.json` este o vedere derivată. Este regenerat, niciodată editat.\n- `_map.json` poartă un nod per cerință și o muchie per `depends_on`.\n- Fiecare nod poartă id-ul cerinței sale, layer, status, area, titlu, intenție,\n  punctele Contract/Verify-intent/Notes, acceptanța, membrii (`role`/`loc`), `deps`,\n  `used_by` și semnalele de risc.\n- Tot textul derivat din cerințe este codificat JSON, ceea ce neutralizează prin construcție un\n  id, un titlu sau un corp ostil — nu există niciun context de markup din care să evadeze.",
+          "acceptance": "CASE-1 — map produce _map.json\n  Given  un corpus de cerințe\n  When   rulează `map`\n  Then   scrie `requirements/_map.json`\n\nCASE-2 — graful are un nod per cerință și o muchie per dependență\n  Given  un corpus de N cerințe purtând în total M legături `depends_on`\n  When   rulează `map`\n  Then   `_map.json` conține exact N noduri și M muchii\n\nCASE-3 — un nod poartă metadatele complete ale cerinței sale\n  Given  o cerință cu id, layer, status, area, titlu, clauze de Contract și membri\n  When   rulează `map`\n  Then   nodul ei poartă toate aceste câmpuri plus `deps`, `used_by` și orice semnale de risc\n\nCASE-4 — acc listează o intrare per criteriu în oricare formă de acceptanță\n  Given  o cerință cu blocuri `CASE-N` etichetate și alta cu acceptanță sub formă de listă\n  When   rulează `map`\n  Then   lista `acc` a fiecărui nod are exact o intrare per criteriu, în ambele cerințe\n\nCASE-5 — repo se rezolvă la owner/repo din remote-ul git\n  Given  un checkout git al cărui remote `origin` indică spre `owner/repo`\n  When   rulează `map`\n  Then   câmpul de nivel superior `repo` din `_map.json` citește `owner/repo`, identificând proiectul\n         pentru afișare în antetul viewer-ului\n\nCASE-6 — un id sau un titlu ostil face drumul dus-întors ca date inerte\n  Given  o cerință al cărei id conține `<\/script>` și al cărei titlu conține un ghilimele brut\n  When   rulează `map`\n  Then   `_map.json` stochează ambele valori neschimbate ca șiruri JSON obișnuite, fără\n         evadare în markup\n         break-out\n\n\n--------------------"
+        }
+      }
     },
     {
       "id": "REQ-MAP-871",
