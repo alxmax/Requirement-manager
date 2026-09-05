@@ -64,8 +64,12 @@ Every bullet below is binding.
 - A clause quantified over "all", "every" or "any" with no stated limit raises a question about
   the upper bound.
 - A clause whose subject is "It" or "the system" raises a question asking which component acts.
-- A requirement with more clauses than cases raises one question per uncovered clause, and one
-  whose cases never mention a failure path raises a question about it.
+- A requirement with more clauses than cases raises ONE question naming how many are
+  uncovered, and saying that a count cannot tell which. It never accuses a clause by
+  position: it compares two numbers and never reads a case, so pointing at the tail
+  clauses was a guess — wrong whenever an early clause is the uncovered one, such as a
+  clause that delegates its cases to another requirement. A requirement whose cases never
+  mention a failure path raises a question about that.
 - A requirement whose cases nearly all start from the same kind of input raises one question
   about the kind that is missing, unless that kind is the corpus's own subject.
 - A requirement with no clause, or with no labelled case, raises a blocking question; every
@@ -157,3 +161,58 @@ CASE-4 — an unknown id is an error, an answered requirement is not
   Given  an id that does not exist, and a requirement with no detectable question
   When   `clarify` runs on each
   Then   the first exits 1 and the second exits 0
+
+
+--------------------
+
+
+---
+id: REQ-CLARIFY-975
+status: draft
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-CLARIFY-062]
+---
+
+# An answer can raise a question the old text never had
+
+## Description
+> Clarifying a requirement means editing it, and an edit is new text: a clause that
+> answers one question can introduce an unbounded quantity, a number with no unit, or a
+> case with no failure path. Nobody re-reads the whole corpus after an edit, so the new
+> question sits unread. `sync` runs after every edit anyway, which makes it the one place
+> the comparison costs nothing.
+
+Every bullet below is binding.
+- `sync` records, per requirement, the RULES of its blocking open questions, in
+  `requirements/_clarifylock.json`. **Requirements with no questions are recorded too**,
+  so "absent from the snapshot" means "never seen" and nothing else. Otherwise a
+  requirement going from zero questions to one would be mistaken for a new file and
+  silenced, which is the case this check exists to catch.
+- On the next `sync`, a rule present now and absent from the snapshot is reported as a
+  NEW question, named with its requirement.
+- **The rule is the fingerprint, not the prose.** Rewording a clause that still has the
+  same defect is the same question, not a new one.
+- **A requirement absent from the snapshot is not reported.** A newly-added requirement
+  has no previous state, so all its questions would read as new, which is noise.
+- The sidecar fails open: absent, corrupt, or written by a newer schema, it reads as
+  empty and the run reports nothing rather than crashing.
+- This is advisory. It never changes an exit code, because an unanswered question is a
+  conversation, not a build failure.
+
+## Cases
+CASE-1 — an edit that raises a new question is reported
+  Given  a requirement synced once, then edited so a new blocking rule fires
+  When   `sync` runs
+  Then   it names that requirement and the new rule, and the exit code is unchanged
+
+CASE-2 — an unchanged question is not re-reported
+  Given  a requirement whose blocking questions are the same as at the last sync
+  When   `sync` runs
+  Then   nothing is reported as new
+
+CASE-3 — a new requirement's questions are not reported as new
+  Given  a requirement that has never been in the snapshot
+  When   `sync` runs
+  Then   its questions are not reported as new

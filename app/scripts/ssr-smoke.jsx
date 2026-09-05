@@ -294,10 +294,16 @@ const explorerChecks = [
   ["explorer: the selected requirement's document renders beside it",
     explorerHtml.includes("ARCH-MAP-007") && explorerHtml.includes("Links — traceability")],
   ["explorer: a collapsed parent advertises its clause count", explorerHtml.includes("clauses")],
-  ["problems: an empty inbox renders the named empty state, not a badge",
-    renderToString(<ProblemsView openSpec={noop} />).includes("Nothing to fix.")],
 ];
 for (const [label, ok] of explorerChecks) test(label, ok);
+
+// The empty state is a property of the VIEW, so it is asserted against an empty
+// registry. It used to run against this repo's own map and passed only because the
+// corpus happened to have nothing to fix — so the first draft requirement anyone
+// added broke a test whose name says nothing about the corpus.
+setRegistry([]);
+test("problems: an empty inbox renders the named empty state, not a badge",
+  renderToString(<ProblemsView openSpec={noop} />).includes("Nothing to fix."));
 
 // ---- registry tally scopes the outline (REQ-VIEWER-945) ---------------------
 setRegistry(json.nodes.map(adaptNode));

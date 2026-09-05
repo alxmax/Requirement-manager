@@ -74,6 +74,11 @@ jobs:
         run: python scripts/check_engine_bump.py --base HEAD~1
       - name: Engine-bump check tests
         run: python -X utf8 scripts/test_check_engine_bump.py
+      # Folding a verb into another one has left a dead instruction behind three
+      # times (`map`, `findings`, and the v4.0.0 verb cut). None of them failed at
+      # merge; each failed later, when a human typed what the docs told them to.
+      - name: No instruction invokes a retired verb
+        run: python -X utf8 scripts/check_retired_verbs.py
       # This repo runs the gate directly (not via check/action.yml) to avoid
       # depending on its own unpublished action.
       # One verdict since v4.0.0: link sync + drift + test links, requirement

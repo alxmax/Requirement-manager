@@ -70,7 +70,7 @@ CASE-6
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana picks up a ticket touching `ARCH-SCAN-002` and runs `reqmap.py show ARCH-SCAN-002`.
+- Ana picks up a ticket touching `ARCH-SCAN-002` and runs `reqmap.py gate --show ARCH-SCAN-002`.
   One screen tells her its status and layer, what it promises, that three other requirements
   depend on it, and exactly which functions and `file:line` locations implement it — so she
   knows what she will affect before changing a thing. When she fat-fingers the id, `show`

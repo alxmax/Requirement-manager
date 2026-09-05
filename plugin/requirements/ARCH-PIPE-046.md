@@ -12,7 +12,7 @@ satisfies: [SYS-QUALITY-104]
 # A closed output pipe ends a command quietly
 
 ## Description
-> `reqmap.py dupes | head` is the natural way to look at a long report. On Windows there
+> `reqmap.py gate --dupes | head` is the natural way to look at a long report. On Windows there
 > is no SIGPIPE, so when `head` stops reading, the next `print` raises `OSError` and the
 > command dies with a traceback the reader had nothing to do with. The first C/C++
 > evidence run hit it on `curl` (2,055 pairs). A closed reader is not an error.
@@ -48,7 +48,7 @@ CASE-3
   `EINVAL` after the redirect and the command exited 120 with an "Exception ignored" line.
 
 **Example**
-`python -X utf8 scripts/reqmap.py dupes | head -12` on a 1,141-requirement corpus prints
+`python -X utf8 scripts/reqmap.py gate --dupes | head -12` on a 1,141-requirement corpus prints
 twelve lines and exits 0 on Windows, instead of `OSError: [Errno 22] Invalid argument`.
 
 **Current implementation**
@@ -73,7 +73,7 @@ satisfies: [ARCH-PIPE-046]
 # A closed reader ends the command with exit 0
 
 ## Description
-> `reqmap.py dupes | head` closes the pipe as soon as `head` has enough. On Windows that
+> `reqmap.py gate --dupes | head` closes the pipe as soon as `head` has enough. On Windows that
 > surfaces as `OSError` rather than `SIGPIPE`, and the command used to die with a traceback
 > the reader had nothing to do with. `_run_cli` catches that specific failure and turns it
 > into a quiet exit 0, so a normal shell pipeline never looks like a crash.

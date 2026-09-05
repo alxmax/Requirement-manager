@@ -135,14 +135,15 @@ const BAKED = [
     members:[{role:"implements",loc:"scripts/reqmap.py:425"},{role:"tested-by",loc:"scripts/test_reqmap.py:463"}],
     deps:["ARCH-PARSE-001"], usedBy:[], risks:[] },
 
-  { id:"ARCH-PROMOTE-011", area:"REQ", title:"Promote", layer:"feature", status:"confirmed",
-    intent:"One command to perform the human-validation step — flip a reviewed requirement to confirmed.",
+  { id:"ARCH-PROMOTE-011", area:"REQ", title:"Confirmation is a human's answer", layer:"feature", status:"draft",
+    intent:"Confirming is not a command — a human writes the status, and an edit takes it back.",
     contract:[
-      "`confirm <ID>` edits only the value of the first `status:` line in the frontmatter, to `confirmed`, leaving the rest of the file byte-identical. [[REQ-PROMOTE-894]] details the behaviour.",
-      "`confirm` refuses a requirement with no `implements:` member — except a `need` or `aggregate`, which the gate covers by edge, not tag — and exits non-zero without writing anything. [[REQ-PROMOTE-895]] details the behaviour.",
-      "`confirm` warns, without failing, when no `tested-by:` member is linked, and reminds the caller to resync afterward. [[REQ-PROMOTE-896]] details the behaviour." ],
-    gwt:"AC-1\n  Given  a baseline requirement with an implements: member\n  When   promote <ID> runs\n  Then   its frontmatter status becomes confirmed, the body is byte-identical, and exit is 0",
-    impl:["`cmd_promote`, `_set_frontmatter_status` in `reqmap.py`."],
+      "There is **no `confirm` command.** A status is set by editing the frontmatter, which is what a human sign-off is: someone read it and wrote it down. The engine still owns the edit mechanics, so nothing else has to get them right. [[REQ-PROMOTE-894]] details the behaviour.",
+      "**An edited confirmed contract goes back to `draft`.** When `sync` finds that a `confirmed` or `implemented` requirement's binding content no longer matches the lock, it writes `draft` into that requirement and advances the baseline. [[REQ-PROMOTE-974]] details the behaviour.",
+      "**`--accept-drift` is the escape hatch, and it is a human saying so:** it keeps the status and advances the baseline. It exists because \"I edited it and it is still valid\" is a real answer — it just has to be given, not assumed.",
+      "**The invariant that a confirmed requirement points at code is enforced by the gate, not by a command.** `RM006` is an error, so a status written by hand with no `implements:` member fails at the next run." ],
+    gwt:"CASE-1\n  Given  a confirmed requirement whose contract has just been edited\n  When   sync runs without --accept-drift\n  Then   its frontmatter reads status: draft, the run says so by name, and the lock advances",
+    impl:["`_write_frontmatter_status` and the demotion branch of `cmd_check` in `reqmap.py`."],
     members:[{role:"implements",loc:"scripts/reqmap.py:446-461"},{role:"tested-by",loc:"scripts/test_reqmap.py:1114"}],
     deps:["ARCH-PARSE-001"], usedBy:[], risks:[] },
 

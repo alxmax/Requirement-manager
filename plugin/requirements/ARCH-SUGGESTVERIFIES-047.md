@@ -63,7 +63,7 @@ CASE-5  <!-- verifiable by: automated test -->
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana inherits a repo with 55 requirements whose tests are already named `test_ac1_…`,
-  `test_ac2_…`. She runs `reqmap.py suggest-verifies`, reads 110 proposals and 6 ambiguities,
+  `test_ac2_…`. She runs `reqmap.py sync --suggest-verifies`, reads 110 proposals and 6 ambiguities,
   re-runs with `--apply`, then `sync`. The gate now names the criteria that genuinely have no
   test, instead of the ones nobody had tagged yet.
 

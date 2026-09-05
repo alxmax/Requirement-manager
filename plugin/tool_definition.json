@@ -3,13 +3,25 @@
     "type": "function",
     "function": {
       "name": "reqmap_init",
-      "description": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code/prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. Run once per repo to get started.",
+      "description": "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring. ",
       "parameters": {
         "type": "object",
         "properties": {
           "root": {
             "type": "string",
             "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "plan": {
+            "type": "boolean",
+            "description": "Emit the extraction plan as JSON instead of writing requirement files."
+          },
+          "out": {
+            "type": "string",
+            "description": "With --plan: write the plan JSON here ('-' or omitted = stdout)."
+          },
+          "md_glob": {
+            "type": "string",
+            "description": "With --plan: also scan these non-code globs for capabilities (repeatable)."
           },
           "wipe": {
             "type": "boolean",
@@ -61,13 +73,65 @@
     "type": "function",
     "function": {
       "name": "reqmap_gate",
-      "description": "Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI.",
+      "description": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review and --implement for the two machine-readable plans. ",
       "parameters": {
         "type": "object",
         "properties": {
           "root": {
             "type": "string",
             "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "mode_audit": {
+            "type": "boolean",
+            "description": "Print every pass that discovers a problem as one report: the gate, corpus risk, duplicate contracts, design signals and tag coverage. The exit code still comes from the gate alone."
+          },
+          "mode_risk": {
+            "type": "boolean",
+            "description": "Print the corpus risk snapshot and the actionable signals, most urgent first."
+          },
+          "mode_show": {
+            "type": "string",
+            "description": "Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals."
+          },
+          "mode_search": {
+            "type": "string",
+            "description": "Rank requirements by lexical relevance to a free-text query."
+          },
+          "mode_dupes": {
+            "type": "boolean",
+            "description": "Rank requirement pairs whose contracts overlap, most similar first."
+          },
+          "mode_design": {
+            "type": "boolean",
+            "description": "Print the advisory design review of the code. Never part of the verdict."
+          },
+          "mode_review": {
+            "type": "string",
+            "description": "Emit the deterministic review plan for one requirement, as JSON."
+          },
+          "mode_implement": {
+            "type": "string",
+            "description": "Emit the implementation brief for one requirement: obligations, required tags, similar existing code."
+          },
+          "show_all": {
+            "type": "boolean",
+            "description": "With --risk: expand every bucket instead of the top few."
+          },
+          "untagged": {
+            "type": "boolean",
+            "description": "With --risk: report membership-tag coverage per directory."
+          },
+          "as_badge": {
+            "type": "boolean",
+            "description": "With --risk: print the coherence score as a badge string."
+          },
+          "threshold": {
+            "type": "string",
+            "description": "With --dupes: override the similarity threshold."
+          },
+          "top": {
+            "type": "integer",
+            "description": "With --search or --dupes: how many results to print."
           },
           "strict": {
             "type": "boolean",
@@ -90,13 +154,37 @@
     "type": "function",
     "function": {
       "name": "reqmap_sync",
-      "description": "Rescan code members, advance the drift baseline, and regenerate the map in one step (a committed _findings.md is refreshed too). Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed.",
+      "description": "The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed. --suggest-verifies proposes per-criterion verifies: tags, and writes them with --apply. ",
       "parameters": {
         "type": "object",
         "properties": {
           "root": {
             "type": "string",
             "description": "Repo root where requirements/ lives; defaults to the current directory."
+          },
+          "mode_retire": {
+            "type": "string",
+            "description": "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+          },
+          "delete": {
+            "type": "boolean",
+            "description": "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
+          },
+          "do_apply": {
+            "type": "boolean",
+            "description": "With --suggest-verifies: write the proposed tags into the test files."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "With --retire: proceed even though dependents still point at this requirement."
+          },
+          "mode_suggest": {
+            "type": "boolean",
+            "description": "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
+          },
+          "findings": {
+            "type": "boolean",
+            "description": "Also regenerate the aggregated open-questions file."
           },
           "accept_drift": {
             "type": "boolean",
@@ -114,155 +202,8 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_next",
-      "description": "Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "show_all": {
-            "type": "boolean",
-            "description": "Expand all buckets to show every item instead of just the top few."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_show",
-      "description": "Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "ID"
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_audit",
-      "description": "Run every pass that discovers a problem and print one report: the gate, corpus risk, duplicate contracts, design candidates, tag coverage, the exemptions in force and the shape of the corpus. Read-only; the exit code comes from the gate alone, because everything else is advice.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "strict": {
-            "type": "boolean",
-            "description": "Promote the gate's drift and test-link warnings to errors, as `gate --strict` does."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_dupes",
-      "description": "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "threshold": {
-            "type": "number",
-            "description": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_search",
-      "description": "Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "QUERY"
-          },
-          "top": {
-            "type": "integer",
-            "description": "Maximum number of ranked matches to show (default 5)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_draft",
-      "description": "Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_confirm",
-      "description": "Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "ID"
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_clarify",
-      "description": "Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. Run it before implementing so the ambiguity is resolved in the requirement, not guessed in code.",
+      "description": "Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. --decompose is the write half of the same question: it scaffolds an over-scoped requirement's clauses into requirements of their own. Run it before implementing, so the ambiguity is resolved in the requirement instead of guessed in code. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -273,156 +214,14 @@
           "arg": {
             "type": "string",
             "description": "AREA-NAME-NNN"
+          },
+          "decompose": {
+            "type": "boolean",
+            "description": "Scaffold an over-scoped requirement's clauses into requirements of their own."
           },
           "as_json": {
             "type": "boolean",
             "description": "Emit the questions as JSON for an agent to answer."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_implement",
-      "description": "Emit the brief for implementing one requirement in code: its obligations, its cases, the exact tags the new code must carry, where similar code already lives, and the command that proves the work landed. Writes no code and no file.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "AREA-NAME-NNN"
-          },
-          "as_json": {
-            "type": "boolean",
-            "description": "Emit the brief as JSON for a coding agent."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_retire",
-      "description": "Take a requirement out of service. Prints the blast radius first — dependents, children, members, and the files where it was the only tagged requirement. Refuses while dependents exist unless --force. Deprecates by default (reversible); --delete also removes the block, its lock entries and its membership tags, never a function body. Nothing is written without --apply.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "AREA-NAME-NNN"
-          },
-          "delete": {
-            "type": "boolean",
-            "description": "Remove the requirement outright instead of marking it deprecated."
-          },
-          "do_apply": {
-            "type": "boolean",
-            "description": "Actually perform the retirement; without it nothing is written."
-          },
-          "force": {
-            "type": "boolean",
-            "description": "Proceed despite dependents, or on a dirty working tree."
-          },
-          "as_json": {
-            "type": "boolean",
-            "description": "Emit the plan (and what was applied) as JSON."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_review",
-      "description": "Emit a JSON review plan (intent, contract, acceptance criteria, structural anchors) for all requirements or one. Used as an AI feed for semantic quality review. Read-only.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "ID"
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_translate",
-      "description": "Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "translate_to": {
-            "type": "string",
-            "description": "Target locale, 'ro' or 'en' (default: the other of the two from the detected corpus majority)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_design",
-      "description": "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "json": {
-            "type": "boolean",
-            "description": "Emit the findings as a JSON object {files, findings[]}."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_suggest_verifies",
-      "description": "Propose `# verifies: <id>#CASE-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "apply": {
-            "type": "boolean",
-            "description": "Write the proposed tags into the test files (ambiguous matches are never written)."
           }
         },
         "required": []

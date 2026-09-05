@@ -23,6 +23,11 @@ if ! "$PY" -X utf8 scripts/check_engine_bump.py --staged; then
   echo "engine changed without a MAP_ENGINE_VERSION bump — set it to today's date in reqmap.py and re-stage." >&2
   exit 1
 fi
+if ! "$PY" -X utf8 scripts/check_retired_verbs.py; then
+  echo "" >&2
+  echo "an instruction still names a verb the engine no longer has — fix the line or bring the verb back." >&2
+  exit 1
+fi
 if ! "$PY" -X utf8 plugin/scripts/reqmap.py gate --root plugin --code .; then
   echo "" >&2
   echo "reqmap: the gate failed — fix the ERRORs above, or run 'python plugin/scripts/reqmap.py" >&2

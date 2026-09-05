@@ -12,25 +12,28 @@ python scripts/reqmap.py init               # first-use bootstrap: scaffold + dr
 # --- author ---------------------------------------------------------------
 python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from the template
 python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold from a TODO.md item
-python scripts/reqmap.py draft              # draft requirements from untagged legacy code (--plan: JSON dry run, writes nothing)
+python scripts/reqmap.py init              # draft requirements from untagged legacy code (--plan: JSON dry run, writes nothing)
 python scripts/reqmap.py clarify AREA-NAME-NNN  # the questions this requirement has not answered (--json; --decompose scaffolds an over-scoped clause out)
-python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a reviewed requirement (requires an implements: member); run sync after
+# confirming is a HUMAN's answer, not a command: edit `status:` in the frontmatter
+# after someone has read it. The gate enforces the invariant (RM006: confirmed with
+# no implements: member is an error), and `sync` demotes an edited contract back to
+# draft on its own.
 
 # --- build ----------------------------------------------------------------
-python scripts/reqmap.py implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
+python scripts/reqmap.py gate --implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
 python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
 python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, docs/map.html, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
-python scripts/reqmap.py retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
+python scripts/reqmap.py sync --retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
 
 # --- read -----------------------------------------------------------------
-python scripts/reqmap.py next               # what to do next: health score + counted risk buckets (--json/--badge: the health numbers; --untagged: files with no implements: tag)
-python scripts/reqmap.py show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
-python scripts/reqmap.py search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
-python scripts/reqmap.py dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
-python scripts/reqmap.py design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars plus house standards; read-only, exit 0, never the gate; thresholds in _config.json
-python scripts/reqmap.py review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors)
-python scripts/reqmap.py suggest-verifies    # propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion; --apply writes them
-python scripts/reqmap.py translate [--to ro|en]  # MANUAL, opt-in: cache a `claude -p` translation of the corpus into requirements/_i18n/<locale>.json, read by the viewer's EN/RO toggle. Never called by gate/sync/the hook. A structural-fidelity check refuses a translation that alters backticks, numbers, markdown markers, `CASE-N` labels or the Gherkin keywords.
+python scripts/reqmap.py gate --risk               # what to do next: health score + counted risk buckets (--json/--badge: the health numbers; --untagged: files with no implements: tag)
+python scripts/reqmap.py gate --show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
+python scripts/reqmap.py gate --search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
+python scripts/reqmap.py gate --dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
+python scripts/reqmap.py gate --design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars plus house standards; read-only, exit 0, never the gate; thresholds in _config.json
+python scripts/reqmap.py gate --review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors)
+python scripts/reqmap.py sync --suggest-verifies    # propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion; --apply writes them
+python scripts/reqmap.py gate --show AREA-NAME-NNN  # one requirement's dossier. The EN/RO toggle in the viewer still reads requirements/_i18n/<locale>.json; the `translate` verb that WROTE that cache was removed 2026-09-05, so a refresh is now a manual step.
 ```
 
 **`gate` and `sync` above already carry `--code ..`** so the scan reaches the repo root
@@ -173,9 +176,9 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v4`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v4` ships with plugin `4.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v5`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v5` ships with plugin `4.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
 ```yaml
-- uses: alxmax/requirement-manager/check@v4
+- uses: alxmax/requirement-manager/check@v5
 ```
 
 The action also ships `check/engine_staleness.py` (`ARCH-STALEENGINE-043`): it compares the

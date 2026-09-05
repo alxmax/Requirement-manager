@@ -599,7 +599,7 @@ satisfies: [ARCH-VIEWER-007]
 # Two engine-emitted readings in the rail
 
 ## Description
-> `reqmap.py next` opens with two numbers — how much of the corpus is green, and how much
+> `reqmap.py gate --risk` opens with two numbers — how much of the corpus is green, and how much
 > of the code is free of design candidates — and the viewer showed neither. They belong
 > where a reader already looks for the shape of the repo: the rail, under the navigation.
 > The viewer displays the records the map hands it; recomputing either one here is what

@@ -31,7 +31,7 @@ Layout on disk (relative to repo root, override with --root / --reqs / --code):
   requirements/*.md     the source of truth (markdown + YAML-ish frontmatter)
   <code>/**            scanned for tags like:  # implements: <ID>
 """
-import argparse, ast, contextlib, errno, fnmatch, hashlib, io, json, math, os, re, shutil, subprocess, sys
+import argparse, ast, contextlib, errno, fnmatch, hashlib, io, json, math, os, re, subprocess, sys
 
 ROLES = ("implements", "generated-from", "validated-against", "tested-by")
 # Both tag patterns are BUILT from ROLES rather than repeating it. The three used to be
@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05"
+MAP_ENGINE_VERSION = "2026-09-05.8"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -264,12 +264,38 @@ COMMANDS = {
     "init": {
         "summary": (
             "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, "
-            "draft requirements from existing code/prose, build the lock and map, and "
+            "draft requirements from existing code and prose, build the lock and map, and "
             "print guided next steps. Idempotent — safe to re-run; never clobbers an "
-            "existing .reqmapignore. Run once per repo to get started."
+            "existing .reqmapignore. --plan emits the extraction plan as JSON and writes no "
+            "requirement files, for looking before authoring. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "plan",
+                "flag": "--plan",
+                "type": "bool",
+                "help": (
+                    "Emit the extraction plan as JSON instead of writing requirement files."
+                ),
+            },
+            {
+                "name": "out",
+                "flag": "--out",
+                "type": "str",
+                "help": (
+                    "With --plan: write the plan JSON here ('-' or omitted = stdout)."
+                ),
+            },
+            {
+                "name": "md_glob",
+                "flag": "--md-glob",
+                "type": "str",
+                "help": (
+                    "With --plan: also scan these non-code globs for capabilities (repeatable)."
+                ),
+            },
             {
                 "name": "wipe",
                 "flag": "--wipe",
@@ -325,14 +351,124 @@ COMMANDS = {
     },
     "gate": {
         "summary": (
-            "Run the commit/CI gate (report-only): verify every code tag resolves to a "
-            "real requirement, every confirmed requirement has at least one implements: "
-            "member, and drift has not been introduced since the last sync. Exits "
-            "non-zero on link-sync errors only (drift and test-link integrity are "
-            "warnings). Never touches _reqlock.json. Run before every commit and in CI."
+            "The commit/CI verdict, and every read-only question you can ask the corpus. "
+            "Bare, it verifies that every code tag resolves to a real requirement, that "
+            "every confirmed requirement has at least one implements: member, and that "
+            "drift has not been introduced since the last sync, then checks requirement "
+            "readability and map freshness. Exits non-zero on link-sync errors only. Never "
+            "writes anything. The mode flags answer one question each instead of running "
+            "the verdict: --audit for the whole problem report, --risk for what to do next, "
+            "--show for one requirement's dossier, --search to rank by relevance, --dupes "
+            "for overlapping contracts, --design for the code review, --review and "
+            "--implement for the two machine-readable plans. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "mode_audit",
+                "flag": "--audit",
+                "type": "bool",
+                "help": (
+                    "Print every pass that discovers a problem as one report: the gate, corpus risk, duplicate contracts, design signals and tag coverage. The exit code still comes from the gate alone."
+                ),
+            },
+            {
+                "name": "mode_risk",
+                "flag": "--risk",
+                "type": "bool",
+                "help": (
+                    "Print the corpus risk snapshot and the actionable signals, most urgent first."
+                ),
+            },
+            {
+                "name": "mode_show",
+                "flag": "--show",
+                "type": "str",
+                "help": (
+                    "Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals."
+                ),
+            },
+            {
+                "name": "mode_search",
+                "flag": "--search",
+                "type": "str",
+                "help": (
+                    "Rank requirements by lexical relevance to a free-text query."
+                ),
+            },
+            {
+                "name": "mode_dupes",
+                "flag": "--dupes",
+                "type": "bool",
+                "help": (
+                    "Rank requirement pairs whose contracts overlap, most similar first."
+                ),
+            },
+            {
+                "name": "mode_design",
+                "flag": "--design",
+                "type": "bool",
+                "help": (
+                    "Print the advisory design review of the code. Never part of the verdict."
+                ),
+            },
+            {
+                "name": "mode_review",
+                "flag": "--review",
+                "type": "str",
+                "help": (
+                    "Emit the deterministic review plan for one requirement, as JSON."
+                ),
+            },
+            {
+                "name": "mode_implement",
+                "flag": "--implement",
+                "type": "str",
+                "help": (
+                    "Emit the implementation brief for one requirement: obligations, required tags, similar existing code."
+                ),
+            },
+            {
+                "name": "show_all",
+                "flag": "--all",
+                "type": "bool",
+                "help": (
+                    "With --risk: expand every bucket instead of the top few."
+                ),
+            },
+            {
+                "name": "untagged",
+                "flag": "--untagged",
+                "type": "bool",
+                "help": (
+                    "With --risk: report membership-tag coverage per directory."
+                ),
+            },
+            {
+                "name": "as_badge",
+                "flag": "--badge",
+                "type": "bool",
+                "help": (
+                    "With --risk: print the coherence score as a badge string."
+                ),
+            },
+            {
+                "name": "threshold",
+                "flag": "--threshold",
+                "type": "str",
+                "help": (
+                    "With --dupes: override the similarity threshold."
+                ),
+            },
+            {
+                "name": "top",
+                "flag": "--top",
+                "type": "int",
+                "help": (
+                    "With --search or --dupes: how many results to print."
+                ),
+            },
             {
                 "name": "strict",
                 "flag": "--strict",
@@ -361,13 +497,72 @@ COMMANDS = {
     },
     "sync": {
         "summary": (
-            "Rescan code members, advance the drift baseline, and regenerate the map in "
-            "one step (a committed _findings.md is refreshed too). Run after editing "
-            "requirement files or tagging new code members. "
-            "Use --accept-drift when a confirmed or implemented contract changed."
+            "The write path. Rescan code members, advance the drift baseline, and "
+            "regenerate the map, the findings file and the generated integration artifacts "
+            "in one step. Run after editing requirement files or tagging new code members. "
+            "--accept-drift is required when a confirmed or implemented contract changed. "
+            "--suggest-verifies proposes per-criterion verifies: tags, and writes them with "
+            "--apply. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "mode_retire",
+                "flag": "--retire",
+                "type": "str",
+                "help": (
+                    "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+                ),
+            },
+            {
+                "name": "delete",
+                "flag": "--delete",
+                "type": "bool",
+                "help": (
+                    "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
+                ),
+            },
+            {
+                "name": "do_apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": (
+                    "With --retire: actually write the change. Without it, the run is a dry report."
+                ),
+            },
+            {
+                "name": "force",
+                "flag": "--force",
+                "type": "bool",
+                "help": (
+                    "With --retire: proceed even though dependents still point at this requirement."
+                ),
+            },
+            {
+                "name": "mode_suggest",
+                "flag": "--suggest-verifies",
+                "type": "bool",
+                "help": (
+                    "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
+                ),
+            },
+            {
+                "name": "do_apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": (
+                    "With --suggest-verifies: write the proposed tags into the test files."
+                ),
+            },
+            {
+                "name": "findings",
+                "flag": "--findings",
+                "type": "bool",
+                "help": (
+                    "Also regenerate the aggregated open-questions file."
+                ),
+            },
             {
                 "name": "accept_drift",
                 "flag": "--accept-drift",
@@ -386,214 +581,28 @@ COMMANDS = {
             },
         ],
     },
-    "next": {
-        "summary": (
-            "Show what to do next: a prioritized, actionable list of risk buckets "
-            "(Orphans, Needs tests, Needs intent review, Drafts to review). "
-            "Read-only, always exits 0. The best follow-up command to run after any action."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "show_all",
-                "flag": "--all",
-                "type": "bool",
-                "help": "Expand all buckets to show every item instead of just the top few.",
-            },
-        ],
-    },
-    "show": {
-        "summary": (
-            "Print a consolidated dossier for one requirement: header, intent, Contract "
-            "bullets, dependencies in both directions, code members grouped by role with "
-            "file:line, open Verify intent questions, and risk signals. Answers 'what "
-            "does this do / where is X' in one command. Read-only."
-        ),
-        "arg": "ID",
-        "params": [],
-    },
-    "audit": {
-        "summary": (
-            "Run every pass that discovers a problem and print one report: the gate, "
-            "corpus risk, duplicate contracts, design candidates, tag coverage, the "
-            "exemptions in force and the shape of the corpus. Read-only; the exit code "
-            "comes from the gate alone, because everything else is advice."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "type": "bool",
-                "help": "Promote the gate's drift and test-link warnings to errors, as `gate --strict` does.",
-            },
-        ],
-    },
-    "dupes": {
-        "summary": (
-            "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), "
-            "so a divergent re-implementation is caught before it lands. Read-only, "
-            "advisory — a human decides if a flagged pair is a real duplicate."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "threshold",
-                "flag": "--threshold",
-                "type": "float",
-                "help": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged.",
-            },
-        ],
-    },
-    "search": {
-        "summary": (
-            "Rank requirements by lexical relevance to a free-text query (same TF-IDF "
-            "cosine as dupes, reused). Read-only. Prints each hit's score, and says so "
-            "explicitly when nothing clears the relevance floor rather than showing a "
-            "spurious top result. Lexical, not synonym-aware."
-        ),
-        "arg": "QUERY",
-        "params": [
-            {
-                "name": "top",
-                "flag": "--top",
-                "type": "int",
-                "help": "Maximum number of ranked matches to show (default 5).",
-            },
-        ],
-    },
-    "draft": {
-        "summary": (
-            "Draft one requirement per untagged file (code and prose). Input is existing "
-            "untagged source code and Markdown. Emits draft requirements — never "
-            "confirmed. After drafting, run gate and report the result. Remind the user "
-            "to review and confirm the real ones."
-        ),
-        "arg": None,
-        "params": [],
-    },
-    "confirm": {
-        "summary": (
-            "Mark a reviewed requirement as confirmed — the human sign-off step. Flips "
-            "status to confirmed in the frontmatter. The engine refuses if the "
-            "requirement has no implements: member (a confirmed requirement must point "
-            "to code). Run sync after confirming."
-        ),
-        "arg": "ID",
-        "params": [],
-    },
     "clarify": {
         "summary": (
             "Ask what a requirement has not answered yet: vague terms with no threshold, "
             "numbers with no unit, unbounded quantities, clauses with no case, a missing "
-            "failure path. Read-only, always exit 0, never a gate rule. Run it before "
-            "implementing so the ambiguity is resolved in the requirement, not guessed in code."
+            "failure path. Read-only, always exit 0, never a gate rule. --decompose is the "
+            "write half of the same question: it scaffolds an over-scoped requirement's "
+            "clauses into requirements of their own. Run it before implementing, so the "
+            "ambiguity is resolved in the requirement instead of guessed in code. "
+       
         ),
         "arg": "AREA-NAME-NNN",
         "params": [
+            {
+                "name": "decompose",
+                "flag": "--decompose",
+                "type": "bool",
+                "help": (
+                    "Scaffold an over-scoped requirement's clauses into requirements of their own."
+                ),
+            },
             {"name": "as_json", "flag": "--json", "type": "bool",
              "help": "Emit the questions as JSON for an agent to answer."},
-        ],
-    },
-    "implement": {
-        "summary": (
-            "Emit the brief for implementing one requirement in code: its obligations, its "
-            "cases, the exact tags the new code must carry, where similar code already lives, "
-            "and the command that proves the work landed. Writes no code and no file."
-        ),
-        "arg": "AREA-NAME-NNN",
-        "params": [
-            {"name": "as_json", "flag": "--json", "type": "bool",
-             "help": "Emit the brief as JSON for a coding agent."},
-        ],
-    },
-    "retire": {
-        "summary": (
-            "Take a requirement out of service. Prints the blast radius first — dependents, "
-            "children, members, and the files where it was the only tagged requirement. "
-            "Refuses while dependents exist unless --force. Deprecates by default (reversible); "
-            "--delete also removes the block, its lock entries and its membership tags, never a "
-            "function body. Nothing is written without --apply."
-        ),
-        "arg": "AREA-NAME-NNN",
-        "params": [
-            {"name": "delete", "flag": "--delete", "type": "bool",
-             "help": "Remove the requirement outright instead of marking it deprecated."},
-            {"name": "do_apply", "flag": "--apply", "type": "bool",
-             "help": "Actually perform the retirement; without it nothing is written."},
-            {"name": "force", "flag": "--force", "type": "bool",
-             "help": "Proceed despite dependents, or on a dirty working tree."},
-            {"name": "as_json", "flag": "--json", "type": "bool",
-             "help": "Emit the plan (and what was applied) as JSON."},
-        ],
-    },
-    "review": {
-        "summary": (
-            "Emit a JSON review plan (intent, contract, acceptance criteria, structural "
-            "anchors) for all requirements or one. Used as an AI feed for semantic "
-            "quality review. Read-only."
-        ),
-        "arg": "ID",
-        "params": [],
-    },
-    "translate": {
-        "summary": (
-            "Manual, opt-in: detect the corpus's majority language (per-file `lang:` "
-            "frontmatter override honored first), then cache a `claude -p` translation "
-            "of every requirement written in that language into "
-            "requirements/_i18n/<target>.json. A structural-fidelity check (backticked "
-            "spans, numbers, heading/bullet markers) gates every cache write; a missing "
-            "`claude` CLI, a timeout, or a failed check skips that entry with a warning "
-            "instead of aborting. `map`/`export` inline the cache into the graph "
-            "read-only, with no `claude` call of their own — this command is the ONLY "
-            "way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map "
-            "or the pre-commit hook."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "translate_to",
-                "flag": "--to",
-                "type": "str",
-                "help": "Target locale, 'ro' or 'en' (default: the other of the two from "
-                        "the detected corpus majority).",
-            },
-        ],
-    },
-    "design": {
-        "summary": (
-            "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. "
-            "encapsulation (module state written from functions, long parameter lists, data "
-            "clumps), abstraction (long or deeply nested functions, prefix families), "
-            "inheritance (unrelated classes sharing methods, duplicated method bodies) and "
-            "polymorphism (isinstance chains, equality switches), standards (file and line "
-            "length, public definitions without a docstring, definitions per file). Read-only, "
-            "exit 0, never part of the gate; every threshold is tunable in requirements/_config.json."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "json",
-                "flag": "--json",
-                "type": "bool",
-                "help": "Emit the findings as a JSON object {files, findings[]}.",
-            },
-        ],
-    },
-    "suggest-verifies": {
-        "summary": (
-            "Propose `# verifies: <id>#CASE-N` tags for tests already named after the "
-            "criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can "
-            "be adopted on an existing corpus. Read-only; --apply writes the tags."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "apply",
-                "flag": "--apply",
-                "type": "bool",
-                "help": "Write the proposed tags into the test files (ambiguous matches are never written).",
-            },
         ],
     },
 }
@@ -631,10 +640,9 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
 # single source of truth, so the grouping the help text and the viewer both show is
 # declared here once rather than restated in each surface.
 COMMAND_GROUPS = (
-    ("author", ("init", "new", "draft", "clarify", "confirm")),
-    ("build", ("implement", "gate", "sync", "retire")),
-    ("read", ("audit", "next", "show", "search", "dupes", "design", "review",
-              "suggest-verifies", "translate")),
+    ("author", ("init", "new", "clarify")),
+    ("build", ("sync",)),
+    ("read", ("gate",)),
 )
 
 
@@ -1940,6 +1948,9 @@ def _atomic_scenario_then_count(scen_lines):  # implements: ARCH-ATOMICFORM-053
     return sum(1 for line in scen_lines if _ATOMIC_THEN_RE.match(line.strip()))
 
 
+_BLOCK_SEP_RE = re.compile(r"^-{3,}$")
+
+
 def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053  # implements: REQ-DRIFT-841
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
@@ -1965,6 +1976,14 @@ def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMIC
                 # in the frontmatter and out of the span. No requirement carried a
                 # blockquote inside a normative section when this was added, so no
                 # existing hash changes.
+                continue
+            if _BLOCK_SEP_RE.match(line.strip()):
+                # The `--------------------` that separates two requirements in a module
+                # file rides along on the block BEFORE it, so it landed inside that
+                # block's normative span. Adding a requirement to a module file then
+                # changed the PREVIOUS one's hash — a phantom edit that now costs its
+                # confirmation (REQ-PROMOTE-974). A separator is structure, never an
+                # obligation.
                 continue
             # rstrip (not strip): leading indent is structure — unnesting a sub-clause
             # is a real change and must drift.
@@ -2042,6 +2061,51 @@ def save_memberlock(reqs_dir, member_hashes):  # implements: ARCH-MEMBERDRIFT-02
     payload = {"_schema": MEMBERLOCK_SCHEMA, "members": member_hashes}
     with open(_memberlock_path(reqs_dir), "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, sort_keys=True)
+
+
+CLARIFYLOCK_SCHEMA = 1
+
+
+def _clarifylock_path(reqs_dir):  # implements: REQ-CLARIFY-975
+    return os.path.join(reqs_dir, "_clarifylock.json")
+
+
+def load_clarifylock(reqs_dir):  # implements: REQ-CLARIFY-975
+    """Return {rid: [rule, ...]} of the blocking questions each requirement had at the
+    last sync, or {} when absent/corrupt or written by a NEWER schema — fail open, the
+    same way the other sidecars do, so a forward-incompatible file degrades to
+    'everything looks new' rather than crashing."""
+    try:
+        with open(_clarifylock_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict) or data.get("_schema", 0) > CLARIFYLOCK_SCHEMA:
+        return {}
+    got = data.get("questions")
+    return got if isinstance(got, dict) else {}
+
+
+def save_clarifylock(reqs_dir, snapshot):  # implements: REQ-CLARIFY-975
+    os.makedirs(reqs_dir, exist_ok=True)
+    payload = {"_schema": CLARIFYLOCK_SCHEMA, "questions": snapshot}
+    with open(_clarifylock_path(reqs_dir), "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+
+def blocking_question_rules(reqs):  # implements: REQ-CLARIFY-975
+    """{rid: sorted [rule]} for EVERY requirement, empty list included.
+
+    The RULE is the fingerprint, not the prose: two runs of the same defect are the
+    same question, and rewording a clause does not invent a new one.
+
+    Requirements with no questions are recorded too, on purpose. Otherwise "absent
+    from the snapshot" would mean both "never seen" and "seen, and clean", so a
+    requirement going from zero questions to one would be mistaken for a brand-new
+    file and silenced — which is exactly the case this check exists to catch."""
+    return {rid: sorted({q["rule"] for q in _clarify_questions(rid, r, reqs)
+                         if q["severity"] == "blocking"})
+            for rid, r in reqs.items()}
 
 
 def untracked_locks(reqs_dir):  # implements: ARCH-CHECK-006  # implements: REQ-CHECK-830
@@ -2675,7 +2739,7 @@ def _rule_orphan_code(ctx):  # implements: ARCH-ORPHANCODE-034
     for rel in orphan_code_files(ctx.code_root, covered, ctx.reqs_dir):
         yield None, (f"{rel}: {ORPHAN_CODE_MIN_LOC}+-line code file has no membership tag — "
                      "link it (`# implements: <ID>`), draft a requirement for it "
-                     "(`reqmap.py draft`), or add it to .reqmapignore")
+                     "(`reqmap.py init`), or add it to .reqmapignore")
 
 
 def _legacy_schema_ids(reqs):  # implements: ARCH-ATOMICFORM-053
@@ -2811,18 +2875,63 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         confirmed_drift = [rid for (rid, old_h, _h) in changed
                            if old_h is not None
                            and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
-        if confirmed_drift and not accept_drift:
-            lock_blocked = True
-            print("Contract drift on confirmed requirements; re-run with --accept-drift "
-                  "to advance the baseline:", file=sys.stderr)
+        if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
+            # An edited contract has not been re-validated by anyone, so it stops
+            # claiming it was: status goes back to `draft` and the baseline advances.
+            # Say it loudly — a demoted requirement leaves the gate's enforcement
+            # (no implements: requirement, no drift check) until a human confirms it
+            # again, and that is exactly the kind of thing that must not happen
+            # quietly. `--accept-drift` is the escape hatch for "I edited it and it
+            # is still valid": it keeps the status and advances the baseline.
+            print("Contract changed on %d confirmed requirement(s) \u2014 status back to "
+                  "`draft`, because nobody has re-validated them:" % len(confirmed_drift))
             for rid in confirmed_drift:
-                print(f"  drift: {rid}", file=sys.stderr)
+                r = reqs.get(rid) or {}
+                was = r.get("meta", {}).get("status")
+                if r and _write_frontmatter_status(r, "draft"):
+                    r["meta"]["status"] = "draft"   # keep this run's own report honest
+                    print("  demoted: %s  %s -> draft" % (rid, was))
+                    # Name the code, not just the requirement: a changed contract is a
+                    # question about whether the code still matches it, and the answer
+                    # lives in these files. Without them the demotion says what happened
+                    # and not what to do about it.
+                    locs = ["%s:%s" % (fp, ln) for (_role, fp, ln) in full_members.get(rid, ())]
+                    if locs:
+                        print("      re-check %d member(s): %s" % (len(locs), ", ".join(locs)))
+                    else:
+                        print("      no members tagged — add an `implements:` tag")
+                else:
+                    print("  WARN  %s: no `status:` line to change" % rid)
+            print("  These no longer gate. Re-read the code above against the new contract,")
+            print("  change whichever is wrong, then set the status back by hand — or re-run")
+            print("  with --accept-drift if the edit did not change what the code must do.")
+            save_lock(reqs_dir, new_lock)
+            save_memberlock(reqs_dir, ctx.full_member_hashes
+                             if ctx.full_member_hashes is not None
+                             else compute_member_hashes(code_root, full_members))
+            print("lock updated.")
         else:
             save_lock(reqs_dir, new_lock)
             save_memberlock(reqs_dir, ctx.full_member_hashes
                              if ctx.full_member_hashes is not None
                              else compute_member_hashes(code_root, full_members))
             print("lock updated.")
+        # Clarifying one requirement can raise questions the previous text never had —
+        # a new clause with an unbounded quantity, a case with no failure path. Nobody
+        # re-reads the whole corpus after an edit, so the diff is reported here, where
+        # every edit already passes.  # implements: REQ-CLARIFY-975
+        _q_now = blocking_question_rules(reqs)
+        _q_before = load_clarifylock(reqs_dir)
+        _fresh = sorted((rid, sorted(set(rules) - set(_q_before.get(rid, []))))
+                        for rid, rules in _q_now.items())
+        _fresh = [(rid, rules) for rid, rules in _fresh if rules and rid in _q_before]
+        if _fresh:
+            print("")
+            print("New open question(s) since the last sync — an edit raised them:")
+            for rid, rules in _fresh:
+                print("  %s: %s" % (rid, ", ".join(rules)))
+            print("  Read them with `reqmap.py clarify <ID>`.")
+        save_clarifylock(reqs_dir, _q_now)
 
     # Integration-artifact freshness (this repo's generated tool_definition.json + the
     # SKILL.universal.md command table); skipped silently when the artifacts don't exist.
@@ -3101,59 +3210,32 @@ def _set_frontmatter_status(text, value):  # implements: ARCH-PROMOTE-011  # imp
     return new_head + rest, n
 
 
-def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # implements: REQ-PROMOTE-894  # implements: REQ-PROMOTE-895  # implements: REQ-PROMOTE-896
-    """Flip a requirement's status to `confirmed` (the human-validation step) by a
-    single frontmatter edit. Refuses if the requirement has no `implements:` member
-    (a confirmed requirement must point to code — else the gate would error), and
-    warns when no `tested-by:` member is linked."""
-    r = reqs.get(cap_id)
-    if not r:
-        print(f"no requirement with id {cap_id} (expected requirements/{cap_id}.md)")
-        return 1
-    cur = r["meta"].get("status")
-    if cur == "confirmed":
-        print(f"{cap_id} is already confirmed.")
-        return 0
-    roles = [m[0] for m in members.get(cap_id, [])]
-    meta = r["meta"]
-    if _impl_exempt(meta):
-        # `need`/`aggregate` are covered by an edge, not by a tag — the same exemption
-        # the gate, `health` and the risk map already apply (_impl_exempt). The edge is
-        # still checked, so the exemption is a different rule, not a hole: an aggregate
-        # with no dependencies is exactly the orphan this refusal exists to catch.
-        if meta.get("layer") == "aggregate" and not _as_list(meta.get("depends_on")):
-            print(f"refusing: {cap_id} is `layer: aggregate` but its `depends_on` is empty — "  # implements: REQ-TRACE-935
-                  "an aggregate is implemented BY its dependencies; list them first.")
-            return 1
-    elif "implements" not in roles:
-        print(f"refusing: {cap_id} has no `implements:` member — a confirmed requirement "
-              f"must point to code. Tag the implementing code `# implements: {cap_id}` first.")
-        return 1
-    # newline="" on both ends: read/write the file's own line endings verbatim so a
-    # CRLF-committed requirement file isn't silently flipped to LF on a POSIX host
-    # (universal-newline translation on read + os.linesep on write would do exactly that).
+def _write_frontmatter_status(r, new_status):  # implements: ARCH-PROMOTE-011
+    """Set one requirement's `status:` in its own file, in place. Returns True on a
+    write, False when the block has no `status:` line to change.
+
+    newline="" on both ends: read/write the file's own line endings verbatim so a
+    CRLF-committed requirement file isn't silently flipped to LF on a POSIX host
+    (universal-newline translation on read + os.linesep on write would do exactly
+    that). Per-line EOL, so a file with MIXED line endings keeps every untouched
+    bare-LF line bare-LF — only the substituted VALUE changes."""
     with open(r["path"], encoding="utf-8-sig", newline="") as f:
         raw = f.read()
-    # Per-line EOL, so a file with MIXED line endings keeps every untouched bare-LF
-    # line bare-LF — only the substituted VALUE changes, never a line ending this
-    # function didn't touch. Line count is invariant (only a value is replaced), so
-    # zipping the original per-line endings back onto the edited text is exact.
     orig_lines = raw.splitlines(keepends=True)
     line_eols = [ln[len(ln.rstrip("\r\n")):] for ln in orig_lines]
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
-    # A module file holds several requirements; flip the status of THIS one, not of the
-    # first block in the file. # implements: ARCH-MODULEFILE-056
+    # A module file holds several requirements; flip the status of THIS one, not of
+    # the first block in the file.  # implements: ARCH-MODULEFILE-056
     blocks = split_requirement_blocks(text)
     if len(blocks) > 1:
         idx = r.get("block", 0)
-        blocks[idx], n = _set_frontmatter_status(blocks[idx], "confirmed")
+        blocks[idx], n = _set_frontmatter_status(blocks[idx], new_status)
         new_text = "".join(blocks)
     else:
-        new_text, n = _set_frontmatter_status(text, "confirmed")
+        new_text, n = _set_frontmatter_status(text, new_status)
     if n == 0:
-        print(f"could not find a `status:` line in {r['path']}")
-        return 1
+        return False
     new_lines = new_text.splitlines()
     if len(new_lines) == len(line_eols):
         new_text = "".join(nl + le for nl, le in zip(new_lines, line_eols))
@@ -3161,18 +3243,7 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # imple
         new_text = new_text.replace("\n", "\r\n")
     with open(r["path"], "w", encoding="utf-8", newline="") as f:
         f.write(new_text)
-    print(f"promoted {cap_id}: {cur or '(unset)'} -> confirmed")
-    if _impl_exempt(meta):
-        print(f"  note: `layer: {meta.get('layer')}` — covered by its "
-              f"{'satisfies:' if meta.get('layer') == 'need' else 'depends_on'} edges, "
-              "not by an implements: tag.")
-        print("  next: reqmap.py sync")
-        return 0
-    if "tested-by" not in roles:
-        print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
-              f"or set `test_exempt: <reason>` to silence the untested signal.")
-    print("  next: reqmap.py sync")
-    return 0
+    return True
 
 
 def _draft_id(rel):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-850
@@ -3968,15 +4039,15 @@ def _parse_todos(root):  # implements: REQ-MAP-871
 
 
 # ---------------------------------------------------------------------------
-# Content translation (`translate`) — implements: ARCH-TRANSLATE-044
+# Content translation, reading half — implements: ARCH-TRANSLATE-044
 #
-# Manual and opt-in only. NOTHING in this block is called from gate/sync/lint/
-# map/the pre-commit hook — `translate` is reached exclusively by typing
-# `reqmap.py translate`. That is deliberate: it is the only subcommand that
-# shells out to an external LLM CLI, and this engine's gate/sync/CI path must
-# stay usable on a machine that has never heard of `claude`. `map`/`export`
-# below only ever READ an already-committed cache file — never the CLI — so
-# they stay exactly as deterministic as before this block existed.
+# READ-ONLY. The command that produced `requirements/_i18n/<locale>.json` was
+# removed on 2026-09-05, together with everything that shelled out to an
+# external LLM CLI. What is left reads an already-committed cache file, so no
+# code path in this engine starts a subprocess and the gate/sync/CI path stays
+# usable on a machine that has never heard of `claude`. A cache entry is served
+# only while its hash matches the requirement, so the cache decays as
+# requirements are edited and refreshing it is a manual step.
 # ---------------------------------------------------------------------------
 TRANSLATOR_VERSION = "1"   # bump to invalidate every cached translation at once
                            # (e.g. after changing _TRANSLATE_PROMPT or the model)
@@ -3994,30 +4065,6 @@ _EN_STOPWORDS = frozenset({
     "be", "to", "of", "in", "on", "a", "an", "when", "where", "each", "every",
     "without", "after", "then", "if", "or",
 })
-
-
-def _strip_code(text):  # implements: ARCH-TRANSLATE-044
-    """Drop fenced code blocks and inline `backticked` spans before a prose scan —
-    an identifier's language must never sway a language-detection heuristic."""
-    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
-    return re.sub(r"`[^`]*`", " ", text)
-
-
-def detect_lang(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """RO/EN classifier over prose stripped of code spans. Romanian diacritics are a
-    near-certain signal; below that, whichever stopword list scores more hits wins.
-    Returns 'ro', 'en', or None when neither signal fires (too little prose, or a
-    requirement that is nearly all code/identifiers) — None means 'undetermined',
-    not 'English'."""
-    bare = _strip_code(text)
-    if any(ch in bare for ch in _RO_DIACRITICS):
-        return "ro"
-    words = [w.lower() for w in _WORD_RE.findall(bare)]
-    ro_hits = sum(1 for w in words if w in _RO_STOPWORDS)
-    en_hits = sum(1 for w in words if w in _EN_STOPWORDS)
-    if ro_hits == 0 and en_hits == 0:
-        return None
-    return "ro" if ro_hits > en_hits else "en"
 
 
 def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
@@ -4039,214 +4086,6 @@ def translation_hash(body, title):  # implements: ARCH-TRANSLATE-044  # implemen
     h.update(_translation_source_text(body, title).encode("utf-8"))
     h.update(TRANSLATOR_VERSION.encode("utf-8"))
     return h.hexdigest()[:12]
-
-
-def _effective_lang(r):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """A requirement's language: an explicit `lang: ro|en` frontmatter override wins;
-    otherwise it is detected from the translated span. The override is the escape
-    hatch for the rare file the heuristic gets wrong (e.g. a Romanian requirement
-    whose Contract is mostly backticked English identifiers)."""
-    override = (r["meta"].get("lang") or "").strip().lower()
-    if override in ("ro", "en"):
-        return override
-    return detect_lang(_translation_source_text(r["body"], _title(r["body"])))
-
-
-def corpus_lang(reqs):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """Majority language across the whole corpus (per-file lang: override honored
-    first). Returns 'ro' or 'en'; None only when every file is undetermined (e.g.
-    an empty registry) — never guessed."""
-    counts = {"ro": 0, "en": 0}
-    for r in reqs.values():
-        lang = _effective_lang(r)
-        if lang in counts:
-            counts[lang] += 1
-    if counts["ro"] == 0 and counts["en"] == 0:
-        return None
-    return "ro" if counts["ro"] >= counts["en"] else "en"
-
-
-def _structural_signature(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """(backtick-span multiset, numeric-literal multiset, ordered structural markers,
-    ordered `AC-N` labels, Gherkin-keyword multiset) — what a translation must preserve
-    exactly. Used to gate a cache write: a translation that drops a backticked identifier
-    or a number is a mistranslation of normative text, not a style choice.
-
-    The last two are identifiers WHERE THEY OPEN A LINE, and the first three checks are
-    blind to both:
-    `AC-1` -> `CA-1` keeps the same digit and is neither heading nor bullet, and
-    `Given` -> `Dat fiind` touches nothing at all. But `AC-N` is what a test points at
-    (`# verifies: <ID>#AC-N`), and Given/When/Then are engine vocabulary the viewer
-    highlights — the same reason `confirmed` and `draft` are left untranslated (i18n.jsx).
-    A reader given "Dat fiind" cannot match the criterion back to the .md file of record."""
-    backticks = tuple(sorted(re.findall(r"`[^`]*`", text)))
-    numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
-    markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
-    labels = tuple(re.findall(r"^\s*((?:CASE|AC)-\d+)\b", text, flags=re.MULTILINE))
-    # A Gherkin keyword is an identifier where it OPENS AN INDENTED LINE, which is what a
-    # step inside a Cases block looks like ("  Given  a repo with no requirements/").
-    # The same word in a sentence is ordinary English that a translation must translate,
-    # and counting those rejected correct work: measured over this corpus, all 3091 real
-    # step keywords are indented and inside the acceptance block, all 7 line-opening prose
-    # occurrences are flush left and outside it, with no exception either way; a further 79
-    # occurrences sit mid-sentence. Indentation separates the two exactly.
-    keywords = tuple(sorted(re.findall(r"(?m)^[ \t]+(Given|When|Then)\b", text)))
-    return (backticks, numbers, markers, labels, keywords)
-
-
-def _translation_preserves_structure(source, translated):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    return _structural_signature(source) == _structural_signature(translated)
-
-
-_LANG_NAMES = {"ro": "Romanian", "en": "English"}
-_TRANSLATE_MARKERS = ("TITLE", "INTENT", "CONTRACT", "ACCEPTANCE")
-_TRANSLATE_PROMPT = (
-    "Translate the following software requirement from {src} to {dst}. This is a "
-    "technical, normative document - preserve meaning exactly. Keep all markdown "
-    "formatting, every backticked `identifier` verbatim and unchanged, every number "
-    "unchanged, and the same list/heading structure line for line.\n"
-    "Two more things are identifiers, not prose, and must appear verbatim: the "
-    "criterion labels `CASE-1`, `CASE-2`, ... (a test refers to one by name), and the "
-    "Gherkin keywords Given / When / Then. Translate the words after them, never "
-    "the keywords themselves.\n\n"
-    "Return EXACTLY four sections, each starting on its own line with the literal "
-    "marker shown below, and nothing else - no commentary, no code fence:\n"
-    "===TITLE===\n<translated title>\n"
-    "===INTENT===\n<translated intent>\n"
-    "===CONTRACT===\n<translated contract>\n"
-    "===ACCEPTANCE===\n<translated acceptance>\n\n"
-    "--- SOURCE ---\n"
-    "===TITLE===\n{title}\n"
-    "===INTENT===\n{intent}\n"
-    "===CONTRACT===\n{contract}\n"
-    "===ACCEPTANCE===\n{acceptance}\n"
-)
-
-
-def _parse_translated_sections(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """Split the model's marker-delimited response into {title, intent, contract,
-    acceptance}. Returns None on any malformed response (a missing marker) — a
-    partial parse is never used, only all four fields or none."""
-    pattern = "(%s)" % "|".join("===%s===" % m for m in _TRANSLATE_MARKERS)
-    chunks = re.split(pattern, text)
-    parts, current = {}, None
-    for chunk in chunks:
-        m = re.match(r"===(\w+)===$", chunk)
-        if m:
-            current = m.group(1)
-            continue
-        if current:
-            parts[current] = chunk.strip()
-            current = None
-    if not all(m in parts for m in _TRANSLATE_MARKERS):
-        return None
-    return {k.lower(): parts[k] for k in _TRANSLATE_MARKERS}
-
-
-def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lang):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """Invoke `claude -p` once per requirement and parse its four-section response.
-    Returns {title, intent, contract, acceptance} on success, or None on ANY
-    failure — CLI missing, non-zero exit, timeout, or a malformed response. The
-    caller treats None as 'skip this entry', never as an error to propagate: this
-    is the fail-open boundary between an optional external tool and everything
-    else in the engine."""
-    prompt = _TRANSLATE_PROMPT.format(
-        src=_LANG_NAMES[src_lang], dst=_LANG_NAMES[dst_lang],
-        title=title, intent=intent, contract=contract, acceptance=acceptance)
-    # Resolve the name through PATH/PATHEXT rather than handing a bare "claude" to
-    # the OS: on Windows the CLI installs as `claude.CMD` and CreateProcess only ever
-    # appends `.exe`, so every entry failed with "CLI unavailable" against a CLI that
-    # was installed and on PATH. The resolved path is still passed as argv[0] — no
-    # shell, so nothing in a requirement can be read as a command.
-    exe = shutil.which("claude")
-    if exe is None:
-        return None
-    try:
-        # The prompt travels on stdin, not argv: a whole requirement in one argument
-        # would hit Windows' ~32k command-line ceiling on a large corpus.
-        proc = subprocess.run(
-            [exe, "-p"], input=prompt,
-            capture_output=True, text=True, encoding="utf-8", timeout=120,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    if proc.returncode != 0 or not proc.stdout.strip():
-        return None
-    return _parse_translated_sections(proc.stdout)
-
-
-def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """Translate every requirement written in the corpus's detected majority
-    language into `target` (default: the other of {ro, en}), caching results in
-    requirements/_i18n/<target>.json. Manual and opt-in — see the module-level
-    comment above this block. Fails open per entry: a missing/erroring `claude`
-    CLI, a timeout, or a translation that fails the structural-fidelity check is
-    skipped with a warning; it never aborts the batch or raises. Cache hits (hash
-    unchanged since the last successful translation) are skipped without calling
-    the CLI. Always exits 0 — this is a report-and-cache tool, never a gate."""
-    src = corpus_lang(reqs)
-    if src is None:
-        print("translate: no requirements to classify - nothing to do.")
-        return 0
-    dst = target or ("en" if src == "ro" else "ro")
-    if dst == src:
-        print("translate: target '{}' matches the corpus's detected language "
-              "'{}' - nothing to translate.".format(dst, src))
-        return 0
-
-    cache_path = os.path.join(reqs_dir, "_i18n", "{}.json".format(dst))
-    cache = {}
-    if os.path.exists(cache_path):
-        try:
-            with open(cache_path, encoding="utf-8") as f:
-                cache = json.load(f)
-            if not isinstance(cache, dict):
-                cache = {}
-        except (OSError, ValueError):
-            cache = {}
-
-    translated = cached = skipped = 0
-    for rid, r in sorted(reqs.items()):
-        if _effective_lang(r) != src:
-            continue   # already in the target language (or undetermined) - leave it
-        title = _title(r["body"])
-        # `_distinct_intent`, not `_first_quote`: the map emits no intent for a
-        # requirement whose quote IS its obligation (91% of the corpus at the time
-        # that rule was written), and translating the raw quote put a `Why — Intent`
-        # block in the Romanian document that the English one correctly hides.
-        intent = _distinct_intent(r["body"])
-        contract = _from_any(_section_raw, r["body"], CONTRACT_LABELS)
-        acceptance = _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS)
-        h = translation_hash(r["body"], title)
-        entry = cache.get(rid)
-        if entry and entry.get("hash") == h:
-            cached += 1
-            continue
-        parsed = _run_claude_translate(title, intent, contract, acceptance, src, dst)
-        if parsed is None:
-            print("  WARN  {}: claude CLI unavailable, failed, or returned a "
-                  "malformed response - skipped".format(rid))
-            skipped += 1
-            continue
-        source_text = "\n".join([title, intent, contract, acceptance])
-        translated_text = "\n".join([parsed["title"], parsed["intent"],
-                                      parsed["contract"], parsed["acceptance"]])
-        if not _translation_preserves_structure(source_text, translated_text):
-            print("  WARN  {}: translation failed the structural-fidelity check "
-                  "(backtick/number/heading mismatch) - skipped".format(rid))
-            skipped += 1
-            continue
-        cache[rid] = dict(parsed, hash=h)
-        translated += 1
-
-    if translated:
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
-        print("wrote {}".format(cache_path))
-    print("translate: {} translated, {} cache hit, {} skipped ({} -> {})".format(
-        translated, cached, skipped, src, dst))
-    return 0
 
 
 def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
@@ -4465,7 +4304,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             flag = "  [REVIEW]" if score >= 2 else ""
             print("  {}{}   {}".format(rid, flag, _req_file(reqs, rid)))
         if not show_all and len(ids) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
         if sig == "unimplemented" and reqs_dir:
             recorded = _recorded_members(reqs_dir, [rid for rid, _ in ids])
@@ -4480,8 +4319,8 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         for fp in shown_u:
             print("  {}".format(fp))
         if not show_all and len(untagged) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(untagged) - top_n))
-        print("  -> Run `reqmap.py draft` to auto-extract requirements, "
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(untagged) - top_n))
+        print("  -> Run `reqmap.py init` to auto-extract requirements, "
               "or add to .reqmapignore to silence.\n")
     if oversize:
         print("Granularity ({})".format(len(oversize)))
@@ -4490,7 +4329,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             print("  {}   ({} ACs) — consider splitting   {}".format(
                 rid, n, _req_file(reqs, rid)))
         if not show_all and len(oversize) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(oversize) - top_n))
         print(
             "  -> A requirement with more than {} acceptance criteria covering disjoint "
             "behaviors is a split candidate. Author two requirements, each with its own "
@@ -4504,11 +4343,11 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         for g in shown_r:
             print("  {}   identical contract   {}".format(", ".join(g), _req_file(reqs, g[0])))
         if not show_all and len(redundant) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(redundant) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(redundant) - top_n))
         print(
             "  -> {} requirement(s) state an obligation another already states, word for "
             "word. Fold each group into one and re-point the tags, or make the contracts "
-            "say different things. Exact matches only — run `reqmap.py dupes` for the "
+            "say different things. Exact matches only — run `reqmap.py gate --dupes` for the "
             "near-matches this cannot see.\n".format(spare)
         )
     return 0
@@ -5597,7 +5436,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
     print("")
     for ln in lines:
         print("info  {}".format(ln))
-    print("info  run `reqmap.py audit` for the full report")
+    print("info  run `reqmap.py gate --audit` for the full report")
 
 
 def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
@@ -5640,13 +5479,13 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
         _audit_section("Gate", "reqmap.py gate", lambda: cmd_check(
             reqs, members, reqs_dir, False, code_root, strict=strict,
             ac_cover=ac_cover, level_cover=level_cover)),
-        _audit_section("Risk", "reqmap.py next", lambda: cmd_next(
+        _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(
             reqs, members, False, code_root=code_root, reqs_dir=reqs_dir)),
-        _audit_section("Duplicates", "reqmap.py dupes",
+        _audit_section("Duplicates", "reqmap.py gate --dupes",
                        lambda: cmd_similar(reqs, SIMILAR_THRESHOLD, members)),
-        _audit_section("Design", "reqmap.py design",
+        _audit_section("Design", "reqmap.py gate --design",
                        lambda: cmd_design(code_root, reqs_dir)),
-        _audit_section("Tag coverage", "reqmap.py next --untagged",
+        _audit_section("Tag coverage", "reqmap.py gate --risk --untagged",
                        lambda: cmd_coverage(reqs, members, code_root, reqs_dir, False)),
     ]
     gate_rc = sections[0][3]
@@ -5656,17 +5495,17 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
     verdict = "FAIL" if gate_rc else "clean"
     rows = [("Gate", verdict, "reqmap.py gate"),
             ("Health", "{}/100 ({}/{} green on every axis)".format(
-                health["score"], health["healthy"], health["total"]), "reqmap.py next")]
+                health["score"], health["healthy"], health["total"]), "reqmap.py gate --risk")]
     if design is not None:
         rows.append(("Design OOP", "{}/100 ({}/{} files with no candidate)".format(
-            design["score"], design["clean_files"], design["files"]), "reqmap.py design"))
+            design["score"], design["clean_files"], design["files"]), "reqmap.py gate --design"))
     if untagged is not None:
         rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),
-                     "reqmap.py next --untagged"))
+                     "reqmap.py gate --risk --untagged"))
     dups = _redundant_groups(reqs)
     if dups:
         rows.append(("Redundancy", "{} group(s) share an identical contract".format(len(dups)),
-                     "reqmap.py dupes"))
+                     "reqmap.py gate --dupes"))
     rows.append(("Exemptions", "{} in force, {} with no recorded reason".format(
         len(exemptions), len(unexplained)), "see below"))
     rows.append(("Corpus shape", "{}/{} carry a `level:`{}".format(
@@ -6048,7 +5887,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
     if design is not None:
-        print("  design (source files w/o candidate): {}/100  ({}/{}) — run `reqmap.py design`".format(
+        print("  design (source files w/o candidate): {}/100  ({}/{}) — run `reqmap.py gate --design`".format(
             design["score"], design["clean_files"], design["files"]))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
@@ -6218,7 +6057,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
     print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
     if created:
         print("created: " + ", ".join(created))
-    print("\nNext: run `reqmap.py next` — it shows what to do, most important first.")
+    print("\nNext: run `reqmap.py gate --risk` — it shows what to do, most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
     return 0
 
@@ -7933,13 +7772,21 @@ def _clarify_questions(rid, r, reqs=None):  # implements: ARCH-CLARIFY-062  # im
                 "Name the subject the title names, so the clause reads on its own.")
 
     if clauses and n_cases and len(clauses) > n_cases:
-        for i in range(n_cases + 1, len(clauses) + 1):
-            if len(out) > 24:                            # a wall of questions is not a conversation
-                break
-            ask("clause-without-case", "advisory", "clause {}".format(i), clauses[i - 1],
-                "What case proves this clause? There are {} clauses and {} cases.".format(
-                    len(clauses), n_cases),
-                "Add a `CASE-{}` exercising it, or fold the clause into an existing case.".format(i))
+        # ONE question about the gap, not one per tail clause. The count is all this
+        # check knows: it compares two numbers and never reads a case to see which
+        # clause it proves. Accusing clauses n_cases+1.. by position was therefore a
+        # guess dressed as a finding, and a wrong one whenever an early clause is the
+        # uncovered one — e.g. a clause that delegates its cases to another
+        # requirement, which the counter cannot see. It sent the reader to rewrite a
+        # clause that already had its case.
+        gap = len(clauses) - n_cases
+        ask("clause-without-case", "advisory", "Cases", "",
+            "{} clause(s) have no case: there are {} clauses and {} cases. This check "
+            "counts, it does not read, so it cannot say WHICH — that is the part only "
+            "you can do.".format(gap, len(clauses), n_cases),
+            "Walk the clauses and find the one no case proves. Add a case for it, fold "
+            "it into an existing case, or move it out of the binding list if another "
+            "requirement already carries its cases.")
 
     if n_cases and not any(w in cases_low for w in CLARIFY_FAILURE_WORDS):
         ask("no-failure-case", "advisory", "Cases", "",
@@ -7990,7 +7837,7 @@ def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  #
         return 0
     if not items:
         print("{}: nothing unclear that this check can see.".format(cap_id or "corpus"))
-        print("  next: reqmap.py implement {}".format(cap_id or "<ID>"))
+        print("  next: reqmap.py gate --implement {}".format(cap_id or "<ID>"))
         return 0
     for it in items:
         blocking = [q for q in it["questions"] if q["severity"] == "blocking"]
@@ -8012,7 +7859,7 @@ def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  #
                 print("     -> {}".format(q["suggest"]))
         print("")
     if cap_id:
-        print("Answer them in {}.md, then: reqmap.py implement {}".format(cap_id, cap_id))
+        print("Answer them in {}.md, then: reqmap.py gate --implement {}".format(cap_id, cap_id))
     return 0
 
 
@@ -9103,9 +8950,34 @@ def main():
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="suggest-verifies: write the proposed `verifies:` tags into the test files")
-    ap.add_argument("--to", dest="translate_to", default=None, choices=["ro", "en"],
-                    help="translate: target locale (default: the other of ro/en from "
-                         "the detected corpus majority)")
+    # Mode flags: the read-only queries that used to be their own verbs. The work
+    # they do is unchanged — only the entry point moved, so `gate` is the one place
+    # a reader asks the corpus anything and `sync` the one place a write happens.
+    ap.add_argument("--audit", dest="mode_audit", action="store_true",
+                    help="gate: also print risk, duplicate contracts, design signals and tag coverage")
+    ap.add_argument("--risk", dest="mode_risk", action="store_true",
+                    help="gate: print the corpus risk snapshot and what to do next")
+    ap.add_argument("--show", dest="mode_show", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: print one requirement's dossier")
+    ap.add_argument("--search", dest="mode_search", metavar="QUERY", nargs="?", default=None,
+                    const="",
+                    help="gate: rank requirements by lexical relevance to a query")
+    ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: emit the review plan for one requirement")
+    ap.add_argument("--implement", dest="mode_implement", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: emit the implementation brief for one requirement")
+    ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
+                    help="gate: rank requirement pairs whose contracts overlap")
+    ap.add_argument("--design", dest="mode_design", action="store_true",
+                    help="gate: print the advisory design review of the code")
+    ap.add_argument("--suggest-verifies", dest="mode_suggest", action="store_true",
+                    help="sync: propose per-criterion `verifies:` tags (--apply writes them)")
+    ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="sync: take a requirement out of service; prints the blast radius first")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -9123,7 +8995,7 @@ def main():
         if not a.arg:
             print("usage: reqmap new AREA-NAME-NNN   |   reqmap new --from-todo \"<todo name>\" --id AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
-    if a.cmd == "init":
+    if a.cmd == "init" and not a.plan:
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
     reqs = load_requirements(reqs_dir)
@@ -9131,37 +9003,51 @@ def main():
     # asked for members. --cache stays on scan_members, the only scanner that implements
     # it - see scan_all's docstring for why it is not duplicated there.
     members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir, cache=a.cache)
-    if a.cmd == "next":
-        if a.as_badge:
-            return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
-        if a.as_json:
-            return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
-        if a.untagged:
-            return cmd_coverage(reqs, members, code_root, reqs_dir, False)
-        cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
-                   headline_only=True)
-        return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
-    if a.cmd == "show":
-        if not a.arg:
-            print("usage: reqmap show <ID>"); return 2
-        # scan_all above (the non-cache path) already produced level_cover in the same
-        # walk; only re-walk via scan_test_levels when --cache forced the
-        # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
-        levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
-        return cmd_show(reqs, members, a.arg, levels)
-    if a.cmd == "audit":
-        return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
-                         as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
-    if a.cmd == "dupes":
-        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members, top=a.top)
-    if a.cmd == "search":
-        if not a.arg:
-            print("usage: reqmap search \"<query>\"   [--top N]"); return 2
-        return cmd_search(reqs, a.arg, a.top if a.top is not None else SEARCH_TOP,
-                          reqs_dir=reqs_dir)
-    if a.cmd == "design":
-        return cmd_design(code_root, reqs_dir, as_json=a.as_json)
+    if a.cmd == "init":            # init --plan: the read-only extraction plan
+        md_globs = []
+        for g in (a.md_glob or []):
+            md_globs += [x.strip() for x in g.split(",") if x.strip()]
+        return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
     if a.cmd == "gate":
+        if a.mode_audit:
+            return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
+                             as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
+        if a.mode_risk:
+            if a.as_badge:
+                return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
+            if a.as_json:
+                return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
+            if a.untagged:
+                return cmd_coverage(reqs, members, code_root, reqs_dir, False)
+            cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
+                       headline_only=True)
+            return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
+        if a.mode_show is not None:
+            if not a.mode_show:
+                print("usage: reqmap gate --show <ID>"); return 2
+            # scan_all above (the non-cache path) already produced level_cover in the same
+            # walk; only re-walk via scan_test_levels when --cache forced the
+            # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
+            levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
+            return cmd_show(reqs, members, a.mode_show, levels)
+        if a.mode_search is not None:
+            if not a.mode_search:
+                print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
+            return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
+                              reqs_dir=reqs_dir)
+        if a.mode_review is not None:
+            if not a.mode_review:
+                print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
+            return cmd_review(reqs, a.mode_review)
+        if a.mode_implement is not None:
+            if not a.mode_implement:
+                print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
+            return cmd_implement(reqs, members, a.mode_implement, as_json=a.as_json)
+        if a.mode_dupes:
+            return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD,
+                               members, top=a.top)
+        if a.mode_design:
+            return cmd_design(code_root, reqs_dir, as_json=a.as_json)
         # The whole verdict, in the order every hook and CI already ran it: link sync +
         # drift + test-link, then requirement readability, then map freshness. They were
         # three commands because they were written on three days, not because a caller
@@ -9178,6 +9064,15 @@ def main():
             rc = cmd_map(reqs, members, reqs_dir, code_root, True, ac_cover=_ac_cover) or rc
         return rc
     if a.cmd == "sync":
+        if a.mode_retire is not None:
+            if not a.mode_retire:
+                print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
+            return cmd_retire(reqs, members, reqs_dir, a.mode_retire, delete=a.delete,
+                              do_apply=a.do_apply, force=a.force, as_json=a.as_json,
+                              code_root=code_root)
+        if a.mode_suggest:
+            return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
+                                        ac_cover=_ac_cover, apply_tags=a.do_apply)
         # Before the gate, not after: the generated integration artifacts are derived
         # from the command registry, and RM028 reports them stale. Regenerating them
         # downstream of a check that fails ON them can never converge.
@@ -9210,7 +9105,7 @@ def main():
             _dups = _redundant_groups(reqs)
             if _dups:
                 print("info  {} group(s) of requirements share an identical contract "
-                      "({} could be folded away) — run `reqmap.py next` to see them"
+                      "({} could be folded away) — run `reqmap.py gate --risk` to see them"
                       .format(len(_dups), sum(len(g) - 1 for g in _dups)))
             # Everything the engine can discover, named in one place at the moment the
             # corpus was just rewritten. `sync` regenerates what is derived; until now it
@@ -9226,15 +9121,6 @@ def main():
             print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
                   "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
         return rc
-    if a.cmd == "draft":
-        if a.plan:
-            md_globs = []
-            for g in (a.md_glob or []):
-                md_globs += [x.strip() for x in g.split(",") if x.strip()]
-            return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
-        return cmd_extract(reqs, members, code_root, reqs_dir)
-    if a.cmd == "review":
-        return cmd_review(reqs, a.arg)
     if a.cmd == "clarify":
         if a.decompose:
             # scaffolding a clause into its own requirement is the write half of the
@@ -9242,25 +9128,6 @@ def main():
             return cmd_lint(reqs, strict=False, members=members, decompose=True,
                             reqs_dir=reqs_dir)
         return cmd_clarify(reqs, a.arg, as_json=a.as_json)
-    if a.cmd == "implement":
-        if not a.arg:
-            print("usage: reqmap implement AREA-NAME-NNN"); return 2
-        return cmd_implement(reqs, members, a.arg, as_json=a.as_json)
-    if a.cmd == "retire":
-        if not a.arg:
-            print("usage: reqmap retire AREA-NAME-NNN [--delete] [--apply]"); return 2
-        return cmd_retire(reqs, members, reqs_dir, a.arg, delete=a.delete,
-                          do_apply=a.do_apply, force=a.force, as_json=a.as_json,
-                          code_root=code_root)
-    if a.cmd == "suggest-verifies":
-        return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
-                                    ac_cover=_ac_cover, apply_tags=a.do_apply)
-    if a.cmd == "translate":
-        return cmd_translate(reqs, reqs_dir, target=a.translate_to)
-    if a.cmd == "confirm":
-        if not a.arg:
-            print("usage: reqmap confirm AREA-NAME-NNN"); return 2
-        return cmd_promote(reqs, members, a.arg)
 
 
 def _pipe_closed():  # implements: ARCH-PIPE-046

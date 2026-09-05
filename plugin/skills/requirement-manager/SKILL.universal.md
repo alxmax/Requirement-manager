@@ -32,16 +32,16 @@ When invoked, choose one of two paths:
 
 All actions run from the repo root where `scripts/reqmap.py` is vendored (see Setup).
 After any action, summarize what changed and, when useful, point to
-`python scripts/reqmap.py next` for the best follow-up.
+`python scripts/reqmap.py gate --risk` for the best follow-up.
 
 | Action | What it does and when to pick it | Commands to run (in order) |
 |---|---|---|
 | **setup** (first use in a repo) | Idempotent bootstrap: scaffold `requirements/` and `.reqmapignore` if missing, draft new requirements for any untagged code/prose, then rebuild the lock + map. Pick this when the repo has never had a requirement registry. Existing requirement files and membership tags are **preserved**. Never clobbers `.reqmapignore`. | `python scripts/reqmap.py init` |
-| **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py draft` → `gate` → report draft count + result |
-| **confirm** (validate a reviewed requirement) | Human-validation step: flip a reviewed requirement's `status` to `confirmed`. Pick this when you have reviewed a `draft` or `baseline` requirement and verified its contract matches the code's actual behaviour. The engine refuses if the requirement has no `implements:` member (a confirmed requirement must point to code). After confirming, run `sync`. | 1. Tag the implementing file: add `# implements: <ID>` (and `# tested-by: <ID>` if there's a test). 2. `python scripts/reqmap.py confirm <ID>`. 3. `python scripts/reqmap.py sync`. |
+| **draft** (discover missing requirements) | Discovery pass: draft new requirements for any untagged code/prose files. Pick this when code has grown since the last extraction and you want to catch new untagged capabilities. Existing requirement files and membership tags are **preserved**. Covers code and prose (`.md`/`.html`). After drafting, run `gate` and report the draft count + gate result (`N errors`). Remind the user to review + `confirm` the real ones. | `python scripts/reqmap.py init` → `gate` → report draft count + result |
+| **confirm** (validate a reviewed requirement) | Human-validation step. There is no command: read the requirement, then set `status: confirmed` in its frontmatter. The gate refuses a confirmed requirement with no `implements:` member (RM006), and `sync` demotes an edited contract back to `draft` on its own. | 1. Tag the implementing file. 2. Edit `status:`. 3. `python scripts/reqmap.py sync`. |
 | **sync** (refresh lock + map after edits) | Rescan code members, advance the drift baseline, and regenerate the map (plus `_findings.md`, if the repo keeps one) — all in one step. Pick this after editing requirement files or tagging new code members (i.e. whenever you want to advance the committed baseline). Use `--accept-drift` to advance an edited confirmed/implemented contract. | `python scripts/reqmap.py sync --accept-drift` (if confirmed contracts changed) or `python scripts/reqmap.py sync` (for new/draft requirements only) → advisory doc-sync |
 | **update-engine** (after a plugin/package update) | Re-seed the vendored `scripts/reqmap.py` (and `scripts/_map_viewer.html` if the repo uses the viewer) from the installed plugin, then re-verify. Pick this after updating the plugin to bring the engine up to date. Report the old → new `MAP_ENGINE_VERSION`. | Copy `reqmap.py` from the plugin's `scripts/` directory into `scripts/reqmap.py` in your repo. Copy `_map_viewer.html` the same way (if you use the viewer). Then run `python scripts/reqmap.py gate` → `map`. The plugin's scripts directory is typically `~/.claude/plugins/cache/requirement-manager/requirement-manager/<version>/scripts/` on Claude Code, or wherever your tool installed the plugin. |
-| **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py next` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
+| **triage** (classify a vibe-coded corpus) | Classify all auto-extracted requirements as Core / Emergent / Accidental. Pick this when the corpus is vibe-coded (most requirements have `owner: auto` and none are `confirmed`). Surfaces what the tool genuinely needs vs. what AI invented. Leads to deprecate / delete decisions for Accidental requirements. | 1. `reqmap.py gate --risk` (see status). 2. Present C/E/A framework to user (see below). 3. User classifies each requirement. 4. Apply: Core → confirm path; Accidental → `deprecated` + delete; Emergent → keep as `baseline`. 5. `reqmap.py sync`. |
 
 **Advisory doc-sync (assistant step, not the engine).** After `map`, for each
 sync-only doc (bucket 2) tagged `generated-from: <ID>`, the assistant reads the doc,
@@ -58,7 +58,7 @@ and never validated for intent. Triage surfaces what the project genuinely needs
 vs. what the AI invented during extraction, before those inventions get promoted
 to `confirmed` and start blocking real work.
 
-**When to offer proactively**: when `reqmap.py next` shows `0 confirmed` and
+**When to offer proactively**: when `reqmap.py gate --risk` shows `0 confirmed` and
 the majority of requirements carry `owner: auto` in their frontmatter, offer
 intent triage before any other action.
 
@@ -76,7 +76,7 @@ intent triage before any other action.
 1. Read each requirement's `## Description` to the user in one sentence.
 2. User says C, E, or A.
 3. After classifying all: apply decisions in bulk.
-   - Core → leave for human review + confirm path (`reqmap.py confirm <ID>`).
+   - Core → leave for human review; a human sets `status: confirmed` in the frontmatter.
    - Emergent → keep as `baseline`; no action needed.
    - Accidental → set `status: deprecated` in frontmatter; delete implementing
      code (check for load-bearing callers first with `grep` before deleting).
@@ -225,7 +225,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     more than four or five acceptance criteria that cover behaviors which could
     break **independently** of each other, it is a *split candidate*. Author two
     or more requirements, each with its own contract and its own failure mode.
-    `reqmap.py next` flags these. A five-AC requirement with one root cause is
+    `reqmap.py gate --risk` flags these. A five-AC requirement with one root cause is
     fine; a three-AC requirement covering three disjoint failure modes is already
     overloaded.
 
@@ -244,7 +244,7 @@ If two behaviors live in the same file but can break in isolation (e.g. a veto p
     the code is covered twice and a later edit will change one of them. `reqmap.py
     next` reports a **Redundancy** bucket for contracts that are identical word for
     word (exact match, no threshold — a group there is a duplicate, not a guess),
-    and `reqmap.py dupes` scores the near-matches. Fold a group into one
+    and `reqmap.py gate --dupes` scores the near-matches. Fold a group into one
     requirement and re-point the tags, or make the contracts say different things.
     Both are advisory and neither ever rewrites a file: which of two ids survives,
     and what the merged contract says, is a judgement call.
@@ -378,7 +378,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v4
+      - uses: alxmax/requirement-manager/check@v5
 ```
 
 Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.
@@ -393,24 +393,11 @@ Creation verbs (pick by input, not by outcome):
 <!--##REQMAP:COMMANDS##-->
 | Command | What it does | Flags |
 |---|---|---|
-| `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code/prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. Run once per repo to get started. | `--wipe`, `--no-site` |
+| `init` | First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, draft requirements from existing code and prose, build the lock and map, and print guided next steps. Idempotent — safe to re-run; never clobbers an existing .reqmapignore. --plan emits the extraction plan as JSON and writes no requirement files, for looking before authoring.  | `--plan`, `--out`, `--md-glob`, `--wipe`, `--no-site` |
 | `new` | Scaffold a new blank requirement from the built-in template. Use --from-todo and --id together to pre-fill from a TODO.md item instead. | `--id`, `--from-todo`, `--mark-done` |
-| `gate` | Run the commit/CI gate (report-only): verify every code tag resolves to a real requirement, every confirmed requirement has at least one implements: member, and drift has not been introduced since the last sync. Exits non-zero on link-sync errors only (drift and test-link integrity are warnings). Never touches _reqlock.json. Run before every commit and in CI. | `--strict`, `--json`, `--since` |
-| `sync` | Rescan code members, advance the drift baseline, and regenerate the map in one step (a committed _findings.md is refreshed too). Run after editing requirement files or tagging new code members. Use --accept-drift when a confirmed or implemented contract changed. | `--accept-drift`, `--strict` |
-| `next` | Show what to do next: a prioritized, actionable list of risk buckets (Orphans, Needs tests, Needs intent review, Drafts to review). Read-only, always exits 0. The best follow-up command to run after any action. | `--all` |
-| `show` | Print a consolidated dossier for one requirement: header, intent, Contract bullets, dependencies in both directions, code members grouped by role with file:line, open Verify intent questions, and risk signals. Answers 'what does this do / where is X' in one command. Read-only. | — |
-| `audit` | Run every pass that discovers a problem and print one report: the gate, corpus risk, duplicate contracts, design candidates, tag coverage, the exemptions in force and the shape of the corpus. Read-only; the exit code comes from the gate alone, because everything else is advice. | `--strict` |
-| `dupes` | Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), so a divergent re-implementation is caught before it lands. Read-only, advisory — a human decides if a flagged pair is a real duplicate. | `--threshold` |
-| `search` | Rank requirements by lexical relevance to a free-text query (same TF-IDF cosine as dupes, reused). Read-only. Prints each hit's score, and says so explicitly when nothing clears the relevance floor rather than showing a spurious top result. Lexical, not synonym-aware. | `--top` |
-| `draft` | Draft one requirement per untagged file (code and prose). Input is existing untagged source code and Markdown. Emits draft requirements — never confirmed. After drafting, run gate and report the result. Remind the user to review and confirm the real ones. | — |
-| `confirm` | Mark a reviewed requirement as confirmed — the human sign-off step. Flips status to confirmed in the frontmatter. The engine refuses if the requirement has no implements: member (a confirmed requirement must point to code). Run sync after confirming. | — |
-| `clarify` | Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. Run it before implementing so the ambiguity is resolved in the requirement, not guessed in code. | `--json` |
-| `implement` | Emit the brief for implementing one requirement in code: its obligations, its cases, the exact tags the new code must carry, where similar code already lives, and the command that proves the work landed. Writes no code and no file. | `--json` |
-| `retire` | Take a requirement out of service. Prints the blast radius first — dependents, children, members, and the files where it was the only tagged requirement. Refuses while dependents exist unless --force. Deprecates by default (reversible); --delete also removes the block, its lock entries and its membership tags, never a function body. Nothing is written without --apply. | `--delete`, `--apply`, `--force`, `--json` |
-| `review` | Emit a JSON review plan (intent, contract, acceptance criteria, structural anchors) for all requirements or one. Used as an AI feed for semantic quality review. Read-only. | — |
-| `translate` | Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook. | `--to` |
-| `design` | Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json. | `--json` |
-| `suggest-verifies` | Propose `# verifies: <id>#CASE-N` tags for tests already named after the criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can be adopted on an existing corpus. Read-only; --apply writes the tags. | `--apply` |
+| `gate` | The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review and --implement for the two machine-readable plans.  | `--audit`, `--risk`, `--show`, `--search`, `--dupes`, `--design`, `--review`, `--implement`, `--all`, `--untagged`, `--badge`, `--threshold`, `--top`, `--strict`, `--json`, `--since` |
+| `sync` | The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed. --suggest-verifies proposes per-criterion verifies: tags, and writes them with --apply.  | `--retire`, `--delete`, `--apply`, `--force`, `--suggest-verifies`, `--apply`, `--findings`, `--accept-drift`, `--strict` |
+| `clarify` | Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. --decompose is the write half of the same question: it scaffolds an over-scoped requirement's clauses into requirements of their own. Run it before implementing, so the ambiguity is resolved in the requirement instead of guessed in code.  | `--decompose`, `--json` |
 <!--##/REQMAP:COMMANDS##-->
 
 **`check` is a deprecated alias for `gate`** — kept for backward compat.

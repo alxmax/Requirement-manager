@@ -1,5 +1,65 @@
 # Changelog
 
+## plugin `v5.0.0` — 2026-09-05
+
+**Breaking: the CLI is six verbs.** `init`, `new`, `gate`, `sync`, `confirm`, `clarify`.
+Eleven verbs became flags on those six, and one was deleted outright. Nothing lost a
+capability: not one `cmd_*` function was removed in the fold, so every behaviour still
+exists and every test that covered it still runs. What moved is the entry point.
+
+    next, dupes, design, audit        gate --risk / --dupes / --design / --audit
+    show, search, review, implement   gate --show / --search / --review / --implement
+    draft, draft --plan               init, init --plan
+    suggest-verifies                  sync --suggest-verifies
+    retire                            confirm --retire
+
+The shape follows what the engine already did. `gate` was a three-in-one merge before this
+(check + lint + map) done by adding flags rather than renaming the verb; `audit` already
+called next, dupes, design and coverage internally; `init` already made the same
+`cmd_extract()` call as plain `draft`. Four of the eleven were therefore a registry change
+only.
+
+**Breaking: there is no `confirm` command, and an edit takes a confirmation back.** Confirming
+was the wrong shape as a command: it let anything that could type — a script, an agent, a habit —
+record a human's judgement. Worse, the judgement outlived the thing it was about, because nothing
+connected editing a contract to re-validating it. A status is now set by editing the frontmatter,
+and `sync` writes `draft` back into any `confirmed` contract whose binding content changed,
+naming each one. `--accept-drift` keeps the status: it is the human saying the edit is still
+valid, which now has to be said rather than assumed.
+
+The cost is stated rather than hidden: a demoted requirement stops being enforced — no
+`implements:` requirement, no drift check — until someone confirms it again. That is why the
+demotion prints loudly, by name, with the sentence "These no longer gate". The invariant the
+command used to guard survives in the gate, where `RM006` makes a confirmed requirement with no
+code an error on every run.
+
+`retire` moves with it, to `sync --retire ID`. Five verbs remain: `init`, `new`, `gate`,
+`sync`, `clarify`.
+
+**`translate` is gone, and the map still reads Romanian.** The command that WROTE
+`requirements/_i18n/<locale>.json` was deleted, together with everything that spawned a
+`claude` subprocess: the language detection, the corpus-majority vote, the
+structural-fidelity check. The reading half is untouched, so the viewer's EN/RO toggle works
+exactly as before — verified, not assumed: 227 of 231 nodes still carry `i18n.ro` after the
+change. No subcommand shells out to anything any more.
+
+The consequence is stated rather than hidden: **the translation cache now decays.** An entry
+is served only while its hash matches the requirement, so every requirement edited from here
+on silently loses its translation and the engine cannot produce a new one. Refreshing one is
+now a manual step.
+
+**New guard: `scripts/check_retired_verbs.py`.** It fails when a live instruction names a
+verb the engine no longer has. This project has folded verbs four times, and three of those
+left a dead instruction behind — `map` in a consumer's CLAUDE.md, `findings` in a consumer's
+script, and the `v4.0.0` cut which shipped a `SKILL.md` documenting `scan` after it was gone.
+None failed at merge, none failed in CI; each failed later, when someone typed what the docs
+told them to. The check found thirteen more of exactly that in this repo's own skill files.
+Wired into the pre-commit hook and CI.
+
+**The published action alias moves to `check@v5`**, per ADR-0029: the alias tracks the
+plugin's major. A consumer pinned to `check@v4` keeps the four-verb engine and is unaffected
+until it re-pins.
+
 ## plugin `v4.2.2` — 2026-09-05
 
 **No more line-ending diff on `SKILL.md` after every `sync` on Windows.** The generated
@@ -141,7 +201,7 @@ does say something the clauses do not, are unaffected in either language.
 ## plugin `v4.0.1` — 2026-09-04
 
 **The Action's major alias tracks the plugin's major** ([ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md)).
-`check@v4` ships with plugin `4.x`. It was a third, independent version axis until now — which is
+`check@v5` ships with plugin `4.x`. It was a third, independent version axis until now — which is
 why `@v2` lived across 2.x through 3.4, and why `v4.0.0` shipped advertised as `@v3`. The
 reasoning held (an alias that moves for reasons unrelated to its own interface forces a re-pin for
 nothing) and the cost was a third number to hold, visible to the one person least equipped to

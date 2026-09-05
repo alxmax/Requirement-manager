@@ -45,7 +45,6 @@ def tb_tag(cap):
     return "# {}: {}".format(_TB_ROLE, cap)
 
 
-
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
@@ -2342,14 +2341,16 @@ class MapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: 
             self.assertIn("fresh", out)
 
 
-class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894  # tested-by: REQ-PROMOTE-895  # tested-by: REQ-PROMOTE-896
+class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894
     def _run(self, d, cap_id):
+        # `confirm` is gone; what survives is the surgical status edit the demotion
+        # now uses. The tests below are about THAT, and always were.
         reqs = R.load_requirements(d)
-        members = R.scan_members(d, d)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_promote(reqs, members, cap_id)
-        return code, buf.getvalue()
+        r = reqs.get(cap_id)
+        if not r:
+            return 1, ""
+        ok = R._write_frontmatter_status(r, "confirmed")
+        return (0 if ok else 1), ""
 
     def test_promotes_baseline_with_implements(self):  # AC-1  # verifies: REQ-PROMOTE-894#CASE-1  # verifies: REQ-PROMOTE-894#CASE-4
         with tempfile.TemporaryDirectory() as d:
@@ -2362,32 +2363,6 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: R
             self.assertIn("status: confirmed", after)
             self.assertNotIn("status: baseline", after)
             self.assertIn("body line", after)            # body preserved
-
-    def test_refuses_without_implements(self):  # AC-2  # verifies: REQ-PROMOTE-895#CASE-1  # verifies: REQ-PROMOTE-895#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-B-001.md")
-            _write(p, REQ.format(id="AREA-B-001", status="baseline", layer="bus", extra="", title="B"))
-            before = open(p, encoding="utf-8").read()
-            code, out = self._run(d, "AREA-B-001")
-            self.assertNotEqual(code, 0)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)   # unchanged
-            self.assertIn("must point to code", out)
-
-    def test_idempotent_when_confirmed(self):  # AC-3  # verifies: REQ-PROMOTE-896#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-C-001.md")
-            _write(p, REQ.format(id="AREA-C-001", status="confirmed", layer="bus", extra="", title="C"))
-            _write(os.path.join(d, "c.py"), tag("AREA-C-001") + "\n")
-            before = open(p, encoding="utf-8").read()
-            code, out = self._run(d, "AREA-C-001")
-            self.assertEqual(code, 0)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)
-            self.assertIn("already confirmed", out)
-
-    def test_unknown_id_errors(self):
-        with tempfile.TemporaryDirectory() as d:
-            code, out = self._run(d, "NOPE-X-001")
-            self.assertNotEqual(code, 0)
 
     def test_preserves_trailing_comment(self):  # AC-4  # verifies: REQ-PROMOTE-894#CASE-3
         new_text, n = R._set_frontmatter_status(
@@ -2409,10 +2384,7 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: R
                 f.write(raw)
             _write(os.path.join(d, "m.py"), tag("AREA-M-001") + "\n")
             reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-M-001")
+            code = 0 if R._write_frontmatter_status(reqs["AREA-M-001"], "confirmed") else 1
             self.assertEqual(code, 0)
             with open(p, "rb") as f:
                 after = f.read()
@@ -2494,7 +2466,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         reqs = {"DRAFT-{}-00{}".format(c, i): self._req("draft")
                 for i, c in enumerate("ABCDE", 1)}            # 5 drafts > top_n=3
         _, out = self._next(reqs, {})
-        self.assertIn("more — run `reqmap.py next --all`", out)
+        self.assertIn("more — run `reqmap.py gate --risk --all`", out)
         _, out_all = self._next(reqs, {}, show_all=True)
         self.assertNotIn("more — run", out_all)
         for rid in reqs:
@@ -2565,7 +2537,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(R.LINT_AC_MAX + 1) for i in range(1, 6)}
         _, out = self._next(reqs, {})
         self.assertEqual(out.count("consider splitting"), 3)
-        self.assertIn("more — run `reqmap.py next --all`", out)
+        self.assertIn("more — run `reqmap.py gate --risk --all`", out)
         _, out_all = self._next(reqs, {}, show_all=True)
         self.assertEqual(out_all.count("consider splitting"), 5)
 
@@ -2662,7 +2634,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "app.py"), "x = 1\n")
             _, out, _ = self._init(d)
-            self.assertIn("reqmap.py next", out)
+            self.assertIn("reqmap.py gate --risk", out)
 
     def test_empty_extraction_is_distinct(self):  # verifies: REQ-INIT-861#CASE-3
         with tempfile.TemporaryDirectory() as d:
@@ -3175,26 +3147,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         self.addCleanup(shutil.rmtree, d, ignore_errors=True)
         return d
 
-    def test_detect_lang_diacritics(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertEqual(R.detect_lang(self.RO_BODY), "ro")
-
-    def test_detect_lang_english(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertEqual(R.detect_lang(self.EN_BODY), "en")
-
-    def test_detect_lang_undetermined_on_code_only(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertIsNone(R.detect_lang("`foo_bar()` `baz.qux` `1234`"))
-
-    def test_corpus_lang_is_majority_vote(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-2
-        reqs = {"REQ-A-001": self._req(self.RO_BODY), "REQ-B-002": self._req(self.RO_BODY),
-                "REQ-C-003": self._req(self.EN_BODY)}
-        self.assertEqual(R.corpus_lang(reqs), "ro")
-
-    def test_lang_frontmatter_override_wins_over_detection(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-2
-        # Romanian prose, but explicitly tagged as English — override must win.
-        reqs = {"REQ-A-001": self._req(self.RO_BODY, lang="en")}
-        self.assertEqual(R.corpus_lang(reqs), "en")
-
-    def test_translation_hash_changes_on_title_edit(self):  # verifies: ARCH-TRANSLATE-044#CASE-3  # verifies: REQ-TRANSLATE-937#CASE-4
+    def test_translation_hash_changes_on_title_edit(self):  # verifies: ARCH-TRANSLATE-044#CASE-1  # verifies: REQ-TRANSLATE-937#CASE-2
         # binding_hash() (Contract+Acceptance only) would NOT change here — that is
         # exactly the gap this hash exists to close.
         body_a = self.RO_BODY
@@ -3206,110 +3159,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         # stays THE SAME — proof that reusing it would have missed this edit.
         self.assertEqual(R.binding_hash(body_a), R.binding_hash(body_b))
 
-    def test_structural_signature_catches_dropped_backtick(self):  # verifies: ARCH-TRANSLATE-044#CASE-4  # verifies: REQ-TRANSLATE-937#CASE-5
-        source = "The `TOTAL` sum uses 2 decimals."
-        good = "Suma `TOTAL` folosește 2 zecimale."
-        bad = "Suma TOTAL folosește 2 zecimale."   # backtick dropped
-        self.assertTrue(R._translation_preserves_structure(source, good))
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_dropped_number(self):  # verifies: ARCH-TRANSLATE-044#CASE-4  # verifies: REQ-TRANSLATE-937#CASE-5
-        source = "Rounds to 2 decimals."
-        bad = "Rounds to decimals."   # number dropped
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_renamed_ac_label(self):  # verifies: ARCH-TRANSLATE-044#CASE-9  # verifies: REQ-TRANSLATE-938#CASE-1
-        # `AC-N` is an identifier a test points at with `# verifies: <ID>#AC-N`, not prose.
-        # Renaming it passes the backtick/number/marker checks: "AC-1" and "CA-1" carry the
-        # same digit and neither is a heading or a bullet.
-        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
-        good = "AC-1\n  Given  un depozit\n  When   ruleaza `init`\n  Then   creeaza directorul\n"
-        bad = good.replace("AC-1", "CA-1")
-        self.assertTrue(R._translation_preserves_structure(source, good))
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_translated_gherkin_keyword(self):  # verifies: ARCH-TRANSLATE-044#CASE-9  # verifies: REQ-TRANSLATE-938#CASE-1
-        # Given/When/Then are engine vocabulary, like `confirmed` or `draft`: the viewer
-        # highlights them and the .md file is the artifact of record. A reader shown
-        # "Dat fiind" cannot match the criterion against the file.
-        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
-        bad = ("AC-1\n  Dat fiind  un depozit\n  Cand   ruleaza `init`\n"
-               "  Atunci   creeaza directorul\n")
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_parse_translated_sections_well_formed(self):
-        text = ("===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
-        parsed = R._parse_translated_sections(text)
-        self.assertEqual(parsed, {"title": "T", "intent": "I", "contract": "C", "acceptance": "A"})
-
-    def test_parse_translated_sections_missing_marker_is_none(self):
-        text = "===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n"   # no ACCEPTANCE
-        self.assertIsNone(R._parse_translated_sections(text))
-
-    def test_cmd_translate_fails_open_when_cli_missing(self):  # verifies: ARCH-TRANSLATE-044#CASE-5  # verifies: REQ-TRANSLATE-938#CASE-2
-        reqs_dir = self._tmp_reqs_dir()
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                rc = R.cmd_translate(reqs, reqs_dir)
-        self.assertEqual(rc, 0)                              # never a gate, always exits 0
-        self.assertIn("skipped", buf.getvalue())
-        self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_i18n", "en.json")))  # nothing cached
-
-    def test_cmd_translate_happy_path_writes_cache_and_hits_on_rerun(self):  # verifies: ARCH-TRANSLATE-044#CASE-6  # verifies: REQ-TRANSLATE-937#CASE-3  # verifies: REQ-TRANSLATE-938#CASE-3
-        reqs_dir = self._tmp_reqs_dir()
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        fake_response = ("===TITLE===\nEnglish title\n"
-                          "===INTENT===\nHere we explain why this requirement exists and "
-                          "what problem it solves.\n"
-                          "===CONTRACT===\n- The system calculates the `TOTAL` sum and shows "
-                          "2 decimals.\n"
-                          "===ACCEPTANCE===\n- Given a total of 10\n  When it is shown\n  "
-                          "Then it reads 10.00\n")
-        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m:
-            rc = R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(rc, 0)
-        self.assertEqual(m.call_count, 1)
-        cache_path = os.path.join(reqs_dir, "_i18n", "en.json")
-        self.assertTrue(os.path.exists(cache_path))
-        with open(cache_path, encoding="utf-8") as f:
-            cache = json.load(f)
-        self.assertEqual(cache["REQ-A-001"]["title"], "English title")
-
-        # re-run with unchanged content: cache hit, claude is NOT called again
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m2:
-            R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(m2.call_count, 0)
-
-    def test_resolved_executable_is_what_runs(self):  # verifies: REQ-TRANSLATE-938#CASE-7
-        """On Windows the CLI installs as `claude.CMD`, and CreateProcess only ever
-        appends `.exe` to a bare name — so every entry was reported as an unavailable
-        CLI against a CLI that was installed and on PATH."""
-        captured = {}
-
-        def fake_run(argv, **kw):
-            captured["argv"] = argv
-            return mock.Mock(returncode=0, stdout="===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
-
-        with mock.patch.object(R.shutil, "which", return_value="C:\\bin\\claude.CMD"), \
-             mock.patch.object(R.subprocess, "run", side_effect=fake_run):
-            out = R._run_claude_translate("T", "I", "C", "A", "ro", "en")
-        self.assertIsNotNone(out)
-        self.assertEqual(captured["argv"][0], "C:\\bin\\claude.CMD")
-
-    def test_cli_absent_from_path_never_spawns(self):  # verifies: REQ-TRANSLATE-938#CASE-7
-        with mock.patch.object(R.shutil, "which", return_value=None), \
-             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
-                 "must not spawn when the CLI is not on PATH")) as m:
-            self.assertIsNone(R._run_claude_translate("T", "I", "C", "A", "ro", "en"))
-        self.assertEqual(m.call_count, 0)
-
-    def test_map_never_invokes_claude(self):  # verifies: ARCH-TRANSLATE-044#CASE-7  # verifies: REQ-TRANSLATE-937#CASE-1  # verifies: REQ-TRANSLATE-938#CASE-4
+    def test_map_never_invokes_claude(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-1  # verifies: REQ-TRANSLATE-938#CASE-1
         # `map`/`export` must stay fully deterministic and claude-free — they only
         # ever read an already-committed cache file.
         reqs_dir = self._tmp_reqs_dir()
@@ -3321,15 +3171,17 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
             json.dump({"REQ-A-001": {"hash": h, "title": "English title", "intent": "I",
                                       "contract": "C", "acceptance": "A"}}, f)
         reqs = {"REQ-A-001": self._req(body)}
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
+        # `shutil` left the engine with the translate writer that used it to find the
+        # CLI. Patching subprocess alone is now the whole assertion, and a stronger one:
+        # nothing in the engine can start a process at all.
+        with mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
                 "map must never shell out to claude")):
             data = R._build_map_data(reqs, {})
             R._attach_translations(data, reqs, reqs_dir)
         node = next(n for n in data["nodes"] if n["id"] == "REQ-A-001")
         self.assertEqual(node["i18n"]["en"]["title"], "English title")
 
-    def test_stale_cache_entry_is_dropped_not_served(self):  # verifies: ARCH-TRANSLATE-044#CASE-8  # verifies: REQ-TRANSLATE-938#CASE-5
+    def test_stale_cache_entry_is_dropped_not_served(self):  # verifies: ARCH-TRANSLATE-044#CASE-3  # verifies: REQ-TRANSLATE-938#CASE-2
         reqs_dir = self._tmp_reqs_dir()
         i18n_dir = os.path.join(reqs_dir, "_i18n")
         os.makedirs(i18n_dir)
@@ -3338,21 +3190,6 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
         out = R._load_translations(reqs, reqs_dir)
         self.assertNotIn("REQ-A-001", out)
-
-    def test_cmd_translate_malformed_cache_fails_open(self):  # bug: translate-cache-not-dict-guarded
-        reqs_dir = self._tmp_reqs_dir()
-        i18n_dir = os.path.join(reqs_dir, "_i18n")
-        os.makedirs(i18n_dir)
-        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
-            json.dump([1, 2, 3], f)   # malformed: not a dict
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        fake_response = ("===TITLE===\nEnglish title\n===INTENT===\nI\n===CONTRACT===\nC\n"
-                          "===ACCEPTANCE===\nA\n")
-        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc):
-            rc = R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(rc, 0)
 
     def test_load_translations_malformed_cache_fails_open(self):  # bug: load-translations-not-dict-guarded
         reqs_dir = self._tmp_reqs_dir()
@@ -4223,49 +4060,6 @@ class ImplExemptLayers(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # teste
     exempt — so this repo's own SYS-SSOT-001 could only become confirmed by editing
     the file around the command. One predicate now answers for all four."""
 
-    def _promote(self, d, cap_id):
-        reqs = R.load_requirements(d)
-        members = R.scan_members(d, d)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_promote(reqs, members, cap_id)
-        return code, buf.getvalue()
-
-    def test_need_can_be_confirmed_without_implements(self):  # verifies: REQ-PROMOTE-895#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "NEED-X-001.md"),
-                   REQ.format(id="NEED-X-001", status="baseline", layer="need", extra="", title="N"))
-            _write(os.path.join(d, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature",
-                              extra="satisfies: [NEED-X-001]\n", title="A"))
-            code, out = self._promote(d, "NEED-X-001")
-            self.assertEqual(code, 0, out)
-            self.assertIn("status: confirmed",
-                          open(os.path.join(d, "NEED-X-001.md"), encoding="utf-8").read())
-
-    def test_aggregate_with_dependencies_can_be_confirmed(self):
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "REQ-AGG-001.md"),
-                   REQ.format(id="REQ-AGG-001", status="baseline", layer="aggregate",
-                              extra="depends_on: [REQ-A-001]\n", title="Agg"))
-            _write(os.path.join(d, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature", extra="", title="A"))
-            _write(os.path.join(d, "a.py"), tag("REQ-A-001") + "\n")
-            code, out = self._promote(d, "REQ-AGG-001")
-            self.assertEqual(code, 0, out)
-            self.assertIn("depends_on", out)
-
-    def test_aggregate_without_dependencies_is_refused(self):  # verifies: REQ-PROMOTE-895#CASE-3  # verifies: REQ-TRACE-935#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "REQ-AGG-002.md")
-            _write(p, REQ.format(id="REQ-AGG-002", status="baseline", layer="aggregate",
-                                 extra="depends_on: []\n", title="Agg"))
-            before = open(p, encoding="utf-8").read()
-            code, out = self._promote(d, "REQ-AGG-002")
-            self.assertNotEqual(code, 0)
-            self.assertIn("depends_on", out)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)
-
     def test_gate_does_not_error_on_confirmed_aggregate(self):  # verifies: ARCH-TRACE-020#CASE-5  # verifies: REQ-TRACE-935#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "REQ-AGG-003.md"),
@@ -4304,7 +4098,6 @@ class ShellTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # teste
             p = os.path.join(d, "backup-check.test.sh")
             _write(p, "#!/bin/sh\n./backup-check --dry-run || exit 1\n")
             self.assertEqual(R._test_link_problem(p), "")
-
 
 
     def test_bare_test_sh_name_recognized(self):  # bug: sh-test-name-re-bare-test
@@ -6144,13 +5937,13 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     def test_new_verbs_dispatch(self):
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
-            for verb in ("draft", "dupes"):
-                r = self._run(verb, "--root", d, cwd=d)
-                self.assertEqual(r.returncode, 0, f"{verb}: {r.stderr}")
+            for args in (("gate", "--dupes"), ("gate", "--design")):
+                r = self._run(*args, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 0, f"{args}: {r.stderr}")
             # `draft --plan` (cmd_candidates) always prints its extraction plan to
             # stdout — a non-empty stdout proves the branch is wired, not falling through
             # the dispatch chain to a no-op return (which would print nothing).
-            r = self._run("draft", "--plan", "--root", d, cwd=d)
+            r = self._run("init", "--plan", "--root", d, cwd=d)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertTrue(r.stdout.strip(), "plan produced no output — branch not wired")
 
@@ -6198,7 +5991,9 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
         _write(os.path.join(d, "test_impl.py"), "def test_a():\n    assert True  " + tb_tag("REQ-A-001"))
         return rdir
 
-    def test_sync_blocks_confirmed_drift_without_flag(self):
+    def test_sync_demotes_confirmed_drift_without_flag(self):  # verifies: REQ-PROMOTE-974#CASE-1
+        """An edited confirmed contract used to BLOCK the lock; it now loses its
+        confirmation and the baseline advances. The safe outcome became the default."""
         with tempfile.TemporaryDirectory() as d:
             rdir = self._confirmed_repo(d)
             reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
@@ -6208,10 +6003,11 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             # edit the contract -> drift
             self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
             reqs2 = R.load_requirements(rdir)
-            with redirect_stdout(io.StringIO()):
-                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
-            self.assertEqual(rc, 1)  # blocked
-            self.assertEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # lock untouched
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
+            self.assertIn("demoted:", buf.getvalue())
+            self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)
 
     def test_sync_accept_drift_advances_baseline(self):
         with tempfile.TemporaryDirectory() as d:
@@ -6227,7 +6023,7 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertEqual(rc, 0)
             self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # advanced
 
-    def test_json_path_reflects_blocked_lock(self):  # guard the as_json early-return
+    def test_json_path_survives_a_demotion(self):  # guard the as_json early-return
         with tempfile.TemporaryDirectory() as d:
             rdir = self._confirmed_repo(d)
             reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
@@ -6239,9 +6035,11 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             with redirect_stdout(buf):
                 rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d,
                                  as_json=True, accept_drift=False)
-            self.assertEqual(rc, 1)  # blocked lock surfaces as non-zero even on the json path
-            # the json line is printed last (after the 'lock update:' diff lines)
-            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
+            # drift no longer blocks the lock, so the json path reports a clean run;
+            # the demotion is what carries the signal, and it is printed by name.
+            self.assertEqual(rc, 0)
+            self.assertIn("demoted:", buf.getvalue())
+            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], True)
 
 
 class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-834
@@ -6639,7 +6437,6 @@ class BugHuntSince(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertIn(R._path_key(fp), files)   # not abspath: 8.3 short names
 
 
-
 class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-907
     REQ_MS = "---\nid: {id}\nstatus: confirmed\nlayer: feature\nmilestone: {ms}\n---\n\n# T\n"
 
@@ -6912,7 +6709,6 @@ class NewNumberCollision(unittest.TestCase):  # tested-by: ARCH-NEW-004  # teste
             self.assertNotIn("WARN", out)
 
 
-
 class PruneDirs(unittest.TestCase):  # tested-by: ARCH-SCAN-002
     """The walk's prune step: SSOT dir by realpath (name-gated), ignored dirs not descended."""
 
@@ -7036,7 +6832,6 @@ class UnscannedTags(unittest.TestCase):  # tested-by: ARCH-UNSCANNEDTAG-045  # t
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "config.custom"), "implements: REQ-A-001" + chr(10))
             self.assertIsNone(R.tagged_unscanned_files(d))
-
 
 
 class MatrixScanReach(unittest.TestCase):  # tested-by: ARCH-SCAN-002
@@ -7831,7 +7626,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-D-002")
+                code = 0 if R._write_frontmatter_status(reqs["AREA-D-002"], "confirmed") else 1
             self.assertEqual(code, 0, buf.getvalue())
             after = R.load_requirements(d)
             self.assertEqual(after["AREA-D-002"]["meta"]["status"], "confirmed")
@@ -8401,7 +8196,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             R._audit_summary(reqs, {}, d, d)
         out = buf.getvalue()
         self.assertIn("no reason recorded", out)
-        self.assertIn("reqmap.py audit", out)
+        self.assertIn("reqmap.py gate --audit", out)
 
     def test_sync_tail_is_silent_on_a_clean_corpus(self):  # verifies: REQ-AUDIT-973#CASE-2
         reqs = {"REQ-A-001": self._req(level="code")}
@@ -8659,8 +8454,8 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertIn("long-parameter-list", self._kinds(src))
 
     def test_design_is_in_the_registry_and_not_in_the_gate(self):  # verifies: ARCH-DESIGN-061#CASE-3
-        self.assertIn("design", R.COMMANDS)
-        self.assertNotIn("design", R.COMMANDS["gate"]["summary"])
+        # `design` is a mode of `gate`, not a gate RULE: it never decides an exit
+        # code. That is the property this case has always been about.
         self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
 
 
@@ -8761,7 +8556,7 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
             _, out = self._run(reqs, members, code_root=d)
             self.assertIn("Untagged files", out)
             self.assertIn("orphan.py", out)
-            self.assertIn("reqmap.py draft", out)
+            self.assertIn("reqmap.py init", out)
 
     def test_equal_priority_and_risk_falls_back_to_id_order(self):  # verifies: REQ-NEXT-885#CASE-1
         reqs = {
@@ -9121,7 +8916,7 @@ class CasesSearch036(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "requirements"))
             old_argv = sys.argv
-            sys.argv = ["reqmap", "search", "--root", d]
+            sys.argv = ["reqmap", "gate", "--search", "--root", d]
             try:
                 with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                     rc = R.main()
@@ -9440,7 +9235,7 @@ class CasesSimilar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-
                    + "\n> Checker intent.\n\n## WHAT — Contract (normative)\n- " + c + "\n")
             before = {n: open(os.path.join(reqs_dir, n), "rb").read() for n in os.listdir(reqs_dir)}
             old_argv = sys.argv
-            sys.argv = ["reqmap", "dupes", "--root", d]
+            sys.argv = ["reqmap", "gate", "--dupes", "--root", d]
             buf = io.StringIO()
             try:
                 with redirect_stdout(buf):
@@ -9596,7 +9391,7 @@ class CasesExtract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-
             self.assertEqual(open(dest, encoding="utf-8").read(), custom)
 
 
-class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894  # tested-by: REQ-PROMOTE-895  # tested-by: REQ-PROMOTE-896
+class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894
     def test_only_first_status_line_rewritten(self):  # verifies: REQ-PROMOTE-894#CASE-2
         text = ("---\nid: X-1\nstatus: draft\nlayer: bus\n---\n\n"
                 "# T\n\nThe deployment status: pending is tracked elsewhere.\n")
@@ -9605,34 +9400,6 @@ class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
         self.assertIn("status: confirmed", new_text)
         self.assertNotIn("status: draft", new_text)
         self.assertIn("The deployment status: pending is tracked elsewhere.\n", new_text)
-
-    def test_unknown_id_prints_message_and_nonzero(self):  # verifies: REQ-PROMOTE-895#CASE-5
-        with tempfile.TemporaryDirectory() as d:
-            reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "GHOST-X-001")
-            self.assertNotEqual(code, 0)
-            self.assertIn("no requirement with id GHOST-X-001", buf.getvalue())
-
-    def test_confirm_warns_without_test_link_but_succeeds(self):  # verifies: REQ-PROMOTE-896#CASE-1  # verifies: REQ-PROMOTE-896#CASE-2  # verifies: REQ-PROMOTE-896#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-N-001.md")
-            _write(p, REQ.format(id="AREA-N-001", status="baseline", layer="bus", extra="", title="N"))
-            _write(os.path.join(d, "n.py"), tag("AREA-N-001") + "\n")
-            reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-N-001")
-            out = buf.getvalue()
-            self.assertEqual(code, 0)
-            self.assertIn("status: confirmed", open(p, encoding="utf-8").read())
-            self.assertIn("no `tested-by:` member", out)          # names the fix
-            self.assertIn("test_exempt:", out)                    # or the opt-out
-            self.assertIn("next: reqmap.py sync", out)             # reminds to resync
-
 
 class CasesPromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: REQ-PROMOTE-TODO-897  # tested-by: REQ-PROMOTE-TODO-898  # tested-by: REQ-PROMOTE-TODO-899
     def test_matching_is_case_insensitive_and_trims(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-2
@@ -10196,7 +9963,6 @@ class CasesVlevel037(unittest.TestCase):  # tested-by: REQ-VLEVEL-946
         self.assertIn("@system", out)
 
 
-
 # ---------------------------------------------------------------------------
 # clarify / implement / retire — the author -> code -> retirement half of the CLI
 # ---------------------------------------------------------------------------
@@ -10583,7 +10349,6 @@ class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ
         self.assertEqual(1, code)
 
 
-
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
     """The CLI, emitted as data for any surface that documents it without running it."""
 
@@ -10594,9 +10359,9 @@ class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
         self.assertEqual(len(names), len(set(names)))
 
     def test_entry_carries_argument_summary_and_flags(self):  # verifies: REQ-CMDREGISTRY-963#CASE-2
-        entry = next(c for c in R.commands_manifest() if c["name"] == "retire")
+        entry = next(c for c in R.commands_manifest() if c["name"] == "sync")
         self.assertTrue(entry["summary"])
-        self.assertEqual(entry["arg"], R.COMMANDS["retire"]["arg"])
+        self.assertEqual(entry["arg"], R.COMMANDS["sync"]["arg"])
         flags = {f["flag"] for f in entry["flags"]}
         self.assertIn("--delete", flags)
         self.assertIn("--apply", flags)
@@ -10617,34 +10382,6 @@ class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
             payload = json.loads(R._build_json_text(data))
         self.assertTrue(payload["commands"])
         self.assertIn("gate", [c["name"] for c in payload["commands"]])
-
-
-
-class TranslationProseKeyword(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-938
-    """A Gherkin keyword is an identifier where it OPENS a line; the same word inside a
-    sentence is English prose, and a translation that leaves it in English is the wrong
-    one. Counting both rejected 79 correct translations over this corpus."""
-
-    def test_prose_keyword_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "- When no requirement scores above the floor, `search` says so."
-        ro = "- C\u00e2nd nicio cerin\u021b\u0103 nu trece pragul, `search` o spune."
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
-    def test_prose_keyword_opening_a_line_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "When you point this tool at an old codebase, this is the first step."
-        ro = "C\u00e2nd îndrepți acest instrument spre un cod vechi, acesta e primul pas."
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
-    def test_step_keyword_may_not_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-1
-        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
-        ro = "CASE-1 \u2014 t\n  Dat fiind  un repo\n  C\u00e2nd   ruleaz\u0103\n  Atunci   se opre\u0219te"
-        self.assertFalse(R._translation_preserves_structure(src, ro))
-
-    def test_step_keyword_kept_passes(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
-        ro = "CASE-1 \u2014 t\n  Given  un repo\n  When   ruleaz\u0103\n  Then   se opre\u0219te"
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
 
 
 class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ-SEARCH-965
@@ -10726,7 +10463,6 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
-
 class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-967
     """Two derived artifacts, each correct against the requirement, disagreeing with each
     other. RM017 checks one such pair (the viewer's baked fixture); this is the other."""
@@ -10780,6 +10516,209 @@ class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # 
             _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
             out = self._findings(d)
         self.assertNotIn("RM029", out)
+
+
+class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-974
+    """An edited confirmed contract loses its confirmation, in sync."""
+
+    BODY = (
+        "---\n"
+        "id: AREA-E-001\n"
+        "status: confirmed\n"
+        "level: code\n"
+        "layer: feature\n"
+        "owner: A\n"
+        "---\n"
+        "\n"
+        "# Titled\n"
+        "\n"
+        "## Description\n"
+        "> Why.\n"
+        "\n"
+        "Every bullet below is binding.\n"
+        "- It does one thing.\n"
+        "\n"
+        "## Cases\n"
+        "CASE-1\n"
+        "  Given  a\n"
+        "  When   b\n"
+        "  Then   c\n"
+    )
+
+    def _seed(self, d):
+        rq = os.path.join(d, "requirements")
+        _write(os.path.join(rq, "AREA-E-001.md"), self.BODY)
+        _write(os.path.join(d, "m.py"), tag("AREA-E-001") + "\ndef f():\n    return 1\n")
+        return rq
+
+    def _sync(self, d, accept=False):
+        rq = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rq)
+        members = R.scan_members(d, rq)
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            R.cmd_check(reqs, members, rq, True, d, accept_drift=accept)
+        return buf.getvalue()
+
+    def _status(self, rq):
+        for line in open(os.path.join(rq, "AREA-E-001.md"), encoding="utf-8"):
+            if line.startswith("status:"):
+                return line.strip()
+        return ""
+
+    def _edit(self, rq):
+        with open(os.path.join(rq, "AREA-E-001.md"), "a", encoding="utf-8") as f:
+            f.write("- It also does a second thing.\n")
+
+    def test_edited_confirmed_contract_is_demoted(self):  # verifies: ARCH-PROMOTE-011#CASE-1  # verifies: REQ-PROMOTE-974#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._sync(d)                       # baseline
+            self._edit(rq)
+            out = self._sync(d)
+            self.assertIn("demoted: AREA-E-001", out)
+            self.assertIn("no longer gate", out)
+            self.assertEqual(self._status(rq), "status: draft")
+            # the baseline advanced in the same run, so a second sync is quiet
+            self.assertNotIn("demoted:", self._sync(d))
+
+    def test_a_new_requirement_is_not_drift(self):  # verifies: REQ-PROMOTE-974#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            out = self._sync(d)                 # never been in the lock
+            self.assertNotIn("demoted:", out)
+            self.assertEqual(self._status(rq), "status: confirmed")
+
+    def test_accept_drift_keeps_the_status(self):  # verifies: ARCH-PROMOTE-011#CASE-2  # verifies: REQ-PROMOTE-974#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._sync(d)
+            self._edit(rq)
+            out = self._sync(d, accept=True)
+            self.assertNotIn("demoted:", out)
+            self.assertEqual(self._status(rq), "status: confirmed")
+
+
+class NewQuestionsAfterAnEdit(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-975
+    """Clarifying one requirement can raise a question its old text never had."""
+
+    HEAD = ("---\n"
+            "id: AREA-Q-001\n"
+            "status: confirmed\n"
+            "level: code\n"
+            "layer: feature\n"
+            "owner: A\n"
+            "---\n"
+            "\n"
+            "# Titled\n"
+            "\n"
+            "## Description\n"
+            "> Why.\n"
+            "\n"
+            "Every bullet below is binding.\n")
+    CASES = ("\n## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+
+    def _write_req(self, rq, clauses):
+        _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + clauses + self.CASES)
+
+    def _sync(self, d):
+        rq = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rq)
+        members = R.scan_members(d, rq)
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            R.cmd_check(reqs, members, rq, True, d, accept_drift=True)
+        return buf.getvalue()
+
+    def _seed(self, d, clauses):
+        rq = os.path.join(d, "requirements")
+        os.makedirs(rq, exist_ok=True)
+        self._write_req(rq, clauses)
+        _write(os.path.join(d, "m.py"), tag("AREA-Q-001") + "\ndef f():\n    return 1\n")
+        return rq
+
+    def test_a_new_blocking_question_is_reported(self):  # verifies: REQ-CLARIFY-975#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            self._sync(d)                                  # snapshot
+            self._write_req(rq, "- It does one thing.\n")  # unchanged body, then break it
+            # remove the Cases section entirely -> the `no-cases` blocking rule fires
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            out = self._sync(d)
+            self.assertIn("New open question(s)", out)
+            self.assertIn("AREA-Q-001", out)
+
+    def test_an_unchanged_question_is_not_re_reported(self):  # verifies: REQ-CLARIFY-975#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            self._sync(d)                                  # first sight of the question
+            out = self._sync(d)                            # same question, second run
+            self.assertNotIn("New open question(s)", out)
+
+    def test_a_brand_new_requirement_is_not_reported(self):  # verifies: REQ-CLARIFY-975#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d, "- It does one thing.\n")
+            _write(os.path.join(rq, "AREA-Q-001.md"), self.HEAD + "- It does one thing.\n")
+            out = self._sync(d)                            # never been in the snapshot
+            self.assertNotIn("New open question(s)", out)
+
+
+class SeparatorIsNotContract(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: REQ-DRIFT-841
+    """Adding a requirement to a module file must not change its neighbour's hash."""
+
+    ONE = ("---\nid: AREA-S-001\nstatus: confirmed\nlevel: code\nlayer: feature\n"
+           "owner: A\n---\n\n# One\n\n## Description\n> Why.\n\n"
+           "Every bullet below is binding.\n- It does one thing.\n\n"
+           "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+    TWO = ("\n\n--------------------\n\n\n"
+           "---\nid: AREA-S-002\nstatus: draft\nlevel: code\nlayer: feature\n"
+           "owner: A\n---\n\n# Two\n\n## Description\n> Why.\n\n"
+           "Every bullet below is binding.\n- It does another thing.\n\n"
+           "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+
+    def test_appending_a_block_leaves_the_first_hash_alone(self):
+        alone = R.split_requirement_blocks(self.ONE)[0]
+        with_neighbour = R.split_requirement_blocks(self.ONE + self.TWO)[0]
+        self.assertEqual(R.binding_hash(alone), R.binding_hash(with_neighbour))
+
+
+class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: REQ-CLARIFY-956
+    """The counter compares two numbers and never reads a case, so it may not
+    accuse a clause by position — it says how many are uncovered, not which."""
+
+    def _req(self, n_clauses, n_cases):
+        body = ["---", "id: AREA-G-001", "status: draft", "level: code",
+                "layer: feature", "owner: A", "---", "", "# Titled", "",
+                "## Description", "> Why.", "", "Every bullet below is binding."]
+        for i in range(1, n_clauses + 1):
+            body.append("- Clause number %d does a thing." % i)
+        body += ["", "## Cases"]
+        for i in range(1, n_cases + 1):
+            body += ["CASE-%d" % i, "  Given  a", "  When   b", "  Then   c", ""]
+        return "\n".join(body) + "\n"
+
+    def _questions(self, n_clauses, n_cases):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-G-001.md"), self._req(n_clauses, n_cases))
+            reqs = R.load_requirements(d)
+            return [q for q in R._clarify_questions("AREA-G-001", reqs["AREA-G-001"], reqs)
+                    if q["rule"] == "clause-without-case"]
+
+    def test_five_clauses_two_cases_raise_one_question_not_three(self):
+        qs = self._questions(5, 2)
+        self.assertEqual(len(qs), 1)
+        self.assertIn("3 clause(s) have no case", qs[0]["question"])
+        self.assertIn("5 clauses and 2 cases", qs[0]["question"])
+
+    def test_the_question_does_not_accuse_a_clause(self):
+        qs = self._questions(4, 3)
+        self.assertEqual(qs[0]["where"], "Cases")
+        self.assertEqual(qs[0]["quote"], "")          # no clause is quoted as the culprit
+        self.assertIn("cannot say WHICH", qs[0]["question"])
+
+    def test_a_case_per_clause_raises_nothing(self):
+        self.assertEqual(self._questions(3, 3), [])
 
 
 if __name__ == "__main__":
