@@ -19,7 +19,7 @@ Subcommands:
   draft             draft requirements from legacy code (status: draft, risk-scored)
   plan              read-only JSON capability-extraction plan (writes no .md)
   findings          aggregate open verify-intent items into requirements/_findings.md
-  design            advisory design candidates in the repo's code, any language (four OOP pillars + standards; never the gate)
+  design            advisory design candidates in the repo's code, any language (four OOP pillars + metrics + standards; never the gate)
   confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
   review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted quality review
   translate [--to ro|en]  manual, opt-in: cache a `claude -p` translation of the corpus's
@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.12"
+MAP_ENGINE_VERSION = "2026-09-05.13"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -8395,7 +8395,8 @@ def cmd_review(reqs, one_id=None):  # implements: ARCH-REVIEW-022  # implements:
 
 
 # ---------- design: advisory design review of the repo's code ----------
-# Reads the consumer's code and names candidates against the four OOP pillars plus a
+# Reads the consumer's code and names candidates against the four OOP pillars, the
+# per-class C&K metrics, plus a
 # few house standards. It is advice: read-only, never part of the gate, exit 0, and a
 # finding asserts a SHAPE worth a look ("these six functions share five parameters"),
 # never a defect. Python is read through `ast`; the brace languages (JS/TS, C/C++,
@@ -8416,14 +8417,25 @@ DESIGN_LINE_MAX = 100           # standards: a physical line wider than this
 DESIGN_FILE_MAX_FUNCS = 30      # standards: top-level functions/classes in one file
 DESIGN_DOCSTRING_PUBLIC = 1     # standards (Python): 1 = public defs/classes need a docstring, 0 = off
 # Chidamber & Kemerer, per class, Python only (see `_design_metrics` for why three of
-# the six are absent). C&K proposed the metrics and no thresholds; these are the
-# conventional ones, and like every other number here they are tunable per repo.
+# the six are absent). C&K (1994) proposed the metrics and NO thresholds: the three
+# below are the conventional textbook numbers, UNTUNED — they have never been
+# calibrated against a corpus, and no citation exists because there is no primary
+# source to cite. Treat a crossing as a number to look at, not as a defect, and
+# retune them per repo through CONFIG_KEYS like every other threshold here.
 DESIGN_WMC_MAX = 20             # metrics: methods in one class (C&K WMC, unweighted)
 DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it calls (C&K RFC)
 DESIGN_LCOM_MAX = 20            # metrics: LCOM1 — method pairs sharing no field, less those that do
 
 DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism",
                   "metrics", "standards")
+# Printed whenever the metrics pillar renders, and when the review renders empty.
+# An absent finding must never be readable as a measured pass on something that was
+# never computed — that is the reassuring-wrong-count failure ADR-0016 rejected.
+DESIGN_METRICS_SCOPE = (
+    "metrics reads Python classes only and reports 3 of Chidamber & Kemerer's 6 "
+    "(WMC, RFC, LCOM1). DIT, NOC and CBO are NOT measured, so silence here says "
+    "nothing about inheritance depth, subclass count or coupling."
+)
 DESIGN_EXTS = ORPHAN_CODE_EXTS          # program-logic files; prose/config/styling are not reviewed
 DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
                      ".c", ".cc", ".cpp", ".h", ".hpp", ".java", ".cs", ".go", ".rs",
@@ -8431,9 +8443,9 @@ DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts
 _DESIGN_ADVICE = {
     "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
     "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
-    "god-class": "a class with this many methods is several classes sharing one name: split it along the fields its methods actually touch",
+    "wide-class": "a class with this many methods is a split candidate: look at whether the fields its methods touch fall into groups",
     "high-response": "a class that reaches this many distinct methods is hard to test alone, because its collaborators are part of its interface: narrow them",
-    "low-cohesion": "methods that share no field are not one object: the groups that touch the same fields are the classes hiding in here",
+    "low-field-sharing": "more method pairs touch disjoint fields than shared ones, which is what a class holding two responsibilities looks like: check whether those groups are two classes",
     "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
     "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
     "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
@@ -8449,7 +8461,7 @@ _DESIGN_ADVICE = {
 }
 _DESIGN_PILLAR_OF = {
     "global-state": "encapsulation", "long-parameter-list": "encapsulation", "data-clump": "encapsulation",
-    "god-class": "metrics", "high-response": "metrics", "low-cohesion": "metrics",
+    "wide-class": "metrics", "high-response": "metrics", "low-field-sharing": "metrics",
     "long-function": "abstraction", "deep-nesting": "abstraction", "prefix-family": "abstraction",
     "shared-methods": "inheritance", "duplicate-method": "inheritance",
     "isinstance-chain": "polymorphism", "type-switch": "polymorphism",
@@ -8614,6 +8626,14 @@ def _design_py_fields(cls):  # implements: REQ-DESIGN-978
                     and t.value.id == "self"):
                 out.add(t.attr)
     for st in cls.body:
+        # A declarative class names its state in the class body instead of assigning it:
+        # `@dataclass`, attrs and Pydantic all write `name: type`, and the assignment
+        # this function looks for happens in an __init__ that is synthesised at runtime
+        # and never appears in the tree. Without this branch cohesion was skipped in
+        # silence for the commonest class shape in modern Python — and the skip was
+        # indistinguishable from a class measured and found cohesive.
+        if isinstance(st, ast.AnnAssign) and isinstance(st.target, ast.Name):
+            out.add(st.target.id)
         if not (isinstance(st, ast.Assign)
                 and any(isinstance(t, ast.Name) and t.id == "__slots__" for t in st.targets)):
             continue
@@ -8654,14 +8674,17 @@ def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: RE
     and a coupling number that is wrong is worse than no coupling number.
 
     Python only: these count methods and field access, which the brace-language
-    heuristics cannot identify without parsing."""
+    heuristics cannot identify without parsing. `cmd_design` therefore prints what this
+    pillar did NOT measure whenever it renders — an empty Metrics block on a
+    subclass-heavy repo would otherwise read as "your classes are fine" when it means
+    "the two metrics that would have spoken were never computed"."""
     out = []
     for cls in [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]:
         methods = [m for m in cls.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))]
         if not methods:
             continue
         if len(methods) > DESIGN_WMC_MAX:
-            out.append(_design_finding("god-class", rel, cls.lineno, cls.name,
+            out.append(_design_finding("wide-class", rel, cls.lineno, cls.name,
                                        "`{}` has {} methods (over {})".format(
                                            cls.name, len(methods), DESIGN_WMC_MAX)))
         called = set()
@@ -8684,7 +8707,7 @@ def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: RE
             continue          # no shared state to lack — see `_design_py_fields`
         lcom = _design_lcom(methods, fields)
         if lcom > DESIGN_LCOM_MAX:
-            out.append(_design_finding("low-cohesion", rel, cls.lineno, cls.name,
+            out.append(_design_finding("low-field-sharing", rel, cls.lineno, cls.name,
                                        "`{}` scores LCOM {} (over {}) across {} methods "
                                        "and {} field(s)".format(cls.name, lcom, DESIGN_LCOM_MAX,
                                                                 len(methods), len(fields))))
@@ -8959,6 +8982,7 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DES
         return 0
     if not findings:
         print("No design candidates in {} source file(s) at the current thresholds.".format(n_files))
+        print("note: " + DESIGN_METRICS_SCOPE)
         return 0
     for pillar in DESIGN_PILLARS:
         mine = [f for f in findings if f["pillar"] == pillar]
@@ -8967,7 +8991,10 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DES
         print("{} ({})".format(pillar.capitalize(), len(mine)))
         for f in mine:
             print("  {}:{}  {:<20} {}".format(f["file"], f["line"], f["kind"], f["detail"]))
-        print("  -> " + "; ".join(dict.fromkeys(_DESIGN_ADVICE[f["kind"]] for f in mine)) + "\n")
+        print("  -> " + "; ".join(dict.fromkeys(_DESIGN_ADVICE[f["kind"]] for f in mine)))
+        if pillar == "metrics":
+            print("  note: " + DESIGN_METRICS_SCOPE)
+        print("")
     print("{} candidate(s) in {} source file(s). Advisory only: a candidate is a shape worth a "
           "look, never a defect, and this never enters the gate.".format(len(findings), n_files))
     return 0
@@ -9041,26 +9068,11 @@ def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: R
 
 
 
-def main():
-    """Parse the command line, load the workspace once, and dispatch to the verb.
-    Returns the process exit code."""
-    # Refuse an interpreter below the declared floor before anything else runs, so the
-    # user gets one readable line instead of an AttributeError from some stdlib call
-    # that did not exist yet.
-    floor = _python_floor_error()  # implements: REQ-PYFLOOR-902
-    if floor:
-        print(floor)
-        return 2
-    # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
-    # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
-    # reqmap.py check` would crash with UnicodeEncodeError and fail the gate on an
-    # encoding error, not a real violation. Force UTF-8 so no caller has to remember
-    # `-X utf8`. Guarded: reconfigure() is Python 3.7+ and may be absent on exotic streams.
-    for _stream in (sys.stdout, sys.stderr):
-        try:
-            _stream.reconfigure(encoding="utf-8")
-        except (AttributeError, ValueError, OSError):
-            pass
+def _build_parser():  # implements: ARCH-CMDREGISTRY-033
+    """The argument parser for every verb and flag, built from the command
+    registry. Separate from `main` because it is a hundred and fifty lines of
+    declaration with no decision in it, and reading the dispatch meant
+    scrolling past all of them."""
     ap = argparse.ArgumentParser(
         prog="reqmap",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -9188,6 +9200,140 @@ def main():
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="?", default=None,
                     const="",
                     help="sync: take a requirement out of service; prints the blast radius first")
+    return ap
+
+
+def _dispatch_gate(a, ws, code_root, reqs_dir):
+    """`gate` and every read-only question its mode flags ask. Returns the exit
+    code; only the bare verdict can make it non-zero."""
+    reqs, members = ws.reqs, ws.members   # the commands that take only part of it
+    if a.mode_audit:
+        return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
+    if a.mode_risk:
+        if a.as_badge:
+            return cmd_health(ws, False, True)
+        if a.as_json:
+            return cmd_health(ws, True, False)
+        if a.untagged:
+            return cmd_coverage(ws, False)
+        cmd_health(ws, False, False, headline_only=True)
+        return cmd_next(ws, a.show_all)
+    if a.mode_show is not None:
+        if not a.mode_show:
+            print("usage: reqmap gate --show <ID>"); return 2
+        # Workspace.load (the non-cache path) already produced level_cover in the
+        # same walk; ws.levels() only re-walks when --cache forced the
+        # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
+        return cmd_show(ws, a.mode_show, ws.levels())
+    if a.mode_search is not None:
+        if not a.mode_search:
+            print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
+        return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
+                          reqs_dir=reqs_dir)
+    if a.mode_review is not None:
+        if not a.mode_review:
+            print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
+        return cmd_review(reqs, a.mode_review)
+    if a.mode_implement is not None:
+        if not a.mode_implement:
+            print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
+        return cmd_implement(ws, a.mode_implement, as_json=a.as_json)
+    if a.mode_dupes:
+        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD,
+                           members, top=a.top)
+    if a.mode_design:
+        return cmd_design(code_root, reqs_dir, as_json=a.as_json)
+    # The whole verdict, in the order every hook and CI already ran it: link sync +
+    # drift + test-link, then requirement readability, then map freshness. They were
+    # three commands because they were written on three days, not because a caller
+    # ever wanted one without the others (the published Action defaults both extras
+    # to on). Report-only throughout: never touches the lock, never writes a map.
+    rc = cmd_check(ws, False, a.strict, a.as_json, getattr(a, "since", None))
+    if a.as_json:
+        return rc                      # one machine-readable document, not three
+    if not a.no_lint:
+        rc = cmd_lint(ws, strict=True) or rc
+    if not a.no_map_check:
+        rc = cmd_map(ws, code_root, True) or rc
+    return rc
+def _dispatch_sync(a, ws, code_root, reqs_dir):
+    """`sync` and its write modes. Returns the exit code."""
+    reqs, members = ws.reqs, ws.members   # the commands that take only part of it
+    if a.mode_retire is not None:
+        if not a.mode_retire:
+            print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
+        return cmd_retire(ws, a.mode_retire, delete=a.delete,
+                          do_apply=a.do_apply, force=a.force, as_json=a.as_json)
+    if a.mode_suggest:
+        return cmd_suggest_verifies(ws, apply_tags=a.do_apply)
+    # Before the gate, not after: the generated integration artifacts are derived
+    # from the command registry, and RM028 reports them stale. Regenerating them
+    # downstream of a check that fails ON them can never converge.
+    if _is_source_repo(code_root):
+        cmd_gen_integration(reqs_dir, code_root)
+    # rescan + regenerate map + advance the drift baseline (guarded). Members were
+    # already scanned above; cmd_check rewrites the lock unless confirmed drift is
+    # detected without --accept-drift, then map regenerates only on success.
+    rc = cmd_check(ws, True, strict=a.strict,
+                   accept_drift=getattr(a, "accept_drift", False))
+    if rc == 0:
+        cmd_map(ws, code_root)
+        # Everything derived is rebuilt in one place: there is no state of the world
+        # in which regenerating the map but not the findings digest, the presentation
+        # page or (in this repository) the generated integration artifacts is what the
+        # caller wanted. Each step below is a no-op when its target does not exist.
+        # `map` already refreshes an existing digest; this is the create path,
+        # kept opt-in so a consumer repo never gains a file it did not ask for.
+        if a.findings and not os.path.exists(os.path.join(reqs_dir, "_findings.md")):
+            cmd_findings(reqs, reqs_dir, raw=False)
+        _site_page = a.attach or _site_default_target(code_root)
+        if _site_page and os.path.isfile(_site_page):
+            cmd_site(ws, code_root, attach=_site_page,
+                     regions=["nav", "stats"], diagram=None, detect=False)
+        # Deliberately here and not in cmd_check: `gate` runs on every commit via the
+        # hook, and a corpus-shape advisory there is noise on work that is already
+        # correct. `sync` is the moment the corpus was just rewritten, which is when
+        # a newly-minted duplicate appears.  # implements: ARCH-REDUNDANCY-058
+        _dups = _redundant_groups(reqs)
+        if _dups:
+            print("info  {} group(s) of requirements share an identical contract "
+                  "({} could be folded away) — run `reqmap.py gate --risk` to see them"
+                  .format(len(_dups), sum(len(g) - 1 for g in _dups)))
+        # Everything the engine can discover, named in one place at the moment the
+        # corpus was just rewritten. `sync` regenerates what is derived; until now it
+        # said nothing about what is WRONG beyond the gate, so a repo could sync for
+        # months without ever meeting `dupes`, `design`, the exemption list or the
+        # fact that its corpus is flat.  # implements: REQ-AUDIT-973
+        _audit_summary(reqs, members, reqs_dir, code_root)
+    else:
+        # The lock may still have advanced above (it is written unless CONFIRMED
+        # drift was refused), while the map was not regenerated — the two then
+        # disagree, `gate` passes locally, and CI fails on `map --check`. Say so
+        # where it happens instead of leaving the reader to infer it.
+        print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
+              "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
+    return rc
+def main():
+    """Parse the command line, load the workspace once, and dispatch to the verb.
+    Returns the process exit code."""
+    # Refuse an interpreter below the declared floor before anything else runs, so the
+    # user gets one readable line instead of an AttributeError from some stdlib call
+    # that did not exist yet.
+    floor = _python_floor_error()  # implements: REQ-PYFLOOR-902
+    if floor:
+        print(floor)
+        return 2
+    # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
+    # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
+    # reqmap.py check` would crash with UnicodeEncodeError and fail the gate on an
+    # encoding error, not a real violation. Force UTF-8 so no caller has to remember
+    # `-X utf8`. Guarded: reconfigure() is Python 3.7+ and may be absent on exotic streams.
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(encoding="utf-8")
+        except (AttributeError, ValueError, OSError):
+            pass
+    ap = _build_parser()
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -9212,125 +9358,21 @@ def main():
     # asked for members. --cache stays on scan_members, the only scanner that implements
     # it - see scan_all's docstring for why it is not duplicated there.
     ws = Workspace.load(reqs_dir, code_root, cache=a.cache)
-    # the handful of commands that take only part of the workspace still read it
-    # straight off the object; they never took the whole clump to begin with.
-    reqs, members = ws.reqs, ws.members
     if a.cmd == "init":            # init --plan: the read-only extraction plan
         md_globs = []
         for g in (a.md_glob or []):
             md_globs += [x.strip() for x in g.split(",") if x.strip()]
         return cmd_candidates(ws, a.out, md_globs)
     if a.cmd == "gate":
-        if a.mode_audit:
-            return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
-        if a.mode_risk:
-            if a.as_badge:
-                return cmd_health(ws, False, True)
-            if a.as_json:
-                return cmd_health(ws, True, False)
-            if a.untagged:
-                return cmd_coverage(ws, False)
-            cmd_health(ws, False, False, headline_only=True)
-            return cmd_next(ws, a.show_all)
-        if a.mode_show is not None:
-            if not a.mode_show:
-                print("usage: reqmap gate --show <ID>"); return 2
-            # Workspace.load (the non-cache path) already produced level_cover in the
-            # same walk; ws.levels() only re-walks when --cache forced the
-            # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
-            return cmd_show(ws, a.mode_show, ws.levels())
-        if a.mode_search is not None:
-            if not a.mode_search:
-                print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
-            return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
-                              reqs_dir=reqs_dir)
-        if a.mode_review is not None:
-            if not a.mode_review:
-                print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
-            return cmd_review(reqs, a.mode_review)
-        if a.mode_implement is not None:
-            if not a.mode_implement:
-                print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
-            return cmd_implement(ws, a.mode_implement, as_json=a.as_json)
-        if a.mode_dupes:
-            return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD,
-                               members, top=a.top)
-        if a.mode_design:
-            return cmd_design(code_root, reqs_dir, as_json=a.as_json)
-        # The whole verdict, in the order every hook and CI already ran it: link sync +
-        # drift + test-link, then requirement readability, then map freshness. They were
-        # three commands because they were written on three days, not because a caller
-        # ever wanted one without the others (the published Action defaults both extras
-        # to on). Report-only throughout: never touches the lock, never writes a map.
-        rc = cmd_check(ws, False, a.strict, a.as_json, getattr(a, "since", None))
-        if a.as_json:
-            return rc                      # one machine-readable document, not three
-        if not a.no_lint:
-            rc = cmd_lint(ws, strict=True) or rc
-        if not a.no_map_check:
-            rc = cmd_map(ws, code_root, True) or rc
-        return rc
+        return _dispatch_gate(a, ws, code_root, reqs_dir)
     if a.cmd == "sync":
-        if a.mode_retire is not None:
-            if not a.mode_retire:
-                print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
-            return cmd_retire(ws, a.mode_retire, delete=a.delete,
-                              do_apply=a.do_apply, force=a.force, as_json=a.as_json)
-        if a.mode_suggest:
-            return cmd_suggest_verifies(ws, apply_tags=a.do_apply)
-        # Before the gate, not after: the generated integration artifacts are derived
-        # from the command registry, and RM028 reports them stale. Regenerating them
-        # downstream of a check that fails ON them can never converge.
-        if _is_source_repo(code_root):
-            cmd_gen_integration(reqs_dir, code_root)
-        # rescan + regenerate map + advance the drift baseline (guarded). Members were
-        # already scanned above; cmd_check rewrites the lock unless confirmed drift is
-        # detected without --accept-drift, then map regenerates only on success.
-        rc = cmd_check(ws, True, strict=a.strict,
-                       accept_drift=getattr(a, "accept_drift", False))
-        if rc == 0:
-            cmd_map(ws, code_root)
-            # Everything derived is rebuilt in one place: there is no state of the world
-            # in which regenerating the map but not the findings digest, the presentation
-            # page or (in this repository) the generated integration artifacts is what the
-            # caller wanted. Each step below is a no-op when its target does not exist.
-            # `map` already refreshes an existing digest; this is the create path,
-            # kept opt-in so a consumer repo never gains a file it did not ask for.
-            if a.findings and not os.path.exists(os.path.join(reqs_dir, "_findings.md")):
-                cmd_findings(reqs, reqs_dir, raw=False)
-            _site_page = a.attach or _site_default_target(code_root)
-            if _site_page and os.path.isfile(_site_page):
-                cmd_site(ws, code_root, attach=_site_page,
-                         regions=["nav", "stats"], diagram=None, detect=False)
-            # Deliberately here and not in cmd_check: `gate` runs on every commit via the
-            # hook, and a corpus-shape advisory there is noise on work that is already
-            # correct. `sync` is the moment the corpus was just rewritten, which is when
-            # a newly-minted duplicate appears.  # implements: ARCH-REDUNDANCY-058
-            _dups = _redundant_groups(reqs)
-            if _dups:
-                print("info  {} group(s) of requirements share an identical contract "
-                      "({} could be folded away) — run `reqmap.py gate --risk` to see them"
-                      .format(len(_dups), sum(len(g) - 1 for g in _dups)))
-            # Everything the engine can discover, named in one place at the moment the
-            # corpus was just rewritten. `sync` regenerates what is derived; until now it
-            # said nothing about what is WRONG beyond the gate, so a repo could sync for
-            # months without ever meeting `dupes`, `design`, the exemption list or the
-            # fact that its corpus is flat.  # implements: REQ-AUDIT-973
-            _audit_summary(reqs, members, reqs_dir, code_root)
-        else:
-            # The lock may still have advanced above (it is written unless CONFIRMED
-            # drift was refused), while the map was not regenerated — the two then
-            # disagree, `gate` passes locally, and CI fails on `map --check`. Say so
-            # where it happens instead of leaving the reader to infer it.
-            print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
-                  "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
-        return rc
+        return _dispatch_sync(a, ws, code_root, reqs_dir)
     if a.cmd == "clarify":
         if a.decompose:
             # scaffolding a clause into its own requirement is the write half of the
             # same question clarify asks about an over-scoped requirement
             return cmd_lint(ws, strict=False, decompose=True)
-        return cmd_clarify(reqs, a.arg, as_json=a.as_json)
+        return cmd_clarify(ws.reqs, a.arg, as_json=a.as_json)
 
 
 def _pipe_closed():  # implements: ARCH-PIPE-046

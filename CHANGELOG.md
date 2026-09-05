@@ -1,5 +1,57 @@
 # Changelog
 
+## plugin `v5.3.0` — 2026-09-05
+
+**The C&K metrics pillar went through a nine-senator audit and came back MODIFY**
+(GO 4 · MODIFY 4 · STOP 1, two rounds —
+`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`). Four of the
+requests are discharged here; two are left open on the record rather than quietly
+dropped.
+
+**A declarative class was skipped in silence — a real defect, and the audit found it.**
+`_design_py_fields` harvested only names assigned through `self.<name>` and `__slots__`.
+A `@dataclass`, an attrs class or a Pydantic model declares its fields as class-body
+annotations and assigns them in an `__init__` synthesised at runtime, which the AST never
+contains — so the pillar saw no fields, skipped cohesion, and produced output
+indistinguishable from a class it had measured and found cohesive. That is the commonest
+class shape in modern Python and the shape this engine meets most often in the consumer
+repos it is seeded into. Class-body annotations now count as state.
+
+**The kinds were verdicts; they are measurements now.** `god-class` became `wide-class`
+and `low-cohesion` became `low-field-sharing`. The old names asserted a defect in a review
+whose own footer says a candidate "is a shape worth a look, never a defect", and
+`low-cohesion`'s advice claimed methods "share no field" when LCOM1 fires on a *difference*
+of pair counts — a firing class necessarily has many pairs that do share.
+
+**The pillar now says what it did not measure.** Whenever the metrics block renders — and
+when the whole review comes back empty — the output names DIT, NOC and CBO as not
+measured. The reasoning for omitting them lived in a requirement no consumer reads, so on
+a subclass-heavy repo an empty metrics block read as "your classes are fine" when it meant
+"the two metrics that would have spoken were never computed". That is the
+reassuring-wrong-count failure ADR-0016 rejected, and it was reintroduced at the code
+layer.
+
+**The thresholds say they are untuned.** C&K (1994) proposed the metrics and no
+thresholds; 20/50/20 are textbook conventions with no primary source to cite and no
+calibration against any corpus. The code says so where the numbers are defined.
+
+**The fire rate is published rather than asserted**, in REQ-DESIGN-978's Context: 1 of 9
+non-test classes (11.1%), which is also 3 of 121 design findings (2.5%) and 1 of 31 files
+(3.2%). The audit established that ADR-0016's 5–40% band has **no defined denominator for
+a code-level check** — every prior application measured the requirement corpus `lint`
+visits — so the band is cited as context, not as a bar this cleared.
+
+**Left open, on the record and not silently dropped:** the confirmation sample is 1 of 1
+and was made by the pillar's own author, which ADR-0022 does not accept as independent;
+and Musk's request to delete WMC and LCOM1 as redundant with RFC (all three fire on the
+same single class, so two of the three have never carried independent signal here) is
+recorded, not actioned. Both are tracked in `TODO.md`.
+
+Also in this release: `main` was 290 lines of argparse-then-dispatch and is now 43, split
+into `_build_parser` plus one function per verb; and a `confirmed` clause that enumerated
+five pillars while six shipped is fixed, with a test asserting the requirement's
+enumeration equals `DESIGN_PILLARS` so the next pillar cannot go stale in silence.
+
 ## plugin `v5.2.0` — 2026-09-05
 
 **A `metrics` pillar: the half of Chidamber & Kemerer that says something about this

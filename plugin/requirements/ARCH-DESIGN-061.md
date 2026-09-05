@@ -17,7 +17,8 @@ satisfies: [SYS-READ-103]
 > globals, six-parameter functions, `isinstance` chains that dispatch by hand, files that
 > never stop growing. `design` reads the repo's code (Python through `ast`, the brace
 > languages through masked-text heuristics) and names the shapes
-> the four OOP pillars would fix, plus the house standards a reviewer checks by eye, so the
+> the four OOP pillars would fix, plus per-class metrics and the house standards a
+> reviewer checks by eye, so the
 > reader who came to understand a file also sees where its design pulls against it. It
 > advises; it never gates.
 
@@ -180,7 +181,7 @@ satisfies: [ARCH-DESIGN-061]
 
 Every bullet below is binding.
 - `design` walks `code_root` with the scanner's walk (`.reqmapignore` honoured), reads the program-logic files (`DESIGN_EXTS`) and skips test paths (`_is_test_path`).
-- `design` prints one block per group in the order encapsulation, abstraction, inheritance, polymorphism, standards, each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
+- `design` prints one block per group in the order `DESIGN_PILLARS` declares — encapsulation, abstraction, inheritance, polymorphism, metrics, standards — each line as `file:line  kind  detail`, followed by the distinct advice sentences of that block.
 - `design --json` emits `{"files": N, "findings": [...]}` with every candidate record and nothing on stdout besides the JSON.
 - With no candidate, `design` prints one line saying so and the file count.
 - A file that does not parse yields no candidate and no error.
@@ -413,10 +414,12 @@ satisfies: [ARCH-DESIGN-061]
 > The pillar reports those three and deliberately omits the rest.
 
 Every bullet below is binding.
-- `_design_metrics` reports `god-class` when a class declares more than `DESIGN_WMC_MAX` methods (C&K WMC, unweighted).
+- `_design_metrics` reports `wide-class` when a class declares more than `DESIGN_WMC_MAX` methods (C&K WMC, unweighted).
 - `_design_metrics` reports `high-response` when a class's own methods plus the distinct method names they call exceed `DESIGN_RFC_MAX` (C&K RFC).
-- `_design_metrics` reports `low-cohesion` when LCOM1 exceeds `DESIGN_LCOM_MAX`. LCOM1 counts the method pairs sharing no instance field, less the pairs that share one.
-- A class's instance fields are the names assigned through `self.<name>` plus those `__slots__` declares; a class with no such field is skipped for cohesion, because a `dict` subclass keys its state elsewhere and would otherwise score as maximally incohesive.
+- `_design_metrics` reports `low-field-sharing` when LCOM1 exceeds `DESIGN_LCOM_MAX`. LCOM1 counts the method pairs sharing no instance field, less the pairs that share one.
+- A class's instance fields are the names assigned through `self.<name>`, those `__slots__` declares, and those a class-body annotation declares — the form `@dataclass`, attrs and Pydantic use, whose assignment happens in a synthesised `__init__` the tree never contains.
+- A class with no field at all is skipped for cohesion. A `dict` subclass keys its state elsewhere, so it has no field two methods could share.
+- The output names what the pillar did not measure whenever it renders, and when the review renders empty. An absent finding therefore never reads as a measured pass on DIT, NOC or CBO.
 - The pillar reads Python only, through `ast`, since counting methods and field access needs a parser rather than the brace-language heuristics.
 - DIT, NOC and CBO are not reported. Their absence is a decision, not a gap: the first two measure an inheritance tree a composing codebase does not have. The third needs type inference this engine does not do.
 - The three thresholds are `CONFIG_KEYS` entries, so a repo can retune them like every other number in the review; it stays advisory and never enters the gate.
@@ -425,22 +428,33 @@ Every bullet below is binding.
 CASE-1 — a wide class is named
   Given  a Python class with more methods than `DESIGN_WMC_MAX`
   When   `design` runs
-  Then   a `god-class` candidate is reported under Metrics, naming the class and its method count
+  Then   a `wide-class` candidate is reported under Metrics, naming the class and its method count
 
 CASE-2 — a dict subclass is not accused of incohesion
-  Given  a class subclassing `dict` with several methods and no `self.<name>` assignment
+  Given  a class subclassing `dict` with several methods and no field of any form
   When   `design` runs
-  Then   no `low-cohesion` candidate is reported for it
+  Then   no `low-field-sharing` candidate is reported for it
+
+CASE-6 — a declarative class is measured, not skipped
+  Given  a `@dataclass` whose fields are class-body annotations and whose methods split
+         across two disjoint field groups
+  When   `design` runs
+  Then   its fields are detected and its cohesion is scored, rather than silently skipped
 
 CASE-3 — split state is reported
   Given  a class whose methods touch two disjoint groups of fields, scoring LCOM over the limit
   When   `design` runs
-  Then   a `low-cohesion` candidate names the class, its LCOM, its method count and its field count
+  Then   a `low-field-sharing` candidate names the class, its LCOM, its method count and its field count
+
+CASE-7 — the pillar says what it did not measure
+  Given  any repo
+  When   `design` renders the metrics pillar, or reports no candidate at all
+  Then   the output names DIT, NOC and CBO as not measured
 
 CASE-4 — the thresholds are per repo
   Given  a `requirements/_config.json` setting `DESIGN_WMC_MAX` to 1
   When   `design` runs over a two-method class
-  Then   that class is reported as a `god-class`
+  Then   that class is reported as a `wide-class`
 
 CASE-5 — a cohesive class is silent
   Given  a small class whose every method pair shares a field
@@ -452,3 +466,6 @@ CASE-5 — a cohesive class is silent
 - LCOM1 has a known blind spot this engine does not correct: a constructor that assigns every field pairs with every other method, so a class with two otherwise disjoint halves scores zero as soon as its `__init__` touches both. The metric still finds the shape it was added for — `Scene`, whose 62 methods spread over 14 fields score 1409 — but a low LCOM is weaker evidence than a high one.
 - WMC is unweighted here. C&K define it as the sum of a per-method complexity weight; counting each method as 1 is the conventional simplification, and it is the reading `god-class` reports.
 - These numbers are advisory like every other candidate. `Scene` is reported and nothing gates on it; splitting it would change the public builder API, which is a semver decision rather than a lint fix.
+- The thresholds 20/50/20 are the conventional textbook numbers and are UNTUNED: C&K (1994) proposed the metrics and no thresholds, so there is no primary source to cite. They have not been calibrated against any corpus and are `CONFIG_KEYS` entries a consumer is expected to retune.
+- Fire rate on this repo, published rather than asserted: 1 of 9 non-test classes carries a candidate (11.1%); the same run is 3 of 121 design findings (2.5%) and 1 of 31 files (3.2%). ADR-0016's 5-40% band has no defined denominator for a code-level check — every prior application measured the requirement corpus `lint` visits — so the band is cited here as context, not as a passed bar. The confirmation sample is 1 of 1 and was made by this pillar's own author, which ADR-0022 does not accept as independent; that obligation is open and tracked in TODO.md.
+- Audited by the Senate on 2026-09-05 (`runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json`, verdict MODIFY, GO 4 / MODIFY 4 / STOP 1). Discharged in the same change: declarative fields now counted, the kinds renamed from verdicts to measurements, the thresholds marked untuned, and the unmeasured metrics named in the output. Left open on the record: an independent confirmation sample, and Musk's request to delete WMC and LCOM1 as redundant with RFC.

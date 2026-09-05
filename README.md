@@ -254,7 +254,7 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 | `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. |
 | `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. |
 | `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). |
-| `--design` | Advisory design review of the code: the four OOP pillars plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
+| `--design` | Advisory design review of the code: the four OOP pillars, three Chidamber & Kemerer per-class metrics (Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
 | `--implement ID` | The brief for writing the code: obligations, cases, the exact tags the new code must carry, where similar code already lives. `--json` for a coding agent. |
 | `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
 
