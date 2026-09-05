@@ -6347,6 +6347,22 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
             self.assertIn(b"new table", data)
             self.assertNotIn(b"\r\n", data, "prose outside the region was flipped to CRLF")
 
+    def test_write_region_body_takes_the_files_line_endings(self):  # verifies: REQ-CMDREGISTRY-834#CASE-3
+        """A CRLF file must not end up with an LF island inside the region: it is
+        byte-equal to git after normalisation, so nothing ever failed, while every
+        sync on Windows left a no-op line-ending diff on SKILL.md."""
+        crlf, lf = chr(13) + chr(10), chr(10)
+        with tempfile.TemporaryDirectory() as d:
+            fp = os.path.join(d, "SKILL.md")
+            with open(fp, "w", encoding="utf-8", newline="") as f:
+                f.write(crlf.join(["prose", "<!--##REQMAP:COMMANDS##-->", "old",
+                                   "<!--##/REQMAP:COMMANDS##-->", "after", ""]))
+            R._write_region(fp, lf.join(["line one", "line two"]))
+            with open(fp, "rb") as f:
+                data = f.read().decode("utf-8")
+            self.assertIn(crlf.join(["line one", "line two"]), data)
+            self.assertEqual(data.count(lf), data.count(crlf), "a bare LF survived")
+
     def test_gen_integration_preserves_existing_eol_convention(self):
         """Regenerating tool_definition.json from scratch must not silently normalize
         the file's existing line-ending convention to the host platform's os.linesep,

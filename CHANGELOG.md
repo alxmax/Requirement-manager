@@ -1,5 +1,15 @@
 # Changelog
 
+## plugin `v4.2.2` — 2026-09-05
+
+**No more line-ending diff on `SKILL.md` after every `sync` on Windows.** The generated
+command region was written with bare LF inside a CRLF file. The freshness check reads that
+file with universal newlines, so CRLF collapsed to LF before the comparison and the gate saw
+nothing wrong — git did, and the working tree carried a line-ending-only diff after every
+regeneration. The region body now takes the file's own convention, the way
+`tool_definition.json` already did. `SKILL.universal.md` carried the same LF island and is
+corrected once here.
+
 ## plugin `v4.2.1` — 2026-09-05
 
 **`SKILL.md`'s command list is generated from the registry.** It is the contract an assistant
