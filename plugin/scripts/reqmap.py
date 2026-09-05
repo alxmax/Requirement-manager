@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.2"
+MAP_ENGINE_VERSION = "2026-09-06.3"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2029,7 +2029,7 @@ def save_lock(reqs_dir, lock):  # implements: ARCH-DRIFT-003  # implements: REQ-
 # stayed put (behaviour shipped, spec not updated) — is invisible there. Member hashes
 # live in a SEPARATE, versioned sidecar so _reqlock.json stays a byte-stable cross-repo
 # contract: an older seeded engine never reads _memberlock.json and is wholly unaffected.
-MEMBERLOCK_SCHEMA = 1
+MEMBERLOCK_SCHEMA = 2   # 2: keys may be `file#definition`, not only `file`
 MEMBER_ROLES = ("implements", "generated-from")   # roles that bind code/doc content to a contract
 
 
@@ -2151,21 +2151,79 @@ def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
     return hashlib.sha256(data).hexdigest()
 
 
+def _py_def_spans(path):  # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-982
+    """`[(first_line, last_line, name)]` for the top-level definitions of a Python file,
+    or None when it is not Python or does not parse. Nesting is deliberately not
+    descended: a tag inside a method belongs to the class a reader opens, and per-method
+    spans would split one contract's implementation across several keys."""
+    if not path.lower().endswith(".py"):
+        return None
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            tree = ast.parse(f.read())
+    except (OSError, SyntaxError, ValueError):
+        return None
+    return [(n.lineno, getattr(n, "end_lineno", n.lineno), n.name) for n in tree.body
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+
+
+def _span_sha(path, lo, hi):  # implements: REQ-MEMBERDRIFT-982
+    """SHA-256 of one line span, LF-normalized exactly as `_file_sha` normalizes a whole
+    file — for the same reason: a CRLF checkout must not read as drift."""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    lines = data.split(b"\n")
+    return hashlib.sha256(b"\n".join(lines[lo - 1:hi])).hexdigest()
+
+
 def compute_member_hashes(code_root, members):  # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
-    """{rid: {relfile: sha}} for member files dedicated to ONE requirement. A file that
-    is an implements/generated-from member of several requirements (e.g. a single engine
-    file) is excluded: a change there cannot be attributed to one contract without noise."""
-    owners = {}   # relfile -> set(rid)
+    """`{rid: {key: sha}}` for the members one requirement owns alone, where a key is
+    `relfile#definition` for a tag inside a Python top-level definition and `relfile` for
+    anything else.
+
+    Ownership is what makes a hash attributable, and the unit of ownership is the unit the
+    tag sits in. Keyed per file, a file tagged by several requirements had to be dropped
+    entirely — a change in it cannot be blamed on one contract — which excluded this
+    engine's own 9k-line file and its 205 requirements from reverse drift altogether.
+    Keyed per definition, each requirement owns the definitions tagged with it and the
+    ambiguity is gone; a definition tagged by SEVERAL requirements is still ambiguous and
+    still dropped, at that finer granularity.
+
+    Python only, because a wrong span is a wrong drift signal: the brace languages are
+    read by heuristics elsewhere in this engine and keep the whole-file hash. The key says
+    which was used, so the lock is self-describing."""
+    owners = {}   # key -> set(rid);  where -> (path, lo, hi) or None for whole-file
+    where = {}
+    spans_by_file = {}
     for rid, hits in members.items():
-        for role, fp, _ln in hits:
-            if role in MEMBER_ROLES:
-                owners.setdefault(fp, set()).add(rid)
+        for role, fp, ln in hits:
+            if role not in MEMBER_ROLES:
+                continue
+            path = os.path.join(code_root, fp)
+            if fp not in spans_by_file:
+                spans_by_file[fp] = _py_def_spans(path)
+            spans = spans_by_file[fp]
+            key, span = fp, None
+            if spans:
+                for lo, hi, name in spans:
+                    if lo <= ln <= hi:
+                        key, span = "{}#{}".format(fp, name), (path, lo, hi)
+                        break
+            owners.setdefault(key, set()).add(rid)
+            where[key] = span
     out = {}
-    for fp, rids in owners.items():
-        if len(rids) == 1:
-            sha = _file_sha(os.path.join(code_root, fp))
-            if sha is not None:
-                out.setdefault(next(iter(rids)), {})[fp] = sha
+    for key, rids in owners.items():
+        if len(rids) != 1:
+            continue          # shared: a change here names no single contract
+        span = where[key]
+        sha = _span_sha(*((span[0], span[1], span[2]) if span
+                          else (os.path.join(code_root, key), 1, 1 << 30)))
+        if sha is not None:
+            out.setdefault(next(iter(rids)), {})[key] = sha
     return out
 
 

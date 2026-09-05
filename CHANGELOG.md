@@ -1,5 +1,45 @@
 # Changelog
 
+## plugin `v5.9.0` — 2026-09-06
+
+**The member hash now keys on the definition a tag sits in, not the whole file.** Reverse
+drift — a member changed while its contract was not re-touched — was computed per file,
+and only for files dedicated to a single requirement. A file tagged by several
+requirements had to be dropped whole, because a change in it names no single contract.
+
+Measured on this repo before changing anything: **34 member files, 13 hashed, 21
+dropped** — and the dropped set included `plugin/scripts/reqmap.py`, a member of **205
+requirements**. The engine's own file, the one that matters most, had no reverse-drift
+detection at all. By construction.
+
+Ownership is what makes a hash attributable, and the unit of ownership is the unit the tag
+sits in. Keyed per definition, each requirement owns the functions tagged with it:
+
+```
+_memberlock.json  { "REQ-A-001": { "src/mod.py#alpha": ... },
+                    "REQ-B-001": { "src/mod.py#beta":  ... } }
+```
+
+Change only `beta` and the warning names `REQ-B-001` and `src/mod.py#beta`, and says
+nothing about `REQ-A-001`. Under the per-file scheme neither would have been recorded at
+all.
+
+**After: 53 requirements carry a hash over 113 keys, 99 of them per-definition**, and
+`reqmap.py` contributes 93 keys where it contributed none.
+
+**A correction, stated rather than quietly restated:** a projection made before
+implementing said 204 requirements would gain a hash. It is 53. That projection had not
+applied the shared-definition rule — most definitions in this engine carry several
+`implements:` tags, so they stay shared and are still dropped, correctly. Sharing a file
+is no longer sharing a key; sharing a definition still is.
+
+Python only. The brace languages keep the whole-file hash, because they are read by
+heuristics elsewhere in this engine and a wrong span is a wrong drift signal — the key
+says which was used, so the lock is self-describing. A tag at module level keeps its
+whole-file key. `_span_sha` normalises line endings exactly as `_file_sha` does, so a CRLF
+checkout never reads as drift. `_memberlock.json` declares `_schema: 2`; a lock written by
+an older engine is rejected and rebaselined on the next `sync`, never half-read.
+
 ## plugin `v5.8.0` — 2026-09-06
 
 **`sync` now reports readability, and how much of the pyramid is still the engine's
