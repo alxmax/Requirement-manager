@@ -508,15 +508,15 @@ memory and exits non-zero if the committed `_map.*` is stale (a code/requirement
 edit shifted it). Wire it next to `gate` in your pre-commit hook / CI so a stale
 map can't be committed. A repo that doesn't track a map passes silently.
 
-## Project site (`reqmap.py site`)
+## Project site (`reqmap.py sync --attach`)
 
-`site` keeps a project presentation page (e.g. `docs/architecture.html`) current by
+`sync --attach` keeps a project presentation page (e.g. `docs/architecture.html`) current by
 injecting **engine-owned, marker-delimited regions** and preserving the authored prose
 between them. It is deterministic and never prompts — the *interactive* part is your job
 as the skill.
 
 **When the user wants a project/landing/architecture page, or to refresh one:**
-1. Run `python scripts/reqmap.py site --detect` (from the dir where `requirements/` lives)
+1. Run `python scripts/reqmap.py sync --detect` (from the dir where `requirements/` lives)
    to see what `docs/` already has and the suggested command.
 2. Ask the user **which target** — an existing `docs/architecture.html`, an
    `index.html`, a bring-your-own HTML path, or scaffold a new page — and **which regions**

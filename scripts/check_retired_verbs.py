@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# implements: ARCH-SELFGATE-039
 # -*- coding: utf-8 -*-
 """Fail if a live instruction still names a CLI verb the engine no longer has.
 
@@ -52,21 +53,40 @@ INSTRUCTION_FILES = [
     "plugin/scripts/reqmap.py",
     "CLAUDE.md",
     "README.md",
-    "plugin/skills/requirement-manager/SKILL.md",
-    "plugin/skills/requirement-manager/SKILL.universal.md",
+    # NOT one skill by name: the plugin ships three, and naming one is how six dead
+    # invocations reached consumers through `requirement-quality-review`. The glob
+    # below reads every SKILL*.md under plugin/skills/, whatever is added next.
     ".githooks/pre-commit",
     ".github/workflows/ci.yml",
     "sync_reqmap.sh",
 ]
 INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml")]
+# Every skill the plugin ships, at any depth: each one instructs a reader to run the
+# engine, and each goes stale the same way.
+INSTRUCTION_TREES = [("plugin/skills", "SKILL", ".md")]
 
 # Verbs this project has had and no longer has. Only these are flagged: matching
 # "any word after reqmap" turns every sentence that mentions the file into a
 # finding ("reqmap.py changed", "reqmap links code to requirements").
+# A line that says a verb is GONE is the opposite of an instruction to run it, and
+# this repo writes those deliberately — the migration note for `check` is the reason
+# a reader stops calling it. Matched on the line itself, so a real instruction that
+# happens to sit near one is still reported.
+REMOVAL_NOTE = re.compile(
+    r"no longer exists|was removed|were removed|is gone|are gone|removed in|"
+    r"deprecated alias|folded into|replaced by|renamed to", re.I)
+
 RETIRED = {
-    "next", "show", "audit", "dupes", "search", "draft", "implement",
-    "retire", "review", "design", "suggest-verifies", "translate",
-    "confirm",
+    # folded into `gate`'s mode flags in v4.0.0/v5.0.0
+    "next", "show", "audit", "dupes", "search", "review", "implement",
+    "design", "health", "coverage", "lint",
+    # folded into `sync`
+    "map", "site", "export", "findings", "retire", "suggest-verifies",
+    "gen-integration",
+    # folded into `init`
+    "draft", "plan",
+    # removed outright
+    "check", "scan", "translate", "confirm",
 }
 
 # An invocation, not a mention: inside backticks or a quoted string, or after
@@ -91,6 +111,15 @@ def candidate_files():
         for name in sorted(os.listdir(base)):
             if name.endswith(ext) and not name.startswith("_"):
                 yield os.path.join(sub, name), os.path.join(base, name)
+    for sub, prefix, ext in INSTRUCTION_TREES:
+        base = os.path.join(ROOT, sub)
+        if not os.path.isdir(base):
+            continue
+        for dirpath, _dirs, names in os.walk(base):
+            for name in sorted(names):
+                if name.startswith(prefix) and name.endswith(ext):
+                    p = os.path.join(dirpath, name)
+                    yield os.path.relpath(p, ROOT).replace(os.sep, "/"), p
 
 
 def main():
@@ -104,6 +133,8 @@ def main():
         except OSError:
             continue
         for n, line in enumerate(text.split("\n"), 1):
+            if REMOVAL_NOTE.search(line):
+                continue          # a note that the verb is gone, not a call to it
             for verb in INVOCATION.findall(line):
                 # a flag, a path or an id is not a verb
                 if verb in live or verb not in RETIRED:

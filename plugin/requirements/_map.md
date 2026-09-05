@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-05
-engine: 2026-09-05.16
+engine: 2026-09-05.17
 nodes: 236
 edges: 117
 design OOP: 29/100 (9/31 source files without a design candidate)
@@ -795,6 +795,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f__github_workflows_ci_yml_2
   f_check_action_yml_2["check/action.yml:2"]
   ARCH_SELFGATE_039 -->|implements| f_check_action_yml_2
+  f_scripts_check_retired_verbs_py_2["scripts/check_retired_verbs.py:2"]
+  ARCH_SELFGATE_039 -->|implements| f_scripts_check_retired_verbs_py_2
   f_scripts_check_versions_py_2["scripts/check_versions.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_versions_py_2
   f_scripts_test_check_engine_bump_py_56["scripts/test_check_engine_bump.py:56"]

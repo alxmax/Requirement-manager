@@ -142,7 +142,7 @@ CASE-12
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana runs `reqmap.py lint` after an editing session. One bullet is flagged
+- Ana runs `reqmap.py gate` after an editing session. One bullet is flagged
   `statement-too-long` (four sentences), another `vague-term` for "robust". She rewrites
   both; the next run is quiet.
 

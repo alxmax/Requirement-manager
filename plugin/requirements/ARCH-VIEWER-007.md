@@ -105,7 +105,7 @@ CASE-8
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana runs `reqmap.py map`, then double-clicks `_map.html`. It opens in her browser with the
+- Ana runs `reqmap.py sync`, then double-clicks `_map.html`. It opens in her browser with the
   whole requirement graph inlined — no server — even though the engine itself is stdlib-only.
 
 **Current implementation**
