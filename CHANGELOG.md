@@ -60,6 +60,39 @@ Wired into the pre-commit hook and CI.
 plugin's major. A consumer pinned to `check@v4` keeps the four-verb engine and is unaffected
 until it re-pins.
 
+**The command layer takes one `Workspace` instead of six loose arguments.** `gate
+--design` named the same clump fifteen times: `reqs`, `members`, `reqs_dir`,
+`code_root` and the two coverage views were computed together in `main` and then
+threaded, in varying orders, through every `cmd_*` function — `cmd_check` alone took
+eleven parameters. They are now one object, built once by `Workspace.load`, and
+`GateContext` derives from it rather than re-listing its fields. Each command body is
+unchanged: the object is unpacked back into the same locals on the first line, so the
+refactor moved the boundary and nothing else. Every command-level long-parameter-list
+finding is gone (`cmd_check` 11 → 6, `cmd_retire` 9 → 6, `cmd_audit` 8 → 3,
+`cmd_health` 7 → 4, `cmd_site` 7 → 6) and the engine's encapsulation findings fell
+from 25 to 8. Internal shape only — no CLI, schema or artifact change.
+
+**The diagram builder grew the value objects its parameter lists were asking for.**
+`Rect` (x, y, w, h), `Style` (stroke/fill plus the four Excalidraw modifiers and the
+group) and `TextStyle` (size, colour, both alignments) replace the long positional
+runs through `_base` (13 parameters), `_text_el` (11), `_iso_polygon` (12) and
+`_place` (8). `align`'s six-branch `axis` chain became a dispatch table, `_move_node`
+lost four levels of nesting behind two named lookups, `save`'s 125-line body split
+into hard checks, a table of advisory checks and the write, and the viewer page and
+the `discover` stub moved into module-level templates. 51 findings → 40; all 60
+builder tests unchanged and passing. **The public builder API is untouched** — `box`,
+`row`, `grid`, `arrow` and `save` keep their signatures, so every existing generator
+still runs. The 38 remaining findings all sit on those public signatures; collapsing
+them into `Rect`/`Style` is a breaking change and is deliberately not in this release.
+
+**README's command table matched a CLI that no longer exists.** It documented
+twenty-four verbs — `map`, `next`, `scan`, `lint`, `show`, `health`, `export`,
+`draft`, `plan`, `findings`, `confirm`, `translate` and the rest — every one of which
+this release folded into a flag or removed. Rewritten to the five real verbs, with a
+table each for `gate`'s read-only questions and `sync`'s write modes, and a note
+saying where each removed verb went. The engine's line count in the repo tour was
+also three thousand lines stale.
+
 ## plugin `v4.2.2` — 2026-09-05
 
 **No more line-ending diff on `SKILL.md` after every `sync` on Windows.** The generated

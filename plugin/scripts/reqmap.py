@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.8"
+MAP_ENGINE_VERSION = "2026-09-05.10"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2375,6 +2375,47 @@ def _test_link_problem(path):  # implements: ARCH-TESTLINK-018  # implements: RE
             "(def test.../func TestX.../#[test]/it()/bash test_x()/py run|main under __main__)")
 
 
+# ---------- the workspace a command runs against ----------
+class Workspace(object):  # implements: ARCH-RULES-059
+    """One repo, scanned once: the requirement corpus, the membership scan, the
+    two roots every command resolves paths against, and the two coverage views
+    the same walk produced.
+
+    These six values are computed together in `main` and were then passed
+    together to fifteen command functions, which is why `gate --design` reported
+    the clump fifteen times. Naming the bundle is the whole point: a command now
+    asks for the workspace it operates on, not for six positional arguments a
+    caller can transpose.
+
+    `reqs_dir` and `code_root` stay optional because two commands are defined for
+    a caller that has neither: `health` skips the sections that need a code root
+    rather than failing, and `next` does the same.
+    """
+
+    __slots__ = ("reqs", "members", "reqs_dir", "code_root", "ac_cover", "level_cover")
+
+    def __init__(self, reqs, members=None, reqs_dir=None, code_root=None,
+                 ac_cover=None, level_cover=None):
+        self.reqs, self.members = reqs, members
+        self.reqs_dir, self.code_root = reqs_dir, code_root
+        self.ac_cover, self.level_cover = ac_cover, level_cover
+
+    @classmethod
+    def load(cls, reqs_dir, code_root, cache=False):
+        """Parse the corpus and walk the code once — the startup path `main`
+        takes before dispatching to any command."""
+        members, ac_cover, level_cover = scan_all(code_root, reqs_dir, cache=cache)
+        return cls(load_requirements(reqs_dir), members, reqs_dir, code_root,
+                   ac_cover, level_cover)
+
+    def levels(self):
+        """The per-requirement test levels, walking for them only if the cached
+        members-only scan skipped them (see `scan_all`'s docstring)."""
+        if self.level_cover is None:
+            self.level_cover = scan_test_levels(self.code_root, self.reqs_dir)
+        return self.level_cover
+
+
 # ---------- gate rules ----------
 class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947
     """Everything a gate rule may read, computed once per run. `members` is the view
@@ -2387,16 +2428,19 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
     full_member_hashes = None
 
 
-    def __init__(self, reqs, members, reqs_dir, code_root, since=None,
-                 ac_cover=None, level_cover=None, full_members=None, update_lock=False):
+    def __init__(self, ws, since=None, full_members=None, update_lock=False):
+        reqs, members = ws.reqs, ws.members
+        reqs_dir, code_root = ws.reqs_dir, ws.code_root
         self.reqs = reqs
         self.members = members
         self.full_members = members if full_members is None else full_members
         self.reqs_dir, self.code_root, self.since = reqs_dir, code_root, since
         self.update_lock = update_lock
         self.cap_ids = set(reqs)
-        self.ac_cover = scan_ac_verifies(code_root, reqs_dir) if ac_cover is None else ac_cover
-        self.level_cover = scan_test_levels(code_root, reqs_dir) if level_cover is None else level_cover
+        self.ac_cover = (scan_ac_verifies(code_root, reqs_dir)
+                         if ws.ac_cover is None else ws.ac_cover)
+        self.level_cover = (scan_test_levels(code_root, reqs_dir)
+                            if ws.level_cover is None else ws.level_cover)
         self.any_validation = any(x[0] == "validated-against"
                                   for hits in self.members.values() for x in hits)
         self.satisfied_by = {rid: [] for rid in reqs}
@@ -2825,10 +2869,13 @@ def _is_source_repo(code_root):
             and os.path.exists(os.path.join(code_root, "app", "src", "lib", "data.js")))
 
 
-def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False, as_json=False, since=None, accept_drift=True,
-              ac_cover=None, level_cover=None):  # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-RULES-948
+def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
+              accept_drift=True):  # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-RULES-948
     """The gate: run GATE_RULES, print findings with their codes, advance the lock when
     asked. Report-only unless `update_lock` (that is `sync`)."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
+    code_root = code_root or "."   # a workspace built without one gates the cwd
+    ac_cover, level_cover = ws.ac_cover, ws.level_cover
     warn_if_stale()
     full_members = members
     pre_warns = []
@@ -2847,8 +2894,11 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 if kept:
                     filtered[cap] = kept
             members = filtered
-    ctx = GateContext(reqs, members, reqs_dir, code_root, since=since, ac_cover=ac_cover,
-                      level_cover=level_cover, full_members=full_members, update_lock=update_lock)
+    # built from the resolved locals, not from `ws` directly: `--since` narrowed
+    # `members`, and `code_root` fell back to the cwd just above.
+    ctx = GateContext(Workspace(reqs, members, reqs_dir, code_root,
+                                ac_cover, level_cover),
+                      since=since, full_members=full_members, update_lock=update_lock)
     # sync on a full scan re-baselines _memberlock below from this same hash set —
     # computed once and handed to the member-drift rule instead of hashing twice.
     _reuse_full_hashes = update_lock and members is full_members
@@ -3313,8 +3363,9 @@ def _prose_facts(src):  # implements: ARCH-PROSE-024  # implements: REQ-PROSE-90
     return title, (headings or h1_sections)
 
 
-def cmd_extract(reqs, members, code_root, reqs_dir):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024  # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
+def cmd_extract(ws):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024  # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
     """Propose DRAFT requirements for code files that have no member tag yet."""
+    members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
     proposed, used = 0, set()
@@ -3614,12 +3665,13 @@ def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: ARCH-CAND
     return out
 
 
-def cmd_candidates(reqs, members, code_root, reqs_dir, out, md_globs=None):  # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
+def cmd_candidates(ws, out, md_globs=None):  # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
     """Emit a deterministic JSON capability-extraction plan and write NO .md.
     Grouping: authoritative `requirements/_capmap.json` when present, else one
     candidate per file (the Stage-2 agent merges/splits using judgment).
     `md_globs` opts non-code `.md` files (prompts, specs) into discovery — advisory
     only, never auto-written; a human authors + confirms each into the SSOT."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     files = _collect_files(code_root, reqs_dir, md_globs)
     facts_by_file = {rel: _file_facts(os.path.join(code_root, rel), rel) for rel in files}
 
@@ -4135,7 +4187,9 @@ def _attach_translations(data, reqs, reqs_dir):  # implements: ARCH-TRANSLATE-04
     return data
 
 
-def cmd_map(reqs, members, reqs_dir, root=".", check=False, ac_cover=None):  # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-870
+def cmd_map(ws, root=".", check=False):  # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-870
+    reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
+    ac_cover = ws.ac_cover
     data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
 
     if check:
@@ -4224,13 +4278,14 @@ def _req_file(reqs, rid):  # implements: ARCH-MODULEFILE-056
     return "requirements/" + (os.path.basename(p) if p else str(rid) + ".md")
 
 
-def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=None):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883  # implements: REQ-NEXT-884  # implements: REQ-NEXT-885  # implements: REQ-NEXT-886  # implements: REQ-NEXT-887
+def cmd_next(ws, show_all=False, top_n=3):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883  # implements: REQ-NEXT-884  # implements: REQ-NEXT-885  # implements: REQ-NEXT-886  # implements: REQ-NEXT-887
     """Terminal 'what should I do next': a focused, counted worklist over the same
     `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
     header, leads with the most-urgent bucket, shows the top few per bucket (the
     extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
     item names the requirement file to open. Also surfaces scannable files that
     carry no membership tag (untagged bucket). Read-only, always exit 0."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     total = len(reqs)
     if total == 0:   # distinguish "nothing set up yet" from "all clean"
         print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
@@ -4880,7 +4935,7 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: AR
 # proposal. Re-adding it needs that ADR's bar met first, not a code review.
 
 
-def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050  # implements: REQ-LINT-863
+def cmd_lint(ws, strict=False, decompose=False):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050  # implements: REQ-LINT-863
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error),
@@ -4897,6 +4952,7 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     .githooks/pre-commit runs gate -> lint --strict -> map --check, so a file written
     during the lint step would fail the map --check step of the same hook run
     (ARCH-DECOMPOSE-050)."""
+    reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
     # Checks promoted from warn→error in --strict mode (structural, not style).
     STRICT_PROMOTE = {"ac-count-high", "over-scoped",
                        "atomic-bullet-then-mismatch", "atomic-story-overlong"}
@@ -4955,12 +5011,13 @@ def cmd_lint(reqs, strict=False, members=None, decompose=False, reqs_dir=None): 
     return 0
 
 
-def cmd_show(reqs, members, cap_id, levels=None):  # implements: ARCH-SHOW-015  # implements: ARCH-VLEVEL-037  # implements: REQ-SHOW-917  # implements: REQ-SHOW-918  # implements: REQ-SHOW-919  # implements: REQ-TRACE-935  # implements: REQ-VLEVEL-946
+def cmd_show(ws, cap_id, levels=None):  # implements: ARCH-SHOW-015  # implements: ARCH-VLEVEL-037  # implements: REQ-SHOW-917  # implements: REQ-SHOW-918  # implements: REQ-SHOW-919  # implements: REQ-TRACE-935  # implements: REQ-VLEVEL-946
     """Print one consolidated, human-readable dossier for a single requirement: its
     status/layer/intent, contract, dependencies (both directions), members grouped
     by role, open verify-intent questions, and risk signals — the 'what does this do
     / where is X' view in one command. Read-only; returns 1 on an unknown id so a
     typo is visible to a caller or CI. Reuses the same signal source as next/findings."""
+    reqs, members = ws.reqs, ws.members
     r = reqs.get(cap_id)
     if not r:
         print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
@@ -5439,8 +5496,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
     print("info  run `reqmap.py gate --audit` for the full report")
 
 
-def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
-              ac_cover=None, level_cover=None):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
+def cmd_audit(ws, strict=False, as_json=False):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
     """Run every pass that discovers a problem, and print one report.
 
     The engine grew one verb per question — is it linked, is it drifted, is it
@@ -5452,6 +5508,7 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
     and advice must not be able to fail a build. Two sections have no verb of their own
     because they only make sense in this report: the exemptions in force, and the shape
     of the corpus on the V-model's left arm."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     exemptions = _exemptions_in_force(reqs)
     unexplained = [e for e in exemptions if not e["reason"]]
     shape = _corpus_shape(reqs)
@@ -5467,8 +5524,7 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
         if untagged is not None:
             out["untagged"] = len(untagged)
         errs, warns = run_gate_rules(
-            GateContext(reqs, members, reqs_dir, code_root, ac_cover=ac_cover,
-                        level_cover=level_cover, full_members=members, update_lock=False),
+            GateContext(ws, full_members=members, update_lock=False),
             strict=strict)
         out["gate"] = {"errors": len(errs), "warnings": len(warns),
                        "findings": [dict(f) for f in list(errs) + list(warns)]}
@@ -5476,17 +5532,15 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
         return 1 if errs else 0
 
     sections = [
-        _audit_section("Gate", "reqmap.py gate", lambda: cmd_check(
-            reqs, members, reqs_dir, False, code_root, strict=strict,
-            ac_cover=ac_cover, level_cover=level_cover)),
-        _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(
-            reqs, members, False, code_root=code_root, reqs_dir=reqs_dir)),
+        _audit_section("Gate", "reqmap.py gate",
+                       lambda: cmd_check(ws, False, strict=strict)),
+        _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(ws, False)),
         _audit_section("Duplicates", "reqmap.py gate --dupes",
                        lambda: cmd_similar(reqs, SIMILAR_THRESHOLD, members)),
         _audit_section("Design", "reqmap.py gate --design",
                        lambda: cmd_design(code_root, reqs_dir)),
         _audit_section("Tag coverage", "reqmap.py gate --risk --untagged",
-                       lambda: cmd_coverage(reqs, members, code_root, reqs_dir, False)),
+                       lambda: cmd_coverage(ws, False)),
     ]
     gate_rc = sections[0][3]
 
@@ -5568,10 +5622,11 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
     return gate_rc
 
 
-def cmd_coverage(reqs, members, code_root, reqs_dir, as_json=False):
+def cmd_coverage(ws, as_json=False):
     """Per-directory coverage report: how many scannable files in each top-level
     directory carry at least one membership tag vs. total scannable files.
     Helps identify which parts of the codebase have no requirement coverage."""
+    members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
     ignore = load_ignore(code_root, reqs_dir)
     # requirements dir contains spec files, not implementation files — exclude from coverage
     reqs_abs = os.path.normcase(os.path.abspath(reqs_dir)) if reqs_dir else None
@@ -5787,8 +5842,7 @@ def _health_record(reqs, members, reqs_dir):  # implements: ARCH-HEALTH-017  # i
     return data
 
 
-def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root=None,
-               headline_only=False):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
+def cmd_health(ws, as_json=False, as_badge=False, headline_only=False):  # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-857  # implements: REQ-HEALTH-858  # implements: REQ-HEALTH-859
     """Print a corpus coherence snapshot: a headline score plus component counts.
     The score is transparent — the percentage of requirements green on EVERY axis
     (confirmed, has an `implements` member, tested-or-`test_exempt`, no open
@@ -5805,6 +5859,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     value changed with no tag at all; that class of drift needs a sourced/
     `validated-against:` convention on the changed file, which is out of
     scope for this signal."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     data = _health_record(reqs, members, reqs_dir)
     score, total, healthy = data["score"], data["total"], data["healthy"]
     confirmed, implemented = data["confirmed"], data["implemented"]
@@ -6027,21 +6082,21 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
     print("Bootstrapping draft requirements from existing code...\n")
-    reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root, reqs_dir)
-    cmd_extract(reqs, members, code_root, reqs_dir)
+    cmd_extract(Workspace(load_requirements(reqs_dir),
+                          scan_members(code_root, reqs_dir), reqs_dir, code_root))
     # extract wrote new files -> reload before locking + mapping
-    reqs = load_requirements(reqs_dir)
-    members = scan_members(code_root, reqs_dir)
-    cmd_check(reqs, members, reqs_dir, update_lock=True, code_root=code_root)
-    cmd_map(reqs, members, reqs_dir, code_root)
+    ws = Workspace(load_requirements(reqs_dir),
+                   scan_members(code_root, reqs_dir), reqs_dir, code_root)
+    reqs = ws.reqs
+    cmd_check(ws, update_lock=True)
+    cmd_map(ws, code_root)
     # implements: ARCH-SITE-026 — best-effort project site. Never aborts init.
     if not no_site:
         target = _site_default_target(code_root)
         if target:
             try:
                 _site_pages_bootstrap(os.path.dirname(target))   # .nojekyll + index.html redirect
-                cmd_site(reqs, members, code_root, attach=target, regions=["nav", "stats"])
+                cmd_site(ws, code_root, attach=target, regions=["nav", "stats"])
             except Exception as e:   # site is decorative; a failure must not break bootstrap
                 print("note: site step skipped ({}).".format(e))
         else:
@@ -7377,12 +7432,13 @@ def _site_default_target(root):  # implements: ARCH-SITE-026
     return os.path.join(docs, "architecture.html") if os.path.isdir(docs) else None
 
 
-def cmd_site(reqs, members, root=".", attach=None,  # implements: REQ-SITE-924
+def cmd_site(ws, root=".", attach=None,  # implements: REQ-SITE-924
              regions=None, diagram=None, detect=False):  # implements: ARCH-SITE-026
     """Inject engine-owned regions into a presentation page (attach mode) or write
     a default page when the target is absent (scaffold mode). Deterministic and
     headless-safe: never prompts, never raises on missing git/files. `detect`
     prints findings + the suggested command and writes nothing."""
+    reqs, members = ws.reqs, ws.members
     regions = regions or ["nav"]
     data = _build_map_data(reqs, members)
     repo_url = _git_remote_web_url(root)
@@ -7613,10 +7669,12 @@ def _apply_verifies(proposals, code_root):  # implements: ARCH-SUGGESTVERIFIES-0
     return written
 
 
-def cmd_suggest_verifies(reqs, members, code_root, reqs_dir, ac_cover=None, apply_tags=False):  # implements: ARCH-SUGGESTVERIFIES-047  # implements: REQ-SUGGESTVERIFIES-929
+def cmd_suggest_verifies(ws, apply_tags=False):  # implements: ARCH-SUGGESTVERIFIES-047  # implements: REQ-SUGGESTVERIFIES-929
     """Propose `# verifies: <id>#AC-N` tags for tests already NAMED after the criterion
     they check, so a corpus can adopt per-criterion coverage without re-deriving the
     matching rules (and their three traps) by hand. Read-only unless --apply."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
+    ac_cover = ws.ac_cover
     if ac_cover is None:
         ac_cover = scan_ac_verifies(code_root, reqs_dir)
     proposals, ambiguous = _verifies_proposals(reqs, members, code_root, ac_cover)
@@ -7890,11 +7948,12 @@ def _neighbours(reqs, members, rid, k=2):  # implements: ARCH-IMPLEMENT-063  # i
             for s, q in scored[:k] if s > 0]
 
 
-def cmd_implement(reqs, members, cap_id, as_json=False):  # implements: ARCH-IMPLEMENT-063  # implements: REQ-IMPLEMENT-958
+def cmd_implement(ws, cap_id, as_json=False):  # implements: ARCH-IMPLEMENT-063  # implements: REQ-IMPLEMENT-958
     """Emit the brief for implementing one requirement in code: its obligations, its
     cases, the tags the new code must carry, where similar code already lives, and the
     command that proves the work landed. The engine writes no code -- it states the
     contract and then verifies it, which is the only half a deterministic tool can own."""
+    reqs, members = ws.reqs, ws.members
     r = reqs.get(cap_id)
     if not r:
         print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
@@ -8024,8 +8083,8 @@ def _retire_plan(reqs, members, cap_id):  # implements: ARCH-RETIRE-064  # imple
     }
 
 
-def cmd_retire(reqs, members, reqs_dir, cap_id, delete=False, do_apply=False,
-               force=False, as_json=False, code_root=None):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
+def cmd_retire(ws, cap_id, delete=False, do_apply=False, force=False,
+               as_json=False):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
     """Take a requirement out of service. Without --apply this only reports the blast
     radius, so the destructive half is always preceded by a readable plan.
 
@@ -8035,6 +8094,7 @@ def cmd_retire(reqs, members, reqs_dir, cap_id, delete=False, do_apply=False,
     is now dead needs to understand the code, which this engine deliberately cannot do.
     The plan names the files where the removed tag was the only one, which is exactly
     the list a human or an agent needs for that second half."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     if cap_id not in reqs:
         print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
         return 1
@@ -8998,38 +9058,37 @@ def main():
     if a.cmd == "init" and not a.plan:
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
-    reqs = load_requirements(reqs_dir)
     # One walk for the commands that need coverage too (gate/sync); the rest only ever
     # asked for members. --cache stays on scan_members, the only scanner that implements
     # it - see scan_all's docstring for why it is not duplicated there.
-    members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir, cache=a.cache)
+    ws = Workspace.load(reqs_dir, code_root, cache=a.cache)
+    # the handful of commands that take only part of the workspace still read it
+    # straight off the object; they never took the whole clump to begin with.
+    reqs, members = ws.reqs, ws.members
     if a.cmd == "init":            # init --plan: the read-only extraction plan
         md_globs = []
         for g in (a.md_glob or []):
             md_globs += [x.strip() for x in g.split(",") if x.strip()]
-        return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
+        return cmd_candidates(ws, a.out, md_globs)
     if a.cmd == "gate":
         if a.mode_audit:
-            return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
-                             as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
+            return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
         if a.mode_risk:
             if a.as_badge:
-                return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
+                return cmd_health(ws, False, True)
             if a.as_json:
-                return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
+                return cmd_health(ws, True, False)
             if a.untagged:
-                return cmd_coverage(reqs, members, code_root, reqs_dir, False)
-            cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
-                       headline_only=True)
-            return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
+                return cmd_coverage(ws, False)
+            cmd_health(ws, False, False, headline_only=True)
+            return cmd_next(ws, a.show_all)
         if a.mode_show is not None:
             if not a.mode_show:
                 print("usage: reqmap gate --show <ID>"); return 2
-            # scan_all above (the non-cache path) already produced level_cover in the same
-            # walk; only re-walk via scan_test_levels when --cache forced the
+            # Workspace.load (the non-cache path) already produced level_cover in the
+            # same walk; ws.levels() only re-walks when --cache forced the
             # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
-            levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
-            return cmd_show(reqs, members, a.mode_show, levels)
+            return cmd_show(ws, a.mode_show, ws.levels())
         if a.mode_search is not None:
             if not a.mode_search:
                 print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
@@ -9042,7 +9101,7 @@ def main():
         if a.mode_implement is not None:
             if not a.mode_implement:
                 print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
-            return cmd_implement(reqs, members, a.mode_implement, as_json=a.as_json)
+            return cmd_implement(ws, a.mode_implement, as_json=a.as_json)
         if a.mode_dupes:
             return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD,
                                members, top=a.top)
@@ -9053,26 +9112,22 @@ def main():
         # three commands because they were written on three days, not because a caller
         # ever wanted one without the others (the published Action defaults both extras
         # to on). Report-only throughout: never touches the lock, never writes a map.
-        rc = cmd_check(reqs, members, reqs_dir, False, code_root, a.strict, a.as_json,
-                       getattr(a, "since", None),
-                       ac_cover=_ac_cover, level_cover=_level_cover)
+        rc = cmd_check(ws, False, a.strict, a.as_json, getattr(a, "since", None))
         if a.as_json:
             return rc                      # one machine-readable document, not three
         if not a.no_lint:
-            rc = cmd_lint(reqs, strict=True, members=members, reqs_dir=reqs_dir) or rc
+            rc = cmd_lint(ws, strict=True) or rc
         if not a.no_map_check:
-            rc = cmd_map(reqs, members, reqs_dir, code_root, True, ac_cover=_ac_cover) or rc
+            rc = cmd_map(ws, code_root, True) or rc
         return rc
     if a.cmd == "sync":
         if a.mode_retire is not None:
             if not a.mode_retire:
                 print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
-            return cmd_retire(reqs, members, reqs_dir, a.mode_retire, delete=a.delete,
-                              do_apply=a.do_apply, force=a.force, as_json=a.as_json,
-                              code_root=code_root)
+            return cmd_retire(ws, a.mode_retire, delete=a.delete,
+                              do_apply=a.do_apply, force=a.force, as_json=a.as_json)
         if a.mode_suggest:
-            return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
-                                        ac_cover=_ac_cover, apply_tags=a.do_apply)
+            return cmd_suggest_verifies(ws, apply_tags=a.do_apply)
         # Before the gate, not after: the generated integration artifacts are derived
         # from the command registry, and RM028 reports them stale. Regenerating them
         # downstream of a check that fails ON them can never converge.
@@ -9081,11 +9136,10 @@ def main():
         # rescan + regenerate map + advance the drift baseline (guarded). Members were
         # already scanned above; cmd_check rewrites the lock unless confirmed drift is
         # detected without --accept-drift, then map regenerates only on success.
-        rc = cmd_check(reqs, members, reqs_dir, True, code_root, strict=a.strict,
-                       accept_drift=getattr(a, "accept_drift", False),
-                       ac_cover=_ac_cover, level_cover=_level_cover)
+        rc = cmd_check(ws, True, strict=a.strict,
+                       accept_drift=getattr(a, "accept_drift", False))
         if rc == 0:
-            cmd_map(reqs, members, reqs_dir, code_root, ac_cover=_ac_cover)
+            cmd_map(ws, code_root)
             # Everything derived is rebuilt in one place: there is no state of the world
             # in which regenerating the map but not the findings digest, the presentation
             # page or (in this repository) the generated integration artifacts is what the
@@ -9096,7 +9150,7 @@ def main():
                 cmd_findings(reqs, reqs_dir, raw=False)
             _site_page = a.attach or _site_default_target(code_root)
             if _site_page and os.path.isfile(_site_page):
-                cmd_site(reqs, members, code_root, attach=_site_page,
+                cmd_site(ws, code_root, attach=_site_page,
                          regions=["nav", "stats"], diagram=None, detect=False)
             # Deliberately here and not in cmd_check: `gate` runs on every commit via the
             # hook, and a corpus-shape advisory there is noise on work that is already
@@ -9125,8 +9179,7 @@ def main():
         if a.decompose:
             # scaffolding a clause into its own requirement is the write half of the
             # same question clarify asks about an over-scoped requirement
-            return cmd_lint(reqs, strict=False, members=members, decompose=True,
-                            reqs_dir=reqs_dir)
+            return cmd_lint(ws, strict=False, decompose=True)
         return cmd_clarify(reqs, a.arg, as_json=a.as_json)
 
 
