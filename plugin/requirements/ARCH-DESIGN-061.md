@@ -28,6 +28,7 @@ Every bullet below is binding.
 - `design` reports house standards per file: length, wide lines, public definitions without a docstring, definitions per file. [[REQ-DESIGN-953]]
 - The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]
 - JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]
+- The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]
 
 ## Cases
 CASE-1
@@ -346,3 +347,48 @@ CASE-4 — standards only elsewhere
   Given  a Ruby file with one 120-column line
   When   `_design_file` reads it
   Then   only line-too-long is reported, and a clean Ruby file reports nothing
+
+---
+id: REQ-DESIGN-976
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DESIGN-061]
+---
+
+# Design candidates in the map
+
+## Description
+> The score told a reader that design was at 23/100 and stopped there. To learn *which*
+> shapes cost the other 77 they had to leave the map and run `gate --design` in a
+> terminal, which is the moment most readers stop looking. The candidates now travel in
+> the committed map beside the score they explain, so the viewer can list them in a tab
+> of their own.
+
+Every bullet below is binding.
+- `_design_summary` takes `with_findings`, off by default; when it is on the returned record also carries `findings`, one entry per candidate with its `pillar`, `kind`, `file`, `line`, `name` and `detail`.
+- The advice text is emitted once per `kind` in a sibling `advice` object, never repeated on each entry, because the advice belongs to the rule rather than to the occurrence.
+- `_assemble_map_data` is the only caller that asks for the candidates, so `_map.json` carries them and `health --json` keeps the small score-only record a CI badge reads.
+- The candidates are ordered by the walk that produced them, so a repo that did not change produces a byte-identical `design` block and `map --check` stays quiet.
+
+## Cases
+CASE-1 — off by default
+  Given  a repo with one Python file carrying a design candidate
+  When   `_design_summary` runs without `with_findings`
+  Then   the record carries `files`, `clean_files`, `score` and `candidates`, and neither `findings` nor `advice`
+
+CASE-2 — the map carries them
+  Given  the same repo
+  When   `map` runs
+  Then   `_map.json`'s `design` object carries a `findings` list whose length equals the summed `candidates` counts, and an `advice` entry for every `kind` present
+
+CASE-3 — the badge payload is unchanged
+  Given  the same repo
+  When   `health --json` runs
+  Then   its output carries no `findings` key
+
+CASE-4 — deterministic
+  Given  a repo whose code did not change
+  When   `map` runs twice
+  Then   both runs write the same `design` block

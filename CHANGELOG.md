@@ -1,5 +1,28 @@
 # Changelog
 
+## plugin `v5.1.0` — 2026-09-05
+
+**The design candidates are in the map, in a tab of their own.** `_map.json` carried the
+design *score* and nothing else, so a reader who saw 23/100 and wanted to know which
+shapes cost the other 77 had to leave the viewer and run `gate --design` in a terminal —
+which is where most readers stop looking. `_design_summary` now takes `with_findings`,
+and `map` is the one caller that asks for them: the record gains a `findings` list (one
+entry per candidate, with its pillar, kind, file, line, name and detail) and a sibling
+`advice` object holding each kind's advice once, because the advice belongs to the rule
+and not to the occurrence.
+
+`health --json` is deliberately left alone. It is a CI badge payload, so a caller reading
+a score keeps getting the same small object rather than a few hundred rows it never asked
+for — which is why the flag is opt-in rather than always on.
+
+**Problems grew a third origin.** The tab lists the candidates grouped by pillar, the
+same shape the CLI prints, and is offered only when the map actually carries some — an
+older map leaves it unoffered rather than rendering an empty shell. They are kept out of
+`All` and out of every severity count on purpose: these rows are about a *file* rather
+than a requirement, they gate nothing, and 125 advisory candidates dropped into the inbox
+would bury the six signals that are actually open about the corpus. ADR-0028 already made
+origin a first-class tab here rather than a severity; this is the third one.
+
 ## plugin `v5.0.0` — 2026-09-05
 
 **Breaking: the CLI is six verbs.** `init`, `new`, `gate`, `sync`, `confirm`, `clarify`.

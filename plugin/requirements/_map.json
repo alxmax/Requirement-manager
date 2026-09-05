@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-05.10",
+  "engine_version": "2026-09-05.11",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -448,7 +448,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9048"
+          "loc": "plugin/scripts/test_reqmap.py:9102"
         }
       ],
       "test_exempt": null,
@@ -519,7 +519,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9048"
+          "loc": "plugin/scripts/test_reqmap.py:9102"
         }
       ],
       "test_exempt": null,
@@ -590,7 +590,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9048"
+          "loc": "plugin/scripts/test_reqmap.py:9102"
         }
       ],
       "test_exempt": null,
@@ -926,7 +926,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9168"
+          "loc": "plugin/scripts/reqmap.py:9185"
         },
         {
           "role": "tested-by",
@@ -1060,7 +1060,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9483"
+          "loc": "plugin/scripts/test_reqmap.py:9537"
         }
       ],
       "test_exempt": null,
@@ -1238,7 +1238,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9483"
+          "loc": "plugin/scripts/test_reqmap.py:9537"
         }
       ],
       "test_exempt": null,
@@ -1450,7 +1450,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9440"
+          "loc": "plugin/scripts/test_reqmap.py:9494"
         }
       ],
       "test_exempt": null,
@@ -1602,7 +1602,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9440"
+          "loc": "plugin/scripts/test_reqmap.py:9494"
         }
       ],
       "test_exempt": null,
@@ -1801,7 +1801,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9440"
+          "loc": "plugin/scripts/test_reqmap.py:9494"
         }
       ],
       "test_exempt": null,
@@ -1924,15 +1924,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9973"
+          "loc": "plugin/scripts/test_reqmap.py:10027"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10587"
+          "loc": "plugin/scripts/test_reqmap.py:10641"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10671"
+          "loc": "plugin/scripts/test_reqmap.py:10725"
         }
       ],
       "test_exempt": null,
@@ -1995,11 +1995,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9973"
+          "loc": "plugin/scripts/test_reqmap.py:10027"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10671"
+          "loc": "plugin/scripts/test_reqmap.py:10725"
         }
       ],
       "test_exempt": null,
@@ -2049,7 +2049,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9973"
+          "loc": "plugin/scripts/test_reqmap.py:10027"
         }
       ],
       "test_exempt": null,
@@ -2116,7 +2116,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10587"
+          "loc": "plugin/scripts/test_reqmap.py:10641"
         }
       ],
       "test_exempt": null,
@@ -2199,11 +2199,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8721"
+          "loc": "plugin/scripts/test_reqmap.py:8775"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10337"
+          "loc": "plugin/scripts/test_reqmap.py:10391"
         }
       ],
       "test_exempt": null,
@@ -2290,7 +2290,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8721"
+          "loc": "plugin/scripts/test_reqmap.py:8775"
         }
       ],
       "test_exempt": null,
@@ -2339,7 +2339,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10337"
+          "loc": "plugin/scripts/test_reqmap.py:10391"
         }
       ],
       "test_exempt": null,
@@ -2395,15 +2395,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8846"
+          "loc": "plugin/scripts/reqmap.py:8863"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8856"
+          "loc": "plugin/scripts/reqmap.py:8873"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9044"
+          "loc": "plugin/scripts/reqmap.py:9061"
         },
         {
           "role": "tested-by",
@@ -2461,11 +2461,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8846"
+          "loc": "plugin/scripts/reqmap.py:8863"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8856"
+          "loc": "plugin/scripts/reqmap.py:8873"
         },
         {
           "role": "tested-by",
@@ -2539,7 +2539,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8702"
+          "loc": "plugin/scripts/test_reqmap.py:8756"
         }
       ],
       "test_exempt": null,
@@ -2602,7 +2602,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8702"
+          "loc": "plugin/scripts/test_reqmap.py:8756"
         }
       ],
       "test_exempt": null,
@@ -2751,7 +2751,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9623"
+          "loc": "plugin/scripts/test_reqmap.py:9677"
         }
       ],
       "test_exempt": null,
@@ -2862,7 +2862,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9157"
+          "loc": "plugin/scripts/test_reqmap.py:9211"
         }
       ],
       "test_exempt": null,
@@ -2922,7 +2922,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9157"
+          "loc": "plugin/scripts/test_reqmap.py:9211"
         }
       ],
       "test_exempt": null,
@@ -3157,7 +3157,8 @@
         "`design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]",
         "`design` reports house standards per file: length, wide lines, public definitions without a docstring, definitions per file. [[REQ-DESIGN-953]]",
         "The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]",
-        "JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]"
+        "JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]",
+        "The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]"
       ],
       "verify": [],
       "notes": [
@@ -3194,7 +3195,8 @@
         "REQ-DESIGN-952",
         "REQ-DESIGN-953",
         "REQ-DESIGN-954",
-        "REQ-DESIGN-955"
+        "REQ-DESIGN-955",
+        "REQ-DESIGN-976"
       ],
       "members": [
         {
@@ -3211,7 +3213,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8797"
+          "loc": "plugin/scripts/reqmap.py:8814"
         },
         {
           "role": "tested-by",
@@ -3223,15 +3225,7 @@
       "priority": "could-have",
       "risks": [],
       "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Analiză consultativă de design",
-          "intent": "Codul scris într-o sesiune AI lungă derivează spre extindere procedurală: stare în globale de modul, funcții cu șase parametri, lanțuri `isinstance` care dispecerizează manual, fișiere care nu se opresc din creștere. `design` citește codul depozitului (Python prin `ast`, limbajele cu acolade prin euristici pe text mascat) și numește formele pe care cei patru piloni OOP le-ar remedia, plus standardele casei pe care un recenzent le verifică vizual, astfel încât cititorul venit să înțeleagă un fișier vede și unde designul acestuia trage împotriva lui. Este consultativ; nu blochează niciodată.",
-          "contract": "> Codul scris într-o sesiune AI lungă derivează spre extindere procedurală: stare în globale\n> de modul, funcții cu șase parametri, lanțuri `isinstance` care dispecerizează manual, fișiere\n> care nu se opresc din creștere. `design` citește codul depozitului (Python prin `ast`,\n> limbajele cu acolade prin euristici pe text mascat) și numește formele\n> pe care cei patru piloni OOP le-ar remedia, plus standardele casei pe care un recenzent le\n> verifică vizual, astfel încât cititorul venit să înțeleagă un fișier vede și unde designul\n> acestuia trage împotriva lui. Este consultativ; nu blochează niciodată.\n\nFiecare punct de mai jos este obligatoriu.\n- `design` raportează candidați de încapsulare și abstractizare: stare de modul scrisă din funcții, liste lungi de parametri, aglomerări de date, funcții lungi sau adânc imbricate, familii de prefixe. [[REQ-DESIGN-950]]\n- `design` raportează candidați de moștenire și polimorfism: clase neînrudite care împart nume sau corpuri de metode, lanțuri `isinstance`, comutări pe egalitate față de o singură valoare. [[REQ-DESIGN-951]]\n- `design` tipărește candidații grupați pe pilon cu câte o linie de recomandare fiecare, emite JSON la cerere, sare peste fișierele de test, iese întotdeauna cu 0, nu intră niciodată în gate. [[REQ-DESIGN-952]]\n- `design` raportează standardele casei per fișier: lungime, linii late, definiții publice fără docstring, definiții per fișier. [[REQ-DESIGN-953]]\n- Aceeași analiză se pliază într-un scor de design unic care circulă în `_map.json`, antetul `_map.md` (ca `design OOP:`) și `health`. [[REQ-DESIGN-954]]\n- JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart și PHP sunt citite prin euristici de potrivire a acoladelor care alimentează aceleași verificări de formă. [[REQ-DESIGN-955]]",
-          "acceptance": "CASE-1\n  Given  un depozit cu un modul Python care scrie o globală dintr-o funcție, și un fișier de test care face același lucru\n  When   `design` rulează\n  Then   candidatul modulului este tipărit sub Încapsulare, fișierul de test nu este menționat, iar codul de ieșire este 0\n\nCASE-2\n  Given  un `requirements/_config.json` care setează `DESIGN_PARAMS_MAX` la 2\n  When   `design` rulează peste o funcție cu trei parametri\n  Then   raportează o listă lungă de parametri\n\nCASE-3\n  Given  registrul de comenzi al motorului și registrul de reguli de gate\n  When   ambele sunt inspectate\n  Then   `design` este o comandă înregistrată și nicio regulă de gate nu îl invocă\n\nCASE-4\n  Given  un depozit cu un modul Python curat\n  When   `map` și `health --json` rulează\n  Then   `_map.json` poartă `design.score` 100 iar JSON-ul de health poartă `design_score` 100\n\nCASE-5\n  Given  un fișier JavaScript cu o funcție cu șapte parametri și un switch cu patru cazuri\n  When   `design` rulează\n  Then   raportează o listă lungă de parametri și o comutare pe tip, aceleași tipuri pe care le-ar raporta un fișier Python"
-        }
-      }
+      "covered": 5
     },
     {
       "id": "REQ-DESIGN-950",
@@ -3411,7 +3405,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8797"
+          "loc": "plugin/scripts/reqmap.py:8814"
         },
         {
           "role": "tested-by",
@@ -3628,6 +3622,60 @@
           "acceptance": "CASE-1 — forme JavaScript\n  Given  un fișier JS cu o funcție cu șapte parametri, două clase neînrudite care partajează trei metode, un switch cu patru cazuri și un lanț instanceof cu trei ramuri\n  When   `_design_file` îl citește\n  Then   raportează long-parameter-list, shared-methods, duplicate-method, un type-switch pe `kind` și un isinstance-chain pe `v`\n\nCASE-2 — forme C++\n  Given  un fișier C++ cu o funcție de 90 de linii și un lanț dynamic_cast cu trei ramuri\n  When   `_design_file` îl citește\n  Then   raportează long-function pentru `compute` și un isinstance-chain, și niciun missing-docstring\n\nCASE-3 — mascare\n  Given  o funcție JS al cărei literal de tip string și comentariu conțin acolade\n  When   `_design_mask` rulează, iar fișierul este analizat\n  Then   literalul dispare din textul mascat, numărul de linii noi rămâne neschimbat, și nu este raportat niciun candidat de lungime sau imbricare\n\nCASE-4 — doar standards în altă parte\n  Given  un fișier Ruby cu o linie de 120 de coloane\n  When   `_design_file` îl citește\n  Then   este raportat doar line-too-long, iar un fișier Ruby curat nu raportează nimic"
         }
       }
+    },
+    {
+      "id": "REQ-DESIGN-976",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Design candidates in the map",
+      "intent": "The score told a reader that design was at 23/100 and stopped there. To learn *which* shapes cost the other 77 they had to leave the map and run `gate --design` in a terminal, which is the moment most readers stop looking. The candidates now travel in the committed map beside the score they explain, so the viewer can list them in a tab of their own.",
+      "contract": [
+        "`_design_summary` takes `with_findings`, off by default; when it is on the returned record also carries `findings`, one entry per candidate with its `pillar`, `kind`, `file`, `line`, `name` and `detail`.",
+        "The advice text is emitted once per `kind` in a sibling `advice` object, never repeated on each entry, because the advice belongs to the rule rather than to the occurrence.",
+        "`_assemble_map_data` is the only caller that asks for the candidates, so `_map.json` carries them and `health --json` keeps the small score-only record a CI badge reads.",
+        "The candidates are ordered by the walk that produced them, so a repo that did not change produces a byte-identical `design` block and `map --check` stays quiet."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — off by default Given  a repo with one Python file carrying a design candidate When   `_design_summary` runs without `with_findings` Then   the record carries `files`, `clean_files`, `score` and `candidates`, and neither `findings` nor `advice`",
+        "CASE-2 — — the map carries them Given  the same repo When   `map` runs Then   `_map.json`'s `design` object carries a `findings` list whose length equals the summed `candidates` counts, and an `advice` entry for every `kind` present",
+        "CASE-3 — — the badge payload is unchanged Given  the same repo When   `health --json` runs Then   its output carries no `findings` key",
+        "CASE-4 — — deterministic Given  a repo whose code did not change When   `map` runs twice Then   both runs write the same `design` block"
+      ],
+      "accept": "CASE-1 — off by default\n  Given  a repo with one Python file carrying a design candidate\n  When   `_design_summary` runs without `with_findings`\n  Then   the record carries `files`, `clean_files`, `score` and `candidates`, and neither `findings` nor `advice`\n\nCASE-2 — the map carries them\n  Given  the same repo\n  When   `map` runs\n  Then   `_map.json`'s `design` object carries a `findings` list whose length equals the summed `candidates` counts, and an `advice` entry for every `kind` present\n\nCASE-3 — the badge payload is unchanged\n  Given  the same repo\n  When   `health --json` runs\n  Then   its output carries no `findings` key\n\nCASE-4 — deterministic\n  Given  a repo whose code did not change\n  When   `map` runs twice\n  Then   both runs write the same `design` block",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-DESIGN-061"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:4230"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap.py:8772"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap.py:8202"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "ARCH-DOCBUNDLE-026",
@@ -3854,11 +3902,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8593"
+          "loc": "plugin/scripts/test_reqmap.py:8647"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10652"
+          "loc": "plugin/scripts/test_reqmap.py:10706"
         }
       ],
       "test_exempt": null,
@@ -3924,11 +3972,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8593"
+          "loc": "plugin/scripts/test_reqmap.py:8647"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10652"
+          "loc": "plugin/scripts/test_reqmap.py:10706"
         }
       ],
       "test_exempt": null,
@@ -3998,7 +4046,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8593"
+          "loc": "plugin/scripts/test_reqmap.py:8647"
         }
       ],
       "test_exempt": null,
@@ -4067,7 +4115,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9501"
+          "loc": "plugin/scripts/test_reqmap.py:9555"
         }
       ],
       "test_exempt": null,
@@ -4130,7 +4178,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9501"
+          "loc": "plugin/scripts/test_reqmap.py:9555"
         }
       ],
       "test_exempt": null,
@@ -4788,7 +4836,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9309"
+          "loc": "plugin/scripts/test_reqmap.py:9363"
         }
       ],
       "test_exempt": null,
@@ -4847,7 +4895,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9309"
+          "loc": "plugin/scripts/test_reqmap.py:9363"
         }
       ],
       "test_exempt": null,
@@ -4915,7 +4963,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9309"
+          "loc": "plugin/scripts/test_reqmap.py:9363"
         }
       ],
       "test_exempt": null,
@@ -4979,7 +5027,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9309"
+          "loc": "plugin/scripts/test_reqmap.py:9363"
         }
       ],
       "test_exempt": null,
@@ -5058,7 +5106,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9109"
+          "loc": "plugin/scripts/test_reqmap.py:9163"
         }
       ],
       "test_exempt": null,
@@ -5128,7 +5176,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9109"
+          "loc": "plugin/scripts/test_reqmap.py:9163"
         }
       ],
       "test_exempt": null,
@@ -5235,7 +5283,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8753"
+          "loc": "plugin/scripts/test_reqmap.py:8807"
         }
       ],
       "test_exempt": null,
@@ -5299,7 +5347,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8753"
+          "loc": "plugin/scripts/test_reqmap.py:8807"
         }
       ],
       "test_exempt": null,
@@ -5582,7 +5630,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8921"
+          "loc": "plugin/scripts/test_reqmap.py:8975"
         }
       ],
       "test_exempt": null,
@@ -5640,7 +5688,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8921"
+          "loc": "plugin/scripts/test_reqmap.py:8975"
         }
       ],
       "test_exempt": null,
@@ -5704,7 +5752,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8921"
+          "loc": "plugin/scripts/test_reqmap.py:8975"
         }
       ],
       "test_exempt": null,
@@ -5767,7 +5815,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8921"
+          "loc": "plugin/scripts/test_reqmap.py:8975"
         }
       ],
       "test_exempt": null,
@@ -5898,7 +5946,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10103"
+          "loc": "plugin/scripts/test_reqmap.py:10157"
         }
       ],
       "test_exempt": null,
@@ -5957,7 +6005,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10103"
+          "loc": "plugin/scripts/test_reqmap.py:10157"
         }
       ],
       "test_exempt": null,
@@ -6013,7 +6061,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10103"
+          "loc": "plugin/scripts/test_reqmap.py:10157"
         }
       ],
       "test_exempt": null,
@@ -6155,7 +6203,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9876"
+          "loc": "plugin/scripts/test_reqmap.py:9930"
         }
       ],
       "test_exempt": null,
@@ -6219,7 +6267,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9876"
+          "loc": "plugin/scripts/test_reqmap.py:9930"
         }
       ],
       "test_exempt": null,
@@ -6297,7 +6345,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9169"
+          "loc": "plugin/scripts/test_reqmap.py:9223"
         }
       ],
       "test_exempt": null,
@@ -6365,7 +6413,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9169"
+          "loc": "plugin/scripts/test_reqmap.py:9223"
         }
       ],
       "test_exempt": null,
@@ -6521,7 +6569,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9585"
+          "loc": "plugin/scripts/test_reqmap.py:9639"
         }
       ],
       "test_exempt": null,
@@ -6592,7 +6640,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9585"
+          "loc": "plugin/scripts/test_reqmap.py:9639"
         }
       ],
       "test_exempt": null,
@@ -7200,7 +7248,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8682"
+          "loc": "plugin/scripts/test_reqmap.py:8736"
         }
       ],
       "test_exempt": null,
@@ -7605,7 +7653,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9535"
+          "loc": "plugin/scripts/test_reqmap.py:9589"
         }
       ],
       "test_exempt": null,
@@ -7673,7 +7721,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9535"
+          "loc": "plugin/scripts/test_reqmap.py:9589"
         }
       ],
       "test_exempt": null,
@@ -7934,7 +7982,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9535"
+          "loc": "plugin/scripts/test_reqmap.py:9589"
         }
       ],
       "test_exempt": null,
@@ -8577,7 +8625,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8631,7 +8679,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8704,7 +8752,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8770,7 +8818,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8841,7 +8889,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8895,7 +8943,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8447"
+          "loc": "plugin/scripts/test_reqmap.py:8501"
         }
       ],
       "test_exempt": null,
@@ -8972,7 +9020,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9525"
+          "loc": "plugin/scripts/test_reqmap.py:9579"
         }
       ],
       "test_exempt": null,
@@ -9040,7 +9088,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9525"
+          "loc": "plugin/scripts/test_reqmap.py:9579"
         }
       ],
       "test_exempt": null,
@@ -9360,7 +9408,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9906"
+          "loc": "plugin/scripts/test_reqmap.py:9960"
         }
       ],
       "test_exempt": null,
@@ -9541,11 +9589,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9186"
+          "loc": "plugin/scripts/reqmap.py:9203"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9205"
+          "loc": "plugin/scripts/reqmap.py:9222"
         },
         {
           "role": "tested-by",
@@ -9592,7 +9640,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9205"
+          "loc": "plugin/scripts/reqmap.py:9222"
         },
         {
           "role": "tested-by",
@@ -9675,11 +9723,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9379"
+          "loc": "plugin/scripts/test_reqmap.py:9433"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10506"
+          "loc": "plugin/scripts/test_reqmap.py:10560"
         }
       ],
       "test_exempt": null,
@@ -9744,7 +9792,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9379"
+          "loc": "plugin/scripts/test_reqmap.py:9433"
         }
       ],
       "test_exempt": null,
@@ -9800,7 +9848,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10506"
+          "loc": "plugin/scripts/test_reqmap.py:10560"
         }
       ],
       "test_exempt": null,
@@ -9878,7 +9926,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9389"
+          "loc": "plugin/scripts/test_reqmap.py:9443"
         }
       ],
       "test_exempt": null,
@@ -9941,7 +9989,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9389"
+          "loc": "plugin/scripts/test_reqmap.py:9443"
         }
       ],
       "test_exempt": null,
@@ -10005,7 +10053,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9389"
+          "loc": "plugin/scripts/test_reqmap.py:9443"
         }
       ],
       "test_exempt": null,
@@ -10069,7 +10117,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9389"
+          "loc": "plugin/scripts/test_reqmap.py:9443"
         }
       ],
       "test_exempt": null,
@@ -10164,7 +10212,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8768"
+          "loc": "plugin/scripts/test_reqmap.py:8822"
         }
       ],
       "test_exempt": null,
@@ -10291,7 +10339,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8768"
+          "loc": "plugin/scripts/test_reqmap.py:8822"
         }
       ],
       "test_exempt": null,
@@ -10363,7 +10411,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9183"
+          "loc": "plugin/scripts/test_reqmap.py:9237"
         }
       ],
       "test_exempt": null,
@@ -10429,7 +10477,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:8900"
+          "loc": "plugin/scripts/reqmap.py:8917"
         },
         {
           "role": "tested-by",
@@ -10437,7 +10485,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9183"
+          "loc": "plugin/scripts/test_reqmap.py:9237"
         }
       ],
       "test_exempt": null,
@@ -10500,7 +10548,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:9158"
+          "loc": "plugin/scripts/reqmap.py:9175"
         },
         {
           "role": "tested-by",
@@ -10633,7 +10681,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9697"
+          "loc": "plugin/scripts/test_reqmap.py:9751"
         }
       ],
       "test_exempt": null,
@@ -10699,7 +10747,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9697"
+          "loc": "plugin/scripts/test_reqmap.py:9751"
         }
       ],
       "test_exempt": null,
@@ -10904,7 +10952,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10197"
+          "loc": "plugin/scripts/test_reqmap.py:10251"
         }
       ],
       "test_exempt": null,
@@ -10964,7 +11012,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10197"
+          "loc": "plugin/scripts/test_reqmap.py:10251"
         }
       ],
       "test_exempt": null,
@@ -11030,7 +11078,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10197"
+          "loc": "plugin/scripts/test_reqmap.py:10251"
         }
       ],
       "test_exempt": null,
@@ -11097,7 +11145,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10197"
+          "loc": "plugin/scripts/test_reqmap.py:10251"
         }
       ],
       "test_exempt": null,
@@ -11394,7 +11442,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9466"
+          "loc": "plugin/scripts/test_reqmap.py:9520"
         }
       ],
       "test_exempt": null,
@@ -11467,7 +11515,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9466"
+          "loc": "plugin/scripts/test_reqmap.py:9520"
         }
       ],
       "test_exempt": null,
@@ -12228,11 +12276,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8791"
+          "loc": "plugin/scripts/test_reqmap.py:8845"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10372"
+          "loc": "plugin/scripts/test_reqmap.py:10426"
         }
       ],
       "test_exempt": null,
@@ -12304,7 +12352,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8791"
+          "loc": "plugin/scripts/test_reqmap.py:8845"
         }
       ],
       "test_exempt": null,
@@ -12368,7 +12416,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8791"
+          "loc": "plugin/scripts/test_reqmap.py:8845"
         }
       ],
       "test_exempt": null,
@@ -12430,7 +12478,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8791"
+          "loc": "plugin/scripts/test_reqmap.py:8845"
         }
       ],
       "test_exempt": null,
@@ -12490,7 +12538,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8791"
+          "loc": "plugin/scripts/test_reqmap.py:8845"
         }
       ],
       "test_exempt": null,
@@ -12567,7 +12615,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10372"
+          "loc": "plugin/scripts/test_reqmap.py:10426"
         }
       ],
       "test_exempt": null,
@@ -12813,7 +12861,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8621"
+          "loc": "plugin/scripts/test_reqmap.py:8675"
         }
       ],
       "test_exempt": null,
@@ -12883,7 +12931,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8621"
+          "loc": "plugin/scripts/test_reqmap.py:8675"
         }
       ],
       "test_exempt": null,
@@ -12999,7 +13047,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8621"
+          "loc": "plugin/scripts/test_reqmap.py:8675"
         }
       ],
       "test_exempt": null,
@@ -13112,7 +13160,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9191"
+          "loc": "plugin/scripts/test_reqmap.py:9245"
         }
       ],
       "test_exempt": null,
@@ -13169,7 +13217,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9191"
+          "loc": "plugin/scripts/test_reqmap.py:9245"
         }
       ],
       "test_exempt": null,
@@ -13253,7 +13301,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9191"
+          "loc": "plugin/scripts/test_reqmap.py:9245"
         }
       ],
       "test_exempt": null,
@@ -13317,7 +13365,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9191"
+          "loc": "plugin/scripts/test_reqmap.py:9245"
         }
       ],
       "test_exempt": null,
@@ -13383,7 +13431,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9191"
+          "loc": "plugin/scripts/test_reqmap.py:9245"
         }
       ],
       "test_exempt": null,
@@ -13898,7 +13946,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9061"
+          "loc": "plugin/scripts/test_reqmap.py:9115"
         }
       ],
       "test_exempt": null,
@@ -13964,7 +14012,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9061"
+          "loc": "plugin/scripts/test_reqmap.py:9115"
         }
       ],
       "test_exempt": null,
@@ -14090,7 +14138,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9061"
+          "loc": "plugin/scripts/test_reqmap.py:9115"
         }
       ],
       "test_exempt": null,
@@ -14186,7 +14234,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9136"
+          "loc": "plugin/scripts/test_reqmap.py:9190"
         }
       ],
       "test_exempt": null,
@@ -14308,7 +14356,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9136"
+          "loc": "plugin/scripts/test_reqmap.py:9190"
         }
       ],
       "test_exempt": null,
@@ -14437,7 +14485,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9136"
+          "loc": "plugin/scripts/test_reqmap.py:9190"
         }
       ],
       "test_exempt": null,
@@ -14805,7 +14853,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9832"
+          "loc": "plugin/scripts/test_reqmap.py:9886"
         }
       ],
       "test_exempt": null,
@@ -14909,7 +14957,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10451"
+          "loc": "plugin/scripts/test_reqmap.py:10505"
         }
       ],
       "test_exempt": null,
@@ -15080,7 +15128,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10451"
+          "loc": "plugin/scripts/test_reqmap.py:10505"
         }
       ],
       "test_exempt": null,
@@ -15216,7 +15264,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9770"
+          "loc": "plugin/scripts/test_reqmap.py:9824"
         }
       ],
       "test_exempt": null,
@@ -15251,7 +15299,8 @@
         "The viewer's registry tally is the control that scopes its outline, and the scope it applies is always visible and clearable. [[REQ-VIEWER-945]]",
         "The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]",
         "The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]",
-        "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]"
+        "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
+        "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]"
       ],
       "verify": [],
       "notes": [
@@ -15306,7 +15355,8 @@
         "REQ-VIEWER-945",
         "REQ-VIEWER-964",
         "REQ-VIEWER-966",
-        "REQ-VIEWER-969"
+        "REQ-VIEWER-969",
+        "REQ-VIEWER-977"
       ],
       "members": [
         {
@@ -15431,21 +15481,13 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8989"
+          "loc": "plugin/scripts/test_reqmap.py:9043"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.04",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Vizualizator de hartă HTML autonom",
-          "intent": "Diagramele Mermaid se randează pe GitHub, dar o vizualizare interactivă mai bogată are nevoie de o aplicație de browser. Aceasta încorporează graful JSON al hărții într-un singur fișier HTML autonom pe care îl deschizi cu dublu-clic — fără server, fără instalare. Este opțional: în absența șablonului vendorizat, motorul emite în continuare diagramele și JSON-ul.",
-          "contract": "> Diagramele Mermaid se randează pe GitHub, dar o vizualizare interactivă mai bogată are nevoie\n> de o aplicație de browser. Aceasta încorporează graful JSON al hărții într-un singur fișier\n> HTML autonom pe care îl deschizi cu dublu-clic — fără server, fără instalare. Este opțional:\n> în absența șablonului vendorizat, motorul emite în continuare diagramele și JSON-ul.\n\nFiecare punct de mai jos este obligatoriu.\n- `map` generează `_map.html` atunci când șablonul `_map_viewer.html` este vendorizat lângă motor, și îl omite (fără să eșueze) când șablonul lipsește. [[REQ-VIEWER-940]]\n- `render_html` face graful injectat sigur pentru HTML în vederea încorporării în `<script>` prin aplicarea a trei escapări în ordine, fiecare fiind un no-op în V8 care se citește identic după parsare. [[REQ-VIEWER-941]]\n- Vizualizatorul ordonează nodurile după cel mai lung lanț de dependențe, astfel încât muchiile `depends_on` să curgă într-o singură direcție, și randează criteriile de acceptanță ale unui nod așa cum le-a scris autorul, nu comprimate pe un singur rând. [[REQ-VIEWER-942]]\n- Vizualizatorul își randează propria interfață într-o limbă aleasă, în timp ce conținutul cerinței și vocabularul motorului rămân exact așa cum au fost redactate. [[REQ-VIEWER-943]]\n- Vizualizatorul transformă referințele încrucișate `[[ID]]` ale unei cerințe în navigare și afișează doar câmpurile de antet pe care exportul le conține efectiv. [[REQ-VIEWER-944]]\n- Totalul din registrul vizualizatorului este controlul care delimitează schița acestuia, iar domeniul aplicat este întotdeauna vizibil și poate fi anulat. [[REQ-VIEWER-945]]\n- Vizualizatorul documentează comenzile proprii ale motorului, în limba cititorului, pornind de la lista pe care o conține harta. [[REQ-VIEWER-964]]\n- Vizualizatorul afișează fiecare semnal deschis într-o singură căsuță de intrare, păstrând distincția între ceea ce a cerut un om și ceea ce a derivat motorul. [[REQ-VIEWER-966]]\n- Vizualizatorul afișează indicatorii de sănătate și de design ai motorului ca două inele în bara laterală, prezentând numerele primite în loc să le calculeze el însuși. [[REQ-VIEWER-969]]",
-          "acceptance": "CASE-1\n  Given  șablonul vendorizat `_map_viewer.html` este prezent\n  When   `map` rulează\n  Then   scrie `_map.html`, iar marcajul `<!--REQMAP_DATA-->` este înlocuit cu o\n         atribuire `window.__REQMAP_DATA__` care conține câte un nod per cerință\n\nCASE-2\n  Given  un câmp de cerință care conține `</script>`\n  When   vizualizatorul este randat\n  Then   secvența este escapată (`<\\/`) astfel încât să nu poată închide prematur scriptul cu date inline\n\nCASE-7\n  Given  un registru ale cărui muchii `depends_on` formează un ciclu\n  When   se calculează dispunerea\n  Then   fiecare nod este plasat, niciun rang nu depășește numărul de noduri, iar muchia de închidere este desenată\n\nCASE-4\n  Given  un câmp de cerință care conține `<!--` (de ex. un corp care documentează injectarea de HTML)\n  When   vizualizatorul este randat\n  Then   `<!--` este escapat ca `<\\!--` în blobul încorporat, astfel încât parserul HTML5 să nu\n         intre niciodată în starea „script data escaped”, iar `window.__REQMAP_DATA__` este întotdeauna\n         accesibil din bundle-ul amânat (verificat: file:// se deschide fără eroare)\n\nCASE-3\n  Given  niciun șablon nu este vendorizat\n  When   `map` rulează\n  Then   `render_html` returnează None și se scriu doar `_map.md` + `_map.json` (fără eroare fatală)\n\nCASE-5\n  Given  o cerință al cărei titlu sau contract conține U+2028 sau U+2029\n  When   `map` scrie `_map.html`\n  Then   niciunul dintre caractere nu apare brut în fișier, iar graful încorporat se parsează în continuare la\n         textul original\n\nCASE-6\n  Given  vizualizatorul randat cu o localizare non-engleză selectată\n  When   este afișată specificația unei cerințe\n  Then   antetele de secțiune apar în acea limbă, în timp ce titlul propriu al cerinței,\n         contractul și textul de acceptanță rămân exact așa cum au fost redactate, iar valorile\n         `status` / `layer` rămân literale\n\nCASE-8\n  Given  un nod care conține atât un bloc `accept` etichetat, cât și lista comprimată `acc`\n  When   specificația sa este randată\n  Then   liniile Given/When/Then apar așa cum au fost redactate, câte una pe rând, iar forma\n         comprimată pe un singur rând nu este ceea ce vede cititorul"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-VIEWER-940",
@@ -15500,7 +15542,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8989"
+          "loc": "plugin/scripts/test_reqmap.py:9043"
         }
       ],
       "test_exempt": null,
@@ -15569,7 +15611,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8989"
+          "loc": "plugin/scripts/test_reqmap.py:9043"
         }
       ],
       "test_exempt": null,
@@ -16045,6 +16087,57 @@
       "covered": 5
     },
     {
+      "id": "REQ-VIEWER-977",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The advisory design tab",
+      "intent": "The rail already showed a design score, and a reader who wanted to know which shapes cost the missing points had to leave the viewer for a terminal. The candidates now travel in the map, so the Problems screen lists them — in a tab of their own, because they are the only rows here that are about a file rather than a requirement, and the only ones that gate nothing.",
+      "contract": [
+        "`ProblemsView` offers a `Design` tab, labelled with the number of candidates the map carries, and offers it only when the map carries at least one.",
+        "The tab groups candidates by pillar, shows each one's kind, name, detail and `file:line`, and prints each kind's advice once per group — the same shape the CLI prints.",
+        "Design candidates are absent from the `All` tab and from every severity count, so the inbox keeps reporting what is open about the corpus.",
+        "The tab states that a candidate is advisory and never enters the gate, so a reader does not mistake the list for a build failure.",
+        "A map written before the engine carried candidates leaves the tab unoffered rather than rendering an empty one."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the tab appears with its count Given  a map whose `design` record carries two candidates When   `ProblemsView` renders Then   a `Design` tab is offered showing the count 2",
+        "CASE-2 — — an older map offers nothing Given  a map whose `design` record carries a score but no candidates When   `ProblemsView` renders Then   no `Design` tab is offered",
+        "CASE-3 — — the inbox is unchanged Given  a map carrying both corpus signals and design candidates When   the open signals are computed Then   no computed row carries a design severity, and the `All` count is the corpus count alone"
+      ],
+      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the inbox is unchanged\n  Given  a map carrying both corpus signals and design candidates\n  When   the open signals are computed\n  Then   no computed row carries a design severity, and the `All` count is the corpus count alone",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "app/src/views/ProblemsView.jsx:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [
+        {
+          "signal": "untested",
+          "advice": "Implemented but no `tested-by` member: write an acceptance test and tag it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter to acknowledge it intentionally and silence this signal."
+        }
+      ],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
       "id": "ARCH-VLEVEL-037",
       "layer": "feature",
       "level": "architecture",
@@ -16351,7 +16444,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9915"
+          "loc": "plugin/scripts/test_reqmap.py:9969"
         }
       ],
       "test_exempt": null,
@@ -17554,6 +17647,10 @@
       "ARCH-DESIGN-061"
     ],
     [
+      "REQ-DESIGN-976",
+      "ARCH-DESIGN-061"
+    ],
+    [
       "ARCH-DOCBUNDLE-026",
       "SYS-GATE-102"
     ],
@@ -18227,6 +18324,10 @@
     ],
     [
       "REQ-VIEWER-969",
+      "ARCH-VIEWER-007"
+    ],
+    [
+      "REQ-VIEWER-977",
       "ARCH-VIEWER-007"
     ],
     [
@@ -19060,27 +19161,1041 @@
     "score": 23,
     "candidates": {
       "encapsulation": 47,
-      "abstraction": 44,
+      "abstraction": 46,
       "inheritance": 0,
       "polymorphism": 0,
       "standards": 32
+    },
+    "findings": [
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/scripts/install-viewer.mjs",
+        "line": 17,
+        "name": "install-viewer.mjs",
+        "detail": "1 line(s) wider than 100 columns, first at line 17"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/scripts/ssr-smoke.jsx",
+        "line": 1,
+        "name": "ssr-smoke.jsx",
+        "detail": "47 line(s) wider than 100 columns, first at line 1"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/App.jsx",
+        "line": 36,
+        "name": "App.jsx",
+        "detail": "20 line(s) wider than 100 columns, first at line 36"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/App.jsx",
+        "line": 106,
+        "name": "Rail",
+        "detail": "`Rail` is 119 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/data.js",
+        "line": 7,
+        "name": "data.js",
+        "detail": "78 line(s) wider than 100 columns, first at line 7"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/i18n.jsx",
+        "line": 60,
+        "name": "i18n.jsx",
+        "detail": "20 line(s) wider than 100 columns, first at line 60"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/icons.jsx",
+        "line": 6,
+        "name": "icons.jsx",
+        "detail": "10 line(s) wider than 100 columns, first at line 6"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/layout.js",
+        "line": 20,
+        "name": "layout.js",
+        "detail": "9 line(s) wider than 100 columns, first at line 20"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/loadData.js",
+        "line": 50,
+        "name": "loadData.js",
+        "detail": "2 line(s) wider than 100 columns, first at line 50"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/search.js",
+        "line": 78,
+        "name": "search.js",
+        "detail": "1 line(s) wider than 100 columns, first at line 78"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/lib/useDragPan.js",
+        "line": 21,
+        "name": "useDragPan.js",
+        "detail": "1 line(s) wider than 100 columns, first at line 21"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/CommandsView.jsx",
+        "line": 23,
+        "name": "CommandsView",
+        "detail": "`CommandsView` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/CommandsView.jsx",
+        "line": 32,
+        "name": "CommandsView.jsx",
+        "detail": "2 line(s) wider than 100 columns, first at line 32"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/ExplorerView.jsx",
+        "line": 76,
+        "name": "ExplorerView.jsx",
+        "detail": "11 line(s) wider than 100 columns, first at line 76"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/ExplorerView.jsx",
+        "line": 102,
+        "name": "ExplorerView",
+        "detail": "`ExplorerView` is 163 lines (over 80)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "app/src/views/MapView.jsx",
+        "line": 13,
+        "name": "NodeBox",
+        "detail": "`NodeBox` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/MapView.jsx",
+        "line": 91,
+        "name": "MapView.jsx",
+        "detail": "29 line(s) wider than 100 columns, first at line 91"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/MapView.jsx",
+        "line": 141,
+        "name": "MapView",
+        "detail": "`MapView` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/MapView.jsx",
+        "line": 141,
+        "name": "MapView",
+        "detail": "`MapView` is 116 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/ProblemsView.jsx",
+        "line": 36,
+        "name": "ProblemsView.jsx",
+        "detail": "13 line(s) wider than 100 columns, first at line 36"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/ProblemsView.jsx",
+        "line": 90,
+        "name": "ProblemsView",
+        "detail": "`ProblemsView` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/ProblemsView.jsx",
+        "line": 90,
+        "name": "ProblemsView",
+        "detail": "`ProblemsView` is 117 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/RoadmapView.jsx",
+        "line": 31,
+        "name": "RoadmapView.jsx",
+        "detail": "21 line(s) wider than 100 columns, first at line 31"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/RoadmapView.jsx",
+        "line": 61,
+        "name": "RoadmapView",
+        "detail": "`RoadmapView` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/RoadmapView.jsx",
+        "line": 61,
+        "name": "RoadmapView",
+        "detail": "`RoadmapView` is 118 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "app/src/views/SpecView.jsx",
+        "line": 16,
+        "name": "SpecView.jsx",
+        "detail": "21 line(s) wider than 100 columns, first at line 16"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "app/src/views/SpecView.jsx",
+        "line": 80,
+        "name": "TranslatedProse",
+        "detail": "`TranslatedProse` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "app/src/views/SpecView.jsx",
+        "line": 129,
+        "name": "SpecDoc",
+        "detail": "`SpecDoc` is 121 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "check/engine_staleness.py",
+        "line": 60,
+        "name": "main",
+        "detail": "1 public definition(s) without a docstring: main"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "check/engine_staleness.py",
+        "line": 61,
+        "name": "engine_staleness.py",
+        "detail": "3 line(s) wider than 100 columns, first at line 61"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1,
+        "name": "reqmap.py",
+        "detail": "9239 lines (over 500)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "too-many-definitions",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1,
+        "name": "reqmap.py",
+        "detail": "291 top-level definitions (over 30)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 7,
+        "name": "reqmap.py",
+        "detail": "308 line(s) wider than 100 columns, first at line 7"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 747,
+        "name": "cmd",
+        "detail": "24 top-level functions start with `cmd`: cmd_audit, cmd_candidates, cmd_check, cmd_clarify, cmd_coverage, cmd_design"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 898,
+        "name": "gate_rule_by_id",
+        "detail": "12 public definition(s) without a docstring: gate_rule_by_id, load_requirements, lock_path, load_lock, save_lock, save_memberlock"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 937,
+        "name": "parse_frontmatter",
+        "detail": "`parse_frontmatter` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1001,
+        "name": "load",
+        "detail": "9 top-level functions start with `load`: _load_capmap, _load_scancache, _load_translations, load_clarifylock, load_config, load_ignore"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1071,
+        "name": "load_ignore",
+        "detail": "`load_ignore` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1091,
+        "name": "_strip_py_strings",
+        "detail": "`_strip_py_strings` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1140,
+        "name": "_scan_file_tags",
+        "detail": "`_scan_file_tags` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1140,
+        "name": "_scan_file_tags",
+        "detail": "`_scan_file_tags` is 90 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1140,
+        "name": "scan",
+        "detail": "6 top-level functions start with `scan`: _scan_file_tags, _scan_untagged, scan_ac_verifies, scan_all, scan_members, scan_test_levels"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1305,
+        "name": "scan_all",
+        "detail": "cache, code_root, reqs_dir travel together through 3 functions: load, scan_all, scan_members"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1384,
+        "name": "_vds_scan_array_body",
+        "detail": "`_vds_scan_array_body` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1546,
+        "name": "untagged_doc_bundles",
+        "detail": "code_root, members, reqs_dir travel together through 3 functions: __init__, _audit_summary, untagged_doc_bundles"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1639,
+        "name": "scan_ac_verifies",
+        "detail": "`scan_ac_verifies` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 1682,
+        "name": "scan_test_levels",
+        "detail": "`scan_test_levels` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2171,
+        "name": "member_drift",
+        "detail": "code_root, members, reqs travel together through 4 functions: __init__, _audit_summary, _verifies_proposals, member_drift"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2397,
+        "name": "__init__",
+        "detail": "ac_cover, members, reqs travel together through 4 functions: __init__, _assemble_map_data, _build_map_data, _verifies_proposals"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2397,
+        "name": "__init__",
+        "detail": "members, reqs, reqs_dir travel together through 4 functions: __init__, _assemble_map_data, _audit_summary, _health_record"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2473,
+        "name": "rule",
+        "detail": "29 top-level functions start with `rule`: _rule_bus_only_system_level, _rule_case_coverage, _rule_confirmed_sections, _rule_corrupt_lock, _rule_dangling_tag, _rule_depends_on_cycle"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2872,
+        "name": "cmd_check",
+        "detail": "`cmd_check` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 2872,
+        "name": "cmd_check",
+        "detail": "`cmd_check` is 146 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 3366,
+        "name": "cmd_extract",
+        "detail": "`cmd_extract` is 93 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 3512,
+        "name": "_py_facts",
+        "detail": "`_py_facts` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 3668,
+        "name": "cmd_candidates",
+        "detail": "`cmd_candidates` is 108 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 3805,
+        "name": "render",
+        "detail": "7 top-level functions start with `render`: _render_findings, _render_findings_raw, _render_findings_triaged, _render_region, render_html, render_json"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 4179,
+        "name": "_attach_translations",
+        "detail": "data, reqs, reqs_dir travel together through 3 functions: _attach_translations, _map_check, _stale_artifacts"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 4216,
+        "name": "_assemble_map_data",
+        "detail": "reqs, reqs_dir, root travel together through 3 functions: _assemble_map_data, _map_check, _stale_artifacts"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 4281,
+        "name": "cmd_next",
+        "detail": "`cmd_next` is 128 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 4572,
+        "name": "lint_requirement",
+        "detail": "`lint_requirement` is 241 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 4938,
+        "name": "cmd_lint",
+        "detail": "`cmd_lint` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 5251,
+        "name": "_test_suite_pairs",
+        "detail": "`_test_suite_pairs` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 5499,
+        "name": "cmd_audit",
+        "detail": "`cmd_audit` is 124 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 5760,
+        "name": "_health_record",
+        "detail": "`_health_record` is 83 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 5845,
+        "name": "cmd_health",
+        "detail": "`cmd_health` is 105 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 5986,
+        "name": "_wipe",
+        "detail": "`_wipe` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 7573,
+        "name": "_verifies_proposals",
+        "detail": "`_verifies_proposals` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 7783,
+        "name": "_clarify_questions",
+        "detail": "`_clarify_questions` is 90 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 7951,
+        "name": "cmd_implement",
+        "detail": "`cmd_implement` is 82 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8086,
+        "name": "cmd_retire",
+        "detail": "`cmd_retire` is 97 lines (over 80)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "prefix-family",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8428,
+        "name": "design",
+        "detail": "16 top-level functions start with `design`: _design_block_end, _design_brace, _design_chain_findings, _design_file, _design_files, _design_finding"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8625,
+        "name": "_design_mask",
+        "detail": "`_design_mask` nests 6 levels deep (over 4)"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "deep-nesting",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8682,
+        "name": "_design_brace",
+        "detail": "`_design_brace` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "global-state",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8873,
+        "name": "apply_config",
+        "detail": "`apply_config` writes module state: CODE_EXTS"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "plugin/scripts/reqmap.py",
+        "line": 8913,
+        "name": "main",
+        "detail": "`main` is 288 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "file-too-long",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 1,
+        "name": "excalidraw_builder.py",
+        "detail": "1939 lines (over 500)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 117,
+        "name": "__init__",
+        "detail": "h, w, x, y travel together through 15 functions: __init__, box, column, connector, data, decision"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 117,
+        "name": "__init__",
+        "detail": "h, x, y travel together through 16 functions: __init__, _vline, box, column, connector, data"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 159,
+        "name": "__init__",
+        "detail": "fill, group, stroke travel together through 3 functions: __init__, box, frame"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 159,
+        "name": "__init__",
+        "detail": "`__init__` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 178,
+        "name": "__init__",
+        "detail": "align, color, size travel together through 3 functions: __init__, label, title"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 186,
+        "name": "excalidraw_builder.py",
+        "detail": "9 line(s) wider than 100 columns, first at line 186"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "h, text, w, x, y travel together through 10 functions: box, connector, data, decision, diamond, ellipse"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "group, h, x, y travel together through 3 functions: _vline, box, frame"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "font_size, x, y travel together through 7 functions: box, column, glossary, grid, legend, pipeline"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "fill, font_size, shape travel together through 5 functions: _place, box, column, grid, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "fill, font_size, h, shape, w, x, y travel together through 4 functions: box, column, grid, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "group, text, x, y travel together through 3 functions: box, label, title"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "text, x, y travel together through 12 functions: box, connector, data, decision, diamond, ellipse"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "group, x, y travel together through 5 functions: _vline, box, frame, label, title"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "fill, h, w, x, y travel together through 5 functions: box, column, frame, grid, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 322,
+        "name": "box",
+        "detail": "`box` takes 12 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 479,
+        "name": "section",
+        "detail": "gap, title, x travel together through 3 functions: glossary, legend, section"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 479,
+        "name": "section",
+        "detail": "color, size, x travel together through 3 functions: label, section, title"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 496,
+        "name": "pipeline",
+        "detail": "connect, font_size, gap, x, y travel together through 3 functions: column, pipeline, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 496,
+        "name": "pipeline",
+        "detail": "font_size, gap, x, y travel together through 5 functions: column, glossary, legend, pipeline, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 496,
+        "name": "pipeline",
+        "detail": "`pipeline` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 557,
+        "name": "frame",
+        "detail": "`frame` takes 8 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 604,
+        "name": "row",
+        "detail": "fill, font_size, h, items, shape, w, x, y travel together through 3 functions: column, grid, row"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 604,
+        "name": "row",
+        "detail": "`row` takes 10 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 624,
+        "name": "column",
+        "detail": "`column` takes 10 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 636,
+        "name": "grid",
+        "detail": "`grid` takes 11 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 651,
+        "name": "enclose",
+        "detail": "`enclose` takes 8 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 680,
+        "name": "legend",
+        "detail": "`legend` takes 8 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 717,
+        "name": "glossary",
+        "detail": "`glossary` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 750,
+        "name": "lane",
+        "detail": "`lane` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 857,
+        "name": "title",
+        "detail": "`title` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 873,
+        "name": "label",
+        "detail": "`label` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 902,
+        "name": "arrow",
+        "detail": "color, dashed, end, group, label, start travel together through 3 functions: arrow, free_arrow, path"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "data-clump",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 902,
+        "name": "arrow",
+        "detail": "color, dashed, group, label travel together through 4 functions: arrow, free_arrow, path, route_under"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 902,
+        "name": "arrow",
+        "detail": "`arrow` takes 10 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 978,
+        "name": "free_arrow",
+        "detail": "`free_arrow` takes 8 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 1003,
+        "name": "path",
+        "detail": "`path` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 1055,
+        "name": "route_under",
+        "detail": "`route_under` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "encapsulation",
+        "kind": "long-parameter-list",
+        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
+        "line": 1349,
+        "name": "save",
+        "detail": "`save` takes 9 parameters (over 6)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "scripts/benchmark_scan.py",
+        "line": 84,
+        "name": "main",
+        "detail": "1 public definition(s) without a docstring: main"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "scripts/benchmark_scan.py",
+        "line": 86,
+        "name": "benchmark_scan.py",
+        "detail": "1 line(s) wider than 100 columns, first at line 86"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "scripts/changelog_notes.py",
+        "line": 36,
+        "name": "main",
+        "detail": "1 public definition(s) without a docstring: main"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "scripts/check_engine_bump.py",
+        "line": 41,
+        "name": "main",
+        "detail": "1 public definition(s) without a docstring: main"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "scripts/check_engine_bump.py",
+        "line": 45,
+        "name": "check_engine_bump.py",
+        "detail": "3 line(s) wider than 100 columns, first at line 45"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "scripts/check_retired_verbs.py",
+        "line": 37,
+        "name": "live_verbs",
+        "detail": "3 public definition(s) without a docstring: live_verbs, candidate_files, main"
+      },
+      {
+        "pillar": "abstraction",
+        "kind": "long-function",
+        "file": "scripts/check_versions.py",
+        "line": 92,
+        "name": "main",
+        "detail": "`main` is 96 lines (over 80)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "missing-docstring",
+        "file": "scripts/check_versions.py",
+        "line": 92,
+        "name": "main",
+        "detail": "1 public definition(s) without a docstring: main"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "scripts/check_versions.py",
+        "line": 93,
+        "name": "check_versions.py",
+        "detail": "2 line(s) wider than 100 columns, first at line 93"
+      }
+    ],
+    "advice": {
+      "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
+      "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
+      "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
+      "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
+      "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
+      "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
+      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
+      "missing-docstring": "a public name without a docstring makes every caller read the body: one sentence saying what it returns is enough",
+      "prefix-family": "functions sharing a prefix are a namespace: a class (or module) with that name makes the boundary explicit",
+      "too-many-definitions": "this many top-level definitions in one file is a package, not a module: group them"
     }
   },
   "health": {
     "score": 98,
-    "total": 231,
-    "healthy": 227,
-    "confirmed": 227,
-    "implemented": 222,
-    "tested": 219,
+    "total": 233,
+    "healthy": 228,
+    "confirmed": 229,
+    "implemented": 224,
+    "tested": 220,
     "drafts": 4,
     "orphans": 0,
-    "untested": 0,
+    "untested": 1,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 227
+    "reviewed_total": 229
   }
 }

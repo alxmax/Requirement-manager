@@ -437,6 +437,37 @@ const gaugeChecks = [
 ];
 for (const [label, ok] of gaugeChecks) test(label, ok);
 
+// ---- the advisory design tab (REQ-VIEWER-977) -----------------------------
+// The engine ships its code-review candidates in `_map.json`; the tab lists them and
+// stays out of the corpus inbox. A map written before that carries no `findings`, so
+// the tab must simply not appear rather than render an empty shell.
+const DESIGN_WITH = {
+  score: 23, clean_files: 7, files: 30,
+  candidates: { encapsulation: 1, abstraction: 1, inheritance: 0, polymorphism: 0, standards: 0 },
+  findings: [
+    { pillar: "encapsulation", kind: "long-parameter-list", file: "src/thing.py",
+      line: 12, name: "build", detail: "`build` takes 9 parameters (over 6)" },
+    { pillar: "abstraction", kind: "long-function", file: "src/thing.py",
+      line: 40, name: "run", detail: "`run` is 120 lines (over 80)" },
+  ],
+  advice: { "long-parameter-list": "a parameter list this long is an object waiting to be named",
+            "long-function": "a function this long hides several steps" },
+};
+setScores(null, DESIGN_WITH);
+const designHtml = renderToString(<ProblemsView openSpec={noop} />);
+setScores(null, { score: 23, clean_files: 7, files: 30, candidates: {} });
+const designBare = renderToString(<ProblemsView openSpec={noop} />);
+setScores(null, null);
+const designChecks = [
+  ["design: the tab is offered with the candidate count",  // verifies: REQ-VIEWER-977#CASE-1
+    designHtml.includes("Design") && designHtml.includes(">2<")],
+  ["design: no tab when the map carries no candidates",  // verifies: REQ-VIEWER-977#CASE-2
+    !designBare.includes(">Design<")],
+  ["design: candidates stay out of the corpus inbox count",  // verifies: REQ-VIEWER-977#CASE-3
+    computeProblems().every(p => p.sev !== "DESIGN")],
+];
+for (const [label, ok] of designChecks) test(label, ok);
+
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
 
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
