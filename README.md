@@ -225,31 +225,60 @@ any assistant — or with no assistant at all.
 > In **this** repo, run commands from inside `plugin/`. In **your** repo, run
 > from wherever `requirements/` lives — the engine resolves paths relative to cwd.
 
-| Command | What it does |
+The CLI is **five verbs**. Everything else is a flag on `gate` (every read-only
+question) or on `sync` (every write), so the shape of a command tells you whether
+it can change a file.
+
+| Verb | What it does |
 |---|---|
-| `init` | First-time setup: scaffold + draft requirements from your code + lock + map + next steps |
-| `gate` | **The gate** — every tag resolves, every requirement has code, nothing drifted. Run before each commit. Report-only: never touches `_reqlock.json`. Flags: `--strict` (promotes drift + test-link warnings to errors), `--json` (structured output), `--since <ref>` (git-scoped: only requirements touched since `ref`). (`check` is a deprecated alias.) |
-| `sync` | Rescan + advance the drift baseline + regenerate the map (and a committed `_findings.md`) in one step. Use after editing requirement files or tagging new code. `--accept-drift` to advance an edited confirmed/implemented contract. |
-| `map` | Generate diagrams (`_map.md`) + graph (`_map.json`) + self-contained viewer (`_map.html` with 4 tabs: Map · Problems · Spec · **Roadmap**). Reads `TODO.md` from the repo root and inlines a `todos` array for the Roadmap tab. |
-| `site --attach <page>` | Inject/refresh engine-owned regions (nav links + counts) into a presentation page; scaffolds one if absent. `--regions nav,stats`, `--diagram <rel>` links an Excalidraw HTML. |
-| `next` | "What should I work on next?" — a prioritized, actionable list |
-| `new AREA-NAME-NNN` | Scaffold a new empty requirement from the template. Use `--from-todo "name" --id ID` to pre-fill from a TODO.md item. |
-| `scan` | List which code belongs to which requirement |
-| `lint` | Readability and structure check on non-draft requirements (long sentences, stacked conditions, missing sections). `--strict` exits non-zero on errors. |
-| `show <ID>` | Consolidated dossier for one requirement: contract, dependencies both ways, code members, open questions, risk signals |
-| `dupes` | Flag requirement pairs with overlapping contracts (TF-IDF cosine). `--threshold T` overrides the default 0.35. A requirement and its own test-suite requirement (linked by `tested-by`) are skipped and counted, not reported. |
-| `search "query"` | Rank requirements by lexical relevance — the same TF-IDF cosine `dupes` uses. `--top N`. |
-| `coverage` | List source files carrying no `implements:` tag, grouped by directory. `--json`. |
-| `health` | Corpus coherence snapshot: percentage of requirements fully green (confirmed + member + tested + no open questions + not drifted). `--json` for a CI badge. |
-| `export` | Emit just the graph JSON (for an external front-end) |
-| `draft` | Draft requirements from untagged legacy code (input: existing code/prose) |
-| `plan` | Read-only JSON plan for AI-assisted extraction (writes no files; use before `draft`) |
-| `findings` | Collect open "needs human review" notes into `_findings.md` |
-| `review [ID]` | Emit a JSON review plan (intent, contract, acceptance, anchors) — AI feed for advisory quality review. Read-only. |
-| `confirm <ID>` | Mark a reviewed requirement as `confirmed` (the human sign-off step). Run `sync` after. |
-| `suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. Read-only by default; `--apply` writes them. |
-| `translate [--to ro\|en]` | **Manual and opt-in.** Cache a `claude -p` translation of the corpus into `requirements/_i18n/<locale>.json`, for a reader who does not speak the authors' language. Never called by `gate`/`sync`/`lint`/`map` or any hook, and the viewer always marks translated text as machine-translated. |
-| `gen-integration` | Maintainer command: regenerate `tool_definition.json` and the SKILL command table from the engine's `COMMANDS` registry. |
+| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft requirements from your existing code and prose, build the lock and map, print guided next steps. Idempotent; never clobbers an existing `.reqmapignore`. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
+| `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
+| `gate` | **The verdict, and every read-only question.** Bare, it is the commit/CI check (below). The mode flags each answer one question instead. Never writes anything. |
+| `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
+| `clarify AREA-NAME-NNN` | Ask what a requirement has *not* answered: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule — run it before implementing, so the ambiguity is resolved in the requirement rather than guessed in code. `--json` for an agent. |
+
+**`gate` — the bare verdict.** Link sync (every tag resolves, every enforced
+requirement has an `implements:` member, every `depends_on` target exists) then
+requirement readability then committed-map freshness. Exits non-zero on link-sync
+errors only; drift and test-link integrity are warnings. `--strict` promotes those
+two to errors, `--json` emits one machine-readable document, `--since <ref>` scopes
+it to requirements whose members changed since a git ref, and `--no-lint` /
+`--no-map-check` opt out of the two extras.
+
+**`gate` — the read-only questions.**
+
+| Flag | What it answers |
+|---|---|
+| `--risk` | *What should I work on next?* A health score plus counted risk buckets. `--json`/`--badge` for the numbers alone, `--untagged` for the files carrying no `implements:` tag. |
+| `--audit` | *How is this repo doing?* Every discovery pass in one report: gate, risk, duplicates, design, tag coverage, the exemptions in force, corpus shape. The exit code comes from the gate alone — the rest is advice. |
+| `--show ID` | *What does this do / where is X?* One requirement's dossier: contract, dependencies both ways, members by role with `file:line`, open questions, risk signals. |
+| `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. |
+| `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). |
+| `--design` | Advisory design review of the code: the four OOP pillars plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
+| `--implement ID` | The brief for writing the code: obligations, cases, the exact tags the new code must carry, where similar code already lives. `--json` for a coding agent. |
+| `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
+
+**`sync` — the write modes.**
+
+| Flag | What it does |
+|---|---|
+| *(bare)* | Rebuild everything derived: lock, `_map.*`, `docs/map.html`, `_findings.md`, the site regions, the integration artifacts. |
+| `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
+| `--retire ID` | Take a requirement out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents. |
+| `--suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. `--apply` writes them; ambiguous matches never are. |
+| `--attach <page>` | Refresh the engine-owned regions (nav links, counts) of a presentation page, scaffolding one if absent. `--regions nav,stats`, `--diagram <rel>`. |
+
+Confirming a requirement is **not** a command — it is a human's answer. Edit
+`status: confirmed` in the frontmatter once someone has actually read it. The gate
+enforces the invariant (a confirmed requirement with no `implements:` member is an
+error), and `sync` demotes an edited contract back to `draft` on its own.
+
+> Removed in `v4.0.0`: the old one-verb-per-question CLI (`map`, `next`, `scan`,
+> `lint`, `show`, `health`, `export`, `draft`, `plan`, `findings`, `confirm`,
+> `coverage`, `site`, `dupes`, `search`, `review`, `check`). Each is now a flag
+> above. `translate` was removed separately on 2026-09-05; the viewer still reads
+> a `requirements/_i18n/<locale>.json` cache if one is committed, but nothing
+> regenerates it any more.
 
 ## The Excalidraw diagram skill
 
@@ -382,7 +411,7 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 5,895 lines on 2026-08-25)
+  scripts/reqmap.py                         the engine (Python stdlib only, 9,223 lines on 2026-09-05)
   scripts/test_reqmap.py                    the engine's own regression suite (importable: `python scripts/test_reqmap.py`)
   requirements/*.md                         the source of truth (one file per capability)
   requirements/_reqlock.json                the drift baseline (committed)
