@@ -58,6 +58,9 @@ def _key(v):
 
 
 def main(argv=None):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALEENGINE-926
+    """Compare the vendored engine against this action's and annotate the run when
+    it is behind. Returns the exit code, which is 0 unless `--stale-engine error`
+    was asked for."""
     ap = argparse.ArgumentParser(description="Warn when a vendored reqmap.py is behind this action's engine.")
     ap.add_argument("--vendored", required=True, help="path to the consumer's vendored reqmap.py")
     ap.add_argument("--reference", default=DEFAULT_REFERENCE,

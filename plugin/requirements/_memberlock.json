@@ -5,7 +5,7 @@
       "plugin/skills/requirement-quality-review/SKILL.universal.md": "c740226f119562077d936c74cae21d9f40551c8cad9db52dde7e2d3660041159"
     },
     "ARCH-SELFGATE-039": {
-      "scripts/check_versions.py": "34efa3c77ab428c2063f4fac5d44e8067e528c4cbda8213ca1a5e5082fef0740"
+      "scripts/check_versions.py": "c31b109d32b0d6f6aca02306556f36fb8143893a8ad868fdae93960145c161f8"
     },
     "ARCH-VIEWER-007": {
       "app/scripts/install-viewer.mjs": "87088a30e7653b152155ea32d146f8f34f3542e949b22c9a2654317f5dbdda69",

@@ -572,3 +572,46 @@
            needs no model change and no fixture move; (c) per-locale corpora, ranked
            separately and merged. Romanian is also inflected, so any of them wants at
            least diacritic-insensitive matching. -->
+
+## v5.2
+- [x] Senate review: is the C&K metrics pillar the right shape? | lane: ops
+- [ ] C&K pillar: an independent confirmation sample | lane: ops
+      <!-- The Senate audit (runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json,
+           MODIFY) discharged four of six requests in v5.3.0. This one is open: ADR-0022 asks
+           for a confirmation sample from a reviewer who did NOT author the check, with each
+           verdict citing executed output and the refusal rate recorded. The sample today is
+           1 of 1 and the reviewer was the author. Tacitus's blocking finding is that this
+           repo has retracted an author-graded finding set twice in four days. -->
+- [ ] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
+      <!-- Musk's request, recorded not actioned: RFC's formula is `len(methods) + len(called)`,
+           so WMC is literally a term inside it, and LCOM1's raw pair count grows mechanically
+           with method count. On this repo all three fire on the same single class and have
+           never diverged, so two of the three have carried no independent signal yet. Decide
+           on evidence: keep them until a class appears that one catches and RFC misses, or
+           delete them and their config keys. -->
+      <!-- v5.2 shipped a `metrics` pillar carrying three of Chidamber & Kemerer's six
+           (WMC, RFC, LCOM1) over Python classes, and deliberately dropped the other
+           three: DIT and NOC because a codebase that composes has no inheritance tree
+           to measure, CBO because resolving which class a Python name refers to needs
+           type inference this engine does not do. Those two omissions were argued from
+           one repo's shape — this one — which is exactly the reasoning a single author
+           is worst at checking.
+
+           Run the `senate` skill on the pillar and let the nine lenses argue it:
+             - vague terms: "god class", "low cohesion" are verdicts stated as measurements
+             - precedent: adopting a named academic suite and shipping half of it sets the
+               expectation that the other half is coming; is that a debt or a decision?
+             - aggressive deletion: would dropping WMC (nearly implied by RFC) lose anything?
+             - statistical discipline: LCOM1 is the WEAKEST of the LCOM family and its
+               constructor blind spot is already recorded in REQ-DESIGN-978's Context —
+               LCOM4 or a connectivity-based variant may be the honest choice
+             - cost: three more thresholds nobody tunes, on a review that never gates
+             - historical accuracy: C&K 1994 proposed no thresholds; the ones shipped
+               (20/50/20) are conventions with no citation in this repo
+
+           Concrete question for the verdict: on a consumer repo that DOES use inheritance,
+           does the pillar's silence on DIT/NOC read as "clean" when it means "not measured"?
+           That is the failure mode ADR-0016's fire-rate floor exists to prevent, and it was
+           not assessed before shipping. Decide: complete the suite, narrow the pillar, or
+           document the omission where a reader meets it rather than in a requirement's
+           Context. -->

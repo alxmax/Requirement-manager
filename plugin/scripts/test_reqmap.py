@@ -2,6 +2,7 @@
 
 Run: python -m unittest test_reqmap   (from plugin/scripts/)
 """
+import ast
 import errno
 import io
 import json
@@ -8199,7 +8200,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             self.assertEqual(sorted(os.listdir(d)), before)
 
 
-class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
+class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-978  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
     """`design`: advisory design candidates against the four pillars, never the gate."""
 
     def _kinds(self, src):
@@ -8350,6 +8351,122 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-976  # tested-by: ARCH
         self.assertEqual(s["candidates"]["encapsulation"], 1)
         self.assertEqual(s["candidates"]["standards"], 1)
 
+    @staticmethod
+    def _metric_kinds(src, name="m.py"):
+        """The `metrics` candidates only — the class's own `_kinds` covers the rest."""
+        found = R._design_file(name, src)
+        return sorted(f["kind"] for f in found if f["pillar"] == "metrics")
+
+    def test_wide_class_is_a_god_class(self):  # verifies: REQ-DESIGN-978#CASE-1
+        body = "".join("    def m%d(self):\n        return self.x\n" % i
+                       for i in range(R.DESIGN_WMC_MAX + 1))
+        src = "class Wide:\n    def __init__(self):\n        self.x = 1\n" + body
+        self.assertIn("wide-class", self._metric_kinds(src))
+
+    def test_dict_subclass_is_not_accused_of_incohesion(self):  # verifies: REQ-DESIGN-978#CASE-2
+        # Its state is keys, not attributes: no field exists for two methods to share,
+        # so cohesion is not a question this class can be asked.
+        body = "".join("    def m%d(self):\n        return self['k%d']\n" % (i, i)
+                       for i in range(8))
+        src = "class Bag(dict):\n" + body
+        self.assertNotIn("low-field-sharing", self._metric_kinds(src))
+
+    def test_split_state_is_reported_as_low_cohesion(self):  # verifies: REQ-DESIGN-978#CASE-3
+        # Two groups of methods over two disjoint fields, and deliberately no __init__:
+        # a constructor touching every field pairs with all of them, which alone drags
+        # LCOM1 to zero on a class this size. That is a property of the metric, not of
+        # this fixture — the requirement's Context records it.
+        halves = "    def a0(self):\n        self.left = 1\n"
+        halves += "".join("    def a%d(self):\n        return self.left\n" % i for i in range(1, 6))
+        halves += "    def b0(self):\n        self.right = 2\n"
+        halves += "".join("    def b%d(self):\n        return self.right\n" % i for i in range(1, 6))
+        src = "class Split:\n" + halves
+        keep = R.DESIGN_LCOM_MAX
+        try:
+            R.apply_config({"DESIGN_LCOM_MAX": 2})     # 12 methods over 2 fields score 6
+            self.assertIn("low-field-sharing", self._metric_kinds(src))
+        finally:
+            R.apply_config({"DESIGN_LCOM_MAX": keep})
+
+    def test_metric_thresholds_come_from_config(self):  # verifies: REQ-DESIGN-978#CASE-4
+        src = ("class Two:\n"
+               "    def __init__(self):\n        self.x = 1\n"
+               "    def a(self):\n        return self.x\n")
+        self.assertNotIn("wide-class", self._metric_kinds(src))
+        keep = R.DESIGN_WMC_MAX
+        try:
+            R.apply_config({"DESIGN_WMC_MAX": 1})
+            self.assertIn("wide-class", self._metric_kinds(src))
+        finally:
+            R.apply_config({"DESIGN_WMC_MAX": keep})
+
+    def test_a_cohesive_class_reports_no_metric(self):  # verifies: REQ-DESIGN-978#CASE-5
+        src = ("class Small:\n"
+               "    def __init__(self):\n        self.x = 1\n"
+               "    def get(self):\n        return self.x\n"
+               "    def bump(self):\n        self.x += 1\n")
+        self.assertEqual(self._metric_kinds(src), [])
+
+    def test_slots_declare_fields_too(self):  # verifies: REQ-DESIGN-978#CASE-3
+        # __slots__ names the state even when nothing assigns it in this class body.
+        halves = "".join("    def a%d(self):\n        return self.left\n" % i for i in range(6))
+        halves += "".join("    def b%d(self):\n        return self.right\n" % i for i in range(6))
+        src = 'class Slotted:\n    __slots__ = ("left", "right")\n' + halves
+        keep = R.DESIGN_LCOM_MAX
+        try:
+            R.apply_config({"DESIGN_LCOM_MAX": 2})     # 12 methods over 2 fields score 6
+            self.assertIn("low-field-sharing", self._metric_kinds(src))
+        finally:
+            R.apply_config({"DESIGN_LCOM_MAX": keep})
+
+    def test_a_declarative_class_is_measured_not_skipped(self):  # verifies: REQ-DESIGN-978#CASE-6
+        """A @dataclass declares its fields as class-body annotations and assigns them in
+        a synthesised __init__ the tree never contains. Before the Senate audit that read
+        as 'no fields', and cohesion was skipped in silence — indistinguishable from a
+        class measured and found cohesive. It is the commonest class shape in modern
+        Python and the one this engine meets most often in consumer repos."""
+        halves = "".join("    def a%d(self):\n        return self.left\n" % i for i in range(8))
+        halves += "".join("    def b%d(self):\n        return self.right\n" % i for i in range(8))
+        src = ("from dataclasses import dataclass\n\n"
+               "@dataclass\nclass Svc:\n    left: int\n    right: int\n") + halves
+        tree = ast.parse(src)
+        cls = [n for n in ast.walk(tree) if isinstance(n, ast.ClassDef)][0]
+        self.assertEqual(R._design_py_fields(cls), {"left", "right"})
+        keep = R.DESIGN_LCOM_MAX
+        try:
+            R.apply_config({"DESIGN_LCOM_MAX": 2})     # 16 methods over 2 fields score 8
+            self.assertIn("low-field-sharing", self._metric_kinds(src))
+        finally:
+            R.apply_config({"DESIGN_LCOM_MAX": keep})
+
+    def test_design_names_what_it_did_not_measure(self):  # verifies: REQ-DESIGN-978#CASE-7
+        """An empty metrics block on a subclass-heavy repo would otherwise read as 'your
+        classes are fine' when it means 'the two metrics that would have spoken were never
+        computed'. Asserted on both paths: findings present, and none at all."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "wide.py"),
+                   "class Wide:\n    def __init__(self):\n        self.x = 1\n"
+                   + "".join("    def m%d(self):\n        return self.x\n" % i
+                             for i in range(R.DESIGN_WMC_MAX + 1)))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            loud = buf.getvalue()
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ok.py"), 'def a():\n    """A."""\n    return 1\n')
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_design(d)
+            quiet = buf.getvalue()
+        for out in (loud, quiet):
+            for metric in ("DIT", "NOC", "CBO"):
+                self.assertIn(metric, out)
+
+    def test_metrics_are_python_only(self):  # verifies: REQ-DESIGN-978#CASE-1
+        body = "".join("  m%d() { return this.x; }\n" % i for i in range(R.DESIGN_WMC_MAX + 5))
+        found = R._design_file("m.js", "class Wide {\n" + body + "}\n")
+        self.assertEqual([f for f in found if f["pillar"] == "metrics"], [])
+
     def _dirty_repo(self, d):
         """One clean file and one carrying two candidates, so a record has both a
         score below 100 and more than one kind to group."""
@@ -8491,6 +8608,22 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-976  # tested-by: ARCH
         self.assertEqual(self._kinds(src), [])
         R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
         self.assertIn("long-parameter-list", self._kinds(src))
+
+    def test_the_requirement_enumerates_every_pillar_that_ships(self):
+        """REQ-DESIGN-952's print-order clause is an exhaustive enumeration, so it goes
+        stale silently the moment a pillar is added: nobody edits it, and `binding_hash`
+        therefore reports no DRIFT. Assert the two agree instead of trusting a reader
+        to notice."""
+        here = os.path.dirname(os.path.abspath(__file__))
+        doc = os.path.join(here, "..", "requirements", "ARCH-DESIGN-061.md")
+        with open(doc, encoding="utf-8") as f:
+            body = f.read()
+        clause = [ln for ln in body.splitlines()
+                  if "prints one block per group in the order" in ln]
+        self.assertEqual(len(clause), 1, "the print-order clause moved or was duplicated")
+        named = [p for p in R.DESIGN_PILLARS if p in clause[0]]
+        self.assertEqual(named, list(R.DESIGN_PILLARS),
+                         "the clause must name every shipped pillar, in DESIGN_PILLARS order")
 
     def test_design_is_in_the_registry_and_not_in_the_gate(self):  # verifies: ARCH-DESIGN-061#CASE-3
         # `design` is a mode of `gate`, not a gate RULE: it never decides an exit

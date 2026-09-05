@@ -34,6 +34,8 @@ def extract(text, version):
 
 
 def main(argv):
+    """Print the CHANGELOG section for the version named in `argv`, and return an
+    exit code — non-zero when there is no such section."""
     # CHANGELOG prose carries non-ASCII (em-dashes, the `→` in the version note).
     # Force UTF-8 so a legacy Windows codepage doesn't crash on print — same guard
     # reqmap.py's main() uses. Best-effort: reconfigure() is 3.7+ and may be absent.
