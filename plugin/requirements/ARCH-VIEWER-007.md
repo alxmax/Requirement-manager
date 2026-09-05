@@ -28,6 +28,7 @@ Every bullet below is binding.
 - The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]
 - The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
+- The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 
 ## Cases
 CASE-1
@@ -644,3 +645,44 @@ CASE-5 — the labels follow the interface language
   Given  the interface language is Romanian
   When   a label and a caption are translated
   Then   both come back in Romanian, numbers interpolated unchanged
+
+---
+id: REQ-VIEWER-977
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# The advisory design tab
+
+## Description
+> The rail already showed a design score, and a reader who wanted to know which shapes
+> cost the missing points had to leave the viewer for a terminal. The candidates now
+> travel in the map, so the Problems screen lists them — in a tab of their own, because
+> they are the only rows here that are about a file rather than a requirement, and the
+> only ones that gate nothing.
+
+Every bullet below is binding.
+- `ProblemsView` offers a `Design` tab, labelled with the number of candidates the map carries, and offers it only when the map carries at least one.
+- The tab groups candidates by pillar, shows each one's kind, name, detail and `file:line`, and prints each kind's advice once per group — the same shape the CLI prints.
+- Design candidates are absent from the `All` tab and from every severity count, so the inbox keeps reporting what is open about the corpus.
+- The tab states that a candidate is advisory and never enters the gate, so a reader does not mistake the list for a build failure.
+- A map written before the engine carried candidates leaves the tab unoffered rather than rendering an empty one.
+
+## Cases
+CASE-1 — the tab appears with its count
+  Given  a map whose `design` record carries two candidates
+  When   `ProblemsView` renders
+  Then   a `Design` tab is offered showing the count 2
+
+CASE-2 — an older map offers nothing
+  Given  a map whose `design` record carries a score but no candidates
+  When   `ProblemsView` renders
+  Then   no `Design` tab is offered
+
+CASE-3 — the inbox is unchanged
+  Given  a map carrying both corpus signals and design candidates
+  When   the open signals are computed
+  Then   no computed row carries a design severity, and the `All` count is the corpus count alone

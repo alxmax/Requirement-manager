@@ -1,5 +1,6 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-966
+// implements: REQ-VIEWER-977
 /* ProblemsView — every open signal about the corpus, in one inbox.
  *
  * Two kinds of row live here, and the difference is who said there was a problem:
@@ -8,6 +9,11 @@
  *     nobody has reviewed);
  *   - an author's open `## Verify intent` question — a human writing down what they
  *     did not resolve.
+ *
+ * A third origin joined them: the advisory code review (`gate --design`), whose rows
+ * are about a FILE rather than a requirement and which never gates anything. It gets its
+ * own tab and is deliberately absent from "All" — the inbox counts what is open about the
+ * corpus, and 123 advisory candidates dropped in there would bury the six that are.
  *
  * They were two screens until v4.0.0, because Problems was then ~618 rows of draft
  * review noise and a real question dropped in there was invisible. Two things ended
@@ -18,7 +24,7 @@
  * stays one click away instead of being ranked among computed findings.
  * See docs/adr/0028. */
 import { useState } from "react";
-import { REQUIREMENTS, coverageOf } from "../lib/data.js";
+import { REQUIREMENTS, coverageOf, DESIGN } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { Pill, statusKind } from "../lib/ui.jsx";
 import { useI18n } from "../lib/i18n.jsx";
@@ -87,6 +93,11 @@ export function ProblemsView({ openSpec }) {
   const [showDrafts, setShowDrafts] = useState(false);
   const all = computeProblems();
   const counts = all.reduce((a,p)=>{ a[p.sev]=(a[p.sev]||0)+1; return a; }, {});
+  // Advisory code-review candidates, grouped the way the CLI prints them. Absent on a
+  // map written before the engine carried them, which is why this is a guarded read.
+  const design = (DESIGN && Array.isArray(DESIGN.findings)) ? DESIGN.findings : [];
+  const advice = (DESIGN && DESIGN.advice) || {};
+  const byPillar = design.reduce((a,f)=>{ (a[f.pillar] = a[f.pillar] || []).push(f); return a; }, {});
   const draftReviews = all.filter(isDraftReview).length;
   const byTab = filter==="ALL" ? all : all.filter(p=>p.sev===filter);
   const shown = showDrafts ? byTab : byTab.filter(p => !isDraftReview(p));
@@ -106,6 +117,7 @@ export function ProblemsView({ openSpec }) {
         <Tab k="WARN" label={t("Warnings")} n={counts.WARN||0} />
         <Tab k="QUESTION" label={t("Questions")} n={counts.QUESTION||0} />
         <Tab k="REVIEW" label={t("Review")} n={counts.REVIEW||0} />
+        {design.length > 0 && <Tab k="DESIGN" label={t("Design")} n={design.length} />}
         <div className="tab-legend">
           {(counts.ERROR||0) > 0
             ? <><Icon name="triangle-alert" size={14} style={{color:"var(--status-error)"}} /> {t("gate blocks the build — {n} error", { n: counts.ERROR })}</>
@@ -114,14 +126,48 @@ export function ProblemsView({ openSpec }) {
       </div>
 
       <div className="problems">
-        {(hidden > 0 || (showDrafts && draftReviews > 0)) && (
+        {filter === "DESIGN" && (
+          <>
+            <div className="prob-chip" style={{cursor:"default"}}>
+              {t("Advisory only — a candidate is a shape worth a look, never a defect, and this never enters the gate.")}
+            </div>
+            {Object.keys(byPillar).sort().map(pillar => {
+              const rows = byPillar[pillar];
+              const kinds = [...new Set(rows.map(f=>f.kind))].sort();
+              return (
+                <div key={pillar}>
+                  <div className="prob-head" style={{margin:"14px 0 6px",textTransform:"capitalize"}}>
+                    <b>{pillar}</b>
+                    <span style={{marginLeft:6,opacity:.7,fontFamily:"var(--font-mono)",fontSize:11}}>{rows.length}</span>
+                  </div>
+                  {rows.map((f,i)=>(
+                    <div className="prob-row" key={i}>
+                      <span className="prob-sev sev-REVIEW">{f.kind}</span>
+                      <div className="prob-body">
+                        <div className="prob-head"><span className="prob-id">{f.name}</span></div>
+                        <div className="prob-msg">{f.detail}</div>
+                      </div>
+                      <span className="prob-loc">{f.file}:{f.line}</span>
+                    </div>
+                  ))}
+                  {kinds.filter(k=>advice[k]).map(k=>(
+                    <div className="prob-fix" key={k} style={{margin:"4px 0 0 4px"}}>
+                      <Icon name="arrow-right" size={13} /> {advice[k]}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </>
+        )}
+        {filter !== "DESIGN" && (hidden > 0 || (showDrafts && draftReviews > 0)) && (
           <button type="button" className="prob-chip" onClick={()=>setShowDrafts(s=>!s)}>
             {showDrafts
               ? t("hide {n} draft review rows", { n: draftReviews })
               : t("{n} draft review rows hidden — show", { n: hidden })}
           </button>
         )}
-        {shown.map((p,i)=>(
+        {filter !== "DESIGN" && shown.map((p,i)=>(
           <div className={"prob-row"+(p.sev==="QUESTION"?" question-row":"")} key={i}
             onClick={()=>p.id!=="—" && openSpec(p.id)}>
             <span className={"prob-sev sev-"+p.sev}>{p.sev==="QUESTION" ? t("ASKED") : p.sev}</span>
@@ -139,7 +185,7 @@ export function ProblemsView({ openSpec }) {
             {p.loc && <span className="prob-loc">{p.loc}</span>}
           </div>
         ))}
-        {shown.length===0 && (
+        {filter !== "DESIGN" && shown.length===0 && (
           <div className="prob-empty">
             <Icon name="shield-check" size={26} style={{color:"var(--cov-tested)"}} />
             {/* `filter` is "ALL" on the default tab, which read as

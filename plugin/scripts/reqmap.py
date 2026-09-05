@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.10"
+MAP_ENGINE_VERSION = "2026-09-05.11"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4227,7 +4227,7 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
     data = _build_map_data(reqs, members, ac_cover)
     data["repo"] = _repo_name(root)
     data["todos"] = _parse_todos(root)
-    _design = _design_summary(root, reqs_dir)      # implements: REQ-DESIGN-954
+    _design = _design_summary(root, reqs_dir, with_findings=True)   # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
     if _design is not None:
         data["design"] = _design
     # The same record `next` prints its headline from, so the viewer reads the score
@@ -8769,14 +8769,22 @@ def _design_files(code_root, reqs_dir=None):
             yield fp, rel
 
 
-def _design_summary(code_root, reqs_dir=None):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-954
+def _design_summary(code_root, reqs_dir=None, with_findings=False):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
     """The design health of the repo's code as one small record, or None when the tree
     holds no non-test program-logic file: `files`, `clean_files` (no candidate at all),
     `score` (clean files as a percentage — the same "green on every axis" reading `health`
     uses for requirements), `candidates` (count per group). Deterministic, so it can live
-    in the committed `_map.json` and be checked for freshness."""
+    in the committed `_map.json` and be checked for freshness.
+
+    `with_findings` adds the candidates themselves, for the one caller that lists them
+    (`map`, whose viewer shows them in their own tab). It is off by default because
+    `health --json` is a CI badge payload: a caller reading a score must keep getting
+    the same small object, not a few hundred rows it never asked for. The advice text
+    is emitted once per kind rather than repeated on every row — it is a property of
+    the rule, not of the occurrence."""
     files = clean = 0
     per = {p: 0 for p in DESIGN_PILLARS}
+    rows = []
     for fp, rel in _design_files(code_root, reqs_dir):
         try:
             with open(fp, encoding="utf-8", errors="ignore") as f:
@@ -8789,9 +8797,18 @@ def _design_summary(code_root, reqs_dir=None):  # implements: ARCH-DESIGN-061  #
             clean += 1
         for x in found:
             per[x["pillar"]] += 1
+        if with_findings:
+            rows.extend(found)
     if not files:
         return None
-    return {"files": files, "clean_files": clean, "score": round(100 * clean / files), "candidates": per}
+    out = {"files": files, "clean_files": clean, "score": round(100 * clean / files),
+           "candidates": per}
+    if with_findings:
+        out["findings"] = [{"pillar": x["pillar"], "kind": x["kind"], "file": x["file"],
+                            "line": x["line"], "name": x["name"], "detail": x["detail"]}
+                           for x in rows]
+        out["advice"] = {k: _DESIGN_ADVICE[k] for k in sorted({x["kind"] for x in rows})}
+    return out
 
 
 def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-952

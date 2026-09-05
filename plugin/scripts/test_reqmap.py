@@ -8199,7 +8199,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             self.assertEqual(sorted(os.listdir(d)), before)
 
 
-class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
+class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
     """`design`: advisory design candidates against the four pillars, never the gate."""
 
     def _kinds(self, src):
@@ -8349,6 +8349,60 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertEqual((s["files"], s["clean_files"], s["score"]), (2, 1, 50))
         self.assertEqual(s["candidates"]["encapsulation"], 1)
         self.assertEqual(s["candidates"]["standards"], 1)
+
+    def _dirty_repo(self, d):
+        """One clean file and one carrying two candidates, so a record has both a
+        score below 100 and more than one kind to group."""
+        _write(os.path.join(d, "clean.py"), 'def a():\n    """A."""\n    return 1\n')
+        _write(os.path.join(d, "dirty.py"),
+               "COUNT = 0\n"
+               "def bump():\n"
+               "    global COUNT\n"
+               "    COUNT += 1\n")
+
+    def test_design_summary_omits_findings_by_default(self):  # verifies: REQ-DESIGN-976#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._dirty_repo(d)
+            s = R._design_summary(d)
+        self.assertEqual(sorted(s), ["candidates", "clean_files", "files", "score"])
+
+    def test_design_summary_with_findings_lists_every_candidate(self):  # verifies: REQ-DESIGN-976#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._dirty_repo(d)
+            s = R._design_summary(d, with_findings=True)
+        self.assertEqual(len(s["findings"]), sum(s["candidates"].values()))
+        one = s["findings"][0]
+        self.assertEqual(sorted(one), ["detail", "file", "kind", "line", "name", "pillar"])
+        # advice is a property of the rule, so it is emitted once per kind, not per row
+        self.assertEqual(sorted(s["advice"]), sorted({f["kind"] for f in s["findings"]}))
+        self.assertNotIn("advice", one)
+
+    def test_map_carries_the_candidates_and_health_does_not(self):  # verifies: REQ-DESIGN-976#CASE-2  # verifies: REQ-DESIGN-976#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _write(os.path.join(rq, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
+            self._dirty_repo(d)
+            data = R._assemble_map_data(R.load_requirements(rq), {}, rq, d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_health(R.Workspace(R.load_requirements(rq), {}, rq, d), as_json=True)
+        design = data["design"]
+        self.assertEqual(len(design["findings"]), sum(design["candidates"].values()))
+        self.assertGreater(len(design["findings"]), 0)
+        self.assertNotIn("findings", json.loads(buf.getvalue()).get("design", {}))
+        self.assertNotIn("findings", buf.getvalue())
+
+    def test_design_block_is_byte_stable_across_runs(self):  # verifies: REQ-DESIGN-976#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            _write(os.path.join(rq, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="feature", extra="", title="T"))
+            self._dirty_repo(d)
+            reqs = R.load_requirements(rq)
+            first = R._assemble_map_data(reqs, {}, rq, d)["design"]
+            second = R._assemble_map_data(reqs, {}, rq, d)["design"]
+        self.assertEqual(json.dumps(first, sort_keys=True), json.dumps(second, sort_keys=True))
 
     def test_map_and_health_carry_the_design_score(self):  # verifies: REQ-DESIGN-954#CASE-2  # verifies: ARCH-DESIGN-061#CASE-4
         with tempfile.TemporaryDirectory() as d:
