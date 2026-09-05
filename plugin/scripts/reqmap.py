@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.13"
+MAP_ENGINE_VERSION = "2026-09-05.14"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -8416,15 +8416,12 @@ DESIGN_FILE_MAX_LINES = 500     # standards: a source file longer than this
 DESIGN_LINE_MAX = 100           # standards: a physical line wider than this
 DESIGN_FILE_MAX_FUNCS = 30      # standards: top-level functions/classes in one file
 DESIGN_DOCSTRING_PUBLIC = 1     # standards (Python): 1 = public defs/classes need a docstring, 0 = off
-# Chidamber & Kemerer, per class, Python only (see `_design_metrics` for why three of
-# the six are absent). C&K (1994) proposed the metrics and NO thresholds: the three
-# below are the conventional textbook numbers, UNTUNED — they have never been
-# calibrated against a corpus, and no citation exists because there is no primary
-# source to cite. Treat a crossing as a number to look at, not as a defect, and
-# retune them per repo through CONFIG_KEYS like every other threshold here.
-DESIGN_WMC_MAX = 20             # metrics: methods in one class (C&K WMC, unweighted)
+# Chidamber & Kemerer, per class, Python only (see `_design_metrics` for what is absent
+# and why). C&K (1994) proposed the metrics and NO thresholds; these are the conventional
+# textbook numbers, and there is no primary source to cite for them. Calibrated once, on
+# 65 unique classes across 7 Python corpora with an independent review of every flag —
+# see REQ-DESIGN-980. Retune per repo through CONFIG_KEYS like every other threshold.
 DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it calls (C&K RFC)
-DESIGN_LCOM_MAX = 20            # metrics: LCOM1 — method pairs sharing no field, less those that do
 
 DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism",
                   "metrics", "standards")
@@ -8432,9 +8429,13 @@ DESIGN_PILLARS = ("encapsulation", "abstraction", "inheritance", "polymorphism",
 # An absent finding must never be readable as a measured pass on something that was
 # never computed — that is the reassuring-wrong-count failure ADR-0016 rejected.
 DESIGN_METRICS_SCOPE = (
-    "metrics reads Python classes only and reports 3 of Chidamber & Kemerer's 6 "
-    "(WMC, RFC, LCOM1). DIT, NOC and CBO are NOT measured, so silence here says "
-    "nothing about inheritance depth, subclass count or coupling."
+    "metrics reads Python classes only and reports 1 of Chidamber & Kemerer's 6: RFC. "
+    "WMC and LCOM1 were measured and dropped — across 65 classes in 7 corpora neither "
+    "ever fired without RFC, and an independent review confirmed 0 of their flags. "
+    "DIT, NOC and CBO are not measured, so silence says nothing about inheritance "
+    "depth, subclass count or coupling. RFC is a proxy for a class that mixes "
+    "toolchains; it over-reports routers, GUI callback classes and builder DSLs, whose "
+    "call count is library calls rather than collaborators."
 )
 DESIGN_EXTS = ORPHAN_CODE_EXTS          # program-logic files; prose/config/styling are not reviewed
 DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts", ".vue", ".svelte",
@@ -8443,9 +8444,7 @@ DESIGN_BRACE_EXTS = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".mts", ".cts
 _DESIGN_ADVICE = {
     "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
     "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
-    "wide-class": "a class with this many methods is a split candidate: look at whether the fields its methods touch fall into groups",
     "high-response": "a class that reaches this many distinct methods is hard to test alone, because its collaborators are part of its interface: narrow them",
-    "low-field-sharing": "more method pairs touch disjoint fields than shared ones, which is what a class holding two responsibilities looks like: check whether those groups are two classes",
     "data-clump": "the same parameters travel through several functions: make them one object with those functions as methods",
     "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
     "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
@@ -8461,7 +8460,7 @@ _DESIGN_ADVICE = {
 }
 _DESIGN_PILLAR_OF = {
     "global-state": "encapsulation", "long-parameter-list": "encapsulation", "data-clump": "encapsulation",
-    "wide-class": "metrics", "high-response": "metrics", "low-field-sharing": "metrics",
+    "high-response": "metrics",
     "long-function": "abstraction", "deep-nesting": "abstraction", "prefix-family": "abstraction",
     "shared-methods": "inheritance", "duplicate-method": "inheritance",
     "isinstance-chain": "polymorphism", "type-switch": "polymorphism",
@@ -8643,14 +8642,23 @@ def _design_py_fields(cls):  # implements: REQ-DESIGN-978
     return out
 
 
-def _design_lcom(methods, fields):  # implements: REQ-DESIGN-978
-    """LCOM1: pairs of methods sharing no instance field, minus the pairs that do,
-    floored at zero. Zero means every pair of methods has some state in common."""
+def _design_lcom(methods, fields):  # implements: REQ-DESIGN-980
+    """LCOM1 over the methods that actually touch state: pairs sharing no instance
+    field, minus the pairs that share one, floored at zero.
+
+    Methods that touch no field at all are excluded, not counted as disjoint from
+    everything. A pure helper has no state to share, so pairing it with every other
+    method measures nothing about how the class is split — it just adds one pair per
+    sibling. An independent review found this dominating the score on two builder
+    classes, and six field-less helpers on a one-field class scoring 26 against a
+    threshold of 20 with no split anywhere in the class."""
     touched = []
     for m in methods:
-        touched.append({n.attr for n in ast.walk(m)
-                        if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
-                        and n.value.id == "self" and n.attr in fields})
+        fs = {n.attr for n in ast.walk(m)
+              if isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name)
+              and n.value.id == "self" and n.attr in fields}
+        if fs:
+            touched.append(fs)
     apart = together = 0
     for i in range(len(touched)):
         for j in range(i + 1, len(touched)):
@@ -8659,6 +8667,22 @@ def _design_lcom(methods, fields):  # implements: REQ-DESIGN-978
             else:
                 apart += 1
     return max(0, apart - together)
+
+
+def _design_cohesion_skipped(tree):  # implements: REQ-DESIGN-979
+    """How many classes in this tree have two or more methods but no field the engine
+    can see, so their cohesion was not measured.
+
+    Reported rather than inferred: a class keeping its state somewhere `ast` cannot
+    follow (a `dict` subclass, `setattr`, a metaclass) yields no `low-field-sharing`
+    candidate, and an absent candidate is otherwise indistinguishable from a measured
+    pass."""
+    n = 0
+    for cls in [x for x in ast.walk(tree) if isinstance(x, ast.ClassDef)]:
+        methods = [m for m in cls.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))]
+        if len(methods) >= 2 and not _design_py_fields(cls):
+            n += 1
+    return n
 
 
 def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: REQ-DESIGN-978
@@ -8683,10 +8707,6 @@ def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: RE
         methods = [m for m in cls.body if isinstance(m, (ast.FunctionDef, ast.AsyncFunctionDef))]
         if not methods:
             continue
-        if len(methods) > DESIGN_WMC_MAX:
-            out.append(_design_finding("wide-class", rel, cls.lineno, cls.name,
-                                       "`{}` has {} methods (over {})".format(
-                                           cls.name, len(methods), DESIGN_WMC_MAX)))
         called = set()
         for m in methods:
             for n in ast.walk(m):
@@ -8702,16 +8722,15 @@ def _design_metrics(rel, tree):  # implements: ARCH-DESIGN-061  # implements: RE
                                        "`{}` reaches {} methods (over {}): {} of its own "
                                        "plus {} it calls".format(cls.name, rfc, DESIGN_RFC_MAX,
                                                                  len(methods), len(called))))
-        fields = _design_py_fields(cls)
-        if not fields or len(methods) < 2:
-            continue          # no shared state to lack — see `_design_py_fields`
-        lcom = _design_lcom(methods, fields)
-        if lcom > DESIGN_LCOM_MAX:
-            out.append(_design_finding("low-field-sharing", rel, cls.lineno, cls.name,
-                                       "`{}` scores LCOM {} (over {}) across {} methods "
-                                       "and {} field(s)".format(cls.name, lcom, DESIGN_LCOM_MAX,
-                                                                len(methods), len(fields))))
     return out
+
+
+def _design_cohesion_skipped_in(src):  # implements: REQ-DESIGN-979
+    """The skipped-cohesion count for one file's source, 0 when it does not parse."""
+    try:
+        return _design_cohesion_skipped(ast.parse(src))
+    except (SyntaxError, ValueError):
+        return 0
 
 
 def _design_python(rel, src):  # implements: REQ-DESIGN-950  # implements: REQ-DESIGN-951
@@ -8968,7 +8987,7 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DES
     """Print (or emit as JSON) the design candidates found in every non-test program-logic
     file under `code_root`, grouped by pillar. Read-only, always exit 0: this is advice a
     reader weighs, not a gate a build fails on."""
-    findings, n_files = [], 0
+    findings, n_files, skipped = [], 0, 0
     for fp, rel in _design_files(code_root, reqs_dir):
         try:
             with open(fp, encoding="utf-8", errors="ignore") as f:
@@ -8977,12 +8996,22 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DES
             continue
         n_files += 1
         findings.extend(_design_file(rel, src))
+        if rel.lower().endswith(".py"):
+            skipped += _design_cohesion_skipped_in(src)
     if as_json:
-        print(json.dumps({"files": n_files, "findings": findings}, indent=2, ensure_ascii=False))
+        # The machine surface carries the same caveats as the text one. A consumer
+        # dashboard reading `findings` and nothing else would otherwise render an empty
+        # metrics group as a clean bill of health on metrics that were never computed.
+        print(json.dumps({"files": n_files, "findings": findings,
+                          "metrics_scope": DESIGN_METRICS_SCOPE,
+                          "cohesion_skipped": skipped}, indent=2, ensure_ascii=False))
         return 0
     if not findings:
         print("No design candidates in {} source file(s) at the current thresholds.".format(n_files))
         print("note: " + DESIGN_METRICS_SCOPE)
+        if skipped:
+            print("note: cohesion not measured for {} class(es) with 2+ methods and no "
+                  "field this engine can see.".format(skipped))
         return 0
     for pillar in DESIGN_PILLARS:
         mine = [f for f in findings if f["pillar"] == pillar]
@@ -8994,6 +9023,9 @@ def cmd_design(code_root, reqs_dir=None, as_json=False):  # implements: ARCH-DES
         print("  -> " + "; ".join(dict.fromkeys(_DESIGN_ADVICE[f["kind"]] for f in mine)))
         if pillar == "metrics":
             print("  note: " + DESIGN_METRICS_SCOPE)
+            if skipped:
+                print("  note: cohesion not measured for {} class(es) with 2+ methods and no "
+                      "field this engine can see.".format(skipped))
         print("")
     print("{} candidate(s) in {} source file(s). Advisory only: a candidate is a shape worth a "
           "look, never a defect, and this never enters the gate.".format(len(findings), n_files))
@@ -9015,7 +9047,7 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_WMC_MAX", "DESIGN_RFC_MAX", "DESIGN_LCOM_MAX")
+               "DESIGN_RFC_MAX")
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949

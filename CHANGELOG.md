@@ -1,5 +1,59 @@
 # Changelog
 
+## plugin `v5.4.0` — 2026-09-05
+
+**The metrics pillar was calibrated, independently reviewed, and is now one metric
+instead of three.** v5.2.0 shipped WMC, RFC and LCOM1 on the strength of one repo and no
+review; the Senate refused that (`OVR`, two blocking requests undelivered). All three have
+now been measured over seven Python corpora and every flag judged by a reviewer who did
+not write them. Two metrics failed and are gone.
+
+**The measurement**, reproducible from the engine over any set of Python trees: 65 unique
+classes across 7 corpora, after collapsing 8 byte-identical copies and excluding
+`archive/`, `old/` and `backup/` directories — which hold successive saved versions of the
+same file, not independent classes. 14 classes flagged, a fire rate of **21.5%**. The
+first pass counted 26 and had to be thrown away: it was the same application class counted
+fifteen times across repos that hold copies of it.
+
+**The independent review: 10 of 14 confirmed, 4 refused — 71%**, below the 8-in-10 an
+independent confirmation is expected to clear. Per metric:
+
+| | confirmed | refused |
+|---|---:|---:|
+| `wide-class` (WMC) | 0 | 2 |
+| `high-response` (RFC) | 10 | 4 |
+| `low-field-sharing` (LCOM1) | 2 | 3 |
+
+**`wide-class` is dropped.** Zero confirmed flags, and across 65 classes it never once
+fired without `high-response` — RFC's formula is `methods + distinct calls`, so WMC is
+literally a term inside it, and RFC's own message already prints the method count.
+
+**LCOM1 was repaired and then dropped anyway.** The reviewer isolated two mechanical
+faults: a method touching no field intersected nothing, so every pair containing it counted
+as "apart" — six pure helpers on a one-field class scored 26 against a threshold of 20 with
+no split anywhere in the class — and LCOM over a single field is not a measurement at all.
+Both are fixed (`_design_lcom` now counts only methods that touch state; cohesion needs two
+fields). The repair made it *worse* as a signal: it stopped firing on both classes it was
+right about and kept firing on the two it was wrong about. Precision 0 of 2, so it is gone
+too. `_design_lcom` and `_design_py_fields` stay, tested — the coverage count reads the
+fields, and a future cohesion variant starts from this reading rather than from nothing.
+
+**RFC is kept at 71% precision, with its weakness printed rather than hidden.** All four
+refusals are the same failure: a class whose call count is *library* calls, not
+collaborators — a request router delegating to free functions, a GUI callback class, and a
+builder DSL over one shared accumulator. The pillar now names those three shapes in its own
+output, so a reader who meets one can dismiss the flag in seconds. That is the most an
+advisory signal at 71% can honestly ask for.
+
+**The coverage signal Dimon's blocking request asked for** (`v5.3.0` delivered half of it):
+`design --json` now carries `metrics_scope` and `cohesion_skipped` beside `findings`, so a
+machine reading the output gets the same caveats as a human reading the text, and the count
+of classes whose cohesion could not be measured is stated rather than inferred.
+
+Recorded in `REQ-DESIGN-980`, including the two facts that deflate the headline: six of the
+ten confirmed flags are copies of three distinct classes, and all ten sit in throwaway
+analysis scripts.
+
 ## plugin `v5.3.0` — 2026-09-05
 
 **The C&K metrics pillar went through a nine-senator audit and came back MODIFY**

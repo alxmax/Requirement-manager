@@ -575,14 +575,14 @@
 
 ## v5.2
 - [x] Senate review: is the C&K metrics pillar the right shape? | lane: ops
-- [ ] C&K pillar: an independent confirmation sample | lane: ops
+- [x] C&K pillar: an independent confirmation sample | lane: ops
       <!-- The Senate audit (runs/senate/2026-09-05_220602-senate-reqmap-ck-metrics-pillar.json,
            MODIFY) discharged four of six requests in v5.3.0. This one is open: ADR-0022 asks
            for a confirmation sample from a reviewer who did NOT author the check, with each
            verdict citing executed output and the refusal rate recorded. The sample today is
            1 of 1 and the reviewer was the author. Tacitus's blocking finding is that this
            repo has retracted an author-graded finding set twice in four days. -->
-- [ ] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
+- [x] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
       <!-- Musk's request, recorded not actioned: RFC's formula is `len(methods) + len(called)`,
            so WMC is literally a term inside it, and LCOM1's raw pair count grows mechanically
            with method count. On this repo all three fire on the same single class and have
