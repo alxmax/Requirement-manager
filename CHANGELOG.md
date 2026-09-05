@@ -1,5 +1,19 @@
 # Changelog
 
+## plugin `v4.2.1` — 2026-09-05
+
+**`SKILL.md`'s command list is generated from the registry.** It is the contract an assistant
+reads when it meets the engine on a fresh repo, and a blanket rename in the `v4.0.0` verb cut had
+left it documenting `scan` after it was gone, five different verbs under the name `sync`, `gate`
+twice (the second describing the lint), and `clarify`, `implement`, `retire`, `review` and
+`search` nowhere at all — a wrong name there is a wrong action on the user's repo. The list now
+lives in the same `<!--##REQMAP:COMMANDS##-->` region `SKILL.universal.md` already used, rendered
+from `COMMANDS` by `gen-integration` as a grouped bullet list, and RM028 fails the gate when it is
+stale. The hand-written prose around it is untouched. Both generated surfaces now walk one
+region table, so adding a third is one line.
+
+The paragraph claiming `check` "still works" is corrected: it was removed in `v4.0.0`.
+
 ## plugin `v4.2.0` — 2026-09-04
 
 **`audit`: every pass that discovers a problem, in one report.** The engine grew one verb per

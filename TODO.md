@@ -541,7 +541,7 @@
 - [x] `cmd_gen_integration` (line 768) writes `tool_definition.json` via the same bare text-mode open with no `newline` argument, so regenerating on a non-Windows box flips the whole committed CRLF file to LF even though the JSON content is unchanged | lane: ops  <!-- fixed 5f19eec -->
       <!-- LOW -- cosmetic but produces a large false diff on every POSIX regeneration; same root-cause pattern as the `_write_region` finding above, kept separate since it's a different function and a different target file. -->
 ## v4.1
-- [ ] Regenerate SKILL.md's command list from the COMMANDS registry | lane: ops
+- [x] Regenerate SKILL.md's command list from the COMMANDS registry | lane: ops
       <!-- The verb-cut refactor renamed the command list in
            plugin/skills/requirement-manager/SKILL.md with a blanket substitution, so the
            shipped contract now documents commands under the wrong names. Measured against

@@ -6282,6 +6282,23 @@ class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # 
         end = text.index("<!--##/REQMAP:COMMANDS##-->")
         self.assertEqual(text[start:end].strip(), table.strip())
 
+    def test_skill_md_list_is_the_registry(self):  # verifies: REQ-CMDREGISTRY-834#CASE-7
+        """The list an assistant reads on a fresh repo: one entry per registered verb, in
+        the registry's own groups, nothing documented that does not exist."""
+        body = R._generate_command_list()
+        documented = re.findall(r"^- `python scripts/reqmap\.py ([a-z-]+)", body, re.M)
+        expected = [n for n, s in R.COMMANDS.items() if not s.get("internal")]
+        self.assertEqual(sorted(documented), sorted(expected))
+        self.assertEqual(len(documented), len(set(documented)))
+        for group in ("**Author**", "**Build**", "**Read**"):
+            self.assertIn(group, body)
+        plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(R.__file__)))
+        with open(os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.md"),
+                  encoding="utf-8") as f:
+            m = R._REGION_RE.search(f.read())
+        self.assertIsNotNone(m)
+        self.assertEqual(m.group(2).strip(), body.strip())
+
     def test_integration_fresh_when_committed(self):  # verifies: REQ-CMDREGISTRY-834#CASE-5
         HERE = os.path.dirname(os.path.abspath(__file__))
         plugin_root = os.path.join(HERE, "..")          # plugin/
