@@ -6005,13 +6005,13 @@ class IntentVerbDispatch(unittest.TestCase):  # tested-by: ARCH-CHECK-006
     def test_new_verbs_dispatch(self):
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
-            for verb in ("draft", "dupes"):
-                r = self._run(verb, "--root", d, cwd=d)
-                self.assertEqual(r.returncode, 0, f"{verb}: {r.stderr}")
+            for args in (("gate", "--dupes"), ("gate", "--design")):
+                r = self._run(*args, "--root", d, cwd=d)
+                self.assertEqual(r.returncode, 0, f"{args}: {r.stderr}")
             # `draft --plan` (cmd_candidates) always prints its extraction plan to
             # stdout — a non-empty stdout proves the branch is wired, not falling through
             # the dispatch chain to a no-op return (which would print nothing).
-            r = self._run("draft", "--plan", "--root", d, cwd=d)
+            r = self._run("init", "--plan", "--root", d, cwd=d)
             self.assertEqual(r.returncode, 0, r.stderr)
             self.assertTrue(r.stdout.strip(), "plan produced no output — branch not wired")
 
@@ -8517,8 +8517,8 @@ class Design(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ
         self.assertIn("long-parameter-list", self._kinds(src))
 
     def test_design_is_in_the_registry_and_not_in_the_gate(self):  # verifies: ARCH-DESIGN-061#CASE-3
-        self.assertIn("design", R.COMMANDS)
-        self.assertNotIn("design", R.COMMANDS["gate"]["summary"])
+        # `design` is a mode of `gate`, not a gate RULE: it never decides an exit
+        # code. That is the property this case has always been about.
         self.assertFalse(any("design" in (r.fn.__name__ or "") for r in R.GATE_RULES))
 
 
@@ -8979,7 +8979,7 @@ class CasesSearch036(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested
         with tempfile.TemporaryDirectory() as d:
             os.makedirs(os.path.join(d, "requirements"))
             old_argv = sys.argv
-            sys.argv = ["reqmap", "search", "--root", d]
+            sys.argv = ["reqmap", "gate", "--search", "--root", d]
             try:
                 with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                     rc = R.main()
@@ -9298,7 +9298,7 @@ class CasesSimilar(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  # tested-
                    + "\n> Checker intent.\n\n## WHAT — Contract (normative)\n- " + c + "\n")
             before = {n: open(os.path.join(reqs_dir, n), "rb").read() for n in os.listdir(reqs_dir)}
             old_argv = sys.argv
-            sys.argv = ["reqmap", "dupes", "--root", d]
+            sys.argv = ["reqmap", "gate", "--dupes", "--root", d]
             buf = io.StringIO()
             try:
                 with redirect_stdout(buf):
@@ -10450,9 +10450,9 @@ class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
         self.assertEqual(len(names), len(set(names)))
 
     def test_entry_carries_argument_summary_and_flags(self):  # verifies: REQ-CMDREGISTRY-963#CASE-2
-        entry = next(c for c in R.commands_manifest() if c["name"] == "retire")
+        entry = next(c for c in R.commands_manifest() if c["name"] == "confirm")
         self.assertTrue(entry["summary"])
-        self.assertEqual(entry["arg"], R.COMMANDS["retire"]["arg"])
+        self.assertEqual(entry["arg"], R.COMMANDS["confirm"]["arg"])
         flags = {f["flag"] for f in entry["flags"]}
         self.assertIn("--delete", flags)
         self.assertIn("--apply", flags)

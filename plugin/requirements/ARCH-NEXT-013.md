@@ -71,7 +71,7 @@ CASE-8
 CASE-9
   Given  scannable files in the repo with no membership tag
   When   `next` runs with a code_root
-  Then   they are listed under "Untagged files" with a `reqmap.py draft` suggestion
+  Then   they are listed under "Untagged files" with a `reqmap.py init` suggestion
 
 CASE-10
   Given  a confirmed requirement with no scanned member, whose node in the committed `_map.json` records one
@@ -111,7 +111,7 @@ CASE-12
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana starts her day unsure what's most important. She runs `reqmap.py next` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 unreviewed" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
+- Ana starts her day unsure what's most important. She runs `reqmap.py gate --risk` and sees a header — "12 requirement(s) · 8 confirmed · 5 tested · 2 unreviewed" — followed by tidy buckets: "Orphans" (requirements with no code) on top, then "Needs tests", then "Drafts to review". One item is tagged `[REVIEW]` and names the exact file to open. She picks the top item and gets to work, no HTML map needed.
 
 **Current implementation**
 - `cmd_next`, `_risk_score`, and `_scan_untagged` in `reqmap.py` — prints the header, builds a minimal node per requirement, collects `_risk_signals`, orders each bucket by `risk:` score then id, truncates to the top-N unless `--all`, and prints `RISK_ADVICE` text. The draft intent-dedup is in `_risk_signals` (shared with the Risk tab). `_scan_untagged` adds the untagged-files bucket using the same walk as `scan_members`.
@@ -337,7 +337,7 @@ CASE-1 — only the top 3 of 5 items print without --all
 CASE-2 — a truncated bucket prints a "... N more" line
   Given  5 drafts in one bucket, shown with default `top_n=3`
   When   `cmd_next` runs
-  Then   its output contains "more — run `reqmap.py next --all`"
+  Then   its output contains "more — run `reqmap.py gate --risk --all`"
 
 CASE-3 — --all prints every item and drops the "more" line
   Given  5 drafts in one bucket

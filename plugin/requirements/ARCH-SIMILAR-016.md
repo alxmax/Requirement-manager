@@ -77,7 +77,7 @@ CASE-7
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana suspects two of her requirements overlap. She runs `reqmap.py dupes` and sees a pair
+- Ana suspects two of her requirements overlap. She runs `reqmap.py gate --dupes` and sees a pair
   scored `0.82` with the shared words "token, session, expire" listed. She opens both, realises
   one is a subset of the other, and merges them before either grows its own divergent code.
 

@@ -48,7 +48,7 @@ CASE-5
   Given  existing untagged code
   When   `init` runs
   Then   it drafts at least one requirement, reports the tracked count, and its summary
-         points at `reqmap.py next`
+         points at `reqmap.py gate --risk`
 
 CASE-6
   Given  a repo with no extractable code
@@ -83,7 +83,7 @@ CASE-7
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana inherits a codebase with no requirements at all. She runs `reqmap.py init` once: it creates the `requirements/` folder, seeds a `.reqmapignore`, drafts requirements from her untagged code, builds the drift lock and the map, then prints a short summary that ends with "now run `reqmap.py next`". In one command her repo went from untracked to gate-passing and navigable, and she knows exactly where to go next.
+- Ana inherits a codebase with no requirements at all. She runs `reqmap.py init` once: it creates the `requirements/` folder, seeds a `.reqmapignore`, drafts requirements from her untagged code, builds the drift lock and the map, then prints a short summary that ends with "now run `reqmap.py gate --risk`". In one command her repo went from untracked to gate-passing and navigable, and she knows exactly where to go next.
 
 **Current implementation**
 - `cmd_init` in `reqmap.py` — creates `requirements/`, conditionally seeds `.reqmapignore` via `_reqmapignore_seed` (which applies the self-hosting exception), then calls `cmd_extract` → `cmd_check(update_lock=True)` → `cmd_map`, and prints the guided summary.
@@ -181,7 +181,7 @@ satisfies: [ARCH-INIT-012]
 Every bullet below is binding.
 - `init` drafts requirements from untagged code, writes the lock, then builds the map, in that
   order. When it finishes, the repo passes the gate and has a map.
-- `init` ends with a short summary naming one next command: `reqmap.py next`. Not a list of
+- `init` ends with a short summary naming one next command: `reqmap.py gate --risk`. Not a list of
   every option.
 - If nothing was drafted, `init` says so in plain words and points at `new`. It never prints a
   count summary that hides an empty result.
@@ -199,7 +199,7 @@ CASE-1 — the lock and map cover the requirements init just drafted
 CASE-2 — the summary names next, not the full command list
   Given  a repo with extractable code
   When   `cmd_init` runs
-  Then   its output contains "reqmap.py next" but names none of "confirm", "dupes", "search" or "coverage"
+  Then   its output contains "reqmap.py gate --risk" but names none of "confirm", "dupes", "search" or "coverage"
 
 CASE-3 — an extraction-free repo gets a distinct empty-result message
   Given  a repo containing only `README.txt` (no extractable code)
@@ -209,7 +209,7 @@ CASE-3 — an extraction-free repo gets a distinct empty-result message
 CASE-4 — a second init run exits clean and reprints the summary
   Given  a repo already initialized by one `cmd_init` run
   When   `cmd_init` runs again
-  Then   it exits 0 and its output again contains "reqmap.py next"
+  Then   it exits 0 and its output again contains "reqmap.py gate --risk"
 
 CASE-5 — a hand-authored requirement and .reqmapignore survive a re-run
   Given  a hand-written `requirements/CORE-FOO-001.md` and an existing `.reqmapignore`

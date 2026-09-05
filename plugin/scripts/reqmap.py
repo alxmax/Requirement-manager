@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.1"
+MAP_ENGINE_VERSION = "2026-09-05.2"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -264,12 +264,38 @@ COMMANDS = {
     "init": {
         "summary": (
             "First-use bootstrap: scaffold requirements/ and .reqmapignore if missing, "
-            "draft requirements from existing code/prose, build the lock and map, and "
+            "draft requirements from existing code and prose, build the lock and map, and "
             "print guided next steps. Idempotent — safe to re-run; never clobbers an "
-            "existing .reqmapignore. Run once per repo to get started."
+            "existing .reqmapignore. --plan emits the extraction plan as JSON and writes no "
+            "requirement files, for looking before authoring. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "plan",
+                "flag": "--plan",
+                "type": "bool",
+                "help": (
+                    "Emit the extraction plan as JSON instead of writing requirement files."
+                ),
+            },
+            {
+                "name": "out",
+                "flag": "--out",
+                "type": "str",
+                "help": (
+                    "With --plan: write the plan JSON here ('-' or omitted = stdout)."
+                ),
+            },
+            {
+                "name": "md_glob",
+                "flag": "--md-glob",
+                "type": "str",
+                "help": (
+                    "With --plan: also scan these non-code globs for capabilities (repeatable)."
+                ),
+            },
             {
                 "name": "wipe",
                 "flag": "--wipe",
@@ -325,14 +351,124 @@ COMMANDS = {
     },
     "gate": {
         "summary": (
-            "Run the commit/CI gate (report-only): verify every code tag resolves to a "
-            "real requirement, every confirmed requirement has at least one implements: "
-            "member, and drift has not been introduced since the last sync. Exits "
-            "non-zero on link-sync errors only (drift and test-link integrity are "
-            "warnings). Never touches _reqlock.json. Run before every commit and in CI."
+            "The commit/CI verdict, and every read-only question you can ask the corpus. "
+            "Bare, it verifies that every code tag resolves to a real requirement, that "
+            "every confirmed requirement has at least one implements: member, and that "
+            "drift has not been introduced since the last sync, then checks requirement "
+            "readability and map freshness. Exits non-zero on link-sync errors only. Never "
+            "writes anything. The mode flags answer one question each instead of running "
+            "the verdict: --audit for the whole problem report, --risk for what to do next, "
+            "--show for one requirement's dossier, --search to rank by relevance, --dupes "
+            "for overlapping contracts, --design for the code review, --review and "
+            "--implement for the two machine-readable plans. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "mode_audit",
+                "flag": "--audit",
+                "type": "bool",
+                "help": (
+                    "Print every pass that discovers a problem as one report: the gate, corpus risk, duplicate contracts, design signals and tag coverage. The exit code still comes from the gate alone."
+                ),
+            },
+            {
+                "name": "mode_risk",
+                "flag": "--risk",
+                "type": "bool",
+                "help": (
+                    "Print the corpus risk snapshot and the actionable signals, most urgent first."
+                ),
+            },
+            {
+                "name": "mode_show",
+                "flag": "--show",
+                "type": "str",
+                "help": (
+                    "Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals."
+                ),
+            },
+            {
+                "name": "mode_search",
+                "flag": "--search",
+                "type": "str",
+                "help": (
+                    "Rank requirements by lexical relevance to a free-text query."
+                ),
+            },
+            {
+                "name": "mode_dupes",
+                "flag": "--dupes",
+                "type": "bool",
+                "help": (
+                    "Rank requirement pairs whose contracts overlap, most similar first."
+                ),
+            },
+            {
+                "name": "mode_design",
+                "flag": "--design",
+                "type": "bool",
+                "help": (
+                    "Print the advisory design review of the code. Never part of the verdict."
+                ),
+            },
+            {
+                "name": "mode_review",
+                "flag": "--review",
+                "type": "str",
+                "help": (
+                    "Emit the deterministic review plan for one requirement, as JSON."
+                ),
+            },
+            {
+                "name": "mode_implement",
+                "flag": "--implement",
+                "type": "str",
+                "help": (
+                    "Emit the implementation brief for one requirement: obligations, required tags, similar existing code."
+                ),
+            },
+            {
+                "name": "show_all",
+                "flag": "--all",
+                "type": "bool",
+                "help": (
+                    "With --risk: expand every bucket instead of the top few."
+                ),
+            },
+            {
+                "name": "untagged",
+                "flag": "--untagged",
+                "type": "bool",
+                "help": (
+                    "With --risk: report membership-tag coverage per directory."
+                ),
+            },
+            {
+                "name": "as_badge",
+                "flag": "--badge",
+                "type": "bool",
+                "help": (
+                    "With --risk: print the coherence score as a badge string."
+                ),
+            },
+            {
+                "name": "threshold",
+                "flag": "--threshold",
+                "type": "str",
+                "help": (
+                    "With --dupes: override the similarity threshold."
+                ),
+            },
+            {
+                "name": "top",
+                "flag": "--top",
+                "type": "int",
+                "help": (
+                    "With --search or --dupes: how many results to print."
+                ),
+            },
             {
                 "name": "strict",
                 "flag": "--strict",
@@ -361,13 +497,40 @@ COMMANDS = {
     },
     "sync": {
         "summary": (
-            "Rescan code members, advance the drift baseline, and regenerate the map in "
-            "one step (a committed _findings.md is refreshed too). Run after editing "
-            "requirement files or tagging new code members. "
-            "Use --accept-drift when a confirmed or implemented contract changed."
+            "The write path. Rescan code members, advance the drift baseline, and "
+            "regenerate the map, the findings file and the generated integration artifacts "
+            "in one step. Run after editing requirement files or tagging new code members. "
+            "--accept-drift is required when a confirmed or implemented contract changed. "
+            "--suggest-verifies proposes per-criterion verifies: tags, and writes them with "
+            "--apply. "
+       
         ),
         "arg": None,
         "params": [
+            {
+                "name": "mode_suggest",
+                "flag": "--suggest-verifies",
+                "type": "bool",
+                "help": (
+                    "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
+                ),
+            },
+            {
+                "name": "do_apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": (
+                    "With --suggest-verifies: write the proposed tags into the test files."
+                ),
+            },
+            {
+                "name": "findings",
+                "flag": "--findings",
+                "type": "bool",
+                "help": (
+                    "Also regenerate the aggregated open-questions file."
+                ),
+            },
             {
                 "name": "accept_drift",
                 "flag": "--accept-drift",
@@ -386,190 +549,73 @@ COMMANDS = {
             },
         ],
     },
-    "next": {
-        "summary": (
-            "Show what to do next: a prioritized, actionable list of risk buckets "
-            "(Orphans, Needs tests, Needs intent review, Drafts to review). "
-            "Read-only, always exits 0. The best follow-up command to run after any action."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "show_all",
-                "flag": "--all",
-                "type": "bool",
-                "help": "Expand all buckets to show every item instead of just the top few.",
-            },
-        ],
-    },
-    "show": {
-        "summary": (
-            "Print a consolidated dossier for one requirement: header, intent, Contract "
-            "bullets, dependencies in both directions, code members grouped by role with "
-            "file:line, open Verify intent questions, and risk signals. Answers 'what "
-            "does this do / where is X' in one command. Read-only."
-        ),
-        "arg": "ID",
-        "params": [],
-    },
-    "audit": {
-        "summary": (
-            "Run every pass that discovers a problem and print one report: the gate, "
-            "corpus risk, duplicate contracts, design candidates, tag coverage, the "
-            "exemptions in force and the shape of the corpus. Read-only; the exit code "
-            "comes from the gate alone, because everything else is advice."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "strict",
-                "flag": "--strict",
-                "type": "bool",
-                "help": "Promote the gate's drift and test-link warnings to errors, as `gate --strict` does.",
-            },
-        ],
-    },
-    "dupes": {
-        "summary": (
-            "Flag requirement pairs whose contracts overlap (TF-IDF cosine similarity), "
-            "so a divergent re-implementation is caught before it lands. Read-only, "
-            "advisory — a human decides if a flagged pair is a real duplicate."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "threshold",
-                "flag": "--threshold",
-                "type": "float",
-                "help": "Cosine similarity cutoff in (0,1] for reporting a pair (default 0.35). Lower = more pairs flagged.",
-            },
-        ],
-    },
-    "search": {
-        "summary": (
-            "Rank requirements by lexical relevance to a free-text query (same TF-IDF "
-            "cosine as dupes, reused). Read-only. Prints each hit's score, and says so "
-            "explicitly when nothing clears the relevance floor rather than showing a "
-            "spurious top result. Lexical, not synonym-aware."
-        ),
-        "arg": "QUERY",
-        "params": [
-            {
-                "name": "top",
-                "flag": "--top",
-                "type": "int",
-                "help": "Maximum number of ranked matches to show (default 5).",
-            },
-        ],
-    },
-    "draft": {
-        "summary": (
-            "Draft one requirement per untagged file (code and prose). Input is existing "
-            "untagged source code and Markdown. Emits draft requirements — never "
-            "confirmed. After drafting, run gate and report the result. Remind the user "
-            "to review and confirm the real ones."
-        ),
-        "arg": None,
-        "params": [],
-    },
     "confirm": {
         "summary": (
-            "Mark a reviewed requirement as confirmed — the human sign-off step. Flips "
-            "status to confirmed in the frontmatter. The engine refuses if the "
-            "requirement has no implements: member (a confirmed requirement must point "
-            "to code). Run sync after confirming."
+            "The human sign-off, and its inverse. Flips a reviewed requirement's status to "
+            "confirmed; the engine refuses if it has no implements: member, because a "
+            "confirmed requirement must point at code. --retire takes a requirement out of "
+            "service instead: it prints the blast radius first, deprecates by default, and "
+            "writes nothing without --apply. "
+       
         ),
         "arg": "ID",
-        "params": [],
+        "params": [
+            {
+                "name": "mode_retire",
+                "flag": "--retire",
+                "type": "str",
+                "help": (
+                    "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+                ),
+            },
+            {
+                "name": "delete",
+                "flag": "--delete",
+                "type": "bool",
+                "help": (
+                    "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
+                ),
+            },
+            {
+                "name": "do_apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": (
+                    "With --retire: actually write the change. Without it, the run is a dry report."
+                ),
+            },
+            {
+                "name": "force",
+                "flag": "--force",
+                "type": "bool",
+                "help": (
+                    "With --retire: proceed even though dependents still point at this requirement."
+                ),
+            },
+        ],
     },
     "clarify": {
         "summary": (
             "Ask what a requirement has not answered yet: vague terms with no threshold, "
             "numbers with no unit, unbounded quantities, clauses with no case, a missing "
-            "failure path. Read-only, always exit 0, never a gate rule. Run it before "
-            "implementing so the ambiguity is resolved in the requirement, not guessed in code."
+            "failure path. Read-only, always exit 0, never a gate rule. --decompose is the "
+            "write half of the same question: it scaffolds an over-scoped requirement's "
+            "clauses into requirements of their own. Run it before implementing, so the "
+            "ambiguity is resolved in the requirement instead of guessed in code. "
+       
         ),
         "arg": "AREA-NAME-NNN",
         "params": [
+            {
+                "name": "decompose",
+                "flag": "--decompose",
+                "type": "bool",
+                "help": (
+                    "Scaffold an over-scoped requirement's clauses into requirements of their own."
+                ),
+            },
             {"name": "as_json", "flag": "--json", "type": "bool",
              "help": "Emit the questions as JSON for an agent to answer."},
-        ],
-    },
-    "implement": {
-        "summary": (
-            "Emit the brief for implementing one requirement in code: its obligations, its "
-            "cases, the exact tags the new code must carry, where similar code already lives, "
-            "and the command that proves the work landed. Writes no code and no file."
-        ),
-        "arg": "AREA-NAME-NNN",
-        "params": [
-            {"name": "as_json", "flag": "--json", "type": "bool",
-             "help": "Emit the brief as JSON for a coding agent."},
-        ],
-    },
-    "retire": {
-        "summary": (
-            "Take a requirement out of service. Prints the blast radius first — dependents, "
-            "children, members, and the files where it was the only tagged requirement. "
-            "Refuses while dependents exist unless --force. Deprecates by default (reversible); "
-            "--delete also removes the block, its lock entries and its membership tags, never a "
-            "function body. Nothing is written without --apply."
-        ),
-        "arg": "AREA-NAME-NNN",
-        "params": [
-            {"name": "delete", "flag": "--delete", "type": "bool",
-             "help": "Remove the requirement outright instead of marking it deprecated."},
-            {"name": "do_apply", "flag": "--apply", "type": "bool",
-             "help": "Actually perform the retirement; without it nothing is written."},
-            {"name": "force", "flag": "--force", "type": "bool",
-             "help": "Proceed despite dependents, or on a dirty working tree."},
-            {"name": "as_json", "flag": "--json", "type": "bool",
-             "help": "Emit the plan (and what was applied) as JSON."},
-        ],
-    },
-    "review": {
-        "summary": (
-            "Emit a JSON review plan (intent, contract, acceptance criteria, structural "
-            "anchors) for all requirements or one. Used as an AI feed for semantic "
-            "quality review. Read-only."
-        ),
-        "arg": "ID",
-        "params": [],
-    },
-    "design": {
-        "summary": (
-            "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. "
-            "encapsulation (module state written from functions, long parameter lists, data "
-            "clumps), abstraction (long or deeply nested functions, prefix families), "
-            "inheritance (unrelated classes sharing methods, duplicated method bodies) and "
-            "polymorphism (isinstance chains, equality switches), standards (file and line "
-            "length, public definitions without a docstring, definitions per file). Read-only, "
-            "exit 0, never part of the gate; every threshold is tunable in requirements/_config.json."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "json",
-                "flag": "--json",
-                "type": "bool",
-                "help": "Emit the findings as a JSON object {files, findings[]}.",
-            },
-        ],
-    },
-    "suggest-verifies": {
-        "summary": (
-            "Propose `# verifies: <id>#CASE-N` tags for tests already named after the "
-            "criterion they check (e.g. `test_ac3_...`), so per-criterion coverage can "
-            "be adopted on an existing corpus. Read-only; --apply writes the tags."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "apply",
-                "flag": "--apply",
-                "type": "bool",
-                "help": "Write the proposed tags into the test files (ambiguous matches are never written).",
-            },
         ],
     },
 }
@@ -607,10 +653,9 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
 # single source of truth, so the grouping the help text and the viewer both show is
 # declared here once rather than restated in each surface.
 COMMAND_GROUPS = (
-    ("author", ("init", "new", "draft", "clarify", "confirm")),
-    ("build", ("implement", "gate", "sync", "retire")),
-    ("read", ("audit", "next", "show", "search", "dupes", "design", "review",
-              "suggest-verifies", "translate")),
+    ("author", ("init", "new", "clarify", "confirm")),
+    ("build", ("sync",)),
+    ("read", ("gate",)),
 )
 
 
@@ -8847,6 +8892,34 @@ def main():
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="suggest-verifies: write the proposed `verifies:` tags into the test files")
+    # Mode flags: the read-only queries that used to be their own verbs. The work
+    # they do is unchanged — only the entry point moved, so `gate` is the one place
+    # a reader asks the corpus anything and `sync` the one place a write happens.
+    ap.add_argument("--audit", dest="mode_audit", action="store_true",
+                    help="gate: also print risk, duplicate contracts, design signals and tag coverage")
+    ap.add_argument("--risk", dest="mode_risk", action="store_true",
+                    help="gate: print the corpus risk snapshot and what to do next")
+    ap.add_argument("--show", dest="mode_show", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: print one requirement's dossier")
+    ap.add_argument("--search", dest="mode_search", metavar="QUERY", nargs="?", default=None,
+                    const="",
+                    help="gate: rank requirements by lexical relevance to a query")
+    ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: emit the review plan for one requirement")
+    ap.add_argument("--implement", dest="mode_implement", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="gate: emit the implementation brief for one requirement")
+    ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
+                    help="gate: rank requirement pairs whose contracts overlap")
+    ap.add_argument("--design", dest="mode_design", action="store_true",
+                    help="gate: print the advisory design review of the code")
+    ap.add_argument("--suggest-verifies", dest="mode_suggest", action="store_true",
+                    help="sync: propose per-criterion `verifies:` tags (--apply writes them)")
+    ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="?", default=None,
+                    const="",
+                    help="confirm: take a requirement out of service instead of confirming it")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -8864,7 +8937,7 @@ def main():
         if not a.arg:
             print("usage: reqmap new AREA-NAME-NNN   |   reqmap new --from-todo \"<todo name>\" --id AREA-NAME-NNN"); return 2
         return cmd_new(reqs_dir, tmpl, a.arg)
-    if a.cmd == "init":
+    if a.cmd == "init" and not a.plan:
         return cmd_init(reqs_dir, code_root, wipe=a.wipe, no_site=a.no_site)
 
     reqs = load_requirements(reqs_dir)
@@ -8872,37 +8945,51 @@ def main():
     # asked for members. --cache stays on scan_members, the only scanner that implements
     # it - see scan_all's docstring for why it is not duplicated there.
     members, _ac_cover, _level_cover = scan_all(code_root, reqs_dir, cache=a.cache)
-    if a.cmd == "next":
-        if a.as_badge:
-            return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
-        if a.as_json:
-            return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
-        if a.untagged:
-            return cmd_coverage(reqs, members, code_root, reqs_dir, False)
-        cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
-                   headline_only=True)
-        return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
-    if a.cmd == "show":
-        if not a.arg:
-            print("usage: reqmap show <ID>"); return 2
-        # scan_all above (the non-cache path) already produced level_cover in the same
-        # walk; only re-walk via scan_test_levels when --cache forced the
-        # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
-        levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
-        return cmd_show(reqs, members, a.arg, levels)
-    if a.cmd == "audit":
-        return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
-                         as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
-    if a.cmd == "dupes":
-        return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD, members, top=a.top)
-    if a.cmd == "search":
-        if not a.arg:
-            print("usage: reqmap search \"<query>\"   [--top N]"); return 2
-        return cmd_search(reqs, a.arg, a.top if a.top is not None else SEARCH_TOP,
-                          reqs_dir=reqs_dir)
-    if a.cmd == "design":
-        return cmd_design(code_root, reqs_dir, as_json=a.as_json)
+    if a.cmd == "init":            # init --plan: the read-only extraction plan
+        md_globs = []
+        for g in (a.md_glob or []):
+            md_globs += [x.strip() for x in g.split(",") if x.strip()]
+        return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
     if a.cmd == "gate":
+        if a.mode_audit:
+            return cmd_audit(reqs, members, reqs_dir, code_root, strict=a.strict,
+                             as_json=a.as_json, ac_cover=_ac_cover, level_cover=_level_cover)
+        if a.mode_risk:
+            if a.as_badge:
+                return cmd_health(reqs, members, reqs_dir, False, True, code_root=code_root)
+            if a.as_json:
+                return cmd_health(reqs, members, reqs_dir, True, False, code_root=code_root)
+            if a.untagged:
+                return cmd_coverage(reqs, members, code_root, reqs_dir, False)
+            cmd_health(reqs, members, reqs_dir, False, False, code_root=code_root,
+                       headline_only=True)
+            return cmd_next(reqs, members, a.show_all, code_root=code_root, reqs_dir=reqs_dir)
+        if a.mode_show is not None:
+            if not a.mode_show:
+                print("usage: reqmap gate --show <ID>"); return 2
+            # scan_all above (the non-cache path) already produced level_cover in the same
+            # walk; only re-walk via scan_test_levels when --cache forced the
+            # scan_members-only path (cache is scan_members-only, see scan_all's docstring).
+            levels = _level_cover if _level_cover is not None else scan_test_levels(code_root, reqs_dir)
+            return cmd_show(reqs, members, a.mode_show, levels)
+        if a.mode_search is not None:
+            if not a.mode_search:
+                print("usage: reqmap gate --search \"<query>\"   [--top N]"); return 2
+            return cmd_search(reqs, a.mode_search, a.top if a.top is not None else SEARCH_TOP,
+                              reqs_dir=reqs_dir)
+        if a.mode_review is not None:
+            if not a.mode_review:
+                print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
+            return cmd_review(reqs, a.mode_review)
+        if a.mode_implement is not None:
+            if not a.mode_implement:
+                print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
+            return cmd_implement(reqs, members, a.mode_implement, as_json=a.as_json)
+        if a.mode_dupes:
+            return cmd_similar(reqs, a.threshold if a.threshold is not None else SIMILAR_THRESHOLD,
+                               members, top=a.top)
+        if a.mode_design:
+            return cmd_design(code_root, reqs_dir, as_json=a.as_json)
         # The whole verdict, in the order every hook and CI already ran it: link sync +
         # drift + test-link, then requirement readability, then map freshness. They were
         # three commands because they were written on three days, not because a caller
@@ -8919,6 +9006,9 @@ def main():
             rc = cmd_map(reqs, members, reqs_dir, code_root, True, ac_cover=_ac_cover) or rc
         return rc
     if a.cmd == "sync":
+        if a.mode_suggest:
+            return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
+                                        ac_cover=_ac_cover, apply_tags=a.do_apply)
         # Before the gate, not after: the generated integration artifacts are derived
         # from the command registry, and RM028 reports them stale. Regenerating them
         # downstream of a check that fails ON them can never converge.
@@ -8967,15 +9057,6 @@ def main():
             print("sync: gate failed — the map was NOT regenerated. Fix the errors above "
                   "and re-run `sync`, or run `map` explicitly.", file=sys.stderr)
         return rc
-    if a.cmd == "draft":
-        if a.plan:
-            md_globs = []
-            for g in (a.md_glob or []):
-                md_globs += [x.strip() for x in g.split(",") if x.strip()]
-            return cmd_candidates(reqs, members, code_root, reqs_dir, a.out, md_globs)
-        return cmd_extract(reqs, members, code_root, reqs_dir)
-    if a.cmd == "review":
-        return cmd_review(reqs, a.arg)
     if a.cmd == "clarify":
         if a.decompose:
             # scaffolding a clause into its own requirement is the write half of the
@@ -8983,22 +9064,15 @@ def main():
             return cmd_lint(reqs, strict=False, members=members, decompose=True,
                             reqs_dir=reqs_dir)
         return cmd_clarify(reqs, a.arg, as_json=a.as_json)
-    if a.cmd == "implement":
-        if not a.arg:
-            print("usage: reqmap implement AREA-NAME-NNN"); return 2
-        return cmd_implement(reqs, members, a.arg, as_json=a.as_json)
-    if a.cmd == "retire":
-        if not a.arg:
-            print("usage: reqmap retire AREA-NAME-NNN [--delete] [--apply]"); return 2
-        return cmd_retire(reqs, members, reqs_dir, a.arg, delete=a.delete,
-                          do_apply=a.do_apply, force=a.force, as_json=a.as_json,
-                          code_root=code_root)
-    if a.cmd == "suggest-verifies":
-        return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
-                                    ac_cover=_ac_cover, apply_tags=a.do_apply)
     if a.cmd == "confirm":
+        if a.mode_retire is not None:
+            if not a.mode_retire:
+                print("usage: reqmap confirm --retire AREA-NAME-NNN"); return 2
+            return cmd_retire(reqs, members, reqs_dir, a.mode_retire, delete=a.delete,
+                              do_apply=a.do_apply, force=a.force, as_json=a.as_json,
+                              code_root=code_root)
         if not a.arg:
-            print("usage: reqmap confirm AREA-NAME-NNN"); return 2
+            print("usage: reqmap confirm AREA-NAME-NNN   |   reqmap confirm --retire AREA-NAME-NNN"); return 2
         return cmd_promote(reqs, members, a.arg)
 
 

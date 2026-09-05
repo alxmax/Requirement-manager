@@ -60,7 +60,7 @@ CASE-5
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana writes `SYS-SSOT-001` for "specs and code stay in sync", then adds
-  `satisfies: [SYS-SSOT-001]` to the gate and the map requirements. Running `reqmap.py show
+  `satisfies: [SYS-SSOT-001]` to the gate and the map requirements. Running `reqmap.py gate --show
   SYS-SSOT-001` now lists those features under "Satisfied by", and `show` on the gate lists
   the need under "Satisfies (upstream)". When she writes a need but forgets to point any
   requirement at it, the gate warns that the need is unaddressed.

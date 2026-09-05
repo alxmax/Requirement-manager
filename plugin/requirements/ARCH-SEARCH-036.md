@@ -70,7 +70,7 @@ CASE-4
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
 - Ana half-remembers there is a requirement about "detecting when a contract changes against
-  the lock" but not its id. She runs `reqmap.py search "detect drift when a contract changes
+  the lock" but not its id. She runs `reqmap.py gate --search "detect drift when a contract changes
   against the lock"` and `ARCH-DRIFT-003` comes back first with its score, ahead of the related
   member-drift requirement — she opens the right file directly. Later she searches for a phrase
   no requirement uses; instead of a misleading top guess, `search` tells her the best score is
