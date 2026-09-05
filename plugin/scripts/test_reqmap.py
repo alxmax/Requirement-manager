@@ -4067,6 +4067,25 @@ class ImplExemptLayers(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # teste
             members = R.scan_members(d, d)
             self.assertEqual(R._link_sync_errors(reqs, members), [])
 
+    def test_gate_warns_on_an_aggregate_covered_by_nothing(self):  # verifies: REQ-TRACE-935#CASE-2
+        """An aggregate is exempt from implements and tested-by because its
+        `depends_on` covers it. An empty list claims the exemption and supplies
+        nothing. The `confirm` verb refused this until v5.0.0 folded it away; nothing
+        replaced the guard, and a confirmed aggregate with `depends_on: []` passed the
+        gate silently until RM031."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "REQ-AGG-004.md"),
+                   REQ.format(id="REQ-AGG-004", status="confirmed", layer="aggregate",
+                              extra="depends_on: []\n", title="Empty agg"))
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(R.Workspace(reqs, {}, d, d), False)
+        out = buf.getvalue()
+        self.assertIn("RM031", out)
+        self.assertIn("REQ-AGG-004", out)
+        self.assertEqual(rc, 0, "RM031 is a warning, never a build failure")
+
     def test_aggregate_is_not_flagged_unimplemented_by_risk(self):
         node = {"status": "confirmed", "layer": "aggregate", "members": [],
                 "verify": [], "test_exempt": None}
@@ -8357,7 +8376,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
         found = R._design_file(name, src)
         return sorted(f["kind"] for f in found if f["pillar"] == "metrics")
 
-    def test_design_names_what_it_did_not_measure(self):  # verifies: REQ-DESIGN-978#CASE-7
+    def test_design_names_what_it_did_not_measure(self):  # verifies: REQ-DESIGN-978#CASE-4
         """An empty metrics block on a subclass-heavy repo would otherwise read as 'your
         classes are fine' when it means 'the two metrics that would have spoken were never
         computed'. Asserted on both paths: findings present, and none at all."""

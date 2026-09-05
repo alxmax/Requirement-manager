@@ -77,7 +77,7 @@ CASE-7
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana runs `reqmap.py health` and sees `94/100`, with lines noting 2 requirements have
+- Ana runs `reqmap.py gate --risk` and sees `94/100`, with lines noting 2 requirements have
   no tests and 1 has drifted from its lock. The number is high, so the corpus is healthy;
   she wires `health --json` into CI so the score shows as a badge on every pull request.
 

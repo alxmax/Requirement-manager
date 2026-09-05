@@ -75,7 +75,7 @@ CASE-6
 
 **Example**
 <!-- Plain-language story; the Contract + Acceptance above are the precise version. -->
-- Ana finishes editing a requirement and runs `reqmap.py lint`. Warnings are advisory, so
+- Ana finishes editing a requirement and runs `reqmap.py gate`. Warnings are advisory, so
   her build stays green. In CI she uses `lint --strict`, which fails the build the day a
   teammate deletes a requirement's Acceptance section — but never on a style warning.
 

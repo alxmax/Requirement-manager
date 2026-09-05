@@ -11,15 +11,15 @@ description: Use on-demand to AI-review the SEMANTIC quality of requirement file
 # Requirement quality review (AI — advisory)
 
 This skill is the **out-of-band AI consumer** of the deterministic plan emitted by
-`reqmap review`. The engine never calls an LLM; the AI assistant makes the semantic
+`reqmap.py gate --review`. The engine never calls an LLM; the AI assistant makes the semantic
 judgements here. **This is advisory only — it is NEVER part of the gate, and the AI
 NEVER edits a requirement file.** A human decides what to act on.
 
 ## Deterministic complement
 
-Before invoking this skill, run `python scripts/reqmap.py lint` — it catches mechanical
-structural issues (missing Contract/Acceptance sections, over-long sentences, stacked
-conditions) that do not require AI judgement. Fix lint findings first; this skill covers
+Before invoking this skill, run `python scripts/reqmap.py gate` — its readability half
+catches mechanical structural issues (missing Contract/Acceptance sections, over-long sentences, stacked
+conditions) that do not require AI judgement. Fix those findings first; this skill covers
 the semantic layer lint cannot reach. Add `lint_exempt: [<check>]` to a requirement's
 frontmatter to silence a lint check that is intentionally violated (e.g.
 `lint_exempt: [ac-count-high]` for a requirement whose many ACs are by design).
@@ -28,8 +28,8 @@ frontmatter to silence a lint check that is intentionally violated (e.g.
 
 1. **Get the plan** (deterministic, read-only — safe to run anywhere):
    ```bash
-   python scripts/reqmap.py review            # whole corpus
-   python scripts/reqmap.py review AREA-NAME-NNN   # one requirement
+   python scripts/reqmap.py gate --review            # whole corpus
+   python scripts/reqmap.py gate --review AREA-NAME-NNN   # one requirement
    ```
    The JSON carries each requirement's prose + structural `anchors`, a `coverage_summary`,
    and the three `categories` you judge.

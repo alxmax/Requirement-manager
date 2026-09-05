@@ -81,11 +81,11 @@ inputs:
     required: false
     default: '3.x'
   freshness:
-    description: 'Also run `reqmap.py map --check` so a stale or never-committed map/lock fails the build. Silent in a repo that does not track a map. Set to "false" to disable.'
+    description: 'Keep the gate''s committed-map freshness half, so a stale or never-committed map/lock fails the build. Silent in a repo that does not track a map. Set to "false" to pass --no-map-check.'
     required: false
     default: 'true'
   lint:
-    description: 'Also run `reqmap.py lint --strict` so an unreadable or structurally broken requirement fails the build. Errors only on a confirmed requirement missing its Contract or Acceptance section, plus the strict-promoted structural checks; style findings stay advisory. Needs a vendored engine >= 2.3.4 (the release that added the `lint_exempt:` escape hatch). Set to "false" to disable.'
+    description: 'Keep the gate''s requirement-readability half, so an unreadable or structurally broken requirement fails the build. Errors only on a confirmed requirement missing its Contract or Acceptance section, plus the strict-promoted structural checks; style findings stay advisory. A deliberate shape opts out per-check with `lint_exempt:`. Set to "false" to pass --no-lint.'
     required: false
     default: 'true'
   stale-engine:
@@ -138,71 +138,15 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       # One verdict since engine v4.0.0: link sync + drift + test links, requirement
-      # readability, committed-map freshness. The `lint` and `map-check` inputs stay,
+      # readability, committed-map freshness. The `lint` and `freshness` inputs stay,
       # and now switch the corresponding half of `gate` off — so a caller's existing
       # `lint: 'false'` keeps meaning what it meant.
       run: |
         set -e
         FLAGS=""
         if [ "${{ inputs.lint }}" != "true" ]; then FLAGS="$FLAGS --no-lint"; fi
-        if [ "${{ inputs.map-check }}" != "true" ]; then FLAGS="$FLAGS --no-map-check"; fi
+        if [ "${{ inputs.freshness }}" != "true" ]; then FLAGS="$FLAGS --no-map-check"; fi
         if [ -n "${{ inputs.reqmap-repo }}" ]; then
           export REQMAP_REPO="${{ inputs.reqmap-repo }}"
         fi
         python -X utf8 "${{ inputs.reqmap-path }}" gate $FLAGS
-    - name: reqmap engine staleness  # implements: REQ-STALEENGINE-925
-      if: ${{ inputs.stale-engine != 'off' }}
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      # The `|| status=$?` dance is what makes "warn-only" true of the STEP and not just
-      # of the script: in warn mode nothing here — a probe that isn't where we expect it,
-      # a python that won't start — may turn a previously green build red, because that
-      # would be a breaking change for a pin that did not move. `error` opted into loud.
-      run: |
-        probe="$GITHUB_ACTION_PATH/engine_staleness.py"
-        status=0
-        if [ ! -f "$probe" ]; then
-          echo "NOTE  engine staleness probe skipped: $probe not found"
-          exit 0
-        fi
-        python -X utf8 "$probe" \
-          --vendored "${{ inputs.reqmap-path }}" \
-          --mode "${{ inputs.stale-engine }}" || status=$?
-        if [ "$status" -ne 0 ] && [ "${{ inputs.stale-engine }}" != "error" ]; then
-          echo "NOTE  engine staleness probe skipped: exited $status"
-          exit 0
-        fi
-        exit "$status"
-    - name: reqmap gate
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      # `gate` is the intent-verb name for the report-only check (v2.0.0+).
-      # The engine keeps `check` as a deprecation alias, so a consumer whose workflow
-      # calls `check` directly keeps working. This action, however, invokes `gate` —
-      # so `@v2` requires a re-seeded reqmap.py (>=2.0.0). An older vendored engine does
-      # not know `gate` and would exit 2 — one more reason this line is `@v2`, not a
-      # re-pointed `@v1`.
-      run: python -X utf8 "${{ inputs.reqmap-path }}" gate
-    - name: reqmap map freshness
-      if: ${{ inputs.freshness == 'true' }}
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      # Catches a stale or never-committed map/lock — the failure mode that lets member
-      # drift accumulate unseen on a fresh checkout. A repo that does not track a map
-      # passes silently. REQMAP_REPO is exported ONLY when provided, because an empty
-      # value means "emit no repo" to the engine and would falsely report staleness
-      # against a committed map that carries a repo slug.
-      run: |
-        if [ -n "${{ inputs.reqmap-repo }}" ]; then
-          export REQMAP_REPO="${{ inputs.reqmap-repo }}"
-        fi
-        python -X utf8 "${{ inputs.reqmap-path }}" map --check
-    - name: reqmap requirement lint
-      if: ${{ inputs.lint == 'true' }}
-      shell: bash
-      working-directory: ${{ inputs.working-directory }}
-      # The gate proves the LINKS are real; it says nothing about whether the
-      # requirement is readable. `lint --strict` is the prose/structure half.
-      # A requirement whose shape is deliberate opts a check out per-check with
-      # `lint_exempt: [check-name]` in its frontmatter.
-      run: python -X utf8 "${{ inputs.reqmap-path }}" lint --strict

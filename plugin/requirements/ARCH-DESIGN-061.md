@@ -438,16 +438,17 @@ CASE-2 — the threshold is per repo
   Then   that class is reported as `high-response`
 
 
-CASE-4 — the pillar says what it did not measure
-  Given  any repo
-  When   `design` renders the metrics pillar, or reports no candidate at all
-  Then   the output names the metrics it does not compute, and its own over-reporting shapes
 
 
 CASE-3 — a small class is silent
   Given  a class with two methods calling almost nothing
   When   `design` runs
   Then   it reports no metrics candidate for that class
+
+CASE-4 — the pillar says what it did not measure
+  Given  any repo
+  When   `design` renders the metrics pillar, or reports no candidate at all
+  Then   the output names the metrics it does not compute, and its own over-reporting shapes
 
 ## Context
 **Notes**

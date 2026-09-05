@@ -158,10 +158,10 @@ CASE-1 — a confirmed aggregate with no implements tag passes the gate
   Then   `_link_sync_errors` reports no missing-implements error for the aggregate, because
          it adds no behaviour of its own — it only asserts its dependencies work together
 
-CASE-2 — confirm refuses an aggregate with an empty depends_on
-  Given  a `layer: aggregate` requirement with `depends_on: []`
-  When   `confirm <ID>` runs
-  Then   it refuses with "depends_on is empty" and leaves the file's status unchanged
+CASE-2 — the gate reports an aggregate covered by nothing
+  Given  a confirmed `layer: aggregate` requirement with `depends_on: []`
+  When   `gate` runs
+  Then   RM031 warns that it claims the coverage exemption and supplies nothing to be covered by
 
 CASE-3 — a confirmed need raises no implements/tested-by finding
   Given  a confirmed `layer: need` requirement with no `implements:` or `tested-by:` tag,

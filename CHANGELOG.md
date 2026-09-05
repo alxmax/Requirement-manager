@@ -1,5 +1,63 @@
 # Changelog
 
+## plugin `v5.6.1` — 2026-09-05
+
+**The published Action was broken, and the guard that exists to catch this said OK.**
+`check/action.yml` contained two copies of its own steps: a corrected one, and the older
+one nobody deleted. The old copy ran `reqmap.py map --check` and `reqmap.py lint --strict`
+as separate steps, both on by default — verbs removed in `v5.0.0`. Any consumer on
+`check@v5` with a v5 engine got `exit 2, unknown command` on step 2 of 3. This repo's CI
+calls the engine directly and never runs its own action, which is why nothing caught it.
+The stale copy is deleted; `gate` already performs all three checks and the `freshness`
+and `lint` inputs now switch its halves off. The surviving block also read
+`inputs.map-check`, an input that does not exist — so map freshness was silently disabled
+for every consumer. It reads `inputs.freshness` now.
+
+**`check_retired_verbs.py` had two blind spots and ten dead invocations went out through
+them.** It scanned the `requirement-manager` skill's two files *by name*, so the plugin's
+other two shipped skills were never read — six stale invocations sat in
+`requirement-quality-review`, telling readers to run `reqmap.py lint` and `reqmap.py
+review`. And `lint`, `map`, `site`, `scan`, `health`, `coverage`, `export`, `findings`,
+`plan`, `check` and `gen-integration` were missing from its retired list, which is how
+`reqmap.py site` survived in a file it *does* read. It now walks every `SKILL*.md` under
+`plugin/skills/` and knows every folded verb. It also learned that a line saying a verb is
+gone is not an instruction to run it, so the migration notes this repo writes on purpose
+no longer trip it.
+
+**Six of the ten were in the engine's own output**, including one that reached the
+published Pages site: `architecture.html` carried "Auto-injected by `reqmap.py site`", and
+`sync --attach`'s usage message told a reader to type `reqmap site`. The five user-story
+narratives in requirement Context sections named `health`, `lint`, `map` and `findings`.
+
+The guard's own docstring says folding a verb "has happened four times, and three of those
+left behind an instruction that told a reader to type a command that no longer resolves".
+It has now happened a fifth time — and the guard's fix is that it would catch it.
+
+## plugin `v5.6.0` — 2026-09-05
+
+**RM031 — the guard that left with the `confirm` verb.** `gate --audit` was run against
+this repo's own corpus and reported a coverage gap on `REQ-TRACE-935`. Chasing it found
+that the criterion described a command that no longer exists: until `v5.0.0`, the `confirm`
+verb refused to promote a `layer: aggregate` requirement whose `depends_on` was empty. The
+verb was folded away and **nothing replaced the guard.**
+
+That matters because `aggregate` is exempt from the implements and tested-by rules on one
+stated promise — it is covered *downward* by its dependencies. An empty list claims the
+exemption and supplies nothing to be covered by. Reproduced before fixing: a confirmed
+aggregate with `depends_on: []` passed the gate at **0 errors, 0 warnings**, exempt from
+every coverage rule and covered by nothing. RM031 now warns on it (advisory, never a build
+failure), `REQ-TRACE-935`'s CASE-2 describes the rule instead of the removed verb, and
+`_impl_exempt`'s docstring no longer names `confirm` as a caller.
+
+**Three smaller findings from the same self-audit, all introduced in this session:**
+`REQ-VIEWER-977` was confirmed with no `tested-by:` member — the SSR smoke carried its
+`verifies:` tags but never declared membership; a `verifies:` tag still pointed at
+`REQ-DESIGN-978#CASE-7` after that requirement was renumbered to four cases; and the same
+renumbering left CASE-4 printed above CASE-3.
+
+The audit is the point: every one of these was made by the same hand that wrote the checks,
+and the checks found them.
+
 ## plugin `v5.5.0` — 2026-09-05
 
 **`lint_requirement` was 241 lines and is now 26.** It was a flat run of twelve check

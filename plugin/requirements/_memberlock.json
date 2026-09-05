@@ -2,9 +2,10 @@
   "_schema": 1,
   "members": {
     "ARCH-REVIEW-022": {
-      "plugin/skills/requirement-quality-review/SKILL.universal.md": "c740226f119562077d936c74cae21d9f40551c8cad9db52dde7e2d3660041159"
+      "plugin/skills/requirement-quality-review/SKILL.universal.md": "0934c5c02dc54a20be9ec7d5bf5b9c937ff0db5be33fa94a88296d1a9afd89b9"
     },
     "ARCH-SELFGATE-039": {
+      "scripts/check_retired_verbs.py": "24f9b6b8ba79fafbc893629e060ebe02a3ce9c6ee9f14b899c28e5e2c3a524d9",
       "scripts/check_versions.py": "c31b109d32b0d6f6aca02306556f36fb8143893a8ad868fdae93960145c161f8"
     },
     "ARCH-VIEWER-007": {

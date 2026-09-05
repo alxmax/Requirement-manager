@@ -214,7 +214,7 @@ RISK_ADVICE = {
                 "it `# tested-by: <ID>`, or set `test_exempt: <reason>` in the frontmatter "
                 "to acknowledge it intentionally and silence this signal.",
     "unverified-intent": "Has open `## Verify intent` question(s): run "
-                         "`reqmap.py findings`, resolve each in `requirements/_findings.md`, "
+                         "`reqmap.py sync`, resolve each in `requirements/_findings.md`, "
                          "then fold the answer into the Contract or delete the bullet.",
 }
 
@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.15"
+MAP_ENGINE_VERSION = "2026-09-05.17"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2329,11 +2329,11 @@ IMPL_EXEMPT_LAYERS = ("need", "aggregate")
 def _impl_exempt(meta):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-935
     """True when a requirement is exempt from the "confirmed code must exist" rule.
 
-    One predicate, four callers (gate link-sync, `health`, the risk signals, and
-    `confirm`). They disagreed before: three exempted `layer: need` and `confirm` did
-    not, so the layer's own reference case could not be promoted by the command that
-    exists to promote it — `SYS-SSOT-001` is `confirmed` here only because the file
-    was hand-edited around `confirm`."""
+    One predicate, three callers (gate link-sync, `health`, the risk signals). They
+    disagreed before, when `confirm` was a verb and a fourth caller: it alone did not
+    exempt `layer: need`, so the layer's own reference case could not be promoted by
+    the command that existed to promote it. `confirm` was removed in v5.0.0; the
+    exemption it granted is now guarded by RM031 instead."""
     return (meta or {}).get("layer") in IMPL_EXEMPT_LAYERS
 
 
@@ -2507,6 +2507,23 @@ def _rule_frontmatter(ctx):  # implements: ARCH-ATOMICFORM-053  # implements: AR
             yield rid, f"{rid}: invalid level {_lvl!r} (expected one of {sorted(VALID_LEVEL)})"
         if m.get("layer") not in VALID_LAYER:
             yield rid, f"{rid}: invalid layer {m.get('layer')!r}"
+
+
+@gate_rule("RM031", "warn")
+def _rule_uncovered_aggregate(ctx):  # implements: ARCH-TRACE-020  # implements: REQ-TRACE-935
+    """An `aggregate` is exempt from the implements and tested-by rules because it is
+    covered downward by its `depends_on`. An empty list is therefore not a small
+    omission: it claims the exemption and supplies nothing to be covered by."""
+    for rid in sorted(ctx.cap_ids):
+        r = ctx.req(rid)
+        meta = r["meta"]
+        if meta.get("layer") != "aggregate" or meta.get("status") not in ENFORCED:
+            continue
+        if _as_list(meta.get("depends_on")) or not ctx.in_scope(rid):
+            continue
+        yield rid, ("{}: layer: aggregate with an empty `depends_on` — it is exempt "
+                    "from the implements and tested-by rules because its dependencies "
+                    "cover it, and it has none".format(rid))
 
 
 @gate_rule("RM003", "error")
@@ -3019,11 +3036,11 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
         print("ERROR", e["rule"], str(e))
     if _stale:
         print("ERROR: stale generated integration artifact(s): " + ", ".join(_stale)
-              + " — run `python scripts/reqmap.py gen-integration` and commit.", file=sys.stderr)
+              + " — run `python scripts/reqmap.py sync` and commit.", file=sys.stderr)
 
     n_find = sum(len(items) for _rid, _t, items in collect_findings(reqs))
     if n_find:
-        print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py findings`")
+        print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py sync`")
 
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "
@@ -3821,7 +3838,7 @@ def collect_findings(reqs):  # implements: ARCH-FINDINGS-010  # implements: REQ-
 def _render_findings_raw(groups, total):  # implements: REQ-FINDINGS-854
     L = ["# Open findings", "",
          "> {} open verify-intent item(s) across {} requirement(s), aggregated from each "
-         "requirement's `## WHAT — Verify intent` section by `reqmap.py findings`."
+         "requirement's `## WHAT — Verify intent` section by `reqmap.py sync`."
          .format(total, len(groups)),
          ">",
          "> These are open questions raised while reconstructing intent from code - NOT "
@@ -7079,7 +7096,7 @@ SITE_TEMPLATE = """\
 <title>%%REPO_NAME%% — project site</title>
 <!--
   ============================================================================
-  PROTOTYPE of `reqmap.py site` — HYBRID model.
+  PROTOTYPE of `reqmap.py sync --attach` — HYBRID model.
     • Regions marked  <!##REQMAP:...##>  are regenerated by the engine on every
       run (nav links, stats band, commands grid, layer model) — never stale.
     • Everything else is AUTHORED prose, preserved across regenerations.
@@ -7237,7 +7254,7 @@ SITE_TEMPLATE = """\
     <div class="stats">
       <!--##REQMAP:STATS##--><!--##/REQMAP:STATS##-->
     </div>
-    <p class="src">Auto-injected by <code>reqmap.py site</code> from <code>_map.json</code> — re-computed on every run, so it never drifts.</p>
+    <p class="src">Auto-injected by <code>reqmap.py sync</code> from <code>_map.json</code> — re-computed on every run, so it never drifts.</p>
   </div>
 </section>
 
@@ -7530,12 +7547,12 @@ def cmd_site(ws, root=".", attach=None,  # implements: REQ-SITE-924
         print("repo: {}".format(repo_url or "(no remote)"))
         print("presentation candidates: {}".format(", ".join(cands) or "(none)"))
         tgt = default or os.path.join(root, "docs", "architecture.html")
-        print("suggested: reqmap site --attach {} --regions nav,stats".format(tgt))
+        print("suggested: reqmap sync --attach {} --regions nav,stats".format(tgt))
         return 0
 
     if not attach:
-        print("usage: reqmap site --attach <page.html> [--regions nav,stats] [--diagram <rel>]")
-        print("   or: reqmap site --detect")
+        print("usage: reqmap sync --attach <page.html> [--regions nav,stats] [--diagram <rel>]")
+        print("   or: reqmap sync --detect")
         return 0
 
     map_ok = os.path.isfile(os.path.join(os.path.dirname(attach) or ".", "map.html"))
