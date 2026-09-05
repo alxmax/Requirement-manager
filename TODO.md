@@ -628,3 +628,57 @@
            not assessed before shipping. Decide: complete the suite, narrow the pillar, or
            document the omission where a reader meets it rather than in a requirement's
            Context. -->
+
+## v5.8
+- [x] Implement ADR-0030: `init` emits the three rungs | lane: feature  <!-- shipped v5.8.0 -->
+      <!-- The record is written (docs/adr/0030-the-engine-drafts-the-pyramid.md, accepted
+           2026-09-06, superseding ADR-0019 on its "the author declares, the engine does not
+           infer" sentence). The engine does not do it yet. One entry point: `cmd_extract`,
+           called only from `cmd_init` — `draft` stopped being a verb in v5.0.0. What it must do:
+             1. `level: code` on every draft extracted from a source file. This is asserted,
+                not guessed — a draft from a file describes that file's behaviour.
+             2. One `status: draft` ARCH requirement per source directory holding code, named
+                from the directory, with each file-level draft declaring `satisfies:` it.
+             3. One `layer: need` SYS placeholder every ARCH draft satisfies, whose title
+                says a human must name it. The engine never guesses a stakeholder need —
+                it is not in the source.
+             4. `level_source: auto` on everything the engine invents about the axis, the
+                parallel of the existing `owner: auto`. This is the ONLY marker that reaches
+                a consumer (ADRs are not shipped in plugin/), so it is the load-bearing part:
+                without it, LINT_FANOUT_BANDS and LEVEL_TEST_PAIR treat a machine guess as a
+                human decision, which is Dimon's blocking finding from the audit.
+             5. Nothing enforced: every minted node is `status: draft`, which the gate never
+                enforces. ADR-0019's warn-only posture is untouched.
+
+           Measured before deciding, and the reason step 2 is a PROPOSAL and not an assertion:
+           directory inference on this repo would mint capabilities named `scripts`,
+           `app/src/lib`, `app/src/views`, `app/scripts`, `check` — ten of them, none of which
+           is a capability. Expect the names to be wrong; the point is that they are visibly
+           wrong (`owner: auto`, `level_source: auto`, `status: draft`) and that renaming them
+           is the author's first task.
+
+           Deming's STOP is unanswered and stays unanswered: whether the three-level shape
+           pays is still calibrated on one corpus, this one. Implementing the record changes
+           what `init` produces, not what is known about whether the shape is worth producing.
+           Do not cite the audit as endorsement — it was MODIFY, GO 1 / MODIFY 6 / STOP 2,
+           bundle runs/senate/2026-09-06_003141-senate-reqmap-three-levels-adoption.json. -->
+- [ ] Requirement history: how a contract changed, and when | lane: feature
+      <!-- Today the corpus records only the CURRENT state plus one hash per requirement in
+           `_reqlock.json`. Drift is detectable (the hash moved) but not READABLE: nothing
+           says what the clause used to say, when it changed, or which change a member was
+           re-checked against. `git log -p` has all of it and nobody reads it that way.
+
+           Worth deciding before building, in this order:
+             - Is git already the answer? A `show --history` that shells out to
+               `git log -L` over the requirement's own block may be the whole feature, and
+               costs no new file. The engine is stdlib-only but already shells to git in
+               `_since_changed_files` and `_commits_since_reqs_touch`, so the precedent exists.
+             - If a stored history is wanted instead, it is a THIRD lock file, and
+               `_reqlock.json` stays byte-stable on purpose (ARCH-MEMBERDRIFT-027 records why
+               `_memberlock.json` was kept separate). Follow that precedent, do not widen the
+               existing lock.
+             - What is the reader's actual question? "Why does this clause say this?" is
+               answered by an ADR or the Context section, not by a diff. "Was this member
+               re-checked after the contract changed?" is answered by drift, which exists.
+               Name the question a history answers that neither already does, or do not
+               build it. -->

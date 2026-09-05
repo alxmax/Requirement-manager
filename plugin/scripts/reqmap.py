@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.1"
+MAP_ENGINE_VERSION = "2026-09-06.3"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2029,7 +2029,7 @@ def save_lock(reqs_dir, lock):  # implements: ARCH-DRIFT-003  # implements: REQ-
 # stayed put (behaviour shipped, spec not updated) — is invisible there. Member hashes
 # live in a SEPARATE, versioned sidecar so _reqlock.json stays a byte-stable cross-repo
 # contract: an older seeded engine never reads _memberlock.json and is wholly unaffected.
-MEMBERLOCK_SCHEMA = 1
+MEMBERLOCK_SCHEMA = 2   # 2: keys may be `file#definition`, not only `file`
 MEMBER_ROLES = ("implements", "generated-from")   # roles that bind code/doc content to a contract
 
 
@@ -2151,21 +2151,79 @@ def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
     return hashlib.sha256(data).hexdigest()
 
 
+def _py_def_spans(path):  # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-982
+    """`[(first_line, last_line, name)]` for the top-level definitions of a Python file,
+    or None when it is not Python or does not parse. Nesting is deliberately not
+    descended: a tag inside a method belongs to the class a reader opens, and per-method
+    spans would split one contract's implementation across several keys."""
+    if not path.lower().endswith(".py"):
+        return None
+    try:
+        with open(path, encoding="utf-8", errors="ignore") as f:
+            tree = ast.parse(f.read())
+    except (OSError, SyntaxError, ValueError):
+        return None
+    return [(n.lineno, getattr(n, "end_lineno", n.lineno), n.name) for n in tree.body
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
+
+
+def _span_sha(path, lo, hi):  # implements: REQ-MEMBERDRIFT-982
+    """SHA-256 of one line span, LF-normalized exactly as `_file_sha` normalizes a whole
+    file — for the same reason: a CRLF checkout must not read as drift."""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None
+    data = data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    lines = data.split(b"\n")
+    return hashlib.sha256(b"\n".join(lines[lo - 1:hi])).hexdigest()
+
+
 def compute_member_hashes(code_root, members):  # implements: ARCH-MEMBERDRIFT-027  # implements: REQ-MEMBERDRIFT-879
-    """{rid: {relfile: sha}} for member files dedicated to ONE requirement. A file that
-    is an implements/generated-from member of several requirements (e.g. a single engine
-    file) is excluded: a change there cannot be attributed to one contract without noise."""
-    owners = {}   # relfile -> set(rid)
+    """`{rid: {key: sha}}` for the members one requirement owns alone, where a key is
+    `relfile#definition` for a tag inside a Python top-level definition and `relfile` for
+    anything else.
+
+    Ownership is what makes a hash attributable, and the unit of ownership is the unit the
+    tag sits in. Keyed per file, a file tagged by several requirements had to be dropped
+    entirely — a change in it cannot be blamed on one contract — which excluded this
+    engine's own 9k-line file and its 205 requirements from reverse drift altogether.
+    Keyed per definition, each requirement owns the definitions tagged with it and the
+    ambiguity is gone; a definition tagged by SEVERAL requirements is still ambiguous and
+    still dropped, at that finer granularity.
+
+    Python only, because a wrong span is a wrong drift signal: the brace languages are
+    read by heuristics elsewhere in this engine and keep the whole-file hash. The key says
+    which was used, so the lock is self-describing."""
+    owners = {}   # key -> set(rid);  where -> (path, lo, hi) or None for whole-file
+    where = {}
+    spans_by_file = {}
     for rid, hits in members.items():
-        for role, fp, _ln in hits:
-            if role in MEMBER_ROLES:
-                owners.setdefault(fp, set()).add(rid)
+        for role, fp, ln in hits:
+            if role not in MEMBER_ROLES:
+                continue
+            path = os.path.join(code_root, fp)
+            if fp not in spans_by_file:
+                spans_by_file[fp] = _py_def_spans(path)
+            spans = spans_by_file[fp]
+            key, span = fp, None
+            if spans:
+                for lo, hi, name in spans:
+                    if lo <= ln <= hi:
+                        key, span = "{}#{}".format(fp, name), (path, lo, hi)
+                        break
+            owners.setdefault(key, set()).add(rid)
+            where[key] = span
     out = {}
-    for fp, rids in owners.items():
-        if len(rids) == 1:
-            sha = _file_sha(os.path.join(code_root, fp))
-            if sha is not None:
-                out.setdefault(next(iter(rids)), {})[fp] = sha
+    for key, rids in owners.items():
+        if len(rids) != 1:
+            continue          # shared: a change here names no single contract
+        span = where[key]
+        sha = _span_sha(*((span[0], span[1], span[2]) if span
+                          else (os.path.join(code_root, key), 1, 1 << 30)))
+        if sha is not None:
+            out.setdefault(next(iter(rids)), {})[key] = sha
     return out
 
 
@@ -3383,12 +3441,98 @@ def _prose_facts(src):  # implements: ARCH-PROSE-024  # implements: REQ-PROSE-90
     return title, (headings or h1_sections)
 
 
+SYS_PLACEHOLDER_ID = "SYS-NEEDS-A-NAME-001"   # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+
+
+def _arch_id_for(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """The architecture id proposed for a source directory.
+
+    The directory is the only structural signal a per-file draft has, and it is a weak
+    one: on this repo it would name capabilities `scripts` and `app/src/lib`, which are
+    not capabilities. That is why the node it produces is a `draft` carrying
+    `level_source: auto` — a proposal to rename, not a claim."""
+    parts = [p for p in rel_dir.replace(os.sep, "/").split("/") if p not in ("", ".")]
+    stem = "-".join(parts[-2:]) if parts else "ROOT"
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
+    return "ARCH-{}-001".format(slug)
+
+
+def _write_sys_placeholder(reqs_dir, arch_ids):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """The apex, written as an explicit hole.
+
+    A stakeholder need is not in the source — nothing in a repository says why a user
+    wants the thing — so the engine refuses to guess one and mints a node whose title
+    says so. Skipped when the corpus already has a `layer: need`."""
+    dest = os.path.join(reqs_dir, SYS_PLACEHOLDER_ID + ".md")
+    if os.path.exists(dest) or not arch_ids:
+        return 0
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write("---\nid: {}\nstatus: draft\nlevel: system\nlayer: need\n"
+                "owner: auto\nlevel_source: auto\n---\n\n"
+                "# NAME THIS NEED\n\n"
+                "> The engine cannot read a stakeholder need out of source code, so it "
+                "left this hole rather than invent one. Replace the title and the clause "
+                "below with the outcome a user actually wants, then rename the file and "
+                "the id. Every architecture draft points here until you do.\n\n"
+                "## Description\n"
+                "Every bullet below is binding.\n"
+                "- TODO: the outcome a user wants, in their words, not the system's.\n\n"
+                "## Cases\n"
+                "CASE-1\n"
+                "  Given  TODO\n"
+                "  When   TODO\n"
+                "  Then   TODO\n".format(SYS_PLACEHOLDER_ID))
+    return 1
+
+
+def _write_arch_drafts(reqs_dir, by_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """One architecture draft per source directory that produced code drafts.
+
+    Returns the ids written, newest-corpus-first order irrelevant. Each is a proposal:
+    `status: draft`, `owner: auto`, `level_source: auto`, and a title that names the
+    directory rather than pretending to name a capability."""
+    written = []
+    for rel_dir in sorted(by_dir):
+        aid = _arch_id_for(rel_dir)
+        dest = os.path.join(reqs_dir, aid + ".md")
+        if os.path.exists(dest):
+            written.append(aid)
+            continue
+        kids = sorted(by_dir[rel_dir])
+        with open(dest, "w", encoding="utf-8") as f:
+            f.write("---\nid: {aid}\nstatus: draft\nlevel: architecture\n"
+                    "layer: feature\nowner: auto\nlevel_source: auto\n"
+                    "satisfies: [{sys}]\n---\n\n"
+                    "# {label}\n\n"
+                    "> PROPOSED grouping, not a capability. The engine had one structural "
+                    "signal — the directory `{rel_dir}` — and a directory is not a "
+                    "capability. Rename this to the thing these {n} behaviour group(s) "
+                    "together let a user do, merge it with a sibling, or delete it and "
+                    "re-point its children.\n\n"
+                    "## Description\n"
+                    "Every bullet below is binding.\n"
+                    "{bullets}\n\n"
+                    "## Cases\n"
+                    "CASE-1\n"
+                    "  Given  TODO\n"
+                    "  When   TODO\n"
+                    "  Then   TODO\n".format(
+                        aid=aid, sys=SYS_PLACEHOLDER_ID, label=rel_dir or "root",
+                        rel_dir=rel_dir or ".", n=len(kids),
+                        bullets="\n".join(
+                            "- TODO: one obligation this capability owes. [[{}]]".format(k)
+                            for k in kids)))
+        written.append(aid)
+    return written
+
+
 def cmd_extract(ws):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024  # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
     """Propose DRAFT requirements for code files that have no member tag yet."""
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
     proposed, used = 0, set()
+    by_dir = {}          # rel dir -> [code-level draft ids], for the ARCH rung
     os.makedirs(reqs_dir, exist_ok=True)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
@@ -3455,8 +3599,10 @@ def cmd_extract(ws):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-0
                 with open(dest, "w", encoding="utf-8") as f:
                     # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
                     # needs no reshaping
-                    f.write(f"---\nid: {cap}\nstatus: draft\nlayer: feature\n"
-                            f"owner: auto\ndepends_on: []\n"
+                    f.write(f"---\nid: {cap}\nstatus: draft\nlevel: code\n"
+                            f"layer: feature\nowner: auto\nlevel_source: auto\n"
+                            f"satisfies: [{_arch_id_for(os.path.relpath(dirpath, code_root))}]\n"
+                            f"depends_on: []\n"
                             f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
                             f"# {os.path.splitext(fn)[0]}\n\n"
                             f"> DRAFT extracted from {rel}. Describes observed behavior, "
@@ -3473,7 +3619,18 @@ def cmd_extract(ws):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-0
                             f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
                             f"## Context (non-binding)\n**Current implementation**\n- {rel}\n{surface}")
             proposed += 1
+            if is_code:
+                rel_dir = os.path.relpath(dirpath, code_root).replace(os.sep, "/")
+                by_dir.setdefault(rel_dir, []).append(cap)
             print(f"{review:14} {cap}  <- {rel}")
+    # The two rungs above the code level. Written last, so they know their children.
+    arch_ids = _write_arch_drafts(reqs_dir, by_dir)
+    n_sys = _write_sys_placeholder(reqs_dir, arch_ids)
+    if arch_ids:
+        print(f"\n{len(arch_ids)} architecture draft(s) proposed from directory names, and "
+              f"{n_sys} system placeholder. Both carry `level_source: auto` — the engine "
+              f"invented them and a directory is not a capability. Rename, merge or delete "
+              f"them; the code level below is the only rung it can assert.")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")
     return 0
 
@@ -5236,18 +5393,26 @@ def _corpus_shape(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-
     its behaviour, and the consequence is that a repo can run the engine for months with
     every requirement on one rung and nothing ever mentioning the other two. This says it
     once, in `audit`, and never in the gate: adopting a level axis is a decision, not a
-    defect."""
+    defect.
+
+    `auto` counts the rungs the ENGINE wrote (`level_source: auto`, ADR-0030). Since
+    `init` drafts a pyramid, a corpus can now be fully levelled and still be nothing but
+    the engine's own guesses — every other number here would read as healthy. This is the
+    number ADR-0030's revisit trigger asks for: a pyramid still made of proposals is
+    untriaged, not done."""
     total = len(reqs)
-    levels, edges = {}, 0
+    levels, edges, auto = {}, 0, 0
     for r in reqs.values():
         meta = r["meta"]
         lv = meta.get("level")
         if lv:
             levels[lv] = levels.get(lv, 0) + 1
+            if meta.get("level_source") == "auto":
+                auto += 1
         edges += len(_as_list(meta.get("satisfies")))
     levelled = sum(levels.values())
     return {"total": total, "levelled": levelled, "levels": levels,
-            "satisfies_edges": edges,
+            "satisfies_edges": edges, "auto": auto,
             "flat": bool(total) and levelled * 10 < total}
 
 
@@ -5548,10 +5713,36 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
     if unexplained:
         lines.append("{} exemption(s) silence a check with no reason recorded".format(
             len(unexplained)))
+    # Readability, reported where it is cheapest to act on. `gate` is what ENFORCES it
+    # (and the pre-commit hook runs `gate`), so this changes no exit code — it moves the
+    # moment a finding is seen to the one where the author still has the clause in mind.
+    lint_errors = lint_warns = 0
+    for rid, r in reqs.items():
+        if r["meta"].get("status") not in LINT_STATUSES:
+            continue
+        for f in lint_requirement(rid, r, members.get(rid)):
+            if f["severity"] == "error":
+                lint_errors += 1
+            else:
+                lint_warns += 1
+    # Errors only. A style warning is not a reason to break this summary's silence on an
+    # otherwise-clean corpus: this repo carries two long-standing ones, so a line keyed on
+    # warnings would fire on every sync forever, which is the habit ADR-0016 rejected. An
+    # ERROR is a confirmed requirement missing a load-bearing section — worth the line.
+    if lint_errors:
+        lines.append("readability: {} error(s) across the non-draft corpus ({} warning(s) "
+                     "too) - run `reqmap.py gate` for the lines".format(lint_errors, lint_warns))
     shape = _corpus_shape(reqs)
     if shape["flat"]:
         lines.append("{} of {} requirements declare no `level:` - the corpus is flat".format(
             shape["total"] - shape["levelled"], shape["total"]))
+    elif shape.get("auto"):
+        # A corpus can be fully levelled and still be nothing but the engine's guesses,
+        # in which case every other number here reads as healthy. ADR-0030's revisit
+        # trigger is exactly this ratio.
+        lines.append("{} of {} levelled requirement(s) still carry the rung the engine "
+                     "proposed (`level_source: auto`) - rename, merge or accept them"
+                     .format(shape["auto"], shape["levelled"]))
     design = _design_summary(code_root, reqs_dir) if code_root else None
     if design is not None and design["clean_files"] < design["files"]:
         lines.append("design {}/100 - {} of {} source files carry a candidate".format(

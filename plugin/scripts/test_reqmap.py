@@ -1125,11 +1125,16 @@ class Extract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-by: R
             with redirect_stdout(buf):
                 R.cmd_extract(R.Workspace({}, {}, reqs_dir, code_root))
             written = [p for p in os.listdir(reqs_dir) if p.endswith(".md")]
-            self.assertEqual(len(written), 1)
-            with open(os.path.join(reqs_dir, written[0]), encoding="utf-8") as f:
+            # one code draft plus the two rungs above it since ADR-0030; the subject of
+            # this test is the drafted CONTRACT, so read the code draft specifically
+            drafts = [p for p in written if p.startswith("DRAFT-")]
+            self.assertEqual(len(drafts), 1, written)
+            with open(os.path.join(reqs_dir, drafts[0]), encoding="utf-8") as f:
                 text = f.read()
             self.assertIn("Every bullet below is binding.", text)
-            self.assertNotIn("shall", text.lower())
+            for p in written:
+                with open(os.path.join(reqs_dir, p), encoding="utf-8") as f:
+                    self.assertNotIn("shall", f.read().lower(), p)
 
 
 class New(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-881  # tested-by: REQ-NEW-882
@@ -8217,6 +8222,154 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             with redirect_stdout(io.StringIO()):
                 R._audit_summary(reqs, {}, d, d)
             self.assertEqual(sorted(os.listdir(d)), before)
+
+
+class ExtractRungs(unittest.TestCase):  # tested-by: REQ-EXTRACT-981
+    """ADR-0030: extraction drafts a pyramid, and marks every rung it invented."""
+
+    def _extract(self, d):
+        rq = os.path.join(d, "requirements")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_extract(R.Workspace(R.load_requirements(rq), {}, rq, d))
+        return rq, buf.getvalue()
+
+    @staticmethod
+    def _meta(path):
+        with open(path, encoding="utf-8") as f:
+            return R.parse_frontmatter(f.read())[0]
+
+    def test_a_code_draft_asserts_its_rung(self):  # verifies: REQ-EXTRACT-981#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "thing.py"), "def a():\n    return 1\n")
+            rq, _ = self._extract(d)
+            drafts = [f for f in os.listdir(rq) if f.startswith("DRAFT-")]
+            self.assertEqual(len(drafts), 1)
+            meta = self._meta(os.path.join(rq, drafts[0]))
+        self.assertEqual(meta.get("level"), "code")
+        self.assertEqual(meta.get("level_source"), "auto")
+
+    def test_one_architecture_draft_per_source_directory(self):  # verifies: REQ-EXTRACT-981#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "store", "a.py"), "def a():\n    return 1\n")
+            _write(os.path.join(d, "src", "store", "b.py"), "def b():\n    return 2\n")
+            _write(os.path.join(d, "src", "cli", "c.py"), "def c():\n    return 3\n")
+            rq, _ = self._extract(d)
+            arch = sorted(f for f in os.listdir(rq) if f.startswith("ARCH-"))
+            kids = {}
+            for f in os.listdir(rq):
+                if not f.startswith("DRAFT-"):
+                    continue
+                m = self._meta(os.path.join(rq, f))
+                kids.setdefault(R._as_list(m.get("satisfies"))[0], []).append(f)
+        self.assertEqual(len(arch), 2, arch)
+        # each architecture draft is satisfied by exactly the drafts of its own directory
+        self.assertEqual(sorted(len(v) for v in kids.values()), [1, 2])
+
+    def test_the_system_rung_is_a_named_hole(self):  # verifies: REQ-EXTRACT-981#CASE-3
+        """A stakeholder need is not in the source. The engine refuses to guess one and
+        says so in the node's own title, rather than minting a plausible-looking need."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "a.py"), "def a():\n    return 1\n")
+            rq, _ = self._extract(d)
+            needs = [f for f in os.listdir(rq) if f.startswith("SYS-")]
+            self.assertEqual(len(needs), 1, needs)
+            path = os.path.join(rq, needs[0])
+            meta = self._meta(path)
+            with open(path, encoding="utf-8") as f:
+                body = f.read()
+            arch = [f for f in os.listdir(rq) if f.startswith("ARCH-")]
+            up = {R._as_list(self._meta(os.path.join(rq, a)).get("satisfies"))[0] for a in arch}
+        self.assertEqual(meta.get("layer"), "need")
+        self.assertEqual(meta.get("level"), "system")
+        self.assertEqual(meta.get("level_source"), "auto")
+        self.assertIn("NAME THIS NEED", body)
+        self.assertEqual(up, {meta["id"]})
+
+    def test_a_second_run_overwrites_nothing(self):  # verifies: REQ-EXTRACT-981#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "src", "a.py"), "def a():\n    return 1\n")
+            rq, _ = self._extract(d)
+            before = {f: open(os.path.join(rq, f), encoding="utf-8").read()
+                      for f in os.listdir(rq)}
+            self._extract(d)
+            after = {f: open(os.path.join(rq, f), encoding="utf-8").read()
+                     for f in os.listdir(rq)}
+        self.assertEqual(before, after)
+
+
+class MemberHashPerDefinition(unittest.TestCase):  # tested-by: REQ-MEMBERDRIFT-982
+    """The hash keys on the definition a tag sits in, so a shared file stays attributable."""
+
+    TWO_OWNERS = ('def alpha():\n    """A."""\n    # implements: REQ-A-001\n    return 1\n'
+                  '\n\ndef beta():\n    """B."""\n    # implements: REQ-B-001\n    return 2\n')
+
+    def _hashes(self, d, src, name="mod.py"):
+        _write(os.path.join(d, "src", name), src)
+        members = R.scan_members(d, os.path.join(d, "requirements"))
+        return R.compute_member_hashes(d, members), members
+
+    def test_one_file_two_owners_two_keys(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-1
+        """Per file this recorded nothing at all: two owners meant the file was dropped."""
+        with tempfile.TemporaryDirectory() as d:
+            h, _ = self._hashes(d, self.TWO_OWNERS)
+        self.assertEqual(sorted(h), ["REQ-A-001", "REQ-B-001"])
+        self.assertEqual(list(h["REQ-A-001"]), ["src/mod.py#alpha"])
+        self.assertEqual(list(h["REQ-B-001"]), ["src/mod.py#beta"])
+
+    def test_drift_names_only_the_changed_definition(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = os.path.join(d, "requirements")
+            for rid in ("REQ-A-001", "REQ-B-001"):
+                _write(os.path.join(rq, rid + ".md"),
+                       REQ.format(id=rid, status="confirmed", layer="feature",
+                                  extra="", title=rid))
+            baseline, _ = self._hashes(d, self.TWO_OWNERS)
+            changed = self.TWO_OWNERS.replace("return 2", "return 999")
+            current, members = self._hashes(d, changed)
+            reqs = R.load_requirements(rq)
+            lock = {rid: R.binding_hash(r["body"]) for rid, r in reqs.items()}
+            drift = R.member_drift(reqs, members, lock, baseline, d, current=current)
+        self.assertEqual(drift, [("REQ-B-001", "src/mod.py#beta")])
+
+    def test_a_shared_definition_is_still_dropped(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-3
+        """Sharing a file is no longer sharing a key; sharing a DEFINITION still is."""
+        src = ('def both():\n    """X."""\n'
+               '    # implements: REQ-A-001\n    # implements: REQ-B-001\n    return 1\n')
+        with tempfile.TemporaryDirectory() as d:
+            h, _ = self._hashes(d, src)
+        self.assertEqual(h, {})
+
+    def test_a_non_python_member_keeps_the_plain_path(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "notes.md"), "# doc\n\n<!-- implements: REQ-A-001 -->\n")
+            members = R.scan_members(d, os.path.join(d, "requirements"))
+            h = R.compute_member_hashes(d, members)
+        self.assertEqual(list(h.get("REQ-A-001", {})), ["notes.md"])
+
+    def test_a_module_level_tag_keeps_the_whole_file_key(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            h, _ = self._hashes(d, "# implements: REQ-A-001\nVALUE = 1\n")
+        self.assertEqual(list(h.get("REQ-A-001", {})), ["src/mod.py"])
+
+    def test_crlf_does_not_read_as_drift(self):  # verifies: REQ-MEMBERDRIFT-982#CASE-2
+        """The span hash normalises line endings, as the whole-file hash already did —
+        otherwise a Windows checkout reports every member as drifted."""
+        with tempfile.TemporaryDirectory() as d:
+            pass
+        def write_bytes(root, data):
+            p = os.path.join(root, "src", "mod.py")
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "wb") as f:      # bytes: text mode would re-translate them
+                f.write(data)
+            members = R.scan_members(root, os.path.join(root, "requirements"))
+            return R.compute_member_hashes(root, members)
+        body = self.TWO_OWNERS.encode("utf-8")
+        with tempfile.TemporaryDirectory() as d:
+            lf = write_bytes(d, body)
+        with tempfile.TemporaryDirectory() as d:
+            crlf = write_bytes(d, body.replace(b"\n", b"\r\n"))
+        self.assertEqual(lf, crlf)
 
 
 class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-DESIGN-979  # tested-by: REQ-DESIGN-978  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955

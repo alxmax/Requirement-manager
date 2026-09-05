@@ -238,8 +238,14 @@ satisfies: [ARCH-AUDIT-065]
 
 Every bullet below is binding.
 - After a successful `sync`, one line is printed for each signal that is not clean:
-  unjustified exemptions, a flat corpus, design candidates, untagged code, and a TODO file
-  whose newest milestone is behind the requirements'.
+  unjustified exemptions, a flat corpus, requirement-readability errors, rungs still
+  carrying the engine's proposal, design candidates, untagged code, and a TODO file whose
+  newest milestone is behind the requirements'.
+- The readability line counts errors only. A style warning never breaks the tail's silence,
+  because a corpus can carry one for months and a line that always appears is not news.
+- The proposed-rung line fires only on a corpus that is not flat, and counts the levelled
+  requirements still marked `level_source: auto` — a pyramid made entirely of the engine's
+  guesses reads as healthy on every other count.
 - A repo where every one of those is clean sees no extra output, so a line that does appear
   is news rather than noise.
 - The tail points at `audit` for the full report, and changes neither what `sync` writes

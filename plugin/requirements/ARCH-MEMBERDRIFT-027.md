@@ -25,6 +25,7 @@ lint_exempt: [ac-count-high]
 Every bullet below is binding.
 - Member content hashes live in a separate, versioned sidecar `_memberlock.json` (`{"_schema": N, "members": {id: {relfile: sha}}}`) computed only for single-requirement member files, on line-ending-normalized bytes, and it fails open when absent, corrupt or newer-schema. [[REQ-MEMBERDRIFT-879]]
 - The gate warns for each confirmed requirement whose dedicated member changed since the sidecar while the requirement's own contract hash did not; a requirement whose contract also drifted is skipped, since forward drift already owns it. [[REQ-MEMBERDRIFT-880]]
+- The hash keys on the definition a tag sits in, not the whole file, so a file shared by several requirements is still attributable. [[REQ-MEMBERDRIFT-982]]
 
 ## Cases
 CASE-1
@@ -210,3 +211,55 @@ CASE-5 — --update-lock re-baselines both lock files together
   Then   `_memberlock.json`'s hash for that file matches its current content, alongside
          `_reqlock.json`'s refresh
 
+---
+id: REQ-MEMBERDRIFT-982
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MEMBERDRIFT-027]
+---
+
+# The member hash keys on the tagged definition
+
+## Description
+> Ownership is what makes a hash attributable, and the unit of ownership is the unit the
+> tag sits in. Keyed per file, a file tagged by several requirements had to be dropped
+> whole — a change in it names no single contract — which excluded this engine's own file
+> and its 205 requirements from reverse drift entirely. Keyed per definition, each
+> requirement owns the definitions tagged with it.
+
+Every bullet below is binding.
+- `compute_member_hashes` returns keys of the form `relfile#definition` when a membership tag sits inside a Python top-level definition, and `relfile` otherwise.
+- A key owned by more than one requirement is dropped, at whatever granularity it was formed. Sharing a file is no longer sharing a key, but sharing a definition still is.
+- `_span_sha` normalises line endings exactly as `_file_sha` does, so a CRLF checkout never reads as drift.
+- Only Python is read per definition. The brace languages keep the whole-file hash, because a wrong span is a wrong drift signal and they are parsed by heuristics elsewhere.
+- `_memberlock.json` declares `_schema: 2`. A lock written by an older engine is rejected as unreadable and rebaselined on the next `sync`, never half-read.
+- A tag at module level, outside any definition, keeps the whole-file key it had.
+
+## Cases
+CASE-1 — one file, two owners, two keys
+  Given  a Python file whose two top-level functions carry tags for two different requirements
+  When   the member hashes are computed
+  Then   each requirement records its own `file#function` key, where the per-file scheme recorded neither
+
+CASE-2 — drift is attributed
+  Given  that fixture, baselined
+  When   only the second function changes
+  Then   member drift names the second requirement and its `file#function`, and says nothing about the first
+
+CASE-3 — a shared definition is still ambiguous
+  Given  one function carrying tags for two requirements
+  When   the member hashes are computed
+  Then   neither requirement records a key for it
+
+CASE-4 — a non-Python member is unchanged
+  Given  a `.md` or `.yml` member dedicated to one requirement
+  When   the member hashes are computed
+  Then   its key is the plain relative path, with no `#`
+
+## Context
+**Notes**
+- Measured on this repo before the change: 34 member files, 13 hashed, 21 dropped as shared — and the dropped set included `plugin/scripts/reqmap.py`, a member of 205 requirements. After: 53 requirements carry a hash over 113 keys, 99 of them per-definition, and that one file contributes 93 keys where it contributed none.
+- The gain is 13 → 53 requirements, not 13 → 205. Most definitions in this engine carry several `implements:` tags, so they remain shared and are still dropped — correctly. A projection made before implementing said 204; it had not applied the shared-definition rule, and is corrected here rather than quietly restated.
+- Nesting is not descended on purpose: a tag inside a method belongs to the class a reader opens, and per-method keys would split one contract's implementation across many.
