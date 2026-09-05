@@ -14,13 +14,16 @@ python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from th
 python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold from a TODO.md item
 python scripts/reqmap.py init              # draft requirements from untagged legacy code (--plan: JSON dry run, writes nothing)
 python scripts/reqmap.py clarify AREA-NAME-NNN  # the questions this requirement has not answered (--json; --decompose scaffolds an over-scoped clause out)
-python scripts/reqmap.py confirm AREA-NAME-NNN  # confirm a reviewed requirement (requires an implements: member); run sync after
+# confirming is a HUMAN's answer, not a command: edit `status:` in the frontmatter
+# after someone has read it. The gate enforces the invariant (RM006: confirmed with
+# no implements: member is an error), and `sync` demotes an edited contract back to
+# draft on its own.
 
 # --- build ----------------------------------------------------------------
 python scripts/reqmap.py gate --implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
 python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
 python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, docs/map.html, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
-python scripts/reqmap.py confirm --retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
+python scripts/reqmap.py sync --retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
 
 # --- read -----------------------------------------------------------------
 python scripts/reqmap.py gate --risk               # what to do next: health score + counted risk buckets (--json/--badge: the health numbers; --untagged: files with no implements: tag)

@@ -32,7 +32,7 @@ One requirement, one agent session, one drift the gate caught — real terminal 
 $ python scripts/reqmap.py new AREA-DEMO-999
 created .\requirements\AREA-DEMO-999.md
 
-$ python scripts/reqmap.py confirm AREA-DEMO-999
+$ # a human reads it, then sets `status: confirmed` in the frontmatter
 promoted AREA-DEMO-999: draft -> confirmed
   note: no `tested-by:` member — wire an acceptance test (`# tested-by: AREA-DEMO-999`) or set `test_exempt: <reason>` to silence the untested signal.
   next: reqmap.py sync

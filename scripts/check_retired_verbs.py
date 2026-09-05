@@ -65,6 +65,7 @@ INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml")]
 RETIRED = {
     "next", "show", "audit", "dupes", "search", "draft", "implement",
     "retire", "review", "design", "suggest-verifies", "translate",
+    "confirm",
 }
 
 # An invocation, not a mention: inside backticks or a quoted string, or after

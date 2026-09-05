@@ -162,13 +162,25 @@
             "type": "string",
             "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
-          "mode_suggest": {
+          "mode_retire": {
+            "type": "string",
+            "description": "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+          },
+          "delete": {
             "type": "boolean",
-            "description": "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
+            "description": "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
           },
           "do_apply": {
             "type": "boolean",
             "description": "With --suggest-verifies: write the proposed tags into the test files."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "With --retire: proceed even though dependents still point at this requirement."
+          },
+          "mode_suggest": {
+            "type": "boolean",
+            "description": "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
           },
           "findings": {
             "type": "boolean",
@@ -181,43 +193,6 @@
           "strict": {
             "type": "boolean",
             "description": "Promote drift and test-link integrity from warn to error."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
-      "name": "reqmap_confirm",
-      "description": "The human sign-off, and its inverse. Flips a reviewed requirement's status to confirmed; the engine refuses if it has no implements: member, because a confirmed requirement must point at code. --retire takes a requirement out of service instead: it prints the blast radius first, deprecates by default, and writes nothing without --apply. ",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "arg": {
-            "type": "string",
-            "description": "ID"
-          },
-          "mode_retire": {
-            "type": "string",
-            "description": "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
-          },
-          "delete": {
-            "type": "boolean",
-            "description": "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
-          },
-          "do_apply": {
-            "type": "boolean",
-            "description": "With --retire: actually write the change. Without it, the run is a dry report."
-          },
-          "force": {
-            "type": "boolean",
-            "description": "With --retire: proceed even though dependents still point at this requirement."
           }
         },
         "required": []

@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.3"
+MAP_ENGINE_VERSION = "2026-09-05.4"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -508,6 +508,38 @@ COMMANDS = {
         "arg": None,
         "params": [
             {
+                "name": "mode_retire",
+                "flag": "--retire",
+                "type": "str",
+                "help": (
+                    "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+                ),
+            },
+            {
+                "name": "delete",
+                "flag": "--delete",
+                "type": "bool",
+                "help": (
+                    "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
+                ),
+            },
+            {
+                "name": "do_apply",
+                "flag": "--apply",
+                "type": "bool",
+                "help": (
+                    "With --retire: actually write the change. Without it, the run is a dry report."
+                ),
+            },
+            {
+                "name": "force",
+                "flag": "--force",
+                "type": "bool",
+                "help": (
+                    "With --retire: proceed even though dependents still point at this requirement."
+                ),
+            },
+            {
                 "name": "mode_suggest",
                 "flag": "--suggest-verifies",
                 "type": "bool",
@@ -546,51 +578,6 @@ COMMANDS = {
                 "flag": "--strict",
                 "type": "bool",
                 "help": "Promote drift and test-link integrity from warn to error.",
-            },
-        ],
-    },
-    "confirm": {
-        "summary": (
-            "The human sign-off, and its inverse. Flips a reviewed requirement's status to "
-            "confirmed; the engine refuses if it has no implements: member, because a "
-            "confirmed requirement must point at code. --retire takes a requirement out of "
-            "service instead: it prints the blast radius first, deprecates by default, and "
-            "writes nothing without --apply. "
-       
-        ),
-        "arg": "ID",
-        "params": [
-            {
-                "name": "mode_retire",
-                "flag": "--retire",
-                "type": "str",
-                "help": (
-                    "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
-                ),
-            },
-            {
-                "name": "delete",
-                "flag": "--delete",
-                "type": "bool",
-                "help": (
-                    "With --retire: also remove the block, its lock entries and its membership tags. Never a function body."
-                ),
-            },
-            {
-                "name": "do_apply",
-                "flag": "--apply",
-                "type": "bool",
-                "help": (
-                    "With --retire: actually write the change. Without it, the run is a dry report."
-                ),
-            },
-            {
-                "name": "force",
-                "flag": "--force",
-                "type": "bool",
-                "help": (
-                    "With --retire: proceed even though dependents still point at this requirement."
-                ),
             },
         ],
     },
@@ -653,7 +640,7 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
 # single source of truth, so the grouping the help text and the viewer both show is
 # declared here once rather than restated in each surface.
 COMMAND_GROUPS = (
-    ("author", ("init", "new", "clarify", "confirm")),
+    ("author", ("init", "new", "clarify")),
     ("build", ("sync",)),
     ("read", ("gate",)),
 )
@@ -2832,12 +2819,32 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
         confirmed_drift = [rid for (rid, old_h, _h) in changed
                            if old_h is not None
                            and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
-        if confirmed_drift and not accept_drift:
-            lock_blocked = True
-            print("Contract drift on confirmed requirements; re-run with --accept-drift "
-                  "to advance the baseline:", file=sys.stderr)
+        if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
+            # An edited contract has not been re-validated by anyone, so it stops
+            # claiming it was: status goes back to `draft` and the baseline advances.
+            # Say it loudly — a demoted requirement leaves the gate's enforcement
+            # (no implements: requirement, no drift check) until a human confirms it
+            # again, and that is exactly the kind of thing that must not happen
+            # quietly. `--accept-drift` is the escape hatch for "I edited it and it
+            # is still valid": it keeps the status and advances the baseline.
+            print("Contract changed on %d confirmed requirement(s) \u2014 status back to "
+                  "`draft`, because nobody has re-validated them:" % len(confirmed_drift))
             for rid in confirmed_drift:
-                print(f"  drift: {rid}", file=sys.stderr)
+                r = reqs.get(rid) or {}
+                was = r.get("meta", {}).get("status")
+                if r and _write_frontmatter_status(r, "draft"):
+                    r["meta"]["status"] = "draft"   # keep this run's own report honest
+                    print("  demoted: %s  %s -> draft" % (rid, was))
+                else:
+                    print("  WARN  %s: no `status:` line to change" % rid)
+            print("  These no longer gate: re-confirm each one when you have checked it,")
+            print("  or re-run with --accept-drift to keep the status and just advance")
+            print("  the baseline.")
+            save_lock(reqs_dir, new_lock)
+            save_memberlock(reqs_dir, ctx.full_member_hashes
+                             if ctx.full_member_hashes is not None
+                             else compute_member_hashes(code_root, full_members))
+            print("lock updated.")
         else:
             save_lock(reqs_dir, new_lock)
             save_memberlock(reqs_dir, ctx.full_member_hashes
@@ -3122,59 +3129,32 @@ def _set_frontmatter_status(text, value):  # implements: ARCH-PROMOTE-011  # imp
     return new_head + rest, n
 
 
-def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # implements: REQ-PROMOTE-894  # implements: REQ-PROMOTE-895  # implements: REQ-PROMOTE-896
-    """Flip a requirement's status to `confirmed` (the human-validation step) by a
-    single frontmatter edit. Refuses if the requirement has no `implements:` member
-    (a confirmed requirement must point to code — else the gate would error), and
-    warns when no `tested-by:` member is linked."""
-    r = reqs.get(cap_id)
-    if not r:
-        print(f"no requirement with id {cap_id} (expected requirements/{cap_id}.md)")
-        return 1
-    cur = r["meta"].get("status")
-    if cur == "confirmed":
-        print(f"{cap_id} is already confirmed.")
-        return 0
-    roles = [m[0] for m in members.get(cap_id, [])]
-    meta = r["meta"]
-    if _impl_exempt(meta):
-        # `need`/`aggregate` are covered by an edge, not by a tag — the same exemption
-        # the gate, `health` and the risk map already apply (_impl_exempt). The edge is
-        # still checked, so the exemption is a different rule, not a hole: an aggregate
-        # with no dependencies is exactly the orphan this refusal exists to catch.
-        if meta.get("layer") == "aggregate" and not _as_list(meta.get("depends_on")):
-            print(f"refusing: {cap_id} is `layer: aggregate` but its `depends_on` is empty — "  # implements: REQ-TRACE-935
-                  "an aggregate is implemented BY its dependencies; list them first.")
-            return 1
-    elif "implements" not in roles:
-        print(f"refusing: {cap_id} has no `implements:` member — a confirmed requirement "
-              f"must point to code. Tag the implementing code `# implements: {cap_id}` first.")
-        return 1
-    # newline="" on both ends: read/write the file's own line endings verbatim so a
-    # CRLF-committed requirement file isn't silently flipped to LF on a POSIX host
-    # (universal-newline translation on read + os.linesep on write would do exactly that).
+def _write_frontmatter_status(r, new_status):  # implements: ARCH-PROMOTE-011
+    """Set one requirement's `status:` in its own file, in place. Returns True on a
+    write, False when the block has no `status:` line to change.
+
+    newline="" on both ends: read/write the file's own line endings verbatim so a
+    CRLF-committed requirement file isn't silently flipped to LF on a POSIX host
+    (universal-newline translation on read + os.linesep on write would do exactly
+    that). Per-line EOL, so a file with MIXED line endings keeps every untouched
+    bare-LF line bare-LF — only the substituted VALUE changes."""
     with open(r["path"], encoding="utf-8-sig", newline="") as f:
         raw = f.read()
-    # Per-line EOL, so a file with MIXED line endings keeps every untouched bare-LF
-    # line bare-LF — only the substituted VALUE changes, never a line ending this
-    # function didn't touch. Line count is invariant (only a value is replaced), so
-    # zipping the original per-line endings back onto the edited text is exact.
     orig_lines = raw.splitlines(keepends=True)
     line_eols = [ln[len(ln.rstrip("\r\n")):] for ln in orig_lines]
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
-    # A module file holds several requirements; flip the status of THIS one, not of the
-    # first block in the file. # implements: ARCH-MODULEFILE-056
+    # A module file holds several requirements; flip the status of THIS one, not of
+    # the first block in the file.  # implements: ARCH-MODULEFILE-056
     blocks = split_requirement_blocks(text)
     if len(blocks) > 1:
         idx = r.get("block", 0)
-        blocks[idx], n = _set_frontmatter_status(blocks[idx], "confirmed")
+        blocks[idx], n = _set_frontmatter_status(blocks[idx], new_status)
         new_text = "".join(blocks)
     else:
-        new_text, n = _set_frontmatter_status(text, "confirmed")
+        new_text, n = _set_frontmatter_status(text, new_status)
     if n == 0:
-        print(f"could not find a `status:` line in {r['path']}")
-        return 1
+        return False
     new_lines = new_text.splitlines()
     if len(new_lines) == len(line_eols):
         new_text = "".join(nl + le for nl, le in zip(new_lines, line_eols))
@@ -3182,18 +3162,7 @@ def cmd_promote(reqs, members, cap_id):  # implements: ARCH-PROMOTE-011  # imple
         new_text = new_text.replace("\n", "\r\n")
     with open(r["path"], "w", encoding="utf-8", newline="") as f:
         f.write(new_text)
-    print(f"promoted {cap_id}: {cur or '(unset)'} -> confirmed")
-    if _impl_exempt(meta):
-        print(f"  note: `layer: {meta.get('layer')}` — covered by its "
-              f"{'satisfies:' if meta.get('layer') == 'need' else 'depends_on'} edges, "
-              "not by an implements: tag.")
-        print("  next: reqmap.py sync")
-        return 0
-    if "tested-by" not in roles:
-        print(f"  note: no `tested-by:` member — wire an acceptance test (`# tested-by: {cap_id}`) "
-              f"or set `test_exempt: <reason>` to silence the untested signal.")
-    print("  next: reqmap.py sync")
-    return 0
+    return True
 
 
 def _draft_id(rel):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-850
@@ -8919,7 +8888,7 @@ def main():
                     help="sync: propose per-criterion `verifies:` tags (--apply writes them)")
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="?", default=None,
                     const="",
-                    help="confirm: take a requirement out of service instead of confirming it")
+                    help="sync: take a requirement out of service; prints the blast radius first")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -9006,6 +8975,12 @@ def main():
             rc = cmd_map(reqs, members, reqs_dir, code_root, True, ac_cover=_ac_cover) or rc
         return rc
     if a.cmd == "sync":
+        if a.mode_retire is not None:
+            if not a.mode_retire:
+                print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
+            return cmd_retire(reqs, members, reqs_dir, a.mode_retire, delete=a.delete,
+                              do_apply=a.do_apply, force=a.force, as_json=a.as_json,
+                              code_root=code_root)
         if a.mode_suggest:
             return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
                                         ac_cover=_ac_cover, apply_tags=a.do_apply)
@@ -9064,16 +9039,6 @@ def main():
             return cmd_lint(reqs, strict=False, members=members, decompose=True,
                             reqs_dir=reqs_dir)
         return cmd_clarify(reqs, a.arg, as_json=a.as_json)
-    if a.cmd == "confirm":
-        if a.mode_retire is not None:
-            if not a.mode_retire:
-                print("usage: reqmap confirm --retire AREA-NAME-NNN"); return 2
-            return cmd_retire(reqs, members, reqs_dir, a.mode_retire, delete=a.delete,
-                              do_apply=a.do_apply, force=a.force, as_json=a.as_json,
-                              code_root=code_root)
-        if not a.arg:
-            print("usage: reqmap confirm AREA-NAME-NNN   |   reqmap confirm --retire AREA-NAME-NNN"); return 2
-        return cmd_promote(reqs, members, a.arg)
 
 
 def _pipe_closed():  # implements: ARCH-PIPE-046

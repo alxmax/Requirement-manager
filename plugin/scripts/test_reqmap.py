@@ -2341,14 +2341,16 @@ class MapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: 
             self.assertIn("fresh", out)
 
 
-class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894  # tested-by: REQ-PROMOTE-895  # tested-by: REQ-PROMOTE-896
+class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894
     def _run(self, d, cap_id):
+        # `confirm` is gone; what survives is the surgical status edit the demotion
+        # now uses. The tests below are about THAT, and always were.
         reqs = R.load_requirements(d)
-        members = R.scan_members(d, d)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_promote(reqs, members, cap_id)
-        return code, buf.getvalue()
+        r = reqs.get(cap_id)
+        if not r:
+            return 1, ""
+        ok = R._write_frontmatter_status(r, "confirmed")
+        return (0 if ok else 1), ""
 
     def test_promotes_baseline_with_implements(self):  # AC-1  # verifies: REQ-PROMOTE-894#CASE-1  # verifies: REQ-PROMOTE-894#CASE-4
         with tempfile.TemporaryDirectory() as d:
@@ -2361,32 +2363,6 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: R
             self.assertIn("status: confirmed", after)
             self.assertNotIn("status: baseline", after)
             self.assertIn("body line", after)            # body preserved
-
-    def test_refuses_without_implements(self):  # AC-2  # verifies: REQ-PROMOTE-895#CASE-1  # verifies: REQ-PROMOTE-895#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-B-001.md")
-            _write(p, REQ.format(id="AREA-B-001", status="baseline", layer="bus", extra="", title="B"))
-            before = open(p, encoding="utf-8").read()
-            code, out = self._run(d, "AREA-B-001")
-            self.assertNotEqual(code, 0)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)   # unchanged
-            self.assertIn("must point to code", out)
-
-    def test_idempotent_when_confirmed(self):  # AC-3  # verifies: REQ-PROMOTE-896#CASE-4
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-C-001.md")
-            _write(p, REQ.format(id="AREA-C-001", status="confirmed", layer="bus", extra="", title="C"))
-            _write(os.path.join(d, "c.py"), tag("AREA-C-001") + "\n")
-            before = open(p, encoding="utf-8").read()
-            code, out = self._run(d, "AREA-C-001")
-            self.assertEqual(code, 0)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)
-            self.assertIn("already confirmed", out)
-
-    def test_unknown_id_errors(self):
-        with tempfile.TemporaryDirectory() as d:
-            code, out = self._run(d, "NOPE-X-001")
-            self.assertNotEqual(code, 0)
 
     def test_preserves_trailing_comment(self):  # AC-4  # verifies: REQ-PROMOTE-894#CASE-3
         new_text, n = R._set_frontmatter_status(
@@ -2408,10 +2384,7 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: R
                 f.write(raw)
             _write(os.path.join(d, "m.py"), tag("AREA-M-001") + "\n")
             reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-M-001")
+            code = 0 if R._write_frontmatter_status(reqs["AREA-M-001"], "confirmed") else 1
             self.assertEqual(code, 0)
             with open(p, "rb") as f:
                 after = f.read()
@@ -4084,49 +4057,6 @@ class ImplExemptLayers(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # teste
     """`confirm` refused a `layer: need` the gate, `health` and the risk map all
     exempt — so this repo's own SYS-SSOT-001 could only become confirmed by editing
     the file around the command. One predicate now answers for all four."""
-
-    def _promote(self, d, cap_id):
-        reqs = R.load_requirements(d)
-        members = R.scan_members(d, d)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_promote(reqs, members, cap_id)
-        return code, buf.getvalue()
-
-    def test_need_can_be_confirmed_without_implements(self):  # verifies: REQ-PROMOTE-895#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "NEED-X-001.md"),
-                   REQ.format(id="NEED-X-001", status="baseline", layer="need", extra="", title="N"))
-            _write(os.path.join(d, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature",
-                              extra="satisfies: [NEED-X-001]\n", title="A"))
-            code, out = self._promote(d, "NEED-X-001")
-            self.assertEqual(code, 0, out)
-            self.assertIn("status: confirmed",
-                          open(os.path.join(d, "NEED-X-001.md"), encoding="utf-8").read())
-
-    def test_aggregate_with_dependencies_can_be_confirmed(self):
-        with tempfile.TemporaryDirectory() as d:
-            _write(os.path.join(d, "REQ-AGG-001.md"),
-                   REQ.format(id="REQ-AGG-001", status="baseline", layer="aggregate",
-                              extra="depends_on: [REQ-A-001]\n", title="Agg"))
-            _write(os.path.join(d, "REQ-A-001.md"),
-                   REQ.format(id="REQ-A-001", status="confirmed", layer="feature", extra="", title="A"))
-            _write(os.path.join(d, "a.py"), tag("REQ-A-001") + "\n")
-            code, out = self._promote(d, "REQ-AGG-001")
-            self.assertEqual(code, 0, out)
-            self.assertIn("depends_on", out)
-
-    def test_aggregate_without_dependencies_is_refused(self):  # verifies: REQ-PROMOTE-895#CASE-3  # verifies: REQ-TRACE-935#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "REQ-AGG-002.md")
-            _write(p, REQ.format(id="REQ-AGG-002", status="baseline", layer="aggregate",
-                                 extra="depends_on: []\n", title="Agg"))
-            before = open(p, encoding="utf-8").read()
-            code, out = self._promote(d, "REQ-AGG-002")
-            self.assertNotEqual(code, 0)
-            self.assertIn("depends_on", out)
-            self.assertEqual(open(p, encoding="utf-8").read(), before)
 
     def test_gate_does_not_error_on_confirmed_aggregate(self):  # verifies: ARCH-TRACE-020#CASE-5  # verifies: REQ-TRACE-935#CASE-1
         with tempfile.TemporaryDirectory() as d:
@@ -6059,7 +5989,9 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
         _write(os.path.join(d, "test_impl.py"), "def test_a():\n    assert True  " + tb_tag("REQ-A-001"))
         return rdir
 
-    def test_sync_blocks_confirmed_drift_without_flag(self):
+    def test_sync_demotes_confirmed_drift_without_flag(self):  # verifies: REQ-PROMOTE-974#CASE-1
+        """An edited confirmed contract used to BLOCK the lock; it now loses its
+        confirmation and the baseline advances. The safe outcome became the default."""
         with tempfile.TemporaryDirectory() as d:
             rdir = self._confirmed_repo(d)
             reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
@@ -6069,10 +6001,11 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             # edit the contract -> drift
             self._confirmed_repo(d, body_tail="\nMore contract text that changes the hash.\n")
             reqs2 = R.load_requirements(rdir)
-            with redirect_stdout(io.StringIO()):
-                rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
-            self.assertEqual(rc, 1)  # blocked
-            self.assertEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # lock untouched
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d, accept_drift=False)
+            self.assertIn("demoted:", buf.getvalue())
+            self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)
 
     def test_sync_accept_drift_advances_baseline(self):
         with tempfile.TemporaryDirectory() as d:
@@ -6088,7 +6021,7 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertEqual(rc, 0)
             self.assertNotEqual(open(R.lock_path(rdir), encoding="utf-8").read(), lock_before)  # advanced
 
-    def test_json_path_reflects_blocked_lock(self):  # guard the as_json early-return
+    def test_json_path_survives_a_demotion(self):  # guard the as_json early-return
         with tempfile.TemporaryDirectory() as d:
             rdir = self._confirmed_repo(d)
             reqs = R.load_requirements(rdir); members = R.scan_members(d, rdir)
@@ -6100,9 +6033,11 @@ class SyncDriftGuard(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             with redirect_stdout(buf):
                 rc = R.cmd_check(reqs2, members, rdir, update_lock=True, code_root=d,
                                  as_json=True, accept_drift=False)
-            self.assertEqual(rc, 1)  # blocked lock surfaces as non-zero even on the json path
-            # the json line is printed last (after the 'lock update:' diff lines)
-            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], False)
+            # drift no longer blocks the lock, so the json path reports a clean run;
+            # the demotion is what carries the signal, and it is printed by name.
+            self.assertEqual(rc, 0)
+            self.assertIn("demoted:", buf.getvalue())
+            self.assertEqual(json.loads(buf.getvalue().strip().splitlines()[-1])["ok"], True)
 
 
 class CommandRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-834
@@ -7689,7 +7624,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             members = R.scan_members(d, d)
             buf = io.StringIO()
             with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-D-002")
+                code = 0 if R._write_frontmatter_status(reqs["AREA-D-002"], "confirmed") else 1
             self.assertEqual(code, 0, buf.getvalue())
             after = R.load_requirements(d)
             self.assertEqual(after["AREA-D-002"]["meta"]["status"], "confirmed")
@@ -9454,7 +9389,7 @@ class CasesExtract(unittest.TestCase):  # tested-by: ARCH-EXTRACT-008  # tested-
             self.assertEqual(open(dest, encoding="utf-8").read(), custom)
 
 
-class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894  # tested-by: REQ-PROMOTE-895  # tested-by: REQ-PROMOTE-896
+class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-894
     def test_only_first_status_line_rewritten(self):  # verifies: REQ-PROMOTE-894#CASE-2
         text = ("---\nid: X-1\nstatus: draft\nlayer: bus\n---\n\n"
                 "# T\n\nThe deployment status: pending is tracked elsewhere.\n")
@@ -9463,34 +9398,6 @@ class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
         self.assertIn("status: confirmed", new_text)
         self.assertNotIn("status: draft", new_text)
         self.assertIn("The deployment status: pending is tracked elsewhere.\n", new_text)
-
-    def test_unknown_id_prints_message_and_nonzero(self):  # verifies: REQ-PROMOTE-895#CASE-5
-        with tempfile.TemporaryDirectory() as d:
-            reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "GHOST-X-001")
-            self.assertNotEqual(code, 0)
-            self.assertIn("no requirement with id GHOST-X-001", buf.getvalue())
-
-    def test_confirm_warns_without_test_link_but_succeeds(self):  # verifies: REQ-PROMOTE-896#CASE-1  # verifies: REQ-PROMOTE-896#CASE-2  # verifies: REQ-PROMOTE-896#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            p = os.path.join(d, "AREA-N-001.md")
-            _write(p, REQ.format(id="AREA-N-001", status="baseline", layer="bus", extra="", title="N"))
-            _write(os.path.join(d, "n.py"), tag("AREA-N-001") + "\n")
-            reqs = R.load_requirements(d)
-            members = R.scan_members(d, d)
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                code = R.cmd_promote(reqs, members, "AREA-N-001")
-            out = buf.getvalue()
-            self.assertEqual(code, 0)
-            self.assertIn("status: confirmed", open(p, encoding="utf-8").read())
-            self.assertIn("no `tested-by:` member", out)          # names the fix
-            self.assertIn("test_exempt:", out)                    # or the opt-out
-            self.assertIn("next: reqmap.py sync", out)             # reminds to resync
-
 
 class CasesPromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: REQ-PROMOTE-TODO-897  # tested-by: REQ-PROMOTE-TODO-898  # tested-by: REQ-PROMOTE-TODO-899
     def test_matching_is_case_insensitive_and_trims(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-2
@@ -10450,9 +10357,9 @@ class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
         self.assertEqual(len(names), len(set(names)))
 
     def test_entry_carries_argument_summary_and_flags(self):  # verifies: REQ-CMDREGISTRY-963#CASE-2
-        entry = next(c for c in R.commands_manifest() if c["name"] == "confirm")
+        entry = next(c for c in R.commands_manifest() if c["name"] == "sync")
         self.assertTrue(entry["summary"])
-        self.assertEqual(entry["arg"], R.COMMANDS["confirm"]["arg"])
+        self.assertEqual(entry["arg"], R.COMMANDS["sync"]["arg"])
         flags = {f["flag"] for f in entry["flags"]}
         self.assertIn("--delete", flags)
         self.assertIn("--apply", flags)
@@ -10607,6 +10514,87 @@ class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # 
             _write(os.path.join(d, "mod.py"), tag("AREA-T-001") + "\ndef f():\n    return 1\n")
             out = self._findings(d)
         self.assertNotIn("RM029", out)
+
+
+class DemoteOnEdit(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: REQ-PROMOTE-974
+    """An edited confirmed contract loses its confirmation, in sync."""
+
+    BODY = (
+        "---\n"
+        "id: AREA-E-001\n"
+        "status: confirmed\n"
+        "level: code\n"
+        "layer: feature\n"
+        "owner: A\n"
+        "---\n"
+        "\n"
+        "# Titled\n"
+        "\n"
+        "## Description\n"
+        "> Why.\n"
+        "\n"
+        "Every bullet below is binding.\n"
+        "- It does one thing.\n"
+        "\n"
+        "## Cases\n"
+        "CASE-1\n"
+        "  Given  a\n"
+        "  When   b\n"
+        "  Then   c\n"
+    )
+
+    def _seed(self, d):
+        rq = os.path.join(d, "requirements")
+        _write(os.path.join(rq, "AREA-E-001.md"), self.BODY)
+        _write(os.path.join(d, "m.py"), tag("AREA-E-001") + "\ndef f():\n    return 1\n")
+        return rq
+
+    def _sync(self, d, accept=False):
+        rq = os.path.join(d, "requirements")
+        reqs = R.load_requirements(rq)
+        members = R.scan_members(d, rq)
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(io.StringIO()):
+            R.cmd_check(reqs, members, rq, True, d, accept_drift=accept)
+        return buf.getvalue()
+
+    def _status(self, rq):
+        for line in open(os.path.join(rq, "AREA-E-001.md"), encoding="utf-8"):
+            if line.startswith("status:"):
+                return line.strip()
+        return ""
+
+    def _edit(self, rq):
+        with open(os.path.join(rq, "AREA-E-001.md"), "a", encoding="utf-8") as f:
+            f.write("- It also does a second thing.\n")
+
+    def test_edited_confirmed_contract_is_demoted(self):  # verifies: ARCH-PROMOTE-011#CASE-1  # verifies: REQ-PROMOTE-974#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._sync(d)                       # baseline
+            self._edit(rq)
+            out = self._sync(d)
+            self.assertIn("demoted: AREA-E-001", out)
+            self.assertIn("no longer gate", out)
+            self.assertEqual(self._status(rq), "status: draft")
+            # the baseline advanced in the same run, so a second sync is quiet
+            self.assertNotIn("demoted:", self._sync(d))
+
+    def test_a_new_requirement_is_not_drift(self):  # verifies: REQ-PROMOTE-974#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            out = self._sync(d)                 # never been in the lock
+            self.assertNotIn("demoted:", out)
+            self.assertEqual(self._status(rq), "status: confirmed")
+
+    def test_accept_drift_keeps_the_status(self):  # verifies: ARCH-PROMOTE-011#CASE-2  # verifies: REQ-PROMOTE-974#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rq = self._seed(d)
+            self._sync(d)
+            self._edit(rq)
+            out = self._sync(d, accept=True)
+            self.assertNotIn("demoted:", out)
+            self.assertEqual(self._status(rq), "status: confirmed")
 
 
 if __name__ == "__main__":

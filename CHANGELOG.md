@@ -19,6 +19,23 @@ called next, dupes, design and coverage internally; `init` already made the same
 `cmd_extract()` call as plain `draft`. Four of the eleven were therefore a registry change
 only.
 
+**Breaking: there is no `confirm` command, and an edit takes a confirmation back.** Confirming
+was the wrong shape as a command: it let anything that could type — a script, an agent, a habit —
+record a human's judgement. Worse, the judgement outlived the thing it was about, because nothing
+connected editing a contract to re-validating it. A status is now set by editing the frontmatter,
+and `sync` writes `draft` back into any `confirmed` contract whose binding content changed,
+naming each one. `--accept-drift` keeps the status: it is the human saying the edit is still
+valid, which now has to be said rather than assumed.
+
+The cost is stated rather than hidden: a demoted requirement stops being enforced — no
+`implements:` requirement, no drift check — until someone confirms it again. That is why the
+demotion prints loudly, by name, with the sentence "These no longer gate". The invariant the
+command used to guard survives in the gate, where `RM006` makes a confirmed requirement with no
+code an error on every run.
+
+`retire` moves with it, to `sync --retire ID`. Five verbs remain: `init`, `new`, `gate`,
+`sync`, `clarify`.
+
 **`translate` is gone, and the map still reads Romanian.** The command that WROTE
 `requirements/_i18n/<locale>.json` was deleted, together with everything that spawned a
 `claude` subprocess: the language detection, the corpus-majority vote, the
