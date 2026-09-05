@@ -8,7 +8,7 @@
   is left exactly as decided.
 - **Decided:** 2026-09-03 (`ARCH-LEVEL-051`, `ARCH-FANOUT-052`, `ARCH-VRUNGS-054`, `ARCH-ATOMICFORM-053`, `ARCH-MODULEFILE-056`)
 - **Evidence:** `CHANGELOG.md` `v2.32.0`; the nine-senator audit
-  `runs/senate/2026-09-02_*-v-model*.json` (advisory); this repo's own corpus, 52 files → 689
+  `runs/senate/2026-09-02_201621-senate-reqmap-vmodel-req-size-and-3-classes.json` and `runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json` (advisory; the earlier `2026-09-02_*-v-model*.json` glob printed here matched no file); this repo's own corpus, 52 files → 689
   requirements
 
 ## Context
