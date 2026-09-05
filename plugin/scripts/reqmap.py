@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.14"
+MAP_ENGINE_VERSION = "2026-09-05.15"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4297,19 +4297,16 @@ def _req_file(reqs, rid):  # implements: ARCH-MODULEFILE-056
     return "requirements/" + (os.path.basename(p) if p else str(rid) + ".md")
 
 
-def cmd_next(ws, show_all=False, top_n=3):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883  # implements: REQ-NEXT-884  # implements: REQ-NEXT-885  # implements: REQ-NEXT-886  # implements: REQ-NEXT-887
-    """Terminal 'what should I do next': a focused, counted worklist over the same
-    `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
-    header, leads with the most-urgent bucket, shows the top few per bucket (the
-    extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
-    item names the requirement file to open. Also surfaces scannable files that
-    carry no membership tag (untagged bucket). Read-only, always exit 0."""
-    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
+def _next_pending(reqs, members, code_root, reqs_dir):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883
+    """Everything `next` has to say about the corpus, before a word of it is
+    formatted: the headline counts, the risk buckets in priority order, the
+    untagged files, and the two corpus-shape advisories. Returns None when the
+    corpus is empty, which the caller reports differently from a clean one."""
     total = len(reqs)
     if total == 0:   # distinguish "nothing set up yet" from "all clean"
         print("No requirements yet. Run `reqmap.py init` to bootstrap from existing "
               "code, or `reqmap.py new AREA-NAME-NNN` to author one.")
-        return 0
+        return None
     confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
     tested = sum(1 for rid in reqs if any(role == "tested-by" for role, *_ in members.get(rid, [])))
     # `unreviewed` = draft + baseline, the same population the "Drafts to review" bucket
@@ -4360,6 +4357,22 @@ def cmd_next(ws, show_all=False, top_n=3):  # implements: ARCH-NEXT-013  # imple
     # The other direction of the same concern: covering the code with FEWER requirements.
     # Granularity above says "this one does too much"; this says "these say the same thing".
     redundant = _redundant_groups(reqs)
+    return (total, confirmed, tested, unreviewed, pending, untagged,
+            oversize, redundant)
+
+def cmd_next(ws, show_all=False, top_n=3):  # implements: ARCH-NEXT-013  # implements: REQ-NEXT-883  # implements: REQ-NEXT-884  # implements: REQ-NEXT-885  # implements: REQ-NEXT-886  # implements: REQ-NEXT-887
+    """Terminal 'what should I do next': a focused, counted worklist over the same
+    `_risk_signals` + `RISK_ADVICE` that drive the Risk tab. Prints a progress
+    header, leads with the most-urgent bucket, shows the top few per bucket (the
+    extract REVIEW-flagged ones first), and collapses the rest behind --all. Each
+    item names the requirement file to open. Also surfaces scannable files that
+    carry no membership tag (untagged bucket). Read-only, always exit 0."""
+    reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
+    found = _next_pending(reqs, members, code_root, reqs_dir)
+    if found is None:
+        return 0
+    (total, confirmed, tested, unreviewed, pending, untagged,
+     oversize, redundant) = found
     # Computed BEFORE the early return: Granularity/Redundancy are their own findings, not
     # a footnote on the four risk buckets above — a corpus clean on every bucket but still
     # carrying an oversize or redundant requirement is NOT "nothing pending".
@@ -4588,20 +4601,9 @@ def _count_ac(body):
     return len(_acc_blocks(body))
 
 
-def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # implements: ARCH-LINT-014  # implements: ARCH-LINTCHECKS-025  # implements: ARCH-FANOUT-052  # implements: REQ-LINT-863  # implements: REQ-LINTCHECKS-865  # implements: REQ-LINTCHECKS-866  # implements: REQ-LINTCHECKS-867  # implements: REQ-LINTCHECKS-868  # implements: REQ-LINTCHECKS-869
-    """Return a list of {severity, check, detail} findings for one requirement;
-    an empty list means clean. Checks the Contract + Acceptance sections only.
-    `member_list` (optional [(role, file, line), ...]) enables the member-based
-    file-spread check; when omitted, that check is skipped.
-    `fanin` (optional int — how many requirements depend on this one) enables the
-    layer-mismatch check; when omitted, that check is skipped.
-    `children` (optional int — how many requirements declare `satisfies:` this one) enables
-    the fan-out check; when omitted, or when it is zero, that check is skipped.
-    Checks named in the requirement's `lint_exempt:` frontmatter list are silently
-    skipped and not counted against the requirement."""
-    exempt = set(_as_list(r["meta"].get("lint_exempt")))
+def _lint_sections(body):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """The two load-bearing sections: present at all, and carrying anything."""
     findings = []
-    body = r["body"]
     # structural (error): a non-draft must carry both load-bearing sections
     if not _has_any(body, CONTRACT_LABELS):
         findings.append({"severity": "error", "check": "missing-section",
@@ -4618,6 +4620,12 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     if _has_any(body, ACCEPTANCE_LABELS) and _count_ac(body) == 0:
         findings.append({"severity": "warn", "check": "empty-section",
                          "detail": "'## Cases' section present but has no criteria"})
+    return findings
+
+def _lint_readability(body):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """Readability of the normative prose: joins per line, anonymous subjects,
+    sentence and clause length, and one obligation per clause."""
+    findings = []
     # prose readability (warn): only on the Contract + Acceptance sections
     for name in (CONTRACT_LABELS[0], CONTRACT_LABELS[1],
                  ACCEPTANCE_LABELS[0], ACCEPTANCE_LABELS[1]):
@@ -4672,6 +4680,12 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "clause_n": _n, "clause_text": _clause,
                 "detail": "clause {} is {} words (>{}) \u2014 re-read it for decomposition: {}".format(
                     _n, _cw, LINT_STATEMENT_WORDS, _clip(_clause))})
+    return findings
+
+def _lint_acceptance(body, r, rid):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """The acceptance criteria: how many there are, and whether the atomic form
+    proves every fact its story claims."""
+    findings = []
     # ac count (warn): too few = under-specified; too many = over-scoped
     if _has_any(body, ACCEPTANCE_LABELS):
         ac_n = _count_ac(body)
@@ -4716,6 +4730,12 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "detail": "{} bullets in the story quote but {} 'Then' line(s) in the "
                           "Scenario — each enumerated fact needs its own Then".format(
                               _bn, _tn)})
+    return findings
+
+def _lint_shape(rid, r, body, children):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """Corpus shape: a requirement over both ceilings at once, and a parent whose
+    fan-out sits outside the band for its level."""
+    findings = []
     # cohesion (warn): over BOTH the contract and acceptance ceilings at once is a strong
     # "several capabilities bundled into one" signal — each contract clause is a separate
     # binding, each AC an independent failure mode. Requiring BOTH axes (a composite) keeps
@@ -4764,6 +4784,12 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                 "severity": "warn", "check": "fan-out",
                 "detail": "{} requirement(s) satisfy this one (over {}): too many — "
                           "split it".format(children, _hi)})
+    return findings
+
+def _lint_terms(body):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """Words that make a clause untestable: vague quality terms, and a modal the
+    section header already supplies."""
+    findings = []
     # vague terms (warn): a Contract bullet using a non-testable quality word is
     # ambiguous (IEEE 29148). Code spans (`backticked`) are stripped first so a
     # backticked identifier is never flagged. One finding per distinct term.
@@ -4799,6 +4825,12 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                         "detail": "redundant modal '{}' (the Contract header already binds "
                                   "every line — use plain present tense): {}".format(
                                       w, _clip(ln))})
+    return findings
+
+def _lint_graph(r, member_list, fanin):  # implements: ARCH-LINTCHECKS-025  # implements: REQ-LINT-863
+    """What the requirement looks like from outside: how far its members are spread,
+    and whether its declared layer matches its fan-in."""
+    findings = []
     # file-spread (warn): a requirement whose implements members span many distinct FILES is
     # architecturally diffuse — a cohesion axis the intent-axis checks (over-scoped, ac-count)
     # cannot see, since a tight contract can still be smeared across many files. Auto-off when
@@ -4826,9 +4858,36 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
                       "requirement(s) — that is a roof, not a foundation; consider "
                       "`layer: aggregate` or `feature`".format(
                           len(_as_list(r["meta"].get("depends_on"))))})
+    return findings
+
+
+def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # implements: ARCH-LINT-014  # implements: ARCH-LINTCHECKS-025  # implements: ARCH-FANOUT-052  # implements: REQ-LINT-863  # implements: REQ-LINTCHECKS-865  # implements: REQ-LINTCHECKS-866  # implements: REQ-LINTCHECKS-867  # implements: REQ-LINTCHECKS-868  # implements: REQ-LINTCHECKS-869
+    """Return a list of {severity, check, detail} findings for one requirement;
+    an empty list means clean. Checks the Contract + Acceptance sections only.
+    `member_list` (optional [(role, file, line), ...]) enables the member-based
+    file-spread check; when omitted, that check is skipped.
+    `fanin` (optional int — how many requirements depend on this one) enables the
+    layer-mismatch check; when omitted, that check is skipped.
+    `children` (optional int — how many requirements declare `satisfies:` this one) enables
+    the fan-out check; when omitted, or when it is zero, that check is skipped.
+    Checks named in the requirement's `lint_exempt:` frontmatter list are silently
+    skipped and not counted against the requirement."""
+    exempt = set(_as_list(r["meta"].get("lint_exempt")))
+    findings = []
+    body = r["body"]
+    exempt = set(_as_list(r["meta"].get("lint_exempt")))
+    body = r["body"]
+    findings = []
+    findings += _lint_sections(body)
+    findings += _lint_readability(body)
+    findings += _lint_acceptance(body, r, rid)
+    findings += _lint_shape(rid, r, body, children)
+    findings += _lint_terms(body)
+    findings += _lint_graph(r, member_list, fanin)
     if exempt:
         findings = [f for f in findings if f["check"] not in exempt]
     return findings
+
 
 
 DECOMPOSED_TEMPLATE = """---
