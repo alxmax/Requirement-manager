@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.5"
+MAP_ENGINE_VERSION = "2026-09-05.6"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2891,11 +2891,20 @@ def cmd_check(reqs, members, reqs_dir, update_lock, code_root=".", strict=False,
                 if r and _write_frontmatter_status(r, "draft"):
                     r["meta"]["status"] = "draft"   # keep this run's own report honest
                     print("  demoted: %s  %s -> draft" % (rid, was))
+                    # Name the code, not just the requirement: a changed contract is a
+                    # question about whether the code still matches it, and the answer
+                    # lives in these files. Without them the demotion says what happened
+                    # and not what to do about it.
+                    locs = ["%s:%s" % (fp, ln) for (_role, fp, ln) in full_members.get(rid, ())]
+                    if locs:
+                        print("      re-check %d member(s): %s" % (len(locs), ", ".join(locs)))
+                    else:
+                        print("      no members tagged — add an `implements:` tag")
                 else:
                     print("  WARN  %s: no `status:` line to change" % rid)
-            print("  These no longer gate: re-confirm each one when you have checked it,")
-            print("  or re-run with --accept-drift to keep the status and just advance")
-            print("  the baseline.")
+            print("  These no longer gate. Re-read the code above against the new contract,")
+            print("  change whichever is wrong, then set the status back by hand — or re-run")
+            print("  with --accept-drift if the edit did not change what the code must do.")
             save_lock(reqs_dir, new_lock)
             save_memberlock(reqs_dir, ctx.full_member_hashes
                              if ctx.full_member_hashes is not None
