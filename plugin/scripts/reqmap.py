@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.21"
+MAP_ENGINE_VERSION = "2026-09-05"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -722,7 +722,15 @@ def _write_region(path, body):  # implements: REQ-CMDREGISTRY-834
     # read (universal-newline translation) with no re-translation on write.
     with open(path, encoding="utf-8", newline="") as f:
         text = f.read()
-    new = _REGION_RE.sub(lambda m: m.group(1) + "\n" + body + "\n" + m.group(3), text)
+    # The body is generated with bare "\n". Written as-is into a CRLF file it left
+    # the region LF inside CRLF prose. `_check_integration_fresh` reads the file with
+    # universal newlines, so CRLF collapses to LF before the comparison and the gate
+    # saw nothing wrong; git did, and every `sync` on Windows left a line-ending-only
+    # diff. The body takes the file's own convention, the way `tool_definition.json`
+    # already did.
+    eol = "\r\n" if "\r\n" in text else "\n"
+    body = body.replace("\r\n", "\n").replace("\n", eol)
+    new = _REGION_RE.sub(lambda m: m.group(1) + eol + body + eol + m.group(3), text)
     if new != text:
         with open(path, "w", encoding="utf-8", newline="") as f:
             f.write(new)

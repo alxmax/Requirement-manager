@@ -105,7 +105,8 @@ CASE-2 — gen-integration derives tool_definition.json from COMMANDS
 CASE-3 — gen-integration rewrites only the marked command-table region
   Given  `SKILL.universal.md` with hand-written prose outside `<!--##REQMAP:COMMANDS##-->`
   When   `gen-integration` runs
-  Then   the region's table refreshes and the surrounding prose is byte-identical
+  Then   the region's table refreshes, the surrounding prose is byte-identical, and the
+         written body carries the file's own line endings, so a rerun leaves no diff
 
 CASE-4 — gen-integration omits internal commands from AI-facing output
   Given  `COMMANDS` including the internal `gen-integration` entry itself
