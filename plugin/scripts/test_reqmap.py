@@ -45,7 +45,6 @@ def tb_tag(cap):
     return "# {}: {}".format(_TB_ROLE, cap)
 
 
-
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
 
 
@@ -3175,26 +3174,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         self.addCleanup(shutil.rmtree, d, ignore_errors=True)
         return d
 
-    def test_detect_lang_diacritics(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertEqual(R.detect_lang(self.RO_BODY), "ro")
-
-    def test_detect_lang_english(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertEqual(R.detect_lang(self.EN_BODY), "en")
-
-    def test_detect_lang_undetermined_on_code_only(self):  # verifies: ARCH-TRANSLATE-044#CASE-1
-        self.assertIsNone(R.detect_lang("`foo_bar()` `baz.qux` `1234`"))
-
-    def test_corpus_lang_is_majority_vote(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-2
-        reqs = {"REQ-A-001": self._req(self.RO_BODY), "REQ-B-002": self._req(self.RO_BODY),
-                "REQ-C-003": self._req(self.EN_BODY)}
-        self.assertEqual(R.corpus_lang(reqs), "ro")
-
-    def test_lang_frontmatter_override_wins_over_detection(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-2
-        # Romanian prose, but explicitly tagged as English — override must win.
-        reqs = {"REQ-A-001": self._req(self.RO_BODY, lang="en")}
-        self.assertEqual(R.corpus_lang(reqs), "en")
-
-    def test_translation_hash_changes_on_title_edit(self):  # verifies: ARCH-TRANSLATE-044#CASE-3  # verifies: REQ-TRANSLATE-937#CASE-4
+    def test_translation_hash_changes_on_title_edit(self):  # verifies: ARCH-TRANSLATE-044#CASE-1  # verifies: REQ-TRANSLATE-937#CASE-2
         # binding_hash() (Contract+Acceptance only) would NOT change here — that is
         # exactly the gap this hash exists to close.
         body_a = self.RO_BODY
@@ -3206,110 +3186,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         # stays THE SAME — proof that reusing it would have missed this edit.
         self.assertEqual(R.binding_hash(body_a), R.binding_hash(body_b))
 
-    def test_structural_signature_catches_dropped_backtick(self):  # verifies: ARCH-TRANSLATE-044#CASE-4  # verifies: REQ-TRANSLATE-937#CASE-5
-        source = "The `TOTAL` sum uses 2 decimals."
-        good = "Suma `TOTAL` folosește 2 zecimale."
-        bad = "Suma TOTAL folosește 2 zecimale."   # backtick dropped
-        self.assertTrue(R._translation_preserves_structure(source, good))
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_dropped_number(self):  # verifies: ARCH-TRANSLATE-044#CASE-4  # verifies: REQ-TRANSLATE-937#CASE-5
-        source = "Rounds to 2 decimals."
-        bad = "Rounds to decimals."   # number dropped
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_renamed_ac_label(self):  # verifies: ARCH-TRANSLATE-044#CASE-9  # verifies: REQ-TRANSLATE-938#CASE-1
-        # `AC-N` is an identifier a test points at with `# verifies: <ID>#AC-N`, not prose.
-        # Renaming it passes the backtick/number/marker checks: "AC-1" and "CA-1" carry the
-        # same digit and neither is a heading or a bullet.
-        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
-        good = "AC-1\n  Given  un depozit\n  When   ruleaza `init`\n  Then   creeaza directorul\n"
-        bad = good.replace("AC-1", "CA-1")
-        self.assertTrue(R._translation_preserves_structure(source, good))
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_structural_signature_catches_translated_gherkin_keyword(self):  # verifies: ARCH-TRANSLATE-044#CASE-9  # verifies: REQ-TRANSLATE-938#CASE-1
-        # Given/When/Then are engine vocabulary, like `confirmed` or `draft`: the viewer
-        # highlights them and the .md file is the artifact of record. A reader shown
-        # "Dat fiind" cannot match the criterion against the file.
-        source = "AC-1\n  Given  a repo\n  When   `init` runs\n  Then   it creates the dir\n"
-        bad = ("AC-1\n  Dat fiind  un depozit\n  Cand   ruleaza `init`\n"
-               "  Atunci   creeaza directorul\n")
-        self.assertFalse(R._translation_preserves_structure(source, bad))
-
-    def test_parse_translated_sections_well_formed(self):
-        text = ("===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
-        parsed = R._parse_translated_sections(text)
-        self.assertEqual(parsed, {"title": "T", "intent": "I", "contract": "C", "acceptance": "A"})
-
-    def test_parse_translated_sections_missing_marker_is_none(self):
-        text = "===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n"   # no ACCEPTANCE
-        self.assertIsNone(R._parse_translated_sections(text))
-
-    def test_cmd_translate_fails_open_when_cli_missing(self):  # verifies: ARCH-TRANSLATE-044#CASE-5  # verifies: REQ-TRANSLATE-938#CASE-2
-        reqs_dir = self._tmp_reqs_dir()
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", side_effect=FileNotFoundError):
-            buf = io.StringIO()
-            with redirect_stdout(buf):
-                rc = R.cmd_translate(reqs, reqs_dir)
-        self.assertEqual(rc, 0)                              # never a gate, always exits 0
-        self.assertIn("skipped", buf.getvalue())
-        self.assertFalse(os.path.exists(os.path.join(reqs_dir, "_i18n", "en.json")))  # nothing cached
-
-    def test_cmd_translate_happy_path_writes_cache_and_hits_on_rerun(self):  # verifies: ARCH-TRANSLATE-044#CASE-6  # verifies: REQ-TRANSLATE-937#CASE-3  # verifies: REQ-TRANSLATE-938#CASE-3
-        reqs_dir = self._tmp_reqs_dir()
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        fake_response = ("===TITLE===\nEnglish title\n"
-                          "===INTENT===\nHere we explain why this requirement exists and "
-                          "what problem it solves.\n"
-                          "===CONTRACT===\n- The system calculates the `TOTAL` sum and shows "
-                          "2 decimals.\n"
-                          "===ACCEPTANCE===\n- Given a total of 10\n  When it is shown\n  "
-                          "Then it reads 10.00\n")
-        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m:
-            rc = R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(rc, 0)
-        self.assertEqual(m.call_count, 1)
-        cache_path = os.path.join(reqs_dir, "_i18n", "en.json")
-        self.assertTrue(os.path.exists(cache_path))
-        with open(cache_path, encoding="utf-8") as f:
-            cache = json.load(f)
-        self.assertEqual(cache["REQ-A-001"]["title"], "English title")
-
-        # re-run with unchanged content: cache hit, claude is NOT called again
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc) as m2:
-            R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(m2.call_count, 0)
-
-    def test_resolved_executable_is_what_runs(self):  # verifies: REQ-TRANSLATE-938#CASE-7
-        """On Windows the CLI installs as `claude.CMD`, and CreateProcess only ever
-        appends `.exe` to a bare name — so every entry was reported as an unavailable
-        CLI against a CLI that was installed and on PATH."""
-        captured = {}
-
-        def fake_run(argv, **kw):
-            captured["argv"] = argv
-            return mock.Mock(returncode=0, stdout="===TITLE===\nT\n===INTENT===\nI\n===CONTRACT===\nC\n===ACCEPTANCE===\nA\n")
-
-        with mock.patch.object(R.shutil, "which", return_value="C:\\bin\\claude.CMD"), \
-             mock.patch.object(R.subprocess, "run", side_effect=fake_run):
-            out = R._run_claude_translate("T", "I", "C", "A", "ro", "en")
-        self.assertIsNotNone(out)
-        self.assertEqual(captured["argv"][0], "C:\\bin\\claude.CMD")
-
-    def test_cli_absent_from_path_never_spawns(self):  # verifies: REQ-TRANSLATE-938#CASE-7
-        with mock.patch.object(R.shutil, "which", return_value=None), \
-             mock.patch.object(R.subprocess, "run", side_effect=AssertionError(
-                 "must not spawn when the CLI is not on PATH")) as m:
-            self.assertIsNone(R._run_claude_translate("T", "I", "C", "A", "ro", "en"))
-        self.assertEqual(m.call_count, 0)
-
-    def test_map_never_invokes_claude(self):  # verifies: ARCH-TRANSLATE-044#CASE-7  # verifies: REQ-TRANSLATE-937#CASE-1  # verifies: REQ-TRANSLATE-938#CASE-4
+    def test_map_never_invokes_claude(self):  # verifies: ARCH-TRANSLATE-044#CASE-2  # verifies: REQ-TRANSLATE-937#CASE-1  # verifies: REQ-TRANSLATE-938#CASE-1
         # `map`/`export` must stay fully deterministic and claude-free — they only
         # ever read an already-committed cache file.
         reqs_dir = self._tmp_reqs_dir()
@@ -3329,7 +3206,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         node = next(n for n in data["nodes"] if n["id"] == "REQ-A-001")
         self.assertEqual(node["i18n"]["en"]["title"], "English title")
 
-    def test_stale_cache_entry_is_dropped_not_served(self):  # verifies: ARCH-TRANSLATE-044#CASE-8  # verifies: REQ-TRANSLATE-938#CASE-5
+    def test_stale_cache_entry_is_dropped_not_served(self):  # verifies: ARCH-TRANSLATE-044#CASE-3  # verifies: REQ-TRANSLATE-938#CASE-2
         reqs_dir = self._tmp_reqs_dir()
         i18n_dir = os.path.join(reqs_dir, "_i18n")
         os.makedirs(i18n_dir)
@@ -3338,21 +3215,6 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
         out = R._load_translations(reqs, reqs_dir)
         self.assertNotIn("REQ-A-001", out)
-
-    def test_cmd_translate_malformed_cache_fails_open(self):  # bug: translate-cache-not-dict-guarded
-        reqs_dir = self._tmp_reqs_dir()
-        i18n_dir = os.path.join(reqs_dir, "_i18n")
-        os.makedirs(i18n_dir)
-        with open(os.path.join(i18n_dir, "en.json"), "w", encoding="utf-8") as f:
-            json.dump([1, 2, 3], f)   # malformed: not a dict
-        reqs = {"REQ-A-001": self._req(self.RO_BODY)}
-        fake_response = ("===TITLE===\nEnglish title\n===INTENT===\nI\n===CONTRACT===\nC\n"
-                          "===ACCEPTANCE===\nA\n")
-        fake_proc = mock.Mock(returncode=0, stdout=fake_response)
-        with mock.patch.object(R.shutil, "which", return_value=FAKE_CLAUDE), \
-             mock.patch.object(R.subprocess, "run", return_value=fake_proc):
-            rc = R.cmd_translate(reqs, reqs_dir, target="en")
-        self.assertEqual(rc, 0)
 
     def test_load_translations_malformed_cache_fails_open(self):  # bug: load-translations-not-dict-guarded
         reqs_dir = self._tmp_reqs_dir()
@@ -4304,7 +4166,6 @@ class ShellTestedBy(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # teste
             p = os.path.join(d, "backup-check.test.sh")
             _write(p, "#!/bin/sh\n./backup-check --dry-run || exit 1\n")
             self.assertEqual(R._test_link_problem(p), "")
-
 
 
     def test_bare_test_sh_name_recognized(self):  # bug: sh-test-name-re-bare-test
@@ -6639,7 +6500,6 @@ class BugHuntSince(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertIn(R._path_key(fp), files)   # not abspath: 8.3 short names
 
 
-
 class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-907
     REQ_MS = "---\nid: {id}\nstatus: confirmed\nlayer: feature\nmilestone: {ms}\n---\n\n# T\n"
 
@@ -6912,7 +6772,6 @@ class NewNumberCollision(unittest.TestCase):  # tested-by: ARCH-NEW-004  # teste
             self.assertNotIn("WARN", out)
 
 
-
 class PruneDirs(unittest.TestCase):  # tested-by: ARCH-SCAN-002
     """The walk's prune step: SSOT dir by realpath (name-gated), ignored dirs not descended."""
 
@@ -7036,7 +6895,6 @@ class UnscannedTags(unittest.TestCase):  # tested-by: ARCH-UNSCANNEDTAG-045  # t
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "config.custom"), "implements: REQ-A-001" + chr(10))
             self.assertIsNone(R.tagged_unscanned_files(d))
-
 
 
 class MatrixScanReach(unittest.TestCase):  # tested-by: ARCH-SCAN-002
@@ -10196,7 +10054,6 @@ class CasesVlevel037(unittest.TestCase):  # tested-by: REQ-VLEVEL-946
         self.assertIn("@system", out)
 
 
-
 # ---------------------------------------------------------------------------
 # clarify / implement / retire — the author -> code -> retirement half of the CLI
 # ---------------------------------------------------------------------------
@@ -10583,7 +10440,6 @@ class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ
         self.assertEqual(1, code)
 
 
-
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
     """The CLI, emitted as data for any surface that documents it without running it."""
 
@@ -10617,34 +10473,6 @@ class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
             payload = json.loads(R._build_json_text(data))
         self.assertTrue(payload["commands"])
         self.assertIn("gate", [c["name"] for c in payload["commands"]])
-
-
-
-class TranslationProseKeyword(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-938
-    """A Gherkin keyword is an identifier where it OPENS a line; the same word inside a
-    sentence is English prose, and a translation that leaves it in English is the wrong
-    one. Counting both rejected 79 correct translations over this corpus."""
-
-    def test_prose_keyword_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "- When no requirement scores above the floor, `search` says so."
-        ro = "- C\u00e2nd nicio cerin\u021b\u0103 nu trece pragul, `search` o spune."
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
-    def test_prose_keyword_opening_a_line_may_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "When you point this tool at an old codebase, this is the first step."
-        ro = "C\u00e2nd îndrepți acest instrument spre un cod vechi, acesta e primul pas."
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
-    def test_step_keyword_may_not_be_translated(self):  # verifies: REQ-TRANSLATE-938#CASE-1
-        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
-        ro = "CASE-1 \u2014 t\n  Dat fiind  un repo\n  C\u00e2nd   ruleaz\u0103\n  Atunci   se opre\u0219te"
-        self.assertFalse(R._translation_preserves_structure(src, ro))
-
-    def test_step_keyword_kept_passes(self):  # verifies: REQ-TRANSLATE-938#CASE-6
-        src = "CASE-1 \u2014 t\n  Given  a repo\n  When   it runs\n  Then   it stops"
-        ro = "CASE-1 \u2014 t\n  Given  un repo\n  When   ruleaz\u0103\n  Then   se opre\u0219te"
-        self.assertTrue(R._translation_preserves_structure(src, ro))
-
 
 
 class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ-SEARCH-965
@@ -10724,7 +10552,6 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         rows = [l for l in out.splitlines() if l.startswith("  ") and l.strip()]
         self.assertTrue(rows)
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
-
 
 
 class TranslationParity(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-967

@@ -369,27 +369,6 @@
   {
     "type": "function",
     "function": {
-      "name": "reqmap_translate",
-      "description": "Manual, opt-in: detect the corpus's majority language (per-file `lang:` frontmatter override honored first), then cache a `claude -p` translation of every requirement written in that language into requirements/_i18n/<target>.json. A structural-fidelity check (backticked spans, numbers, heading/bullet markers) gates every cache write; a missing `claude` CLI, a timeout, or a failed check skips that entry with a warning instead of aborting. `map`/`export` inline the cache into the graph read-only, with no `claude` call of their own — this command is the ONLY way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map or the pre-commit hook.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "Repo root where requirements/ lives; defaults to the current directory."
-          },
-          "translate_to": {
-            "type": "string",
-            "description": "Target locale, 'ro' or 'en' (default: the other of the two from the detected corpus majority)."
-          }
-        },
-        "required": []
-      }
-    }
-  },
-  {
-    "type": "function",
-    "function": {
       "name": "reqmap_design",
       "description": "Advisory design review of the repo's code (Python via ast; JS/TS, C/C++, Java, C#, Go, Rust and other brace languages via heuristics): the four OOP pillars plus house standards. encapsulation (module state written from functions, long parameter lists, data clumps), abstraction (long or deeply nested functions, prefix families), inheritance (unrelated classes sharing methods, duplicated method bodies) and polymorphism (isinstance chains, equality switches), standards (file and line length, public definitions without a docstring, definitions per file). Read-only, exit 0, never part of the gate; every threshold is tunable in requirements/_config.json.",
       "parameters": {

@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05"
+MAP_ENGINE_VERSION = "2026-09-05.1"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -535,30 +535,6 @@ COMMANDS = {
         ),
         "arg": "ID",
         "params": [],
-    },
-    "translate": {
-        "summary": (
-            "Manual, opt-in: detect the corpus's majority language (per-file `lang:` "
-            "frontmatter override honored first), then cache a `claude -p` translation "
-            "of every requirement written in that language into "
-            "requirements/_i18n/<target>.json. A structural-fidelity check (backticked "
-            "spans, numbers, heading/bullet markers) gates every cache write; a missing "
-            "`claude` CLI, a timeout, or a failed check skips that entry with a warning "
-            "instead of aborting. `map`/`export` inline the cache into the graph "
-            "read-only, with no `claude` call of their own — this command is the ONLY "
-            "way a `claude` subprocess runs; it is never invoked by gate/sync/lint/map "
-            "or the pre-commit hook."
-        ),
-        "arg": None,
-        "params": [
-            {
-                "name": "translate_to",
-                "flag": "--to",
-                "type": "str",
-                "help": "Target locale, 'ro' or 'en' (default: the other of the two from "
-                        "the detected corpus majority).",
-            },
-        ],
     },
     "design": {
         "summary": (
@@ -3996,30 +3972,6 @@ _EN_STOPWORDS = frozenset({
 })
 
 
-def _strip_code(text):  # implements: ARCH-TRANSLATE-044
-    """Drop fenced code blocks and inline `backticked` spans before a prose scan —
-    an identifier's language must never sway a language-detection heuristic."""
-    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
-    return re.sub(r"`[^`]*`", " ", text)
-
-
-def detect_lang(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """RO/EN classifier over prose stripped of code spans. Romanian diacritics are a
-    near-certain signal; below that, whichever stopword list scores more hits wins.
-    Returns 'ro', 'en', or None when neither signal fires (too little prose, or a
-    requirement that is nearly all code/identifiers) — None means 'undetermined',
-    not 'English'."""
-    bare = _strip_code(text)
-    if any(ch in bare for ch in _RO_DIACRITICS):
-        return "ro"
-    words = [w.lower() for w in _WORD_RE.findall(bare)]
-    ro_hits = sum(1 for w in words if w in _RO_STOPWORDS)
-    en_hits = sum(1 for w in words if w in _EN_STOPWORDS)
-    if ro_hits == 0 and en_hits == 0:
-        return None
-    return "ro" if ro_hits > en_hits else "en"
-
-
 def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
     """The exact span that gets translated and hashed: title + WHY + Contract +
     Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance only) —
@@ -4039,214 +3991,6 @@ def translation_hash(body, title):  # implements: ARCH-TRANSLATE-044  # implemen
     h.update(_translation_source_text(body, title).encode("utf-8"))
     h.update(TRANSLATOR_VERSION.encode("utf-8"))
     return h.hexdigest()[:12]
-
-
-def _effective_lang(r):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """A requirement's language: an explicit `lang: ro|en` frontmatter override wins;
-    otherwise it is detected from the translated span. The override is the escape
-    hatch for the rare file the heuristic gets wrong (e.g. a Romanian requirement
-    whose Contract is mostly backticked English identifiers)."""
-    override = (r["meta"].get("lang") or "").strip().lower()
-    if override in ("ro", "en"):
-        return override
-    return detect_lang(_translation_source_text(r["body"], _title(r["body"])))
-
-
-def corpus_lang(reqs):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """Majority language across the whole corpus (per-file lang: override honored
-    first). Returns 'ro' or 'en'; None only when every file is undetermined (e.g.
-    an empty registry) — never guessed."""
-    counts = {"ro": 0, "en": 0}
-    for r in reqs.values():
-        lang = _effective_lang(r)
-        if lang in counts:
-            counts[lang] += 1
-    if counts["ro"] == 0 and counts["en"] == 0:
-        return None
-    return "ro" if counts["ro"] >= counts["en"] else "en"
-
-
-def _structural_signature(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """(backtick-span multiset, numeric-literal multiset, ordered structural markers,
-    ordered `AC-N` labels, Gherkin-keyword multiset) — what a translation must preserve
-    exactly. Used to gate a cache write: a translation that drops a backticked identifier
-    or a number is a mistranslation of normative text, not a style choice.
-
-    The last two are identifiers WHERE THEY OPEN A LINE, and the first three checks are
-    blind to both:
-    `AC-1` -> `CA-1` keeps the same digit and is neither heading nor bullet, and
-    `Given` -> `Dat fiind` touches nothing at all. But `AC-N` is what a test points at
-    (`# verifies: <ID>#AC-N`), and Given/When/Then are engine vocabulary the viewer
-    highlights — the same reason `confirmed` and `draft` are left untranslated (i18n.jsx).
-    A reader given "Dat fiind" cannot match the criterion back to the .md file of record."""
-    backticks = tuple(sorted(re.findall(r"`[^`]*`", text)))
-    numbers = tuple(sorted(re.findall(r"\d+(?:[.,]\d+)?", text)))
-    markers = tuple(re.findall(r"^(#{1,6}\s|-\s|\d+\.\s)", text, flags=re.MULTILINE))
-    labels = tuple(re.findall(r"^\s*((?:CASE|AC)-\d+)\b", text, flags=re.MULTILINE))
-    # A Gherkin keyword is an identifier where it OPENS AN INDENTED LINE, which is what a
-    # step inside a Cases block looks like ("  Given  a repo with no requirements/").
-    # The same word in a sentence is ordinary English that a translation must translate,
-    # and counting those rejected correct work: measured over this corpus, all 3091 real
-    # step keywords are indented and inside the acceptance block, all 7 line-opening prose
-    # occurrences are flush left and outside it, with no exception either way; a further 79
-    # occurrences sit mid-sentence. Indentation separates the two exactly.
-    keywords = tuple(sorted(re.findall(r"(?m)^[ \t]+(Given|When|Then)\b", text)))
-    return (backticks, numbers, markers, labels, keywords)
-
-
-def _translation_preserves_structure(source, translated):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    return _structural_signature(source) == _structural_signature(translated)
-
-
-_LANG_NAMES = {"ro": "Romanian", "en": "English"}
-_TRANSLATE_MARKERS = ("TITLE", "INTENT", "CONTRACT", "ACCEPTANCE")
-_TRANSLATE_PROMPT = (
-    "Translate the following software requirement from {src} to {dst}. This is a "
-    "technical, normative document - preserve meaning exactly. Keep all markdown "
-    "formatting, every backticked `identifier` verbatim and unchanged, every number "
-    "unchanged, and the same list/heading structure line for line.\n"
-    "Two more things are identifiers, not prose, and must appear verbatim: the "
-    "criterion labels `CASE-1`, `CASE-2`, ... (a test refers to one by name), and the "
-    "Gherkin keywords Given / When / Then. Translate the words after them, never "
-    "the keywords themselves.\n\n"
-    "Return EXACTLY four sections, each starting on its own line with the literal "
-    "marker shown below, and nothing else - no commentary, no code fence:\n"
-    "===TITLE===\n<translated title>\n"
-    "===INTENT===\n<translated intent>\n"
-    "===CONTRACT===\n<translated contract>\n"
-    "===ACCEPTANCE===\n<translated acceptance>\n\n"
-    "--- SOURCE ---\n"
-    "===TITLE===\n{title}\n"
-    "===INTENT===\n{intent}\n"
-    "===CONTRACT===\n{contract}\n"
-    "===ACCEPTANCE===\n{acceptance}\n"
-)
-
-
-def _parse_translated_sections(text):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """Split the model's marker-delimited response into {title, intent, contract,
-    acceptance}. Returns None on any malformed response (a missing marker) — a
-    partial parse is never used, only all four fields or none."""
-    pattern = "(%s)" % "|".join("===%s===" % m for m in _TRANSLATE_MARKERS)
-    chunks = re.split(pattern, text)
-    parts, current = {}, None
-    for chunk in chunks:
-        m = re.match(r"===(\w+)===$", chunk)
-        if m:
-            current = m.group(1)
-            continue
-        if current:
-            parts[current] = chunk.strip()
-            current = None
-    if not all(m in parts for m in _TRANSLATE_MARKERS):
-        return None
-    return {k.lower(): parts[k] for k in _TRANSLATE_MARKERS}
-
-
-def _run_claude_translate(title, intent, contract, acceptance, src_lang, dst_lang):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
-    """Invoke `claude -p` once per requirement and parse its four-section response.
-    Returns {title, intent, contract, acceptance} on success, or None on ANY
-    failure — CLI missing, non-zero exit, timeout, or a malformed response. The
-    caller treats None as 'skip this entry', never as an error to propagate: this
-    is the fail-open boundary between an optional external tool and everything
-    else in the engine."""
-    prompt = _TRANSLATE_PROMPT.format(
-        src=_LANG_NAMES[src_lang], dst=_LANG_NAMES[dst_lang],
-        title=title, intent=intent, contract=contract, acceptance=acceptance)
-    # Resolve the name through PATH/PATHEXT rather than handing a bare "claude" to
-    # the OS: on Windows the CLI installs as `claude.CMD` and CreateProcess only ever
-    # appends `.exe`, so every entry failed with "CLI unavailable" against a CLI that
-    # was installed and on PATH. The resolved path is still passed as argv[0] — no
-    # shell, so nothing in a requirement can be read as a command.
-    exe = shutil.which("claude")
-    if exe is None:
-        return None
-    try:
-        # The prompt travels on stdin, not argv: a whole requirement in one argument
-        # would hit Windows' ~32k command-line ceiling on a large corpus.
-        proc = subprocess.run(
-            [exe, "-p"], input=prompt,
-            capture_output=True, text=True, encoding="utf-8", timeout=120,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
-    if proc.returncode != 0 or not proc.stdout.strip():
-        return None
-    return _parse_translated_sections(proc.stdout)
-
-
-def cmd_translate(reqs, reqs_dir, target=None):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-937
-    """Translate every requirement written in the corpus's detected majority
-    language into `target` (default: the other of {ro, en}), caching results in
-    requirements/_i18n/<target>.json. Manual and opt-in — see the module-level
-    comment above this block. Fails open per entry: a missing/erroring `claude`
-    CLI, a timeout, or a translation that fails the structural-fidelity check is
-    skipped with a warning; it never aborts the batch or raises. Cache hits (hash
-    unchanged since the last successful translation) are skipped without calling
-    the CLI. Always exits 0 — this is a report-and-cache tool, never a gate."""
-    src = corpus_lang(reqs)
-    if src is None:
-        print("translate: no requirements to classify - nothing to do.")
-        return 0
-    dst = target or ("en" if src == "ro" else "ro")
-    if dst == src:
-        print("translate: target '{}' matches the corpus's detected language "
-              "'{}' - nothing to translate.".format(dst, src))
-        return 0
-
-    cache_path = os.path.join(reqs_dir, "_i18n", "{}.json".format(dst))
-    cache = {}
-    if os.path.exists(cache_path):
-        try:
-            with open(cache_path, encoding="utf-8") as f:
-                cache = json.load(f)
-            if not isinstance(cache, dict):
-                cache = {}
-        except (OSError, ValueError):
-            cache = {}
-
-    translated = cached = skipped = 0
-    for rid, r in sorted(reqs.items()):
-        if _effective_lang(r) != src:
-            continue   # already in the target language (or undetermined) - leave it
-        title = _title(r["body"])
-        # `_distinct_intent`, not `_first_quote`: the map emits no intent for a
-        # requirement whose quote IS its obligation (91% of the corpus at the time
-        # that rule was written), and translating the raw quote put a `Why — Intent`
-        # block in the Romanian document that the English one correctly hides.
-        intent = _distinct_intent(r["body"])
-        contract = _from_any(_section_raw, r["body"], CONTRACT_LABELS)
-        acceptance = _from_any(_section_raw, r["body"], ACCEPTANCE_LABELS)
-        h = translation_hash(r["body"], title)
-        entry = cache.get(rid)
-        if entry and entry.get("hash") == h:
-            cached += 1
-            continue
-        parsed = _run_claude_translate(title, intent, contract, acceptance, src, dst)
-        if parsed is None:
-            print("  WARN  {}: claude CLI unavailable, failed, or returned a "
-                  "malformed response - skipped".format(rid))
-            skipped += 1
-            continue
-        source_text = "\n".join([title, intent, contract, acceptance])
-        translated_text = "\n".join([parsed["title"], parsed["intent"],
-                                      parsed["contract"], parsed["acceptance"]])
-        if not _translation_preserves_structure(source_text, translated_text):
-            print("  WARN  {}: translation failed the structural-fidelity check "
-                  "(backtick/number/heading mismatch) - skipped".format(rid))
-            skipped += 1
-            continue
-        cache[rid] = dict(parsed, hash=h)
-        translated += 1
-
-    if translated:
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(cache, f, ensure_ascii=False, indent=2, sort_keys=True)
-        print("wrote {}".format(cache_path))
-    print("translate: {} translated, {} cache hit, {} skipped ({} -> {})".format(
-        translated, cached, skipped, src, dst))
-    return 0
 
 
 def _load_translations(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-938
@@ -9103,9 +8847,6 @@ def main():
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
                     help="suggest-verifies: write the proposed `verifies:` tags into the test files")
-    ap.add_argument("--to", dest="translate_to", default=None, choices=["ro", "en"],
-                    help="translate: target locale (default: the other of ro/en from "
-                         "the detected corpus majority)")
     a = ap.parse_args()
     reqs_dir = a.reqs or os.path.join(a.root, "requirements")
     code_root = a.code or a.root
@@ -9255,8 +8996,6 @@ def main():
     if a.cmd == "suggest-verifies":
         return cmd_suggest_verifies(reqs, members, code_root, reqs_dir,
                                     ac_cover=_ac_cover, apply_tags=a.do_apply)
-    if a.cmd == "translate":
-        return cmd_translate(reqs, reqs_dir, target=a.translate_to)
     if a.cmd == "confirm":
         if not a.arg:
             print("usage: reqmap confirm AREA-NAME-NNN"); return 2
