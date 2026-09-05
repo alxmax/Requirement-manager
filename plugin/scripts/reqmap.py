@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-04.20"
+MAP_ENGINE_VERSION = "2026-09-04.21"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -673,7 +673,46 @@ def _generate_command_table():  # implements: REQ-CMDREGISTRY-834
     return "\n".join(rows)
 
 
+def _generate_command_list():  # implements: REQ-CMDREGISTRY-834
+    """The command reference for SKILL.md, grouped the way COMMAND_GROUPS groups the
+    verbs, as the bullet list that file has always used. SKILL.md is the contract an
+    assistant reads when it meets the engine on a fresh repo, and a hand-kept list there
+    documented `scan` after it was gone and five different verbs under the name `sync`.
+    Rendered from the registry, a verb that exists is documented and one that does not,
+    is not — the same guarantee the universal table already had."""
+    group_of = {}
+    for group, names in COMMAND_GROUPS:
+        for n in names:
+            group_of[n] = group
+    titles = {"author": "Author", "build": "Build", "read": "Read"}
+    lines = []
+    for group, _names in COMMAND_GROUPS:
+        members = [(n, s) for n, s in COMMANDS.items()
+                   if not s.get("internal") and group_of.get(n, "read") == group]
+        if not members:
+            continue
+        lines.append("**{}**".format(titles.get(group, group.title())))
+        for name, spec in members:
+            call = "python scripts/reqmap.py " + name
+            if spec.get("arg"):
+                call += " " + spec["arg"]
+            flags = "; ".join("`{}` {}".format(p["flag"], " ".join(p["help"].split()))
+                              for p in spec["params"])
+            lines.append("- `{}` — {}{}".format(
+                call, " ".join(spec["summary"].split()),
+                " Flags: " + flags + "." if flags else ""))
+        lines.append("")
+    return "\n".join(lines).rstrip()
+
+
 _REGION_RE = re.compile(r"(<!--##REQMAP:COMMANDS##-->)(.*?)(<!--##/REQMAP:COMMANDS##-->)", re.DOTALL)
+
+# Every generated region, with the renderer that owns it. Both the writer and the
+# freshness check walk this one list, so adding a surface here is the whole job.
+_SKILL_REGIONS = (
+    (("skills", "requirement-manager", "SKILL.universal.md"), _generate_command_table),
+    (("skills", "requirement-manager", "SKILL.md"), _generate_command_list),
+)
 
 
 def _write_region(path, body):  # implements: REQ-CMDREGISTRY-834
@@ -708,10 +747,11 @@ def cmd_gen_integration(reqs_dir, code_root):  # implements: REQ-CMDREGISTRY-834
     with open(tj_path, "w", encoding="utf-8", newline="") as f:
         f.write(schema)
     print("wrote tool_definition.json")
-    skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
-    if os.path.exists(skill):
-        _write_region(skill, _generate_command_table())
-        print("wrote SKILL.universal.md command table")
+    for parts, render in _SKILL_REGIONS:
+        skill = os.path.join(plugin_root, *parts)
+        if os.path.exists(skill):
+            _write_region(skill, render())
+            print("wrote {} command region".format(parts[-1]))
     return 0
 
 
@@ -727,12 +767,13 @@ def _check_integration_fresh(plugin_root):  # implements: REQ-CMDREGISTRY-834
         with open(tj, encoding="utf-8") as _f:
             if _f.read() != _generate_schema():
                 stale.append("tool_definition.json")
-    skill = os.path.join(plugin_root, "skills", "requirement-manager", "SKILL.universal.md")
-    if os.path.exists(skill):
-        with open(skill, encoding="utf-8") as _f:
-            m = _REGION_RE.search(_f.read())
-        if m and m.group(2).strip() != _generate_command_table().strip():
-            stale.append("skills/requirement-manager/SKILL.universal.md")
+    for parts, render in _SKILL_REGIONS:
+        skill = os.path.join(plugin_root, *parts)
+        if os.path.exists(skill):
+            with open(skill, encoding="utf-8") as _f:
+                m = _REGION_RE.search(_f.read())
+            if m and m.group(2).strip() != render().strip():
+                stale.append("/".join(parts))
     return stale
 
 
