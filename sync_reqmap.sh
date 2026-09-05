@@ -69,8 +69,14 @@ if [[ -d "$CACHE" ]]; then
   cp "$SRC" "$CACHE/scripts/reqmap.py"
   [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$CACHE/scripts/_map_viewer.html" && echo "  → viewer template updated"
   echo "  → plugin cache updated"
-  # regenerate the plugin's own map
-  (cd "$CACHE" && python -X utf8 scripts/reqmap.py map 2>&1 | sed 's/^/     /')
+  # No map regeneration in the cache. The step used to call `map`, which folded into
+  # `sync` in v4.0.0, so every run since printed an argparse error here after the copy
+  # had already succeeded. Swapping the verb does not bring it back: the cache is not a
+  # checkout - half of this corpus's members live in app/ and .github/, which the
+  # plugin does not ship - so its gate can never pass, and `sync` refuses to write a
+  # map behind a failing gate. `map` wrote it anyway, which is the only reason the
+  # step ever looked like it worked. The engine and the viewer template are what the
+  # cache needs from this script; the map it carries is whatever the release shipped.
 else
   echo "  WARN: plugin cache not found at $CACHE — skipping"
 fi
