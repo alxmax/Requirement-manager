@@ -46,6 +46,9 @@ def live_verbs():
 
 # Prose that tells someone what to type. Everything else is history or generated.
 INSTRUCTION_FILES = [
+    # The engine prints instructions too: the audit report names the command that
+    # runs each section on its own. Those strings go stale like any other doc.
+    "plugin/scripts/reqmap.py",
     "CLAUDE.md",
     "README.md",
     "plugin/skills/requirement-manager/SKILL.md",
@@ -64,9 +67,12 @@ RETIRED = {
     "retire", "review", "design", "suggest-verifies", "translate",
 }
 
-# An invocation, not a mention: inside backticks, or after `python` / $PY.
+# An invocation, not a mention: inside backticks or a quoted string, or after
+# `python` / $PY. The quoted form matters because the engine PRINTS instructions
+# — the audit report tells you how to run each section on its own, and those
+# strings went stale in exactly the same way the docs did.
 INVOCATION = re.compile(
-    r"(?:`|python\s+|\$PY\s+|\"\$PY\"\s+)[^`\n]*?reqmap(?:\.py)?\s+([a-z][a-z-]*)"
+    r"(?:`|\"|python\s+|\$PY\s+)[^`\"\n]*?reqmap(?:\.py)?\s+([a-z][a-z-]*)"
 )
 
 

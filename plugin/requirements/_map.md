@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-05
-engine: 2026-09-05.2
+engine: 2026-09-05.3
 nodes: 231
 edges: 116
 design OOP: 23/100 (7/31 source files without a design candidate)

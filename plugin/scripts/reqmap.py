@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-05.2"
+MAP_ENGINE_VERSION = "2026-09-05.3"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -2696,7 +2696,7 @@ def _rule_orphan_code(ctx):  # implements: ARCH-ORPHANCODE-034
     for rel in orphan_code_files(ctx.code_root, covered, ctx.reqs_dir):
         yield None, (f"{rel}: {ORPHAN_CODE_MIN_LOC}+-line code file has no membership tag — "
                      "link it (`# implements: <ID>`), draft a requirement for it "
-                     "(`reqmap.py draft`), or add it to .reqmapignore")
+                     "(`reqmap.py init`), or add it to .reqmapignore")
 
 
 def _legacy_schema_ids(reqs):  # implements: ARCH-ATOMICFORM-053
@@ -3989,15 +3989,15 @@ def _parse_todos(root):  # implements: REQ-MAP-871
 
 
 # ---------------------------------------------------------------------------
-# Content translation (`translate`) — implements: ARCH-TRANSLATE-044
+# Content translation, reading half — implements: ARCH-TRANSLATE-044
 #
-# Manual and opt-in only. NOTHING in this block is called from gate/sync/lint/
-# map/the pre-commit hook — `translate` is reached exclusively by typing
-# `reqmap.py translate`. That is deliberate: it is the only subcommand that
-# shells out to an external LLM CLI, and this engine's gate/sync/CI path must
-# stay usable on a machine that has never heard of `claude`. `map`/`export`
-# below only ever READ an already-committed cache file — never the CLI — so
-# they stay exactly as deterministic as before this block existed.
+# READ-ONLY. The command that produced `requirements/_i18n/<locale>.json` was
+# removed on 2026-09-05, together with everything that shelled out to an
+# external LLM CLI. What is left reads an already-committed cache file, so no
+# code path in this engine starts a subprocess and the gate/sync/CI path stays
+# usable on a machine that has never heard of `claude`. A cache entry is served
+# only while its hash matches the requirement, so the cache decays as
+# requirements are edited and refreshing it is a manual step.
 # ---------------------------------------------------------------------------
 TRANSLATOR_VERSION = "1"   # bump to invalidate every cached translation at once
                            # (e.g. after changing _TRANSLATE_PROMPT or the model)
@@ -4254,7 +4254,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             flag = "  [REVIEW]" if score >= 2 else ""
             print("  {}{}   {}".format(rid, flag, _req_file(reqs, rid)))
         if not show_all and len(ids) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(ids) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(ids) - top_n))
         print("  -> {}\n".format(RISK_ADVICE[sig]))
         if sig == "unimplemented" and reqs_dir:
             recorded = _recorded_members(reqs_dir, [rid for rid, _ in ids])
@@ -4269,8 +4269,8 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         for fp in shown_u:
             print("  {}".format(fp))
         if not show_all and len(untagged) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(untagged) - top_n))
-        print("  -> Run `reqmap.py draft` to auto-extract requirements, "
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(untagged) - top_n))
+        print("  -> Run `reqmap.py init` to auto-extract requirements, "
               "or add to .reqmapignore to silence.\n")
     if oversize:
         print("Granularity ({})".format(len(oversize)))
@@ -4279,7 +4279,7 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
             print("  {}   ({} ACs) — consider splitting   {}".format(
                 rid, n, _req_file(reqs, rid)))
         if not show_all and len(oversize) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(oversize) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(oversize) - top_n))
         print(
             "  -> A requirement with more than {} acceptance criteria covering disjoint "
             "behaviors is a split candidate. Author two requirements, each with its own "
@@ -4293,11 +4293,11 @@ def cmd_next(reqs, members, show_all=False, top_n=3, code_root=None, reqs_dir=No
         for g in shown_r:
             print("  {}   identical contract   {}".format(", ".join(g), _req_file(reqs, g[0])))
         if not show_all and len(redundant) > top_n:
-            print("  ... {} more — run `reqmap.py next --all`".format(len(redundant) - top_n))
+            print("  ... {} more — run `reqmap.py gate --risk --all`".format(len(redundant) - top_n))
         print(
             "  -> {} requirement(s) state an obligation another already states, word for "
             "word. Fold each group into one and re-point the tags, or make the contracts "
-            "say different things. Exact matches only — run `reqmap.py dupes` for the "
+            "say different things. Exact matches only — run `reqmap.py gate --dupes` for the "
             "near-matches this cannot see.\n".format(spare)
         )
     return 0
@@ -5386,7 +5386,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
     print("")
     for ln in lines:
         print("info  {}".format(ln))
-    print("info  run `reqmap.py audit` for the full report")
+    print("info  run `reqmap.py gate --audit` for the full report")
 
 
 def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
@@ -5429,13 +5429,13 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
         _audit_section("Gate", "reqmap.py gate", lambda: cmd_check(
             reqs, members, reqs_dir, False, code_root, strict=strict,
             ac_cover=ac_cover, level_cover=level_cover)),
-        _audit_section("Risk", "reqmap.py next", lambda: cmd_next(
+        _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(
             reqs, members, False, code_root=code_root, reqs_dir=reqs_dir)),
-        _audit_section("Duplicates", "reqmap.py dupes",
+        _audit_section("Duplicates", "reqmap.py gate --dupes",
                        lambda: cmd_similar(reqs, SIMILAR_THRESHOLD, members)),
-        _audit_section("Design", "reqmap.py design",
+        _audit_section("Design", "reqmap.py gate --design",
                        lambda: cmd_design(code_root, reqs_dir)),
-        _audit_section("Tag coverage", "reqmap.py next --untagged",
+        _audit_section("Tag coverage", "reqmap.py gate --risk --untagged",
                        lambda: cmd_coverage(reqs, members, code_root, reqs_dir, False)),
     ]
     gate_rc = sections[0][3]
@@ -5445,17 +5445,17 @@ def cmd_audit(reqs, members, reqs_dir, code_root, strict=False, as_json=False,
     verdict = "FAIL" if gate_rc else "clean"
     rows = [("Gate", verdict, "reqmap.py gate"),
             ("Health", "{}/100 ({}/{} green on every axis)".format(
-                health["score"], health["healthy"], health["total"]), "reqmap.py next")]
+                health["score"], health["healthy"], health["total"]), "reqmap.py gate --risk")]
     if design is not None:
         rows.append(("Design OOP", "{}/100 ({}/{} files with no candidate)".format(
-            design["score"], design["clean_files"], design["files"]), "reqmap.py design"))
+            design["score"], design["clean_files"], design["files"]), "reqmap.py gate --design"))
     if untagged is not None:
         rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),
-                     "reqmap.py next --untagged"))
+                     "reqmap.py gate --risk --untagged"))
     dups = _redundant_groups(reqs)
     if dups:
         rows.append(("Redundancy", "{} group(s) share an identical contract".format(len(dups)),
-                     "reqmap.py dupes"))
+                     "reqmap.py gate --dupes"))
     rows.append(("Exemptions", "{} in force, {} with no recorded reason".format(
         len(exemptions), len(unexplained)), "see below"))
     rows.append(("Corpus shape", "{}/{} carry a `level:`{}".format(
@@ -5837,7 +5837,7 @@ def cmd_health(reqs, members, reqs_dir, as_json=False, as_badge=False, code_root
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
     if design is not None:
-        print("  design (source files w/o candidate): {}/100  ({}/{}) — run `reqmap.py design`".format(
+        print("  design (source files w/o candidate): {}/100  ({}/{}) — run `reqmap.py gate --design`".format(
             design["score"], design["clean_files"], design["files"]))
     if total == 0:
         print("  (no requirements yet — run `reqmap.py init` or `new`)")
@@ -6007,7 +6007,7 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
     print("reqmap initialized — {} requirement(s) tracked.".format(len(reqs)))
     if created:
         print("created: " + ", ".join(created))
-    print("\nNext: run `reqmap.py next` — it shows what to do, most important first.")
+    print("\nNext: run `reqmap.py gate --risk` — it shows what to do, most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
     return 0
 
@@ -7779,7 +7779,7 @@ def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  #
         return 0
     if not items:
         print("{}: nothing unclear that this check can see.".format(cap_id or "corpus"))
-        print("  next: reqmap.py implement {}".format(cap_id or "<ID>"))
+        print("  next: reqmap.py gate --implement {}".format(cap_id or "<ID>"))
         return 0
     for it in items:
         blocking = [q for q in it["questions"] if q["severity"] == "blocking"]
@@ -7801,7 +7801,7 @@ def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  #
                 print("     -> {}".format(q["suggest"]))
         print("")
     if cap_id:
-        print("Answer them in {}.md, then: reqmap.py implement {}".format(cap_id, cap_id))
+        print("Answer them in {}.md, then: reqmap.py gate --implement {}".format(cap_id, cap_id))
     return 0
 
 
@@ -9041,7 +9041,7 @@ def main():
             _dups = _redundant_groups(reqs)
             if _dups:
                 print("info  {} group(s) of requirements share an identical contract "
-                      "({} could be folded away) — run `reqmap.py next` to see them"
+                      "({} could be folded away) — run `reqmap.py gate --risk` to see them"
                       .format(len(_dups), sum(len(g) - 1 for g in _dups)))
             # Everything the engine can discover, named in one place at the moment the
             # corpus was just rewritten. `sync` regenerates what is derived; until now it

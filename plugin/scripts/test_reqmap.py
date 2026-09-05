@@ -2493,7 +2493,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         reqs = {"DRAFT-{}-00{}".format(c, i): self._req("draft")
                 for i, c in enumerate("ABCDE", 1)}            # 5 drafts > top_n=3
         _, out = self._next(reqs, {})
-        self.assertIn("more — run `reqmap.py next --all`", out)
+        self.assertIn("more — run `reqmap.py gate --risk --all`", out)
         _, out_all = self._next(reqs, {}, show_all=True)
         self.assertNotIn("more — run", out_all)
         for rid in reqs:
@@ -2564,7 +2564,7 @@ class Next(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: REQ-NEX
         reqs = {"AREA-FOO-00{}".format(i): self._req_with_acs(R.LINT_AC_MAX + 1) for i in range(1, 6)}
         _, out = self._next(reqs, {})
         self.assertEqual(out.count("consider splitting"), 3)
-        self.assertIn("more — run `reqmap.py next --all`", out)
+        self.assertIn("more — run `reqmap.py gate --risk --all`", out)
         _, out_all = self._next(reqs, {}, show_all=True)
         self.assertEqual(out_all.count("consider splitting"), 5)
 
@@ -2661,7 +2661,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "app.py"), "x = 1\n")
             _, out, _ = self._init(d)
-            self.assertIn("reqmap.py next", out)
+            self.assertIn("reqmap.py gate --risk", out)
 
     def test_empty_extraction_is_distinct(self):  # verifies: REQ-INIT-861#CASE-3
         with tempfile.TemporaryDirectory() as d:
@@ -8259,7 +8259,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             R._audit_summary(reqs, {}, d, d)
         out = buf.getvalue()
         self.assertIn("no reason recorded", out)
-        self.assertIn("reqmap.py audit", out)
+        self.assertIn("reqmap.py gate --audit", out)
 
     def test_sync_tail_is_silent_on_a_clean_corpus(self):  # verifies: REQ-AUDIT-973#CASE-2
         reqs = {"REQ-A-001": self._req(level="code")}
@@ -8619,7 +8619,7 @@ class CasesNext(unittest.TestCase):  # tested-by: ARCH-NEXT-013  # tested-by: RE
             _, out = self._run(reqs, members, code_root=d)
             self.assertIn("Untagged files", out)
             self.assertIn("orphan.py", out)
-            self.assertIn("reqmap.py draft", out)
+            self.assertIn("reqmap.py init", out)
 
     def test_equal_priority_and_risk_falls_back_to_id_order(self):  # verifies: REQ-NEXT-885#CASE-1
         reqs = {
