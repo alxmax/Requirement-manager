@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.18"
+MAP_ENGINE_VERSION = "2026-09-07"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -435,6 +435,16 @@ COMMANDS = {
                 "type": "bool",
                 "help": (
                     "With --risk: expand every bucket instead of the top few."
+                ),
+            },
+            {
+                "name": "mode_i18n",
+                "flag": "--i18n",
+                "type": "bool",
+                "help": (
+                    "List the translations the configured LANGUAGE (en | ro | both, in "
+                    "requirements/_config.json) expects and does not have, missing or stale. "
+                    "--json emits each entry's source fields and cache key for whoever translates."
                 ),
             },
             {
@@ -4501,6 +4511,89 @@ TRANSLATOR_VERSION = "1"   # part of the cache key: bump to invalidate every cac
                            # cache was removed 2026-09-05; the reader below stays)
 
 
+# The repository's declared requirements language: `en`, `ro`, or `both`. Set in
+# `requirements/_config.json` as `"LANGUAGE": "ro"`. It changes what the engine EXPECTS,
+# never what it writes: with `ro` or `both` a requirement without a fresh Romanian entry
+# is a gap `sync` reports and `gate --i18n` lists, and the viewer opens in Romanian
+# (`ro`) or offers both (`both`). The engine still translates nothing — that is
+# REQ-TRANSLATE-937, and it holds because the emitter hands the source text and the
+# cache key to whoever does.
+LANGUAGE = "en"          # implements: REQ-TRANSLATE-996
+LANGUAGE_LOCALES = {"en": (), "ro": ("ro",), "both": ("ro",)}   # locales a setting expects filled
+
+
+def _translation_gaps(reqs, reqs_dir):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-996
+    """Every (requirement, locale) the configured LANGUAGE expects a fresh translation
+    for and does not have, with the reason and the exact source fields to translate.
+
+    Reads the cache files raw rather than through `_load_translations`, which drops a
+    stale entry silently — here "stale" is the finding, so the two must be told apart.
+    Returns `[]` under `en`: nothing is expected, so nothing is missing."""
+    out = []
+    for locale in LANGUAGE_LOCALES.get(LANGUAGE, ()):
+        cache = {}
+        try:
+            with open(os.path.join(reqs_dir, "_i18n", locale + ".json"), encoding="utf-8") as f:
+                cache = json.load(f)
+        except (OSError, ValueError):
+            cache = {}
+        if not isinstance(cache, dict):
+            cache = {}
+        for rid in sorted(reqs):
+            r = reqs[rid]
+            if r["meta"].get("status") == "deprecated":
+                continue
+            body = r["body"]
+            title = _title(body)
+            want = translation_hash(body, title)
+            entry = cache.get(rid)
+            have = entry.get("hash") if isinstance(entry, dict) else None
+            if have == want:
+                continue
+            out.append({
+                "id": rid, "locale": locale,
+                "reason": "stale" if entry is not None else "missing",
+                "hash": want,
+                "title": title,
+                "intent": _first_quote(body),
+                "contract": _from_any(_section_raw, body, CONTRACT_LABELS),
+                "acceptance": _from_any(_section_raw, body, ACCEPTANCE_LABELS),
+            })
+    return out
+
+
+def cmd_i18n(ws, as_json=False):  # implements: ARCH-TRANSLATE-044  # implements: REQ-TRANSLATE-996
+    """`gate --i18n`: the translations the configured LANGUAGE expects and does not have.
+
+    Read-only. The JSON form is the hand-off: each entry carries the four source fields
+    exactly as the hash was computed over them, plus that hash, so whoever translates —
+    the skill, an assistant, a person — writes `_i18n/<locale>.json[id]` with the four
+    translated fields and the same `hash`, and the next `sync` serves it. The engine
+    calls nothing external (REQ-TRANSLATE-937); it says what is owed and by what key."""
+    reqs, reqs_dir = ws.reqs, ws.reqs_dir
+    gaps = _translation_gaps(reqs, reqs_dir)
+    if as_json:
+        print(json.dumps({"language": LANGUAGE, "gaps": gaps}, indent=2, ensure_ascii=False))
+        return 0
+    if not LANGUAGE_LOCALES.get(LANGUAGE):
+        print("LANGUAGE is `{}` - no translation is expected. Set `\"LANGUAGE\": \"ro\"` or "
+              "`\"both\"` in requirements/{} to have the engine track Romanian coverage."
+              .format(LANGUAGE, CONFIG_FILE))
+        return 0
+    if not gaps:
+        print("LANGUAGE is `{}` - every requirement has a fresh translation in: {}."
+              .format(LANGUAGE, ", ".join(LANGUAGE_LOCALES[LANGUAGE])))
+        return 0
+    missing = sum(1 for g in gaps if g["reason"] == "missing")
+    print("LANGUAGE is `{}` - {} requirement(s) need a translation ({} missing, {} stale):\n"
+          .format(LANGUAGE, len(gaps), missing, len(gaps) - missing))
+    for g in gaps:
+        print("  {:<8} {:<26} {:<7} {}".format(g["locale"], g["id"], g["reason"], g["title"][:60]))
+    print("\nRe-run with --json for the source fields and the cache key to write back; "
+          "each entry goes in requirements/_i18n/<locale>.json under its id, with the same `hash`.")
+    return 0
+
+
 def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
     """The exact span that gets translated and hashed: title + WHY + Contract +
     Acceptance. Deliberately wider than binding_hash() (Contract+Acceptance only) —
@@ -4608,6 +4701,7 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):  # imp
         ac_cover = scan_ac_verifies(root, reqs_dir)
     data = _build_map_data(reqs, members, ac_cover)
     data["repo"] = _repo_name(root)
+    data["language"] = LANGUAGE          # implements: REQ-TRANSLATE-996
     data["todos"] = _parse_todos(root)
     _design = _design_summary(root, reqs_dir, with_findings=True)   # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
     if _design is not None:
@@ -6353,6 +6447,15 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         lines.append("{} requirement(s) carry contract groups and no code children - "
                      "`reqmap.py clarify --decompose` plans the split along those groups, "
                      "--apply writes it".format(len(splittable)))
+    # Translation coverage, only when the repo asked for a second language. Under `en`
+    # nothing is expected and nothing is said; under `ro`/`both` a requirement with no
+    # fresh Romanian entry is a gap, named with the command that hands over the text.
+    _gaps = _translation_gaps(reqs, reqs_dir)
+    if _gaps:
+        _missing = sum(1 for g in _gaps if g["reason"] == "missing")
+        lines.append("{} requirement(s) have no fresh translation for LANGUAGE `{}` ({} missing, "
+                     "{} stale) - `reqmap.py gate --i18n --json` emits the entries to fill"
+                     .format(len(_gaps), LANGUAGE, _missing, len(_gaps) - _missing))
     if shape.get("auto"):
         # A corpus can be fully levelled and still be nothing but the engine's guesses,
         # in which case every other number here reads as healthy. ADR-0030's revisit
@@ -10176,13 +10279,13 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_RFC_MAX", "DRIFT_SEVERITY")
+               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE")
 
 # A string-valued config key names a behaviour, so its accepted spellings are declared
 # here and a value outside them is reported rather than applied. Without this, a repo
 # that wrote `"eror"` would get the default back in silence — precisely the failure the
 # whole config mechanism exists to avoid.
-CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error")}
+CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error"), "LANGUAGE": ("en", "ro", "both")}
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
@@ -10350,6 +10453,8 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="gate: also print risk, duplicate contracts, design signals and tag coverage")
     ap.add_argument("--risk", dest="mode_risk", action="store_true",
                     help="gate: print the corpus risk snapshot and what to do next")
+    ap.add_argument("--i18n", dest="mode_i18n", action="store_true",
+                    help="gate: list the translations the configured LANGUAGE expects and does not have")
     ap.add_argument("--show", dest="mode_show", metavar="ID", nargs="?", default=None,
                     const="",
                     help="gate: print one requirement's dossier")
@@ -10380,6 +10485,8 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
     reqs, members = ws.reqs, ws.members   # the commands that take only part of it
     if a.mode_audit:
         return cmd_audit(ws, strict=a.strict, as_json=a.as_json)
+    if a.mode_i18n:
+        return cmd_i18n(ws, as_json=a.as_json)
     if a.mode_risk:
         if a.as_badge:
             return cmd_health(ws, False, True)

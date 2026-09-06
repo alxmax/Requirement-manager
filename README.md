@@ -254,6 +254,7 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 | `--search "query"` | Rank requirements by lexical relevance (TF-IDF cosine). `--top N`. Says so explicitly when nothing clears the floor, rather than showing a spurious top hit. |
 | `--dupes` | Requirement pairs whose contracts overlap, so a divergent re-implementation is caught before it lands. `--threshold T` (default 0.35). |
 | `--design` | Advisory design review of the code: the four OOP pillars, one Chidamber & Kemerer per-class metric (RFC, Python only), plus house standards. Read-only, exit 0, never part of the gate; thresholds live in `requirements/_config.json`. |
+| `--i18n` | Translations the configured `LANGUAGE` (`en` \| `ro` \| `both`, set in `requirements/_config.json`) expects and does not have, missing or stale. `--json` emits each entry's source fields and cache key for whoever translates — the engine never does. |
 | `--implement ID` | The brief for writing the code: obligations, cases, the exact tags the new code must carry, where similar code already lives. `--json` for a coding agent. |
 | `--review [ID]` | A JSON review plan (intent, contract, acceptance, anchors) — the AI feed for advisory quality review. |
 
@@ -384,7 +385,7 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 10,604 lines)
+  scripts/reqmap.py                         the engine (Python stdlib only, 10,711 lines)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git

@@ -117,6 +117,10 @@
             "type": "boolean",
             "description": "With --risk: expand every bucket instead of the top few."
           },
+          "mode_i18n": {
+            "type": "boolean",
+            "description": "List the translations the configured LANGUAGE (en | ro | both, in requirements/_config.json) expects and does not have, missing or stale. --json emits each entry's source fields and cache key for whoever translates."
+          },
           "untagged": {
             "type": "boolean",
             "description": "With --risk: report membership-tag coverage per directory."

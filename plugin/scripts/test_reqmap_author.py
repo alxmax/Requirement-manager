@@ -3194,3 +3194,111 @@ CASE-3
         self.assertIn("TOOL-OTHER  (3 contract groups", out)
         self.assertNotIn("TOOL-FLAT  (", out)
         self.assertIn("6 child requirement(s) from 2 parent(s)", out)
+
+
+class LanguageSetting(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-by: REQ-TRANSLATE-996
+    """`LANGUAGE` (en | ro | both): what the engine EXPECTS translated, never what it writes."""
+
+    BODY = ("# {title}\n\n> why this exists\n\n## Description\nEvery bullet below is binding.\n"
+            "- It does {what}.\n\n## Cases\nCASE-1 - a\n  Given x\n  When y\n  Then z\n")
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.rd = os.path.join(self.tmp, "requirements"); os.makedirs(self.rd)
+        for rid, title, what in (("AREA-FRESH-001", "Fresh", "one"), ("AREA-STALE-002", "Stale", "two"),
+                                 ("AREA-NONE-003", "None", "three")):
+            _write(os.path.join(self.rd, rid + ".md"),
+                   "---\nid: {}\nstatus: confirmed\nlayer: feature\nowner: a\n---\n\n".format(rid)
+                   + self.BODY.format(title=title, what=what))
+        self.reqs = R.load_requirements(self.rd)
+        fresh = self.reqs["AREA-FRESH-001"]["body"]
+        _write(os.path.join(self.rd, "_i18n", "ro.json"), json.dumps({
+            "AREA-FRESH-001": {"title": "Proaspăt", "intent": "i", "contract": "c", "acceptance": "a",
+                               "hash": R.translation_hash(fresh, R._title(fresh))},
+            "AREA-STALE-002": {"title": "Vechi", "intent": "i", "contract": "c", "acceptance": "a",
+                               "hash": "000000000000"},
+        }, ensure_ascii=False))
+        self._saved = R.LANGUAGE
+        self.addCleanup(setattr, R, "LANGUAGE", self._saved)
+
+    def _set(self, value):
+        err = io.StringIO()
+        R.apply_config({"LANGUAGE": value}, out=err)
+        return err.getvalue()
+
+    def test_the_setting_is_an_enum(self):  # verifies: REQ-TRANSLATE-996#CASE-1
+        self.assertEqual(self._set("ro"), "")
+        self.assertEqual(R.LANGUAGE, "ro")
+        err = self._set("romanian")
+        self.assertIn("LANGUAGE", err)
+        self.assertEqual(R.LANGUAGE, "ro")
+        self.assertIn("LANGUAGE", R.CONFIG_KEYS)
+        self.assertEqual(R.CONFIG_ENUMS["LANGUAGE"], ("en", "ro", "both"))
+
+    def test_the_map_carries_the_setting(self):  # verifies: REQ-TRANSLATE-996#CASE-2
+        self._set("both")
+        data = R._assemble_map_data(self.reqs, {}, self.rd, self.tmp)
+        self.assertEqual(data["language"], "both")
+
+    def test_missing_and_stale_are_told_apart(self):  # verifies: REQ-TRANSLATE-996#CASE-3
+        self._set("ro")
+        gaps = R._translation_gaps(self.reqs, self.rd)
+        self.assertEqual([(g["id"], g["reason"]) for g in gaps],
+                         [("AREA-NONE-003", "missing"), ("AREA-STALE-002", "stale")])
+        self.assertTrue(all(g["locale"] == "ro" for g in gaps))
+
+    def test_english_means_nothing_is_owed(self):  # verifies: REQ-TRANSLATE-996#CASE-4
+        self._set("en")
+        self.assertEqual(R._translation_gaps(self.reqs, self.rd), [])
+        ws = R.Workspace.load(self.rd, self.tmp)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = R.cmd_i18n(ws)
+        self.assertEqual(rc, 0)
+        self.assertIn("no translation is expected", buf.getvalue())
+        self.assertIn("LANGUAGE", buf.getvalue())
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R._audit_summary(self.reqs, {}, self.rd, None)
+        self.assertNotIn("translation", buf.getvalue())
+
+    def test_the_json_hand_off_carries_source_and_key(self):  # verifies: REQ-TRANSLATE-996#CASE-5
+        self._set("ro")
+        ws = R.Workspace.load(self.rd, self.tmp)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_i18n(ws, as_json=True)
+        doc = json.loads(buf.getvalue())
+        self.assertEqual(doc["language"], "ro")
+        gap = next(g for g in doc["gaps"] if g["id"] == "AREA-NONE-003")
+        for k in ("id", "locale", "reason", "hash", "title", "intent", "contract", "acceptance"):
+            self.assertIn(k, gap)
+        self.assertEqual(gap["title"], "None")
+        self.assertIn("It does three.", gap["contract"])
+        # write the four fields back under that key and the gap closes
+        cache = json.load(io.open(os.path.join(self.rd, "_i18n", "ro.json"), encoding="utf-8"))
+        for g in doc["gaps"]:
+            cache[g["id"]] = {"title": "t", "intent": "i", "contract": "c", "acceptance": "a", "hash": g["hash"]}
+        _write(os.path.join(self.rd, "_i18n", "ro.json"), json.dumps(cache))
+        self.assertEqual(R._translation_gaps(self.reqs, self.rd), [])
+
+    def test_the_sync_tail_names_the_gap(self):  # verifies: REQ-TRANSLATE-996#CASE-6
+        self._set("ro")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R._audit_summary(self.reqs, {}, self.rd, None)
+        out = buf.getvalue()
+        self.assertIn("2 requirement(s) have no fresh translation for LANGUAGE `ro` (1 missing, 1 stale)", out)
+        self.assertIn("gate --i18n --json", out)
+
+    def test_gate_i18n_lists_every_gap_readably(self):  # verifies: REQ-TRANSLATE-996#CASE-3
+        self._set("both")
+        ws = R.Workspace.load(self.rd, self.tmp)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_i18n(ws)
+        out = buf.getvalue()
+        self.assertIn("2 requirement(s) need a translation (1 missing, 1 stale)", out)
+        self.assertIn("AREA-STALE-002", out); self.assertIn("stale", out)
+        self.assertIn("AREA-NONE-003", out);  self.assertIn("missing", out)
+        self.assertNotIn("AREA-FRESH-001", out)
