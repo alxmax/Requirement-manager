@@ -412,22 +412,20 @@ Intent sync is *not* automatable — it surfaces at human review (promote
 ```bash
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
-python -X utf8 scripts/reqmap.py gate || exit 1
-python -X utf8 scripts/reqmap.py gate || exit 1
 python -X utf8 scripts/reqmap.py gate
 EOF
 chmod +x .git/hooks/pre-commit
 ```
 
-`map --check` is there on purpose: the gate alone is link-sync (a stale or
-never-committed map/lock passes it), so a freshness check beside it is what keeps an
-out-of-date map or an uncommitted lock from merging.
+One `gate` is the whole verdict: link sync and drift, then requirement readability
+(strict), then the committed-map freshness check. They were three commands once, and
+this hook ran the same `gate` three times after the verbs folded — three full scans
+per commit for one answer.
 
-`lint --strict` is there for the same reason on the prose axis: the gate proves the
-links are real, not that the requirement is readable. Left un-wired, the clarity rules
-are documentation nobody runs. `--strict` blocks only on error-severity findings (a
-`confirmed` requirement missing its Contract or Acceptance section) plus the promoted
-structural checks; style warnings stay advisory.
+The readability check is part of the verdict for the same reason on the prose axis:
+link sync proves the links are real, not that the requirement is readable. It blocks
+only on error-severity findings (a `confirmed` requirement missing its Description or
+Cases section) plus the promoted structural checks; style warnings stay advisory.
 
 **Never exempt a check, and never pass `--no-lint`, to make a run green.** An exemption is
 a finding somebody decided not to see, and it is the cheapest thing in this tool to reach
@@ -498,7 +496,7 @@ Creation verbs (pick by input, not by outcome):
 - `python scripts/reqmap.py clarify AREA-NAME-NNN` — Ask what a requirement has not answered yet: vague terms with no threshold, numbers with no unit, unbounded quantities, clauses with no case, a missing failure path. Read-only, always exit 0, never a gate rule. --decompose is the write half of the same question: it scaffolds an over-scoped requirement's clauses into requirements of their own. Run it before implementing, so the ambiguity is resolved in the requirement instead of guessed in code. Flags: `--decompose` Scaffold an over-scoped requirement's clauses into requirements of their own.; `--json` Emit the questions as JSON for an agent to answer..
 
 **Build**
-- `python scripts/reqmap.py sync` — The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed. --suggest-verifies proposes per-criterion verifies: tags, and writes them with --apply. Flags: `--retire` Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply.; `--delete` With --retire: also remove the block, its lock entries and its membership tags. Never a function body.; `--apply` With --retire: actually write the change. Without it, the run is a dry report.; `--force` With --retire: proceed even though dependents still point at this requirement.; `--suggest-verifies` Propose per-criterion `verifies:` tags for tests already named after the criterion they check.; `--apply` With --suggest-verifies: write the proposed tags into the test files.; `--findings` Also regenerate the aggregated open-questions file.; `--accept-drift` Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it.; `--strict` Promote drift and test-link integrity from warn to error..
+- `python scripts/reqmap.py sync` — The write path. Rescan code members, advance the drift baseline, and regenerate the map, the findings file and the generated integration artifacts in one step. Run after editing requirement files or tagging new code members. --accept-drift is required when a confirmed or implemented contract changed. --suggest-verifies proposes per-criterion verifies: tags, and writes them with --apply. Flags: `--retire` Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply.; `--delete` With --retire: also remove the block, its lock entries and its membership tags. Never a function body.; `--apply` With --retire or --suggest-verifies: actually write the change. Without it, the run is a dry report.; `--force` With --retire: proceed even though dependents still point at this requirement.; `--suggest-verifies` Propose per-criterion `verifies:` tags for tests already named after the criterion they check.; `--findings` Also regenerate the aggregated open-questions file.; `--accept-drift` Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it.; `--strict` Promote drift and test-link integrity from warn to error..
 
 **Read**
 - `python scripts/reqmap.py gate` — The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review and --implement for the two machine-readable plans. Flags: `--audit` Print every pass that discovers a problem as one report: the gate, corpus risk, duplicate contracts, design signals and tag coverage. The exit code still comes from the gate alone.; `--risk` Print the corpus risk snapshot and the actionable signals, most urgent first.; `--show` Print one requirement's dossier: intent, contract, dependencies both ways, code members with file:line, open questions and risk signals.; `--search` Rank requirements by lexical relevance to a free-text query.; `--dupes` Rank requirement pairs whose contracts overlap, most similar first.; `--design` Print the advisory design review of the code. Never part of the verdict.; `--review` Emit the deterministic review plan for one requirement, as JSON.; `--implement` Emit the implementation brief for one requirement: obligations, required tags, similar existing code.; `--all` With --risk: expand every bucket instead of the top few.; `--untagged` With --risk: report membership-tag coverage per directory.; `--badge` With --risk: print the coherence score as a badge string.; `--threshold` With --dupes: override the similarity threshold.; `--top` With --search or --dupes: how many results to print.; `--strict` Promote drift and test-link integrity warnings to errors. Useful in CI when all requirements are confirmed.; `--json` Emit structured JSON output instead of human-readable text.; `--since` Scope the gate to requirements whose member files changed since this git ref (e.g. 'main', 'HEAD~1')..

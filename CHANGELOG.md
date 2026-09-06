@@ -1,5 +1,72 @@
 # Changelog
 
+## plugin `v5.10.0` — 2026-09-06
+
+**A full audit of the engine, and the fixes it was safe to land in one change.** The
+report itself (bugs by priority, efficiency diffs, removable code with a line budget) is
+`docs/audit/2026-09-06-full-audit.md`; this entry is what changed.
+
+Bugs fixed, worst first:
+
+- **The advisory design review could kill the gate.** `_design_py_nesting` recursed into
+  every expression node, so a generated 1,000-term `+` chain or a 1,000-branch `elif`
+  in any consumer file raised `RecursionError` straight through `gate`, `sync` and
+  `gate --audit` (exit 1, traceback). The walker is iterative and `_design_file` treats
+  an overflow like a parse failure: no candidates, not a crashed commit hook.
+- **`init --wipe` sliced string literals and README examples.** It cut every `TAG_RE`
+  hit, with none of the masking the scanner applies; on this repo it turned a test
+  fixture `"# implements: X\n..."` into `"` (a `SyntaxError`) and blanked every fenced
+  example of the tagging convention. The wipe now strips only the lines
+  `_scan_file_tags` reads as tags, and the `.reqmapignore` is seeded *before* the wipe
+  reads it. `_strip_line_tag` also keeps a CRLF ending and knows `/*`, `--` and `;`.
+- **A consumer with its own `tool_definition.json` failed its gate on ours** (RM028):
+  two directories above a vendored engine is the consumer's repo root. The check now runs
+  only where `.claude-plugin/plugin.json` sits beside the engine.
+- **`clarify <ID> --decompose` scaffolded for the whole corpus**, ignoring the id.
+  `cmd_lint` takes `only=`.
+- **`--decompose` could mint a duplicate id**: `_next_free_number` read file names, and a
+  module file holds many ids (110 on a corpus whose highest id is 982). It reads the
+  loaded ids too.
+- **`sync --retire --delete` left `// implements:` tags behind** (it required a `#`) and
+  had no right boundary, so retiring `X-001` corrupted the tag of `X-0011`.
+- **`health` and `gate` disagreed on `gate_exempt`**: `_link_sync_errors` bypassed the
+  exemption filter, so an exempted requirement still counted as a link-sync error in the
+  committed map's health block.
+- A requirement file with one undecodable byte crashed the whole corpus load (now a
+  stderr warning and a skip, as the docstring always promised); `load_ignore` and
+  `load_clarifylock` fail open on the same class of input; RM016 now reports a
+  `[]`/`null` lock that `load_lock` swallows.
+- `_bullets` (the map, `show`, `search`, `dupes`) folded the tail of a multi-line
+  `<!-- -->` comment into the previous clause and opened a clause on any `-`; it now
+  reads a comment as one unit and a bullet as `- `, the way the linter always did.
+- `sync --suggest-verifies` proposed nothing for `test_case3_…`: `_ac_name_re` matched
+  `ac` only. The mermaid hierarchy drew a bare node for a parent with no `level:`; the
+  site injector missed `<body class="…">`.
+- `COMMANDS["sync"]` declared `--apply` twice, so every generated surface listed it twice
+  and the OpenAI schema kept only the second help text. The epilog of `--help` is now
+  rendered from the registry (the hand-written one named twelve verbs argparse rejects),
+  and six parser flags nothing read (`--raw`, `--update-lock`, `--check`, `--regions`,
+  `--diagram`, `--detect`) are gone.
+- Repo tooling: `sync_reqmap.sh` no longer dies silently when the plugin cache has no
+  version dir, nor aborts the consumer loop after copying the engine; the CHANGELOG gate
+  uses the same reader as the release job; `check_engine_bump.py` rejects a backwards
+  bump; `check_versions.py` rejects `20260906`-shaped engine versions; the shipped
+  `SKILL.md` hook ran `gate` three times; `CONTRIBUTING.md` named two retired verbs and
+  `check_retired_verbs.py` now scans it.
+
+Faster:
+
+- `gate` assembled the map document twice (RM027 and the explicit freshness check),
+  each run re-doing the design review, the health record and the TODO parse — measured
+  at 2.48 s → 2.27 s for this repo's gate. `Workspace.map_data()` builds it once.
+- The test-link rule opened the same suite once per requirement naming it (206 opens of
+  `test_reqmap.py` per gate); `_domain_heads` was recomputed for every requirement in
+  the clarify pass (90% of that pass, quadratic in the corpus).
+
+Removed: the orphaned `_RO_*`/`_EN_STOPWORDS` of the deleted `translate` verb,
+`Requirement.has`, `_clean_item`, the always-false `lock_blocked`, a duplicated
+save-lock branch, duplicate assignments in `lint_requirement`, an unused `dep_count`.
+
 ## plugin `v5.9.0` — 2026-09-06
 
 **The member hash now keys on the definition a tag sits in, not the whole file.** Reverse

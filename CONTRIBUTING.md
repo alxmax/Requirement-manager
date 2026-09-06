@@ -40,10 +40,8 @@ from:
 
 ```bash
 cd plugin
-python -X utf8 scripts/reqmap.py gate --code ..          # link sync + drift + test links
-python -X utf8 scripts/reqmap.py lint --strict --code ..  # requirement readability
-python -X utf8 scripts/reqmap.py sync --code ..           # rescan + advance lock + regen map
-python -X utf8 scripts/reqmap.py map --check --code ..    # committed map still fresh?
+python -X utf8 scripts/reqmap.py gate --code ..   # link sync + drift + test links + readability + map freshness
+python -X utf8 scripts/reqmap.py sync --code ..   # rescan + advance lock + regen map
 ```
 
 `gate` must report **0 errors** before you commit. Warnings are informative and do not
