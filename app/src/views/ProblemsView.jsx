@@ -87,11 +87,14 @@ export function computeQuestions() {
  * not the default reading. */
 const isDraftReview = (p) => p.sev === "REVIEW" && p.signal === "unreviewed";
 
-export function ProblemsView({ openSpec }) {
+export function ProblemsView({ openSpec, problems }) {
   const { t } = useI18n();
   const [filter, setFilter] = useState("ALL");
   const [showDrafts, setShowDrafts] = useState(false);
-  const all = computeProblems();
+  // `problems` lets a caller (App) share one computeProblems() result across the
+  // rail badges and this view instead of recomputing it here too; a caller that
+  // renders this view standalone (e.g. the SSR smoke test) gets the old behavior.
+  const all = problems || computeProblems();
   const counts = all.reduce((a,p)=>{ a[p.sev]=(a[p.sev]||0)+1; return a; }, {});
   // Advisory code-review candidates, grouped the way the CLI prints them. Absent on a
   // map written before the engine carried them, which is why this is a guarded read.

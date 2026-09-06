@@ -23,7 +23,7 @@
       "plugin/scripts/reqmap.py#warn_if_stale": "4e5ef714ff765bda045095887e7ac681e7d907079064fe21abba3dff8b738fc6"
     },
     "ARCH-CMDREGISTRY-033": {
-      "plugin/scripts/reqmap.py#_build_parser": "1636d767778c17d570cfe7fe3d5f25aa5e64e66a05689ad06e4d5ebab7a7fea4",
+      "plugin/scripts/reqmap.py#_build_parser": "fd99c055bf069fbf0c155173590a3d1ba455c9d6b3c3114920e3810ce1dd26f7",
       "plugin/scripts/reqmap.py#_generate_schema": "5e7f982bb348ed1d45d5cdb8274a543973f304588f66e4035a7dd5458ce270c9"
     },
     "ARCH-DESCRIPTION-057": {

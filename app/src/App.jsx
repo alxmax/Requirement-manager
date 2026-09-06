@@ -1,14 +1,14 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-945
 /* App — shell: top bar, rail nav, search, theme toggle, view switching. */
-import { useState, useEffect, Component } from "react";
+import { useState, useEffect, useMemo, Component } from "react";
 import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI, HEALTH, DESIGN } from "./lib/data.js";
 import { searchRequirements } from "./lib/search.js";
 import { Icon, Logomark } from "./lib/icons.jsx";
 import { Btn } from "./lib/ui.jsx";
 import { useI18n, LOCALES } from "./lib/i18n.jsx";
 import { MapView } from "./views/MapView.jsx";
-import { ProblemsView, computeProblems, computeQuestions } from "./views/ProblemsView.jsx";
+import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
 import { SpecView, ENFORCED } from "./views/SpecView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 import { ExplorerView } from "./views/ExplorerView.jsx";
@@ -60,7 +60,10 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   // The same three layers as the engine `search` command (ARCH-SEARCH-036): the id
   // the query names, then a requirement whose text contains it verbatim — in any
   // language the map carries — then the shared TF-IDF ranking for everything else.
-  const hits = q ? searchRequirements(REQUIREMENTS, q, { top: 8 }) : [];
+  const hits = useMemo(
+    () => q ? searchRequirements(REQUIREMENTS, q, { top: 8 }) : [],
+    [q, REQUIREMENTS]
+  );
   return (
     <header className="topbar">
       <div className="brand">
@@ -103,15 +106,17 @@ function TopBar({ query, setQuery, theme, setTheme, onSearchPick }) {
   );
 }
 
-function Rail({ view, setView, focus, setFocus }) {
+function Rail({ view, setView, focus, setFocus, problems }) {
   const { t } = useI18n();
-  const problems = computeProblems();
   const errCount = problems.filter(p=>p.sev==="ERROR").length;
   const todoCount = TODOS.filter(t => !t.done).length;
   // An author's open questions live in Problems since v4.0.0 (ADR-0028) but keep
   // their own badge: a computed warning and a human writing down what they do not
   // know are different news. `0` is not news at all, so the badge hides at zero.
-  const questionCount = computeQuestions().length;
+  // Derived from the same `problems` computed once in App — computeQuestions()
+  // internally recomputed computeProblems(), which is exactly the redundant work
+  // this shared computation avoids.
+  const questionCount = problems.filter(p=>p.sev==="QUESTION").length;
   const counts = {
     explorer: REQUIREMENTS.length,
     map: REQUIREMENTS.filter(r=>r.level!=="code").length,
@@ -249,6 +254,11 @@ export default function App() {
   const [theme, setTheme] = useState("light");
   // Which registry slice the Explorer is scoped to, driven from the rail tally.
   const [focus, setFocus] = useState(null);
+  // Computed once per render and shared by Rail (badge counts) and ProblemsView
+  // (the inbox itself) — computeProblems() used to run up to three times per
+  // render (Rail directly, again inside computeQuestions(), again inside
+  // ProblemsView) over the same static REQUIREMENTS.
+  const problems = useMemo(() => computeProblems(), [REQUIREMENTS]);
 
   useEffect(()=>{ document.documentElement.setAttribute("data-theme", theme); }, [theme]);
 
@@ -281,14 +291,14 @@ export default function App() {
       <TopBar query={query} setQuery={setQuery} theme={theme} setTheme={setTheme}
         onSearchPick={searchPick} />
       <div className="body">
-        <Rail view={view} setView={setView} focus={focus}
+        <Rail view={view} setView={setView} focus={focus} problems={problems}
           setFocus={(k)=>{ setFocus(k); setView("explorer"); }} />
         <ErrorBoundary key={view}>
           {view==="explorer" && <ExplorerView selId={selId} setSelId={setSelId}
             focus={focus} clearFocus={()=>setFocus(null)} />}
           {view==="map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec}
             highlightId={highlightId} setHighlightId={setHighlightId} />}
-          {view==="problems" && <ProblemsView openSpec={openSpec} />}
+          {view==="problems" && <ProblemsView openSpec={openSpec} problems={problems} />}
           {view==="spec" && <SpecView selId={selId} setSelId={setSelId} />}
           {view==="roadmap" && <RoadmapView openSpec={openSpec} />}
           {view==="commands" && <CommandsView />}

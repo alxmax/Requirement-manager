@@ -1,5 +1,37 @@
 # Changelog
 
+## plugin `v5.10.1` — 2026-09-06
+
+**A second audit pass, landed on top of `v5.10.0`.** The overlap with that entry was
+resolved in its favour; what remains here is what the first pass did not cover.
+
+Bugs fixed:
+
+- **`sync` reported a stale `confirmed` count.** `n_confirmed` was snapshotted before
+  the loop that demotes a drifted contract from `confirmed` to `draft`, so the summary
+  line printed the pre-demotion number. It is recomputed just before the print.
+
+Fewer recomputations, no behaviour change:
+
+- `_walk_code_lines` no longer duplicates `_walk_code`’s walk loop; it iterates over it.
+- `compute_member_hashes` calls `_file_sha` for a whole-file member instead of
+  re-implementing it inline through a `1 << 30` sentinel span.
+- `cmd_candidates` precomputes a `stem -> test files` index once (was O(groups × files)).
+- `_verifies_proposals` reads each `tested-by` file once per requirement, not once per
+  missing criterion.
+- `_build_map_data` computes `_verify_bullets` once per node (was twice).
+- `_lint_readability` computes `_contract_clauses` once (was twice) and iterates
+  `CONTRACT_LABELS + ACCEPTANCE_LABELS` instead of indexing the first two of each.
+- `cmd_coverage` normalises each path once per file.
+- `_audit_summary` and `cmd_health` share one `_roadmap_behind` helper, so the two
+  cannot disagree on whether the roadmap trails the requirements.
+- The viewer memoises its search tokenisation (was re-tokenising the whole corpus on
+  every keystroke) and computes `computeProblems()` once per render, not two-three times.
+
+Flag help in the parser now names the surviving verbs (`clarify --decompose`,
+`gate --dupes`, `gate --search`, `gate`) instead of the standalone ones removed at
+consolidation.
+
 ## plugin `v5.10.0` — 2026-09-06
 
 **A full audit of the engine, and the fixes it was safe to land in one change.** The
