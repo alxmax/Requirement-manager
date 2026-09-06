@@ -1,6 +1,6 @@
 ---
 id: ARCH-PROMOTE-011
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -77,7 +77,7 @@ CASE-3
 
 ---
 id: REQ-PROMOTE-894
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
@@ -95,10 +95,10 @@ satisfies: [ARCH-PROMOTE-011]
 Every bullet below is binding.
 - `_write_frontmatter_status` edits only the value of the first `status:` line in the
   leading frontmatter.
-- It preserves that line's indentation and any trailing inline comment.
-- It leaves the body untouched, byte for byte.
-- It preserves the file's own line endings, per line, so a file with mixed endings keeps
-  every line it did not touch exactly as it was.
+- The rewrite preserves that line's indentation and any trailing inline comment.
+- The rewrite leaves the body untouched, byte for byte.
+- The rewrite preserves the file's own line endings, per line, so a file with mixed
+  endings keeps every line it did not touch exactly as it was.
 - In a module file holding several requirements, it edits the block of the requirement it
   was given, not the first block in the file.
 
@@ -129,7 +129,7 @@ CASE-4 — the right block in a module file
 
 ---
 id: REQ-PROMOTE-974
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

@@ -1,5 +1,5 @@
 // implements: ARCH-VIEWER-007
-/* RoadmapView — Gantt-style chart: semver milestones on X, swim lanes on Y.
+/* RoadmapView — Gantt-style chart: semver milestones on X, one lane on Y.
    Requirements with `milestone:` field + TODO.md items via TODOS.
 
    One column per milestone and a chip carrying the full title made the table as
@@ -45,15 +45,15 @@ function barVariant(status) {
   return "planned";
 }
 
-// Two lanes, not one per layer. A roadmap answers "what is broken, what is coming" — the
-// bus/feature/need/ops split is the ENGINE's taxonomy (graph position), and putting it on
-// the Y axis made four thin rows nobody read as a plan. `lane: bug` on a TODO item marks a
-// bug; every other TODO lane (feature, bus, ops — still parsed, never rejected) and every
-// milestoned requirement is a feature, because a requirement describes a capability by
-// definition and a bug is a TODO until it is fixed.
-const LANES      = ["bug", "feature"];   // implements: REQ-VIEWER-995
-const LANE_LABEL = { bug: "Bugs", feature: "Features" };
-const laneOfTodo = t => (t.lane === "bug" ? "bug" : "feature");
+// One lane. The Y axis carried four rows (bus/feature/need/ops — the ENGINE's taxonomy,
+// a requirement's position in the graph), then two, Bugs and Features. Bugs rendered
+// empty: nothing on this roadmap was a defect. The items are work that was not specified
+// up front, which is not the same thing, and an axis with one populated value sorts
+// nothing while still costing a row. So the lane stops classifying and names what the
+// chips are. Every open TODO item and every milestoned requirement lands in it, whatever
+// `lane:` says — the field still parses and is still emitted, it just no longer splits
+// the chart.
+const LANE_LABEL = "Implementations";   // implements: REQ-VIEWER-995
 
 const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)";
 
@@ -236,17 +236,13 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
     );
   }
 
-  const rows = LANES.flatMap(lane => {
-    const reqs  = lane === "feature"
-      ? REQUIREMENTS.filter(r => r.milestone && r.status !== "deprecated")
-      : [];
-    const todos = TODOS.filter(t => laneOfTodo(t) === lane && !t.done);
-    const byMs  = Object.fromEntries(milestones.map(ms => [ms, []]));
-    reqs.forEach(r  => { if (byMs[r.milestone])  byMs[r.milestone].push({ type: "req",  r  }); });
-    todos.forEach(t => { if (byMs[t.milestone])  byMs[t.milestone].push({ type: "todo", t  }); });
-    const maxRows = Math.max(1, ...Object.values(byMs).map(a => a.length));
-    return Array.from({ length: maxRows }, (_, i) => ({ lane, rowIdx: i, maxRows, byMs }));
-  });
+  const byMs = Object.fromEntries(milestones.map(ms => [ms, []]));
+  REQUIREMENTS.filter(r => r.milestone && r.status !== "deprecated")
+    .forEach(r => { if (byMs[r.milestone]) byMs[r.milestone].push({ type: "req", r }); });
+  TODOS.filter(t => !t.done)
+    .forEach(t => { if (byMs[t.milestone]) byMs[t.milestone].push({ type: "todo", t }); });
+  const maxRows = Math.max(1, ...Object.values(byMs).map(a => a.length));
+  const rows = Array.from({ length: maxRows }, (_, i) => ({ rowIdx: i, maxRows, byMs }));
 
   const thBase = {
     background: "var(--bg-raised)", color: "var(--fg-muted)", fontSize: 11, fontWeight: 600,
@@ -264,7 +260,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
         <ZoomControl zoom={zoom} setZoom={setZoom} />
         <Segmented label="Density" options={["compact", "comfy"]} value={density} onChange={setDensity} />
         <span style={{ fontSize: 11, color: "var(--fg-faint)", marginLeft: "auto" }}>
-          {milestones.length} milestones · {rows.length} lane rows
+          {milestones.length} milestones · {rows.length} rows
         </span>
       </div>
 
@@ -290,15 +286,15 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ lane, rowIdx, maxRows, byMs }) => (
-                <tr key={`${lane}-${rowIdx}`}>
+              {rows.map(({ rowIdx }) => (
+                <tr key={rowIdx}>
                   {rowIdx === 0 && (
                     <td rowSpan={maxRows} style={{
                       fontSize: 10, fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase",
                       color: "var(--fg-faint)", padding: d.lanePad, textAlign: "right", verticalAlign: "middle",
                       borderRight: "1px solid var(--border)", whiteSpace: "nowrap", background: "var(--bg-raised)", minWidth: 60,
                     }}>
-                      {LANE_LABEL[lane]}
+                      {LANE_LABEL}
                     </td>
                   )}
                   {milestones.map(ms => {

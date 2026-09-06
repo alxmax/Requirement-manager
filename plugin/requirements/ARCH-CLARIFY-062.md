@@ -168,7 +168,7 @@ CASE-4 — an unknown id is an error, an answered requirement is not
 
 ---
 id: REQ-CLARIFY-975
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex

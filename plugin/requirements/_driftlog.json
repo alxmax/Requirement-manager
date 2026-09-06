@@ -34,8 +34,8 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "ARCH-VIEWER-007": {
-      "hash": "c9960b4fcf98",
-      "reason": "v6.3.0: the roadmap has two lanes (REQ-VIEWER-995)"
+      "hash": "299f410ea090",
+      "reason": "v6.5.0: the Roadmap has one lane, Implementations"
     },
     "REQ-AUDIT-970": {
       "hash": "918984c1362a",
@@ -65,6 +65,10 @@
       "hash": "e2419be12c70",
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     },
+    "REQ-PROMOTE-894": {
+      "hash": "b9701e079e3a",
+      "reason": "readability: named the subject of three REQ-PROMOTE-894 clauses; no behaviour change"
+    },
     "REQ-REPRO-905": {
       "hash": "34bdcb2ea67a",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
@@ -72,6 +76,10 @@
     "REQ-TRANSLATE-996": {
       "hash": "4f6e6771dd73",
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
+    },
+    "REQ-VIEWER-995": {
+      "hash": "f6bcd1e2cb0f",
+      "reason": "v6.5.0: the Roadmap has one lane, Implementations"
     }
   }
 }

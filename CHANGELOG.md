@@ -1,5 +1,24 @@
 # Changelog
 
+## plugin `v6.5.0` — 2026-09-07
+
+**The Roadmap has one lane: Implementations.** It had four — bus, feature, need, ops, the
+engine's own layer taxonomy laid on the Y axis — and then two, Bugs and Features, in
+`v6.4.0`. Bugs rendered empty and stayed empty, because nothing on this roadmap is a
+defect: the items are work that was not specified up front, which is a different thing. An
+axis with one populated value sorts nothing and still costs a row, so the lane stops
+classifying and names what the chips are.
+
+- **Everything lands in it.** Every open `TODO.md` item, whatever its `lane` says, and
+  every requirement carrying a `milestone:` that is not deprecated. Completed items (`[x]`)
+  still render nowhere.
+- **`lane:` is not gone and is not rejected.** The engine still parses it and still emits
+  it in `_map.json` — `bug`, `feature`, and the older `bus`/`ops` values alike. A repo that
+  files its items by lane loses the split and nothing else. No engine data changed.
+- The SSR smoke asserts the rule on a synthetic registry, not on whatever `TODO.md` holds
+  today: exactly one lane label, every lane value inside it, a done item outside it.
+  `REQ-VIEWER-995` is the contract; the viewer is rebuilt.
+
 ## plugin `v6.4.0` — 2026-09-07
 
 **A repository declares its requirements language.** `"LANGUAGE": "en" | "ro" | "both"` in

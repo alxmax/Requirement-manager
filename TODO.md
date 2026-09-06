@@ -1,7 +1,8 @@
 # TODO
 
-<!-- Items here appear in the Roadmap tab of the viewer.
-     Format: - [ ] Name | lane: bug|feature   (older bus|ops values still parse, filed as features)
+<!-- Items here appear in the Roadmap tab of the viewer, in its single Implementations lane.
+     Format: - [ ] Name | lane: <label>   (optional — the lane is still parsed and still
+     emitted in _map.json, it just no longer splits the chart)
      Group by milestone version: ## vX.Y -->
 
 ## v1.13
@@ -810,3 +811,29 @@
            `by_dir` writes no architecture draft, and `_write_sys_placeholder` is fed
            those ids, so it writes nothing either. Zero drafts really is zero pyramid
            — the gap is structural, not a threshold anyone can tune. -->
+
+## v6.5
+- [ ] Refactor reqmap.py | lane: ops
+      <!-- Filed 2026-09-07 at the author's request. Decide the scope before touching
+           anything, because the obvious reading is already settled: ADR-0014 says the
+           engine stays ONE file, with no line-count gate and named numeric re-open
+           triggers. This item is not a split. A PR that splits the engine reverses an
+           ADR, and that needs a NEW record superseding 0014, not this checkbox.
+
+           One slice of the internal shape is already filed and should not be duplicated
+           here: "Engine: the nine long functions still over 80 lines" (v5.2, open)
+           carries the list in descending order and the rule that they go ONE AT A TIME,
+           each with an equivalence check against the pre-split engine.
+
+           So this item is the question that one does not answer: what else about 10,711
+           lines is worth changing — measured, not felt. Before any code:
+             - Read `gate --design` first. It scores this repo 30/100 today and names its
+               own candidates; that is the closest thing to a baseline that exists.
+             - Name the complaint. "Hard to navigate" and "hard to change safely" want
+               different fixes and only the second earns a refactor.
+             - Ship every change behind an equivalence check against the pre-change
+               engine, the way v5.5.0 did — both functions split there hid a real bug
+               that only the comparison caught.
+           No target number, on purpose: ADR-0014's re-open triggers are the numbers this
+           repo agreed to act on, and inventing a second set here would quietly overrule
+           them. -->
