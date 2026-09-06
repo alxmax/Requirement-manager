@@ -43,6 +43,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0030](0030-the-engine-drafts-the-pyramid.md) | The engine drafts the pyramid; the author corrects it | Accepted |
 | [0031](0031-a-tagged-corpus-can-be-given-the-rungs.md) | A corpus that was already tagged can be given the rungs | Accepted |
 | [0032](0032-the-eight-thousand-line-trigger-fired.md) | ADR-0014's line-count trigger fired; the audit is scheduled, not pre-empted | Accepted |
+| [0033](0033-the-costed-audit-the-split-is-blocked-by-one-representation.md) | The costed audit: still one file, and the split is blocked by one representation | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
