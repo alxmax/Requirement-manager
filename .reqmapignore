@@ -57,6 +57,12 @@ app/scripts/.ssr-smoke.bundle.*
 .superpowers/**
 # diagrams/: regenerable Excalidraw outputs (gitignored) + a README. No members.
 diagrams/**
+# TODO-feedback-*.md: consumer-feedback notes from using the plugin on another
+# repo (.gitignore:36 keeps them local). Same class as the caches above - a file
+# CI never checks out, reported by `--untagged` as a capability with no
+# requirement. Prose feedback is not a capability; the fixes it asked for become
+# requirements, the notes do not.
+TODO-feedback-*.md
 
 # docs/map.html is the published render of the SAME generated viewer template
 # excluded above (plugin/scripts/_map_viewer.html) — it inlines this repo's own

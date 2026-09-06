@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: bus
 owner: Alex
+milestone: v2.33
 priority: should-have
 depends_on: [ARCH-PARSE-001, ARCH-DRIFT-003]
 satisfies: [SYS-AUTHOR-101]

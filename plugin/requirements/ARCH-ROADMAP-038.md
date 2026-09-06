@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.17
 depends_on: [ARCH-HEALTH-017]
 satisfies: [SYS-REPORT-105]
 ---
@@ -19,8 +20,9 @@ satisfies: [SYS-REPORT-105]
 > clean-ups.
 
 Every bullet below is binding.
-- `health --json` reads `TODO.md` from the code root, or its parent when absent there, and reports two read-only signals. [[REQ-ROADMAP-907]]
+- `health --json` reads `TODO.md` from the code root, or its parent when absent there, and reports three read-only signals. [[REQ-ROADMAP-907]]
 - The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]
+- The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]
 
 ## Cases
 CASE-1
@@ -48,6 +50,11 @@ CASE-5
   When   the versions are compared
   Then   `v2.10` ranks above `v2.9`, which a string compare would reverse
 
+CASE-6
+  Given  a roadmap that marks work shipped past the newest requirement `milestone:`
+  When   `health --json` runs
+  Then   it reports that drift too, so neither direction is the only one watched
+
 ## Context
 **Terms**
 - the roadmap      TODO.md — milestone sections holding checklist items.
@@ -55,14 +62,19 @@ CASE-5
 - a version heading  a `## ` heading whose first token is `vX.Y`.
 
 **Notes**
-- The behind-signal compares against requirement `milestone:` fields, not against a
+- Both signals compare against requirement `milestone:` fields, not against a
   package version. The engine owns the former in every repo; the latter is
-  project-specific. A repo that leaves `milestone:` unset gets no behind-signal.
+  project-specific. A repo that leaves `milestone:` unset gets neither.
+- Only ONE direction was checked from v2.17 to v5.10, and the unchecked one is the
+  one that happened: 27 requirements written across six minors carried no
+  `milestone:`, so the chart's newest column read v4.0 while the product shipped
+  5.10. The signal that would have said so did not exist.
 - Neither signal is a gate. The v1.35 roadmap-hygiene note chose manual upkeep over
   automation when demand was n=1; this is the read-only middle ground after n=2.
 
 **Current implementation**
-- `_roadmap_signals` and `_version_key` in `reqmap.py`, read by `cmd_health`.
+- `_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by
+  `cmd_health` and `_audit_summary`.
 
 
 --------------------
@@ -140,3 +152,55 @@ CASE-7 — an item under a non-version heading is filed under the prior mileston
   When   `_parse_todos_from_text` parses the text
   Then   that item's `milestone` reads `"v2.16"`, not `"Deferred work"`
 
+
+--------------------
+
+
+---
+id: REQ-ROADMAP-983
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# The roadmap can also be ahead of the requirements
+
+## Description
+> The behind-signal asks one question, `is TODO.md older than the corpus`, and the
+> answer was no for six minors while the opposite was quietly true: the requirements
+> stopped declaring `milestone:` at v4.0 and the roadmap chart ended two majors before
+> the product did. A check that watches one direction reports nothing when the drift
+> runs the other way, and reads as a clean result.
+
+Every bullet below is binding.
+- `health --json` reports `roadmap_unmapped` when the newest requirement `milestone:`
+  is older than the newest milestone `TODO.md` marks shipped, naming both versions.
+- Shipped means at least one item under that heading is checked `[x]`. An open item
+  under a later heading is a plan, so a roadmap that looks ahead of the code raises
+  nothing — which is every roadmap worth keeping.
+- The signal is one line naming the two versions, never one finding per milestone
+  that lacks a requirement.
+- `roadmap_unmapped` is read-only, like the behind-signal it mirrors: no exit code
+  changes, and the health score is untouched.
+
+## Cases
+CASE-1 — the requirements trailing the shipped roadmap is reported
+  Given  a `TODO.md` whose `## v2.16` section holds a `[x]` item, and a corpus whose
+         newest requirement `milestone:` is `v2.13`
+  When   `health --json` runs
+  Then   `roadmap_unmapped` equals `{"shipped": "v2.16", "requirements": "v2.13"}` and
+         `health` still exits 0
+
+CASE-2 — an open item under a later heading is a plan, not a gap
+  Given  a `TODO.md` whose `## v2.16` section holds only an unchecked item, and a
+         corpus whose newest requirement `milestone:` is `v2.13`
+  When   `health --json` runs
+  Then   the payload carries no `roadmap_unmapped` key
+
+CASE-3 — a corpus level with the shipped roadmap raises nothing
+  Given  a `TODO.md` whose newest shipped milestone is `v2.13`, and a corpus whose
+         newest requirement `milestone:` is `v2.13`
+  When   `health --json` runs
+  Then   the payload carries no `roadmap_unmapped` key

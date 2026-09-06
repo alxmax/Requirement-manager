@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.17
 depends_on: [ARCH-CHECK-006]
 satisfies: [SYS-SHIP-108]
 lint_exempt: [file-spread, ac-count-high]

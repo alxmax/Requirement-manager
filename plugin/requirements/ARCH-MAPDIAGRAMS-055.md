@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.32
 priority: should-have
 depends_on: [ARCH-MAP-007]
 satisfies: [SYS-VISUAL-106]

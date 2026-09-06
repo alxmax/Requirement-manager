@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.32
 priority: should-have
 depends_on: [ARCH-PARSE-001, ARCH-DRIFT-003, ARCH-CHECK-006]
 satisfies: [SYS-AUTHOR-101]

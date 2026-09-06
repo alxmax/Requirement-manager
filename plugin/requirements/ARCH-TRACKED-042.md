@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.20
 depends_on: [ARCH-SCAN-002, ARCH-CHECK-006]
 satisfies: [SYS-GATE-102]
 ---

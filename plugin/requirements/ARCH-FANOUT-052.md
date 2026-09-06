@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.32
 priority: could-have
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014, ARCH-LEVEL-051]
 satisfies: [SYS-VMODEL-107]

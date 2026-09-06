@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.5"
+MAP_ENGINE_VERSION = "2026-09-06.6"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4202,7 +4202,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
     return data
 
 
-def _roadmap_signals(root):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907
+def _roadmap_signals(root):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907  # implements: REQ-ROADMAP-983
     """Read TODO.md and report two read-only roadmap signals, or None when the file
     is absent (most repos have no TODO.md, and they must see nothing).
 
@@ -4232,7 +4232,14 @@ def _roadmap_signals(root):  # implements: ARCH-ROADMAP-038  # implements: REQ-R
             else:
                 bad.append(s[3:].strip())
         newest = max(versions, key=_version_key) if versions else None
-        return {"newest_milestone": newest, "unversioned_headings": bad}
+        # The newest milestone the roadmap marks SHIPPED (at least one `[x]` item).
+        # The reverse-direction check reads this, never `newest`: an open item under a
+        # future heading is a plan, and warning on a plan would fire on every roadmap
+        # that looks ahead — which is every useful one.
+        shipped = [t["milestone"] for t in _parse_todos_from_text(text)
+                   if t["done"] and t["milestone"]]
+        return {"newest_milestone": newest, "unversioned_headings": bad,
+                "newest_shipped": max(shipped, key=_version_key) if shipped else None}
     return None
 
 
@@ -4242,15 +4249,23 @@ def _version_key(v):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-
     return tuple(int(p) for p in v.lstrip("v").split(".") if p.isdigit())
 
 
-def _roadmap_behind(reqs, roadmap):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907
-    """(behind, newest_req) — the highest `milestone:` any requirement declares, and
-    whether TODO.md's newest heading (`roadmap["newest_milestone"]`) trails it. Shared
-    by `_audit_summary` and `cmd_health` so the two cannot disagree on the comparison."""
+def _roadmap_behind(reqs, roadmap):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907  # implements: REQ-ROADMAP-983
+    """(behind, newest_req, unmapped) — the highest `milestone:` any requirement
+    declares, plus whether the roadmap and the corpus drifted apart, in EITHER direction.
+    `behind`: TODO.md's newest heading trails the requirements. `unmapped`: the
+    requirements trail the newest milestone TODO.md marks SHIPPED, so work that shipped
+    carries no requirement and the roadmap chart ends before the product does — the
+    direction that went unseen for six minors because only the first was checked. One
+    comparison, read by `_audit_summary` and `cmd_health` so the two cannot disagree, and
+    one line per direction — never one finding per milestone."""
     newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
                       if m.get("milestone")), key=_version_key, default=None)
     behind = bool(roadmap["newest_milestone"] and newest_req and
                   _version_key(roadmap["newest_milestone"]) < _version_key(newest_req))
-    return behind, newest_req
+    shipped = roadmap.get("newest_shipped")
+    unmapped = bool(shipped and newest_req and
+                    _version_key(newest_req) < _version_key(shipped))
+    return behind, newest_req, unmapped
 
 
 def _parse_todos_from_text(text):
@@ -5774,10 +5789,14 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         lines.append("{} code file(s) traced to no requirement".format(len(untagged)))
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap:
-        behind, newest_req = _roadmap_behind(reqs, roadmap)
+        behind, newest_req, unmapped = _roadmap_behind(reqs, roadmap)
         if behind:
             lines.append("TODO.md stops at {} while the requirements reach {} - the roadmap "
                          "is behind".format(roadmap["newest_milestone"], newest_req))
+        if unmapped:
+            lines.append("the requirements stop at {} while TODO.md marks work shipped "
+                         "through {} - the roadmap chart ends before the product does"
+                         .format(newest_req, roadmap["newest_shipped"]))
         if roadmap["unversioned_headings"]:
             lines.append("{} TODO.md heading(s) are not milestones, so their items never "
                          "reach the roadmap".format(len(roadmap["unversioned_headings"])))
@@ -6186,10 +6205,13 @@ def cmd_health(ws, as_json=False, as_badge=False, headline_only=False):  # imple
         data["design_files"] = design["files"]
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap is not None:
-        behind, newest_req = _roadmap_behind(reqs, roadmap)
+        behind, newest_req, unmapped = _roadmap_behind(reqs, roadmap)
         if behind:
             data["roadmap_behind"] = {"todo": roadmap["newest_milestone"],
                                       "requirements": newest_req}
+        if unmapped:
+            data["roadmap_unmapped"] = {"shipped": roadmap["newest_shipped"],
+                                        "requirements": newest_req}
         if roadmap["unversioned_headings"]:
             data["roadmap_unversioned_headings"] = roadmap["unversioned_headings"]
     if as_badge:

@@ -1,5 +1,39 @@
 # Changelog
 
+## plugin `v5.11.0` — 2026-09-06
+
+**The roadmap check watched one direction, and the drift ran the other way.**
+`_roadmap_behind` asked only whether `TODO.md` had fallen behind the requirements. It
+had not. What had happened was the reverse: requirements stopped declaring
+`milestone:` after v4.0 while the roadmap recorded work shipped through v5.8, so the
+Roadmap tab's newest column read two majors behind the product and 27 requirements sat
+in the chart's `unscheduled` block instead of on it. A one-directional check reports
+nothing in that case, and reads as a clean result.
+
+- **New signal, `roadmap_unmapped`** (`health --json`, and one line in the `gate`/`sync`
+  info block). It fires when the newest requirement `milestone:` is older than the newest
+  milestone `TODO.md` marks **shipped** — shipped meaning at least one `[x]` item under
+  that heading. An open item under a later heading is a plan, not a gap, so a roadmap
+  that looks ahead of the code raises nothing; warning there would fire on every roadmap
+  worth keeping. One line naming the two versions, never one finding per milestone.
+  Read-only, like the behind-signal it mirrors: no exit code changes, no score change.
+  `_roadmap_signals` gains `newest_shipped`; `_roadmap_behind` returns a third value that
+  `_audit_summary` and `cmd_health` both read, so the two still cannot disagree.
+  New `REQ-ROADMAP-983`, `ARCH-ROADMAP-038` +CASE-6.
+- **The 27 requirements are back on the chart.** Every `ARCH-*`/`SYS-*` requirement
+  written between v2.15 and v4.2 without a `milestone:` now carries the plugin minor it
+  was introduced in, derived from `plugin.json` at the commit that added it to
+  `plugin/requirements/`. The Roadmap axis goes from 26 columns ending at v4.0 to 37
+  ending at v4.2, and the `unscheduled` block drops from 27 to 0. Frontmatter only — the
+  drift hash reads the body, so no contract changed.
+- Two acceptance criteria that were missing rather than deliberate: `REQ-TRANSLATE-937`
+  gains the `TRANSLATOR_VERSION` cache-invalidation case, `REQ-TRANSLATE-938` the
+  malformed-cache case — whose test already existed, untagged, because there was no
+  criterion for it to point at. The corpus lints clean at 0 warnings.
+- `scripts/check_engine_bump.py` carries `implements: ARCH-SELFGATE-039`; its own test and
+  both sibling checks already pointed there. `.reqmapignore` excludes `TODO-feedback-*.md`
+  (gitignored local notes, same class as the caches beside it).
+
 ## plugin `v5.10.1` — 2026-09-06
 
 **A second audit pass, landed on top of `v5.10.0`.** The overlap with that entry was
