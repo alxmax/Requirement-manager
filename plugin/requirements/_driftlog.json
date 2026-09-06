@@ -9,6 +9,10 @@
       "hash": "d29eb01c1e04",
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
     },
+    "ARCH-REPRO-041": {
+      "hash": "95d822880e6c",
+      "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
+    },
     "ARCH-RULES-059": {
       "hash": "8fff0918ce55",
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
@@ -52,6 +56,10 @@
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+    },
+    "REQ-REPRO-905": {
+      "hash": "34bdcb2ea67a",
+      "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     }
   }
 }

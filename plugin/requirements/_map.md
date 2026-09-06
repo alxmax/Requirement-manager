@@ -1,9 +1,9 @@
 ---
 generated: 2026-09-06
 engine: 2026-09-06.15
-nodes: 252
-edges: 117
-design OOP: 29/100 (9/31 source files without a design candidate)
+nodes: 244
+edges: 115
+design OOP: 30/100 (9/30 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -31,9 +31,6 @@ graph TD
   ARCH_DOCBUNDLE_026[ARCH-DOCBUNDLE-026<br/>1 code]
   ARCH_DRIFT_003[ARCH-DRIFT-003<br/>3 code]
   ARCH_DRIFTIMPACT_035[ARCH-DRIFTIMPACT-035<br/>1 code]
-  ARCH_EXCALIDRAW_030[ARCH-EXCALIDRAW-030<br/>2 code]
-  ARCH_EXCALIDRAW_031[ARCH-EXCALIDRAW-031<br/>2 code]
-  ARCH_EXCALIDRAW_032[ARCH-EXCALIDRAW-032<br/>1 code]
   ARCH_EXTRACT_008[ARCH-EXTRACT-008<br/>4 code]
   ARCH_FANOUT_052[ARCH-FANOUT-052<br/>1 code]
   ARCH_FINDINGS_010[ARCH-FINDINGS-010<br/>4 code]
@@ -110,9 +107,6 @@ graph TD
   SYS_GATE_102 --> ARCH_DOCBUNDLE_026
   SYS_GATE_102 --> ARCH_DRIFT_003
   SYS_GATE_102 --> ARCH_DRIFTIMPACT_035
-  SYS_VISUAL_106 --> ARCH_EXCALIDRAW_030
-  SYS_VISUAL_106 --> ARCH_EXCALIDRAW_031
-  SYS_VISUAL_106 --> ARCH_EXCALIDRAW_032
   SYS_READ_103 --> ARCH_EXTRACT_008
   SYS_VMODEL_107 --> ARCH_FANOUT_052
   SYS_REPORT_105 --> ARCH_FINDINGS_010
@@ -212,9 +206,6 @@ graph LR
     ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
     ARCH_DRIFT_003["Contract hashing & lock<br><small>ARCH-DRIFT-003</small>"]
     ARCH_DRIFTIMPACT_035["Drift blast-radius: name dependents<br><small>ARCH-DRIFTIMPACT-035</small>"]
-    ARCH_EXCALIDRAW_030["Excalidraw scene builder — core API<br><small>ARCH-EXCALIDRAW-030</small>"]
-    ARCH_EXCALIDRAW_031["Excalidraw quality gates<br><small>ARCH-EXCALIDRAW-031</small>"]
-    ARCH_EXCALIDRAW_032["Excalidraw builder CLI verbs<br><small>ARCH-EXCALIDRAW-032</small>"]
     ARCH_EXTRACT_008["Legacy extraction<br><small>ARCH-EXTRACT-008</small>"]
     ARCH_FANOUT_052["Hierarchy breadth<br><small>ARCH-FANOUT-052</small>"]
     ARCH_FINDINGS_010["Open-findings report<br><small>ARCH-FINDINGS-010</small>"]
@@ -311,11 +302,6 @@ graph LR
     REQ_DRIFT_842["Reading and writing the drift baseline<br><small>REQ-DRIFT-842</small>"]
     REQ_DRIFT_988["The waiver leaves a trace<br><small>REQ-DRIFT-988</small>"]
     REQ_DRIFTIMPACT_843["Name a drifted requirement's direct dependents<br><small>REQ-DRIFTIMPACT-843</small>"]
-    REQ_EXCALIDRAW_844["Shape, layout, and annotation vocabulary<br><small>REQ-EXCALIDRAW-844</small>"]
-    REQ_EXCALIDRAW_845["Connectors and the save() contract<br><small>REQ-EXCALIDRAW-845</small>"]
-    REQ_EXCALIDRAW_846["Named gates: crossing, legend, and overflow checks<br><small>REQ-EXCALIDRAW-846</small>"]
-    REQ_EXCALIDRAW_847["Text-overlap, label-fit gates, and the two hard gates<br><small>REQ-EXCALIDRAW-847</small>"]
-    REQ_EXCALIDRAW_848["Smoke test, render and discover verbs<br><small>REQ-EXCALIDRAW-848</small>"]
     REQ_EXTRACT_849["Which files draft walks<br><small>REQ-EXTRACT-849</small>"]
     REQ_EXTRACT_850["Writing one draft proposal per file<br><small>REQ-EXTRACT-850</small>"]
     REQ_EXTRACT_851["Scoring risk and capturing an authoring hint<br><small>REQ-EXTRACT-851</small>"]
@@ -463,8 +449,6 @@ graph LR
   ARCH_DECOMPOSE_050 --> ARCH_LINT_014
   ARCH_DECOMPOSE_050 --> ARCH_NEW_004
   ARCH_DESIGN_061 --> ARCH_CMDREGISTRY_033
-  ARCH_EXCALIDRAW_031 --> ARCH_EXCALIDRAW_030
-  ARCH_EXCALIDRAW_032 --> ARCH_EXCALIDRAW_030
   ARCH_FANOUT_052 --> ARCH_LINT_014
   ARCH_FANOUT_052 --> ARCH_LEVEL_051
   ARCH_IMPLEMENT_063 --> ARCH_SIMILAR_016
@@ -554,8 +538,6 @@ graph LR
   f_plugin_scripts_test_reqmap_scan_py_466_507["plugin/scripts/test_reqmap_scan.py:466-507"]
   ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_466_507
   ARCH_CHECK_006["The gate<br><small>ARCH-CHECK-006</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_CHECK_006 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1914_7739["plugin/scripts/reqmap.py:1914-7739"]
   ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1914_7739
   f_plugin_scripts_test_reqmap_gate_py_42_2798["plugin/scripts/test_reqmap_gate.py:42-2798"]
@@ -595,8 +577,6 @@ graph LR
   f_plugin_scripts_test_reqmap_report_py_4524["plugin/scripts/test_reqmap_report.py:4524"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4524
   ARCH_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>ARCH-DESCRIPTION-057</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_DESCRIPTION_057 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1833_2381["plugin/scripts/reqmap.py:1833-2381"]
   ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1833_2381
   f_plugin_scripts_test_reqmap_scan_py_1199["plugin/scripts/test_reqmap_scan.py:1199"]
@@ -612,8 +592,6 @@ graph LR
   f_plugin_scripts_test_reqmap_gate_py_239["plugin/scripts/test_reqmap_gate.py:239"]
   ARCH_DOCBUNDLE_026 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_239
   ARCH_DRIFT_003["Contract hashing & lock<br><small>ARCH-DRIFT-003</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_DRIFT_003 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1996_2931["plugin/scripts/reqmap.py:1996-2931"]
   ARCH_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_1996_2931
   f_plugin_scripts_test_reqmap_gate_py_52_2654["plugin/scripts/test_reqmap_gate.py:52-2654"]
@@ -627,21 +605,6 @@ graph LR
   ARCH_DRIFTIMPACT_035 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_454
   f_plugin_scripts_test_reqmap_report_py_4000["plugin/scripts/test_reqmap_report.py:4000"]
   ARCH_DRIFTIMPACT_035 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4000
-  ARCH_EXCALIDRAW_030["Excalidraw scene builder — core API<br><small>ARCH-EXCALIDRAW-030</small>"]
-  f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:2"]
-  ARCH_EXCALIDRAW_030 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2
-  f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_2["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"]
-  ARCH_EXCALIDRAW_030 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_2
-  ARCH_EXCALIDRAW_031["Excalidraw quality gates<br><small>ARCH-EXCALIDRAW-031</small>"]
-  f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_3["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:3"]
-  ARCH_EXCALIDRAW_031 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_3
-  f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_3["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:3"]
-  ARCH_EXCALIDRAW_031 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_3
-  ARCH_EXCALIDRAW_032["Excalidraw builder CLI verbs<br><small>ARCH-EXCALIDRAW-032</small>"]
-  f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_4["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:4"]
-  ARCH_EXCALIDRAW_032 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_4
-  f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:4"]
-  ARCH_EXCALIDRAW_032 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4
   ARCH_EXTRACT_008["Legacy extraction<br><small>ARCH-EXTRACT-008</small>"]
   f_plugin_scripts_reqmap_py_3565_3837["plugin/scripts/reqmap.py:3565-3837"]
   ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_py_3565_3837
@@ -682,8 +645,6 @@ graph LR
   f_plugin_scripts_test_reqmap_report_py_2084_4524["plugin/scripts/test_reqmap_report.py:2084-4524"]
   ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2084_4524
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_LEVEL_051 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_149_4324["plugin/scripts/reqmap.py:149-4324"]
   ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_149_4324
   f_plugin_scripts_test_reqmap_gate_py_2194_2560["plugin/scripts/test_reqmap_gate.py:2194-2560"]
@@ -706,8 +667,6 @@ graph LR
   f_plugin_scripts_test_reqmap_scan_py_528["plugin/scripts/test_reqmap_scan.py:528"]
   ARCH_LINTCHECKS_025 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_528
   ARCH_MAP_007["Requirement graph (_map.json)<br><small>ARCH-MAP-007</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_MAP_007 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1794_7827["plugin/scripts/reqmap.py:1794-7827"]
   ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_1794_7827
   f_plugin_scripts_test_reqmap_gate_py_936_2154["plugin/scripts/test_reqmap_gate.py:936-2154"]
@@ -749,8 +708,6 @@ graph LR
   f_plugin_scripts_test_reqmap_gate_py_394_2608["plugin/scripts/test_reqmap_gate.py:394-2608"]
   ARCH_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_394_2608
   ARCH_PARSE_001["Requirement reading<br><small>ARCH-PARSE-001</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_PARSE_001 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_813_1012["plugin/scripts/reqmap.py:813-1012"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_py_813_1012
   f_plugin_scripts_test_reqmap_report_py_4524["plugin/scripts/test_reqmap_report.py:4524"]
@@ -835,8 +792,6 @@ graph LR
   f_plugin_scripts_test_reqmap_gate_py_2285_2735["plugin/scripts/test_reqmap_gate.py:2285-2735"]
   ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2285_2735
   ARCH_SCAN_002["Member discovery<br><small>ARCH-SCAN-002</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_SCAN_002 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_120_1685["plugin/scripts/reqmap.py:120-1685"]
   ARCH_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_120_1685
   f_plugin_scripts_test_reqmap_scan_py_112_1420["plugin/scripts/test_reqmap_scan.py:112-1420"]
@@ -918,8 +873,6 @@ graph LR
   f_plugin_scripts_test_reqmap_gate_py_625_2539["plugin/scripts/test_reqmap_gate.py:625-2539"]
   ARCH_TESTLINK_018 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_625_2539
   ARCH_TRACE_020["Upstream traceability<br><small>ARCH-TRACE-020</small>"]
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_TRACE_020 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_2472_5491["plugin/scripts/reqmap.py:2472-5491"]
   ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2472_5491
   f_plugin_scripts_test_reqmap_gate_py_825_1229["plugin/scripts/test_reqmap_gate.py:825-1229"]
@@ -986,8 +939,6 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_RoadmapView_jsx_1
   f_app_src_views_SpecView_jsx_1["app/src/views/SpecView.jsx:1"]
   ARCH_VIEWER_007 -->|implements| f_app_src_views_SpecView_jsx_1
-  f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
-  ARCH_VIEWER_007 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_1453_7963["plugin/scripts/reqmap.py:1453-7963"]
   ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1453_7963
   f_plugin_scripts_test_reqmap_report_py_351_3806["plugin/scripts/test_reqmap_report.py:351-3806"]
@@ -1034,8 +985,8 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 
 ```mermaid
 graph LR
-  a_ARCH["ARCH<br><small>70 caps</small>"]
-  a_REQ["REQ<br><small>173 caps</small>"]
+  a_ARCH["ARCH<br><small>67 caps</small>"]
+  a_REQ["REQ<br><small>168 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   style a_ARCH stroke-width:3px
   style a_REQ stroke-width:3px

@@ -94,11 +94,6 @@ jobs:
       - name: Engine regression tests
         working-directory: plugin/scripts
         run: python -X utf8 -m unittest test_reqmap -v
-      - name: Excalidraw builder + example diagrams
-        working-directory: plugin/skills/excalidraw-diagram/scripts
-        run: |
-          python -X utf8 excalidraw_builder.py
-          python -X utf8 -m unittest test_excalidraw -v
 
   # Portability matrix. The engine claims "stdlib only, runs anywhere with Python",
   # and until now one job on ubuntu + `python-version: 3.x` was the whole evidence for
@@ -142,12 +137,6 @@ jobs:
         run: python -X utf8 test_changelog_notes.py
       - name: Cross-tool falsification (seed engine -> sync -> gate -> map)
         run: python -X utf8 scripts/test_cross_tool.py
-      - name: Excalidraw builder smoke
-        working-directory: plugin/skills/excalidraw-diagram/scripts
-        run: python -X utf8 excalidraw_builder.py
-      - name: Excalidraw tests
-        working-directory: plugin/skills/excalidraw-diagram/scripts
-        run: python -X utf8 -m unittest test_excalidraw -v
 
   # Committed build artifacts, re-derived and compared. Two files in this repo are
   # BUILD OUTPUT that is nonetheless committed, because the whole point is that a
@@ -193,18 +182,6 @@ jobs:
             echo "::error::plugin/scripts/_map_viewer.html is stale - rebuild it with \`cd app && npm run build:viewer\` and commit the result (see app/CLAUDE.md)."
             exit 1
           fi
-      # The diagram generator writes a .excalidraw next to its .html, and docs/*.excalidraw
-      # is hard-blocked by .gitignore, so build into a temp dir and compare instead of
-      # regenerating in place.
-      - name: Published architecture diagram matches its generator  # implements: REQ-REPRO-905
-        run: |
-          out=$(mktemp -d)
-          python -X utf8 plugin/skills/excalidraw-diagram/examples/make_full_architecture.py "$out"
-          if ! cmp -s "$out/full_architecture.html" docs/full_architecture.html; then
-            echo "::error::docs/full_architecture.html no longer matches make_full_architecture.py - regenerate it and commit the result."
-            exit 1
-          fi
-          echo "docs/full_architecture.html matches its generator"
 
   # Two numbers about the engine that nothing published before: how much of it the
   # suite actually executes, and what a linter makes of it. Both land in the run's job
