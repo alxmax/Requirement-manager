@@ -3166,6 +3166,19 @@ CASE-3
         self.assertIsNone(rc)                      # the caller then runs the clause-level path
         self.assertEqual(self._files(), ["TOOL-UTILS.md"])
 
+    def test_sync_tail_names_the_fix_until_a_child_exists(self):  # verifies: REQ-AUDIT-973#CASE-1
+        def tail():
+            ws = R.Workspace.load(self.rd, self.tmp)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R._audit_summary(ws.reqs, ws.members, self.rd, self.tmp)
+            return buf.getvalue()
+        out = tail()
+        self.assertIn("1 requirement(s) carry contract groups and no code children", out)
+        self.assertIn("clarify --decompose", out)
+        self._run(apply_it=True)                    # children now satisfy the parent
+        self.assertNotIn("carry contract groups and no code children", tail())
+
     def test_corpus_wide_plans_every_grouped_requirement(self):
         _write(os.path.join(self.rd, "TOOL-OTHER.md"),
                self.PARENT.replace("id: TOOL-UTILS", "id: TOOL-OTHER"))

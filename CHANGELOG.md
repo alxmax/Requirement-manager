@@ -52,6 +52,15 @@ Description and Cases is byte-identical. A confirmed parent therefore drifts, vi
 `sync --accept-drift` is the acknowledgement; `git checkout` the parent and delete the
 children to undo.
 
+**`sync` points at it.** Its tail already reported a flat or half-levelled corpus; it now also
+reports *"N requirement(s) carry contract groups and no code children — `reqmap.py clarify
+--decompose` plans the split, `--apply` writes it"*. Reported there, never written there:
+`sync` runs inside the consumer's pre-commit hook, and a write that creates files the
+commit does not contain and drifts confirmed parents is what
+[ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md)'s "Why not on `sync`"
+refuses. Upgrading the engine and running `sync` surfaces the fix by itself; one more
+command applies it.
+
 Children carry `status: draft`, `level: code`, `level_source: auto` and `satisfies:` the
 parent — ADR-0030 rules 1, 4 and 5. A requirement with no group labels falls through to the
 older clause-level path, which is unchanged. `REQ-DECOMPOSE-994` is the contract.

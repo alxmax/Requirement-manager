@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.16"
+MAP_ENGINE_VERSION = "2026-09-06.17"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -6338,6 +6338,21 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
                      "nothing without --apply".format(
                          unlevelled, shape["total"],
                          " - the corpus is flat" if shape["flat"] else ""))
+    # The code rung a tagged corpus could not reach (REQ-DECOMPOSE-994): requirements whose
+    # Description already draws the seams — bold group labels — and that have no child
+    # satisfying them. Reported here, never written here: `sync` runs inside the consumer's
+    # pre-commit hook, and a write that creates files the commit does not contain and
+    # drifts confirmed parents is what ADR-0031's "Why not on sync" refuses. The command is
+    # named so the fix is one step away from the place the signal appears.
+    kids = set()
+    for _r in reqs.values():
+        kids.update(_as_list(_r["meta"].get("satisfies")))
+    splittable = [rid for rid, _r in reqs.items()
+                  if rid not in kids and len(_contract_groups(_r["body"])) >= 2]
+    if splittable:
+        lines.append("{} requirement(s) carry contract groups and no code children - "
+                     "`reqmap.py clarify --decompose` plans the split along those groups, "
+                     "--apply writes it".format(len(splittable)))
     if shape.get("auto"):
         # A corpus can be fully levelled and still be nothing but the engine's guesses,
         # in which case every other number here reads as healthy. ADR-0030's revisit
