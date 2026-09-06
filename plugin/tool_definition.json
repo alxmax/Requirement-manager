@@ -172,7 +172,7 @@
           },
           "do_apply": {
             "type": "boolean",
-            "description": "With --retire: actually write the change (without it, the run is a dry report). With --suggest-verifies: write the proposed tags into the test files."
+            "description": "With --retire or --suggest-verifies: actually write the change. Without it, the run is a dry report."
           },
           "force": {
             "type": "boolean",

@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.4"
+MAP_ENGINE_VERSION = "2026-09-06.5"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -528,8 +528,7 @@ COMMANDS = {
                 "flag": "--apply",
                 "type": "bool",
                 "help": (
-                    "With --retire: actually write the change (without it, the run is a dry "
-                    "report). With --suggest-verifies: write the proposed tags into the test files."
+                    "With --retire or --suggest-verifies: actually write the change. Without it, the run is a dry report."
                 ),
             },
             {
@@ -844,9 +843,6 @@ class Requirement(dict):  # implements: ARCH-PARSE-001
         """True when `gate_exempt:` names this rule's code (`gate_exempt: [RM016]`)."""
         return rule_id in set(self.list("gate_exempt"))
 
-    def has(self, labels):
-        return _has_any(self.body, labels)
-
 
 class Finding(dict):  # implements: ARCH-RULES-059  # implements: REQ-RULES-948
     """One gate finding: `rule` (RMnnn), `severity` (error|warn), `rid` (or None for a
@@ -921,12 +917,6 @@ def _scalar_value(v):  # implements: ARCH-PARSE-001
     return re.split(r'(?:^|\s)#', v, 1)[0].strip()
 
 
-def _clean_item(s):  # implements: ARCH-PARSE-001  # implements: REQ-PARSE-891
-    """One list element: unquote a quoted item verbatim, else drop a trailing
-    `# comment` and trim. A '#' is a comment only at the token start or after
-    whitespace, so an embedded '#' (e.g. issue#123) is preserved — matching the
-    scalar parse path."""
-    return _scalar_value(s)
 
 
 def _parse_meta_lines(lines):  # implements: ARCH-PARSE-001  # implements: REQ-PARSE-891
@@ -946,13 +936,13 @@ def _parse_meta_lines(lines):  # implements: ARCH-PARSE-001  # implements: REQ-P
             # inline list; tolerate a missing `]` (lenient) — a '#' inside
             # the brackets is data, a '#' after the close is a comment
             inner = v[1:v.index("]")] if "]" in v else v[1:]
-            meta[k] = [x for x in (_clean_item(x) for x in inner.split(",")) if x]
+            meta[k] = [x for x in (_scalar_value(x) for x in inner.split(",")) if x]
         elif not v:
             # block-style list: consume following indented `- item` lines.
             # No items -> keep the empty scalar (e.g. an unset superseded_by).
             items = []
             while i < len(lines) and lines[i].lstrip().startswith("- "):
-                items.append(_clean_item(lines[i].lstrip()[2:]))
+                items.append(_scalar_value(lines[i].lstrip()[2:]))
                 i += 1
             meta[k] = [x for x in items if x] if items else ""
         else:
@@ -1017,9 +1007,9 @@ def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: AR
         try:
             with open(path, encoding="utf-8-sig") as f:  # tolerate a UTF-8 BOM
                 text = f.read()
-        except (OSError, UnicodeDecodeError, ValueError):
-            # unreadable / permission-denied / undecodable file: skip it rather than
-            # raising, so one bad file cannot blind the whole corpus (see docstring).
+        except (OSError, ValueError) as exc:   # ValueError covers UnicodeDecodeError
+            print("WARNING: skipping unreadable requirement file {!r}: {}".format(name, exc),
+                  file=sys.stderr)
             continue
         for _i, _blk in enumerate(split_requirement_blocks(text)):
             meta, body = parse_frontmatter(_blk)
@@ -1096,7 +1086,7 @@ def load_ignore(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002  # imple
                     if s and not s.startswith("#"):
                         pats.append(s)
             break   # first .reqmapignore found wins
-        except OSError:
+        except (OSError, ValueError):   # unreadable OR undecodable: no patterns, no crash
             continue
     return pats
 
@@ -2068,8 +2058,9 @@ def load_clarifylock(reqs_dir):  # implements: REQ-CLARIFY-975
             data = json.load(f)
     except (OSError, ValueError):
         return {}
-    if not isinstance(data, dict) or data.get("_schema", 0) > CLARIFYLOCK_SCHEMA:
-        return {}
+    schema = data.get("_schema", 0) if isinstance(data, dict) else None
+    if not isinstance(schema, int) or schema > CLARIFYLOCK_SCHEMA:
+        return {}   # fail-open like the other sidecars — a hand-edited `"1"` was a TypeError
     got = data.get("questions")
     return got if isinstance(got, dict) else {}
 
@@ -2092,7 +2083,8 @@ def blocking_question_rules(reqs):  # implements: REQ-CLARIFY-975
     from the snapshot" would mean both "never seen" and "seen, and clean", so a
     requirement going from zero questions to one would be mistaken for a brand-new
     file and silenced — which is exactly the case this check exists to catch."""
-    return {rid: sorted({q["rule"] for q in _clarify_questions(rid, r, reqs)
+    domain = _domain_heads(reqs)
+    return {rid: sorted({q["rule"] for q in _clarify_questions(rid, r, reqs, domain)
                          if q["severity"] == "blocking"})
             for rid, r in reqs.items()}
 
@@ -2438,13 +2430,27 @@ class Workspace(object):  # implements: ARCH-RULES-059
     rather than failing, and `next` does the same.
     """
 
-    __slots__ = ("reqs", "members", "reqs_dir", "code_root", "ac_cover", "level_cover")
+    __slots__ = ("reqs", "members", "reqs_dir", "code_root", "ac_cover", "level_cover",
+                 "_map_data")
 
     def __init__(self, reqs, members=None, reqs_dir=None, code_root=None,
                  ac_cover=None, level_cover=None):
         self.reqs, self.members = reqs, members
         self.reqs_dir, self.code_root = reqs_dir, code_root
         self.ac_cover, self.level_cover = ac_cover, level_cover
+        self._map_data = None
+
+    def map_data(self, root=".", members=None):
+        """The assembled map document, built once per (members, root) and reused.
+        `gate` asked for it twice — the RM027 freshness rule and the explicit
+        `map --check` that follows — and each assembly re-ran the design review,
+        the health record and the TODO parse (about a tenth of a gate's wall time)."""
+        members = self.members if members is None else members
+        cached = self._map_data
+        if cached is None or cached[0] is not members or cached[1] != root:
+            data = _assemble_map_data(self.reqs, members, self.reqs_dir, root, self.ac_cover)
+            self._map_data = cached = (members, root, data)
+        return cached[2]
 
     @classmethod
     def load(cls, reqs_dir, code_root, cache=False):
@@ -2477,6 +2483,7 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
     def __init__(self, ws, since=None, full_members=None, update_lock=False):
         reqs, members = ws.reqs, ws.members
         reqs_dir, code_root = ws.reqs_dir, ws.code_root
+        self.ws = ws
         self.reqs = reqs
         self.members = members
         self.full_members = members if full_members is None else full_members
@@ -2653,12 +2660,16 @@ def _rule_owner_auto(ctx):
 def _rule_test_link(ctx):  # implements: ARCH-TESTLINK-018  # implements: REQ-TESTLINK-933
     # checked at EVERY status; only a confirmed requirement's broken link is strict-promoted
     # (see cmd_check: a non-confirmed hit is downgraded to a plain warn there).
+    # one read per test file, not one per requirement naming it: a suite every
+    # requirement points at (this repo's test_reqmap.py) was opened 206 times per gate
+    problems = {}
     for rid, r in ctx.reqs.items():
         tests = [x for x in ctx.full_members.get(rid, []) if x[0] == "tested-by"]
         for fp in sorted({t[1] for t in tests}):
-            problem = _test_link_problem(os.path.join(ctx.code_root, fp))
-            if problem:
-                yield rid, f"{rid}: tested-by {fp} {problem}"
+            if fp not in problems:
+                problems[fp] = _test_link_problem(os.path.join(ctx.code_root, fp))
+            if problems[fp]:
+                yield rid, f"{rid}: tested-by {fp} {problems[fp]}"
 
 
 @gate_rule("RM013", "warn")
@@ -2705,7 +2716,8 @@ def _rule_corrupt_lock(ctx):
     if os.path.exists(lp):
         try:
             with open(lp, encoding="utf-8") as f:
-                json.load(f)
+                if not isinstance(json.load(f), dict):
+                    raise ValueError("not a JSON object")   # `[]`/`null`: load_lock swallows it too
         except (ValueError, OSError):
             yield None, ("_reqlock.json present but unreadable (corrupt/merge-conflicted) "
                          "— drift detection skipped this run; re-run with --update-lock")
@@ -2881,7 +2893,7 @@ def _rule_map_stale(ctx):  # implements: ARCH-MAP-007
         return
     try:
         stale_map = _stale_artifacts(
-            _assemble_map_data(ctx.reqs, ctx.full_members, ctx.reqs_dir, ctx.code_root, ctx.ac_cover),
+            ctx.ws.map_data(ctx.code_root, ctx.full_members),
             ctx.reqs_dir, ctx.code_root, ctx.reqs)
     except Exception:
         stale_map = []            # fail-open — a freshness probe never blocks the gate
@@ -2920,9 +2932,11 @@ def _link_sync_errors(reqs, members):  # implements: ARCH-HEALTH-017  # implemen
     ctx = GateContext.__new__(GateContext)
     ctx.reqs, ctx.members, ctx.full_members = reqs, members, members
     ctx.cap_ids, ctx.since = set(reqs), None
+    # honour `gate_exempt:` exactly as run_gate_rules does, or a requirement the gate
+    # passes still counts as a link-sync error in `health` and the committed map
     return [msg for rule_id in ("RM001", "RM006")
-            for _rid, msg in gate_rule_by_id(rule_id).fn(ctx)
-            if _rid is None or not ctx.req(_rid).exempt_from(rule_id)]
+            for rid, msg in gate_rule_by_id(rule_id).fn(ctx)
+            if rid is None or not ctx.req(rid).exempt_from(rule_id)]
 
 
 def _is_source_repo(code_root):
@@ -2963,13 +2977,15 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
     ctx = GateContext(Workspace(reqs, members, reqs_dir, code_root,
                                 ac_cover, level_cover),
                       since=since, full_members=full_members, update_lock=update_lock)
+    # the CALLER's workspace carries the map-document cache, so the freshness rule and
+    # the `map --check` that `gate` runs next share one assembly instead of two
+    ctx.ws = ws
     # sync on a full scan re-baselines _memberlock below from this same hash set —
     # computed once and handed to the member-drift rule instead of hashing twice.
     _reuse_full_hashes = update_lock and members is full_members
     ctx.full_member_hashes = compute_member_hashes(code_root, full_members) if _reuse_full_hashes else None
     errors, warns = run_gate_rules(ctx, strict=strict)
     warns = pre_warns + warns
-    n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
     legacy = _legacy_schema_ids(reqs)
     lock, new_lock = ctx.lock, ctx.new_lock
 
@@ -3043,11 +3059,19 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
     # Integration-artifact freshness (this repo's generated tool_definition.json + the
     # SKILL.universal.md command table); skipped silently when the artifacts don't exist.
     # Must run BEFORE the as_json early-return so --json also exits non-zero on it.
+    # Only inside the plugin package itself: two directories above a VENDORED engine
+    # (`<consumer>/scripts/reqmap.py`) is the consumer's repo root, and a consumer that
+    # ships its own `tool_definition.json` there was failing its gate on ours.
     plugin_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    _stale = _check_integration_fresh(plugin_root)
+    _stale = []
+    if os.path.exists(os.path.join(plugin_root, ".claude-plugin", "plugin.json")):
+        _stale = _check_integration_fresh(plugin_root)
     if _stale:
         errors = list(errors) + [Finding("RM028", "error", None,
                                          "stale integration artifact(s): " + ", ".join(_stale))]
+    # counted after the demotion loop above, so a `sync` that just demoted reports the
+    # corpus it leaves behind rather than the one it found
+    n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
 
     if as_json:
         print(json.dumps({"ok": not errors,
@@ -4280,22 +4304,9 @@ def _parse_todos(root):  # implements: REQ-MAP-871
 # only while its hash matches the requirement, so the cache decays as
 # requirements are edited and refreshing it is a manual step.
 # ---------------------------------------------------------------------------
-TRANSLATOR_VERSION = "1"   # bump to invalidate every cached translation at once
-                           # (e.g. after changing _TRANSLATE_PROMPT or the model)
-
-_RO_DIACRITICS = "ăâîșțĂÂÎȘȚ"
-# Small, deliberately generic stopword lists — this is a majority-vote signal over
-# a whole corpus, not a per-sentence classifier, so it does not need to be exhaustive.
-_RO_STOPWORDS = frozenset({
-    "și", "este", "sunt", "pentru", "care", "această", "acest", "aceste", "dacă",
-    "sau", "din", "cu", "la", "de", "un", "o", "nu", "se", "fi", "prin", "între",
-    "toate", "fiecare", "asupra", "unde", "cum", "atunci", "fără", "după",
-})
-_EN_STOPWORDS = frozenset({
-    "the", "and", "is", "are", "for", "this", "that", "with", "from", "not",
-    "be", "to", "of", "in", "on", "a", "an", "when", "where", "each", "every",
-    "without", "after", "then", "if", "or",
-})
+TRANSLATOR_VERSION = "1"   # part of the cache key: bump to invalidate every cached
+                           # translation at once (the `translate` verb that wrote the
+                           # cache was removed 2026-09-05; the reader below stays)
 
 
 def _translation_source_text(body, title):  # implements: ARCH-TRANSLATE-044
@@ -4370,9 +4381,8 @@ def cmd_map(ws, root=".", check=False):  # implements: ARCH-MAP-007  # implement
     """Regenerate every derived view of the corpus — `_map.md`, `_map.json`, the
     single-file viewer and the published `docs/map.html` — or, with `check`,
     write nothing and return non-zero when the committed copies are stale."""
-    reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
-    ac_cover = ws.ac_cover
-    data = _assemble_map_data(reqs, members, reqs_dir, root, ac_cover)
+    reqs, reqs_dir = ws.reqs, ws.reqs_dir
+    data = ws.map_data(root)
 
     if check:
         return _map_check(data, reqs_dir, root, reqs)
@@ -4611,6 +4621,11 @@ def cmd_next(ws, show_all=False, top_n=3):  # implements: ARCH-NEXT-013  # imple
 # NOT checked in v1 — without a term dictionary it is too false-positive-prone on
 # prose that carries code references.
 LINT_STATUSES = {"baseline", "in-progress", "implemented", "confirmed"}
+# Checks promoted from warn→error under `--strict` (structural, not style). One
+# constant, because `gate` runs the lint strict and `sync`'s summary counted errors
+# without the promotion — a corpus failing `gate` on `over-scoped` had a silent sync.
+LINT_STRICT_PROMOTE = frozenset({"ac-count-high", "over-scoped",
+                                 "atomic-bullet-then-mismatch", "atomic-story-overlong"})
 LINT_STACKED_CONNECTORS = 3    # a normative line with this many 'and'/'or' joins (warn)
 LINT_CLAUSE_SENTENCES = 3      # a Contract bullet spanning MORE sentences than this is
                                # flagged by `statement-too-long` (warn). Sentence count is
@@ -5094,33 +5109,42 @@ CASE-1
 """
 
 
-def _next_free_number(reqs_dir):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-838
+def _next_free_number(reqs_dir, reqs=None):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-838
     """Highest NNN across the corpus, plus one. Ids stay in AREA-NAME-NNN shape rather
     than taking a derived suffix such as REQ-AUTH-012-B: the suffix form passes _ID_PAT,
-    but _warn_number_collision reads parts[-1] as the number and would compare "B"."""
+    but _warn_number_collision reads parts[-1] as the number and would compare "B".
+
+    Read from the loaded ids when the caller has them: a module file
+    (ARCH-MODULEFILE-056) holds many ids under one name, so the file names alone
+    reported 110 on a corpus whose highest id was 982 — one `--decompose` away from a
+    duplicate id. The directory listing is only the fallback for a caller with no corpus."""
     best = 0
+    stems = list(reqs or ())
     try:
-        names = os.listdir(reqs_dir)
+        stems += [fn[:-3] for fn in os.listdir(reqs_dir)
+                  if fn.endswith(".md") and not fn.startswith("_")]
     except OSError:
-        return 1
-    for fn in names:
-        if not fn.endswith(".md") or fn.startswith("_"):
-            continue
-        parts = fn[:-3].split("-")
+        if reqs is None:
+            return 1
+    for stem in stems:
+        parts = stem.split("-")
         if len(parts) >= 3 and parts[-1].isdigit():
             best = max(best, int(parts[-1]))
     return best + 1
 
 
-def _already_decomposed(reqs_dir, parent_id, n):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-839
+def _already_decomposed(reqs_dir, parent_id, n, reqs=None):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-839
     """True when some requirement already carries the `decomposed-from: <parent>#<n>` marker.
 
     Re-running must be a no-op, and the allocated file NAME cannot detect that: the id comes
     from the next free number, so a second run picks a fresh name and `os.path.exists` never
     fires. Provenance is the only stable key. The marker is an HTML comment rather than a
     frontmatter field so it stays invisible to `binding_hash`, and `decomposed-from` is not
-    a member role, so TAG_LIST_RE never reads it as a link."""
+    a member role, so TAG_LIST_RE never reads it as a link. The loaded bodies answer it
+    without re-reading the directory; the listing is the fallback for a caller without them."""
     needle = "decomposed-from: {}#{}".format(parent_id, n)
+    if reqs is not None and any(needle in r["body"] for r in reqs.values()):
+        return True   # else fall through: a draft written earlier in this run is on disk only
     try:
         names = os.listdir(reqs_dir)
     except OSError:
@@ -5137,20 +5161,20 @@ def _already_decomposed(reqs_dir, parent_id, n):  # implements: ARCH-DECOMPOSE-0
     return False
 
 
-def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-837  # implements: REQ-DECOMPOSE-838
+def _decompose_clause(reqs_dir, parent_id, parent, n, clause, reqs=None):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-837  # implements: REQ-DECOMPOSE-838
     """Scaffold one draft requirement from an over-threshold Contract clause.
 
     Creates exactly one file and never touches the parent, so a confirmed contract cannot
     drift and deleting the new file undoes the whole operation. Returns the created id, or
     None when this clause was already scaffolded (re-running is a no-op, reported by the
     caller)."""
-    if _already_decomposed(reqs_dir, parent_id, n):
+    if _already_decomposed(reqs_dir, parent_id, n, reqs):
         return None
     parts = parent_id.split("-")
     stem = "-".join(parts[:-1]) if len(parts) >= 3 and parts[-1].isdigit() else parent_id
-    new_id = "{}-{:03d}".format(stem, _next_free_number(reqs_dir))
+    new_id = "{}-{:03d}".format(stem, _next_free_number(reqs_dir, reqs))
     dest = os.path.join(reqs_dir, new_id + ".md")
-    if os.path.exists(dest):
+    if os.path.exists(dest) or (reqs is not None and new_id in reqs):
         return None
     meta = parent["meta"]
     text = DECOMPOSED_TEMPLATE.format(
@@ -5173,7 +5197,7 @@ def _decompose_clause(reqs_dir, parent_id, parent, n, clause):  # implements: AR
 # proposal. Re-adding it needs that ADR's bar met first, not a code review.
 
 
-def cmd_lint(ws, strict=False, decompose=False):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050  # implements: REQ-LINT-863
+def cmd_lint(ws, strict=False, decompose=False, only=None):  # implements: ARCH-LINT-014  # implements: ARCH-DECOMPOSE-050  # implements: REQ-LINT-863
     """Report readability/structure violations on non-draft requirements so they
     stay easy to understand — the SKILL.md 'Audience & writing level' rules made
     mechanical. Checks: missing-section (error),
@@ -5186,16 +5210,15 @@ def cmd_lint(ws, strict=False, decompose=False):  # implements: ARCH-LINT-014  #
     The default run writes nothing. With `decompose` (the opt-in `--decompose` flag) each
     `statement-size` finding scaffolds one draft requirement from its clause. It covers
     that check ONLY - see the note above `cmd_lint` for why `ac-count-high` does not get
-    the same treatment. The gate, the pre-commit hook and CI never pass it:
-    .githooks/pre-commit runs gate -> lint --strict -> map --check, so a file written
-    during the lint step would fail the map --check step of the same hook run
-    (ARCH-DECOMPOSE-050)."""
+    the same treatment. The gate, the pre-commit hook and CI never pass it: `gate` runs
+    the lint and the map-freshness check in one verdict, so a file written during the
+    lint step would fail the freshness check of the same run (ARCH-DECOMPOSE-050).
+    `only` narrows the run to one id — `clarify <ID> --decompose` promises to scaffold
+    for that requirement, not for every over-long clause in the corpus."""
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
-    # Checks promoted from warn→error in --strict mode (structural, not style).
-    STRICT_PROMOTE = {"ac-count-high", "over-scoped",
-                       "atomic-bullet-then-mismatch", "atomic-story-overlong"}
     targets = [(rid, r) for rid, r in sorted(reqs.items())
-               if r["meta"].get("status") in LINT_STATUSES]
+               if r["meta"].get("status") in LINT_STATUSES
+               and (only is None or rid == only)]
     fanin = {rid: 0 for rid in reqs}                      # implements: ARCH-LINTCHECKS-025
     kids = {rid: 0 for rid in reqs}                        # implements: ARCH-FANOUT-052
     for _rid, _r in reqs.items():                          # satisfies edges, child side
@@ -5218,7 +5241,7 @@ def cmd_lint(ws, strict=False, decompose=False):  # implements: ARCH-LINT-014  #
             print("  (exempt: {})".format(", ".join(sorted(exempt))))
         for f in fs:
             effective = f["severity"]
-            if strict and f["check"] in STRICT_PROMOTE:
+            if strict and f["check"] in LINT_STRICT_PROMOTE:
                 effective = "error"
             if effective == "error":
                 errors += 1; mark = "ERROR"
@@ -5228,7 +5251,7 @@ def cmd_lint(ws, strict=False, decompose=False):  # implements: ARCH-LINT-014  #
         if decompose and reqs_dir:
             for f in fs:
                 if f["check"] == "statement-size":
-                    made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"])
+                    made = _decompose_clause(reqs_dir, rid, r, f["clause_n"], f["clause_text"], reqs)
                     if made:
                         created.append(made)
                         print("  created  requirements/{}.md  (draft, seeded from clause {})".format(
@@ -5720,8 +5743,8 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         if r["meta"].get("status") not in LINT_STATUSES:
             continue
         for f in lint_requirement(rid, r, members.get(rid)):
-            if f["severity"] == "error":
-                lint_errors += 1
+            if f["severity"] == "error" or f["check"] in LINT_STRICT_PROMOTE:
+                lint_errors += 1     # the same promotion `gate` applies (it lints strict)
             else:
                 lint_warns += 1
     # Errors only. A style warning is not a reason to break this summary's silence on an
@@ -6235,10 +6258,12 @@ def _strip_line_tag(line):
     if m is None:
         return line
     pre = line[:m.start()]
-    nl = "\n" if line.endswith("\n") else ""
+    nl = "\r\n" if line.endswith("\r\n") else "\n" if line.endswith("\n") else ""
     cut = -1
-    for marker in ("#", "//", "<!--"):
+    for marker in ("#", "//", "<!--", "/*", "--", ";"):
         idx = pre.rfind(marker)
+        if marker == "--" and idx >= 2 and pre[idx - 2:idx] == "<!":
+            continue   # the tail of an HTML comment opener, handled as `<!--` above
         # the marker opens the tag's comment only when the gap between the
         # marker token and the tag id is whitespace-only; otherwise it is an
         # unrelated heading / inline comment and must not anchor the cut
@@ -6267,33 +6292,30 @@ def _wipe(reqs_dir, code_root):
                 except OSError:
                     pass
     stripped_files = 0
-    ignore = load_ignore(code_root, reqs_dir)
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
-        for fn in files:
-            if not _is_code_file(fn):
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            try:
-                # surrogateescape (read AND write) round-trips any non-UTF-8 bytes
-                # verbatim, so stripping a tag never silently corrupts e.g. a
-                # Latin-1 comment elsewhere in the file (errors="ignore" dropped them).
-                # newline="" on both ends: read/write the file's own line endings verbatim
-                # so stripping ONE tag comment never silently normalizes the WHOLE file to
-                # the host platform's os.linesep (e.g. flips an LF-committed shell hook to
-                # CRLF on Windows, which breaks /bin/sh on the CR).
-                with open(fp, encoding="utf-8", errors="surrogateescape", newline="") as f:
-                    lines = f.readlines()
-                new_lines = [_strip_line_tag(l) for l in lines]
-                if new_lines != lines:
-                    with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
-                        f.writelines(new_lines)
-                    stripped_files += 1
-            except OSError:
-                continue
+    for fp, _rel in _walk_code(code_root, reqs_dir):
+        try:
+            # surrogateescape (read AND write) round-trips any non-UTF-8 bytes
+            # verbatim, so stripping a tag never silently corrupts e.g. a
+            # Latin-1 comment elsewhere in the file (errors="ignore" dropped them).
+            # newline="" on both ends: read/write the file's own line endings verbatim
+            # so stripping ONE tag comment never silently normalizes the WHOLE file to
+            # the host platform's os.linesep (e.g. flips an LF-committed shell hook to
+            # CRLF on Windows, which breaks /bin/sh on the CR).
+            with open(fp, encoding="utf-8", errors="surrogateescape", newline="") as f:
+                lines = f.readlines()
+            # Only the lines the SCANNER reads as tags. Cutting every TAG_RE hit
+            # sliced a tag-shaped string literal in a test fixture in half
+            # (`"# implements: X\n..."` -> `"`, a SyntaxError) and blanked the fenced
+            # examples in every README that documents the tagging convention.
+            hits = {ln for _role, _cid, ln in (_scan_file_tags(fp, lines) or [])}
+            new_lines = [_strip_line_tag(l) if i in hits else l
+                         for i, l in enumerate(lines, 1)]
+            if new_lines != lines:
+                with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
+                    f.writelines(new_lines)
+                stripped_files += 1
+        except OSError:
+            continue
     print("wipe: deleted {} requirement file(s), stripped tags from {} source file(s).".format(
         deleted, stripped_files))
 
@@ -6340,17 +6362,19 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
     from existing code, build the lock + map, then print guided next steps.
     Pass wipe=True (--wipe flag) for a hard reset: all non-generated requirement
     files are deleted and membership tags stripped from source before re-extracting."""
-    if wipe:
-        _wipe(reqs_dir, code_root)
     created = []
     if not os.path.isdir(reqs_dir):
         os.makedirs(reqs_dir, exist_ok=True)
         created.append(os.path.relpath(reqs_dir, code_root).replace(os.sep, "/") + "/")
+    # Seed the ignore file BEFORE a wipe reads it: on a fresh consumer the wipe
+    # otherwise ran with no patterns and stripped the vendored engine's own tags.
     ignore = os.path.join(code_root, ".reqmapignore")
     if not os.path.exists(ignore):
         with open(ignore, "w", encoding="utf-8") as f:
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
+    if wipe:
+        _wipe(reqs_dir, code_root)
     print("Bootstrapping draft requirements from existing code...\n")
     cmd_extract(Workspace(load_requirements(reqs_dir),
                           scan_members(code_root, reqs_dir), reqs_dir, code_root))
@@ -6599,7 +6623,7 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
             # "> " char class -- that would also eat a real leading ">" in the content,
             # e.g. ">100 requests/sec" losing its ">100"). Mirrors _first_quote.
             return [" ".join(l.strip().lstrip(">").strip() for l in _sp[0]).strip()]
-    out, grab, seen, fenced = [], False, False, False
+    out, grab, seen, fenced, in_comment = [], False, False, False, False
     for line in body.splitlines():
         s = line.strip()
         if s.startswith("```"):
@@ -6616,7 +6640,20 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
             continue
         if not grab:
             continue
-        if s.startswith("-"):
+        # A multi-line `<!-- ... -->` is one comment, not a first line to skip and
+        # then prose to fold into the previous clause (the linter's _contract_clauses
+        # already read it that way; the map, `show` and `dupes` did not).
+        if in_comment:
+            in_comment = "-->" not in s
+            continue
+        if s.startswith("<!--"):
+            in_comment = "-->" not in s
+            continue
+        if _BLOCK_SEP_RE.match(s):
+            continue                          # a `---` rule separates; it is not prose
+        if s == "-" or s.startswith("- "):
+            # `- ` opens a clause; a bare `-flag` continuation does not (the same test
+            # _contract_clauses applies, so the two readers agree)
             out.append(s[1:].strip())
         elif _is_label_line(line):
             # A clause-group label — a heading, not prose. Folding it in would append
@@ -6625,7 +6662,7 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
             # is positional (see _is_label_line), so an indented wrapped clause that
             # merely opens and closes on bold spans still folds below.
             continue
-        elif s and not s.startswith("<!--") and out:
+        elif s and out:
             # hanging-indent continuation of the current bullet — fold it back in
             # so multi-line clauses are not truncated to their first physical line.
             out[-1] = (out[-1] + " " + s).strip()
@@ -6841,7 +6878,10 @@ def _mermaid_hierarchy(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements:
         shape = "[[{}]]" if is_root else "[{}]"
         lines.append("  {}{}".format(_safe_id(rid), shape.format(label)))
     for child, parent in data.get("upstream_edges", []):
-        if levels.get(child) in ("system", "architecture") and parent in levels:
+        # both ends must be drawn: a parent with no `level:` (a corpus that adopted the
+        # axis partially) is not in `drawn`, and Mermaid would mint a bare node for it
+        if (levels.get(child) in ("system", "architecture")
+                and levels.get(parent) in ("system", "architecture")):
             lines.append("  {} --> {}".format(_safe_id(parent), _safe_id(child)))
     for n in drawn:
         if kids.get(n["id"], 0) == 0:
@@ -7182,9 +7222,12 @@ def _inject_region(html, name, inner, anchor="<body>"):  # implements: ARCH-SITE
     j = html.find(close_m, i + len(open_m)) if i != -1 else -1
     if i != -1 and j != -1:
         return html[:i] + block + html[j + len(close_m):]
-    a = html.find(anchor)
+    # `<body class="...">` is still the body tag: a literal find appended the
+    # block after `</html>` on any authored page whose body carries attributes
+    m = (re.search(r"<body\b[^>]*>", html, re.I) if anchor == "<body>" else None)
+    a = m.end() if m else html.find(anchor)
     if a != -1:
-        a += len(anchor)
+        a += 0 if m else len(anchor)
         return html[:a] + "\n" + block + html[a:]
     return html + "\n" + block
 
@@ -7829,10 +7872,11 @@ def _test_functions(path):  # implements: ARCH-SUGGESTVERIFIES-047  # implements
 
 
 def _ac_name_re(ac):  # implements: ARCH-SUGGESTVERIFIES-047  # implements: REQ-SUGGESTVERIFIES-928
-    """Match `AC-3` inside a test name as `ac3`, `ac_3`, `ac-3` or `ac 3` — and NOT as
-    a prefix of `ac30`, which is a different criterion."""
+    """Match `CASE-3` (or the legacy `AC-3`) inside a test name as `case3`, `case_3`,
+    `ac3`, `ac_3`, `ac-3` or `ac 3` — and NOT as a prefix of `case30`, which is a
+    different criterion."""
     n = ac.split("-", 1)[1]
-    return re.compile(r"(?:^|[^a-z0-9])ac[ _-]?0*{}(?![0-9])".format(re.escape(n)), re.I)
+    return re.compile(r"(?:^|[^a-z0-9])(?:case|ac)[ _-]?0*{}(?![0-9])".format(re.escape(n)), re.I)
 
 
 def _comment_prefix(path):
@@ -8050,11 +8094,14 @@ def _domain_heads(reqs):
     return frozenset(w for w, c in counts.items() if c / float(total) >= CLARIFY_DOMAIN_SHARE)
 
 
-def _clarify_questions(rid, r, reqs=None):  # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
+def _clarify_questions(rid, r, reqs=None, domain=None):  # implements: ARCH-CLARIFY-062  # implements: REQ-CLARIFY-956
     """The open questions one requirement has not answered, as records:
     {rule, severity, where, quote, question, suggest}. Deterministic -- the same
     requirement always yields the same list, in the same order. `blocking` means the
-    requirement cannot be implemented as written; everything else is advice."""
+    requirement cannot be implemented as written; everything else is advice.
+    `domain` is `_domain_heads(reqs)`, passed in by the corpus-wide callers so it is
+    read once rather than recomputed per requirement (it was 90% of a `sync`'s
+    question pass, and quadratic in the corpus)."""
     body = r["body"]
     clauses = _from_any(_bullets, body, CONTRACT_LABELS)
     cases_raw = _from_any(_section_raw, body, ACCEPTANCE_LABELS) or ""
@@ -8128,7 +8175,9 @@ def _clarify_questions(rid, r, reqs=None):  # implements: ARCH-CLARIFY-062  # im
             counts[h] = counts.get(h, 0) + 1
         common = max(sorted(counts), key=lambda k: counts[k])
         share = counts[common] / float(len(heads))
-        if share >= CLARIFY_MONOCULTURE_SHARE and common not in _domain_heads(reqs):
+        if domain is None:
+            domain = _domain_heads(reqs)
+        if share >= CLARIFY_MONOCULTURE_SHARE and common not in domain:
             ask("case-monoculture", "advisory", "Cases", "",
                 'Every case starts from the same kind of input ("{}"). What is the other kind '
                 'a caller would supply?'.format(common),
@@ -8151,8 +8200,9 @@ def cmd_clarify(reqs, cap_id, as_json=False):  # implements: ARCH-CLARIFY-062  #
         return 1
     ids = [cap_id] if cap_id else sorted(reqs)
     items = []
+    domain = _domain_heads(reqs)
     for rid in ids:
-        qs = _clarify_questions(rid, reqs[rid], reqs)
+        qs = _clarify_questions(rid, reqs[rid], reqs, domain)
         if not cap_id:
             qs = [q for q in qs if q["severity"] == "blocking"]
         if qs:
@@ -8475,8 +8525,11 @@ def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
     for m in mem:
         by_file.setdefault(m["file"], []).append(m["line"])
     removed = 0
-    tag_re = re.compile(r"#\s*(?:implements|tested-by|verifies)\s*:\s*" + re.escape(cap_id) +
-                        r"(?:#[A-Za-z]+-\d+)?\s*")
+    # Same left guard as TAG_RE and no `#` requirement, so a `// implements:` in a JS
+    # or Go member is stripped too (it used to survive and fail the next gate as a
+    # dangling tag); the right guard keeps `X-001` from eating the tag of `X-0011`.
+    tag_re = re.compile(r"(?<![\w-])(?:" + _ROLE_ALT + r"|verifies)\s*:\s*" + re.escape(cap_id) +
+                        r"(?![\w-])(?:#[A-Za-z]+-\d+)?\s*")
     for rel in sorted(by_file):
         path = os.path.join(code_root or ".", rel.replace("/", os.sep))
         try:
@@ -8833,13 +8886,24 @@ def _design_py_params(fn):
     return [x.arg for x in a.posonlyargs + a.args + a.kwonlyargs if x.arg not in ("self", "cls")]
 
 
+_DESIGN_NESTING_NODES = (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.AsyncFor, ast.AsyncWith)
+_DESIGN_SCOPE_NODES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
+
+
 def _design_py_nesting(node, depth=0):
-    best = depth
-    for child in ast.iter_child_nodes(node):
-        if isinstance(child, (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.AsyncFor, ast.AsyncWith)):
-            best = max(best, _design_py_nesting(child, depth + 1))
-        elif not isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            best = max(best, _design_py_nesting(child, depth))
+    """Deepest block nesting under `node`. Iterative on purpose: a generated
+    1,000-term expression or a 1,000-branch `elif` chain parses fine but sits deeper
+    than the interpreter's recursion limit, and a RecursionError here escaped every
+    handler and killed `gate` and `sync` (advisory pass, fatal exit)."""
+    best, stack = depth, [(node, depth)]
+    while stack:
+        n, d = stack.pop()
+        for child in ast.iter_child_nodes(n):
+            if isinstance(child, _DESIGN_NESTING_NODES):
+                best = max(best, d + 1)
+                stack.append((child, d + 1))
+            elif not isinstance(child, _DESIGN_SCOPE_NODES):
+                stack.append((child, d))
     return best
 
 
@@ -9172,12 +9236,18 @@ def _design_file(rel, src):  # implements: ARCH-DESIGN-061  # implements: REQ-DE
     """All findings for one source file, in source order: Python through `ast`, a brace
     language through the masked-text heuristics, anything else standards only."""
     low = rel.lower()
-    if low.endswith(".py"):
-        out = _design_python(rel, src)
-    elif low.endswith(DESIGN_BRACE_EXTS):
-        out = _design_brace(rel, src)
-    else:
-        out = _design_standards(rel, src, 0, [])
+    try:
+        if low.endswith(".py"):
+            out = _design_python(rel, src)
+        elif low.endswith(DESIGN_BRACE_EXTS):
+            out = _design_brace(rel, src)
+        else:
+            out = _design_standards(rel, src, 0, [])
+    except RecursionError:
+        # `ast.dump` on a pathological class body is recursive too. This review is
+        # advisory and never the gate; a file it cannot measure is a file with no
+        # candidates, not a crashed commit hook.
+        return []
     out.sort(key=lambda f: (f["line"], f["kind"]))
     return out
 
@@ -9353,29 +9423,22 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     registry. Separate from `main` because it is a hundred and fifty lines of
     declaration with no decision in it, and reading the dispatch meant
     scrolling past all of them."""
+    # The epilog is rendered from the registry: a hand-written one listed twelve verbs
+    # argparse rejected (`draft`, `confirm`, `translate`, ...) for a whole release.
+    epilog = []
+    for group, names in COMMAND_GROUPS:
+        epilog.append(group.capitalize() + ":")
+        for name in names:
+            spec = COMMANDS[name]
+            verb = name + (" " + spec["arg"] if spec.get("arg") else "")
+            flags = " ".join(p["flag"] for p in spec["params"])
+            epilog.append("  {:<22} {}".format(verb, spec["summary"].split(". ")[0]))
+            if flags:
+                epilog.append("  {:<22} flags: {}".format("", flags))
     ap = argparse.ArgumentParser(
         prog="reqmap",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=(
-            "Five top-level commands; every other verb below is a mode flag on one of them.\n"
-            "\nAuthor:\n"
-            "  init                 bootstrap a repo (scaffold + draft from code + lock + map + next-steps)\n"
-            "  init --plan          JSON dry run of the same draft extraction, writes nothing\n"
-            "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID)\n"
-            "  clarify ID           the questions this requirement has not answered (--decompose "
-            "to scaffold an over-scoped clause out)\n"
-            "  (confirming is a human's answer, not a command: edit status: in the frontmatter)\n"
-            "\nBuild:\n"
-            "  gate --implement ID  the brief for writing its code (tags, cases, neighbours)\n"
-            "  gate                 the whole verdict: link sync + drift + readability + map freshness\n"
-            "  sync                 rebuild everything derived: lock, map, findings, site, integration\n"
-            "  sync --retire ID     take a requirement out of service (plan first, --apply to act)\n"
-            "\nRead:\n"
-            "  gate --risk          what to do next (--json/--badge: health, --untagged: files with no tag)\n"
-            "  gate --show ID       one-requirement dossier\n"
-            "  gate --search \"query\"  rank requirements by lexical relevance\n"
-            "  gate --dupes / --design / --review ID, sync --suggest-verifies\n"
-        ),
+        epilog="\n".join(epilog),
     )
     ap.add_argument("cmd", choices=_cli_choices())
     ap.add_argument("arg", nargs="?")
@@ -9387,8 +9450,6 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     ap.add_argument("--md-glob", action="append", default=None,
                     help="candidates: also discover .md files matching this glob (repeatable; "
                          "comma-separated ok). Off unless given. e.g. --md-glob 'prompts/**' --md-glob 'modes/**'")
-    ap.add_argument("--raw", action="store_true",
-                    help="findings: ignore the triage sidecar and emit the raw grouped list")
     ap.add_argument("--all", dest="show_all", action="store_true",
                     help="next: list every pending item instead of the top few per bucket")
     ap.add_argument("--strict", action="store_true",
@@ -9421,7 +9482,6 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="check|health|coverage|design: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, color)")
-    ap.add_argument("--update-lock", action="store_true")
     ap.add_argument("--accept-drift", dest="accept_drift", action="store_true",
                     help="sync: advance the drift baseline even when a confirmed/implemented "
                          "contract changed (otherwise sync refuses and exits non-zero)")
@@ -9431,8 +9491,6 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "
                          "membership tags from source files before re-extracting")
-    ap.add_argument("--check", dest="check_fresh", action="store_true",
-                    help="map: verify the committed _map.* is fresh (exit 1 if stale) instead of writing")
     ap.add_argument("--id", dest="new_id", default=None,
                     help="new --from-todo: the AREA-NAME-NNN id for the scaffolded requirement (required)")
     ap.add_argument("--from-todo", dest="from_todo", default=None,
@@ -9444,17 +9502,13 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="opt-in: reuse a per-file scan cache (requirements/_scancache.json) so unchanged "
                          "files skip re-parsing. Off by default; results are identical with or without it.")
     ap.add_argument("--attach", default=None,
-                    help="site: target HTML to inject engine-owned regions into (scaffolds it if absent)")
-    ap.add_argument("--regions", default="nav",
-                    help="site: comma list of regions to inject (nav,stats); default nav")
-    ap.add_argument("--diagram", default=None,
-                    help="site: relative path (from the page) to an excalidraw HTML; linked only if it exists")
-    ap.add_argument("--detect", action="store_true",
-                    help="site: print docs/ findings + the suggested command; writes nothing")
+                    help="sync: target HTML to inject the site's engine-owned regions into "
+                         "(scaffolds it if absent)")
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
-                    help="suggest-verifies: write the proposed `verifies:` tags into the test files")
+                    help="sync --retire / --suggest-verifies: actually write the change "
+                         "(without it, the run is a dry report)")
     # Mode flags: the read-only queries that used to be their own verbs. The work
     # they do is unchanged — only the entry point moved, so `gate` is the one place
     # a reader asks the corpus anything and `sync` the one place a write happens.
@@ -9653,8 +9707,11 @@ def main():
     if a.cmd == "clarify":
         if a.decompose:
             # scaffolding a clause into its own requirement is the write half of the
-            # same question clarify asks about an over-scoped requirement
-            return cmd_lint(ws, strict=False, decompose=True)
+            # same question clarify asks about an over-scoped requirement — for THIS
+            # requirement (it used to scaffold every over-long clause in the corpus)
+            if a.arg and a.arg not in ws.reqs:
+                print("no requirement with id {}".format(a.arg)); return 1
+            return cmd_lint(ws, strict=False, decompose=True, only=a.arg or None)
         return cmd_clarify(ws.reqs, a.arg, as_json=a.as_json)
 
 

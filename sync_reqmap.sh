@@ -52,7 +52,9 @@ PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin/.claude-plugin/plugin.
   | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
 CACHE="$CACHE_BASE/$PLUGIN_VERSION"
 if [[ ! -d "$CACHE" ]]; then
-  CACHE="$(ls -d "$CACHE_BASE"/*/ 2>/dev/null | sort -V | tail -1)"
+  # `|| true`: with no version dir at all `ls` exits 2, and under `pipefail` + `-e`
+  # that killed the script here with no output — nothing synced, nothing said.
+  CACHE="$(ls -d "$CACHE_BASE"/*/ 2>/dev/null | sort -V | tail -1 || true)"
   CACHE="${CACHE%/}"
 fi
 
@@ -98,8 +100,12 @@ for REPO in "$@"; do
     cp "$VIEWER_SRC" "$REPO/$ENGINE_DIR/_map_viewer.html"
   fi
   echo "  → $REPO synced ($REL)"
-  (cd "$REPO" && python -X utf8 "$REL" sync --accept-drift 2>&1 | sed 's/^/     /') \
-    || echo "  WARN: sync failed for $REPO (see output above) — continuing"
+  # A failing consumer sync must not abort the loop: the engine is already copied,
+  # so stopping here would leave THIS repo with a new engine and an old lock and
+  # skip every repo after it. Warn and move on, as the header promises.
+  PY=python3; command -v python3 >/dev/null 2>&1 || PY=python
+  (cd "$REPO" && "$PY" -X utf8 "$REL" sync --accept-drift 2>&1 | sed 's/^/     /') \
+    || echo "  WARN: sync failed in $REPO — engine copied, lock/map NOT refreshed"
 done
 
 echo "done."

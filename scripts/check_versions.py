@@ -138,7 +138,9 @@ def main(argv=None) -> int:
         # integer) — lets a second engine bump on the same calendar day get a
         # distinct, still lexicographically-ordered version.
         base, sep, rev = engine.partition(".")
-        valid = True
+        # Shape first: on Python 3.11+ `fromisoformat` also accepts `20260906` and
+        # `2026-W36-1`, and the staleness probe string-compares this value.
+        valid = re.fullmatch(r"\d{4}-\d{2}-\d{2}", base) is not None
         try:
             dt.date.fromisoformat(base)
         except ValueError:

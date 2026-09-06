@@ -110,9 +110,8 @@ def main(argv=None):
         rows.append(_time("scan_test_levels", lambda: R.scan_test_levels(root, reqs_dir)))
         rows.append(_time("scan_all (one walk)", lambda: R.scan_all(root, reqs_dir)))
         one = rows[-1][2]
-        rows.append(_time("gate (all of it)", lambda: R.cmd_check(
-            reqs, members, reqs_dir, update_lock=False, code_root=root,
-            ac_cover=one[1], level_cover=one[2])))
+        ws = R.Workspace(reqs, members, reqs_dir, root, ac_cover=one[1], level_cover=one[2])
+        rows.append(_time("gate (all of it)", lambda: R.cmd_check(ws, False)))
         data = R._build_map_data(reqs, members)
         rows.append(_time("build+render map", lambda: (R.render_md(data, reqs_dir),
                                                        R.render_json(data, reqs_dir))))

@@ -57,7 +57,10 @@ jobs:
         run: |
           if git rev-parse HEAD~1 >/dev/null 2>&1 && ! git diff --quiet HEAD~1 -- plugin/.claude-plugin/plugin.json; then
             VERSION=$(python -c "import json; print(json.load(open('plugin/.claude-plugin/plugin.json'))['version'])")
-            if ! grep -qF "\`v$VERSION\`" CHANGELOG.md; then
+            # The same reader the release job uses: a backticked version mentioned in
+            # prose ("deferred to `v6.0.0`") satisfied the old grep here and then failed
+            # `changelog_notes.py` after merge, which needs a `## plugin` heading.
+            if ! python scripts/changelog_notes.py "$VERSION" >/dev/null 2>&1; then
               echo "::error::plugin.json version bumped to $VERSION but CHANGELOG.md has no matching 'v$VERSION' heading — add one before merging."
               exit 1
             fi
@@ -353,7 +356,9 @@ jobs:
       # silently wrong until someone reads the README and notices.
       - name: Move the action's major-alias tag onto the released commit
         run: |
-          ALIAS=$(grep -oE 'requirement-manager/check@v[0-9]+' check/action.yml | head -n1 | sed 's/.*@//')
+          # `|| true`: under the runner's `-eo pipefail` a no-match grep would exit the
+          # step before the `case` below could print its diagnostic.
+          ALIAS=$(grep -oE 'requirement-manager/check@v[0-9]+' check/action.yml | head -n1 | sed 's/.*@//' || true)
           case "$ALIAS" in
             v[0-9]*) ;;
             *) echo "::error::no 'requirement-manager/check@vN' reference in check/action.yml - cannot derive the alias tag"; exit 1 ;;

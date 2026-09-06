@@ -11071,5 +11071,109 @@ class ClauseCaseGapIsOneQuestion(unittest.TestCase):  # tested-by: ARCH-CLARIFY-
         self.assertEqual(self._questions(3, 3), [])
 
 
+class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007  # tested-by: ARCH-SUGGESTVERIFIES-047
+    """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md)."""
+
+    LONG = " ".join(["alpha"] * 155)
+    REQ_BODY = ("# T\n\n## Description\n\nEvery bullet below is binding.\n- {}.\n\n"
+                "## Cases\nCASE-1\n  Given  a\n  When   b\n  Then   c\n")
+
+    def test_design_review_survives_a_deep_expression(self):
+        # a generated 3,000-term chain parses fine but sits deeper than the recursion limit
+        src = "def table():\n    return " + "+".join(["1"] * 3000) + "\n"
+        self.assertIsInstance(R._design_file("t.py", src), list)
+        src = "def d(x):\n" + "".join("    {} x=={}: return {}\n".format("if" if i == 0 else "elif", i, i)
+                                       for i in range(1500))
+        self.assertIsInstance(R._design_file("t.py", src), list)
+
+    def test_wipe_strips_only_what_the_scanner_reads_as_a_tag(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir)
+            literal = 's = "{}\\ndef f(): pass"\n'.format(tag("A-B-001"))
+            _write(os.path.join(d, "t.py"), "x = 1  {}\n".format(tag("A-B-001")) + literal)
+            _write(os.path.join(d, "README.md"), "```\n{}\n```\n".format(tag("A-B-001")))
+            with redirect_stdout(io.StringIO()):
+                R._wipe(rdir, d)
+            py = open(os.path.join(d, "t.py"), encoding="utf-8").read()
+            self.assertEqual(py, "x = 1\n" + literal)            # literal intact, tag gone
+            md = open(os.path.join(d, "README.md"), encoding="utf-8").read()
+            self.assertIn(tag("A-B-001"), md)                     # fenced example intact
+
+    def test_retire_strips_slash_comment_tags_and_respects_the_id_boundary(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "a.js"),
+                   "// {}: X-A-001\n// {}: X-A-0011\nlet y = 1;\n".format(_ROLE, _ROLE))
+            mem = [{"file": "a.js", "line": 1}]
+            with redirect_stdout(io.StringIO()):
+                n = R._strip_member_tags(d, mem, "X-A-001")
+            self.assertEqual(n, 1)
+            text = open(os.path.join(d, "a.js"), encoding="utf-8").read()
+            self.assertEqual(text, "// {}: X-A-0011\nlet y = 1;\n".format(_ROLE))
+
+    def test_health_link_sync_honours_gate_exempt(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "X-A-001.md"),
+                   "---\nid: X-A-001\nstatus: confirmed\nlayer: feature\ngate_exempt: [RM006]\n---\n# T\n")
+            reqs = R.load_requirements(d)
+            self.assertEqual(R._link_sync_errors(reqs, {}), [])
+            reqs["X-A-001"]["meta"].pop("gate_exempt")
+            self.assertEqual(len(R._link_sync_errors(reqs, {})), 1)
+
+    def test_next_free_number_reads_ids_inside_module_files(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ARCH-X-001.md"),
+                   "---\nid: ARCH-X-001\n---\n# A\n---\nid: REQ-X-900\n---\n# B\n")
+            reqs = R.load_requirements(d)
+            self.assertEqual(R._next_free_number(d, reqs), 901)
+            self.assertEqual(R._next_free_number(d), 2)          # the old, name-only reading
+
+    def test_decompose_is_scoped_to_the_named_requirement(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir)
+            reqs = {}
+            for rid in ("REQ-A-001", "REQ-B-001"):
+                body = self.REQ_BODY.format(self.LONG)
+                _write(os.path.join(rdir, rid + ".md"), "---\nid: {}\nstatus: confirmed\n---\n".format(rid) + body)
+                reqs[rid] = {"meta": {"status": "confirmed", "layer": "feature"}, "body": body}
+            with redirect_stdout(io.StringIO()):
+                R.cmd_lint(R.Workspace(reqs, None, rdir), decompose=True, only="REQ-A-001")
+            made = sorted(f for f in os.listdir(rdir) if f not in ("REQ-A-001.md", "REQ-B-001.md"))
+            self.assertEqual(made, ["REQ-A-002.md"])
+
+    def test_an_undecodable_requirement_file_is_skipped_not_fatal(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "X-A-001.md"), "---\nid: X-A-001\nstatus: draft\n---\n# T\n")
+            with open(os.path.join(d, "X-B-001.md"), "wb") as f:
+                f.write(b"---\nid: X-B-001\n---\n# caf\xe9\n")
+            err = io.StringIO()
+            with redirect_stderr(err):
+                reqs = R.load_requirements(d)
+            self.assertEqual(sorted(reqs), ["X-A-001"])
+            self.assertIn("X-B-001.md", err.getvalue())
+
+    def test_map_data_is_assembled_once_per_workspace(self):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "X-A-001.md"), "---\nid: X-A-001\nstatus: draft\n---\n# T\n")
+            ws = R.Workspace.load(rdir, d)
+            self.assertIs(ws.map_data(d), ws.map_data(d))
+            self.assertIsNot(ws.map_data(d), ws.map_data(d, {}))   # a narrowed view is its own document
+
+    def test_bullets_read_a_multiline_comment_as_one_unit(self):
+        body = ("## Description\n- clause one\n<!-- glossary:\n  - not a clause\n-->\n"
+                "- clause two\n  --flag continuation\n---\n")
+        self.assertEqual(R._bullets(body, "description"),
+                         ["clause one", "clause two --flag continuation"])
+
+    def test_suggest_verifies_matches_the_case_label_spelling(self):
+        rx = R._ac_name_re("CASE-3")
+        self.assertTrue(rx.search("test_case3_reads"))
+        self.assertTrue(rx.search("test_case_3_reads"))
+        self.assertTrue(rx.search("test_ac3_reads"))
+        self.assertFalse(rx.search("test_case30_reads"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
