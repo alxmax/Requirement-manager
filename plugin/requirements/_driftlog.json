@@ -2,8 +2,8 @@
   "_schema": 1,
   "accepted": {
     "ARCH-DECOMPOSE-050": {
-      "hash": "71e95ce68b8a",
-      "reason": "the split findings name a remedy that acts on them; the no-op case lives with its child"
+      "hash": "82f6630155c2",
+      "reason": "v6.2.0: clarify --decompose splits along contract groups (REQ-DECOMPOSE-994); ARCH-DECOMPOSE-050 gains the second seam"
     },
     "ARCH-DRIFT-003": {
       "hash": "d29eb01c1e04",

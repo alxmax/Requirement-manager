@@ -1,5 +1,70 @@
 # Changelog
 
+# Changelog
+
+## plugin `v6.2.0` — 2026-09-06
+
+**A tagged corpus can now reach the code rung.** `clarify <ID> --decompose` splits a
+requirement into `level: code` children along the bold group labels its author already
+wrote in the Description. `--apply` writes them and rewrites the parent; without it you get
+the whole plan. With no id, every requirement in the corpus that carries two or more groups.
+
+```
+$ reqmap.py clarify SCRIPTS-UTILS --decompose
+SCRIPTS-UTILS  (4 contract groups, 3 cases)
+  -> SCRIPTS-UTILS-MODULE                     4 clause(s), 0 case(s), 0 expected member(s)
+  -> SCRIPTS-UTILS-FORCE-UTF8-STREAMS         2 clause(s), 1 case(s), 1 expected member(s)
+  -> SCRIPTS-UTILS-IS-HEADLESS                2 clause(s), 1 case(s), 1 expected member(s)
+  -> SCRIPTS-UTILS-LOAD-JSON-STDIN            3 clause(s), 1 case(s), 1 expected member(s)
+  parent keeps 0 case(s)
+```
+
+**Why this and not before.** `init` mints the code rung only for files it extracts, and it
+extracts only untagged files. `clarify --levels` classifies a requirement but never creates
+one. So a corpus that adopted the tool at the architecture rung had no path to `level:
+code` at all. Measured on one consumer: **40 of 42 architecture nodes with zero children,
+and 160 group labels sitting in their Descriptions** saying exactly where the seams were.
+The earlier reading — that the rule would fire on nothing — was measured on this repo, which
+happens to be the one corpus that does not write grouped contracts.
+
+**The three hard parts, and what ships for each** (they were named in the request that
+asked for this, and they are the design):
+
+- *Assigning cases is the real work.* A case moves to a child only when its text names
+  **exactly one** group's subject. Naming none, or two, leaves it on the parent, and the
+  run prints how many stayed. On that consumer, 39 of 180 move and 141 are named as
+  staying. A run that moves 46 and says so is useful; one that silently distributes 180 is
+  the failure mode.
+- *Group count is not child count.* More than `LINT_AC_MAX` groups is **refused** with the
+  group list and the instruction to merge labels first. Twelve children for one capability
+  is ADR-0025 in miniature.
+- *Nothing verifies a tag points at the right code.* So **no `implements:` tag is
+  written**. Each child lists the members it is expected to claim — the parent's
+  `implements:` files searched for the group's subject at a definition — for a human to
+  verify and tag.
+
+**The parent IS edited on apply, and that is the point.** Each split group becomes one
+obligation line ending in its child's id — the ARCH shape this repo documents. Moved cases
+leave; surviving cases keep their labels (a label is what a `verifies:` tag points at). A
+parent stripped of every case gets one placeholder naming what the rung still owes: the case
+that shows the children work *together*, which the engine cannot write. Everything outside
+Description and Cases is byte-identical. A confirmed parent therefore drifts, visibly, and
+`sync --accept-drift` is the acknowledgement; `git checkout` the parent and delete the
+children to undo.
+
+**`sync` points at it.** Its tail already reported a flat or half-levelled corpus; it now also
+reports *"N requirement(s) carry contract groups and no code children — `reqmap.py clarify
+--decompose` plans the split, `--apply` writes it"*. Reported there, never written there:
+`sync` runs inside the consumer's pre-commit hook, and a write that creates files the
+commit does not contain and drifts confirmed parents is what
+[ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md)'s "Why not on `sync`"
+refuses. Upgrading the engine and running `sync` surfaces the fix by itself; one more
+command applies it.
+
+Children carry `status: draft`, `level: code`, `level_source: auto` and `satisfies:` the
+parent — ADR-0030 rules 1, 4 and 5. A requirement with no group labels falls through to the
+older clause-level path, which is unchanged. `REQ-DECOMPOSE-994` is the contract.
+
 ## plugin `v6.1.0` — 2026-09-06
 
 **`excalidraw-diagram` ships from its own repository now:**

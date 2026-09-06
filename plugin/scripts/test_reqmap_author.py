@@ -3011,3 +3011,181 @@ class RetireKeepsTheLineBreak(unittest.TestCase):  # tested-by: ARCH-RETIRE-064 
     def test_crlf_source_keeps_its_line_endings(self):
         got = self._strip("def f():\r\n    x = 1  " + tag("AREA-X-001") + "\r\n    return x\r\n")
         self.assertEqual(got, "def f():\r\n    x = 1\r\n    return x\r\n")
+
+
+class DecomposeOnGroups(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: REQ-DECOMPOSE-994
+    """`clarify <ID> --decompose` on a Description with bold group labels: one code-rung
+    child per group, cases moved only on an unambiguous name match, no tags written, the
+    parent rewritten only where the split happened."""
+
+    PARENT = """---
+id: TOOL-UTILS
+status: confirmed
+level: architecture
+layer: bus
+owner: Ana
+---
+
+# Shared utilities
+
+> WHY: one helper module, so nothing is reimplemented.
+
+## Description
+Every line in this section is binding.
+
+**Module**
+- The module uses only the standard library.
+
+**`load_json_stdin(name)`**
+- The function reads stdin and returns the parsed value.
+- On empty stdin it exits 2 naming `name`.
+
+**`is_headless()`**
+- The function returns True only when `CLAUDE_HEADLESS` is exactly "1".
+
+## Cases
+CASE-1
+  Given  empty stdin and the name "x.py"
+  When   `load_json_stdin("x.py")` runs
+  Then   it exits 2 and mentions x.py
+
+CASE-2
+  Given  `CLAUDE_HEADLESS` unset
+  When   `is_headless()` runs, then `load_json_stdin` runs
+  Then   both behave
+
+CASE-3
+  Given  any environment
+  When   the package is imported
+  Then   it imports cleanly
+
+## Context
+**Notes**
+- prose that must survive untouched
+"""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, self.tmp, True)
+        self.rd = os.path.join(self.tmp, "requirements"); os.makedirs(self.rd)
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"), self.PARENT)
+        _write(os.path.join(self.tmp, "lib", "utils.py"),
+               tag("TOOL-UTILS") + "\n\ndef load_json_stdin(name):\n    return 1\n\n"
+               "def is_headless():\n    return False\n")
+
+    def _run(self, only="TOOL-UTILS", apply_it=False):
+        ws = R.Workspace.load(self.rd, self.tmp)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = R.cmd_decompose_groups(ws, only=only, apply_it=apply_it, code_root=self.tmp)
+        return rc, buf.getvalue()
+
+    def _files(self):
+        return sorted(f for f in os.listdir(self.rd) if f.endswith(".md"))
+
+    def test_the_authors_group_labels_are_the_seams(self):  # verifies: REQ-DECOMPOSE-994#CASE-1
+        rc, _ = self._run(apply_it=True)
+        self.assertEqual(rc, 0)
+        self.assertEqual(self._files(), ["TOOL-UTILS-IS-HEADLESS.md", "TOOL-UTILS-LOAD-JSON-STDIN.md",
+                                         "TOOL-UTILS-MODULE.md", "TOOL-UTILS.md"])
+        child = io.open(os.path.join(self.rd, "TOOL-UTILS-LOAD-JSON-STDIN.md"), encoding="utf-8").read()
+        for needle in ("level: code", "level_source: auto", "status: draft", "satisfies: [TOOL-UTILS]",
+                       "- The function reads stdin and returns the parsed value.",
+                       "- On empty stdin it exits 2 naming `name`."):
+            self.assertIn(needle, child)
+
+    def test_a_case_moves_only_when_it_names_exactly_one_subject(self):  # verifies: REQ-DECOMPOSE-994#CASE-2
+        rc, out = self._run(apply_it=True)
+        child = io.open(os.path.join(self.rd, "TOOL-UTILS-LOAD-JSON-STDIN.md"), encoding="utf-8").read()
+        parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
+        self.assertIn("mentions x.py", child)            # CASE-1 named one subject: moved
+        self.assertNotIn("mentions x.py", parent)
+        self.assertIn("CASE-2", parent)                   # named two subjects: stayed
+        self.assertIn("CASE-3", parent)                   # named none: stayed
+        self.assertIn("2 stay on their parents", out)
+
+    def test_no_tag_is_written_and_expected_members_are_listed(self):  # verifies: REQ-DECOMPOSE-994#CASE-3
+        src_before = io.open(os.path.join(self.tmp, "lib", "utils.py"), encoding="utf-8").read()
+        self._run(apply_it=True)
+        src_after = io.open(os.path.join(self.tmp, "lib", "utils.py"), encoding="utf-8").read()
+        self.assertEqual(src_before, src_after)
+        child = io.open(os.path.join(self.rd, "TOOL-UTILS-IS-HEADLESS.md"), encoding="utf-8").read()
+        self.assertIn("`lib/utils.py:", child)
+        self.assertEqual(child.count("TOOL-UTILS-IS-HEADLESS"), 1)   # its own id only, no self-tag
+
+    def test_too_many_groups_is_refused_not_split(self):  # verifies: REQ-DECOMPOSE-994#CASE-4
+        groups = "".join("**g{}**\n- clause {}.\n\n".format(i, i) for i in range(R.LINT_AC_MAX + 1))
+        body = self.PARENT.split("## Description")[0] + "## Description\n" + groups + "## Cases\nCASE-1 x\n"
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"), body)
+        rc, out = self._run(apply_it=True)
+        self.assertEqual(self._files(), ["TOOL-UTILS.md"])
+        self.assertIn("refused", out)
+        self.assertIn("**g0**", out)
+        self.assertIn("Merge the labels", out)
+
+    def test_the_dry_run_is_a_dry_run(self):  # verifies: REQ-DECOMPOSE-994#CASE-5
+        before = {f: io.open(os.path.join(self.rd, f), encoding="utf-8").read() for f in self._files()}
+        rc, out = self._run(apply_it=False)
+        self.assertEqual(rc, 0)
+        self.assertIn("Nothing written", out)
+        self.assertIn("TOOL-UTILS-LOAD-JSON-STDIN", out)
+        after = {f: io.open(os.path.join(self.rd, f), encoding="utf-8").read() for f in self._files()}
+        self.assertEqual(before, after)
+
+    def test_the_parent_is_rewritten_only_where_the_split_happened(self):  # verifies: REQ-DECOMPOSE-994#CASE-6
+        self._run(apply_it=True)
+        parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
+        for line in ("- Module — see [[TOOL-UTILS-MODULE]].",
+                     "- load_json_stdin — see [[TOOL-UTILS-LOAD-JSON-STDIN]].",
+                     "- is_headless — see [[TOOL-UTILS-IS-HEADLESS]]."):
+            self.assertIn(line, parent)
+        self.assertNotIn("**Module**", parent)
+        self.assertNotIn("uses only the standard library", parent)
+        # untouched outside the two sections, and surviving cases keep their labels
+        head = self.PARENT.split("## Description")[0]
+        self.assertTrue(parent.startswith(head))
+        self.assertTrue(parent.rstrip().endswith("- prose that must survive untouched"))
+        self.assertIn("CASE-2\n", parent)
+        self.assertIn("CASE-3\n", parent)
+        self.assertNotIn("CASE-1\n  Given  empty stdin", parent)
+
+    def test_a_parent_stripped_of_every_case_gets_a_placeholder(self):  # verifies: REQ-DECOMPOSE-994#CASE-7
+        body = self.PARENT.replace(
+            "CASE-2\n  Given  `CLAUDE_HEADLESS` unset\n  When   `is_headless()` runs, then `load_json_stdin` runs\n  Then   both behave\n\n", ""
+        ).replace("CASE-3\n  Given  any environment\n  When   the package is imported\n  Then   it imports cleanly\n\n", "")
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"), body)
+        self._run(apply_it=True)
+        parent = io.open(os.path.join(self.rd, "TOOL-UTILS.md"), encoding="utf-8").read()
+        self.assertIn("work TOGETHER", parent)
+        self.assertEqual(len(R._acc_blocks(parent.split("---", 2)[2])), 1)
+
+    def test_a_requirement_with_no_groups_falls_through(self):
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"),
+               self.PARENT.replace("**Module**\n", "").replace("**`load_json_stdin(name)`**\n", "")
+               .replace("**`is_headless()`**\n", ""))
+        rc, out = self._run(apply_it=True)
+        self.assertIsNone(rc)                      # the caller then runs the clause-level path
+        self.assertEqual(self._files(), ["TOOL-UTILS.md"])
+
+    def test_sync_tail_names_the_fix_until_a_child_exists(self):  # verifies: REQ-AUDIT-973#CASE-1
+        def tail():
+            ws = R.Workspace.load(self.rd, self.tmp)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R._audit_summary(ws.reqs, ws.members, self.rd, self.tmp)
+            return buf.getvalue()
+        out = tail()
+        self.assertIn("1 requirement(s) carry contract groups and no code children", out)
+        self.assertIn("clarify --decompose", out)
+        self._run(apply_it=True)                    # children now satisfy the parent
+        self.assertNotIn("carry contract groups and no code children", tail())
+
+    def test_corpus_wide_plans_every_grouped_requirement(self):
+        _write(os.path.join(self.rd, "TOOL-OTHER.md"),
+               self.PARENT.replace("id: TOOL-UTILS", "id: TOOL-OTHER"))
+        _write(os.path.join(self.rd, "TOOL-FLAT.md"),
+               "---\nid: TOOL-FLAT\nstatus: confirmed\n---\n\n# F\n\n## Description\n- one.\n\n## Cases\nCASE-1 x\n")
+        rc, out = self._run(only=None, apply_it=False)
+        self.assertIn("TOOL-UTILS  (3 contract groups", out)
+        self.assertIn("TOOL-OTHER  (3 contract groups", out)
+        self.assertNotIn("TOOL-FLAT  (", out)
+        self.assertIn("6 child requirement(s) from 2 parent(s)", out)

@@ -161,6 +161,17 @@
       "plugin/scripts/reqmap.py#_write_region": "324a00f8c2ea230896066bdd11fe024551340782b0c6d70e7f56aa16157431fa",
       "plugin/scripts/reqmap.py#cmd_gen_integration": "8ca5f30af5781c768bad37b4d1769509a98e9afccbdf89ae359c17d872337060"
     },
+    "REQ-DECOMPOSE-994": {
+      "plugin/scripts/reqmap.py#_assign_cases": "cb59d815b11fd4420f1b97b8c13d85674704c3a987ea49383d277a3de85bb4fe",
+      "plugin/scripts/reqmap.py#_case_raw_blocks": "ef31bb4503c72aca99af5a87d22c0c1a8d85161955925f3f7e7117938aeb3de4",
+      "plugin/scripts/reqmap.py#_expected_members": "c7c82b6ca6cfd482d036f0157e61cfcc9f8620ca59b48b6ce159081c179fc738",
+      "plugin/scripts/reqmap.py#_group_child_id": "23fcffba5d208e9e6d095eabab071cb545c11c3af3f4d1a2afaa01ca27b6d3c2",
+      "plugin/scripts/reqmap.py#_group_slug": "d3b2848459a47ec50c69c0d9dac2db4978ee7be6745a63da903063f252e22f83",
+      "plugin/scripts/reqmap.py#_group_subject": "12962a6a6c326695af38bcb9ac1d1647c94f556c9510f7d7342a918f54963e0c",
+      "plugin/scripts/reqmap.py#_plan_group_split": "651f376f17ebd47291a149fbde66c8cae650936cfb268264f15f3a2fa95a43af",
+      "plugin/scripts/reqmap.py#_render_group_child": "44df30fcf208e4e414095736c489a3484b0596dc344c4ac25180941267bcdcfb",
+      "plugin/scripts/reqmap.py#_rewrite_parent_after_split": "7ae31a64749b4074c8ce52d7d9e768db8cede3b691f48148747989926259f590"
+    },
     "REQ-DESIGN-951": {
       "plugin/scripts/reqmap.py#_design_chain_findings": "3c05b3fbc2200672747fd52f017cae6ae3d1c10839253970f8a95f1ec20f327a"
     },
