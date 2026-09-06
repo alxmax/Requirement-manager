@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.12"
+MAP_ENGINE_VERSION = "2026-09-06.13"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1764,21 +1764,8 @@ def _acc_blocks(body):  # implements: ARCH-ACVERIFY-019  # implements: ARCH-ATOM
         _txt = " ".join(l.strip() for l in _sp[1])
         return [{"label": "", "text": _txt, "manual": bool(_AC_VERIFIABLE_RE.search(_txt))
                  and any(w in _txt.lower() for w in _AC_MANUAL_WORDS)}]
-    out, grab, seen, fenced = [], False, False, False
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced                  # skip fenced examples, like _count_ac
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
-            grab = (not seen) and any(_heading_label_is(s, n) for n in ACCEPTANCE_LABELS)
-            if grab:
-                seen = True
-            continue
-        if not grab:
-            continue
+    out = []
+    for s in _section_lines(body, ACCEPTANCE_LABELS):
         m = _AC_LABEL_RE.match(s)
         if m or s.startswith("- "):
             label = m.group(1) if m else ""
@@ -1872,6 +1859,58 @@ _NORMATIVE_HEADING_RE = re.compile(
                        + ("input", "output")) + ")", re.I)
 
 
+def _body_lines(body):  # implements: ARCH-SECTIONS-068  # implements: REQ-SECTIONS-994
+    """Yield `(is_heading, line)` for every line of a requirement body outside a ``` fence.
+
+    The fence is checked BEFORE the heading test, so a `## ` written inside a fenced
+    example is code, not a section boundary. Eight readers of these files carried a copy
+    of this two-line state machine and `_has_section` carried none — which is why a
+    heading inside a fence satisfied the presence check while every reader of that
+    section came back empty.
+    """
+    fenced = False
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced:
+            continue
+        yield s.startswith("## "), line
+
+
+def _section_headings(body):  # implements: ARCH-SECTIONS-068  # implements: REQ-SECTIONS-994
+    """Every `## ` heading in the body, stripped, in order."""
+    return (line.strip() for is_heading, line in _body_lines(body) if is_heading)
+
+
+def _section_lines(body, names, raw=False):  # implements: ARCH-SECTIONS-068  # implements: REQ-SECTIONS-994
+    """Yield the lines of the FIRST section whose heading label matches any of `names`,
+    up to the next `## `.
+
+    `names` is one label or a tuple of them (`CONTRACT_LABELS`, `ACCEPTANCE_LABELS`) —
+    current spelling first, legacy spellings after, so a section that was renamed still
+    reads. The match is anchored to the label (`_heading_label_is`), so a commentary
+    heading that merely mentions the word does not capture the section.
+
+    `raw=True` keeps the physical line, indentation and blank lines included, for the
+    Given/When/Then blocks the viewer renders as written; otherwise lines come back
+    stripped. What each caller does with those lines — bullets, clauses, prose, criteria —
+    is the caller's business; where the section starts and stops is not.
+    """
+    if isinstance(names, str):
+        names = (names,)
+    grab = seen = False
+    for is_heading, line in _body_lines(body):
+        if is_heading:
+            if seen:
+                return                    # the section ended at the next heading
+            seen = grab = any(_heading_label_is(line.strip(), n) for n in names)
+            continue
+        if grab:
+            yield line.rstrip() if raw else line.strip()
+
+
 def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
     """True if a `## ` heading's LABEL is `name` (case-insensitive), allowing an
     optional `WHAT`/`HOW` prefix whose dash is optional — so `## WHAT — Contract`,
@@ -1960,7 +1999,10 @@ def binding_hash(body):  # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMIC
     commentary and may drift freely without tripping the gate. (Legacy docs used
     Input/Output/Acceptance; those headers are still honored for back-compat.)"""
     keep, grab = [], False
-    for line in body.splitlines():
+    # `_body_lines`, so a `## Description` written inside a ```-fenced EXAMPLE neither
+    # opens a normative span nor closes one. It was the last reader of these files that
+    # could not see a fence, and it is the one whose answer is a contract's identity.
+    for _is_heading, line in _body_lines(body):
         h = line.strip().lower()
         if h.startswith("## "):
             new_grab = bool(_NORMATIVE_HEADING_RE.match(h))
@@ -2326,11 +2368,7 @@ def _has_section(body, name):  # implements: ARCH-CHECK-006
     and Scenario stand in for both, so it answers True for those two names."""
     if name in CONTRACT_LABELS + ACCEPTANCE_LABELS and _atomic_spans(body):
         return True
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("## ") and _heading_label_is(s, name):
-            return True
-    return False
+    return any(_heading_label_is(h, name) for h in _section_headings(body))
 
 
 def _has_any(body, names):  # implements: ARCH-DESCRIPTION-057
@@ -4829,20 +4867,9 @@ def _lint_prose(body, name):  # implements: ARCH-LINT-014  # implements: REQ-LIN
     anything inside a ``` fence — are skipped so the linter never flags code or
     markup as unreadable. Fence state is tracked BEFORE heading detection, so a
     `## ` comment inside a fenced block is treated as code, not a section boundary."""
-    out, grab, seen, fenced = [], False, False, False
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):          # fence first: an in-fence `## ` is code, not a heading
-            fenced = not fenced
-            continue
-        if fenced:
-            continue
-        if s.startswith("## "):
-            grab = (not seen) and _heading_label_is(s, name)   # anchored, agrees with _has_section
-            if grab:
-                seen = True
-            continue
-        if not grab or not s or s.startswith(("|", ">", "#")):
+    out = []
+    for s in _section_lines(body, name):
+        if not s or s.startswith(("|", ">", "#")):
             continue
         if s == "-" or s.startswith("- "):   # a real bullet marker (not '--strict' / '-5')
             s = s[1:].strip()
@@ -4879,19 +4906,13 @@ def _contract_clauses(body):  # implements: ARCH-ATOMICITY-049  # implements: RE
     hard-wrapped near 95 columns, so a 90-word clause reaches `_lint_prose` as six ~15-word
     lines and no per-line ceiling can ever see it. Bold group labels, table rows, block
     quotes, fenced code and HTML comments are not clauses and are skipped."""
-    out, cur, grab, seen, fenced, in_comment = [], None, False, False, False, False
+    out, cur, in_comment = [], None, False
 
     def flush():
         if cur is not None:
             out.append(cur)
 
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):              # fence first: an in-fence `## ` is code
-            fenced = not fenced
-            continue
-        if fenced:
-            continue
+    for s in _section_lines(body, CONTRACT_LABELS):
         if in_comment:                       # glossary comments are guidance, not clauses
             if "-->" in s:
                 in_comment = False
@@ -4899,14 +4920,6 @@ def _contract_clauses(body):  # implements: ARCH-ATOMICITY-049  # implements: RE
         if s.startswith("<!--"):
             if "-->" not in s:
                 in_comment = True
-            continue
-        if s.startswith("## "):
-            flush(); cur = None
-            grab = (not seen) and any(_heading_label_is(s, n) for n in CONTRACT_LABELS)
-            if grab:
-                seen = True
-            continue
-        if not grab:
             continue
         if not s or s.startswith(("|", ">", "#")) or (s.startswith("**") and s.endswith("**")):
             flush(); cur = None
@@ -6745,14 +6758,9 @@ def _first_quote(body):  # implements: ARCH-MAP-007  # implements: REQ-MAP-873  
     one line. A multi-line `>` WHY (a richer plain-language summary) is gathered whole,
     not truncated to its first line. Fenced code is skipped so a `>` inside a fence
     never counts."""
-    out, started, in_fence = [], False, False
-    for line in body.splitlines():
+    out, started = [], False
+    for _is_heading, line in _body_lines(body):
         s = line.strip()
-        if s.startswith("```"):
-            in_fence = not in_fence
-            continue
-        if in_fence:
-            continue
         if s.startswith(">"):
             content = s.lstrip(">").strip()
             if content:
@@ -6764,46 +6772,20 @@ def _first_quote(body):  # implements: ARCH-MAP-007  # implements: REQ-MAP-873  
 
 
 def _section(body, name):  # implements: ARCH-MAP-007
-    out, grab, seen, fenced = [], False, False, False
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
-            grab = (not seen) and _heading_label_is(s, name)   # anchored, like _bullets
-            if grab:
-                seen = True
-            continue
-        if grab and s and not s.startswith("<!--"):
-            # strip only a literal one-time "- " bullet marker, not a lstrip() char
-            # class -- a class-lstrip also eats real leading "-"/">" content
-            # (e.g. "- -1 means error" must keep its "-1", not become "1 means error")
-            out.append(s[2:] if s.startswith("- ") else s)
-    return " ".join(out)
+    """One section folded to a single line."""
+    # strip only a literal one-time "- " bullet marker, not a lstrip() char class -- a
+    # class-lstrip also eats real leading "-"/">" content (e.g. "- -1 means error" must
+    # keep its "-1", not become "1 means error")
+    return " ".join(s[2:] if s.startswith("- ") else s
+                    for s in _section_lines(body, name)
+                    if s and not s.startswith("<!--"))
 
 
 def _section_raw(body, name):  # implements: ARCH-MAP-007
     """Like _section but preserves line breaks + indentation — used for the
     multi-line Given/When/Then acceptance blocks so they read as written."""
-    out, grab, seen, fenced = [], False, False, False
-    for line in body.splitlines():
-        s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
-            grab = (not seen) and _heading_label_is(s, name)   # anchored, like _bullets
-            if grab:
-                seen = True
-            continue
-        if grab and not s.startswith("<!--"):
-            out.append(line.rstrip())
-    return "\n".join(out).strip()
+    return "\n".join(l for l in _section_lines(body, name, raw=True)
+                     if not l.strip().startswith("<!--")).strip()
 
 
 def _is_label_line(line):  # implements: ARCH-MAP-007  # implements: REQ-MAP-872
@@ -6830,23 +6812,9 @@ def _bullets(body, name):  # implements: ARCH-MAP-007  # implements: ARCH-ATOMIC
             # "> " char class -- that would also eat a real leading ">" in the content,
             # e.g. ">100 requests/sec" losing its ">100"). Mirrors _first_quote.
             return [" ".join(l.strip().lstrip(">").strip() for l in _sp[0]).strip()]
-    out, grab, seen, fenced, in_comment = [], False, False, False, False
-    for line in body.splitlines():
+    out, in_comment = [], False
+    for line in _section_lines(body, name, raw=True):
         s = line.strip()
-        if s.startswith("```"):
-            fenced = not fenced               # a `## ` inside a fence is code, not a boundary
-            continue
-        if fenced:
-            continue
-        if s.lower().startswith("## "):
-            # anchored heading match (not substring) so a commentary heading like
-            # `## Notes — contract caveats` doesn't capture the Contract section
-            grab = (not seen) and _heading_label_is(s, name)
-            if grab:
-                seen = True
-            continue
-        if not grab:
-            continue
         # A multi-line `<!-- ... -->` is one comment, not a first line to skip and
         # then prose to fold into the previous clause (the linter's _contract_clauses
         # already read it that way; the map, `show` and `dupes` did not).

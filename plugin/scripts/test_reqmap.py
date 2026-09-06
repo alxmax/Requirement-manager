@@ -40,15 +40,13 @@ def gtag_html(cap):  # runtime-built so THIS .py source registers no phantom mem
 
 
 _TB_ROLE = "tested" + "-by"
-_V_ROLE = "veri" + "fies"
-
-
-def v_tag(cap, case):   # runtime-built: a fixture tag must not become real coverage here
-    return "# {}: {}#{}".format(_V_ROLE, cap, case)
-
-
+_VERIFY_ROLE = "veri" + "fies"   # split so THIS file registers no real coverage
 def tb_tag(cap):
     return "# {}: {}".format(_TB_ROLE, cap)
+
+
+def v_tag(cap, ac):
+    return "# {}: {}#{}".format(_VERIFY_ROLE, cap, ac)
 
 
 REQ = "---\nid: {id}\nstatus: {status}\nlayer: {layer}\n{extra}---\n\n# {title}\n"
@@ -4039,13 +4037,6 @@ class TestLink(unittest.TestCase):  # tested-by: ARCH-TESTLINK-018  # tested-by:
             self.assertEqual(code, 0)                              # warn-only -> still passes
             self.assertIn("tested-by tests/missing_test.py", out)
             self.assertIn("does not exist", out)
-
-
-_VERIFY_ROLE = "verifies"  # runtime-built so synthetic tags don't pollute the repo scan
-
-
-def v_tag(cap, ac):
-    return "# {}: {}#{}".format(_VERIFY_ROLE, cap, ac)
 
 
 def _ac_body(contract="- It shall do the thing.", acceptance="AC-1\n  Given x\n  When y\n  Then z"):
@@ -11845,7 +11836,7 @@ class FencedTagsAreExamples(unittest.TestCase):  # tested-by: ARCH-SCAN-002  # t
                 + tag("REQ-FAKE-999") + "\n"
                 "```\n"
                 "\n"
-                "<!-- " + _V_ROLE + ": REQ-REAL-001#CASE-2 -->\n"
+                "<!-- " + _VERIFY_ROLE + ": REQ-REAL-001#CASE-2 -->\n"
                 "<!-- " + _ROLE + ": REQ-REAL-001 -->\n")
 
     def test_fenced_verifies_is_not_coverage(self):  # verifies: REQ-SCAN-992#CASE-1
@@ -12043,6 +12034,89 @@ class OneGitRunner(unittest.TestCase):  # tested-by: ARCH-GITRUN-067  # tested-b
         runner = next(n for n in ast.walk(tree)
                       if isinstance(n, ast.FunctionDef) and n.name == "_git")
         self.assertTrue(runner.lineno < starts[0] <= (runner.end_lineno or starts[0]))
+
+
+class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # tested-by: REQ-SECTIONS-994
+    """Nine readers of a requirement body, one answer to where a section starts."""
+
+    FENCED = ("# X\n\n"
+              "## Notes\n"
+              "Here is what a requirement looks like:\n\n"
+              "```markdown\n"
+              "## Description\n"
+              "- a fenced example clause\n"
+              "## Cases\n"
+              "CASE-9 fake\n"
+              "```\n\n"
+              "## Cases\n"
+              "CASE-1 real\n")
+
+    def test_the_fence_is_checked_before_the_heading(self):  # verifies: REQ-SECTIONS-994#CASE-1  # verifies: ARCH-SECTIONS-068#CASE-1
+        seen = [line.strip() for is_h, line in R._body_lines(self.FENCED) if is_h]
+        self.assertEqual(seen, ["## Notes", "## Cases"])
+
+    def test_every_reader_agrees_a_fenced_section_is_absent(self):  # verifies: REQ-SECTIONS-994#CASE-1  # verifies: ARCH-SECTIONS-068#CASE-1
+        self.assertFalse(R._has_section(self.FENCED, "description"))
+        self.assertEqual(R._bullets(self.FENCED, "description"), [])
+        self.assertEqual(R._section(self.FENCED, "description"), "")
+        self.assertEqual(R._contract_clauses(self.FENCED), [])
+        self.assertEqual([f["check"] for f in R._lint_sections(self.FENCED)
+                          if "Description" in f["detail"]], ["missing-section"])
+
+    def test_a_fenced_example_is_not_part_of_the_contract(self):  # verifies: REQ-SECTIONS-994#CASE-5  # verifies: ARCH-SECTIONS-068#CASE-2
+        with_fence = ("## Description\n- real clause\n\n"
+                      "```markdown\n## Cases\nCASE-9 fake\n```\n\n"
+                      "## Cases\nCASE-1 real\n")
+        without = "## Description\n- real clause\n\n## Cases\nCASE-1 real\n"
+        self.assertEqual(R.binding_hash(with_fence), R.binding_hash(without))
+
+    def test_a_section_stops_at_the_next_heading(self):  # verifies: REQ-SECTIONS-994#CASE-2
+        body = "## Description\n- one\n\n## Notes\n- two\n"
+        self.assertEqual(list(R._section_lines(body, "description")), ["- one", ""])
+        self.assertEqual(R._bullets(body, "description"), ["one"])
+
+    def test_a_legacy_spelling_still_reads(self):  # verifies: REQ-SECTIONS-994#CASE-3
+        body = "## WHAT — Contract (normative)\n- one\n\n## HOW — Acceptance\nAC-1 x\n"
+        self.assertEqual([c for _n, c in R._contract_clauses(body)], ["one"])
+        self.assertEqual([b["label"] for b in R._acc_blocks(body)], ["AC-1"])
+
+    def test_raw_keeps_indentation_and_stripped_does_not(self):  # verifies: REQ-SECTIONS-994#CASE-4
+        body = "## Cases\nCASE-1 — t\n  Given  a thing\n"
+        self.assertEqual(list(R._section_lines(body, "cases", raw=True)),
+                         ["CASE-1 — t", "  Given  a thing"])
+        self.assertEqual(list(R._section_lines(body, "cases")),
+                         ["CASE-1 — t", "Given  a thing"])
+
+    def test_presence_and_readability_answer_to_the_same_fence(self):  # verifies: ARCH-SECTIONS-068#CASE-3
+        """Over this repo's real corpus, not a fixture: the presence check and the
+        section reader must agree on every block, in both directions."""
+        rdir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(R.__file__))),
+                            "requirements")
+        if not os.path.isdir(rdir):
+            self.skipTest("not running inside the source repo")
+        names = R.CONTRACT_LABELS + R.ACCEPTANCE_LABELS + ("context", "notes")
+        blocks = 0
+        for fn in sorted(os.listdir(rdir)):
+            if not fn.endswith(".md") or fn.startswith("_"):
+                continue
+            with io.open(os.path.join(rdir, fn), encoding="utf-8") as f:
+                text = f.read()
+            for body in R.split_requirement_blocks(text):
+                blocks += 1
+                atomic = bool(R._atomic_spans(body))
+                headings = list(R._section_headings(body))
+                for name in names:
+                    opened = any(R._heading_label_is(h, name) for h in headings)
+                    present = R._has_section(body, name)
+                    if atomic and name in R.CONTRACT_LABELS + R.ACCEPTANCE_LABELS:
+                        continue          # the atomic form stands in for both by design
+                    self.assertEqual(present, opened,
+                                     "{}: {!r} present={} opened={}".format(fn, name, present, opened))
+        self.assertGreater(blocks, 100, "the corpus should have been read")
+
+    def test_only_the_first_matching_section_is_read(self):  # verifies: REQ-SECTIONS-994#CASE-2
+        body = "## Description\n- first\n\n## Notes\nx\n\n## Description\n- second\n"
+        self.assertEqual(R._bullets(body, "description"), ["first"])
 
 
 if __name__ == "__main__":

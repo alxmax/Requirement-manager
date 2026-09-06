@@ -1,5 +1,40 @@
 # Changelog
 
+## plugin `v5.19.0` — 2026-09-06
+
+**One section reader instead of nine** (`ARCH-SECTIONS-068`). A requirement body is read
+by the drift hash, the linter's two prose passes, the clause reader, the criteria parser,
+the map, `show` and `dupes` — and each one first has to answer the same two questions:
+where does this section start, and is this line inside a fenced example. Eight of them
+carried a copy of the same loop. `binding_hash` carried a ninth copy that did not track
+the fence at all, and `_has_section` tracked nothing — it scanned every line for a `## `.
+
+That produced a real disagreement. Given a requirement whose only `## Description` sits
+inside a fenced example:
+
+| reader | before |
+|---|---|
+| `_has_section` | the section is present |
+| `_bullets`, `_section`, `_contract_clauses` | the section is empty |
+| the linter | `empty-section` (warn) |
+| `binding_hash` | the fenced example is part of the contract |
+
+Now `_body_lines` yields `(is_heading, line)` for every line outside a fence, and
+`_section_lines` yields one section's lines; every reader asks them, `binding_hash`
+included. The same requirement is now correctly reported as `missing-section` (an error —
+it genuinely has no Description), and a fenced example of a heading neither opens a
+normative span nor closes one.
+
+Checked before shipping, over all 255 requirement blocks in this repo: every reader
+returns exactly what the previous engine returned, and **no `binding_hash` changes** — so
+no confirmed contract re-baselines and no consumer's lock goes stale. What a caller does
+with a section's lines — bullets, clauses, prose, criteria — is still entirely the
+caller's; only the boundary is shared.
+
+**Upgrade note.** A requirement whose only normative heading lives inside a code fence
+moves from a warning to an error. That requirement has no contract, so the error is the
+right answer, but it is a build that was green and is not. `gate --audit` names it.
+
 ## plugin `v5.18.0` — 2026-09-06
 
 **One runner for every git question** (`ARCH-GITRUN-067`). Eleven call sites had each
