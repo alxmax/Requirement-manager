@@ -53,6 +53,10 @@ INSTRUCTION_FILES = [
     "plugin/scripts/reqmap.py",
     "CLAUDE.md",
     "README.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    # The hook shipped to consumers: a retired verb there fails every consumer commit.
+    "plugin/hooks/pre-commit",
     # NOT one skill by name: the plugin ships three, and naming one is how six dead
     # invocations reached consumers through `requirement-quality-review`. The glob
     # below reads every SKILL*.md under plugin/skills/, whatever is added next.

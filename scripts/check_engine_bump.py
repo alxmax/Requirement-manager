@@ -28,6 +28,12 @@ ADDED_RE = re.compile(r'^\+MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)
 REMOVED_RE = re.compile(r'^-MAP_ENGINE_VERSION\s*=\s*"([^"]+)"', re.M)
 
 
+def _version_key(v):
+    """Orderable form of `YYYY-MM-DD[.N]` — the same reading the staleness probe uses."""
+    base, _sep, rev = v.partition(".")
+    return (base, int(rev) if rev.isdigit() else 0)
+
+
 def _engine_diff(diff_args, cwd):
     """The engine file's diff text, or None when git cannot produce one."""
     try:
@@ -58,6 +64,12 @@ def main(argv=None, cwd=None) -> int:
         return 0
     added, removed = ADDED_RE.search(diff), REMOVED_RE.search(diff)
     if added and removed and added.group(1) != removed.group(1):
+        if _version_key(added.group(1)) <= _version_key(removed.group(1)):
+            # a bump that moves BACKWARDS tells every consumer it is ahead of the
+            # action, which silences the staleness probe for good
+            print("FAIL  MAP_ENGINE_VERSION moved backwards: {!r} -> {!r}".format(
+                removed.group(1), added.group(1)))
+            return 1
         print("OK  {} changed and MAP_ENGINE_VERSION bumped {!r} -> {!r}".format(
             ENGINE, removed.group(1), added.group(1)))
         return 0

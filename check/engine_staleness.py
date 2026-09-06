@@ -97,7 +97,9 @@ def _probe(vendored_path, reference_path, mode):  # implements: REQ-STALEENGINE-
                "checks this action expects".format(vendored, reference))
     if os.environ.get("GITHUB_ACTIONS"):
         # A workflow annotation surfaces on the run itself; a log line scrolls past.
-        print("::warning title=Stale reqmap engine::{}".format(message))
+        # The annotation's severity follows the verdict: `error` mode fails the job.
+        level = "error" if mode == "error" else "warning"
+        print("::{} title=Stale reqmap engine::{}".format(level, message))
     else:
         print("WARN  {}".format(message))
     return 1 if mode == "error" else 0
