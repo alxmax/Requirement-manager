@@ -207,7 +207,6 @@ file, with all Claude Code-specific directives removed (`Skill` tool invocations
 | File | Skill |
 |---|---|
 | `plugin/skills/requirement-manager/SKILL.universal.md` | Core SSOT + drift workflow |
-| `plugin/skills/excalidraw-diagram/SKILL.universal.md` | Excalidraw diagram generation |
 | `plugin/skills/requirement-quality-review/SKILL.universal.md` | Advisory quality review |
 
 **Verify AI-agnostic compatibility:**
@@ -282,42 +281,17 @@ error), and `sync` demotes an edited contract back to `draft` on its own.
 
 ## The Excalidraw diagram skill
 
-Bundled alongside `requirement-manager` is a second skill — **`excalidraw-diagram`**
-— that turns a system description into a genuine [Excalidraw](https://excalidraw.com)
-scene (`.excalidraw`) and a self-contained HTML viewer (`.html`). The output is
-hand-drawn-look and fully editable, not a screenshot.
+The `excalidraw-diagram` skill used to ship alongside this plugin. It now lives in
+[its own repository](https://github.com/alxmax/excalidraw-diagram) and installs on its own:
 
-**When to reach for it:**
-- "Diagram this repo's architecture" / "draw the flow"
-- Flowcharts, pipelines, multi-agent layouts, state flows, module maps
-- Any time you want a whiteboard-style schematic you can open in excalidraw.com
+```
+/plugin marketplace add alxmax/excalidraw-diagram
+/plugin install excalidraw-diagram
+```
 
-**How to invoke it:**
-- *Claude Code* — ask for the `excalidraw-diagram` skill; it explores the repo,
-  writes a generator script against the built-in `Scene` API, runs it, and delivers
-  both files.
-- *Other assistants* — load `SKILL.universal.md` as a system prompt and call the
-  builder CLI directly (see CLI helper commands below).
-
-**CLI helper commands** (run from `plugin/skills/excalidraw-diagram/scripts/`):
-
-| Command | What it does |
-|---|---|
-| `python excalidraw_builder.py` | Self-test / smoke test — verifies the builder is healthy |
-| `python excalidraw_builder.py discover <repo> [out.py]` | Scan a repo and emit a runnable multi-layer poster scaffold (`make_diagram.py`) — fill in the real content, then run it |
-| `python excalidraw_builder.py render <scene.excalidraw> [out_dir]` | Rebuild just the `.html` viewer from an existing scene (e.g. after hand-editing on excalidraw.com) |
-
-**Output:** one `.excalidraw` + one `.html` per call.
-- `.excalidraw` — drag onto excalidraw.com to edit; works fully offline.
-- `.html` — double-click to open; has a built-in "Download .excalidraw" button.
-  Loads Excalidraw from a CDN, so the first open needs a network connection.
-
-**Linking a diagram to your project page:** `reqmap.py sync --attach docs/architecture.html --diagram <rel-path-to.html>` adds a live link to the diagram in the engine-owned nav region of your project page.
-
-The full builder API (shapes, auto-layout helpers, quality gates) is documented in
-[`plugin/skills/excalidraw-diagram/SKILL.md`](plugin/skills/excalidraw-diagram/SKILL.md).
-
----
+It shared this repository and nothing else — no imports in either direction — so a change
+to either one took the other's CI with it, and anyone who wanted diagrams had to install a
+requirements engine to get them.
 
 ## Run the gate in CI
 
@@ -405,7 +379,6 @@ plugin/                                     the plugin — self-contained
   skills/requirement-manager/
     SKILL.md                                full contract & authoring rules (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  skills/excalidraw-diagram/
     SKILL.md                                diagram skill contract (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   skills/requirement-quality-review/

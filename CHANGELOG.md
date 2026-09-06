@@ -1,5 +1,43 @@
 # Changelog
 
+## plugin `v6.1.0` — 2026-09-06
+
+**`excalidraw-diagram` ships from its own repository now:**
+<https://github.com/alxmax/excalidraw-diagram>
+
+```
+/plugin marketplace add alxmax/excalidraw-diagram
+/plugin install excalidraw-diagram
+```
+
+It shared this repository and nothing else. No imports in either direction, no shared
+runtime, no shared configuration — the only mentions of `reqmap.py` inside the skill were
+strings drawn *inside* example diagrams. Anyone who wanted a diagram had to install a
+requirements engine to get one, and a change to either took the other's CI with it.
+
+**If you use the skill, install it from the link above.** It is gone from this plugin, so
+`/plugin update requirement-manager` removes it. Same code, same 60 tests, same output;
+the new repo carries the original 43 commits via `git subtree split`, so `git blame` still
+answers. It is **MIT** there, where it was BUSL-1.1 here.
+
+**Its contracts went with it.** `ARCH-EXCALIDRAW-030/031/032` and `REQ-EXCALIDRAW-844`–`848`
+describe that builder, and a confirmed requirement whose code has left is eight `RM006`
+errors waiting to happen. They were moved rather than retired — retiring says a capability
+was withdrawn, and this one was relocated. The new repo vendors the engine and gates them:
+9 requirements, 33 members, 0 errors.
+
+**What that took out of this repo besides the skill:**
+
+- `docs/full_architecture.html` and the CI step that checked it against
+  `make_full_architecture.py`. The generator lives in the other repo now, so the choice was
+  a committed artifact with nothing verifying it, or neither. Neither. `docs/architecture.html`
+  — the actual project page — is untouched.
+- `REQ-REPRO-905` loses its two diagram cases and keeps its four viewer ones; the
+  reproducibility contract still covers `plugin/scripts/_map_viewer.html`.
+- Four CI steps across `gate-and-tests` and the portability matrix.
+
+Nothing about the engine changed, so `MAP_ENGINE_VERSION` does not move.
+
 ## plugin `v6.0.0` — 2026-09-06
 
 ### Breaking: the engine writes one rendered map, not two

@@ -30,7 +30,7 @@ CASE-1
 CASE-2
   Given  a commit that changes the architecture generator without re-committing its output
   When   the `artifacts` job runs
-  Then   it fails and names `docs/full_architecture.html` and the rebuild command
+  Then   it fails and names the stale file and the command that regenerates it
 
 CASE-3
   Given  a tree whose committed artifacts match their sources
@@ -87,8 +87,6 @@ satisfies: [ARCH-REPRO-041]
 
 Every bullet below is binding.
 - `plugin/scripts/_map_viewer.html` derives from `app/`, built by `npm run build:viewer`.
-- `docs/full_architecture.html` derives from
-  `plugin/skills/excalidraw-diagram/examples/make_full_architecture.py`.
 - The `artifacts` CI job rebuilds each covered artifact from its source on every push and
   pull request.
 - The job fails the build when a rebuilt artifact differs from the committed one.
@@ -103,32 +101,20 @@ CASE-1 — a stale vendored viewer fails the job and names the fix
   Then   `git diff --exit-code` on that file is non-zero, the step fails, and the error
          names the file and `npm run build:viewer`
 
-CASE-2 — the published architecture diagram matches its generator
-  Given  `make_full_architecture.py` regenerated into a temporary directory
-  When   its output is compared byte-for-byte against the committed
-         `docs/full_architecture.html`
-  Then   the two files are identical
-
-CASE-3 — the SSR smoke runs against this repo's real registry, not a stand-in
+CASE-2 — the SSR smoke runs against this repo's real registry, not a stand-in
   Given  a fresh checkout whose `app/public/data.json` is gitignored and absent
   When   the "Viewer SSR smoke" step runs
   Then   `npm run sync` first builds that fixture from the committed
          `plugin/requirements/_map.json` before `npm run smoke` runs against it
 
-CASE-4 — the vendored-viewer check is the rebuild's own diff, not a second comparison
+CASE-3 — the vendored-viewer check is the rebuild's own diff, not a second comparison
   Given  the "Rebuild the vendored viewer" step has just overwritten
          `plugin/scripts/_map_viewer.html` in place
   When   the next step runs
   Then   it inspects the working-tree diff on that one file — the rebuild writing over the
          committed copy IS the check, with no separate comparison logic
 
-CASE-5 — the diagram check builds into a temp directory, never in place
-  Given  `.gitignore` hard-blocks `docs/*.excalidraw`, a sibling file the generator writes
-  When   the "Published architecture diagram matches its generator" step runs
-  Then   `make_full_architecture.py` writes into a `mktemp -d` directory, and only that
-         output is compared against the committed `docs/full_architecture.html`
-
-CASE-6 — the release job depends on the artifacts job
+CASE-4 — the release job depends on the artifacts job
   Given  `.github/workflows/ci.yml`
   When   the `release` job's `needs:` list is inspected
   Then   it names `artifacts` alongside `gate-and-tests` and `tests`

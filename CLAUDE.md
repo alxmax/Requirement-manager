@@ -83,8 +83,6 @@ python scripts/check_engine_bump.py --base main   # reqmap.py changed => MAP_ENG
 python -X utf8 scripts/test_check_engine_bump.py
 python -X utf8 scripts/test_changelog_notes.py    # release-notes extraction (CI runs it with cwd=scripts/)
 python -X utf8 scripts/test_cross_tool.py         # seeds the engine into a tempdir, runs sync→gate→map: the AI-agnostic falsification test
-python -X utf8 plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py   # builder smoke + layout/overlap self-checks
-python -X utf8 -m unittest test_excalidraw -v     # from plugin/skills/excalidraw-diagram/scripts/
 ```
 
 **Python floor: 3.9** (`MIN_PYTHON` in `reqmap.py`, `ARCH-PYFLOOR-040`). It is deliberately the oldest version CI runs, not the oldest the code happens to work on (3.7): a floor nothing tests is a claim, not a guarantee. `reqmap.py` refuses an older interpreter with one readable line and exit 2. Raising it means moving the matrix and `MIN_PYTHON` together — a test asserts they stay equal.
@@ -93,7 +91,7 @@ CI has **two** test surfaces, don't confuse them: `gate-and-tests` (ubuntu, `3.x
 
 A third, non-authoritative job — `quality` — measures the engine rather than verifying it: `coverage` over `test_reqmap.py` (92% at the time of writing) and `ruff`, both published to the run's job summary. Only `ruff --select E9,F` (syntax errors, undefined names) can fail it; every other rule is advisory, because several ruff complaints describe deliberate choices here (`except Exception: return None` IS the fail-open contract in a dozen places). It is the only job that installs from PyPI, both tools pinned, and it is deliberately **not** in `release`'s `needs` — the authoritative verdicts stay dependency-free. There is no coverage floor yet, on purpose: publish the number first.
 
-The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` (which since `v4.0.0` *is* the lint and the map-freshness check as well) → `test_reqmap.py` → excalidraw builder + tests.
+The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any requirement file. CI (`.github/workflows/ci.yml`, job `gate-and-tests`) runs, in order: `check_versions.py` → `test_check_versions.py` → `test_changelog_notes.py` → the CHANGELOG-entry check → `reqmap.py gate --code ..` (which since `v4.0.0` *is* the lint and the map-freshness check as well) → `test_reqmap.py`.
 
 **Hooks — two different files, don't confuse them:**
 - `.githooks/pre-commit` is *this repo's dev* hook, mirroring the CI order (`check_versions.py` → `check_engine_bump.py --staged` → `gate`). Enable once: `git config core.hooksPath .githooks`. `.githooks/pre-push` also blocks direct pushes to `main`.
@@ -103,12 +101,14 @@ The gate must pass (`0 errors`) before committing changes to `reqmap.py` or any 
 
 ## Architecture
 
-This repo is a Claude Code plugin that ships **three skills** under `plugin/skills/`:
+This repo is a Claude Code plugin that ships **two skills** under `plugin/skills/`:
 - `requirement-manager` — the core skill; seeds `reqmap.py` into a target repo and drives the SSOT/drift workflow. Its `SKILL.md` is the authoritative contract.
 - `requirement-quality-review` — on-demand AI *advisory* review of requirement files' semantic quality (is a clause testable, does the WHY explain intent). Never part of the gate (`implements: ARCH-REVIEW-022`).
-- `excalidraw-diagram` — generates Excalidraw scenes + a self-contained HTML viewer from a system description. Fully independent of `reqmap.py`: its own stdlib-only builder at `skills/excalidraw-diagram/scripts/excalidraw_builder.py` (smoke test + auto-layout/overlap self-checks via `python excalidraw_builder.py`). Example generators live in `skills/excalidraw-diagram/examples/` — `make_full_architecture.py` (the complete-architecture poster), `make_iso5807_flowchart.py` (the reqmap flow in ISO 5807 notation), and `make_excalidraw_skill_flow.py`.
 
-**Generating diagrams *of this repo*:** run a maintained generator from `plugin/skills/excalidraw-diagram/examples/` with `diagrams` as the output arg (e.g. `python plugin/skills/excalidraw-diagram/examples/make_full_architecture.py diagrams`). Outputs land in `diagrams/` (gitignored, regenerable, never committed) — **never** `docs/`, which is the published Pages root and holds only reviewed, self-contained HTML (`.gitignore` hard-blocks `docs/*.excalidraw`). Do not author ad-hoc generators with an absolute plugin-cache import; reuse the examples (they use a portable relative import).
+**Diagrams of this repo** are no longer generated here. The `excalidraw-diagram` skill was
+split out at plugin `v6.1.0` into [its own repository](https://github.com/alxmax/excalidraw-diagram) — it shared this one and
+nothing else, with no imports in either direction. `docs/` stays the published Pages root and
+holds only reviewed, self-contained HTML; `.gitignore` still hard-blocks `docs/*.excalidraw`.
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 

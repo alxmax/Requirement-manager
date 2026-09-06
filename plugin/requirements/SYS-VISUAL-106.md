@@ -20,9 +20,6 @@ Scenario: the system is rendered
   Then   the same graph is available as diagrams that render in a browser with no install, and as a data file any front-end can consume
 
 ## Requirements in this system (auto)
-- `ARCH-EXCALIDRAW-030` — Excalidraw scene builder — core API  (architecture)  ·  9 detailed design
-- `ARCH-EXCALIDRAW-031` — Excalidraw quality gates  (architecture)  ·  9 detailed design
-- `ARCH-EXCALIDRAW-032` — Excalidraw builder CLI verbs  (architecture)  ·  4 detailed design
 - `ARCH-MAP-007` — Requirement graph (_map.json)  (architecture)  ·  18 detailed design
 - `ARCH-MAPDIAGRAMS-055` — Mermaid diagrams (_map.md)  (architecture)  ·  17 detailed design
 - `ARCH-SITE-026` — Generate & maintain a project presentation page  (architecture)  ·  6 detailed design

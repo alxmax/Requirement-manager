@@ -1368,10 +1368,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1914"
         },
@@ -3177,10 +3173,6 @@
       "satisfied_by": [],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1833"
         },
@@ -4199,10 +4191,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1996"
         },
@@ -4604,577 +4592,6 @@
           "intent": "`cmd_check` construiește o dată un index invers `depends_on` din cerințele încărcate. Când hash-ul de contract al unei cerințe confirmate nu se mai potrivește cu lock-ul, aceeași linie de avertisment care raportează drift-ul listează și id-urile cerințelor care depind de ea — astfel un reviewer obține raza de impact gratuit, în loc să o reconstruiască manual din map.",
           "contract": "> `cmd_check` construiește o dată un index invers `depends_on` din cerințele încărcate. Când\n> hash-ul de contract al unei cerințe confirmate nu se mai potrivește cu lock-ul, aceeași linie\n> de avertisment care raportează drift-ul listează și id-urile cerințelor care depind de ea —\n> astfel un reviewer obține raza de impact gratuit, în loc să o reconstruiască manual din map.\n\nFiecare bullet de mai jos este obligatoriu.\n- Când gate raportează un drift de contract pentru o cerință, și cel puțin o\n  altă cerință listează cerința cu drift în `depends_on`, aceeași linie de\n  avertisment numește și acele id-uri de cerințe dependente.\n- Lista de dependenți este sortată și deduplicată, astfel încât rezultatul este\n  determinist între platforme și ordini de parcurgere.\n- Sunt numiți doar dependenții direcți — o muchie, nu închiderea tranzitivă. O\n  închidere tranzitivă explodează pe nodurile de layer bus și îngroapă semnalul; un\n  reviewer urmărește lanțul un pas o dată.\n- O cerință cu drift fără dependenți produce avertismentul existent\n  neschimbat — fără clauză \"dependents\" goală.\n- Adăugarea nu schimbă severitatea avertismentului de drift: rămâne\n  warn-only implicit și promovabil doar prin `--strict`, exact ca înainte.",
           "acceptance": "CASE-1 — avertismentul de drift numește o cerință care depinde de cea cu drift\n  Given  o cerință confirmată cu drift și o a doua cerință care o are în `depends_on`\n  When   `gate` rulează\n  Then   linia de avertisment de drift include \"review dependent(s):\" urmat de al doilea id,\n         cu severitatea neschimbată — tot warn-only, promovabilă doar prin `--strict`\n\nCASE-2 — doi dependenți sunt numiți în ordine sortată pe linia de drift\n  Given  o cerință cu drift cu doi dependenți ale căror id-uri se sortează unul după altul\n  When   `gate` rulează\n  Then   lista \"review dependent(s):\" arată ambele id-uri în ordine crescătoare\n\nCASE-3 — un dependent-al-unui-dependent nu este numit pe linia de drift\n  Given  A depinde de B (cu drift), și C depinde de A (dar nu de B)\n  When   `gate` rulează\n  Then   avertismentul de drift pentru B îl numește pe A dar nu îl numește pe C\n\nCASE-4 — avertismentul unei cerințe izolate cu drift nu poartă nicio clauză de dependenți\n  Given  o cerință confirmată cu drift pe care nicio altă cerință nu o listează în `depends_on`\n  When   `gate` rulează\n  Then   linia de avertisment de drift nu conține deloc text \"review dependent(s):\""
-        }
-      }
-    },
-    {
-      "id": "ARCH-EXCALIDRAW-030",
-      "layer": "feature",
-      "level": "architecture",
-      "status": "confirmed",
-      "area": "ARCH",
-      "title": "Excalidraw scene builder — core API",
-      "intent": "The excalidraw-diagram skill needs a stdlib-only Python library that turns declarative shape and arrow declarations into a valid Excalidraw scene file and a self-contained HTML viewer, with no external dependencies, so the skill can be vendored into any environment without install friction.",
-      "contract": [
-        "`Scene` exposes shape primitives, ISO 5807 flowchart aliases, layout helpers, and annotation helpers for building a diagram declaratively. [[REQ-EXCALIDRAW-844]] details the behaviour.",
-        "`Scene` exposes connector helpers and a `.save(basename, out_dir)` that writes both a `.excalidraw` scene and a self-contained `.html` viewer once, deterministically when seeded. [[REQ-EXCALIDRAW-845]] details the behaviour."
-      ],
-      "verify": [],
-      "notes": [
-        "The authoritative usage reference is `skills/excalidraw-diagram/SKILL.md`.",
-        "`save()` overlap detection raises on any two non-container shapes that overlap (co-ordinates checked after all shapes are added)."
-      ],
-      "current_impl": [
-        "`class Scene` and all shape/layout/arrow methods in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`."
-      ],
-      "acc": [
-        "CASE-1 — Given  a `Scene` with at least one `box` and one `arrow` When   `.save()` is called Then   both `<basename>.excalidraw` and `<basename>.html` are written and the `.excalidraw` file parses as valid JSON with `type: \"excalidraw\"`",
-        "CASE-2 — Given  two `box` shapes placed at overlapping coordinates When   `.save()` is called without `allow_overlap=True` Then   a `ValueError` is raised naming the overlapping shapes",
-        "CASE-3 — Given  `Scene(seed=42)` with identical shape declarations run twice When   both outputs are compared byte-for-byte Then   they are identical",
-        "CASE-4 — Given  `.save()` has already been called once on a `Scene` When   `.save()` is called again Then   a `RuntimeError` is raised",
-        "CASE-5 — Given  a `pipeline([...])` call with step dicts When   `.save()` is called Then   the resulting scene contains connected flowchart nodes with no overlapping shapes"
-      ],
-      "accept": "CASE-1\n  Given  a `Scene` with at least one `box` and one `arrow`\n  When   `.save()` is called\n  Then   both `<basename>.excalidraw` and `<basename>.html` are written and the\n         `.excalidraw` file parses as valid JSON with `type: \"excalidraw\"`\n\nCASE-2\n  Given  two `box` shapes placed at overlapping coordinates\n  When   `.save()` is called without `allow_overlap=True`\n  Then   a `ValueError` is raised naming the overlapping shapes\n\nCASE-3\n  Given  `Scene(seed=42)` with identical shape declarations run twice\n  When   both outputs are compared byte-for-byte\n  Then   they are identical\n\nCASE-4\n  Given  `.save()` has already been called once on a `Scene`\n  When   `.save()` is called again\n  Then   a `RuntimeError` is raised\n\nCASE-5\n  Given  a `pipeline([...])` call with step dicts\n  When   `.save()` is called\n  Then   the resulting scene contains connected flowchart nodes with no\n         overlapping shapes",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [
-        "ARCH-EXCALIDRAW-031",
-        "ARCH-EXCALIDRAW-032"
-      ],
-      "satisfies": [
-        "SYS-VISUAL-106"
-      ],
-      "satisfied_by": [
-        "REQ-EXCALIDRAW-844",
-        "REQ-EXCALIDRAW-845"
-      ],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:2"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": "v2.4",
-      "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Constructorul de scene Excalidraw — API de bază",
-          "intent": "Skill-ul excalidraw-diagram are nevoie de o bibliotecă Python doar-stdlib care transformă declarații declarative de forme și săgeți într-un fișier de scenă Excalidraw valid și un viewer HTML de sine stătător, fără dependențe externe, astfel încât skill-ul să poată fi vendorizat în orice mediu fără fricțiune de instalare.",
-          "contract": "> Skill-ul excalidraw-diagram are nevoie de o bibliotecă Python doar-stdlib care\n> transformă declarații declarative de forme și săgeți într-un fișier de scenă\n> Excalidraw valid și un viewer HTML de sine stătător, fără dependențe externe, astfel\n> încât skill-ul să poată fi vendorizat în orice mediu fără fricțiune de instalare.\n\nFiecare punct de mai jos este obligatoriu.\n- `Scene` expune primitive de formă, aliasuri de flowchart ISO 5807, helpere de layout, și helpere de adnotare pentru construirea unei diagrame declarativ. [[REQ-EXCALIDRAW-844]] detaliază comportamentul.\n- `Scene` expune helpere de conector și un `.save(basename, out_dir)` care scrie atât o scenă `.excalidraw` cât și un viewer `.html` de sine stătător o singură dată, determinist când este seed-uit. [[REQ-EXCALIDRAW-845]] detaliază comportamentul.",
-          "acceptance": "CASE-1\n  Given  o `Scene` cu cel puțin un `box` și o `arrow`\n  When   `.save()` este apelată\n  Then   sunt scrise atât `<basename>.excalidraw` cât și `<basename>.html`, iar fișierul\n         `.excalidraw` se analizează ca JSON valid cu `type: \"excalidraw\"`\n\nCASE-2\n  Given  două forme `box` plasate la coordonate suprapuse\n  When   `.save()` este apelată fără `allow_overlap=True`\n  Then   se ridică un `ValueError` care numește formele suprapuse\n\nCASE-3\n  Given  `Scene(seed=42)` cu declarații de forme identice rulate de două ori\n  When   ambele ieșiri sunt comparate octet-cu-octet\n  Then   sunt identice\n\nCASE-4\n  Given  `.save()` a fost deja apelată o dată pe o `Scene`\n  When   `.save()` este apelată din nou\n  Then   se ridică un `RuntimeError`\n\nCASE-5\n  Given  un apel `pipeline([...])` cu dict-uri de pași\n  When   `.save()` este apelată\n  Then   scena rezultată conține noduri de flowchart conectate, fără\n         forme suprapuse"
-        }
-      }
-    },
-    {
-      "id": "REQ-EXCALIDRAW-844",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Shape, layout, and annotation vocabulary",
-      "intent": "A diagram is built by declaring shapes and arranging them, not by computing pixel coordinates by hand. `Scene` gives a caller shape primitives, ISO 5807 flowchart aliases (so a flowchart reads like a flowchart, not a pile of boxes), layout helpers that place shapes without overlap, and annotation helpers for titles and labels.",
-      "contract": [
-        "`Scene()` produces a valid Excalidraw JSON scene (schema version 2) with a `type: \"excalidraw\"` root and a `elements` list compatible with excalidraw.com import.",
-        "`Scene` exposes shape primitives: `box`, `ellipse`, `diamond`, `frame`.",
-        "`Scene` exposes ISO 5807 flowchart aliases: `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation`, `connector`.",
-        "`Scene` exposes layout helpers: `row`, `column`, `grid`, `enclose`, `lane`, `pipeline`, `section`, `align`, `distribute`.",
-        "`Scene` exposes annotation helpers: `title`, `label`, `legend`, `glossary`, `role`."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "CASE-1 — — Scene() produces an excalidraw.com-importable JSON scene Given  a `Scene` with at least one shape added When   `.save()` writes the `.excalidraw` file Then   it parses as JSON with `type: \"excalidraw\"` and an `elements` list",
-        "CASE-2 — — each shape primitive adds one element of its kind Given  a `Scene` When   `box`, `ellipse`, `diamond` and `frame` are each called once Then   the scene gains one element of each corresponding Excalidraw type",
-        "CASE-3 — — ISO 5807 aliases produce their underlying shapes Given  a `Scene` When   `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation` and `connector` are each called Then   each adds an element without raising, using its mapped primitive shape",
-        "CASE-4 — — layout helpers place shapes without overlap Given  three boxes When   `row([...])` arranges them Then   the resulting coordinates place them side by side with no overlapping pair",
-        "CASE-5 — — annotation helpers attach text without raising Given  a `Scene` with one shape When   `title`, `label`, `legend`, `glossary` and `role` are each called Then   each adds its text element and `.save()` still succeeds --------------------"
-      ],
-      "accept": "CASE-1 — Scene() produces an excalidraw.com-importable JSON scene\n  Given  a `Scene` with at least one shape added\n  When   `.save()` writes the `.excalidraw` file\n  Then   it parses as JSON with `type: \"excalidraw\"` and an `elements` list\n\nCASE-2 — each shape primitive adds one element of its kind\n  Given  a `Scene`\n  When   `box`, `ellipse`, `diamond` and `frame` are each called once\n  Then   the scene gains one element of each corresponding Excalidraw type\n\nCASE-3 — ISO 5807 aliases produce their underlying shapes\n  Given  a `Scene`\n  When   `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation` and `connector` are each called\n  Then   each adds an element without raising, using its mapped primitive shape\n\nCASE-4 — layout helpers place shapes without overlap\n  Given  three boxes\n  When   `row([...])` arranges them\n  Then   the resulting coordinates place them side by side with no overlapping pair\n\nCASE-5 — annotation helpers attach text without raising\n  Given  a `Scene` with one shape\n  When   `title`, `label`, `legend`, `glossary` and `role` are each called\n  Then   each adds its text element and `.save()` still succeeds\n\n\n--------------------",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:109"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:150"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:172"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:183"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:551"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [],
-      "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Vocabular de forme, layout și adnotare",
-          "intent": "O diagramă este construită prin declararea formelor și aranjarea lor, nu prin calcularea manuală a coordonatelor în pixeli. `Scene` oferă apelantului primitive de formă, alias-uri de flowchart ISO 5807 (astfel încât un flowchart să se citească precum un flowchart, nu o grămadă de casete), helper-e de layout care plasează formele fără suprapunere, și helper-e de adnotare pentru titluri și etichete.",
-          "contract": "> O diagramă este construită prin declararea formelor și aranjarea lor, nu prin calcularea\n> manuală a coordonatelor în pixeli. `Scene` oferă apelantului primitive de formă, alias-uri\n> de flowchart ISO 5807 (astfel încât un flowchart să se citească precum un flowchart, nu o\n> grămadă de casete), helper-e de layout care plasează formele fără suprapunere, și\n> helper-e de adnotare pentru titluri și etichete.\n\nFiecare bullet de mai jos este obligatoriu.\n- `Scene()` produce o scenă JSON Excalidraw validă (versiune schemă 2) cu\n  o rădăcină `type: \"excalidraw\"` și o listă `elements` compatibilă cu\n  importul excalidraw.com.\n- `Scene` expune primitive de formă: `box`, `ellipse`, `diamond`, `frame`.\n- `Scene` expune alias-uri de flowchart ISO 5807: `process`, `terminator`,\n  `decision`, `data`, `predefined_process`, `preparation`, `connector`.\n- `Scene` expune helper-e de layout: `row`, `column`, `grid`, `enclose`,\n  `lane`, `pipeline`, `section`, `align`, `distribute`.\n- `Scene` expune helper-e de adnotare: `title`, `label`, `legend`,\n  `glossary`, `role`.",
-          "acceptance": "CASE-1 — Scene() produce o scenă JSON importabilă pe excalidraw.com\n  Given  un `Scene` cu cel puțin o formă adăugată\n  When   `.save()` scrie fișierul `.excalidraw`\n  Then   se parsează ca JSON cu `type: \"excalidraw\"` și o listă `elements`\n\nCASE-2 — fiecare primitivă de formă adaugă un element de tipul ei\n  Given  un `Scene`\n  When   `box`, `ellipse`, `diamond` și `frame` sunt fiecare apelate o dată\n  Then   scena câștigă câte un element din fiecare tip Excalidraw corespunzător\n\nCASE-3 — alias-urile ISO 5807 produc formele lor de bază\n  Given  un `Scene`\n  When   `process`, `terminator`, `decision`, `data`, `predefined_process`, `preparation` și `connector` sunt fiecare apelate\n  Then   fiecare adaugă un element fără a ridica o eroare, folosind forma primitivă mapată\n\nCASE-4 — helper-ele de layout plasează formele fără suprapunere\n  Given  trei casete\n  When   `row([...])` le aranjează\n  Then   coordonatele rezultate le plasează una lângă alta fără nicio pereche suprapusă\n\nCASE-5 — helper-ele de adnotare atașează text fără a ridica o eroare\n  Given  un `Scene` cu o formă\n  When   `title`, `label`, `legend`, `glossary` și `role` sunt fiecare apelate\n  Then   fiecare adaugă elementul său de text și `.save()` tot reușește\n\n\n--------------------"
-        }
-      }
-    },
-    {
-      "id": "REQ-EXCALIDRAW-845",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Connectors and the save() contract",
-      "intent": "Shapes alone are not a diagram until they are linked, and a caller needs one predictable moment where the scene becomes files on disk. Connector helpers bind arrows to shape ids; `.save()` writes the `.excalidraw` scene and its HTML viewer together, exactly once, and — when the scene was seeded — byte-identically on every run, so a regenerated diagram never shows as a spurious diff.",
-      "contract": [
-        "`Scene` exposes connector helpers: `arrow`, `free_arrow`, `path`, `route_under`.",
-        "`.save(basename, out_dir)` writes both `<basename>.excalidraw` (the scene JSON) and `<basename>.html` (a self-contained viewer) in one call and raises `RuntimeError` if called more than once on the same `Scene`.",
-        "`Scene(seed=<int>)` produces byte-identical output across re-runs.",
-        "The builder has no external dependencies — stdlib only."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "CASE-1 — — connector helpers link two shapes Given  two boxes already placed in a `Scene` When   `arrow(a, b)` is called Then   the scene gains an arrow element bound to both shapes' ids",
-        "CASE-2 — — one .save() call writes both output files Given  a `Scene` with at least one shape When   `.save(\"demo\", out_dir)` is called Then   both `demo.excalidraw` and `demo.html` exist in `out_dir` after the single call",
-        "CASE-3 — — a fixed seed reproduces byte-identical output Given  the same shape declarations built twice with `Scene(seed=42)` When   each is saved to its own file Then   the two `.excalidraw` files are byte-for-byte identical",
-        "CASE-4 — — the builder imports only the standard library Given  `excalidraw_builder.py` When   its top-level imports are inspected Then   every imported module belongs to the Python standard library"
-      ],
-      "accept": "CASE-1 — connector helpers link two shapes\n  Given  two boxes already placed in a `Scene`\n  When   `arrow(a, b)` is called\n  Then   the scene gains an arrow element bound to both shapes' ids\n\nCASE-2 — one .save() call writes both output files\n  Given  a `Scene` with at least one shape\n  When   `.save(\"demo\", out_dir)` is called\n  Then   both `demo.excalidraw` and `demo.html` exist in `out_dir` after the single call\n\nCASE-3 — a fixed seed reproduces byte-identical output\n  Given  the same shape declarations built twice with `Scene(seed=42)`\n  When   each is saved to its own file\n  Then   the two `.excalidraw` files are byte-for-byte identical\n\nCASE-4 — the builder imports only the standard library\n  Given  `excalidraw_builder.py`\n  When   its top-level imports are inspected\n  Then   every imported module belongs to the Python standard library",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:186"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:902"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1349"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:2"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:551"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Conectori și contractul save()",
-          "intent": "Formele singure nu sunt o diagramă până nu sunt legate, iar apelantul are nevoie de un moment predictibil în care scena devine fișiere pe disc. Helper-ele de conector leagă săgeți de id-uri de formă; `.save()` scrie scena `.excalidraw` și viewer-ul ei HTML împreună, exact o dată, și — atunci când scena a fost inițializată cu seed — identic la nivel de byte la fiecare rulare, astfel încât o diagramă regenerată nu apare niciodată ca un diff fals.",
-          "contract": "> Formele singure nu sunt o diagramă până nu sunt legate, iar apelantul are nevoie\n> de un moment predictibil în care scena devine fișiere pe disc. Helper-ele de\n> conector leagă săgeți de id-uri de formă; `.save()` scrie scena `.excalidraw` și\n> viewer-ul ei HTML împreună, exact o dată, și — atunci când scena a fost inițializată\n> cu seed — identic la nivel de byte la fiecare rulare, astfel încât o diagramă\n> regenerată nu apare niciodată ca un diff fals.\n\nFiecare bullet de mai jos este obligatoriu.\n- `Scene` expune helper-e de conector: `arrow`, `free_arrow`, `path`,\n  `route_under`.\n- `.save(basename, out_dir)` scrie atât `<basename>.excalidraw` (JSON-ul\n  scenei) cât și `<basename>.html` (un viewer de sine stătător) într-un singur apel și\n  ridică `RuntimeError` dacă este apelat mai mult de o dată pe același `Scene`.\n- `Scene(seed=<int>)` produce output identic la nivel de byte între rulări repetate.\n- Builder-ul nu are dependențe externe — doar stdlib.",
-          "acceptance": "CASE-1 — helper-ele de conector leagă două forme\n  Given  două casete deja plasate într-un `Scene`\n  When   `arrow(a, b)` este apelat\n  Then   scena câștigă un element săgeată legat de id-urile ambelor forme\n\nCASE-2 — un singur apel .save() scrie ambele fișiere de output\n  Given  un `Scene` cu cel puțin o formă\n  When   `.save(\"demo\", out_dir)` este apelat\n  Then   atât `demo.excalidraw` cât și `demo.html` există în `out_dir` după singurul apel\n\nCASE-3 — un seed fix reproduce output identic la nivel de byte\n  Given  aceleași declarații de formă construite de două ori cu `Scene(seed=42)`\n  When   fiecare este salvat în propriul fișier\n  Then   cele două fișiere `.excalidraw` sunt identice byte cu byte\n\nCASE-4 — builder-ul importă doar biblioteca standard\n  Given  `excalidraw_builder.py`\n  When   importurile sale de nivel superior sunt inspectate\n  Then   fiecare modul importat aparține bibliotecii standard Python"
-        }
-      }
-    },
-    {
-      "id": "ARCH-EXCALIDRAW-031",
-      "layer": "feature",
-      "level": "architecture",
-      "status": "confirmed",
-      "area": "ARCH",
-      "title": "Excalidraw quality gates",
-      "intent": "A diagram that ships with overlapping shapes, arrows that cut through unrelated boxes, unlegended colours, text that spills outside its box, an arrow too short to draw a visible line, or a label wider than the arrow it sits on is unreadable to an outsider. Hard-fail gates at `.save()` time make these defects impossible to ship silently.",
-      "contract": [
-        "`.save()` supports five named gates (`crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`, `label_fit_check`), each accepting `\"warn\"` (default, prints) or `\"error\"` (raises `ValueError`). [[REQ-EXCALIDRAW-846]]",
-        "`.save()` additionally enforces two hard gates that raise `ValueError` by default — overlapping shapes and arrows clamped too short to render — each with its own opt-out flag for a deliberate exception. [[REQ-EXCALIDRAW-847]]"
-      ],
-      "verify": [],
-      "notes": [
-        "The canonical pattern for a ship-quality diagram is all five named gates set to `\"error\"` (the two hard gates already raise by default): `save(..., crossing_check=\"error\", legend_check=\"error\", overflow_check=\"error\", text_overlap_check=\"error\", label_fit_check=\"error\")`."
-      ],
-      "current_impl": [
-        "`check_overlaps`, `check_arrow_crossings`, `check_legend_coverage`, `check_text_overflow`, `check_text_overlaps`, `check_short_arrows`, `check_arrow_label_fit` and the `save()` gate dispatch in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`.",
-        "`skills/excalidraw-diagram/scripts/test_excalidraw.py` (gate regression suite).",
-        "-------------------"
-      ],
-      "acc": [
-        "CASE-1 — Given  a scene where a bound arrow's path passes through an unrelated box When   `save(crossing_check=\"error\")` is called Then   a `ValueError` is raised; `save(crossing_check=\"warn\")` emits a warning and exits normally",
-        "CASE-2 — Given  a scene with `fill=\"blue\"` on a box and no `legend()` rendered When   `save(legend_check=\"error\")` is called Then   a `ValueError` is raised naming the unlegended colour",
-        "CASE-3 — Given  a box whose bound text is wider than the box width When   `save(overflow_check=\"error\")` is called Then   a `ValueError` is raised; `check_text_overflow()` returns the offending shape id",
-        "CASE-4 — Given  two `label()` elements placed at overlapping coordinates When   `save(text_overlap_check=\"error\")` is called Then   a `ValueError` is raised naming the overlapping pair",
-        "CASE-5 — Given  each maintained example generator in `examples/` When   `test_excalidraw.py` runs it Then   the generator produces zero violations on every gate (the five named gates and both hard gates)",
-        "CASE-6 — Given  two boxes placed close but not overlapping, joined by a bound arrow When   `save()` is called with defaults Then   a `ValueError` is raised (the connector is too short to render); `save(allow_short_arrows=True)` writes the files, and `check_short_arrows()` returns the offending pair",
-        "CASE-7 — Given  a bound arrow whose label is wider than the arrow's visible line When   `save(label_fit_check=\"error\")` is called Then   a `ValueError` is raised; `check_arrow_label_fit()` returns the offending label"
-      ],
-      "accept": "CASE-1\n  Given  a scene where a bound arrow's path passes through an unrelated box\n  When   `save(crossing_check=\"error\")` is called\n  Then   a `ValueError` is raised; `save(crossing_check=\"warn\")` emits a\n         warning and exits normally\n\nCASE-2\n  Given  a scene with `fill=\"blue\"` on a box and no `legend()` rendered\n  When   `save(legend_check=\"error\")` is called\n  Then   a `ValueError` is raised naming the unlegended colour\n\nCASE-3\n  Given  a box whose bound text is wider than the box width\n  When   `save(overflow_check=\"error\")` is called\n  Then   a `ValueError` is raised; `check_text_overflow()` returns the\n         offending shape id\n\nCASE-4\n  Given  two `label()` elements placed at overlapping coordinates\n  When   `save(text_overlap_check=\"error\")` is called\n  Then   a `ValueError` is raised naming the overlapping pair\n\nCASE-5\n  Given  each maintained example generator in `examples/`\n  When   `test_excalidraw.py` runs it\n  Then   the generator produces zero violations on every gate (the five named\n         gates and both hard gates)\n\nCASE-6\n  Given  two boxes placed close but not overlapping, joined by a bound arrow\n  When   `save()` is called with defaults\n  Then   a `ValueError` is raised (the connector is too short to render);\n         `save(allow_short_arrows=True)` writes the files, and\n         `check_short_arrows()` returns the offending pair\n\nCASE-7\n  Given  a bound arrow whose label is wider than the arrow's visible line\n  When   `save(label_fit_check=\"error\")` is called\n  Then   a `ValueError` is raised; `check_arrow_label_fit()` returns the\n         offending label",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "depends_on": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "used_by": [],
-      "satisfies": [
-        "SYS-VISUAL-106"
-      ],
-      "satisfied_by": [
-        "REQ-EXCALIDRAW-846",
-        "REQ-EXCALIDRAW-847"
-      ],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:3"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:3"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": "v2.4",
-      "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Porți de calitate Excalidraw",
-          "intent": "O diagramă livrată cu forme suprapuse, săgeți care traversează casete fără legătură, culori fără legendă, text care se revarsă în afara casetei sale, o săgeată prea scurtă pentru a desena o linie vizibilă, sau o etichetă mai lată decât săgeata pe care stă este ilizibilă pentru un outsider. Porțile de eșec ferm la momentul `.save()` fac imposibilă livrarea în tăcere a acestor defecte.",
-          "contract": "> O diagramă livrată cu forme suprapuse, săgeți care traversează casete fără legătură,\n> culori fără legendă, text care se revarsă în afara casetei sale, o săgeată prea scurtă\n> pentru a desena o linie vizibilă, sau o etichetă mai lată decât săgeata pe care stă\n> este ilizibilă pentru un outsider. Porțile de eșec ferm la momentul `.save()` fac\n> imposibilă livrarea în tăcere a acestor defecte.\n\nFiecare punct de mai jos este obligatoriu.\n- `.save()` suportă cinci porți numite (`crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`, `label_fit_check`), fiecare acceptând `\"warn\"` (implicit, afișează) sau `\"error\"` (ridică `ValueError`). [[REQ-EXCALIDRAW-846]]\n- `.save()` impune suplimentar două porți ferme care ridică `ValueError` implicit — forme suprapuse și săgeți fixate prea scurt pentru a fi randate — fiecare cu propriul flag de dezactivare pentru o excepție deliberată. [[REQ-EXCALIDRAW-847]]",
-          "acceptance": "CASE-1\n  Given  o scenă unde traseul unei săgeți legate trece prin o casetă fără legătură\n  When   `save(crossing_check=\"error\")` este apelată\n  Then   se ridică un `ValueError`; `save(crossing_check=\"warn\")` emite un\n         avertisment și iese normal\n\nCASE-2\n  Given  o scenă cu `fill=\"blue\"` pe o casetă și fără nicio `legend()` randată\n  When   `save(legend_check=\"error\")` este apelată\n  Then   se ridică un `ValueError` care numește culoarea fără legendă\n\nCASE-3\n  Given  o casetă al cărei text legat este mai lat decât lățimea casetei\n  When   `save(overflow_check=\"error\")` este apelată\n  Then   se ridică un `ValueError`; `check_text_overflow()` returnează id-ul\n         formei incriminate\n\nCASE-4\n  Given  două elemente `label()` plasate la coordonate suprapuse\n  When   `save(text_overlap_check=\"error\")` este apelată\n  Then   se ridică un `ValueError` care numește perechea suprapusă\n\nCASE-5\n  Given  fiecare generator de exemplu întreținut din `examples/`\n  When   `test_excalidraw.py` îl rulează\n  Then   generatorul produce zero încălcări pe fiecare poartă (cele cinci porți\n         numite și ambele porți ferme)\n\nCASE-6\n  Given  două casete plasate aproape dar fără suprapunere, unite printr-o săgeată legată\n  When   `save()` este apelată cu valorile implicite\n  Then   se ridică un `ValueError` (conectorul este prea scurt pentru a fi randat);\n         `save(allow_short_arrows=True)` scrie fișierele, iar\n         `check_short_arrows()` returnează perechea incriminată\n\nCASE-7\n  Given  o săgeată legată a cărei etichetă este mai lată decât linia vizibilă a săgeții\n  When   `save(label_fit_check=\"error\")` este apelată\n  Then   se ridică un `ValueError`; `check_arrow_label_fit()` returnează\n         eticheta incriminată"
-        }
-      }
-    },
-    {
-      "id": "REQ-EXCALIDRAW-846",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Named gates: crossing, legend, and overflow checks",
-      "intent": "`.save()` runs five named checks before it writes a scene. Each accepts `\"warn\"` (print and continue, the default) or `\"error\"` (raise `ValueError`), so a generator can ship diagrams where readability defects — an arrow cutting through an unrelated box, an unlegended colour, text spilling out of its shape — fail the build instead of shipping silently.",
-      "contract": [
-        "`.save()` supports five named gates, each accepting `\"warn\"` (default, prints) or `\"error\"` (raises `ValueError`): `crossing_check`, `legend_check`, `overflow_check`, `text_overlap_check`, `label_fit_check`.",
-        "`crossing_check`: a bound arrow whose straight centre-to-centre path passes through an unrelated box triggers the gate.",
-        "`legend_check`: a fill colour used on any shape but absent from the `legend()` key triggers the gate (fires only after `legend()` is rendered; a scene with no legend is exempt).",
-        "`overflow_check`: a shape whose bound text is larger than the shape bounds (text spills outside) triggers the gate."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "CASE-1 — — each named gate accepts warn or error mode Given  a scene with a crossing_check violation When   `save(crossing_check=\"warn\")` and `save(crossing_check=\"error\")` are each called Then   the warn call prints a warning and returns normally, the error call raises `ValueError`",
-        "CASE-2 — — crossing_check fires when an arrow's path crosses an unrelated box Given  a bound arrow whose straight centre-to-centre path passes through a third, unrelated box When   `save(crossing_check=\"error\")` is called Then   a `ValueError` naming the crossing is raised",
-        "CASE-3 — — legend_check fires for an unlegended colour, exempt with no legend Given  a shape filled \"blue\" with `legend()` rendered but \"blue\" absent from its key When   `save(legend_check=\"error\")` is called Then   a `ValueError` naming the unlegended colour is raised; the same scene with no `legend()` call raises nothing",
-        "CASE-4 — — overflow_check fires when bound text exceeds the shape bounds Given  a box whose bound text is wider than the box When   `save(overflow_check=\"error\")` is called Then   a `ValueError` is raised --------------------"
-      ],
-      "accept": "CASE-1 — each named gate accepts warn or error mode\n  Given  a scene with a crossing_check violation\n  When   `save(crossing_check=\"warn\")` and `save(crossing_check=\"error\")` are each called\n  Then   the warn call prints a warning and returns normally, the error call raises `ValueError`\n\nCASE-2 — crossing_check fires when an arrow's path crosses an unrelated box\n  Given  a bound arrow whose straight centre-to-centre path passes through a third, unrelated\n         box\n  When   `save(crossing_check=\"error\")` is called\n  Then   a `ValueError` naming the crossing is raised\n\nCASE-3 — legend_check fires for an unlegended colour, exempt with no legend\n  Given  a shape filled \"blue\" with `legend()` rendered but \"blue\" absent from its key\n  When   `save(legend_check=\"error\")` is called\n  Then   a `ValueError` naming the unlegended colour is raised; the same scene with no\n         `legend()` call raises nothing\n\nCASE-4 — overflow_check fires when bound text exceeds the shape bounds\n  Given  a box whose bound text is wider than the box\n  When   `save(overflow_check=\"error\")` is called\n  Then   a `ValueError` is raised\n\n\n--------------------",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-031"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1119"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1159"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1188"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1349"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:99"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Gate-uri numite: verificări de crossing, legend și overflow",
-          "intent": "`.save()` rulează cinci verificări numite înainte de a scrie o scenă. Fiecare acceptă `\"warn\"` (afișează și continuă, implicit) sau `\"error\"` (ridică `ValueError`), astfel încât un generator poate livra diagrame în care defecte de lizibilitate — o săgeată care taie prin o casetă nelegată, o culoare nelegendată, text care depășește forma sa — fac build-ul să eșueze în loc să fie livrate în tăcere.",
-          "contract": "> `.save()` rulează cinci verificări numite înainte de a scrie o scenă. Fiecare acceptă\n> `\"warn\"` (afișează și continuă, implicit) sau `\"error\"` (ridică `ValueError`), astfel\n> încât un generator poate livra diagrame în care defecte de lizibilitate — o săgeată\n> care taie prin o casetă nelegată, o culoare nelegendată, text care depășește\n> forma sa — fac build-ul să eșueze în loc să fie livrate în tăcere.\n\nFiecare bullet de mai jos este obligatoriu.\n- `.save()` suportă cinci gate-uri numite, fiecare acceptând `\"warn\"` (implicit,\n  afișează) sau `\"error\"` (ridică `ValueError`): `crossing_check`, `legend_check`,\n  `overflow_check`, `text_overlap_check`, `label_fit_check`.\n- `crossing_check`: o săgeată legată al cărei traseu drept centru-la-centru trece\n  printr-o casetă nelegată declanșează gate-ul.\n- `legend_check`: o culoare de umplere folosită pe orice formă dar absentă din\n  cheia `legend()` declanșează gate-ul (se declanșează doar după ce `legend()` este\n  randat; o scenă fără legendă este exceptată).\n- `overflow_check`: o formă al cărei text legat este mai mare decât limitele formei\n  (textul depășește) declanșează gate-ul.",
-          "acceptance": "CASE-1 — fiecare gate numit acceptă modul warn sau error\n  Given  o scenă cu o încălcare de crossing_check\n  When   `save(crossing_check=\"warn\")` și `save(crossing_check=\"error\")` sunt fiecare apelate\n  Then   apelul warn afișează un avertisment și se întoarce normal, apelul error ridică `ValueError`\n\nCASE-2 — crossing_check se declanșează când traseul unei săgeți traversează o casetă nelegată\n  Given  o săgeată legată al cărei traseu drept centru-la-centru trece printr-o a treia casetă,\n         nelegată\n  When   `save(crossing_check=\"error\")` este apelat\n  Then   este ridicat un `ValueError` care numește intersecția\n\nCASE-3 — legend_check se declanșează pentru o culoare nelegendată, exceptată fără legendă\n  Given  o formă umplută \"blue\" cu `legend()` randat dar cu \"blue\" absent din cheia sa\n  When   `save(legend_check=\"error\")` este apelat\n  Then   este ridicat un `ValueError` care numește culoarea nelegendată; aceeași scenă fără\n         apel `legend()` nu ridică nimic\n\nCASE-4 — overflow_check se declanșează când textul legat depășește limitele formei\n  Given  o casetă al cărei text legat este mai lat decât caseta\n  When   `save(overflow_check=\"error\")` este apelat\n  Then   este ridicat un `ValueError`\n\n\n--------------------"
-        }
-      }
-    },
-    {
-      "id": "REQ-EXCALIDRAW-847",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Text-overlap, label-fit gates, and the two hard gates",
-      "intent": "Two more named checks (`text_overlap_check`, `label_fit_check`) catch overlapping captions and labels that crowd their arrow. Beyond those, `.save()` enforces two hard gates that always raise unless explicitly opted out — overlapping shapes and arrows too short to render — because those two defects have no legitimate \"warn and ship\" case.",
-      "contract": [
-        "`text_overlap_check`: two free captions or label elements that geometrically overlap each other trigger the gate.",
-        "`label_fit_check`: a bound arrow whose text label is wider than the connector it sits on — leaving less than ~24px of visible line on each side, measuring the label box projected onto the arrow direction — triggers the gate (the label crowds the arrowheads or spills onto the joined boxes).",
-        "`.save()` additionally enforces two hard gates that raise `ValueError` by default (no `\"warn\"`/`\"error\"` mode), each with an opt-out flag for a deliberate exception: overlapping non-container shapes (`allow_overlap=True`) and a bound arrow clamped too short to render a visible line — only its label would show — (`allow_short_arrows=True`).",
-        "The inspection methods `check_overlaps()`, `check_arrow_crossings()`, `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`, `check_short_arrows()`, `check_arrow_label_fit()` each return a list of offending items (empty list = clean) and are callable before `.save()`.",
-        "`test_excalidraw.py` exercises the five named gates in both `\"warn\"` and `\"error\"` modes, and the two hard gates, for each maintained example generator."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "CASE-1 — — text_overlap_check fires when two labels geometrically overlap Given  two `label()` elements placed at overlapping coordinates When   `save(text_overlap_check=\"error\")` is called Then   a `ValueError` naming the overlapping pair is raised",
-        "CASE-2 — — label_fit_check fires when a label crowds a short arrow Given  a bound arrow whose label leaves less than ~24px of visible line on one side When   `save(label_fit_check=\"error\")` is called Then   a `ValueError` is raised",
-        "CASE-3 — — the two hard gates raise by default and respect their opt-out flags Given  two overlapping non-container shapes, and separately a bound arrow clamped too short to render When   `save()` is called with defaults, then again with `allow_overlap=True` / `allow_short_arrows=True` Then   the default calls raise `ValueError`, and the opt-out calls write the files without raising",
-        "CASE-4 — — an inspection method returns offending items without saving Given  a scene with one crossing-arrow violation and no other defects When   `check_arrow_crossings()` is called before `.save()` Then   it returns a list containing that one item, while an unaffected check like `check_text_overflow()` returns an empty list"
-      ],
-      "accept": "CASE-1 — text_overlap_check fires when two labels geometrically overlap\n  Given  two `label()` elements placed at overlapping coordinates\n  When   `save(text_overlap_check=\"error\")` is called\n  Then   a `ValueError` naming the overlapping pair is raised\n\nCASE-2 — label_fit_check fires when a label crowds a short arrow\n  Given  a bound arrow whose label leaves less than ~24px of visible line on one side\n  When   `save(label_fit_check=\"error\")` is called\n  Then   a `ValueError` is raised\n\nCASE-3 — the two hard gates raise by default and respect their opt-out flags\n  Given  two overlapping non-container shapes, and separately a bound arrow clamped too short to\n         render\n  When   `save()` is called with defaults, then again with `allow_overlap=True` /\n         `allow_short_arrows=True`\n  Then   the default calls raise `ValueError`, and the opt-out calls write the files without\n         raising\n\nCASE-4 — an inspection method returns offending items without saving\n  Given  a scene with one crossing-arrow violation and no other defects\n  When   `check_arrow_crossings()` is called before `.save()`\n  Then   it returns a list containing that one item, while an unaffected check like\n         `check_text_overflow()` returns an empty list",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-031"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1071"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1212"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1236"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1273"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1349"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:99"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:636"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Gate-urile text-overlap, label-fit, și cele două gate-uri stricte",
-          "intent": "Alte două verificări numite (`text_overlap_check`, `label_fit_check`) prind titluri suprapuse și etichete care își aglomerează săgeata. Dincolo de acestea, `.save()` impune două gate-uri stricte care ridică întotdeauna o eroare, cu excepția unei renunțări explicite — forme suprapuse și săgeți prea scurte pentru a fi randate — pentru că aceste două defecte nu au niciun caz legitim de \"avertizează și livrează\".",
-          "contract": "> Alte două verificări numite (`text_overlap_check`, `label_fit_check`) prind titluri\n> suprapuse și etichete care își aglomerează săgeata. Dincolo de acestea, `.save()` impune\n> două gate-uri stricte care ridică întotdeauna o eroare, cu excepția unei renunțări\n> explicite — forme suprapuse și săgeți prea scurte pentru a fi randate — pentru că\n> aceste două defecte nu au niciun caz legitim de \"avertizează și livrează\".\n\nFiecare bullet de mai jos este obligatoriu.\n- `text_overlap_check`: două titluri libere sau elemente de etichetă care se suprapun\n  geometric unul pe celălalt declanșează gate-ul.\n- `label_fit_check`: o săgeată legată a cărei etichetă text este mai lată decât conectorul\n  pe care se află — lăsând mai puțin de ~24px de linie vizibilă pe fiecare parte, măsurând\n  caseta etichetei proiectată pe direcția săgeții — declanșează gate-ul\n  (eticheta aglomerează vârfurile săgeții sau se revarsă peste casetele unite).\n- `.save()` impune suplimentar două gate-uri stricte care ridică `ValueError`\n  implicit (fără mod `\"warn\"`/`\"error\"`), fiecare cu un flag de renunțare pentru o\n  excepție deliberată: forme non-container suprapuse (`allow_overlap=True`)\n  și o săgeată legată clampată prea scurt pentru a randa o linie vizibilă — doar eticheta\n  sa ar apărea — (`allow_short_arrows=True`).\n- Metodele de inspecție `check_overlaps()`, `check_arrow_crossings()`,\n  `check_legend_coverage()`, `check_text_overflow()`, `check_text_overlaps()`,\n  `check_short_arrows()`, `check_arrow_label_fit()` returnează fiecare o listă de\n  elemente cu probleme (listă goală = curat) și pot fi apelate înainte de `.save()`.\n- `test_excalidraw.py` exersează cele cinci gate-uri numite atât în modul `\"warn\"` cât și\n  `\"error\"`, plus cele două gate-uri stricte, pentru fiecare generator exemplu întreținut.",
-          "acceptance": "CASE-1 — text_overlap_check se declanșează când două etichete se suprapun geometric\n  Given  două elemente `label()` plasate la coordonate suprapuse\n  When   `save(text_overlap_check=\"error\")` este apelat\n  Then   este ridicat un `ValueError` care numește perechea suprapusă\n\nCASE-2 — label_fit_check se declanșează când o etichetă aglomerează o săgeată scurtă\n  Given  o săgeată legată a cărei etichetă lasă mai puțin de ~24px de linie vizibilă pe o parte\n  When   `save(label_fit_check=\"error\")` este apelat\n  Then   este ridicat un `ValueError`\n\nCASE-3 — cele două gate-uri stricte ridică o eroare implicit și respectă flag-urile lor de renunțare\n  Given  două forme non-container suprapuse, și separat o săgeată legată clampată prea scurt pentru\n         a fi randată\n  When   `save()` este apelat cu valorile implicite, apoi din nou cu `allow_overlap=True` /\n         `allow_short_arrows=True`\n  Then   apelurile implicite ridică `ValueError`, iar apelurile de renunțare scriu fișierele fără\n         a ridica o eroare\n\nCASE-4 — o metodă de inspecție returnează elementele cu probleme fără a salva\n  Given  o scenă cu o încălcare de tip crossing-arrow și niciun alt defect\n  When   `check_arrow_crossings()` este apelat înainte de `.save()`\n  Then   returnează o listă conținând acel element, în timp ce o verificare neafectată precum\n         `check_text_overflow()` returnează o listă goală"
-        }
-      }
-    },
-    {
-      "id": "ARCH-EXCALIDRAW-032",
-      "layer": "feature",
-      "level": "architecture",
-      "status": "confirmed",
-      "area": "ARCH",
-      "title": "Excalidraw builder CLI verbs",
-      "intent": "Diagrams need to be rebuilt when source changes: either from a generator script (the main authoring path), from a hand-edited `.excalidraw` file (viewer rebuild only), or from an existing repo that needs a scaffolded starting point (discover). The CLI exposes these as three distinct verbs so each use-case has a single, unambiguous entry point.",
-      "contract": [
-        "The CLI exposes three verbs, each a single unambiguous entry point: no-arg runs the CI smoke test, `render` rebuilds a viewer HTML from an existing `.excalidraw` file, and `discover` scaffolds a starting-point stub from an existing repo; any other verb exits 2 with usage. [[REQ-EXCALIDRAW-848]]"
-      ],
-      "verify": [],
-      "notes": [
-        "`discover` only scaffolds the *components* it can see; inferring real data flow and grouping remains the author's responsibility.",
-        "The smoke test (no-arg invocation) is what CI depends on — do not change the no-arg behaviour."
-      ],
-      "current_impl": [
-        "`_main(argv)` and the `render_html`, `discover_stub` functions in `skills/excalidraw-diagram/scripts/excalidraw_builder.py`.",
-        "`skills/excalidraw-diagram/scripts/test_excalidraw.py` (CLI test class).",
-        "-------------------"
-      ],
-      "acc": [
-        "CASE-1 — Given  no arguments When   `python excalidraw_builder.py` is run Then   it exits 0 and stdout contains a success/summary line (not an error)",
-        "CASE-2 — Given  a valid `.excalidraw` file at `<path>` When   `render <path>` is run Then   a `<basename>.html` is written; the source `.excalidraw` is unchanged",
-        "CASE-3 — Given  a directory containing at least one `.py` source file When   `discover <dir>` is run Then   a runnable Python stub is emitted that imports `excalidraw_builder` and calls `.save()`",
-        "CASE-4 — Given  an unknown verb such as `frobnicate` When   `python excalidraw_builder.py frobnicate` Then   the process exits with code 2 and prints usage"
-      ],
-      "accept": "CASE-1\n  Given  no arguments\n  When   `python excalidraw_builder.py` is run\n  Then   it exits 0 and stdout contains a success/summary line (not an error)\n\nCASE-2\n  Given  a valid `.excalidraw` file at `<path>`\n  When   `render <path>` is run\n  Then   a `<basename>.html` is written; the source `.excalidraw` is unchanged\n\nCASE-3\n  Given  a directory containing at least one `.py` source file\n  When   `discover <dir>` is run\n  Then   a runnable Python stub is emitted that imports `excalidraw_builder`\n         and calls `.save()`\n\nCASE-4\n  Given  an unknown verb such as `frobnicate`\n  When   `python excalidraw_builder.py frobnicate`\n  Then   the process exits with code 2 and prints usage",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "depends_on": [
-        "ARCH-EXCALIDRAW-030"
-      ],
-      "used_by": [],
-      "satisfies": [
-        "SYS-VISUAL-106"
-      ],
-      "satisfied_by": [
-        "REQ-EXCALIDRAW-848"
-      ],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:4"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:4"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": "v2.4",
-      "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Verbele CLI ale constructorului Excalidraw",
-          "intent": "Diagramele trebuie reconstruite atunci când sursa se schimbă: fie dintr-un script generator (calea principală de autorat), fie dintr-un fișier `.excalidraw` editat manual (reconstruire doar a viewer-ului), fie dintr-un repo existent care are nevoie de un punct de pornire schelet (discover). CLI-ul expune acestea ca trei verbe distincte, astfel încât fiecare caz de utilizare are un singur punct de intrare, fără ambiguitate.",
-          "contract": "> Diagramele trebuie reconstruite atunci când sursa se schimbă: fie dintr-un script\n> generator (calea principală de autorat), fie dintr-un fișier `.excalidraw` editat\n> manual (reconstruire doar a viewer-ului), fie dintr-un repo existent care are nevoie\n> de un punct de pornire schelet (discover). CLI-ul expune acestea ca trei verbe\n> distincte, astfel încât fiecare caz de utilizare are un singur punct de intrare, fără\n> ambiguitate.\n\nFiecare punct de mai jos este obligatoriu.\n- CLI-ul expune trei verbe, fiecare un singur punct de intrare fără ambiguitate: fără argument rulează testul de fum CI, `render` reconstruiește un viewer HTML dintr-un fișier `.excalidraw` existent, iar `discover` schelează un stub de punct de pornire dintr-un repo existent; orice alt verb iese cu 2 și afișează utilizarea. [[REQ-EXCALIDRAW-848]]",
-          "acceptance": "CASE-1\n  Given  niciun argument\n  When   `python excalidraw_builder.py` este rulat\n  Then   iese cu 0 iar stdout conține o linie de succes/rezumat (nu o eroare)\n\nCASE-2\n  Given  un fișier `.excalidraw` valid la `<path>`\n  When   `render <path>` este rulat\n  Then   se scrie un `<basename>.html`; sursa `.excalidraw` rămâne neschimbată\n\nCASE-3\n  Given  un director care conține cel puțin un fișier sursă `.py`\n  When   `discover <dir>` este rulat\n  Then   se emite un stub Python rulabil care importă `excalidraw_builder`\n         și apelează `.save()`\n\nCASE-4\n  Given  un verb necunoscut precum `frobnicate`\n  When   `python excalidraw_builder.py frobnicate`\n  Then   procesul iese cu codul 2 și afișează utilizarea"
-        }
-      }
-    },
-    {
-      "id": "REQ-EXCALIDRAW-848",
-      "layer": "feature",
-      "level": "code",
-      "status": "confirmed",
-      "area": "REQ",
-      "title": "Smoke test, render and discover verbs",
-      "intent": "A diagram can need rebuilding from three different starting points — a generator script, a hand-edited `.excalidraw` scene, or an existing repo with no diagram yet — and each needs its own unambiguous command rather than one verb guessing the intent. The no-arg form is also CI's health check for the builder itself, so it must never be shadowed by a new default.",
-      "contract": [
-        "Invoking `python excalidraw_builder.py` with **no arguments** runs the builder smoke test, prints a human-readable summary, and exits 0 on success. This is the CI health-check entry point and is never shadowed by a new default verb.",
-        "`python excalidraw_builder.py render <scene.excalidraw> [out_dir]` reads an existing `.excalidraw` file and writes a fresh self-contained `<basename>.html` viewer beside it (or into `out_dir` when given). The source `.excalidraw` file is never modified.",
-        "`python excalidraw_builder.py discover <repo> [out.py]` scans `<repo>` for source files and emits a runnable multi-layer poster stub (STRUCTURE layer pre-populated, WORKFLOW / INTEGRATION / MODES / MODEL / DATA layers commented as scaffolds) to `out.py` (default: `make_diagram.py`).",
-        "Any unrecognised verb exits with code 2 and prints a usage message."
-      ],
-      "verify": [],
-      "notes": [],
-      "current_impl": [],
-      "acc": [
-        "CASE-1 — — no-arg invocation runs the smoke test and exits 0 Given  no command-line arguments When   `python excalidraw_builder.py` runs Then   it prints a success summary line and exits 0",
-        "CASE-2 — — render rebuilds the HTML viewer without touching the source Given  an existing `<scene>.excalidraw` file When   `render <scene>.excalidraw` runs Then   a fresh `<scene>.html` is written and the `.excalidraw` file's bytes are unchanged",
-        "CASE-3 — — discover emits a runnable multi-layer stub Given  a repository containing at least one source file When   `discover <repo> out.py` runs Then   `out.py` is written, imports `excalidraw_builder`, and runs without error",
-        "CASE-4 — — an unknown verb exits 2 with usage Given  the verb `frobnicate` When   `python excalidraw_builder.py frobnicate` runs Then   it exits with code 2 and prints a usage message"
-      ],
-      "accept": "CASE-1 — no-arg invocation runs the smoke test and exits 0\n  Given  no command-line arguments\n  When   `python excalidraw_builder.py` runs\n  Then   it prints a success summary line and exits 0\n\nCASE-2 — render rebuilds the HTML viewer without touching the source\n  Given  an existing `<scene>.excalidraw` file\n  When   `render <scene>.excalidraw` runs\n  Then   a fresh `<scene>.html` is written and the `.excalidraw` file's bytes are unchanged\n\nCASE-3 — discover emits a runnable multi-layer stub\n  Given  a repository containing at least one source file\n  When   `discover <repo> out.py` runs\n  Then   `out.py` is written, imports `excalidraw_builder`, and runs without error\n\nCASE-4 — an unknown verb exits 2 with usage\n  Given  the verb `frobnicate`\n  When   `python excalidraw_builder.py frobnicate` runs\n  Then   it exits with code 2 and prints a usage message",
-      "input": "",
-      "output": "",
-      "desc": "",
-      "deps": [],
-      "depends_on": [],
-      "used_by": [],
-      "satisfies": [
-        "ARCH-EXCALIDRAW-032"
-      ],
-      "satisfied_by": [],
-      "members": [
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1600"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1794"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:1903"
-        },
-        {
-          "role": "tested-by",
-          "loc": "plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:390"
-        }
-      ],
-      "test_exempt": null,
-      "milestone": null,
-      "priority": "",
-      "risks": [],
-      "clauses": 4,
-      "covered": 4,
-      "i18n": {
-        "ro": {
-          "title": "Verbele smoke test, render și discover",
-          "intent": "O diagramă poate necesita reconstrucție din trei puncte de plecare diferite — un script generator, o scenă `.excalidraw` editată manual, sau un repo existent fără nicio diagramă încă — și fiecare are nevoie de propria comandă neambiguă în loc de un singur verb care ghicește intenția. Forma fără argumente este de asemenea verificarea de sănătate a CI pentru builder-ul însuși, deci nu trebuie niciodată umbrită de un nou verb implicit.",
-          "contract": "> O diagramă poate necesita reconstrucție din trei puncte de plecare diferite — un\n> script generator, o scenă `.excalidraw` editată manual, sau un repo existent fără\n> nicio diagramă încă — și fiecare are nevoie de propria comandă neambiguă în loc de\n> un singur verb care ghicește intenția. Forma fără argumente este de asemenea\n> verificarea de sănătate a CI pentru builder-ul însuși, deci nu trebuie niciodată\n> umbrită de un nou verb implicit.\n\nFiecare bullet de mai jos este obligatoriu.\n- Invocarea `python excalidraw_builder.py` fără **niciun argument** rulează\n  smoke test-ul builder-ului, afișează un rezumat lizibil pentru om, și iese cu 0 la succes.\n  Acesta este punctul de intrare al verificării de sănătate CI și nu este niciodată umbrit de un nou\n  verb implicit.\n- `python excalidraw_builder.py render <scene.excalidraw> [out_dir]` citește\n  un fișier `.excalidraw` existent și scrie un viewer `<basename>.html`\n  proaspăt, de sine stătător, lângă el (sau în `out_dir` dacă este dat). Fișierul\n  `.excalidraw` sursă nu este niciodată modificat.\n- `python excalidraw_builder.py discover <repo> [out.py]` scanează `<repo>`\n  pentru fișiere sursă și emite un stub de poster multi-layer rulabil (layer-ul STRUCTURE\n  pre-populat, layer-ele WORKFLOW / INTEGRATION / MODES / MODEL / DATA\n  comentate ca schele) în `out.py` (implicit: `make_diagram.py`).\n- Orice verb nerecunoscut iese cu codul 2 și afișează un mesaj de utilizare.",
-          "acceptance": "CASE-1 — invocarea fără argumente rulează smoke test-ul și iese cu 0\n  Given  niciun argument de linie de comandă\n  When   `python excalidraw_builder.py` rulează\n  Then   afișează o linie de rezumat de succes și iese cu 0\n\nCASE-2 — render reconstruiește viewer-ul HTML fără a atinge sursa\n  Given  un fișier `<scene>.excalidraw` existent\n  When   `render <scene>.excalidraw` rulează\n  Then   un `<scene>.html` proaspăt este scris și octeții fișierului `.excalidraw` rămân neschimbați\n\nCASE-3 — discover emite un stub multi-layer rulabil\n  Given  un repository conținând cel puțin un fișier sursă\n  When   `discover <repo> out.py` rulează\n  Then   `out.py` este scris, importă `excalidraw_builder`, și rulează fără erori\n\nCASE-4 — un verb necunoscut iese cu 2 și afișează utilizarea\n  Given  verbul `frobnicate`\n  When   `python excalidraw_builder.py frobnicate` rulează\n  Then   iese cu codul 2 și afișează un mesaj de utilizare"
         }
       }
     },
@@ -7003,10 +6420,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:149"
         },
@@ -8099,10 +7512,6 @@
         "REQ-MAP-873"
       ],
       "members": [
-        {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:1794"
@@ -10275,10 +9684,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:813"
         },
@@ -11460,7 +10865,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:120"
+          "loc": ".github/workflows/ci.yml:115"
         },
         {
           "role": "implements",
@@ -11793,10 +11198,10 @@
       ],
       "acc": [
         "CASE-1 — Given  a commit that changes `app/` without re-committing the built viewer When   the `artifacts` job runs Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command",
-        "CASE-2 — Given  a commit that changes the architecture generator without re-committing its output When   the `artifacts` job runs Then   it fails and names `docs/full_architecture.html` and the rebuild command",
+        "CASE-2 — Given  a commit that changes the architecture generator without re-committing its output When   the `artifacts` job runs Then   it fails and names the stale file and the command that regenerates it",
         "CASE-3 — Given  a tree whose committed artifacts match their sources When   the `artifacts` job runs Then   it passes and `release` becomes eligible to run"
       ],
-      "accept": "CASE-1\n  Given  a commit that changes `app/` without re-committing the built viewer\n  When   the `artifacts` job runs\n  Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command\n\nCASE-2\n  Given  a commit that changes the architecture generator without re-committing its output\n  When   the `artifacts` job runs\n  Then   it fails and names `docs/full_architecture.html` and the rebuild command\n\nCASE-3\n  Given  a tree whose committed artifacts match their sources\n  When   the `artifacts` job runs\n  Then   it passes and `release` becomes eligible to run",
+      "accept": "CASE-1\n  Given  a commit that changes `app/` without re-committing the built viewer\n  When   the `artifacts` job runs\n  Then   it fails and names `plugin/scripts/_map_viewer.html` and the rebuild command\n\nCASE-2\n  Given  a commit that changes the architecture generator without re-committing its output\n  When   the `artifacts` job runs\n  Then   it fails and names the stale file and the command that regenerates it\n\nCASE-3\n  Given  a tree whose committed artifacts match their sources\n  When   the `artifacts` job runs\n  Then   it passes and `release` becomes eligible to run",
       "input": "",
       "output": "",
       "desc": "",
@@ -11822,15 +11227,7 @@
       "test_exempt": "pipeline wiring (a CI job that rebuilds and compares) — the behavior IS the comparison, observed by CI running it; a unit test would only re-assert that a byte compare compares",
       "milestone": "v2.19",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Artefactele de build commise rămân re-derivabile",
-          "intent": "Două fișiere de aici sunt ieșiri de build care sunt totuși commise, deoarece întreaga promisiune este că un consumator le primește fără să instaleze un toolchain. Nimic nu verifica vreunul dintre ele față de sursa din care provenea, astfel încât o editare a aplicației viewer sau a unui generator de diagrame putea livra un artefact care nu mai corespundea propriului cod, iar repo-ul rămânea totuși verde.",
-          "contract": "> Două fișiere de aici sunt ieșiri de build care sunt totuși commise, deoarece\n> întreaga promisiune este că un consumator le primește fără să instaleze un\n> toolchain. Nimic nu verifica vreunul dintre ele față de sursa din care provenea,\n> astfel încât o editare a aplicației viewer sau a unui generator de diagrame putea\n> livra un artefact care nu mai corespundea propriului cod, iar repo-ul rămânea\n> totuși verde.\n\nFiecare punct de mai jos este obligatoriu.\n- `plugin/scripts/_map_viewer.html` derivă din `app/`, construit prin `npm run build:viewer`; job-ul CI `artifacts` reconstruiește fiecare artefact acoperit și face build-ul să eșueze atunci când o reconstrucție diferă de ce este commis. [[REQ-REPRO-905]]",
-          "acceptance": "CASE-1\n  Given  un commit care schimbă `app/` fără a re-commite viewer-ul construit\n  When   job-ul `artifacts` rulează\n  Then   eșuează și numește `plugin/scripts/_map_viewer.html` și comanda de reconstrucție\n\nCASE-2\n  Given  un commit care schimbă generatorul de arhitectură fără a re-commite ieșirea lui\n  When   job-ul `artifacts` rulează\n  Then   eșuează și numește `docs/full_architecture.html` și comanda de reconstrucție\n\nCASE-3\n  Given  un tree ale cărui artefacte commise se potrivesc cu sursele lor\n  When   job-ul `artifacts` rulează\n  Then   trece iar `release` devine eligibil să ruleze"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-REPRO-905",
@@ -11842,7 +11239,6 @@
       "intent": "A committed build artifact is a promise that a consumer never has to run the toolchain that produced it — but that promise silently rots the moment source changes without a rebuild. Rebuilding each artifact fresh on every push and diffing it against the committed copy turns \"probably still matches\" into a hard CI failure, at the cost of running a Node and a Python build on every push.",
       "contract": [
         "`plugin/scripts/_map_viewer.html` derives from `app/`, built by `npm run build:viewer`.",
-        "`docs/full_architecture.html` derives from `plugin/skills/excalidraw-diagram/examples/make_full_architecture.py`.",
         "The `artifacts` CI job rebuilds each covered artifact from its source on every push and pull request.",
         "The job fails the build when a rebuilt artifact differs from the committed one.",
         "The failure message names the stale file and the command that regenerates it.",
@@ -11853,13 +11249,11 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — a stale vendored viewer fails the job and names the fix Given  a commit that changes `app/` without re-committing `plugin/scripts/_map_viewer.html` When   the \"Vendored viewer matches app/\" step runs Then   `git diff --exit-code` on that file is non-zero, the step fails, and the error names the file and `npm run build:viewer`",
-        "CASE-2 — — the published architecture diagram matches its generator Given  `make_full_architecture.py` regenerated into a temporary directory When   its output is compared byte-for-byte against the committed `docs/full_architecture.html` Then   the two files are identical",
-        "CASE-3 — — the SSR smoke runs against this repo's real registry, not a stand-in Given  a fresh checkout whose `app/public/data.json` is gitignored and absent When   the \"Viewer SSR smoke\" step runs Then   `npm run sync` first builds that fixture from the committed `plugin/requirements/_map.json` before `npm run smoke` runs against it",
-        "CASE-4 — — the vendored-viewer check is the rebuild's own diff, not a second comparison Given  the \"Rebuild the vendored viewer\" step has just overwritten `plugin/scripts/_map_viewer.html` in place When   the next step runs Then   it inspects the working-tree diff on that one file — the rebuild writing over the committed copy IS the check, with no separate comparison logic",
-        "CASE-5 — — the diagram check builds into a temp directory, never in place Given  `.gitignore` hard-blocks `docs/*.excalidraw`, a sibling file the generator writes When   the \"Published architecture diagram matches its generator\" step runs Then   `make_full_architecture.py` writes into a `mktemp -d` directory, and only that output is compared against the committed `docs/full_architecture.html`",
-        "CASE-6 — — the release job depends on the artifacts job Given  `.github/workflows/ci.yml` When   the `release` job's `needs:` list is inspected Then   it names `artifacts` alongside `gate-and-tests` and `tests`"
+        "CASE-2 — — the SSR smoke runs against this repo's real registry, not a stand-in Given  a fresh checkout whose `app/public/data.json` is gitignored and absent When   the \"Viewer SSR smoke\" step runs Then   `npm run sync` first builds that fixture from the committed `plugin/requirements/_map.json` before `npm run smoke` runs against it",
+        "CASE-3 — — the vendored-viewer check is the rebuild's own diff, not a second comparison Given  the \"Rebuild the vendored viewer\" step has just overwritten `plugin/scripts/_map_viewer.html` in place When   the next step runs Then   it inspects the working-tree diff on that one file — the rebuild writing over the committed copy IS the check, with no separate comparison logic",
+        "CASE-4 — — the release job depends on the artifacts job Given  `.github/workflows/ci.yml` When   the `release` job's `needs:` list is inspected Then   it names `artifacts` alongside `gate-and-tests` and `tests`"
       ],
-      "accept": "CASE-1 — a stale vendored viewer fails the job and names the fix\n  Given  a commit that changes `app/` without re-committing `plugin/scripts/_map_viewer.html`\n  When   the \"Vendored viewer matches app/\" step runs\n  Then   `git diff --exit-code` on that file is non-zero, the step fails, and the error\n         names the file and `npm run build:viewer`\n\nCASE-2 — the published architecture diagram matches its generator\n  Given  `make_full_architecture.py` regenerated into a temporary directory\n  When   its output is compared byte-for-byte against the committed\n         `docs/full_architecture.html`\n  Then   the two files are identical\n\nCASE-3 — the SSR smoke runs against this repo's real registry, not a stand-in\n  Given  a fresh checkout whose `app/public/data.json` is gitignored and absent\n  When   the \"Viewer SSR smoke\" step runs\n  Then   `npm run sync` first builds that fixture from the committed\n         `plugin/requirements/_map.json` before `npm run smoke` runs against it\n\nCASE-4 — the vendored-viewer check is the rebuild's own diff, not a second comparison\n  Given  the \"Rebuild the vendored viewer\" step has just overwritten\n         `plugin/scripts/_map_viewer.html` in place\n  When   the next step runs\n  Then   it inspects the working-tree diff on that one file — the rebuild writing over the\n         committed copy IS the check, with no separate comparison logic\n\nCASE-5 — the diagram check builds into a temp directory, never in place\n  Given  `.gitignore` hard-blocks `docs/*.excalidraw`, a sibling file the generator writes\n  When   the \"Published architecture diagram matches its generator\" step runs\n  Then   `make_full_architecture.py` writes into a `mktemp -d` directory, and only that\n         output is compared against the committed `docs/full_architecture.html`\n\nCASE-6 — the release job depends on the artifacts job\n  Given  `.github/workflows/ci.yml`\n  When   the `release` job's `needs:` list is inspected\n  Then   it names `artifacts` alongside `gate-and-tests` and `tests`",
+      "accept": "CASE-1 — a stale vendored viewer fails the job and names the fix\n  Given  a commit that changes `app/` without re-committing `plugin/scripts/_map_viewer.html`\n  When   the \"Vendored viewer matches app/\" step runs\n  Then   `git diff --exit-code` on that file is non-zero, the step fails, and the error\n         names the file and `npm run build:viewer`\n\nCASE-2 — the SSR smoke runs against this repo's real registry, not a stand-in\n  Given  a fresh checkout whose `app/public/data.json` is gitignored and absent\n  When   the \"Viewer SSR smoke\" step runs\n  Then   `npm run sync` first builds that fixture from the committed\n         `plugin/requirements/_map.json` before `npm run smoke` runs against it\n\nCASE-3 — the vendored-viewer check is the rebuild's own diff, not a second comparison\n  Given  the \"Rebuild the vendored viewer\" step has just overwritten\n         `plugin/scripts/_map_viewer.html` in place\n  When   the next step runs\n  Then   it inspects the working-tree diff on that one file — the rebuild writing over the\n         committed copy IS the check, with no separate comparison logic\n\nCASE-4 — the release job depends on the artifacts job\n  Given  `.github/workflows/ci.yml`\n  When   the `release` job's `needs:` list is inspected\n  Then   it names `artifacts` alongside `gate-and-tests` and `tests`",
       "input": "",
       "output": "",
       "desc": "",
@@ -11873,37 +11267,25 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:183"
+          "loc": ".github/workflows/ci.yml:172"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:186"
+          "loc": ".github/workflows/ci.yml:175"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:190"
+          "loc": ".github/workflows/ci.yml:179"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:199"
-        },
-        {
-          "role": "implements",
-          "loc": ".github/workflows/ci.yml:337"
+          "loc": ".github/workflows/ci.yml:314"
         }
       ],
       "test_exempt": "pipeline wiring observed by the CI artifacts job, not by a unit test",
       "milestone": null,
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Reconstruirea și diff-uirea fiecărui artefact committed în CI",
-          "intent": "Un artefact de build committed este o promisiune că un consumator nu trebuie niciodată să ruleze toolchain-ul care l-a produs — dar acea promisiune putrezește tacit de îndată ce sursa se schimbă fără o reconstrucție. Reconstruirea fiecărui artefact proaspăt la fiecare push și diff-uirea lui față de copia committed transformă \"probabil tot se potrivește\" într-un eșec CI ferm, cu costul rulării unui build Node și unul Python la fiecare push.",
-          "contract": "> Un artefact de build committed este o promisiune că un consumator nu trebuie\n> niciodată să ruleze toolchain-ul care l-a produs — dar acea promisiune putrezește\n> tacit de îndată ce sursa se schimbă fără o reconstrucție. Reconstruirea fiecărui\n> artefact proaspăt la fiecare push și diff-uirea lui față de copia committed transformă\n> \"probabil tot se potrivește\" într-un eșec CI ferm, cu costul rulării unui build Node și\n> unul Python la fiecare push.\n\nFiecare bullet de mai jos este obligatoriu.\n- `plugin/scripts/_map_viewer.html` derivă din `app/`, construit de `npm run build:viewer`.\n- `docs/full_architecture.html` derivă din\n  `plugin/skills/excalidraw-diagram/examples/make_full_architecture.py`.\n- Job-ul CI `artifacts` reconstruiește fiecare artefact acoperit din sursa lui la fiecare push și\n  pull request.\n- Job-ul eșuează build-ul când un artefact reconstruit diferă de cel committed.\n- Mesajul de eșec numește fișierul perimat și comanda care îl regenerează.\n- Job-ul `release` rulează doar după ce `artifacts` trece, astfel încât un artefact perimat nu\n  ajunge niciodată la un tag publicat.",
-          "acceptance": "CASE-1 — un viewer vendored perimat eșuează job-ul și numește fix-ul\n  Given  un commit care schimbă `app/` fără să re-commit-eze `plugin/scripts/_map_viewer.html`\n  When   rulează pasul \"Vendored viewer matches app/\"\n  Then   `git diff --exit-code` pe acel fișier este non-zero, pasul eșuează, iar eroarea\n         numește fișierul și `npm run build:viewer`\n\nCASE-2 — diagrama de arhitectură publicată se potrivește cu generatorul ei\n  Given  `make_full_architecture.py` regenerat într-un director temporar\n  When   ieșirea sa este comparată byte-cu-byte cu\n         `docs/full_architecture.html`-ul committed\n  Then   cele două fișiere sunt identice\n\nCASE-3 — smoke test-ul SSR rulează pe registry-ul real al acestui repo, nu pe un substitut\n  Given  un checkout proaspăt al cărui `app/public/data.json` este gitignored și absent\n  When   rulează pasul \"Viewer SSR smoke\"\n  Then   `npm run sync` construiește mai întâi acel fixture din\n         `plugin/requirements/_map.json`-ul committed înainte ca `npm run smoke` să ruleze pe el\n\nCASE-4 — verificarea viewer-ului vendored este diff-ul propriu al reconstrucției, nu o a doua comparație\n  Given  pasul \"Rebuild the vendored viewer\" tocmai a suprascris\n  `plugin/scripts/_map_viewer.html` pe loc\n  When   rulează pasul următor\n  Then   inspectează diff-ul working-tree pe acel fișier — reconstrucția care suprascrie copia\n         committed ESTE verificarea, fără nicio logică de comparație separată\n\nCASE-5 — verificarea diagramei se construiește într-un director temp, niciodată pe loc\n  Given  `.gitignore` blochează dur `docs/*.excalidraw`, un fișier frate pe care generatorul îl scrie\n  When   rulează pasul \"Published architecture diagram matches its generator\"\n  Then   `make_full_architecture.py` scrie într-un director `mktemp -d`, și doar acea\n         ieșire este comparată cu `docs/full_architecture.html`-ul committed\n\nCASE-6 — job-ul release depinde de job-ul artifacts\n  Given  `.github/workflows/ci.yml`\n  When   este inspectată lista `needs:` a job-ului `release`\n  Then   numește `artifacts` alături de `gate-and-tests` și `tests`"
-        }
-      }
+      "risks": []
     },
     {
       "id": "ARCH-RETIRE-064",
@@ -13048,10 +12430,6 @@
         "REQ-SCAN-992"
       ],
       "members": [
-        {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:120"
@@ -16075,10 +15453,6 @@
       ],
       "members": [
         {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
-        },
-        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap.py:2472"
         },
@@ -16995,10 +16369,6 @@
         {
           "role": "implements",
           "loc": "app/src/views/SpecView.jsx:1"
-        },
-        {
-          "role": "generated-from",
-          "loc": "docs/full_architecture.html:4"
         },
         {
           "role": "implements",
@@ -18560,9 +17930,6 @@
         "SYS-SSOT-001"
       ],
       "satisfied_by": [
-        "ARCH-EXCALIDRAW-030",
-        "ARCH-EXCALIDRAW-031",
-        "ARCH-EXCALIDRAW-032",
         "ARCH-MAP-007",
         "ARCH-MAPDIAGRAMS-055",
         "ARCH-SITE-026",
@@ -18768,14 +18135,6 @@
     [
       "ARCH-DRIFTIMPACT-035",
       "ARCH-DRIFT-003"
-    ],
-    [
-      "ARCH-EXCALIDRAW-031",
-      "ARCH-EXCALIDRAW-030"
-    ],
-    [
-      "ARCH-EXCALIDRAW-032",
-      "ARCH-EXCALIDRAW-030"
     ],
     [
       "ARCH-EXTRACT-008",
@@ -19346,38 +18705,6 @@
     [
       "REQ-DRIFTIMPACT-843",
       "ARCH-DRIFTIMPACT-035"
-    ],
-    [
-      "ARCH-EXCALIDRAW-030",
-      "SYS-VISUAL-106"
-    ],
-    [
-      "REQ-EXCALIDRAW-844",
-      "ARCH-EXCALIDRAW-030"
-    ],
-    [
-      "REQ-EXCALIDRAW-845",
-      "ARCH-EXCALIDRAW-030"
-    ],
-    [
-      "ARCH-EXCALIDRAW-031",
-      "SYS-VISUAL-106"
-    ],
-    [
-      "REQ-EXCALIDRAW-846",
-      "ARCH-EXCALIDRAW-031"
-    ],
-    [
-      "REQ-EXCALIDRAW-847",
-      "ARCH-EXCALIDRAW-031"
-    ],
-    [
-      "ARCH-EXCALIDRAW-032",
-      "SYS-VISUAL-106"
-    ],
-    [
-      "REQ-EXCALIDRAW-848",
-      "ARCH-EXCALIDRAW-032"
     ],
     [
       "ARCH-EXTRACT-008",
@@ -20935,16 +20262,16 @@
     }
   ],
   "design": {
-    "files": 31,
+    "files": 30,
     "clean_files": 9,
-    "score": 29,
+    "score": 30,
     "candidates": {
-      "encapsulation": 49,
+      "encapsulation": 11,
       "abstraction": 42,
       "inheritance": 0,
       "polymorphism": 0,
-      "metrics": 1,
-      "standards": 25
+      "metrics": 0,
+      "standards": 23
     },
     "findings": [
       {
@@ -21525,334 +20852,6 @@
       },
       {
         "pillar": "standards",
-        "kind": "file-too-long",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 1,
-        "name": "excalidraw_builder.py",
-        "detail": "1939 lines (over 500)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 117,
-        "name": "__init__",
-        "detail": "h, w, x, y travel together through 15 functions: __init__, box, column, connector, data, decision"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 117,
-        "name": "__init__",
-        "detail": "h, x, y travel together through 16 functions: __init__, _vline, box, column, connector, data"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 159,
-        "name": "__init__",
-        "detail": "fill, group, stroke travel together through 3 functions: __init__, box, frame"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 159,
-        "name": "__init__",
-        "detail": "`__init__` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 178,
-        "name": "__init__",
-        "detail": "align, color, size travel together through 3 functions: __init__, label, title"
-      },
-      {
-        "pillar": "metrics",
-        "kind": "high-response",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 183,
-        "name": "Scene",
-        "detail": "`Scene` reaches 154 methods (over 50): 62 of its own plus 92 it calls"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 186,
-        "name": "excalidraw_builder.py",
-        "detail": "9 line(s) wider than 100 columns, first at line 186"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "h, text, w, x, y travel together through 10 functions: box, connector, data, decision, diamond, ellipse"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "group, h, x, y travel together through 3 functions: _vline, box, frame"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "font_size, x, y travel together through 7 functions: box, column, glossary, grid, legend, pipeline"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "fill, font_size, shape travel together through 5 functions: _place, box, column, grid, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "fill, font_size, h, shape, w, x, y travel together through 4 functions: box, column, grid, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "group, text, x, y travel together through 3 functions: box, label, title"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "text, x, y travel together through 12 functions: box, connector, data, decision, diamond, ellipse"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "group, x, y travel together through 5 functions: _vline, box, frame, label, title"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "fill, h, w, x, y travel together through 5 functions: box, column, frame, grid, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 322,
-        "name": "box",
-        "detail": "`box` takes 12 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 479,
-        "name": "section",
-        "detail": "gap, title, x travel together through 3 functions: glossary, legend, section"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 479,
-        "name": "section",
-        "detail": "color, size, x travel together through 3 functions: label, section, title"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 496,
-        "name": "pipeline",
-        "detail": "connect, font_size, gap, x, y travel together through 3 functions: column, pipeline, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 496,
-        "name": "pipeline",
-        "detail": "font_size, gap, x, y travel together through 5 functions: column, glossary, legend, pipeline, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 496,
-        "name": "pipeline",
-        "detail": "`pipeline` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 557,
-        "name": "frame",
-        "detail": "`frame` takes 8 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 604,
-        "name": "row",
-        "detail": "fill, font_size, h, items, shape, w, x, y travel together through 3 functions: column, grid, row"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 604,
-        "name": "row",
-        "detail": "`row` takes 10 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 624,
-        "name": "column",
-        "detail": "`column` takes 10 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 636,
-        "name": "grid",
-        "detail": "`grid` takes 11 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 651,
-        "name": "enclose",
-        "detail": "`enclose` takes 8 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 680,
-        "name": "legend",
-        "detail": "`legend` takes 8 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 717,
-        "name": "glossary",
-        "detail": "`glossary` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 750,
-        "name": "lane",
-        "detail": "`lane` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 857,
-        "name": "title",
-        "detail": "`title` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 873,
-        "name": "label",
-        "detail": "`label` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 902,
-        "name": "arrow",
-        "detail": "color, dashed, end, group, label, start travel together through 3 functions: arrow, free_arrow, path"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "data-clump",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 902,
-        "name": "arrow",
-        "detail": "color, dashed, group, label travel together through 4 functions: arrow, free_arrow, path, route_under"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 902,
-        "name": "arrow",
-        "detail": "`arrow` takes 10 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 978,
-        "name": "free_arrow",
-        "detail": "`free_arrow` takes 8 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 1003,
-        "name": "path",
-        "detail": "`path` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 1055,
-        "name": "route_under",
-        "detail": "`route_under` takes 7 parameters (over 6)"
-      },
-      {
-        "pillar": "encapsulation",
-        "kind": "long-parameter-list",
-        "file": "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py",
-        "line": 1349,
-        "name": "save",
-        "detail": "`save` takes 9 parameters (over 6)"
-      },
-      {
-        "pillar": "standards",
         "kind": "line-too-long",
         "file": "scripts/benchmark_scan.py",
         "line": 88,
@@ -21889,7 +20888,6 @@
       "deep-nesting": "nesting this deep hides the main path: return early, or extract the inner block",
       "file-too-long": "a file this long is several modules sharing a name: split it along the prefix families it already shows",
       "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
-      "high-response": "a class that reaches this many distinct methods is hard to test alone, because its collaborators are part of its interface: narrow them",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
       "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
       "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
@@ -21899,11 +20897,11 @@
   },
   "health": {
     "score": 98,
-    "total": 252,
-    "healthy": 247,
-    "confirmed": 247,
-    "implemented": 243,
-    "tested": 240,
+    "total": 244,
+    "healthy": 239,
+    "confirmed": 239,
+    "implemented": 235,
+    "tested": 232,
     "drafts": 5,
     "orphans": 0,
     "untested": 0,
@@ -21912,6 +20910,6 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 247
+    "reviewed_total": 239
   }
 }
