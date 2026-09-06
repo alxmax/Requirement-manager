@@ -11986,5 +11986,64 @@ class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # t
         self.assertIn("gate exploded", out)
 
 
+class OneGitRunner(unittest.TestCase):  # tested-by: ARCH-GITRUN-067  # tested-by: REQ-GITRUN-993
+    """Every git question goes through one runner, with one decoding rule and one
+    fail-open contract. Eleven hand-written copies disagreed about both."""
+
+    def test_a_failing_command_reads_as_no_answer(self):  # verifies: REQ-GITRUN-993#CASE-1  # verifies: ARCH-GITRUN-067#CASE-1
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        self.assertIsNone(R._git(["rev-parse", "--show-toplevel"], cwd=d, timeout=5))
+
+    def test_a_missing_git_is_not_an_exception(self):  # verifies: REQ-GITRUN-993#CASE-2
+        with mock.patch.object(R.subprocess, "run", side_effect=OSError("no git")):
+            self.assertIsNone(R._git(["status"]))
+        with mock.patch.object(R.subprocess, "run",
+                               side_effect=UnicodeDecodeError("utf-8", b"", 0, 1, "bad")):
+            self.assertIsNone(R._git(["status"]))
+
+    def test_the_runner_pins_utf8_decoding(self):  # verifies: REQ-GITRUN-993#CASE-2
+        seen = {}
+
+        def fake(cmd, **kw):
+            seen.update(kw)
+            return mock.Mock(returncode=0, stdout="ok")
+
+        with mock.patch.object(R.subprocess, "run", side_effect=fake):
+            self.assertEqual(R._git(["status"]), "ok")
+        self.assertEqual(seen.get("encoding"), "utf-8")
+        self.assertTrue(seen.get("text"))
+        self.assertNotIn("errors", seen)   # strict: a path git cannot encode reads as None
+
+    def test_the_root_falls_back_to_the_directory_given(self):  # verifies: REQ-GITRUN-993#CASE-3  # verifies: ARCH-GITRUN-067#CASE-2
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        self.assertEqual(R._git_root(d), d)
+        with mock.patch.object(R, "_git", return_value="  /repo/root \n"):
+            self.assertEqual(R._git_root(d), "/repo/root")
+
+    def test_the_remote_url_is_empty_when_git_cannot_say(self):
+        with mock.patch.object(R, "_git", return_value=None):
+            self.assertEqual(R._git_remote_url("."), "")
+        with mock.patch.object(R, "_git", return_value="git@example.com:a/b.git\n"):
+            self.assertEqual(R._git_remote_url("."), "git@example.com:a/b.git")
+
+    def test_no_other_code_starts_a_git_process(self):  # verifies: REQ-GITRUN-993#CASE-4  # verifies: ARCH-GITRUN-067#CASE-3
+        with io.open(R.__file__, encoding="utf-8") as f:
+            src = f.read()
+        tree = ast.parse(src)
+        starts = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            f = node.func
+            if (isinstance(f, ast.Attribute) and f.attr in ("run", "check_output", "Popen",
+                                                            "call", "check_call")
+                    and isinstance(f.value, ast.Name) and f.value.id == "subprocess"):
+                starts.append(node.lineno)
+        self.assertEqual(len(starts), 1, "subprocess started at lines {}".format(starts))
+        runner = next(n for n in ast.walk(tree)
+                      if isinstance(n, ast.FunctionDef) and n.name == "_git")
+        self.assertTrue(runner.lineno < starts[0] <= (runner.end_lineno or starts[0]))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

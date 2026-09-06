@@ -1,5 +1,65 @@
 # Changelog
 
+## plugin `v5.18.0` — 2026-09-06
+
+**One runner for every git question** (`ARCH-GITRUN-067`). Eleven call sites had each
+hand-written the same six lines around `subprocess.run(["git", ...])`, and they disagreed
+about the detail that decides whether a check fails open:
+
+| | sites |
+|---|---|
+| `encoding="utf-8"` | 3 of 11 |
+| `text=True` with no encoding (locale codec) | 6 of 11 |
+| `check_output(...).decode()` (locale codec again) | 2 of 11 |
+| caught `Exception` | 5 |
+| caught `(OSError, SubprocessError)` only | 6 |
+
+With `text=True` and no `encoding=`, Python decodes git's output with the **locale**
+codec. On a Windows console that is cp1252, so a non-ASCII path or a remote URL with a
+non-ASCII character either mojibakes or raises a `UnicodeDecodeError` — which five of the
+sites caught and six did not. A caught one reads back as "git found nothing", which for
+`untracked_members`, `untracked_locks` and `_since_changed_files` means *a check passing
+because it could not run*. Three sites already carried the encoding, each added after
+someone was bitten; the fix was never generalised.
+
+`_git(args, cwd, timeout)` now runs every git command in the engine and returns stdout or
+`None` — `None` being the single way a caller learns git could not answer. Decoding stays
+**strict** on purpose: a path git cannot hand over as UTF-8 must surface as `None` and
+send the caller to the full, safe answer, never as a replacement character that silently
+fails to match a real file.
+
+Two helpers ride on it because they were also duplicated: `_git_root` (three spellings of
+`rev-parse --show-toplevel`, two of them via `check_output().decode()` — a repo where they
+disagreed would publish `docs/map.html` to one directory and check its freshness against
+another) and `_git_remote_url` (two identical copies). A test walks the engine's AST and
+asserts the only `subprocess` process start in the file is inside `_git`.
+
+No behaviour changes on an ASCII path in a healthy checkout. What changes is what happens
+off that path.
+
+**One walk, one ignore.** Six loops carried a copy of the `os.walk` discipline, and they
+had drifted in ways that only show up on someone else's repo:
+
+| loop | what its copy was missing |
+|---|---|
+| `untagged_doc_bundles` | `dirs.sort()` — descent order came from the filesystem |
+| `orphan_code_files` | `dirs.sort()` |
+| `cmd_draft` | `code_root`/`ignore` on `_prune_dirs`, so `build/**` still descended into build/ |
+| `_collect_files` | the same |
+| `cmd_coverage` | `_prune_dirs` entirely — a hand-rolled `(.git, __pycache__, node_modules)` list that never matched the SSOT directory by realpath and never pruned an ignored tree |
+
+`_walk_files(code_root, reqs_dir, accept)` is now the walk, and `accept(filename, rel)` is
+all a caller decides. `_walk_code` is that with the code-file filter. The pruning gaps
+cost time rather than correctness — a file under an ignored directory was dropped by the
+per-path `fnmatch` anyway — but the two missing `dirs.sort()` calls were a real
+reproducibility hole in a generated artifact, and `cmd_coverage` was counting files in the
+SSOT directory on any repo where the realpath check would have mattered.
+
+Verified equal to the previous engine on this corpus, output for output: members,
+doc bundles, orphan files, the candidate file list, the code walk and the full
+`gate --risk --untagged` report.
+
+
 ## plugin `v5.17.0` — 2026-09-06
 
 Four bugs found by reading the engine rather than running it. Three of them made a check

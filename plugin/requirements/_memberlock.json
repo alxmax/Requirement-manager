@@ -87,7 +87,7 @@
     },
     "ARCH-SCAN-002": {
       "plugin/scripts/reqmap.py#_is_code_file": "257de1fd8c543e6699bc9595e02190f6d038284ec435a8d6db8d80736f6a1cf2",
-      "plugin/scripts/reqmap.py#_walk_code": "1878d3f8f9e3dc95e2ed8f757e1a0a861a0f9b10489afb4a1ab31b12d19968e1"
+      "plugin/scripts/reqmap.py#_walk_code": "791e5b55b8aa44cacd17407b4d2c6dce031447562f969f530800903673c93129"
     },
     "ARCH-SELFGATE-039": {
       "scripts/check_engine_bump.py": "64790fbdbefdb34794e037121006b0bbb451c9828a8efcc0ad3f448acb9d29df",
@@ -100,12 +100,12 @@
     },
     "ARCH-SITE-026": {
       "plugin/scripts/reqmap.py#_extract_region": "023a8ccf7070c4ea7527ed656830c9d43e5899ac1ddde451c9bbf070dcfe47d5",
-      "plugin/scripts/reqmap.py#_git_remote_web_url": "0bfa0ca4ee900da34fe3e45d7e86d9cd9c4bbdfafb769aebd67526f7a0eafec8",
+      "plugin/scripts/reqmap.py#_git_remote_web_url": "718f49cdd5a6f978961c868460d7342ff4e406d2c0bc39c42c79d825e66b850d",
       "plugin/scripts/reqmap.py#_html_escape": "48935aca11993bf93da55c718c70a075511324d893c6038a7153e2546db8451d",
       "plugin/scripts/reqmap.py#_normalise_remote": "f243dcae4e0aa0b639945794f932d915aa5fe1fc301ca3649226b30231c54401",
       "plugin/scripts/reqmap.py#_region_markers": "37623eb785beca5b0e5e4a67e6b7de63c5f2970b17ef74d1bdb7c0b1160b8cea",
       "plugin/scripts/reqmap.py#_site_context_from_data": "e37b414df9eba6d7814d886716821906e6b2474913855178a46b8e17325f2fa0",
-      "plugin/scripts/reqmap.py#_site_default_target": "2d2bf980c1b78aff801e85c30990fd55c02c04c87932c6096f3c8859d4ae92f0",
+      "plugin/scripts/reqmap.py#_site_default_target": "92ae959c00b5b644bc9a9cd463ac68e29b30a93d514e68d039f053374d35409f",
       "plugin/scripts/reqmap.py#_site_diagram_ok": "a21d34d9bd5c2478e446e8c556f7c40e82d7d419ece4163df73468971da055ea",
       "plugin/scripts/reqmap.py#_strip_engine_stat": "aa0e68b31277be6c4af03b6f0fb850d686fea98202567a9de703f1b194a0f67c"
     },
@@ -214,7 +214,7 @@
       "plugin/scripts/reqmap.py#_print_retire_plan": "a5a6f9b197ecdb439fac2f692fd0ad1b49aa73c9094621ea314d03691b5fd062"
     },
     "REQ-RETIRE-961": {
-      "plugin/scripts/reqmap.py#_git_dirty": "d6ba53161b0148cdfbffa6fe2e0d70d03f4f401e1a2a76cde75a9643aa6041e0",
+      "plugin/scripts/reqmap.py#_git_dirty": "a561642268d0c8dec6b75f8a5c97189dc98a40062ea0a50bfdd24c0b5d0acc6b",
       "plugin/scripts/reqmap.py#_retire_blockers": "e7a816cd078ce1a963854bf441cafc21934676ab4cb47fd9f26b05265d3f8000"
     },
     "REQ-RETIRE-962": {

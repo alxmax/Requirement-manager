@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.11"
+MAP_ENGINE_VERSION = "2026-09-06.12"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1279,26 +1279,38 @@ def _save_scancache(reqs_dir, cache):  # implements: ARCH-SCANCACHE-023  # imple
         pass
 
 
-def _walk_code(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
-    """Yield (abs_path, posix_rel_path) for every scannable file under `code_root`.
+def _walk_files(code_root, reqs_dir=None, accept=None):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-909
+    """Yield (abs_path, posix_rel_path) for every file under `code_root` the walk admits.
 
-    The one place the walk discipline lives: prune noise dirs and the SSOT output dir,
-    descend and read in sorted order so a generated map is identical across platforms,
-    keep only known code files, and honour `.reqmapignore`. Three scanners used to carry
-    a byte-for-byte copy of this loop, which is how they drifted apart in the first place.
+    The one place the walk discipline lives: prune the noise dirs and the SSOT output dir,
+    prune a directory a `.reqmapignore` `/**` pattern already covers, descend and read in
+    sorted order so a generated artifact is identical across platforms, and drop any path
+    an ignore pattern matches. `accept(filename, rel)` is all a caller still decides —
+    which files it wants.
+
+    Six loops used to carry a copy of this, drifted in ways that only show up on someone
+    else's repo: two never called `dirs.sort()`, so their output depended on filesystem
+    order; two called `_prune_dirs` without `code_root`/`ignore`, so a `build/**` pattern
+    still descended into build/ and stat'ed every file inside it; and the coverage report
+    hand-rolled the prune list, matching neither the SSOT directory by realpath nor an
+    ignored tree at all.
     """
     ignore = load_ignore(code_root, reqs_dir)
     for dirpath, dirs, files in os.walk(code_root):
         _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
         dirs.sort()                  # deterministic descent — raw os.walk order is OS-dependent
         for fn in sorted(files):     # deterministic file order — the map must not depend on the filesystem
-            if not _is_code_file(fn):
-                continue
             fp = os.path.join(dirpath, fn)
             rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
             if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
                 continue
-            yield fp, rel
+            if accept is None or accept(fn, rel):
+                yield fp, rel
+
+
+def _walk_code(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
+    """(abs, rel) for every scannable SOURCE file — the walk with the code-file filter."""
+    return _walk_files(code_root, reqs_dir, lambda fn, _rel: _is_code_file(fn))
 
 
 def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: ARCH-ACVERIFY-019  # implements: REQ-SCAN-992
@@ -1466,6 +1478,48 @@ def check_viewer_data_sync(data_js_path, map_nodes):  # implements: ARCH-VIEWER-
 DOC_BUNDLE_MIN_BYTES = 50_000   # a docs/ HTML doc this big is a generated bundle, not a stub
 
 
+def _git(args, cwd=None, timeout=10):  # implements: ARCH-GITRUN-067  # implements: REQ-GITRUN-993
+    """Run one git command; return its stdout, or None when git could not answer.
+
+    Every git call in this engine is advisory or fail-open — a missing git, a directory
+    that is not a work tree, a non-zero exit all mean "unknown", never "raise". Eleven
+    call sites each decided that for themselves and disagreed on the details that matter:
+
+    - `encoding="utf-8"` is not cosmetic. With `text=True` alone Python decodes with the
+      LOCALE codec, so on a Windows console (cp1252) a non-ASCII path or remote URL either
+      mojibakes or raises inside a bare `except`, and the caller reads the empty result as
+      "nothing found" — a check failing OPEN, silently, on one platform. Three sites had
+      the encoding because someone was bitten; the other eight did not.
+    - Two of them used `check_output(...).decode()`, which is the same bug with no `text=`.
+    - The exception nets ranged from `Exception` to `(OSError, SubprocessError)`, so a
+      `UnicodeDecodeError` was caught by some and fatal in others.
+
+    Decoding stays strict on purpose: a path git could not hand over as UTF-8 must surface
+    as None (fall back to the full, safe answer), never as a replacement character that
+    silently fails to match a real file.
+    """
+    try:
+        r = subprocess.run(["git"] + list(args), cwd=cwd or None,
+                           capture_output=True, text=True, encoding="utf-8", timeout=timeout)
+    except Exception:
+        return None
+    return r.stdout if r.returncode == 0 else None
+
+
+def _git_root(root):  # implements: ARCH-GITRUN-067  # implements: REQ-GITRUN-993
+    """The work-tree root containing `root`, or `root` itself when git cannot say.
+
+    Three call sites resolved the toplevel with three spellings; a repo where they
+    disagreed would publish `docs/map.html` to one directory and check its freshness
+    against another."""
+    return (_git(["-C", root, "rev-parse", "--show-toplevel"], timeout=3) or "").strip() or root
+
+
+def _git_remote_url(root):  # implements: ARCH-GITRUN-067  # implements: REQ-GITRUN-993
+    """`remote.origin.url`, or "" when git is absent / there is no remote."""
+    return (_git(["-C", root, "config", "--get", "remote.origin.url"], timeout=3) or "").strip()
+
+
 def untracked_members(code_root, members):  # implements: ARCH-TRACKED-042  # implements: REQ-TRACKED-936
     """Sorted rel-paths of member files git does not track, or None when unknowable.
 
@@ -1482,17 +1536,12 @@ def untracked_members(code_root, members):  # implements: ARCH-TRACKED-042  # im
     rather than ignored. Returns None - the fail-open signal, matching
     `_since_changed_files` - when git is absent or `code_root` is not a work tree.
     """
-    try:
-        result = subprocess.run(
-            ["git", "-c", "core.quotepath=off", "ls-files", "-z"],
-            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=30,
-        )
-        if result.returncode != 0:
-            return None
-    except Exception:
+    tracked_out = _git(["-c", "core.quotepath=off", "ls-files", "-z"],
+                       cwd=code_root, timeout=30)
+    if tracked_out is None:
         return None
     tracked = {os.path.normcase(p.replace("/", os.sep))
-               for p in result.stdout.split("\0") if p}
+               for p in tracked_out.split("\0") if p}
     seen = set()
     for hits in members.values():
         for _role, fp, _ln in hits:
@@ -1517,14 +1566,9 @@ def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: ARCH-UNSCAN
     invisible. Bounded by `git ls-files` like untracked_members, skips `.reqmapignore`
     matches, the SSOT dir, `_`-prefixed and binary/oversized files; a non-UTF-8 file
     is skipped, never reported."""
-    try:
-        result = subprocess.run(
-            ["git", "-c", "core.quotepath=off", "ls-files", "-z"],
-            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=30,
-        )
-        if result.returncode != 0:
-            return None
-    except Exception:
+    tracked_out = _git(["-c", "core.quotepath=off", "ls-files", "-z"],
+                       cwd=code_root, timeout=30)
+    if tracked_out is None:
         return None
     ignore = load_ignore(code_root, reqs_dir)
     reqs_rel = None
@@ -1534,7 +1578,7 @@ def tagged_unscanned_files(code_root, reqs_dir=None):  # implements: ARCH-UNSCAN
         except ValueError:
             reqs_rel = None
     out = []
-    for rel in result.stdout.split("\0"):
+    for rel in tracked_out.split("\0"):
         if not rel:
             continue
         fn = os.path.basename(rel)
@@ -1570,24 +1614,17 @@ def untagged_doc_bundles(code_root, members, reqs_dir=None):  # implements: ARCH
     viewer). Threshold-only + warn-only by design, so it nudges without false alarms."""
     tagged = {fp for hits in members.values()
               for (role, fp, _ln) in hits if role == "generated-from"}
-    ignore = load_ignore(code_root, reqs_dir)
+    def wanted(fn, rel):
+        return (fn.endswith(".html") and not fn.startswith("_") and fn != "map.html"
+                and rel.startswith("docs/") and rel not in tagged)
+
     out = []
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
-        for fn in sorted(files):
-            if not fn.endswith(".html") or fn.startswith("_") or fn == "map.html":
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if not (rel == "docs" or rel.startswith("docs/")):
-                continue
-            if rel in tagged or any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            try:
-                if os.path.getsize(fp) >= DOC_BUNDLE_MIN_BYTES:
-                    out.append(rel)
-            except OSError:
-                continue
+    for fp, rel in _walk_files(code_root, reqs_dir, wanted):
+        try:
+            if os.path.getsize(fp) >= DOC_BUNDLE_MIN_BYTES:
+                out.append(rel)
+        except OSError:
+            continue
     return sorted(out)
 
 
@@ -1632,24 +1669,16 @@ def orphan_code_files(code_root, covered, reqs_dir=None):  # implements: ARCH-OR
     scan. Walk discipline matches scan_members: honors `.reqmapignore`, prunes noise.
     Warn-only at ANY flag combination (the ARCH-COVERAGE-029 Senate audit capped
     coverage signals at advisory — a hard gate makes hollow tags the way to pass CI)."""
-    ignore = load_ignore(code_root, reqs_dir)
     out = []
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
-        for fn in sorted(files):
-            if not fn.endswith(ORPHAN_CODE_EXTS):
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if rel in covered or any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    loc = sum(1 for _ in f)
-            except OSError:
-                continue
-            if loc >= ORPHAN_CODE_MIN_LOC:
-                out.append(rel)
+    for fp, rel in _walk_files(code_root, reqs_dir,
+                               lambda fn, r: fn.endswith(ORPHAN_CODE_EXTS) and r not in covered):
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                loc = sum(1 for _ in f)
+        except OSError:
+            continue
+        if loc >= ORPHAN_CODE_MIN_LOC:
+            out.append(rel)
     return sorted(out)
 
 
@@ -2160,20 +2189,12 @@ def untracked_locks(reqs_dir):  # implements: ARCH-CHECK-006  # implements: REQ-
     if not paths:
         return []
     root = os.path.dirname(os.path.abspath(reqs_dir)) or "."
-    try:
-        inside = subprocess.run(["git", "-C", root, "rev-parse", "--is-inside-work-tree"],
-                                capture_output=True, text=True, timeout=3)
-        if inside.returncode != 0 or inside.stdout.strip() != "true":
-            return []
-        out = []
-        for p in paths:
-            r = subprocess.run(["git", "-C", root, "ls-files", "--error-unmatch", os.path.abspath(p)],
-                               capture_output=True, text=True, timeout=3)
-            if r.returncode != 0:
-                out.append(p)
-        return out
-    except (OSError, subprocess.SubprocessError):
+    inside = _git(["-C", root, "rev-parse", "--is-inside-work-tree"], timeout=3)
+    if (inside or "").strip() != "true":
         return []
+    return [p for p in paths
+            if _git(["-C", root, "ls-files", "--error-unmatch", os.path.abspath(p)],
+                    timeout=3) is None]
 
 
 def _file_sha(path):  # implements: ARCH-MEMBERDRIFT-027
@@ -3659,99 +3680,91 @@ def cmd_extract(ws):  # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-0
     """Propose DRAFT requirements for code files that have no member tag yet."""
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
-    ignore = load_ignore(code_root, reqs_dir)   # honor .reqmapignore, same as scan
     proposed, used = 0, set()
     by_dir = {}          # rel dir -> [code-level draft ids], for the ARCH rung
     os.makedirs(reqs_dir, exist_ok=True)
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)   # skip noise + the SSOT output dir
-        dirs.sort()                            # deterministic id/suffix assignment
-        for fn in sorted(files):
-            is_code = _is_code_file(fn) and not fn.endswith(PROSE_EXTS)
-            is_prose = fn.endswith(PROSE_EXTS)
-            if not (is_code or is_prose):
-                continue
-            rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):  # ignored -> never draft
-                continue
-            if rel in tagged:
-                continue
-            if is_prose and classify_prose(rel) != "capability":
-                continue                           # bucket 1/2 -> never auto-drafted
-            cap = base = _draft_id(rel)
-            k = 2
-            while cap in used:                 # residual collision (case/ext only)
-                cap = "{}-{}".format(base, k); k += 1
-            used.add(cap)
-            dest = os.path.join(reqs_dir, cap + ".md")
-            if os.path.exists(dest):
-                continue
-            with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
-                src = f.read()
-            if is_prose:
-                title, headings = _prose_facts(src)
-                review = "REVIEW"   # intent is unrecoverable from prose — always author
-                hint = "\n".join("  - {}".format(h) for h in headings) \
-                    or "  - (no section headings detected)"
-                # str.format (not f-string): the template embeds literal {cap}/{rel} inside backticked instructions
-                with open(dest, "w", encoding="utf-8") as f:
-                    f.write("---\nid: {cap}\nstatus: draft\nlayer: feature\n"
-                            "owner: auto\ndepends_on: []\n"
-                            "risk: 2  # REVIEW — prose capability, author the contract "
-                            "before promoting\n---\n\n"
-                            "# {title}\n\n"
-                            "> DRAFT extracted from {rel} (prose capability). The source "
-                            "prose is NOT the contract — author the normative behavior "
-                            "below, then tag the source `# generated-from: {cap}` "
-                            "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
-                            "## Description\n"
-                            "Every bullet below is binding.\n"
-                            "<!-- Name the subject, write in present tense, one statement per "
-                            "bullet, at most 3 sentences and 150 words. -->\n"
-                            "- TODO: the capability this prose defines (author from "
-                            "intent, do not copy the prose).\n\n"
-                            "## Verify intent (open questions for the human)\n"
-                            "- TODO: which source sections are normative vs illustrative?\n\n"
-                            "## Cases (= tests)\n"
-                            "- TODO: Given/When/Then checks for the contract above.\n\n"
-                            # the hint belongs in Context: bullets under Verify intent
-                            # are read back as open questions by `findings`
-                            "## Context (non-binding)\n**Current implementation**\n- {rel}\n\n"
-                            "**Source sections detected (authoring hint, not the contract)**\n"
-                            "{hint}\n".format(
-                                cap=cap, title=(title or os.path.splitext(fn)[0]),
-                                rel=rel, hint=hint))
-            else:
-                risk = _risk(src)
-                review = "REVIEW" if risk >= 2 else "auto-baseline"
-                surface = _observed_surface(_file_facts(os.path.join(dirpath, fn), rel))
-                with open(dest, "w", encoding="utf-8") as f:
-                    # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
-                    # needs no reshaping
-                    f.write(f"---\nid: {cap}\nstatus: draft\nlevel: code\n"
-                            f"layer: feature\nowner: auto\nlevel_source: auto\n"
-                            f"satisfies: [{_arch_id_for(os.path.relpath(dirpath, code_root))}]\n"
-                            f"depends_on: []\n"
-                            f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
-                            f"# {os.path.splitext(fn)[0]}\n\n"
-                            f"> DRAFT extracted from {rel}. Describes observed behavior, "
-                            f"not validated intent.\n\n"
-                            f"## Description\n"
-                            f"Every bullet below is binding.\n"
-                            f"<!-- Name the subject, write in present tense, one statement per "
-                            f"bullet, at most 3 sentences and 150 words. -->\n"
-                            f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
-                            f"## Verify intent (open questions for the human)\n"
-                            f"- TODO: anything that looks like an accident (swallowed error, magic "
-                            f"constant, dead branch) — intended, or a bug to fix?\n\n"
-                            f"## Cases (= tests)\n"
-                            f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
-                            f"## Context (non-binding)\n**Current implementation**\n- {rel}\n{surface}")
-            proposed += 1
-            if is_code:
-                rel_dir = os.path.relpath(dirpath, code_root).replace(os.sep, "/")
-                by_dir.setdefault(rel_dir, []).append(cap)
-            print(f"{review:14} {cap}  <- {rel}")
+    for fp, rel in _walk_files(code_root, reqs_dir,
+                               lambda fn, _r: _is_code_file(fn) or fn.endswith(PROSE_EXTS)):
+        dirpath, fn = os.path.dirname(fp), os.path.basename(fp)
+        is_prose = fn.endswith(PROSE_EXTS)
+        if rel in tagged:
+            continue
+        if is_prose and classify_prose(rel) != "capability":
+            continue                           # bucket 1/2 -> never auto-drafted
+        cap = base = _draft_id(rel)
+        k = 2
+        while cap in used:                 # residual collision (case/ext only)
+            cap = "{}-{}".format(base, k); k += 1
+        used.add(cap)
+        dest = os.path.join(reqs_dir, cap + ".md")
+        if os.path.exists(dest):
+            continue
+        with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
+            src = f.read()
+        if is_prose:
+            title, headings = _prose_facts(src)
+            review = "REVIEW"   # intent is unrecoverable from prose — always author
+            hint = "\n".join("  - {}".format(h) for h in headings) \
+                or "  - (no section headings detected)"
+            # str.format (not f-string): the template embeds literal {cap}/{rel} inside backticked instructions
+            with open(dest, "w", encoding="utf-8") as f:
+                f.write("---\nid: {cap}\nstatus: draft\nlayer: feature\n"
+                        "owner: auto\ndepends_on: []\n"
+                        "risk: 2  # REVIEW — prose capability, author the contract "
+                        "before promoting\n---\n\n"
+                        "# {title}\n\n"
+                        "> DRAFT extracted from {rel} (prose capability). The source "
+                        "prose is NOT the contract — author the normative behavior "
+                        "below, then tag the source `# generated-from: {cap}` "
+                        "(HTML: `<!-- generated-from: {cap} -->`) and promote.\n\n"
+                        "## Description\n"
+                        "Every bullet below is binding.\n"
+                        "<!-- Name the subject, write in present tense, one statement per "
+                        "bullet, at most 3 sentences and 150 words. -->\n"
+                        "- TODO: the capability this prose defines (author from "
+                        "intent, do not copy the prose).\n\n"
+                        "## Verify intent (open questions for the human)\n"
+                        "- TODO: which source sections are normative vs illustrative?\n\n"
+                        "## Cases (= tests)\n"
+                        "- TODO: Given/When/Then checks for the contract above.\n\n"
+                        # the hint belongs in Context: bullets under Verify intent
+                        # are read back as open questions by `findings`
+                        "## Context (non-binding)\n**Current implementation**\n- {rel}\n\n"
+                        "**Source sections detected (authoring hint, not the contract)**\n"
+                        "{hint}\n".format(
+                            cap=cap, title=(title or os.path.splitext(fn)[0]),
+                            rel=rel, hint=hint))
+        else:
+            risk = _risk(src)
+            review = "REVIEW" if risk >= 2 else "auto-baseline"
+            surface = _observed_surface(_file_facts(os.path.join(dirpath, fn), rel))
+            with open(dest, "w", encoding="utf-8") as f:
+                # emission schema matches REQUIREMENT_TEMPLATE so a promoted draft
+                # needs no reshaping
+                f.write(f"---\nid: {cap}\nstatus: draft\nlevel: code\n"
+                        f"layer: feature\nowner: auto\nlevel_source: auto\n"
+                        f"satisfies: [{_arch_id_for(os.path.relpath(dirpath, code_root))}]\n"
+                        f"depends_on: []\n"
+                        f"risk: {risk}  # {review} — author triage hint, not read by the engine\n---\n\n"
+                        f"# {os.path.splitext(fn)[0]}\n\n"
+                        f"> DRAFT extracted from {rel}. Describes observed behavior, "
+                        f"not validated intent.\n\n"
+                        f"## Description\n"
+                        f"Every bullet below is binding.\n"
+                        f"<!-- Name the subject, write in present tense, one statement per "
+                        f"bullet, at most 3 sentences and 150 words. -->\n"
+                        f"- TODO: the observed behavior (characterization — correctness UNVERIFIED).\n\n"
+                        f"## Verify intent (open questions for the human)\n"
+                        f"- TODO: anything that looks like an accident (swallowed error, magic "
+                        f"constant, dead branch) — intended, or a bug to fix?\n\n"
+                        f"## Cases (= tests)\n"
+                        f"- characterization: current behavior captured, correctness UNVERIFIED\n\n"
+                        f"## Context (non-binding)\n**Current implementation**\n- {rel}\n{surface}")
+        proposed += 1
+        if not is_prose:   # a file that passed the filter is one or the other
+            rel_dir = os.path.relpath(dirpath, code_root).replace(os.sep, "/")
+            by_dir.setdefault(rel_dir, []).append(cap)
+        print(f"{review:14} {cap}  <- {rel}")
     # The two rungs above the code level. Written last, so they know their children.
     arch_ids = _write_arch_drafts(reqs_dir, by_dir)
     n_sys = _write_sys_placeholder(reqs_dir, arch_ids)
@@ -3954,20 +3967,14 @@ def _collect_files(code_root, reqs_dir, md_globs=None):  # implements: ARCH-CAND
     `.md` file is included ONLY when it matches one of these globs (and is not
     ignored). Empty/None -> no `.md` is ever collected (behavior unchanged). The
     presence of a glob IS the opt-in; there is no separate on/off flag."""
-    ignore = load_ignore(code_root, reqs_dir)   # match scan_members: look in requirements/ first
     md_globs = md_globs or []
     out = []
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir)
-        dirs.sort()
-        for fn in sorted(files):
-            rel = os.path.relpath(os.path.join(dirpath, fn), code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            if _is_code_file(fn) and not fn.endswith(PROSE_EXTS):
-                out.append(rel)
-            elif fn.endswith(".md") and any(fnmatch.fnmatch(rel, g) for g in md_globs):
-                out.append(rel)
+    for fp, rel in _walk_files(code_root, reqs_dir):
+        fn = os.path.basename(fp)
+        if _is_code_file(fn) and not fn.endswith(PROSE_EXTS):
+            out.append(rel)
+        elif fn.endswith(".md") and any(fnmatch.fnmatch(rel, g) for g in md_globs):
+            out.append(rel)
     return out
 
 
@@ -6095,8 +6102,9 @@ def cmd_coverage(ws, as_json=False):
     directory carry at least one membership tag vs. total scannable files.
     Helps identify which parts of the codebase have no requirement coverage."""
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
-    ignore = load_ignore(code_root, reqs_dir)
-    # requirements dir contains spec files, not implementation files — exclude from coverage
+    # requirements dir holds spec files, not implementation files — excluded from coverage.
+    # `_walk_files` already prunes it by realpath; this abspath test also catches an SSOT
+    # dir reached through a symlink.
     reqs_abs = os.path.normcase(os.path.abspath(reqs_dir)) if reqs_dir else None
     tagged_files = set()
     for mlist in members.values():
@@ -6104,26 +6112,18 @@ def cmd_coverage(ws, as_json=False):
             tagged_files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, fp))))
 
     buckets = {}  # dir_label -> [total, tagged]
-    for dirpath, dirs, files in os.walk(code_root):
-        dirs[:] = [d for d in sorted(dirs) if d not in (".git", "__pycache__", "node_modules")]
-        for fn in sorted(files):
-            if not _is_code_file(fn):
-                continue
-            fp = os.path.join(dirpath, fn)
-            norm_fp = os.path.normcase(os.path.abspath(fp))
-            if reqs_abs and norm_fp.startswith(reqs_abs + os.sep):
-                continue
-            rel = os.path.relpath(fp, code_root).replace("\\", "/")
-            if any(fnmatch.fnmatch(rel, p) for p in ignore):
-                continue
-            # Group by first path component (top-level directory or "." for root files)
-            parts = rel.split("/")
-            label = parts[0] if len(parts) > 1 else "."
-            if label not in buckets:
-                buckets[label] = [0, 0]
-            buckets[label][0] += 1
-            if norm_fp in tagged_files:
-                buckets[label][1] += 1
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        norm_fp = os.path.normcase(os.path.abspath(fp))
+        if reqs_abs and norm_fp.startswith(reqs_abs + os.sep):
+            continue
+        # Group by first path component (top-level directory or "." for root files)
+        parts = rel.split("/")
+        label = parts[0] if len(parts) > 1 else "."
+        if label not in buckets:
+            buckets[label] = [0, 0]
+        buckets[label][0] += 1
+        if norm_fp in tagged_files:
+            buckets[label][1] += 1
 
     rows = []
     for label in sorted(buckets):
@@ -6203,26 +6203,19 @@ def _commits_since_reqs_touch(code_root, reqs_dir):  # implements: ARCH-REGISTRY
     when unmeasurable — git missing, `code_root` not a git worktree, or `reqs_dir`
     has no commit in history — so the reading is absent rather than falsely 0.
     Read-only; never a gate, never enters the score."""
+    # reqs_dir must resolve against the CALLER's cwd, not against code_root — `git -C
+    # code_root` changes where the pathspec is resolved, so a relative reqs_dir (e.g.
+    # `--code ..` from `plugin/`) would silently look for `../requirements` instead of
+    # `../plugin/requirements`. Mirrors the abspath(p) pattern `untracked_locks` already
+    # uses for the same reason (ARCH-CHECK-006).
+    sha = (_git(["-C", code_root, "log", "-1", "--format=%H", "--", os.path.abspath(reqs_dir)],
+                timeout=5) or "").strip()
+    if not sha:
+        return None
+    cnt = _git(["-C", code_root, "rev-list", "--count", "{}..HEAD".format(sha)], timeout=5)
     try:
-        last = subprocess.run(
-            # reqs_dir must resolve against the CALLER's cwd, not against code_root —
-            # `git -C code_root` changes where the pathspec is resolved, so a relative
-            # reqs_dir (e.g. `--code ..` from `plugin/`) would silently look for
-            # `../requirements` instead of `../plugin/requirements`. Mirrors the
-            # abspath(p) pattern `untracked_locks` already uses for the same reason
-            # (ARCH-CHECK-006).
-            ["git", "-C", code_root, "log", "-1", "--format=%H", "--", os.path.abspath(reqs_dir)],
-            capture_output=True, text=True, timeout=5)
-        sha = last.stdout.strip()
-        if last.returncode != 0 or not sha:
-            return None
-        cnt = subprocess.run(
-            ["git", "-C", code_root, "rev-list", "--count", f"{sha}..HEAD"],
-            capture_output=True, text=True, timeout=5)
-        if cnt.returncode != 0:
-            return None
-        return int(cnt.stdout.strip())
-    except (OSError, subprocess.SubprocessError, ValueError):
+        return int((cnt or "").strip())
+    except ValueError:
         return None
 
 
@@ -7358,14 +7351,7 @@ def _repo_name(root):  # implements: ARCH-MAP-007  # implements: REQ-MAP-871
     override = os.environ.get("REQMAP_REPO")
     if override is not None:
         return override or None
-    url = ""
-    try:
-        r = subprocess.run(["git", "-C", root, "config", "--get", "remote.origin.url"],
-                           capture_output=True, text=True, timeout=3)
-        if r.returncode == 0:
-            url = r.stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        url = ""
+    url = _git_remote_url(root)
     if url:
         slug = url[:-4] if url.endswith(".git") else url
         parts = [p for p in re.split(r"[:/]", slug.rstrip("/")) if p]
@@ -7403,14 +7389,7 @@ def _git_remote_web_url(root):  # implements: ARCH-SITE-026
         if not override:
             return None
         return override if "://" in override else "https://github.com/" + override
-    url = ""
-    try:
-        r = subprocess.run(["git", "-C", root, "config", "--get", "remote.origin.url"],
-                           capture_output=True, text=True, timeout=3)
-        if r.returncode == 0:
-            url = r.stdout.strip()
-    except (OSError, subprocess.SubprocessError):
-        url = ""
+    url = _git_remote_url(root)
     return _normalise_remote(url)
 
 
@@ -7801,33 +7780,21 @@ def _since_changed_files(ref, code_root):
     Returns None as the fail-open signal: caller must fall back to full scan.
     """
     try:
-        result = subprocess.run(
-            # core.quotepath=off: emit non-ASCII paths verbatim, not octal-escaped &
-            # double-quoted — otherwise those files silently drop out of the since-set
-            # and the gate falsely reports clean.
-            ["git", "-c", "core.quotepath=off", "diff", "--name-only", f"{ref}...HEAD"],
-            capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=10,
-        )
-        if result.returncode != 0:
+        # core.quotepath=off: emit non-ASCII paths verbatim, not octal-escaped &
+        # double-quoted — otherwise those files silently drop out of the since-set
+        # and the gate falsely reports clean.
+        diff = _git(["-c", "core.quotepath=off", "diff", "--name-only",
+                     "{}...HEAD".format(ref)], cwd=code_root, timeout=10)
+        if diff is None:
             return None
         # `git diff` emits paths relative to the repo ROOT, not to cwd. Resolve
         # the toplevel so these abspaths line up with member abspaths (which are
         # relative to code_root) even when code_root is a subdirectory of the
         # git root — otherwise the since-set and member-set never intersect and
-        # the gate silently checks zero requirements. Fall back to code_root on
-        # failure (mirrors _docs_publish_path).
-        root = code_root
-        try:
-            top = subprocess.run(
-                ["git", "rev-parse", "--show-toplevel"],
-                capture_output=True, text=True, encoding="utf-8", cwd=code_root, timeout=10,
-            )
-            if top.returncode == 0 and top.stdout.strip():
-                root = top.stdout.strip()
-        except Exception:
-            pass
+        # the gate silently checks zero requirements. Falls back to code_root.
+        root = _git_root(code_root)
         files = set()
-        for line in result.stdout.splitlines():
+        for line in diff.splitlines():
             line = line.strip()
             if line:
                 files.add(_path_key(os.path.join(root, line)))
@@ -7902,13 +7869,7 @@ def _docs_publish_path(root):  # implements: ARCH-PAGES-021  # implements: REQ-P
     Uses the git root so repos where reqmap runs from a sub-directory (e.g.
     plugin/) still find docs/ at the project root. Falls back to root itself
     when git is absent or the tree is not a checkout."""
-    try:
-        git_root = subprocess.check_output(
-            ["git", "-C", root, "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, timeout=3
-        ).decode().strip()
-    except Exception:
-        git_root = root
+    git_root = _git_root(root)
     docs = os.path.join(git_root, "docs")
     if not os.path.isdir(docs):
         return None
@@ -7948,12 +7909,7 @@ def _site_default_target(root):  # implements: ARCH-SITE-026
     """docs/architecture.html at the git root (so running from plugin/ still finds
     the project-root docs/), or None when there is no docs/. Mirrors
     _docs_publish_path's git-root resolution."""
-    try:
-        git_root = subprocess.check_output(
-            ["git", "-C", root, "rev-parse", "--show-toplevel"],
-            stderr=subprocess.DEVNULL, timeout=3).decode().strip()
-    except Exception:
-        git_root = root
+    git_root = _git_root(root)
     docs = os.path.join(git_root, "docs")
     return os.path.join(docs, "architecture.html") if os.path.isdir(docs) else None
 
@@ -8811,12 +8767,7 @@ def _git_dirty(root):  # implements: REQ-RETIRE-961
     """True when the working tree has uncommitted changes. Fails OPEN (False) when
     git is absent or this is not a repository: a missing safety net must not block a
     legitimate operation, and the plan was printed before this point either way."""
-    try:
-        out = subprocess.run(["git", "status", "--porcelain"], cwd=root or ".",
-                             capture_output=True, text=True, timeout=20)
-        return out.returncode == 0 and bool(out.stdout.strip())
-    except Exception:
-        return False
+    return bool((_git(["status", "--porcelain"], cwd=root or ".", timeout=20) or "").strip())
 
 
 def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
