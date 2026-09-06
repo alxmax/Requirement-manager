@@ -27,6 +27,5 @@ Scenario: the corpus is interrogated
 - `ARCH-NEXT-013` — What-should-I-do-next report  (architecture)  ·  23 detailed design
 - `ARCH-REGISTRYLAG-035` — Registry-lag signal — commits since the requirements dir was last touched  (architecture)  ·  10 detailed design
 - `ARCH-ROADMAP-038` — Roadmap coherence signals  (architecture)  ·  8 detailed design
-- `ARCH-SCAN-005` — List members per capability  (architecture)  ·  4 detailed design
 - `ARCH-SEARCH-036` — Free-text requirement search  (architecture)  ·  19 detailed design
 - `ARCH-SHOW-015` — Single-requirement dossier  (architecture)  ·  13 detailed design

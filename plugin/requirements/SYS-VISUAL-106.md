@@ -25,6 +25,5 @@ Scenario: the system is rendered
 - `ARCH-EXCALIDRAW-032` — Excalidraw builder CLI verbs  (architecture)  ·  4 detailed design
 - `ARCH-MAP-007` — Requirement graph (_map.json)  (architecture)  ·  18 detailed design
 - `ARCH-MAPDIAGRAMS-055` — Mermaid diagrams (_map.md)  (architecture)  ·  17 detailed design
-- `ARCH-PAGES-021` — Publish & gate the GitHub Pages map copy  (architecture)  ·  3 detailed design
 - `ARCH-SITE-026` — Generate & maintain a project presentation page  (architecture)  ·  6 detailed design
 - `ARCH-VIEWER-007` — Self-contained HTML map viewer  (architecture)  ·  24 detailed design
