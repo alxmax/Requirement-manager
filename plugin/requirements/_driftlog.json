@@ -30,8 +30,8 @@
       "reason": "reworded to the house's plain present tense"
     },
     "REQ-CHECK-831": {
-      "hash": "9ddfc67cb1b9",
-      "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+      "hash": "b94ffb48a121",
+      "reason": "reword REQ-CHECK-831's new clause to drop a redundant modal"
     },
     "REQ-DECOMPOSE-839": {
       "hash": "754c8d23f4ff",

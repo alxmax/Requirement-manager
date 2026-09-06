@@ -392,7 +392,7 @@ Every bullet below is binding.
   least one such tag (see [[ARCH-VLEVEL-037]]).
 - Whether the repo carries such a tag, and whether a given need carries one, are read from
   the whole tree. `--since` narrows which requirements are REPORTED on, never the facts a
-  rule reads: half a tag pair inside a diff must not warn about the half outside it.
+  rule reads: half a tag pair inside a diff never warns about the half outside it.
 - A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.
 - A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.
 - The cycle warning stays a warning under `--strict`, so an existing corpus keeps its
