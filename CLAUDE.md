@@ -31,7 +31,7 @@ python scripts/reqmap.py gate --risk               # what to do next: health sco
 python scripts/reqmap.py gate --show AREA-NAME-NNN  # consolidated dossier for one requirement (contract, deps, members, risk)
 python scripts/reqmap.py gate --search "query"     # rank requirements by lexical relevance (same TF-IDF cosine as dupes; --top)
 python scripts/reqmap.py gate --dupes              # flag requirement pairs with overlapping contracts (TF-IDF cosine; --threshold)
-python scripts/reqmap.py gate --design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars, three C&K per-class metrics (Python only), plus house standards; read-only, exit 0, never the gate; thresholds in _config.json
+python scripts/reqmap.py gate --design [--json]     # advisory design review of the repo's code (Python via ast; brace languages via heuristics): the four OOP pillars, one C&K per-class metric (RFC, Python only), plus house standards; read-only, exit 0, never the gate; thresholds in _config.json
 python scripts/reqmap.py gate --review [AREA-NAME-NNN]  # emit a JSON review plan (AI-feed: intent, contract, acceptance, anchors)
 python scripts/reqmap.py sync --suggest-verifies    # propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion; --apply writes them
 python scripts/reqmap.py gate --show AREA-NAME-NNN  # one requirement's dossier. The EN/RO toggle in the viewer still reads requirements/_i18n/<locale>.json; the `translate` verb that WROTE that cache was removed 2026-09-05, so a refresh is now a manual step.
