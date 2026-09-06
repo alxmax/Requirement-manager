@@ -98,7 +98,8 @@ for REPO in "$@"; do
     cp "$VIEWER_SRC" "$REPO/$ENGINE_DIR/_map_viewer.html"
   fi
   echo "  → $REPO synced ($REL)"
-  (cd "$REPO" && python -X utf8 "$REL" sync --accept-drift 2>&1 | sed 's/^/     /')
+  (cd "$REPO" && python -X utf8 "$REL" sync --accept-drift 2>&1 | sed 's/^/     /') \
+    || echo "  WARN: sync failed for $REPO (see output above) — continuing"
 done
 
 echo "done."

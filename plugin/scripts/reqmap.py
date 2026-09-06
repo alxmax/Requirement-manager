@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.3"
+MAP_ENGINE_VERSION = "2026-09-06.4"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -528,7 +528,8 @@ COMMANDS = {
                 "flag": "--apply",
                 "type": "bool",
                 "help": (
-                    "With --retire: actually write the change. Without it, the run is a dry report."
+                    "With --retire: actually write the change (without it, the run is a dry "
+                    "report). With --suggest-verifies: write the proposed tags into the test files."
                 ),
             },
             {
@@ -545,14 +546,6 @@ COMMANDS = {
                 "type": "bool",
                 "help": (
                     "Propose per-criterion `verifies:` tags for tests already named after the criterion they check."
-                ),
-            },
-            {
-                "name": "do_apply",
-                "flag": "--apply",
-                "type": "bool",
-                "help": (
-                    "With --suggest-verifies: write the proposed tags into the test files."
                 ),
             },
             {
@@ -1021,8 +1014,13 @@ def load_requirements(reqs_dir):  # implements: ARCH-PARSE-001  # implements: AR
         if not name.endswith(".md") or name.startswith("_"):
             continue
         path = os.path.join(reqs_dir, name)
-        with open(path, encoding="utf-8-sig") as f:  # tolerate a UTF-8 BOM
-            text = f.read()
+        try:
+            with open(path, encoding="utf-8-sig") as f:  # tolerate a UTF-8 BOM
+                text = f.read()
+        except (OSError, UnicodeDecodeError, ValueError):
+            # unreadable / permission-denied / undecodable file: skip it rather than
+            # raising, so one bad file cannot blind the whole corpus (see docstring).
+            continue
         for _i, _blk in enumerate(split_requirement_blocks(text)):
             meta, body = parse_frontmatter(_blk)
             # only the FIRST block may fall back to the filename; a later block without an
@@ -1658,36 +1656,26 @@ def _walk_code_lines(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002  # 
     same `.reqmapignore`, descends in the same sorted order, and — for `.py` — masks
     string-literal content so a tag inside a docstring is not read as a real tag. A
     caller receives lines already masked and only has to say what a tag means."""
-    ignore = load_ignore(code_root, reqs_dir)
-    for dirpath, dirs, files in os.walk(code_root):
-        _prune_dirs(dirpath, dirs, reqs_dir, code_root, ignore)
-        dirs.sort()                  # deterministic descent, mirrors scan_members
-        for fn in sorted(files):
-            if not _is_code_file(fn):
-                continue
-            fp = os.path.join(dirpath, fn)
-            rel = os.path.relpath(fp, code_root).replace(os.sep, "/")
-            if any(fnmatch.fnmatch(rel, pat) for pat in ignore):
-                continue
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    lines = f.readlines()
-            except OSError:
-                continue
-            is_py = fp.endswith(".py")
-            in_triple = None
-            for i, line in enumerate(lines, 1):
-                masked = line
-                if is_py:
-                    masked = masked.rstrip("\n\r")
-                    if in_triple is not None:
-                        idx = masked.find(in_triple)
-                        if idx == -1:
-                            continue          # still inside the literal
-                        masked = masked[idx + len(in_triple):]
-                        in_triple = None
-                    masked, in_triple = _strip_py_strings(masked)
-                yield rel, i, masked
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+        except OSError:
+            continue
+        is_py = fp.endswith(".py")
+        in_triple = None
+        for i, line in enumerate(lines, 1):
+            masked = line
+            if is_py:
+                masked = masked.rstrip("\n\r")
+                if in_triple is not None:
+                    idx = masked.find(in_triple)
+                    if idx == -1:
+                        continue          # still inside the literal
+                    masked = masked[idx + len(in_triple):]
+                    in_triple = None
+                masked, in_triple = _strip_py_strings(masked)
+            yield rel, i, masked
 
 
 def scan_ac_verifies(code_root, reqs_dir=None):  # implements: ARCH-ACVERIFY-019  # implements: REQ-ACVERIFY-821
@@ -2220,8 +2208,7 @@ def compute_member_hashes(code_root, members):  # implements: ARCH-MEMBERDRIFT-0
         if len(rids) != 1:
             continue          # shared: a change here names no single contract
         span = where[key]
-        sha = _span_sha(*((span[0], span[1], span[2]) if span
-                          else (os.path.join(code_root, key), 1, 1 << 30)))
+        sha = _span_sha(*span) if span else _file_sha(os.path.join(code_root, key))
         if sha is not None:
             out.setdefault(next(iter(rids)), {})[key] = sha
     return out
@@ -2934,7 +2921,8 @@ def _link_sync_errors(reqs, members):  # implements: ARCH-HEALTH-017  # implemen
     ctx.reqs, ctx.members, ctx.full_members = reqs, members, members
     ctx.cap_ids, ctx.since = set(reqs), None
     return [msg for rule_id in ("RM001", "RM006")
-            for _rid, msg in gate_rule_by_id(rule_id).fn(ctx)]
+            for _rid, msg in gate_rule_by_id(rule_id).fn(ctx)
+            if _rid is None or not ctx.req(_rid).exempt_from(rule_id)]
 
 
 def _is_source_repo(code_root):
@@ -2985,7 +2973,6 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
     legacy = _legacy_schema_ids(reqs)
     lock, new_lock = ctx.lock, ctx.new_lock
 
-    lock_blocked = False
     if update_lock:
         changed = [(rid, lock.get(rid), h)
                    for rid, h in sorted(new_lock.items()) if lock.get(rid) != h]
@@ -3031,17 +3018,11 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
             print("  These no longer gate. Re-read the code above against the new contract,")
             print("  change whichever is wrong, then set the status back by hand — or re-run")
             print("  with --accept-drift if the edit did not change what the code must do.")
-            save_lock(reqs_dir, new_lock)
-            save_memberlock(reqs_dir, ctx.full_member_hashes
-                             if ctx.full_member_hashes is not None
-                             else compute_member_hashes(code_root, full_members))
-            print("lock updated.")
-        else:
-            save_lock(reqs_dir, new_lock)
-            save_memberlock(reqs_dir, ctx.full_member_hashes
-                             if ctx.full_member_hashes is not None
-                             else compute_member_hashes(code_root, full_members))
-            print("lock updated.")
+        save_lock(reqs_dir, new_lock)
+        save_memberlock(reqs_dir, ctx.full_member_hashes
+                         if ctx.full_member_hashes is not None
+                         else compute_member_hashes(code_root, full_members))
+        print("lock updated.")
         # Clarifying one requirement can raise questions the previous text never had —
         # a new clause with an unbounded quantity, a case with no failure path. Nobody
         # re-reads the whole corpus after an edit, so the diff is reported here, where
@@ -3069,11 +3050,11 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
                                          "stale integration artifact(s): " + ", ".join(_stale))]
 
     if as_json:
-        print(json.dumps({"ok": not (errors or lock_blocked),
+        print(json.dumps({"ok": not errors,
                           "errors": [str(e) for e in errors],
                           "warnings": [str(w) for w in warns],
                           "findings": [dict(f) for f in errors + warns]}))
-        return 1 if (errors or lock_blocked) else 0
+        return 1 if errors else 0
 
     for w in warns:
         print("WARN ", w["rule"], str(w))
@@ -3087,10 +3068,13 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
     if n_find:
         print(f"info  {n_find} open verify-intent finding(s) — run `reqmap.py sync`")
 
+    # recompute: the demotion loop above may have flipped some status from
+    # "confirmed" to "draft" since n_confirmed was first snapshotted.
+    n_confirmed = sum(1 for r in reqs.values() if r["meta"].get("status") == "confirmed")
     print(f"\n{len(reqs)} requirements ({n_confirmed} confirmed, {len(legacy)} legacy-schema), "
           f"{sum(len(v) for v in members.values())} members, "
           f"{len(errors)} errors, {len(warns)} warnings.")
-    return 1 if (errors or lock_blocked) else 0
+    return 1 if errors else 0
 
 
 
@@ -3892,6 +3876,15 @@ def cmd_candidates(ws, out, md_globs=None):  # implements: ARCH-CANDIDATES-009  
 
     group_id_of_file = {f: g["id"] for g in groups for f in g["files"]}
 
+    # Precompute once: which test_ files exist per stem, so the per-group tested_by
+    # lookup below is O(1) per stem instead of rescanning the whole `files` list
+    # once per group (O(groups * files)).
+    test_by_stem = {}
+    for r in files:
+        b = os.path.basename(r)
+        if b.startswith("test_"):
+            test_by_stem.setdefault(os.path.splitext(b)[0][len("test_"):], []).append(r)
+
     cands = []
     for g in groups:
         sigs, docs, imps, loc = [], {}, set(), 0
@@ -3907,10 +3900,7 @@ def cmd_candidates(ws, out, md_globs=None):  # implements: ARCH-CANDIDATES-009  
         own = set(g["files"])
         deps = sorted({group_id_of_file[stem_of[m]] for m in imps
                        if m in stem_of and stem_of[m] not in own})
-        tested_by = sorted(
-            r for r in files
-            if os.path.basename(r).startswith("test_")
-            and os.path.splitext(os.path.basename(r))[0][len("test_"):] in my_stems)
+        tested_by = sorted(t for stem in my_stems for t in test_by_stem.get(stem, ()))
         existing = next((tagged[f] for f in g["files"] if f in tagged), None)
         cands.append({  # implements: REQ-CANDIDATES-827
             "suggested_id": g["id"], "_layer": g["layer"], "files": g["files"],
@@ -4138,6 +4128,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
     data = {"nodes": [], "edges": [], "upstream_edges": []}
     for rid, r in reqs.items():
         m = r["meta"]
+        _verify = _verify_bullets(r["body"])
         data["nodes"].append({
             "id": rid, "layer": m.get("layer", "feature"),
             "level": m.get("level"),                       # implements: ARCH-LEVEL-051
@@ -4147,7 +4138,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
             "intent": _distinct_intent(r["body"]),
             # new emission schema (Contract / Verify-intent / Notes / Current-impl)
             "contract": _from_any(_bullets, r["body"], CONTRACT_LABELS),
-            "verify": _verify_bullets(r["body"]),
+            "verify": _verify,
             # legacy per-topic heading first; ADR-0017's consolidated Context section
             # (bold **Notes**/**Current implementation** sub-groups) is the fallback,
             # never both at once in one file, so this never masks real content.
@@ -4174,7 +4165,7 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
             "risks": [{"signal": s, "advice": RISK_ADVICE[s]} for s in _risk_signals(
                 {"status": m.get("status", "draft"), "layer": m.get("layer", "feature"),
                  "members": members.get(rid, []),
-                 "verify": _verify_bullets(r["body"]), "test_exempt": m.get("test_exempt")})],
+                 "verify": _verify, "test_exempt": m.get("test_exempt")})],
         })
         _attach_ac_coverage(data["nodes"][-1], r["body"], (ac_cover or {}).get(rid, {}))
     for rid, r in reqs.items():
@@ -4225,6 +4216,17 @@ def _version_key(v):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-
     """Sort key for a `vX.Y.Z` string: compare numerically per segment, so v2.10
     sorts above v2.9 where a string compare would not."""
     return tuple(int(p) for p in v.lstrip("v").split(".") if p.isdigit())
+
+
+def _roadmap_behind(reqs, roadmap):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907
+    """(behind, newest_req) — the highest `milestone:` any requirement declares, and
+    whether TODO.md's newest heading (`roadmap["newest_milestone"]`) trails it. Shared
+    by `_audit_summary` and `cmd_health` so the two cannot disagree on the comparison."""
+    newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
+                      if m.get("milestone")), key=_version_key, default=None)
+    behind = bool(roadmap["newest_milestone"] and newest_req and
+                  _version_key(roadmap["newest_milestone"]) < _version_key(newest_req))
+    return behind, newest_req
 
 
 def _parse_todos_from_text(text):
@@ -4788,8 +4790,7 @@ def _lint_readability(body):  # implements: ARCH-LINTCHECKS-025  # implements: R
     sentence and clause length, and one obligation per clause."""
     findings = []
     # prose readability (warn): only on the Contract + Acceptance sections
-    for name in (CONTRACT_LABELS[0], CONTRACT_LABELS[1],
-                 ACCEPTANCE_LABELS[0], ACCEPTANCE_LABELS[1]):
+    for name in CONTRACT_LABELS + ACCEPTANCE_LABELS:
         for ln in _lint_prose(body, name):
             low = ln.lower()
             # Every line in a Contract/Acceptance section is normative by virtue of the
@@ -4820,7 +4821,8 @@ def _lint_readability(body):  # implements: ARCH-LINTCHECKS-025  # implements: R
     # lines — which is why this check reported 0 corpus-wide while measuring the wrong
     # unit. Measured before the switch: 0 of 625 non-draft clauses hold more than three
     # sentences, so widening the unit changes nothing the check says today.
-    for _cn, ln in _contract_clauses(body):
+    clauses = _contract_clauses(body)
+    for _cn, ln in clauses:
         sents = _sentences(ln)
         if len(sents) > LINT_CLAUSE_SENTENCES:
             findings.append({
@@ -4833,7 +4835,7 @@ def _lint_readability(body):  # implements: ARCH-LINTCHECKS-025  # implements: R
     # asserts that it holds two obligations, which the engine cannot observe
     # (ARCH-ATOMICITY-049). The finding carries clause_n/clause_text so `--decompose` can
     # scaffold from the same clause without re-parsing.
-    for _n, _clause in _contract_clauses(body):
+    for _n, _clause in clauses:
         _cw = _clause_words(_clause)
         if _cw > LINT_STATEMENT_WORDS:
             findings.append({
@@ -5033,9 +5035,6 @@ def lint_requirement(rid, r, member_list=None, fanin=None, children=None):  # im
     the fan-out check; when omitted, or when it is zero, that check is skipped.
     Checks named in the requirement's `lint_exempt:` frontmatter list are silently
     skipped and not counted against the requirement."""
-    exempt = set(_as_list(r["meta"].get("lint_exempt")))
-    findings = []
-    body = r["body"]
     exempt = set(_as_list(r["meta"].get("lint_exempt")))
     body = r["body"]
     findings = []
@@ -5752,10 +5751,8 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         lines.append("{} code file(s) traced to no requirement".format(len(untagged)))
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap:
-        newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
-                          if m.get("milestone")), key=_version_key, default=None)
-        if roadmap["newest_milestone"] and newest_req and \
-                _version_key(roadmap["newest_milestone"]) < _version_key(newest_req):
+        behind, newest_req = _roadmap_behind(reqs, roadmap)
+        if behind:
             lines.append("TODO.md stops at {} while the requirements reach {} - the roadmap "
                          "is behind".format(roadmap["newest_milestone"], newest_req))
         if roadmap["unversioned_headings"]:
@@ -5915,7 +5912,8 @@ def cmd_coverage(ws, as_json=False):
             if not _is_code_file(fn):
                 continue
             fp = os.path.join(dirpath, fn)
-            if reqs_abs and os.path.normcase(os.path.abspath(fp)).startswith(reqs_abs + os.sep):
+            norm_fp = os.path.normcase(os.path.abspath(fp))
+            if reqs_abs and norm_fp.startswith(reqs_abs + os.sep):
                 continue
             rel = os.path.relpath(fp, code_root).replace("\\", "/")
             if any(fnmatch.fnmatch(rel, p) for p in ignore):
@@ -5926,7 +5924,7 @@ def cmd_coverage(ws, as_json=False):
             if label not in buckets:
                 buckets[label] = [0, 0]
             buckets[label][0] += 1
-            if os.path.normcase(os.path.abspath(fp)) in tagged_files:
+            if norm_fp in tagged_files:
                 buckets[label][1] += 1
 
     rows = []
@@ -6165,9 +6163,8 @@ def cmd_health(ws, as_json=False, as_badge=False, headline_only=False):  # imple
         data["design_files"] = design["files"]
     roadmap = _roadmap_signals(code_root) if code_root else None
     if roadmap is not None:
-        newest_req = max((m["milestone"] for m in (r["meta"] for r in reqs.values())
-                          if m.get("milestone")), key=_version_key, default=None)
-        if roadmap["newest_milestone"] and newest_req and                 _version_key(roadmap["newest_milestone"]) < _version_key(newest_req):
+        behind, newest_req = _roadmap_behind(reqs, roadmap)
+        if behind:
             data["roadmap_behind"] = {"todo": roadmap["newest_milestone"],
                                       "requirements": newest_req}
         if roadmap["unversioned_headings"]:
@@ -6988,10 +6985,6 @@ def _risk_signals(node):
 
 
 def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-878
-    dep_count = {n["id"]: 0 for n in data["nodes"]}
-    for _, b in data["edges"]:
-        dep_count[b] = dep_count.get(b, 0) + 1
-
     risky = [(n, _risk_signals(n)) for n in data["nodes"]]
     risky = [(n, s) for n, s in risky if s]
 
@@ -7882,6 +7875,7 @@ def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: ARCH
         if not missing:
             continue
         files = sorted({fp for role, fp, _ln in members.get(rid, []) if role == "tested-by"})
+        tests_by_file = {fp: _test_functions(os.path.join(code_root, fp)) for fp in files}
         distinctive = [p for p in rid.lower().split("-") if counts.get(p) == 1]
         foreign = {n for other, n in numbers.items() if other != rid}
         mine = numbers.get(rid)
@@ -7890,7 +7884,7 @@ def _verifies_proposals(reqs, members, code_root, ac_cover):  # implements: ARCH
             hits = []
             for fp in files:
                 shared = len(owners.get(fp, ())) > 1
-                for ln, name in _test_functions(os.path.join(code_root, fp)):
+                for ln, name in tests_by_file[fp]:
                     low = name.lower()
                     if not want.search(low):
                         continue
@@ -9363,22 +9357,24 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
         prog="reqmap",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "Author:\n"
-            "  init                 bootstrap a repo (scaffold + draft + lock + map)\n"
+            "Five top-level commands; every other verb below is a mode flag on one of them.\n"
+            "\nAuthor:\n"
+            "  init                 bootstrap a repo (scaffold + draft from code + lock + map + next-steps)\n"
+            "  init --plan          JSON dry run of the same draft extraction, writes nothing\n"
             "  new ID               scaffold one requirement   (--from-todo \"name\" --id ID)\n"
-            "  draft                derive draft requirements from untagged code (--plan: JSON, writes nothing)\n"
-            "  clarify ID           the questions this requirement has not answered\n"
-            "  confirm ID           validate a reviewed requirement -> status confirmed\n"
+            "  clarify ID           the questions this requirement has not answered (--decompose "
+            "to scaffold an over-scoped clause out)\n"
+            "  (confirming is a human's answer, not a command: edit status: in the frontmatter)\n"
             "\nBuild:\n"
-            "  implement ID         the brief for writing its code (tags, cases, neighbours)\n"
+            "  gate --implement ID  the brief for writing its code (tags, cases, neighbours)\n"
             "  gate                 the whole verdict: link sync + drift + readability + map freshness\n"
             "  sync                 rebuild everything derived: lock, map, findings, site, integration\n"
-            "  retire ID            take a requirement out of service (plan first, --apply to act)\n"
+            "  sync --retire ID     take a requirement out of service (plan first, --apply to act)\n"
             "\nRead:\n"
-            "  next                 what to do next (--json/--badge: health, --untagged: files with no tag)\n"
-            "  show ID              one-requirement dossier\n"
-            "  search \"query\"       rank requirements by lexical relevance\n"
-            "  dupes / design / review / suggest-verifies / translate\n"
+            "  gate --risk          what to do next (--json/--badge: health, --untagged: files with no tag)\n"
+            "  gate --show ID       one-requirement dossier\n"
+            "  gate --search \"query\"  rank requirements by lexical relevance\n"
+            "  gate --dupes / --design / --review ID, sync --suggest-verifies\n"
         ),
     )
     ap.add_argument("cmd", choices=_cli_choices())
@@ -9414,12 +9410,13 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
     ap.add_argument("--force", action="store_true",
                     help="retire: proceed despite dependents, or on a dirty working tree")
     ap.add_argument("--decompose", action="store_true",
-                    help="lint: scaffold one draft requirement per statement-size finding "
-                         "(opt-in; the only lint mode that writes files)")
+                    help="clarify --decompose: scaffold one draft requirement per statement-size "
+                         "finding (opt-in; the only mode that writes files)")
     ap.add_argument("--threshold", type=_threshold_arg, default=None,
-                    help="similar: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
+                    help="gate --dupes: cosine cutoff in (0,1] for reporting a pair (default 0.35)")
     ap.add_argument("--top", type=int, default=None,
-                    help="search: max ranked matches to show (default 5); dupes: max pairs to print (default all)")
+                    help="gate --search: max ranked matches to show (default 5); "
+                         "gate --dupes: max pairs to print (default all)")
     ap.add_argument("--json", dest="as_json", action="store_true",
                     help="check|health|coverage|design: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
@@ -9429,7 +9426,7 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="sync: advance the drift baseline even when a confirmed/implemented "
                          "contract changed (otherwise sync refuses and exits non-zero)")
     ap.add_argument("--since", metavar="REF",
-                    help="check: scope gate to requirements whose member files changed since REF "
+                    help="gate: scope to requirements whose member files changed since REF "
                          "(hypothesis: highest-frequency changes; falls back to full scan on git error)")
     ap.add_argument("--wipe", action="store_true",
                     help="init: hard-reset — delete all non-generated requirements and strip "

@@ -1,5 +1,13 @@
 # Changelog
 
+## plugin `v5.9.1` — 2026-09-06
+
+Internal audit fixes: dead code removal, a handful of contained bug fixes (stale
+sync summary count, health/gate exemption mismatch, a fail-open contract gap in
+requirement loading, stale CLI help text, a multi-repo sync script that aborted
+after the first failing repo), and several redundant-recomputation efficiency
+fixes. No behavior change to the gate's pass/fail verdicts.
+
 ## plugin `v5.9.0` — 2026-09-06
 
 **The member hash now keys on the definition a tag sits in, not the whole file.** Reverse
