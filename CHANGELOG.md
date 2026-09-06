@@ -1,5 +1,50 @@
 # Changelog
 
+## plugin `v5.13.0` — 2026-09-06
+
+**A corpus that was already tagged had no path to the three rungs.** `init` writes the
+V-model levels only onto requirements it EXTRACTED from untagged source files, and it
+mints the architecture and system rungs from those drafts — `by_dir` is populated inside
+the per-file draft loop and `_write_arch_drafts` runs after it. So a repository whose
+files already carry membership tags proposes zero drafts, and zero drafts is zero
+pyramid. Its requirements, hand-authored before the axis existed, had no command that
+could give them the axis at all; adopting it meant editing every file by hand.
+
+**New: `clarify --levels`** ([ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md),
+`ARCH-LEVELRETROFIT-066`).
+
+- Proposes one rung per requirement that **declares none**, and prints the reason beside
+  each. A requirement whose author already declared a level is never overruled.
+- `layer: need` proposes `system` and `layer: aggregate` proposes `architecture`, because
+  each layer already states what the rung would say.
+- **`code` is proposed only on evidence**: an `implements:` member, at least `LINT_AC_MIN`
+  labelled cases, and at least one of those cases linked to a test by a `verifies:` tag.
+  `code` is the rung an author reaches by DECOMPOSING a capability, not by renaming one,
+  so a corpus that reaches only two rungs is told what the third is and which command
+  reaches it — a two-rung corpus is an end state, not a half-finished one.
+- **Read-only without `--apply`**, exit 0 always, and no gate rule reads it. It lives on
+  `clarify` and not on `sync`, because the shipped pre-commit hook runs `sync` on every
+  commit and this writes into files a human authored.
+- **`satisfies:` edges are never proposed or written.** `satisfies:` is the level axis and
+  `depends_on` is the composition axis; deriving one from the other is the conflation the
+  engine refuses to make everywhere else.
+- Writes preserve the file's own line endings and touch one block of a module file,
+  leaving its siblings byte for byte — the same two hazards `_apply_status` handles, and
+  the new path mirrors it deliberately rather than inventing second mechanics.
+
+**And the report that found the problem now names the fix.** The flat-corpus block in
+`gate --audit` ended at "Adopting it is a decision, not a defect" and stopped: a reader
+learned they were flat and not what to do about it. It now names `clarify --levels` and
+says it writes nothing without `--apply`.
+
+Recorded honestly in ADR-0031: ADR-0030's reversibility is cleaner than this one, because
+there the whole FILE was engine-written, while here two lines are added to a file a human
+wrote — which is the entire reason the write is opt-in, printed first, and marked
+`level_source: auto`. And the rung is inferred from SHAPE, which is not intent; the run
+says so in its own last sentence. The ADR carries a dated revisit: if nobody runs it
+within six months, or if authors routinely correct the rung it proposed, it should be
+deleted rather than kept for symmetry.
+
 ## plugin `v5.12.1` — 2026-09-06
 
 **`v5.12.0`'s roadmap controls, written down and asserted.** New `REQ-VIEWER-984`, and

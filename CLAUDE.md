@@ -14,6 +14,7 @@ python scripts/reqmap.py new AREA-NAME-NNN  # scaffold a new requirement from th
 python scripts/reqmap.py new --from-todo "TODO name" --id AREA-NAME-NNN [--mark-done]  # scaffold from a TODO.md item
 python scripts/reqmap.py init              # draft requirements from untagged legacy code (--plan: JSON dry run, writes nothing)
 python scripts/reqmap.py clarify AREA-NAME-NNN  # the questions this requirement has not answered (--json; --decompose scaffolds an over-scoped clause out)
+python scripts/reqmap.py clarify --levels       # propose a V-model rung for every requirement that declares none; read-only, --apply writes them marked `level_source: auto` (ADR-0031)
 # confirming is a HUMAN's answer, not a command: edit `status:` in the frontmatter
 # after someone has read it. The gate enforces the invariant (RM006: confirmed with
 # no implements: member is an error), and `sync` demotes an edited contract back to
@@ -103,7 +104,7 @@ This repo is a Claude Code plugin that ships **three skills** under `plugin/skil
 
 The repo dogfoods itself: `plugin/requirements/` describes the engine's own capabilities.
 
-**Design decisions live in `docs/adr/`** (26 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
+**Design decisions live in `docs/adr/`** (31 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
 **Single engine file:** `plugin/scripts/reqmap.py` — 7,169 lines measured 2026-09-03, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 

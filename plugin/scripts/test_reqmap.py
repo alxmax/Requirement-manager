@@ -3217,6 +3217,151 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         self.assertNotEqual(before, after)
 
 
+class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # tested-by: REQ-LEVELRETROFIT-985  # tested-by: REQ-LEVELRETROFIT-986  # tested-by: REQ-LEVELRETROFIT-987
+    """`clarify --levels`: propose a V-model rung for a corpus that declares none."""
+
+    HEAD = "---\nid: {id}\nstatus: confirmed\n{extra}layer: {layer}\nowner: Alex\n---\n\n# {id}\n\n"
+    CASES = ("## Cases\nCASE-1 - a\n  Given x\n  When y\n  Then z\n\n"
+             "CASE-2 - b\n  Given x\n  When y\n  Then z\n\n"
+             "CASE-3 - c\n  Given x\n  When y\n  Then z\n")
+
+    def _req(self, rid, layer="feature", extra="", cases=False, eol="\n"):
+        body = self.HEAD.format(id=rid, layer=layer, extra=extra)
+        body += "## Description\nEvery bullet below is binding.\n- {} does one thing.\n\n".format(rid)
+        if cases:
+            body += self.CASES
+        return body.replace("\n", eol)
+
+    def _repo(self, files, members=None, ac_cover=None):
+        # newline='' on purpose: the CRLF case needs a genuinely CRLF file, and the
+        # others a genuinely LF one. Python's default translation would erase both.
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        reqs_dir = os.path.join(d, "requirements")
+        os.makedirs(reqs_dir, exist_ok=True)
+        for name, text in files.items():
+            with open(os.path.join(reqs_dir, name), "w", encoding="utf-8", newline="") as f:
+                f.write(text)
+        reqs = R.load_requirements(reqs_dir)
+        return d, R.Workspace(reqs, members or {}, reqs_dir, d, ac_cover=ac_cover or {})
+
+    def _run(self, ws, **kw):
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = R.cmd_levels(ws, **kw)
+        return rc, buf.getvalue()
+
+    # ---- REQ-LEVELRETROFIT-985: which rung, and on what evidence ----------
+    def test_layer_answers_the_rung_where_the_layer_already_said_so(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-1  # verifies: REQ-LEVELRETROFIT-985#CASE-1
+        _d, ws = self._repo({
+            "SYS-A-001.md": self._req("SYS-A-001", layer="need"),
+            "AGG-B-002.md": self._req("AGG-B-002", layer="aggregate"),
+        })
+        got = R._propose_levels(ws.reqs, ws.members, ws.ac_cover)
+        self.assertEqual(got["SYS-A-001"][0], "system")
+        self.assertIn("need", got["SYS-A-001"][1])
+        self.assertEqual(got["AGG-B-002"][0], "architecture")
+        self.assertIn("aggregate", got["AGG-B-002"][1])
+
+    def test_code_needs_cases_a_member_and_a_test_link(self):  # verifies: REQ-LEVELRETROFIT-985#CASE-2
+        # Same layer, same status: only the evidence differs, and only the one
+        # carrying all three signals is proposed at the decomposed rung.
+        _d, ws = self._repo(
+            {"REQ-A-001.md": self._req("REQ-A-001", cases=True),
+             "REQ-B-002.md": self._req("REQ-B-002", cases=False)},
+            members={"REQ-A-001": [("implements", "src/a.py", 1)],
+                     "REQ-B-002": [("implements", "src/b.py", 1)]},
+            ac_cover={"REQ-A-001": {"CASE-1": ["t"]}})
+        got = R._propose_levels(ws.reqs, ws.members, ws.ac_cover)
+        self.assertEqual(got["REQ-A-001"][0], "code")
+        self.assertEqual(got["REQ-B-002"][0], "architecture")
+
+    def test_a_declared_rung_is_never_overruled(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-3  # verifies: REQ-LEVELRETROFIT-985#CASE-3
+        # Shape says `code`; the author said `architecture`. The author wins, and
+        # the run reports that there is nothing to propose.
+        _d, ws = self._repo(
+            {"REQ-A-001.md": self._req("REQ-A-001", extra="level: architecture\n", cases=True)},
+            members={"REQ-A-001": [("implements", "src/a.py", 1)]},
+            ac_cover={"REQ-A-001": {"CASE-1": ["t"]}})
+        self.assertEqual(R._propose_levels(ws.reqs, ws.members, ws.ac_cover), {})
+        rc, out = self._run(ws)
+        self.assertEqual(rc, 0)
+        self.assertIn("nothing to propose", out)
+
+    # ---- REQ-LEVELRETROFIT-986: writing into somebody else's file ---------
+    def test_a_crlf_file_comes_back_crlf(self):  # verifies: REQ-LEVELRETROFIT-986#CASE-1
+        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001", eol="\r\n")})
+        rc, _out = self._run(ws, apply_it=True)
+        self.assertEqual(rc, 0)
+        raw = open(ws.reqs["REQ-A-001"]["path"], "rb").read()
+        self.assertEqual(raw.count(b"\r\n"), raw.count(b"\n"))   # no bare LF survived
+        self.assertIn(b"level_source: auto\r\n", raw)
+
+    def test_one_block_of_a_module_file_and_only_one(self):  # verifies: REQ-LEVELRETROFIT-986#CASE-2
+        mod = (self._req("REQ-A-001", layer="need")
+               + "\n\n--------------------\n\n\n"
+               + self._req("REQ-B-002", layer="aggregate"))
+        _d, ws = self._repo({"REQ-A-001.md": mod})
+        rc, _out = self._run(ws, apply_it=True)
+        self.assertEqual(rc, 0)
+        text = open(os.path.join(ws.reqs_dir, "REQ-A-001.md"), encoding="utf-8").read()
+        self.assertIn("id: REQ-A-001\nstatus: confirmed\nlevel: system", text)
+        self.assertIn("id: REQ-B-002\nstatus: confirmed\nlevel: architecture", text)
+        self.assertEqual(text.count("level_source: auto"), 2)
+
+    def test_a_block_that_already_carries_a_level_is_skipped_not_forced(self):  # verifies: REQ-LEVELRETROFIT-986#CASE-3
+        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001")})
+        before = open(ws.reqs["REQ-A-001"]["path"], "rb").read()
+        ok, msg = R._apply_level(ws.reqs["REQ-A-001"], "code")
+        self.assertTrue(ok)
+        ok2, msg2 = R._apply_level(ws.reqs["REQ-A-001"], "architecture")
+        self.assertFalse(ok2)
+        self.assertIn("no editable frontmatter", msg2)
+        after = open(ws.reqs["REQ-A-001"]["path"], "rb").read()
+        # written once, not twice: the second call found a `level:` and refused
+        self.assertEqual(after.count(b"level: code"), 1)
+        self.assertEqual(after.count(b"level_source: auto"), 1)
+        self.assertNotIn(b"architecture", after)
+        self.assertNotEqual(before, after)
+
+    # ---- REQ-LEVELRETROFIT-987: read-only, and honest about its limits ----
+    def test_the_default_run_changes_nothing_on_disk(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-1
+        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001")})
+        path = ws.reqs["REQ-A-001"]["path"]
+        before = open(path, "rb").read()
+        rc, out = self._run(ws)
+        self.assertEqual(rc, 0)
+        self.assertEqual(open(path, "rb").read(), before)
+        self.assertIn("Nothing written", out)
+        self.assertIn("REQ-A-001", out)
+
+    def test_satisfies_edges_are_never_proposed_or_written(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-2
+        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001", layer="need")})
+        rc, out = self._run(ws, apply_it=True)
+        self.assertEqual(rc, 0)
+        self.assertIn("`satisfies:` edges are NOT proposed", out)
+        self.assertNotIn("satisfies:", open(ws.reqs["REQ-A-001"]["path"], encoding="utf-8").read())
+
+    def test_a_two_rung_corpus_is_told_what_the_third_rung_is(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-3
+        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001")})
+        _rc, out = self._run(ws)
+        self.assertIn("No requirement is proposed at `code`", out)
+        self.assertIn("--decompose", out)
+
+    def test_apply_writes_the_rung_and_the_marker(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-2
+        _d, ws = self._repo({
+            "SYS-A-001.md": self._req("SYS-A-001", layer="need"),
+            "REQ-B-002.md": self._req("REQ-B-002"),
+        })
+        rc, _out = self._run(ws, apply_it=True)
+        self.assertEqual(rc, 0)
+        reread = R.load_requirements(ws.reqs_dir)
+        self.assertEqual(reread["SYS-A-001"]["meta"]["level"], "system")
+        self.assertEqual(reread["REQ-B-002"]["meta"]["level"], "architecture")
+        for r in reread.values():
+            self.assertEqual(r["meta"].get("level_source"), "auto")
+
+
 class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHOW-917  # tested-by: REQ-SHOW-918  # tested-by: REQ-SHOW-919
     def _show(self, reqs, members, cap_id):
         buf = io.StringIO()
