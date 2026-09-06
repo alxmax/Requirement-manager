@@ -1,5 +1,41 @@
 # Changelog
 
+## plugin `v5.12.0` — 2026-09-06
+
+**The Roadmap chart was 15,600px wide and showed three versions at a time.** One
+column per milestone and a chip carrying the full requirement title made the table as
+wide as its longest title times its column count, so reading the plan meant panning
+across it. Two controls, because they trade away different things.
+
+- **Zoom, 40-150%, continuous.** `ctrl`/`⌘` + scroll over the chart, or the
+  `− / 100% / +` control in the new toolbar; clicking the percentage resets it. A bare
+  wheel still scrolls — a table this wide needs the wheel more than it needs a
+  shortcut. The point under the cursor is held still while zooming, so zooming out to
+  find a version does not lose the one you were reading.
+- **Density, `comfy` or `compact`.** Compact narrows the chip instead of shrinking it:
+  row height 24—18px, cell padding 6/10—3/5, and the title truncates at 108px with the
+  full text in the tooltip the chip already carried. The type stays crisp, which zoom
+  cannot do.
+- Both are remembered per reader (`localStorage`, guarded like the locale is: SSR has no
+  `window`, and a hardened `file://` browser throws on the accessor itself). The
+  defaults are unchanged — 100% and `comfy`, so a reader who touches nothing sees what
+  they saw before.
+
+Two details worth recording, because both were wrong in the first cut and caught by
+driving the built viewer rather than by reading it:
+
+- The zoom uses CSS `zoom`, not `transform: scale`. A transform leaves the scroll
+  container at full size, so the reader pans across empty space to reach the last
+  column; `zoom` shrinks the scroll extent with the content (measured: 15,604px at
+  100% — 8,766px at 56% — 6,285px at 40%).
+- A trackpad flick delivers several wheel events inside one frame. Reading the current
+  zoom from a ref synced at render handed all of them the same stale value, collapsing
+  the flick into a single step (six zoom-out events moved 100% to 91%, not 56%). The
+  handler now writes that ref synchronously.
+
+The wheel listener is registered natively and non-passive: React's `onWheel` cannot
+`preventDefault`, and without that the browser's own page zoom fires instead.
+
 ## plugin `v5.11.0` — 2026-09-06
 
 **The roadmap check watched one direction, and the drift ran the other way.**

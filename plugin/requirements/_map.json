@@ -19868,15 +19868,15 @@
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/views/RoadmapView.jsx",
-        "line": 31,
+        "line": 64,
         "name": "RoadmapView.jsx",
-        "detail": "21 line(s) wider than 100 columns, first at line 31"
+        "detail": "26 line(s) wider than 100 columns, first at line 64"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/RoadmapView.jsx",
-        "line": 61,
+        "line": 153,
         "name": "RoadmapView",
         "detail": "`RoadmapView` nests 6 levels deep (over 4)"
       },
@@ -19884,9 +19884,9 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/RoadmapView.jsx",
-        "line": 61,
+        "line": 153,
         "name": "RoadmapView",
-        "detail": "`RoadmapView` is 118 lines (over 80)"
+        "detail": "`RoadmapView` is 185 lines (over 80)"
       },
       {
         "pillar": "standards",
