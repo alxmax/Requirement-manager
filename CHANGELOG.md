@@ -1,5 +1,40 @@
 # Changelog
 
+## plugin `v5.12.1` — 2026-09-06
+
+**`v5.12.0`'s roadmap controls, written down and asserted.** New `REQ-VIEWER-984`, and
+three checks in the SSR smoke that each fail when the behaviour they name is broken
+(verified by mutation: swapping CSS `zoom` for `transform: scale` fails CASE-1 and CASE-3,
+dropping the compact truncation fails CASE-2, and moving the default off 100% fails CASE-3).
+
+- `RoadmapView` accepts `initialZoom` / `initialDensity`, the seam `I18nProvider` already
+  opens with `initialLocale`: a host or a render test presets the controls, and absent both
+  the reader's stored choice is used, falling back to 100%/`comfy`.
+- The requirement records what is NOT covered and why: `renderToString` has no DOM and
+  dispatches no events, so the `ctrl`+wheel handler — where both of `v5.12.0`'s real bugs
+  lived — is exercised by hand, not by the harness. Read the absence of a case as
+  untested, not as passing.
+- `ARCH-VIEWER-007` gains its eleventh child, which pushed it to 11 contract clauses and 8
+  criteria and turned the `over-scoped` lint from silent to **ERROR**. The check is right,
+  so the exemption added here is a deferral with its reason in the requirement's own prose,
+  and the split is filed in `TODO.md` under v5.13 with the seam named: the ARTIFACT (`map`
+  writes one self-contained file, and the escaping that makes the graph safe inside
+  `<script>`) versus WHAT IT RENDERS. They already have different test surfaces — Python
+  for the first, the SSR smoke for the second — which is the honest sign the seam is real.
+  It needs an ADR, and it is exactly the change that must not happen as a side effect of
+  the next viewer feature, which is how it reached eleven.
+
+Also filed for v5.13, from the Senate repo (a real consumer, 42 hand-authored confirmed
+requirements): an already-tagged corpus has no path to the three rungs. ADR-0030 works, but
+rung 1 fires only on a requirement `init` extracts from an untagged source file, and the
+architecture and system rungs are minted from those drafts — so zero drafts is zero
+pyramid, confirmed in the engine (`by_dir` is fed only inside the per-file draft loop, and
+`_write_arch_drafts` runs after it). The item deliberately refuses the request as put
+("generate the levels at `sync` too"): `sync` runs on every commit via the hook, the most
+automatic placement available and the opposite of the audit anchor. It also names a
+second-order effect on ADR-0019's 2027-03-03 review — a consumer whose non-use of the axis
+is STRUCTURAL is evidence of a missing retrofit path, not of a missing reader.
+
 ## plugin `v5.12.0` — 2026-09-06
 
 **The Roadmap chart was 15,600px wide and showed three versions at a time.** One

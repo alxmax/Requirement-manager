@@ -12792,7 +12792,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:84"
+          "loc": "app/scripts/ssr-smoke.jsx:85"
         },
         {
           "role": "implements",
@@ -15765,10 +15765,12 @@
         "The viewer documents the engine's own commands, in the reader's language, from the list the map carries. [[REQ-VIEWER-964]]",
         "The viewer shows every open signal in one inbox, keeping what a human asked distinguishable from what the engine derived. [[REQ-VIEWER-966]]",
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
-        "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]"
+        "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]",
+        "The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]"
       ],
       "verify": [],
       "notes": [
+        "`lint_exempt: over-scoped`, and this one is a deferral, not a defence. The check is right: eleven contract clauses and eight criteria describe an architecture requirement that has grown one child per viewer surface, and it fired the moment the eleventh arrived. Splitting it is a real decision — the seam runs between the ARTIFACT (`map` writes one self-contained file, and the escaping that makes it safe to embed) and what that file RENDERS (outline, spec, map, roadmap, problems, commands) — and it deserves its own change and its own ADR, not a side effect of adding a zoom control. Filed in `TODO.md` under v5.13. Until then the exemption keeps the count visible in `gate --audit` instead of the error blocking every commit.",
         "`lint_exempt: file-spread`: the members are one engine function plus the viewer's source tree (`app/src/**`, its vendoring script and single-file build config). A UI is many files by construction; they are built into ONE artifact, so the spread is not diffuseness.",
         "`lint_exempt: [ac-count-high]`: the 8 criteria cover four independent surfaces of one artifact — data injection and its three escapes, node placement, UI language, and how the acceptance block is rendered. Splitting them would produce requirements that all point at the same single vendored file, which is the coupling the count is meant to detect, not a fix for it.",
         "The single-file build (`app/` → `npm run build:viewer`) is vendored beside the engine as `scripts/_map_viewer.html` with a `<!--REQMAP_DATA-->` marker; the stdlib engine swaps the marker for the inline data, so it ships a rich UI without itself depending on Node/npm.",
@@ -15821,7 +15823,8 @@
         "REQ-VIEWER-964",
         "REQ-VIEWER-966",
         "REQ-VIEWER-969",
-        "REQ-VIEWER-977"
+        "REQ-VIEWER-977",
+        "REQ-VIEWER-984"
       ],
       "members": [
         {
@@ -16572,9 +16575,9 @@
       "acc": [
         "CASE-1 — — the tab appears with its count Given  a map whose `design` record carries two candidates When   `ProblemsView` renders Then   a `Design` tab is offered showing the count 2",
         "CASE-2 — — an older map offers nothing Given  a map whose `design` record carries a score but no candidates When   `ProblemsView` renders Then   no `Design` tab is offered",
-        "CASE-3 — — the inbox is unchanged Given  a map carrying both corpus signals and design candidates When   the open signals are computed Then   no computed row carries a design severity, and the `All` count is the corpus count alone"
+        "CASE-3 — — the inbox is unchanged Given  a map carrying both corpus signals and design candidates When   the open signals are computed Then   no computed row carries a design severity, and the `All` count is the corpus count alone --------------------"
       ],
-      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the inbox is unchanged\n  Given  a map carrying both corpus signals and design candidates\n  When   the open signals are computed\n  Then   no computed row carries a design severity, and the `All` count is the corpus count alone",
+      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the inbox is unchanged\n  Given  a map carrying both corpus signals and design candidates\n  When   the open signals are computed\n  Then   no computed row carries a design severity, and the `All` count is the corpus count alone\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -16592,6 +16595,69 @@
         {
           "role": "implements",
           "loc": "app/src/views/ProblemsView.jsx:3"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-VIEWER-984",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Reading a roadmap wider than the screen",
+      "intent": "One column per milestone and a chip carrying the full requirement title made the chart as wide as its longest title times its column count. At 42 milestones that is over 15,000px, so three versions were visible and the rest was panning. Scaling and packing are two different answers and a reader needs both: zoom shrinks the type along with everything else, while a tighter chip keeps the type crisp and gives up the tail of the title instead.",
+      "contract": [
+        "The chart scales through the CSS `zoom` property, so its scroll extent shrinks with its contents. A `transform` would leave the container at full size and make the reader pan across empty space to reach the last column.",
+        "The compact density truncates a chip's title and keeps the full text in the chip's `title` attribute, rather than scaling the chip down. Nothing a reader can only see by hovering is lost, because the tooltip was already there.",
+        "With nothing stored and nothing passed, the chart renders at 100% and `comfy` — the view a reader had before either control existed.",
+        "`initialZoom` and `initialDensity` let a host or a render test preset the two controls; absent both, the reader's last choice is read from browser storage, and a storage that is missing or throws yields the defaults rather than an error."
+      ],
+      "verify": [],
+      "notes": [
+        "The wheel handler is deliberately NOT covered here, and the omission is the honest one: the render harness is `renderToString`, which has no DOM and dispatches no events, so a case asserting `ctrl`+wheel would assert nothing. Two failure modes live there and were each found by driving the built viewer by hand: a same-frame flick collapsing into one zoom step, and the browser's own page zoom firing because a React `onWheel` cannot `preventDefault`. Read the absence of a case as untested, not as passing.",
+        "The zoom range is 40-150%. The floor is where a 42-column chart fits a laptop screen at compact density; the ceiling is a legibility aid, not a use case anyone asked for."
+      ],
+      "current_impl": [
+        "`app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`, the `DENSITY` table.",
+        "`app/scripts/ssr-smoke.jsx` — the three cases above."
+      ],
+      "acc": [
+        "CASE-1 — — the chart scales with CSS `zoom`, not with a transform Given  `RoadmapView` rendered with `initialZoom` 40 When   the markup is inspected Then   the chart's wrapper carries `zoom:0.4` and no `transform`, so the scroll extent scales with the content rather than staying at full width",
+        "CASE-2 — — compact truncates the title and keeps it in the tooltip Given  `RoadmapView` rendered with `initialDensity` `compact` When   the markup is inspected Then   a chip's label carries `text-overflow:ellipsis` under a max width, and the chip still carries the untruncated title as its `title` attribute",
+        "CASE-3 — — the defaults are the view that existed before the controls Given  `RoadmapView` rendered with neither prop and no stored preference When   the markup is inspected Then   the zoom control reads `100%`, the wrapper carries `zoom:1`, and no label is truncated"
+      ],
+      "accept": "CASE-1 — the chart scales with CSS `zoom`, not with a transform\n  Given  `RoadmapView` rendered with `initialZoom` 40\n  When   the markup is inspected\n  Then   the chart's wrapper carries `zoom:0.4` and no `transform`, so the scroll extent\n         scales with the content rather than staying at full width\n\nCASE-2 — compact truncates the title and keeps it in the tooltip\n  Given  `RoadmapView` rendered with `initialDensity` `compact`\n  When   the markup is inspected\n  Then   a chip's label carries `text-overflow:ellipsis` under a max width, and the chip\n         still carries the untruncated title as its `title` attribute\n\nCASE-3 — the defaults are the view that existed before the controls\n  Given  `RoadmapView` rendered with neither prop and no stored preference\n  When   the markup is inspected\n  Then   the zoom control reads `100%`, the wrapper carries `zoom:1`, and no label\n         is truncated",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/ssr-smoke.jsx:4"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/RoadmapView.jsx:56"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/RoadmapView.jsx:104"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/RoadmapView.jsx:156"
         }
       ],
       "test_exempt": null,
@@ -18819,6 +18885,10 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-VIEWER-984",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "ARCH-VLEVEL-037",
       "SYS-VMODEL-107"
     ],
@@ -19495,6 +19565,18 @@
       "lane": "feature",
       "milestone": "v5.8",
       "done": false
+    },
+    {
+      "name": "Split ARCH-VIEWER-007: the artifact and what it renders are two requirements",
+      "lane": "feature",
+      "milestone": "v5.13",
+      "done": false
+    },
+    {
+      "name": "An already-tagged corpus has no path to the three rungs",
+      "lane": "feature",
+      "milestone": "v5.13",
+      "done": false
     }
   ],
   "commands": [
@@ -19702,7 +19784,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "48 line(s) wider than 100 columns, first at line 1"
+        "detail": "50 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -19870,13 +19952,13 @@
         "file": "app/src/views/RoadmapView.jsx",
         "line": 64,
         "name": "RoadmapView.jsx",
-        "detail": "26 line(s) wider than 100 columns, first at line 64"
+        "detail": "28 line(s) wider than 100 columns, first at line 64"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/RoadmapView.jsx",
-        "line": 153,
+        "line": 156,
         "name": "RoadmapView",
         "detail": "`RoadmapView` nests 6 levels deep (over 4)"
       },
@@ -19884,7 +19966,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/RoadmapView.jsx",
-        "line": 153,
+        "line": 156,
         "name": "RoadmapView",
         "detail": "`RoadmapView` is 185 lines (over 80)"
       },
@@ -20640,11 +20722,11 @@
   },
   "health": {
     "score": 98,
-    "total": 239,
-    "healthy": 234,
-    "confirmed": 234,
-    "implemented": 230,
-    "tested": 227,
+    "total": 240,
+    "healthy": 235,
+    "confirmed": 235,
+    "implemented": 231,
+    "tested": 228,
     "drafts": 5,
     "orphans": 0,
     "untested": 0,
@@ -20653,6 +20735,6 @@
     "gate_errors": 0,
     "gate_link_sync_clean": true,
     "reviewed_score": 100,
-    "reviewed_total": 234
+    "reviewed_total": 235
   }
 }
