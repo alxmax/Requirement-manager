@@ -53,7 +53,7 @@ const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%,
 /* The two densities differ only in numbers a reader can see the effect of.
  * `titleMax` is the one that reclaims width: a chip stops growing with its
  * title, and the full text moves to the tooltip `Bar` already carries. */
-const DENSITY = {
+const DENSITY = {  // implements: REQ-VIEWER-984
   comfy:   { barH: 24, barPadL: 9, barGap: 5, font: 11, idFont: 9,
              cellPad: "6px 10px", headPad: "10px 14px", lanePad: "0 14px", titleMax: null },
   compact: { barH: 18, barPadL: 7, barGap: 4, font: 10, idFont: 9,
@@ -101,7 +101,7 @@ const ctrlBtn = {
   color: "var(--fg-muted)", padding: "3px 9px", fontSize: 12, lineHeight: 1.4,
 };
 
-function ZoomControl({ zoom, setZoom }) {
+function ZoomControl({ zoom, setZoom }) {  // implements: REQ-VIEWER-984
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
@@ -115,7 +115,7 @@ function ZoomControl({ zoom, setZoom }) {
           title="Reset to 100%"
           style={{ ...ctrlBtn, minWidth: 48, textAlign: "center", fontWeight: 700,
                    color: "var(--fg)", background: "var(--surface-hov)" }}
-        >{zoom}%</button>
+        >{`${zoom}%`}</button>
         <button style={ctrlBtn} title="Zoom in" aria-label="Zoom in"
                 onClick={() => setZoom(z => clampZoom(z * 1.1))}>+</button>
       </span>
@@ -150,13 +150,16 @@ function Segmented({ label, options, value, onChange }) {
   );
 }
 
-export function RoadmapView({ openSpec }) {
+/* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
+ * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
+ * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
+export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // implements: REQ-VIEWER-984
   const [showUnscheduled, setShowUnscheduled] = useState(false);
-  const [zoom, setZoom] = useState(() => readStored(ZOOM_KEY, v => {
+  const [zoom, setZoom] = useState(() => initialZoom != null ? clampZoom(initialZoom) : readStored(ZOOM_KEY, v => {
     const n = Number(v);
     return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : null;
   }, ZOOM_DEFAULT));
-  const [density, setDensity] = useState(() => readStored(
+  const [density, setDensity] = useState(() => initialDensity || readStored(
     DENSITY_KEY, v => (v === "comfy" || v === "compact" ? v : null), "comfy"));
   const { ref, onMouseDown, onClickCapture } = useDragPan();
   // The wheel handler both reads and WRITES this, synchronously: a trackpad

@@ -684,6 +684,24 @@
                build it. -->
 
 ## v5.13
+- [ ] Split ARCH-VIEWER-007: the artifact and what it renders are two requirements | lane: feature
+      <!-- Filed 2026-09-06 when REQ-VIEWER-984 became its eleventh child and the
+           `over-scoped` lint went from silent to ERROR (11 contract clauses + 8 criteria,
+           both over 10/7). The exemption now in its frontmatter is a deferral with the
+           reason recorded in its own prose, not a verdict that the check is wrong — it is
+           not wrong.
+
+           The seam, if it is taken: the ARTIFACT (`map` writes one self-contained file,
+           plus the three-escape sequence that makes the graph safe inside `<script>`,
+           REQ-VIEWER-940/941) versus WHAT THAT FILE RENDERS (outline, spec, map, roadmap,
+           problems, commands, the two rail readings — 942/943/944/945/964/966/969/977/984).
+           The first is an engine obligation and is tested from Python; the second is a
+           React app tested by the SSR smoke. They already have different test surfaces,
+           which is the honest sign the seam is real.
+
+           Needs an ADR: it renumbers nothing, but it moves nine `satisfies:` edges and
+           splits a `confirmed` contract that six ADRs already cite. Do not do it as a
+           side effect of the next viewer feature — which is exactly how it got to eleven. -->
 - [ ] An already-tagged corpus has no path to the three rungs | lane: feature
       <!-- Filed from the Senate repo (a real consumer, 42 confirmed requirements) on
            2026-09-06, engine 2026-09-06.6. The request as the user put it: "generate the

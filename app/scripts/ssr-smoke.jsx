@@ -1,6 +1,7 @@
 // tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
 // tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
 // tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
+// tested-by: REQ-VIEWER-984
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -469,6 +470,27 @@ const designChecks = [
 for (const [label, ok] of designChecks) test(label, ok);
 
 setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
+
+// ---- roadmap zoom and density (REQ-VIEWER-984) ----------------------------
+// The wheel handler is NOT reachable from here: renderToString has no DOM and
+// dispatches no events. What IS observable is the primitive each control uses,
+// which is where both of this feature's real bugs lived.
+const roadZoomed  = renderToString(<RoadmapView openSpec={noop} initialZoom={40} />);
+const roadCompact = renderToString(<RoadmapView openSpec={noop} initialDensity="compact" />);
+const roadDefault = renderToString(<RoadmapView openSpec={noop} />);
+const roadmapChecks = [
+  ["roadmap: scaling uses CSS zoom, not a transform",  // verifies: REQ-VIEWER-984#CASE-1
+    // text-transform:uppercase is all over the markup, so the assertion has to name the scale itself
+    roadZoomed.includes("zoom:0.4") && !roadZoomed.includes("transform:scale")],
+  ["roadmap: compact truncates the title and keeps it in the tooltip",  // verifies: REQ-VIEWER-984#CASE-2
+    roadCompact.includes("text-overflow:ellipsis")
+    && roadCompact.includes("max-width:108px")
+    && /title="[^"]{40,}"/.test(roadCompact)],
+  ["roadmap: the defaults are the pre-control view",  // verifies: REQ-VIEWER-984#CASE-3
+    roadDefault.includes("zoom:1") && roadDefault.includes(">100%<")
+    && !roadDefault.includes("text-overflow:ellipsis")],
+];
+for (const [label, ok] of roadmapChecks) test(label, ok);
 
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
 process.exit(failures ? 1 : 0);

@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-06
 engine: 2026-09-06.6
-nodes: 239
+nodes: 240
 edges: 117
 design OOP: 29/100 (9/31 source files without a design candidate)
 ---
@@ -79,7 +79,7 @@ graph TD
   ARCH_TRACKED_042[ARCH-TRACKED-042<br/>1 code]
   ARCH_TRANSLATE_044[ARCH-TRANSLATE-044<br/>3 code]
   ARCH_UNSCANNEDTAG_045[ARCH-UNSCANNEDTAG-045<br/>1 code]
-  ARCH_VIEWER_007[ARCH-VIEWER-007<br/>10 code]
+  ARCH_VIEWER_007[ARCH-VIEWER-007<br/>11 code]
   ARCH_VLEVEL_037[ARCH-VLEVEL-037<br/>3 code]
   ARCH_VRUNGS_054[[ARCH-VRUNGS-054]]
   SYS_AUTHOR_101[[SYS-AUTHOR-101]]
@@ -420,6 +420,7 @@ graph LR
     REQ_VIEWER_966["One inbox, with the origin of a signal as a tab<br><small>REQ-VIEWER-966</small>"]
     REQ_VIEWER_969["Two engine-emitted readings in the rail<br><small>REQ-VIEWER-969</small>"]
     REQ_VIEWER_977["The advisory design tab<br><small>REQ-VIEWER-977</small>"]
+    REQ_VIEWER_984["Reading a roadmap wider than the screen<br><small>REQ-VIEWER-984</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
     REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
     REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]
@@ -954,7 +955,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>68 caps</small>"]
-  a_REQ["REQ<br><small>162 caps</small>"]
+  a_REQ["REQ<br><small>163 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   style a_ARCH stroke-width:3px
   style a_REQ stroke-width:3px
