@@ -23,8 +23,8 @@
       "plugin/scripts/reqmap.py#warn_if_stale": "4e5ef714ff765bda045095887e7ac681e7d907079064fe21abba3dff8b738fc6"
     },
     "ARCH-CMDREGISTRY-033": {
-      "plugin/scripts/reqmap.py#_build_parser": "3ef1bfa685e8b18f56f7d0bee805008f1fc7b830ca2ed0098d8a68b3e0efb0e3",
-      "plugin/scripts/reqmap.py#_generate_schema": "5e7f982bb348ed1d45d5cdb8274a543973f304588f66e4035a7dd5458ce270c9"
+      "plugin/scripts/reqmap.py#_build_parser": "191a6dcc7f265ebdfb5ff3f4eb6c69285a21e4e1deead409884bf49eb396d3f4",
+      "plugin/scripts/reqmap.py#_generate_schema": "3ea8c52d84c2512eb470f90a5b7a1db19f31db63848f5cd3c5ba37295c7018a2"
     },
     "ARCH-DESCRIPTION-057": {
       "plugin/scripts/reqmap.py#_from_any": "6245f46a532700afc86f082153b76e107f4c439689ea5b415e860c26fec4dd81",
@@ -203,13 +203,20 @@
     "REQ-MEMBERDRIFT-982": {
       "plugin/scripts/reqmap.py#_span_sha": "c682396c12262242327c59d57a77be751dccb64db2b11102fcce0016c6fa5486"
     },
+    "REQ-RETIRE-960": {
+      "plugin/scripts/reqmap.py#_print_retire_plan": "a5a6f9b197ecdb439fac2f692fd0ad1b49aa73c9094621ea314d03691b5fd062"
+    },
     "REQ-RETIRE-961": {
-      "plugin/scripts/reqmap.py#_git_dirty": "d6ba53161b0148cdfbffa6fe2e0d70d03f4f401e1a2a76cde75a9643aa6041e0"
+      "plugin/scripts/reqmap.py#_git_dirty": "d6ba53161b0148cdfbffa6fe2e0d70d03f4f401e1a2a76cde75a9643aa6041e0",
+      "plugin/scripts/reqmap.py#_retire_blockers": "e7a816cd078ce1a963854bf441cafc21934676ab4cb47fd9f26b05265d3f8000"
     },
     "REQ-RETIRE-962": {
       "plugin/scripts/reqmap.py#_drop_lock_entries": "2944ec64356bcb8ba5c5477c04c14b398d68015df5f9173f6b5424858918fafe",
       "plugin/scripts/reqmap.py#_remove_requirement_block": "6888f3f9a394e495bc4a3fb55c3bf490f57fccfebdcb22000f35d2319865c815",
       "plugin/scripts/reqmap.py#_strip_member_tags": "87e8666c06867afc6888629b50a35a1d73ae4daff080cf98aa6580aef2b6f667"
+    },
+    "REQ-RETIRE-963": {
+      "plugin/scripts/reqmap.py#_retire_order": "953f0c27bd29d10cc1112e7c80e55f6d85ac636cdd992b9ed95b6e13b9f02f8a"
     },
     "REQ-SEARCH-965": {
       "plugin/scripts/reqmap.py#_text_matches": "dddae0f5fed0799b9704a5e7e633bbbb5706adbd358c1e0f4dbadd3da1953f95"

@@ -23,6 +23,7 @@ Every bullet below is binding.
 - `retire` reports everything that points at the requirement before anything is changed: dependents, children, members, prose references, and the files where it is the only tagged requirement. [[REQ-RETIRE-960]]
 - `retire` deprecates by default, refuses while dependents or children exist unless forced, and never writes without `--apply`. [[REQ-RETIRE-961]]
 - `retire --delete` removes the requirement block, its lock entries and its membership tags — never a function body. [[REQ-RETIRE-962]]
+- `retire` takes a whole class out in one call, ordered from the graph and guarded once; a pointer from a deprecated requirement, or from one retired in the same call, never blocks. [[REQ-RETIRE-963]]
 
 ## Cases
 CASE-1 — the plan comes before the change
@@ -39,6 +40,11 @@ CASE-3 — deprecating keeps the code working
   Given  a confirmed requirement with an implementing member and no dependents
   When   `retire --apply` runs
   Then   its status becomes deprecated and its tags are untouched
+
+CASE-4 — a class retires as one operation
+  Given  two requirements where the second declares `depends_on` on the first
+  When   `retire` runs on both at once
+  Then   one plan is printed, the dependent is ordered first, and neither blocks the other
 
 
 ---
@@ -109,6 +115,8 @@ satisfies: [ARCH-RETIRE-064]
 Every bullet below is binding.
 - Without `--apply` nothing is written, and the output says so.
 - With dependents or children present, `retire` refuses and exits 1 unless `--force` is given.
+- A dependent or child that is already `deprecated` does not count as a blocker: it is out of
+  service and exempt from every gate, so its pointer cannot make a retirement unsafe.
 - `--apply` without `--delete` sets the requirement's status to deprecated and leaves its code
   and tags untouched.
 - `--apply` refuses on a working tree with uncommitted changes unless `--force`, so the
@@ -130,6 +138,11 @@ CASE-3 — deprecation is a status change and nothing else
   Given  a confirmed requirement with members and no dependents
   When   `retire --apply --force` runs
   Then   its frontmatter reads `status: deprecated` and its member tags are unchanged
+
+CASE-4 — a deprecated dependent does not block
+  Given  a requirement whose only dependent already reads `status: deprecated`
+  When   `retire --apply` runs without `--force`
+  Then   the retirement proceeds
 
 ---
 id: REQ-RETIRE-962
@@ -177,3 +190,56 @@ CASE-4 — code is never removed on the strength of a tag
   Given  a file whose only tag was A's, carrying a function body
   When   A is deleted
   Then   the function body is still there and the file is named as now-unreferenced
+
+
+---
+id: REQ-RETIRE-963
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-RETIRE-064]
+---
+
+# Retiring a class in one operation
+
+## Description
+> A class of requirements — twelve test suites that stopped being separate capabilities —
+> is one decision, so it should cost one operation. Retired one at a time it cost twelve:
+> each step was refused because of the step before it, and the clean-tree guard then asked
+> for a commit between every pair. The two safeguards cancelled each other out on exactly
+> the case they exist for.
+
+Every bullet below is binding.
+- `retire` accepts one id or many, and reports the aggregated blast radius before writing.
+- A batch is retired in an order computed from the graph: a requirement goes only after
+  everything inside the batch that declares `depends_on` or `satisfies` on it has gone.
+- A pointer from another member of the same batch does not block the retirement; the order
+  is what makes it safe.
+- The working tree is checked once for the whole batch, and one `--apply` performs it.
+- The corpus is re-read between steps, so retiring one requirement cannot cut the wrong
+  lines out of a module file that holds the next one.
+- A cycle inside the batch leaves its members at the end of the order rather than dropping
+  them from it.
+- A single id behaves exactly as before: the same printed plan and the same `--json` document.
+
+## Cases
+CASE-1 — the order puts the consumer first
+  Given  requirements A and B, where B declares `depends_on: [A]`
+  When   `retire` runs on A and B together
+  Then   the printed order names B before A
+
+CASE-2 — batch members do not block each other
+  Given  the same pair
+  When   `retire --apply` runs on both without `--force`
+  Then   both are retired and nothing is refused
+
+CASE-3 — one working-tree check for the batch
+  Given  a dirty working tree
+  When   `retire --apply` runs on two requirements without `--force`
+  Then   it refuses once and neither requirement is changed
+
+CASE-4 — a single id is unchanged
+  Given  one requirement nothing points at
+  When   `retire` runs on it alone
+  Then   the output carries no batch ordering line
