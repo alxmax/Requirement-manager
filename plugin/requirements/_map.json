@@ -10240,9 +10240,7 @@
       "depends_on": [
         "ARCH-MAP-007"
       ],
-      "used_by": [
-        "ARCH-SITE-026"
-      ],
+      "used_by": [],
       "satisfies": [
         "SYS-VISUAL-106"
       ],
@@ -15107,13 +15105,11 @@
       "desc": "",
       "deps": [
         "ARCH-MAP-007",
-        "ARCH-VIEWER-007",
-        "ARCH-PAGES-021"
+        "ARCH-VIEWER-007"
       ],
       "depends_on": [
         "ARCH-MAP-007",
-        "ARCH-VIEWER-007",
-        "ARCH-PAGES-021"
+        "ARCH-VIEWER-007"
       ],
       "used_by": [],
       "satisfies": [
@@ -19154,10 +19150,6 @@
     [
       "ARCH-SITE-026",
       "ARCH-VIEWER-007"
-    ],
-    [
-      "ARCH-SITE-026",
-      "ARCH-PAGES-021"
     ],
     [
       "ARCH-STALEENGINE-043",
