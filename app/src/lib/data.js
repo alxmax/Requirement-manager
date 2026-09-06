@@ -43,7 +43,8 @@ const BAKED = [
     intent:"Find every place in the code that claims membership of a capability, by scanning for tags.",
     contract:[
       "`scan_members` walks a code root and, in every source file with a known extension, finds inline `role: <ID>` tags and returns `cap_id -> [(role, relative_file, line), ...]`. [[REQ-SCAN-908]]",
-      "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]" ],
+      "A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]",
+      "Every scanner reads the same masked view of a file, so a tag written inside a code fence or a string literal is an example to all of them and a member to none. [[REQ-SCAN-992]]" ],
     acc:[
       "A file containing `# implements: <ID>` produces a member `(implements, file, line)` under `<ID>`.",
       "Excluded directories are not scanned; member paths are POSIX-relative.",

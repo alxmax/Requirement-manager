@@ -13,13 +13,29 @@
       "hash": "8fff0918ce55",
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
     },
+    "ARCH-SCAN-002": {
+      "hash": "43d5fd4acbce",
+      "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+    },
+    "ARCH-SECTIONS-068": {
+      "hash": "a4b0d8cc1c2c",
+      "reason": "v5.19.0: CASE-3 restated as a checkable invariant"
+    },
     "ARCH-SELFGATE-039": {
       "hash": "2c71a3dd7141",
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
     },
+    "REQ-AUDIT-970": {
+      "hash": "918984c1362a",
+      "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+    },
     "REQ-AUDIT-971": {
       "hash": "7b757f667fb5",
       "reason": "reworded to the house's plain present tense"
+    },
+    "REQ-CHECK-831": {
+      "hash": "b94ffb48a121",
+      "reason": "reword REQ-CHECK-831's new clause to drop a redundant modal"
     },
     "REQ-DECOMPOSE-839": {
       "hash": "754c8d23f4ff",
@@ -32,6 +48,10 @@
     "REQ-DESIGN-991": {
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
+    },
+    "REQ-NEW-881": {
+      "hash": "e2419be12c70",
+      "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     }
   }
 }

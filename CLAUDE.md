@@ -58,11 +58,19 @@ proves the tag exists. This is an accepted, permanent consequence of the widened
 a bug: CI and the pre-commit hook always run widened, so it never fires there; a human running the
 bare command locally sees a loud, immediately-diagnosable error rather than a silent divergence.
 
+The regression suite is five files: `test_reqmap.py` is the entry point and re-exports
+`test_reqmap_common` (shared fixtures), `test_reqmap_scan` (parser, scanning, masking, walk,
+git), `test_reqmap_gate` (gate rules, drift, `--since`, test links), `test_reqmap_author`
+(new/init/lint/clarify/retire) and `test_reqmap_report` (map, viewer, site, health, audit,
+design). ADR-0014 keeps the ENGINE in one file and says nothing about the tests. Every
+documented invocation still goes through `test_reqmap`; a part also runs on its own.
+
 Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8` — the suites print non-ASCII and fail on cp1252:
 
 ```bash
 python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
 python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
+python -X utf8 -m unittest test_reqmap_gate -v                     # one part on its own
 python scripts/reqmap.py gate --code ..                            # includes the freshness check: fails if committed _map.* (or docs/map.html) is stale
 ```
 
@@ -106,7 +114,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 
 **Design decisions live in `docs/adr/`** (31 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — 7,169 lines measured 2026-09-03, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — 10,178 lines measured 2026-09-06, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `ARCH-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
 
@@ -128,7 +136,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 
 **Section names — `## Description` and `## Cases`, since 2026-09-03** (`ARCH-DESCRIPTION-057`). `## Description` merged the standalone `> WHY:` blockquote with `## WHAT — Contract (normative)`: the same capability was described twice, as rationale and as obligation, under two headings that both said WHAT. The quote now opens the section and the binding clauses follow it. `## Cases` (labels `CASE-1`, `CASE-2`, …) replaced `## HOW — Acceptance (= tests)` and `AC-N`. `## Verify intent` and `## Notes` simply dropped a `WHAT —` prefix that no longer named a section.
 
-**Every old spelling still parses, forever.** `CONTRACT_LABELS = ("description", "contract")` and `ACCEPTANCE_LABELS = ("cases", "acceptan")` are the SSOT — current name first — and `_has_any`/`_from_any` are the only way a call site should ask for either section. `AC_VERIFY_RE` and `_AC_LABEL_RE` accept `CASE-N` and `AC-N` alike, because the label is an **identifier a `# verifies:` tag points at**: dropping the old spelling would break every consumer tag already written. Most `test_reqmap.py` fixtures are deliberately left in the legacy form — that is the back-compat suite, and rewriting them would delete the only coverage of the older shape.
+**Every old spelling still parses, forever.** `CONTRACT_LABELS = ("description", "contract")` and `ACCEPTANCE_LABELS = ("cases", "acceptan")` are the SSOT — current name first — and `_has_any`/`_from_any` are the only way a call site should ask for either section. `AC_VERIFY_RE` and `_AC_LABEL_RE` accept `CASE-N` and `AC-N` alike, because the label is an **identifier a `# verifies:` tag points at**: dropping the old spelling would break every consumer tag already written. Most fixtures across the suite are deliberately left in the legacy form — that is the back-compat suite, and rewriting them would delete the only coverage of the older shape.
 
 **The intent quote is inside the normative section but outside the drift hash.** `binding_hash` skips `>` lines within a normative span, so improving an explanation never reports DRIFT on a confirmed contract; `_contract_clauses` never treated a blockquote as a clause, so the linter never sees rationale either. The atomic form draws the same line by keeping `rationale:` in the frontmatter. No requirement carried a blockquote inside a normative section when this was added, so no existing hash changed.
 

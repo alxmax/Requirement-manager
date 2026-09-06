@@ -411,8 +411,13 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 10,238 lines)
-  scripts/test_reqmap.py                    the engine's own regression suite (importable: `python scripts/test_reqmap.py`)
+  scripts/reqmap.py                         the engine (Python stdlib only, 10,178 lines)
+  scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
+  scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
+  scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git
+  scripts/test_reqmap_gate.py               the verdict: gate rules, drift, --since, test links
+  scripts/test_reqmap_author.py             writing requirements: new, init, lint, clarify, retire
+  scripts/test_reqmap_report.py             what it prints: map, viewer, site, health, audit, design
   requirements/*.md                         the source of truth (one file per architecture capability, its children beside it)
   requirements/_reqlock.json                the drift baseline (committed)
 scripts/

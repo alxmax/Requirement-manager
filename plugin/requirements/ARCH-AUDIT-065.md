@@ -84,6 +84,8 @@ Every bullet below is binding.
 - The exit code is the gate's. Every other section is advice and can never change it.
 - A section that raises is reported as a failed section and the rest of the report still
   prints. A partial report is worth more than a traceback.
+- A gate section that raises fails the audit. Advice that crashes is missing advice; a gate
+  that crashes reached no verdict, and reporting one is worse than reporting nothing.
 - `--json` emits the gate findings, the health record, the design record, the untagged
   count, the exemptions and the corpus shape as one object.
 
@@ -112,6 +114,11 @@ CASE-5 — the structured form carries the same signals
   Given  any corpus
   When   `audit --json` runs
   Then   the parsed object carries `gate`, `health`, `exemptions` and `shape`
+
+CASE-6 — a crashing gate section is not a clean gate
+  Given  a gate section whose function raises
+  When   `audit` runs
+  Then   the report prints, the Gate row reads FAIL, and the exit code is 1
 
 
 --------------------

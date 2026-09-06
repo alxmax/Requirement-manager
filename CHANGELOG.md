@@ -1,5 +1,181 @@
 # Changelog
 
+## plugin `v5.19.1` — 2026-09-06
+
+**The regression suite is five files.** `test_reqmap.py` had reached 12,132 lines and 177
+classes: finding the class that covered a behaviour meant grepping, and adding one meant
+appending to the bottom whatever the subject — which is how a `v_tag` helper came to be
+defined twice, 4,000 lines apart, with the second silently shadowing the first.
+
+ADR-0014 is about the ENGINE. It argues for one file on the grounds of hermetic
+deployment — a consumer vendors `reqmap.py` and nothing else — and that argument says
+nothing about a test suite no consumer ever receives.
+
+`test_reqmap.py` is now the entry point and re-exports four parts:
+
+| part | lines | subject |
+|---|---|---|
+| `test_reqmap_common` | 87 | fixtures the parts share (runtime-built tag strings) |
+| `test_reqmap_scan` | 1,621 | reading the tree: parser, scanning, masking, walk, git |
+| `test_reqmap_gate` | 2,824 | the verdict: gate rules, drift, `--since`, test links |
+| `test_reqmap_author` | 2,958 | writing requirements: new, init, lint, clarify, retire |
+| `test_reqmap_report` | 4,740 | what it prints: map, viewer, site, health, audit, design |
+
+Every documented invocation is unchanged — `python scripts/test_reqmap.py`, `python -m
+unittest test_reqmap`, `python -m unittest test_reqmap.Gate.test_name` — and CI needs no
+edit. A part also runs on its own (`python -m unittest test_reqmap_gate`).
+
+No test was rewritten: the split moves source text verbatim and the same 1,056 tests run
+with the same result. No engine change, so `MAP_ENGINE_VERSION` does not move; the semver
+does, because the shipped plugin's file list did.
+
+## plugin `v5.19.0` — 2026-09-06
+
+**One section reader instead of nine** (`ARCH-SECTIONS-068`). A requirement body is read
+by the drift hash, the linter's two prose passes, the clause reader, the criteria parser,
+the map, `show` and `dupes` — and each one first has to answer the same two questions:
+where does this section start, and is this line inside a fenced example. Eight of them
+carried a copy of the same loop. `binding_hash` carried a ninth copy that did not track
+the fence at all, and `_has_section` tracked nothing — it scanned every line for a `## `.
+
+That produced a real disagreement. Given a requirement whose only `## Description` sits
+inside a fenced example:
+
+| reader | before |
+|---|---|
+| `_has_section` | the section is present |
+| `_bullets`, `_section`, `_contract_clauses` | the section is empty |
+| the linter | `empty-section` (warn) |
+| `binding_hash` | the fenced example is part of the contract |
+
+Now `_body_lines` yields `(is_heading, line)` for every line outside a fence, and
+`_section_lines` yields one section's lines; every reader asks them, `binding_hash`
+included. The same requirement is now correctly reported as `missing-section` (an error —
+it genuinely has no Description), and a fenced example of a heading neither opens a
+normative span nor closes one.
+
+Checked before shipping, over all 255 requirement blocks in this repo: every reader
+returns exactly what the previous engine returned, and **no `binding_hash` changes** — so
+no confirmed contract re-baselines and no consumer's lock goes stale. What a caller does
+with a section's lines — bullets, clauses, prose, criteria — is still entirely the
+caller's; only the boundary is shared.
+
+**Upgrade note.** A requirement whose only normative heading lives inside a code fence
+moves from a warning to an error. That requirement has no contract, so the error is the
+right answer, but it is a build that was green and is not. `gate --audit` names it.
+
+## plugin `v5.18.0` — 2026-09-06
+
+**One runner for every git question** (`ARCH-GITRUN-067`). Eleven call sites had each
+hand-written the same six lines around `subprocess.run(["git", ...])`, and they disagreed
+about the detail that decides whether a check fails open:
+
+| | sites |
+|---|---|
+| `encoding="utf-8"` | 3 of 11 |
+| `text=True` with no encoding (locale codec) | 6 of 11 |
+| `check_output(...).decode()` (locale codec again) | 2 of 11 |
+| caught `Exception` | 5 |
+| caught `(OSError, SubprocessError)` only | 6 |
+
+With `text=True` and no `encoding=`, Python decodes git's output with the **locale**
+codec. On a Windows console that is cp1252, so a non-ASCII path or a remote URL with a
+non-ASCII character either mojibakes or raises a `UnicodeDecodeError` — which five of the
+sites caught and six did not. A caught one reads back as "git found nothing", which for
+`untracked_members`, `untracked_locks` and `_since_changed_files` means *a check passing
+because it could not run*. Three sites already carried the encoding, each added after
+someone was bitten; the fix was never generalised.
+
+`_git(args, cwd, timeout)` now runs every git command in the engine and returns stdout or
+`None` — `None` being the single way a caller learns git could not answer. Decoding stays
+**strict** on purpose: a path git cannot hand over as UTF-8 must surface as `None` and
+send the caller to the full, safe answer, never as a replacement character that silently
+fails to match a real file.
+
+Two helpers ride on it because they were also duplicated: `_git_root` (three spellings of
+`rev-parse --show-toplevel`, two of them via `check_output().decode()` — a repo where they
+disagreed would publish `docs/map.html` to one directory and check its freshness against
+another) and `_git_remote_url` (two identical copies). A test walks the engine's AST and
+asserts the only `subprocess` process start in the file is inside `_git`.
+
+No behaviour changes on an ASCII path in a healthy checkout. What changes is what happens
+off that path.
+
+**One walk, one ignore.** Six loops carried a copy of the `os.walk` discipline, and they
+had drifted in ways that only show up on someone else's repo:
+
+| loop | what its copy was missing |
+|---|---|
+| `untagged_doc_bundles` | `dirs.sort()` — descent order came from the filesystem |
+| `orphan_code_files` | `dirs.sort()` |
+| `cmd_draft` | `code_root`/`ignore` on `_prune_dirs`, so `build/**` still descended into build/ |
+| `_collect_files` | the same |
+| `cmd_coverage` | `_prune_dirs` entirely — a hand-rolled `(.git, __pycache__, node_modules)` list that never matched the SSOT directory by realpath and never pruned an ignored tree |
+
+`_walk_files(code_root, reqs_dir, accept)` is now the walk, and `accept(filename, rel)` is
+all a caller decides. `_walk_code` is that with the code-file filter. The pruning gaps
+cost time rather than correctness — a file under an ignored directory was dropped by the
+per-path `fnmatch` anyway — but the two missing `dirs.sort()` calls were a real
+reproducibility hole in a generated artifact, and `cmd_coverage` was counting files in the
+SSOT directory on any repo where the realpath check would have mattered.
+
+Verified equal to the previous engine on this corpus, output for output: members,
+doc bundles, orphan files, the candidate file list, the code walk and the full
+`gate --risk --untagged` report.
+
+
+## plugin `v5.17.0` — 2026-09-06
+
+Four bugs found by reading the engine rather than running it. Three of them made a check
+report a green answer it had not earned; the fourth let a bad id into the corpus with no
+legal way out.
+
+**A `verifies:` tag inside a code fence counted as real coverage.** The engine has three
+tag scanners, and each carried its own hand-copied masking pass. They had already drifted:
+only member discovery knew what a Markdown fence was, so this —
+
+```markdown
+Show your team how to link a case to its test:
+
+    ```python
+    # verifies: REQ-LOGIN-042#CASE-3
+    ```
+```
+
+— registered `CASE-3` as tested. `RM013` warns once per requirement naming every *untagged*
+case; the example silenced the warning for the one case nobody had written a test for. A
+masking rule that lives in three places cannot be half-applied to two of them.
+
+The fix is one generator, `_visible_lines`, that yields the lines a tag may legitimately
+live on: prose fences and Markdown indented blocks dropped, Python string literals blanked,
+comments kept. `_scan_file_tags`, `_extract_coverage` and `_walk_code_lines` all read
+through it, so `scan_all` and the three standalone scanners cannot disagree about a
+position. `REQ-SCAN-992` states the rule; there had been no clause for it anywhere.
+
+Verified against this corpus: 1031 `verifies:` hits and 14 levelled `tested-by:` hits before
+and after, byte-identical — no requirement here was leaning on a phantom tag. The hole was
+open; nothing had fallen through it yet.
+
+**`--since` could fail CI on half a tag pair.** `RM008` (a confirmed `need` with no
+`validated-against:` member) read the `--since`-*narrowed* member set, and so did the
+`any_validation` opt-in probe. A push touching one validation file therefore switched the
+rule on corpus-wide and reported every *other* need as unvalidated — its tag was outside the
+diff, not absent. `--since` narrows which requirements a rule REPORTS on; it must never
+narrow the facts a rule reads. `GateContext.roles()` now has no way to ask for the narrowed
+set, and the rule carries the `in_scope` guard the neighbouring rules already had.
+
+**`new` accepted an id no tag could ever spell.** `reqmap.py new "my req"` wrote
+`requirements/my req.md` with `id: my req` — a requirement `TAG_RE` can never match, so
+`RM006` errored forever and the only legal fix was deleting the file. `new --id ../evil`
+wrote outside the requirements directory. Both are refused at the door now, exit 2, nothing
+written.
+
+**`gate --audit` could exit 0 after the gate crashed.** `_audit_section` swallows a section
+that raises, because advice must not fail a build — and it returned rc 0 for the *gate*
+section too, whose rc IS the audit's exit code. A crashed gate printed `Gate  clean` and
+exited 0. Advice that crashes is missing advice; a gate that crashes reached no verdict, and
+reporting one is worse than reporting nothing.
+
 ## plugin `v5.16.0` — 2026-09-06
 
 **`gate` could exit 1 on a purely advisory metric.** Closes
