@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.7"
+MAP_ENGINE_VERSION = "2026-09-06.8"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -510,9 +510,9 @@ COMMANDS = {
             {
                 "name": "mode_retire",
                 "flag": "--retire",
-                "type": "str",
+                "type": "list",
                 "help": (
-                    "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+                    "Take these requirements out of service instead of confirming them. Accepts one id or many; a batch retires in an order computed from the graph, under one working-tree check. Prints the blast radius; writes nothing without --apply."
                 ),
             },
             {
@@ -536,7 +536,7 @@ COMMANDS = {
                 "flag": "--force",
                 "type": "bool",
                 "help": (
-                    "With --retire: proceed even though dependents still point at this requirement."
+                    "With --retire: proceed even though dependents still point at this requirement, or the working tree is dirty. Dependents that are already deprecated, and those retired in the same call, never block."
                 ),
             },
             {
@@ -618,7 +618,11 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
     """Function-calling schema (OpenAI tool format) generated from COMMANDS.
     Returns a JSON string (indent=2, trailing newline) — byte-stable for the gate
     drift-compare. Internal commands are excluded from the AI-facing schema."""
-    _TYPE = {"bool": "boolean", "str": "string", "float": "number", "int": "integer"}
+    # A flag that takes many values must not be advertised as a lone string: a caller
+    # that believes the schema sends one id and never learns the other eleven were
+    # dropped. `list` is the only entry whose JSON shape needs an `items` clause.
+    _TYPE = {"bool": "boolean", "str": "string", "float": "number", "int": "integer",
+             "list": "array"}
     tools = []
     for name, spec in COMMANDS.items():
         if spec.get("internal"):
@@ -629,6 +633,8 @@ def _generate_schema():  # implements: ARCH-CMDREGISTRY-033
             props["arg"] = {"type": "string", "description": spec["arg"]}
         for p in spec["params"]:
             props[p["name"]] = {"type": _TYPE[p["type"]], "description": p["help"]}
+            if p["type"] == "list":
+                props[p["name"]]["items"] = {"type": "string"}
         tools.append({"type": "function", "function": {
             "name": "reqmap_" + name.replace("-", "_"),
             "description": spec["summary"],
@@ -4187,7 +4193,13 @@ def _build_map_data(reqs, members, ac_cover=None):  # implements: ARCH-MAP-007  
             # `## Description` — which is the Contract and is emitted above.
             "desc": (_section(r["body"], "description")
                      if _has_any(r["body"], ("input", "output")) else ""),
+            # `deps` is the historical name and the one the vendored viewer reads
+            # (`n.deps` in app/src/lib/loadData.js), so it stays. `depends_on` is the
+            # same list under the name the frontmatter and every document use: a
+            # consumer that asked for the documented name got a silent None and built
+            # the wrong graph from it.
             "deps": _as_list(m.get("depends_on")),
+            "depends_on": _as_list(m.get("depends_on")),
             "used_by": used_by.get(rid, []),
             "satisfies": _as_list(m.get("satisfies")),       # upstream needs this fulfils
             "satisfied_by": satisfied_by.get(rid, []),       # requirements fulfilling this need
@@ -8438,103 +8450,194 @@ def _retire_plan(reqs, members, cap_id):  # implements: ARCH-RETIRE-064  # imple
     }
 
 
-def cmd_retire(ws, cap_id, delete=False, do_apply=False, force=False,
-               as_json=False):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961
-    """Take a requirement out of service. Without --apply this only reports the blast
-    radius, so the destructive half is always preceded by a readable plan.
+def _retire_blockers(reqs, plan, batch=()):  # implements: REQ-RETIRE-961
+    """The dependents and children that actually stand in the way.
+
+    Two kinds never do. A `deprecated` requirement is already out of service and exempt
+    from every gate, so a pointer from one cannot make a retirement unsafe. A requirement
+    being retired in the same call is handled by the ORDER, not by a refusal. Without
+    both filters a class of N retires in N-1 forced writes: step two is blocked by step
+    one, which is itself already gone."""
+    return [rid for rid in plan["dependents"] + plan["children"]
+            if rid not in batch
+            and (reqs[rid]["meta"].get("status") if rid in reqs else None) != "deprecated"]
+
+
+def _retire_order(reqs, ids):  # implements: REQ-RETIRE-963
+    """The order a batch is safe to retire in: consumers before what they consume.
+
+    `depends_on` runs consumer -> foundation and `satisfies` runs child -> parent, so a
+    requirement is safe to take out only once everything pointing AT it has gone. Kahn
+    over the in-batch pointers only; input order is preserved inside a layer, and a cycle
+    (which the gate reports on its own) leaves its members at the end rather than
+    dropping them from the batch."""
+    batch = set(ids)
+    first = {rid: set() for rid in ids}      # rid -> batch members that must precede it
+    for rid in ids:
+        meta = reqs[rid]["meta"] if rid in reqs else {}
+        for target in _as_list(meta.get("depends_on")) + _as_list(meta.get("satisfies")):
+            if target in batch and target != rid:
+                first[target].add(rid)
+    out, done = [], set()
+    while True:
+        ready = [rid for rid in ids if rid not in done and not (first[rid] - done)]
+        if not ready:
+            break
+        out.extend(ready)
+        done.update(ready)
+    out.extend(rid for rid in ids if rid not in done)
+    return out
+
+
+def _print_retire_plan(plan):  # implements: REQ-RETIRE-960
+    """One requirement's blast radius, as a human reads it."""
+    print("{} · {} · retire ({})".format(plan["id"], plan["status"], plan["mode"]))
+    print(plan["title"])
+    print("\nDepended on by: " + (", ".join(plan["dependents"]) or "(none)"))
+    print("Satisfied by (children): " + (", ".join(plan["children"]) or "(none)"))
+    print("Referenced in prose by: " + (", ".join(plan["referenced_by"]) or "(none)"))
+    print("\nMembers in code ({}):".format(len(plan["members"])))
+    for m in plan["members"]:
+        print("  {:12} {}:{}".format(m["role"], m["file"], m["line"]))
+    if plan["exclusive_files"]:
+        print("\nFiles where this was the ONLY tagged requirement — their code is "
+              "unreferenced once it goes:")
+        for f in plan["exclusive_files"]:
+            print("  " + f)
+    if plan["shared_files"]:
+        print("\nFiles shared with other requirements — only the tag line goes:")
+        for f in plan["shared_files"]:
+            print("  " + f)
+    if plan["leaves_unused"]:
+        print("\nLeft with no consumer once this goes — check whether their code is "
+              "still reached:")
+        for dep in plan["leaves_unused"]:
+            print("  " + dep)
+
+
+def cmd_retire(ws, cap_ids, delete=False, do_apply=False, force=False,
+               as_json=False):  # implements: ARCH-RETIRE-064  # implements: REQ-RETIRE-961  # implements: REQ-RETIRE-963
+    """Take a requirement — or a whole class of them — out of service. Without --apply
+    this only reports the blast radius, so the destructive half is always preceded by a
+    readable plan.
 
     Deprecating is the default and is reversible: the requirement stays in the corpus,
     exempt from the gates, and its code keeps working. --delete removes the block, its
     lock entries and its membership TAGS -- never a function body: deciding which code
     is now dead needs to understand the code, which this engine deliberately cannot do.
     The plan names the files where the removed tag was the only one, which is exactly
-    the list a human or an agent needs for that second half."""
+    the list a human or an agent needs for that second half.
+
+    Many ids retire as ONE operation: one aggregated plan, one working-tree check, one
+    --apply, in an order computed from the graph. A class retired one call at a time cost
+    either a commit per step (the clean-tree guard) or --force on every step after the
+    first (each blocked by the one already gone) — the two safeguards cancelled each
+    other out on the exact case they exist for.
+
+    `cap_ids` takes a string or a list, and a list of one behaves like the string: the
+    single-requirement output and `--json` document are unchanged."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
-    if cap_id not in reqs:
-        print("no requirement with id {} (expected requirements/{}.md)".format(cap_id, cap_id))
+    ids = [cap_ids] if isinstance(cap_ids, str) else list(dict.fromkeys(cap_ids))
+    if not ids:
+        print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]")
+        return 2
+    single = len(ids) == 1
+    unknown = [i for i in ids if i not in reqs]
+    if unknown:
+        for i in unknown:
+            print("no requirement with id {} (expected requirements/{}.md)".format(i, i))
         return 1
-    plan = _retire_plan(reqs, members, cap_id)
-    plan["mode"] = "delete" if delete else "deprecate"
-    plan["applied"] = False
-    blockers = plan["dependents"] + plan["children"]
+
+    mode = "delete" if delete else "deprecate"
+    order = _retire_order(reqs, ids)
+    plans = []
+    for cap_id in order:
+        plan = _retire_plan(reqs, members, cap_id)
+        plan["mode"] = mode
+        plan["applied"] = False
+        plan["blocked_by"] = _retire_blockers(reqs, plan, set(ids))
+        plans.append(plan)
+
+    def _emit(rc):
+        if as_json:
+            print(json.dumps(plans[0] if single else
+                             {"mode": mode, "order": order, "plans": plans},
+                             indent=2, ensure_ascii=False))
+        return rc
 
     if not as_json:
-        print("{} · {} · retire ({})".format(cap_id, plan["status"], plan["mode"]))
-        print(plan["title"])
-        print("\nDepended on by: " + (", ".join(plan["dependents"]) or "(none)"))
-        print("Satisfied by (children): " + (", ".join(plan["children"]) or "(none)"))
-        print("Referenced in prose by: " + (", ".join(plan["referenced_by"]) or "(none)"))
-        print("\nMembers in code ({}):".format(len(plan["members"])))
-        for m in plan["members"]:
-            print("  {:12} {}:{}".format(m["role"], m["file"], m["line"]))
-        if plan["exclusive_files"]:
-            print("\nFiles where this was the ONLY tagged requirement — their code is "
-                  "unreferenced once it goes:")
-            for f in plan["exclusive_files"]:
-                print("  " + f)
-        if plan["shared_files"]:
-            print("\nFiles shared with other requirements — only the tag line goes:")
-            for f in plan["shared_files"]:
-                print("  " + f)
-        if plan["leaves_unused"]:
-            print("\nLeft with no consumer once this goes — check whether their code is "
-                  "still reached:")
-            for dep in plan["leaves_unused"]:
-                print("  " + dep)
+        if not single:
+            print("retire ({}) · {} requirements, in this order:".format(mode, len(order)))
+            print("  " + " -> ".join(order) + "\n")
+        for i, plan in enumerate(plans):
+            if i:
+                print("\n" + "-" * 60)
+            _print_retire_plan(plan)
 
-    if blockers and not force:
-        msg = ("refusing: {} still has {} dependent(s)/child(ren) — {}. Retire or re-point them "
-               "first, or pass --force once you have decided.".format(
-                   cap_id, len(blockers), ", ".join(blockers)))
-        if as_json:
+    blocked = [p for p in plans if p["blocked_by"]]
+    if blocked and not force:
+        names = sorted({b for p in blocked for b in p["blocked_by"]})
+        msg = ("refusing: {} still has {} dependent(s)/child(ren) outside this retirement — "
+               "{}. Retire or re-point them first, or pass --force once you have "
+               "decided.".format(", ".join(p["id"] for p in blocked), len(names),
+                                 ", ".join(names)))
+        for plan in plans:
             plan["refused"] = msg
-            print(json.dumps(plan, indent=2, ensure_ascii=False))
-        else:
+        if not as_json:
             print("\n" + msg)
-        return 1
+        return _emit(1)
 
     if not do_apply:
-        plan["note"] = ("plan only — nothing was changed. Re-run with --apply to {} it."
-                        .format(plan["mode"]))
-        if as_json:
-            print(json.dumps(plan, indent=2, ensure_ascii=False))
-        else:
-            print("\n" + plan["note"])
-        return 0
+        note = ("plan only — nothing was changed. Re-run with --apply to {} {}."
+                .format(mode, ids[0] if single else "all {}".format(len(ids))))
+        for plan in plans:
+            plan["note"] = note
+        if not as_json:
+            print("\n" + note)
+        return _emit(0)
 
     if not force and _git_dirty(os.path.dirname(reqs_dir) or "."):
         print("\nrefusing: the working tree has uncommitted changes. Commit or stash first so "
               "this is one reviewable diff, or pass --force.")
         return 1
 
-    if not delete:
-        ok, msg = _apply_status(reqs[cap_id], "deprecated")
-        print("\n" + msg)
-        if not ok:
-            return 1
+    rc = 0
+    for plan in plans:
+        cap_id = plan["id"]
+        # Re-parsed between steps: retiring one requirement rewrites the file that may
+        # hold the next one, and a module file's stale block span would cut the wrong
+        # lines out. Only the corpus is re-read — the code walk cannot change here.
+        live = reqs if single else load_requirements(reqs_dir)
+        if cap_id not in live:
+            print("\n{}: already gone, skipped.".format(cap_id))
+            continue
+        if not delete:
+            ok, msg = _apply_status(live[cap_id], "deprecated")
+            print("\n" + msg)
+            if not ok:
+                rc = 1
+                continue
+            plan["applied"] = True
+            if not as_json:
+                print("  its code and tags are untouched; a deprecated requirement is "
+                      "exempt from the gates.")
+            continue
+        removed_tags = _strip_member_tags(code_root or os.path.dirname(reqs_dir) or ".",
+                                          plan["members"], cap_id)
+        block_ok = _remove_requirement_block(live[cap_id])
+        _drop_lock_entries(reqs_dir, cap_id)
         plan["applied"] = True
-        if as_json:
-            print(json.dumps(plan, indent=2, ensure_ascii=False))
-        else:
-            print("  its code and tags are untouched; a deprecated requirement is exempt from the gates.")
-            print("  next: reqmap.py sync")
-        return 0
-
-    removed_tags = _strip_member_tags(code_root or os.path.dirname(reqs_dir) or ".",
-                                      plan["members"], cap_id)
-    block_ok = _remove_requirement_block(reqs[cap_id])
-    _drop_lock_entries(reqs_dir, cap_id)
-    plan["applied"] = True
-    plan["tags_removed"] = removed_tags
-    if as_json:
-        print(json.dumps(plan, indent=2, ensure_ascii=False))
-        return 0
-    print("\ndeleted {}: {} tag(s) stripped, requirement {}, lock entries dropped.".format(
-        cap_id, removed_tags, "block removed" if block_ok else "NOT removed (see above)"))
-    if plan["exclusive_files"]:
-        print("  the files listed above now hold code nothing points at — delete what is dead.")
-    print("  next: reqmap.py sync")
-    return 0
+        plan["tags_removed"] = removed_tags
+        if not as_json:
+            print("\ndeleted {}: {} tag(s) stripped, requirement {}, lock entries dropped."
+                  .format(cap_id, removed_tags,
+                          "block removed" if block_ok else "NOT removed (see above)"))
+            if plan["exclusive_files"]:
+                print("  the files listed above now hold code nothing points at — "
+                      "delete what is dead.")
+    if not as_json:
+        print("  next: reqmap.py sync")
+    return _emit(rc)
 
 
 def _git_dirty(root):  # implements: REQ-RETIRE-961
@@ -9739,9 +9842,9 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="gate: print the advisory design review of the code")
     ap.add_argument("--suggest-verifies", dest="mode_suggest", action="store_true",
                     help="sync: propose per-criterion `verifies:` tags (--apply writes them)")
-    ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="?", default=None,
-                    const="",
-                    help="sync: take a requirement out of service; prints the blast radius first")
+    ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
+                    help="sync: take one or more requirements out of service; prints the "
+                         "blast radius first")
     return ap
 
 
@@ -9803,7 +9906,7 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     reqs, members = ws.reqs, ws.members   # the commands that take only part of it
     if a.mode_retire is not None:
         if not a.mode_retire:
-            print("usage: reqmap sync --retire AREA-NAME-NNN"); return 2
+            print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]"); return 2
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
     if a.mode_suggest:

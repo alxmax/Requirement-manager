@@ -1,5 +1,43 @@
 # Changelog
 
+## plugin `v5.14.0` — 2026-09-06
+
+**Retiring a class of requirements cost one commit per member, or `--force` on every
+step after the first.** Field report from a consumer repo that folded twelve test-suite
+requirements back into the capabilities they tested: `sync --retire` takes one id, so the
+group needed twelve invocations — and each of those was refused, because the requirement
+retired in step one still appeared as a `depends_on` dependent in step two. The
+clean-tree guard then asked for a commit between every pair. Two correct safeguards
+cancelling each other out on exactly the case they exist for.
+
+**A deprecated dependent no longer blocks** (`REQ-RETIRE-961`).
+
+- A `deprecated` requirement is already out of service and exempt from every gate, so its
+  pointer cannot make a retirement unsafe. It is still listed in the plan; it just stops
+  counting as a blocker.
+
+**`sync --retire` takes a batch** (`ARCH-RETIRE-064`, `REQ-RETIRE-963`).
+
+- `sync --retire A B C` — one aggregated plan, one working-tree check, one `--apply`.
+- The order is computed from the graph: a requirement goes only after everything inside
+  the batch that declares `depends_on` or `satisfies` on it has gone. Input order is kept
+  inside a layer; a cycle leaves its members at the end rather than dropping them.
+- A pointer from another member of the same batch never blocks — the ordering is what
+  makes it safe.
+- The corpus is re-read between steps, so retiring one requirement cannot cut the wrong
+  lines out of a module file that holds the next one.
+- A single id is byte-for-byte what it was: same printed plan, same `--json` document.
+
+**`_map.json` answers to the documented name** (`REQ-MAP-870`).
+
+- Each node now carries `depends_on` beside the historical `deps` — the same list under
+  the name the frontmatter, `CLAUDE.md` and `SKILL.md` all use. A consumer that asked for
+  the documented key got a silent `None` and built the wrong graph from it. `deps` stays;
+  the vendored viewer reads it.
+- `--retire`'s entry in the generated function-calling schema is an `array` of strings
+  rather than a lone `string`, for the same reason: a caller that believes the schema
+  would have sent one id and never learned the other eleven were dropped.
+
 ## plugin `v5.13.0` — 2026-09-06
 
 **A corpus that was already tagged had no path to the three rungs.** `init` writes the

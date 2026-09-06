@@ -264,7 +264,7 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 |---|---|
 | *(bare)* | Rebuild everything derived: lock, `_map.*`, `docs/map.html`, `_findings.md`, the site regions, the integration artifacts. |
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
-| `--retire ID` | Take a requirement out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents. |
+| `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
 | `--suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. `--apply` writes them; ambiguous matches never are. |
 | `--attach <page>` | Refresh the engine-owned regions (nav links, counts) of a presentation page, scaffolding one if absent. `--regions nav,stats`, `--diagram <rel>`. |
 

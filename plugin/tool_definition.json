@@ -163,8 +163,11 @@
             "description": "Repo root where requirements/ lives; defaults to the current directory."
           },
           "mode_retire": {
-            "type": "string",
-            "description": "Take this requirement out of service instead of confirming it. Prints the blast radius; writes nothing without --apply."
+            "type": "array",
+            "description": "Take these requirements out of service instead of confirming them. Accepts one id or many; a batch retires in an order computed from the graph, under one working-tree check. Prints the blast radius; writes nothing without --apply.",
+            "items": {
+              "type": "string"
+            }
           },
           "delete": {
             "type": "boolean",
@@ -176,7 +179,7 @@
           },
           "force": {
             "type": "boolean",
-            "description": "With --retire: proceed even though dependents still point at this requirement."
+            "description": "With --retire: proceed even though dependents still point at this requirement, or the working tree is dirty. Dependents that are already deprecated, and those retired in the same call, never block."
           },
           "mode_suggest": {
             "type": "boolean",

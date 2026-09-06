@@ -24,7 +24,7 @@ python scripts/reqmap.py clarify --levels       # propose a V-model rung for eve
 python scripts/reqmap.py gate --implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
 python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
 python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, docs/map.html, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
-python scripts/reqmap.py sync --retire AREA-NAME-NNN  # take a requirement out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents
+python scripts/reqmap.py sync --retire AREA-NAME-NNN [ID ...]  # take one requirement — or a whole class — out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents. A batch retires in a graph-computed order (consumers first) under ONE working-tree check; a dependent that is already deprecated, or that is in the same batch, never blocks
 
 # --- read -----------------------------------------------------------------
 python scripts/reqmap.py gate --risk               # what to do next: health score + counted risk buckets (--json/--badge: the health numbers; --untagged: files with no implements: tag)
@@ -149,7 +149,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 
 **Generated outputs** (under `plugin/requirements/`):
 - `_map.md` — 4 Mermaid diagrams for static rendering (System Map, Req→Code, Dependencies, Risk) *(committed)*
-- `_map.json` — `{engine_version, nodes, edges}` registry graph; consumed by the viewer and any external front-end; also written standalone by `export` *(committed)*
+- `_map.json` — `{engine_version, nodes, edges}` registry graph; consumed by the viewer and any external front-end; also written standalone by `export` *(committed)*. **A node's dependency list answers to two names**: `deps`, the historical key the vendored viewer reads (`n.deps` in `app/src/lib/loadData.js`), and `depends_on`, the name the frontmatter and every document use — same list, emitted twice, because a consumer that asked for the documented name used to get a silent `None` and build the wrong graph from it. `used_by` is its inverse and has no frontmatter spelling; `satisfies`/`satisfied_by` are the level axis.
 - `_map.html` — a self-contained single-file copy of the React viewer (`app/`) with this repo's `_map.json` inlined; opens by double-click, no server. *Regenerable (template + `_map.json`), gitignored — not committed.*
 - `_reqlock.json` — content hash baseline for drift detection (one hash per requirement = the contract; prose-ahead-of-code direction) *(committed)*
 - `_memberlock.json` — versioned sidecar (`{_schema, members}`) of dedicated-member content hashes for reverse-direction (member-ahead-of-spec) drift; kept separate so `_reqlock.json` stays a byte-stable cross-repo contract an older seeded engine reads unchanged (`ARCH-MEMBERDRIFT-027`) *(committed)*

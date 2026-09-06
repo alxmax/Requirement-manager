@@ -1417,6 +1417,22 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
     def test_node_with_no_members_has_empty_list(self):  # verifies: REQ-MAP-870#CASE-3  # verifies: ARCH-MAP-007#CASE-3
         self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
+    def test_dependency_list_answers_to_both_names(self):  # verifies: REQ-MAP-870#CASE-7  # verifies: ARCH-MAP-007#CASE-7
+        # `deps` is what the vendored viewer reads; `depends_on` is what the frontmatter
+        # and every document call it. A consumer asking for the documented name used to
+        # get a silent None and build the wrong graph from it.
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-DEP-002.md"),
+                   REQ.format(id="A-DEP-002", status="confirmed", layer="bus", extra="", title="D"))
+            _write(os.path.join(rd, "A-USE-001.md"),
+                   REQ.format(id="A-USE-001", status="confirmed", layer="feature",
+                              extra="depends_on: [A-DEP-002]\n", title="U"))
+            node = next(n for n in R._build_map_data(R.load_requirements(rd), {})["nodes"]
+                        if n["id"] == "A-USE-001")
+        self.assertEqual(node["deps"], ["A-DEP-002"])
+        self.assertEqual(node["depends_on"], node["deps"])
+
     def test_json_carries_repo_field(self):  # dynamic repo name in viewer header  # verifies: REQ-MAP-870#CASE-5  # verifies: REQ-MAP-871#CASE-1
         doc = json.loads(R._build_json_text(
             {"repo": "owner/proj", "nodes": [], "edges": []}))
@@ -10729,7 +10745,7 @@ class Implement(unittest.TestCase):  # tested-by: ARCH-IMPLEMENT-063  # tested-b
         self.assertNotIn("Similar requirements", out)
 
 
-class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-960  # tested-by: REQ-RETIRE-961  # tested-by: REQ-RETIRE-962
+class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-960  # tested-by: REQ-RETIRE-961  # tested-by: REQ-RETIRE-962  # tested-by: REQ-RETIRE-963
     def _seed(self, d, extra_files=True):
         rd = os.path.join(d, "requirements")
         _write(os.path.join(rd, "AREA-R-001.md"), _spec("AREA-R-001", ["`gate` writes the lock file."]))
@@ -10867,6 +10883,74 @@ class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ
             self._seed(d)
             code, _out = self._run(d, rid="NOPE-X-001")
         self.assertEqual(1, code)
+
+    def _pair(self, d, dependent=True):
+        """AREA-R-001, plus AREA-D-003 which optionally depends on it."""
+        rd = self._seed(d, extra_files=False)
+        _write(os.path.join(rd, "AREA-D-003.md"),
+               _spec("AREA-D-003", ["`map` draws the graph."],
+                     extra=("depends_on: [AREA-R-001]\n" if dependent else "")))
+        return rd
+
+    def test_a_deprecated_dependent_does_not_block(self):  # verifies: REQ-RETIRE-961#CASE-4
+        # A deprecated requirement is out of service and exempt from every gate, so its
+        # pointer cannot make a retirement unsafe. Counting it made retiring a class of
+        # N cost N-1 forced writes: each step was blocked by the step already gone.
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d)
+            _write(os.path.join(rd, "AREA-D-003.md"),
+                   _spec("AREA-D-003", ["`map` draws the graph."], status="deprecated",
+                         extra="depends_on: [AREA-R-001]\n"))
+            code, out = self._run(d, do_apply=True)
+            spec = open(os.path.join(rd, "AREA-R-001.md"), encoding="utf-8").read()
+        self.assertEqual(0, code)
+        self.assertNotIn("refusing", out)
+        self.assertIn("status: deprecated", spec)
+
+    def test_a_batch_orders_the_consumer_first(self):  # verifies: ARCH-RETIRE-064#CASE-4  # verifies: REQ-RETIRE-963#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._pair(d)
+            _code, out = self._run(d, rid=["AREA-R-001", "AREA-D-003"])
+        self.assertIn("AREA-D-003 -> AREA-R-001", out)
+
+    def test_batch_members_do_not_block_each_other(self):  # verifies: REQ-RETIRE-963#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._pair(d)
+            code, out = self._run(d, rid=["AREA-R-001", "AREA-D-003"], do_apply=True)
+            texts = [open(os.path.join(rd, f), encoding="utf-8").read()
+                     for f in ("AREA-R-001.md", "AREA-D-003.md")]
+        self.assertEqual(0, code)
+        self.assertNotIn("refusing", out)
+        self.assertTrue(all("status: deprecated" in x for x in texts), texts)
+
+    def test_one_working_tree_check_for_the_whole_batch(self):  # verifies: REQ-RETIRE-963#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._pair(d, dependent=False)
+            names = ("AREA-R-001.md", "AREA-D-003.md")
+            before = [open(os.path.join(rd, f), encoding="utf-8").read() for f in names]
+            with mock.patch.object(R, "_git_dirty", return_value=True):
+                code, out = self._run(d, rid=["AREA-R-001", "AREA-D-003"], do_apply=True)
+            after = [open(os.path.join(rd, f), encoding="utf-8").read() for f in names]
+        self.assertEqual(1, code)
+        self.assertEqual(1, out.count("uncommitted changes"))
+        self.assertEqual(before, after)
+
+    def test_a_single_id_carries_no_batch_ordering_line(self):  # verifies: REQ-RETIRE-963#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self._seed(d, extra_files=False)
+            _code, out = self._run(d, rid=["AREA-R-001"])
+        self.assertNotIn("in this order", out)
+
+    def test_a_cycle_inside_the_batch_keeps_every_member(self):
+        # `gate` reports the cycle on its own; retire must not silently drop its members.
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._seed(d, extra_files=False)
+            _write(os.path.join(rd, "AREA-D-003.md"),
+                   _spec("AREA-D-003", ["`map` draws."], extra="depends_on: [AREA-R-001]\n"))
+            reqs = R.load_requirements(rd)
+            reqs["AREA-R-001"]["meta"]["depends_on"] = ["AREA-D-003"]
+            order = R._retire_order(reqs, ["AREA-R-001", "AREA-D-003"])
+        self.assertEqual(sorted(order), ["AREA-D-003", "AREA-R-001"])
 
 
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963

@@ -107,6 +107,9 @@ Every bullet below is binding.
 - Each node carries its requirement's id, layer, status, area, title, intent,
   Contract/Verify-intent/Notes bullets, acceptance, members (`role`/`loc`), `deps`,
   `used_by`, and risk signals.
+- The dependency list is emitted twice under two names: `deps`, which the vendored viewer
+  reads, and `depends_on`, the name the frontmatter and every document use. A consumer that
+  asks for the documented name gets the same list, never a silent empty answer.
 - All requirement-derived text is JSON-encoded, which neutralizes a hostile id, title or body
   by construction — there is no markup context for it to break out of.
 
@@ -125,6 +128,11 @@ CASE-3 — a node carries its full requirement metadata
   Given  a requirement with an id, layer, status, area, title, Contract clauses and members
   When   `map` runs
   Then   its node carries all of those fields plus `deps`, `used_by` and any risk signals
+
+CASE-7 — the dependency list answers to both names
+  Given  a requirement declaring `depends_on: [X]`
+  When   `map` runs
+  Then   its node's `deps` and `depends_on` both read `[X]`
 
 CASE-4 — acc lists one entry per criterion in either acceptance form
   Given  one requirement with labelled `CASE-N` blocks and another with bulleted acceptance
