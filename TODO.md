@@ -682,3 +682,56 @@
                re-checked after the contract changed?" is answered by drift, which exists.
                Name the question a history answers that neither already does, or do not
                build it. -->
+
+## v5.13
+- [ ] An already-tagged corpus has no path to the three rungs | lane: feature
+      <!-- Filed from the Senate repo (a real consumer, 42 confirmed requirements) on
+           2026-09-06, engine 2026-09-06.6. The request as the user put it: "generate the
+           three levels at `sync` too, not just at `init`."
+
+           The measurement behind it. ADR-0030 shipped and works — but rung 1 fires only on
+           a requirement `init` EXTRACTS FROM AN UNTAGGED SOURCE FILE. That repo's
+           `gate --risk --untagged` is 100% in agents, docs, lib, prompts, scripts, tests
+           and workflows; its root 1/4 is CLAUDE.md, SKILL.md and TODO.md, which the engine
+           ignores by rule. So `init` proposes 0 drafts and writes no `level:` — and because
+           architecture and system nodes are minted alongside file-level drafts, zero drafts
+           means zero pyramid. Its 42 requirements were hand-authored before ADR-0030
+           existed, and there is now no command that can give them the axis. Adopting it
+           there means editing 42 files by hand, which nobody will do.
+
+           This is a retrofit gap, not a `sync` gap, and the difference matters:
+
+             - Writing `level:` on every `sync` is the one thing the audit explicitly
+               blocked. Aurelius's anchor: cmd_init, cmd_draft and cmd_new must contain
+               ZERO code paths writing a `level:` key unless a human supplied it on that
+               invocation. `sync` runs on every commit via the pre-commit hook, so putting
+               the write there is the most automatic placement available — the opposite of
+               what the anchor asks for. Do not implement the request literally.
+             - The honest shape is an explicit, human-invoked retrofit — a flag or verb that
+               proposes rungs for ALREADY-TAGGED requirements, writes `level_source: auto`
+               like ADR-0030 does, and touches nothing without being asked. ADR-0030's
+               reversibility claim (delete every `level_source: auto` and the corpus is
+               restored exactly) does not hold as cleanly here, because these files are
+               `confirmed` and hand-written: the field would be added to a file the engine
+               did not create. Decide whether that is acceptable before building.
+
+           It also changes how ADR-0019's 2027-03-03 review should read its own evidence.
+           That criterion is "the level fields stay unused by any consumer repo after
+           6 months", and concludes such a field should be removed rather than documented
+           harder. Senate is a consumer repo whose non-use is STRUCTURAL, not a preference:
+           it cannot reach the axis with any shipped command. Counting it as evidence of
+           low demand would be measuring the absence of a retrofit path, not the absence of
+           a reader. Either build the retrofit before that date, or record in ADR-0019 that
+           fully-tagged corpora are excluded from the denominator.
+
+           Deming's STOP from the original audit still stands unanswered and is not
+           answered by this item either. Do not cite the audit as endorsement — it was
+           MODIFY, GO 1 / MODIFY 6 / STOP 2, bundle
+           runs/senate/2026-09-06_003141-senate-reqmap-three-levels-adoption.json.
+
+           Confirmed in the engine on 2026-09-06, not taken on trust: `by_dir` is
+           populated only inside the per-file draft loop (`reqmap.py:3632`), and
+           `_write_arch_drafts(reqs_dir, by_dir)` runs after it (`:3635`). An empty
+           `by_dir` writes no architecture draft, and `_write_sys_placeholder` is fed
+           those ids, so it writes nothing either. Zero drafts really is zero pyramid
+           — the gap is structural, not a threshold anyone can tune. -->
