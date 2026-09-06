@@ -145,8 +145,12 @@ Every bullet below is binding.
 - The gate warns once per unjustified exemption. The finding is warn-only and is never
   promoted under `--strict` — the point is to make silencing cost something, not to make
   it impossible.
-- The report names `clarify <ID> --decompose` as what to do with an over-scoped
-  requirement instead, and the `ac-count-high` and `over-scoped` findings name it too.
+- The two findings used to name `clarify <ID> --decompose` as the remedy. They no longer
+  do: that flag acts on `statement-size` findings ONLY, so an author who followed the
+  advice on an over-scoped requirement got `All clean` and no files from a command the
+  gate had just called an error — and was left with `lint_exempt:`, the one action the
+  skill names as the reflex to avoid. Naming a remedy is right; naming one that no-ops
+  is worse than naming none.
 
 ## Cases
 CASE-1 — an exemption with a written reason is clean
@@ -164,10 +168,10 @@ CASE-3 — the exemption warning never fails a build
   When   `gate --strict` runs
   Then   the finding is still a warning and the run still exits 0
 
-CASE-4 — the split findings name the tool that splits
+CASE-4 — the split findings name a remedy that can act on them
   Given  a requirement with more acceptance criteria than the ceiling
   When   the linter reports it
-  Then   the finding names `clarify <ID> --decompose`
+  Then   the finding says what to move and says that `--decompose` does not cover it
 
 
 --------------------

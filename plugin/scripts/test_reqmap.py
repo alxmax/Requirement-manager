@@ -8353,13 +8353,19 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         self.assertEqual(rule.severity, "warn")
         self.assertFalse(rule.strict)
 
-    def test_oversize_findings_name_the_tool_that_splits(self):  # verifies: REQ-AUDIT-971#CASE-4
+    def test_oversize_findings_name_a_remedy_that_can_act(self):  # verifies: REQ-AUDIT-971#CASE-4
+        """It used to name `clarify <ID> --decompose`, which acts on `statement-size`
+        findings only. Following it printed `All clean` and wrote nothing, from a command
+        the same gate run had just called an error — leaving `lint_exempt:` as the only
+        visible way out, which is the one action the skill says must never be the reflex."""
         body = "# T\n\n## Description\n" + "".join(
             "- Clause {}.\n".format(i) for i in range(3)) + "\n## Cases\n" + "".join(
             "CASE-{}\n  Then it holds\n".format(i) for i in range(1, R.LINT_AC_MAX + 3))
         found = R.lint_requirement("REQ-A-001", {"meta": {"status": "confirmed"}, "body": body})
         detail = " ".join(f["detail"] for f in found if f["check"] == "ac-count-high")
-        self.assertIn("clarify REQ-A-001 --decompose", detail)
+        self.assertNotIn("clarify REQ-A-001 --decompose", detail)
+        self.assertIn("move", detail)
+        self.assertIn("does not cover this check", detail)
 
     # ---- corpus shape ----------------------------------------------------
     def test_a_levelled_corpus_is_not_called_flat(self):  # verifies: REQ-AUDIT-972#CASE-1
@@ -10951,6 +10957,257 @@ class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ
             reqs["AREA-R-001"]["meta"]["depends_on"] = ["AREA-D-003"]
             order = R._retire_order(reqs, ["AREA-R-001", "AREA-D-003"])
         self.assertEqual(sorted(order), ["AREA-D-003", "AREA-R-001"])
+
+
+class DriftReason(unittest.TestCase):  # tested-by: ARCH-DRIFT-003  # tested-by: REQ-DRIFT-988
+    """`--accept-drift` is the one escape hatch in the gate. It must leave a trace."""
+
+    def _confirmed_repo(self, d, body_tail=""):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               _spec("REQ-A-001", ["`gate` writes the lock file."]) + body_tail)
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        _write(os.path.join(d, "test_impl.py"),
+               "def test_a():" + "\n" + "    assert True  " + tb_tag("REQ-A-001"))
+        return rdir
+
+    def _drift(self, d, **kw):
+        """Seed a lock, edit the contract, re-check with `kw`. Returns (rdir, output)."""
+        rdir = self._confirmed_repo(d)
+        reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
+        with redirect_stdout(io.StringIO()):
+            R.cmd_check(R.Workspace(reqs, members, rdir, d), True)
+        self._confirmed_repo(d, body_tail="\n" + "Text that changes the hash." + "\n")
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_check(R.Workspace(R.load_requirements(rdir), members, rdir, d), True, **kw)
+        return rdir, buf.getvalue()
+
+    def test_a_reason_is_recorded_where_a_reviewer_reads_it(self):  # verifies: ARCH-DRIFT-003#CASE-5  # verifies: REQ-DRIFT-988#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rdir, _out = self._drift(d, accept_drift=True, drift_reason="renamed the flag")
+            log = R.load_driftlog(rdir)
+        self.assertIn("REQ-A-001", log)
+        self.assertEqual("renamed the flag", log["REQ-A-001"]["reason"])
+        self.assertTrue(log["REQ-A-001"]["hash"])
+
+    def test_a_bare_waiver_is_recorded_with_no_reason(self):  # verifies: REQ-DRIFT-988#CASE-2
+        # Silence is a legible answer. Recording only the explained waivers would make
+        # the UNexplained one the invisible one, which is backwards.
+        with tempfile.TemporaryDirectory() as d:
+            rdir, _out = self._drift(d, accept_drift=True)
+            log = R.load_driftlog(rdir)
+        self.assertIn("REQ-A-001", log)
+        self.assertIsNone(log["REQ-A-001"]["reason"])
+
+    def test_a_demotion_records_nothing(self):  # verifies: REQ-DRIFT-988#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rdir, out = self._drift(d, accept_drift=False)
+            self.assertIn("demoted:", out)
+            self.assertFalse(os.path.exists(R._driftlog_path(rdir)))
+
+    def test_a_retired_id_is_pruned_from_the_log(self):  # verifies: REQ-DRIFT-988#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rdir, _out = self._drift(d, accept_drift=True, drift_reason="first")
+            R.save_driftlog(rdir, dict(R.load_driftlog(rdir),
+                                       **{"GONE-X-999": {"hash": "abc", "reason": "old"}}))
+            self._confirmed_repo(d, body_tail="\n" + "Changed again." + "\n")
+            members = R.scan_members(d, rdir)
+            with redirect_stdout(io.StringIO()):
+                R.cmd_check(R.Workspace(R.load_requirements(rdir), members, rdir, d), True,
+                            accept_drift=True, drift_reason="second")
+            log = R.load_driftlog(rdir)
+        self.assertNotIn("GONE-X-999", log)
+        self.assertEqual("second", log["REQ-A-001"]["reason"])
+
+    def test_a_forward_schema_fails_open(self):  # verifies: REQ-DRIFT-988#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            os.makedirs(rdir)
+            _write(R._driftlog_path(rdir),
+                   json.dumps({"_schema": R.DRIFTLOG_SCHEMA + 1, "accepted": {"A-1": {}}}))
+            self.assertEqual({}, R.load_driftlog(rdir))
+
+    def test_the_flag_takes_a_reason_and_still_works_bare(self):  # verifies: ARCH-DRIFT-003#CASE-6
+        # `nargs="?"` must not swallow the flag that follows it: `--accept-drift --code ..`
+        # was the shape that would have silently eaten the code root.
+        p = R._build_parser()
+        self.assertIs(False, p.parse_args(["sync"]).accept_drift)
+        self.assertIs(True, p.parse_args(["sync", "--accept-drift"]).accept_drift)
+        self.assertEqual("why", p.parse_args(["sync", "--accept-drift", "why"]).accept_drift)
+        a = p.parse_args(["sync", "--accept-drift", "--code", ".."])
+        self.assertIs(True, a.accept_drift)
+        self.assertEqual("..", a.code)
+
+
+class DriftSeverityConfig(unittest.TestCase):  # tested-by: ARCH-RULES-059  # tested-by: REQ-RULES-989
+    """A repo may promote drift for ITSELF. The default never moves."""
+
+    def setUp(self):
+        self._saved = R.DRIFT_SEVERITY
+
+    def tearDown(self):
+        R.DRIFT_SEVERITY = self._saved
+
+    def _drifted_ctx(self, d, exempt=""):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               _spec("REQ-A-001", ["`gate` writes the lock file."], extra=exempt))
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
+        R.save_lock(rdir, {"REQ-A-001": "stale-hash-from-an-older-contract"})
+        return R.GateContext(R.Workspace(reqs, members, rdir, d))
+
+    def _codes(self, ctx):
+        errors, warns = R.run_gate_rules(ctx)
+        return ([f["rule"] for f in errors], [f["rule"] for f in warns])
+
+    def test_the_default_is_still_warn(self):  # verifies: ARCH-RULES-059#CASE-4  # verifies: REQ-RULES-989#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            errs, warns = self._codes(self._drifted_ctx(d))
+        self.assertNotIn("RM018", errs)
+        self.assertIn("RM018", warns)
+
+    def test_config_promotes_drift_for_this_repo_only(self):  # verifies: ARCH-RULES-059#CASE-5  # verifies: REQ-RULES-989#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            ctx = self._drifted_ctx(d)
+            R.apply_config({"DRIFT_SEVERITY": "error"}, out=io.StringIO())
+            errs, _warns = self._codes(ctx)
+        self.assertIn("RM018", errs)
+
+    def test_a_requirements_own_exemption_still_wins(self):  # verifies: ARCH-RULES-059#CASE-6  # verifies: REQ-RULES-989#CASE-3
+        # A repo-wide dial must not overrule a decision written down per requirement.
+        with tempfile.TemporaryDirectory() as d:
+            ctx = self._drifted_ctx(d, exempt="gate_exempt: [RM018]" + "\n")
+            R.apply_config({"DRIFT_SEVERITY": "error"}, out=io.StringIO())
+            errs, warns = self._codes(ctx)
+        self.assertNotIn("RM018", errs)
+        self.assertNotIn("RM018", warns)
+
+    def test_a_mistyped_value_is_reported_not_silently_ignored(self):  # verifies: REQ-RULES-989#CASE-4
+        # apply_config's numeric branch would have rejected every string outright, so a
+        # repo could never set this at all; a typo must be loud, not a silent default.
+        out = io.StringIO()
+        self.assertEqual([], R.apply_config({"DRIFT_SEVERITY": "eror"}, out=out))
+        self.assertEqual("warn", R.DRIFT_SEVERITY)
+        self.assertIn("DRIFT_SEVERITY", out.getvalue())
+
+    def test_the_registry_is_not_mutated(self):  # verifies: REQ-RULES-989#CASE-5
+        # `audit` runs cmd_check twice over the same module-level GATE_RULES; a promotion
+        # written back onto the Rule would leak from the first run into the second.
+        before = {r.id: r.severity for r in R.GATE_RULES}
+        with tempfile.TemporaryDirectory() as d:
+            ctx = self._drifted_ctx(d)
+            R.apply_config({"DRIFT_SEVERITY": "error"}, out=io.StringIO())
+            self._codes(ctx)
+        self.assertEqual(before, {r.id: r.severity for r in R.GATE_RULES})
+
+
+def _repo_root():
+    """The source repo's root, or None when this suite runs from a seeded copy."""
+    here = os.path.dirname(os.path.abspath(R.__file__))
+    for _ in range(4):
+        here = os.path.dirname(here)
+        if os.path.isdir(os.path.join(here, "docs", "adr")) and \
+                os.path.isfile(os.path.join(here, "README.md")):
+            return here
+    return None
+
+
+class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-by: ARCH-SELFGATE-039  # tested-by: REQ-SELFGATE-990
+    """The tool's thesis is that a claim about code should be checked, not trusted.
+    Its own front page asserted 9,223 lines against a 10,066-line file for two days
+    and nothing noticed, because no check read it."""
+
+    def setUp(self):
+        self.root = _repo_root()
+        if not self.root:
+            self.skipTest("not the source repo")
+
+    def test_the_readme_engine_line_count_is_current(self):  # verifies: ARCH-SELFGATE-039#CASE-9  # verifies: REQ-SELFGATE-990#CASE-1
+        readme = open(os.path.join(self.root, "README.md"), encoding="utf-8").read()
+        m = re.search(r"stdlib only,\s*([\d,]+)\s+lines", readme)
+        self.assertIsNotNone(m, "README no longer states the engine's line count")
+        claimed = int(m.group(1).replace(",", ""))
+        with open(os.path.join(self.root, "plugin", "scripts", "reqmap.py"),
+                  encoding="utf-8") as f:
+            actual = sum(1 for _ in f)
+        self.assertEqual(actual, claimed,
+                         "README claims {} lines, reqmap.py has {}".format(claimed, actual))
+
+    def test_every_adr_on_disk_has_an_index_row(self):  # verifies: ARCH-SELFGATE-039#CASE-10  # verifies: REQ-SELFGATE-990#CASE-2
+        # ADR-0027 existed on disk and in no index for nine days.
+        adr = os.path.join(self.root, "docs", "adr")
+        index = open(os.path.join(adr, "README.md"), encoding="utf-8").read()
+        missing = [f for f in sorted(os.listdir(adr))
+                   if f.endswith(".md") and f != "README.md" and "(" + f + ")" not in index]
+        self.assertEqual([], missing, "ADR files with no index row")
+
+    def test_the_index_states_no_count_it_would_have_to_maintain(self):  # verifies: REQ-SELFGATE-990#CASE-3
+        # "Twenty-three decisions" was written when there were 23 and never moved again.
+        index = open(os.path.join(self.root, "docs", "adr", "README.md"), encoding="utf-8").read()
+        head = index.split("| # |")[0]
+        self.assertNotRegex(head, r"(?i)\b(twenty|thirty|forty|fourteen|\d+)\s+decisions\b")
+
+
+class RemedyCanAct(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # tested-by: REQ-DECOMPOSE-839
+    """Both checks are ERRORS under `--strict`, and `gate` always runs the lint strict.
+    They named `clarify <ID> --decompose` as the fix; that flag acts on `statement-size`
+    findings only, so following the advice printed `All clean` and wrote nothing — and
+    left the author with `lint_exempt:`, the one action the skill says must never be the
+    reflex. Reported from a consumer repo where nine auditors hit it independently."""
+
+    def _fs(self, rid, r):
+        return R.lint_requirement(rid, r, {}, {}, {})
+
+    def _oversized(self, n_ac=9):
+        cases = tuple("CASE-{} \u2014 c{}\n  Given x{}  When y{}  Then z".format(i, i, "", "", "")
+                      for i in range(1, n_ac + 1))
+        return _spec("A-BIG-001", ["`gate` writes the lock file."], cases=cases)
+
+    def test_over_scoped_says_clearing_either_number_clears_it(self):
+        # The trigger is `contract_n > MAX and ac_count > MAX`, so an author who brings
+        # the criteria under the ceiling clears it without touching contract structure.
+        # Nothing said so, and the exemption was the only visible way out.
+        clauses = ["clause {} does a distinct thing.".format(i)
+                   for i in range(1, R.LINT_CONTRACT_MAX + 3)]
+        cases = tuple("CASE-{} \u2014 c{}\n  Given x{}  When y{}  Then z".format(i, i, "", "", "")
+                      for i in range(1, R.LINT_AC_MAX + 3))
+        body = _spec("A-BIG-002", clauses, cases=cases)
+        fs = self._fs("A-BIG-002", {"meta": {"status": "confirmed", "layer": "feature",
+                                             "owner": "Ana"}, "body": body})
+        f = next((x for x in fs if x["check"] == "over-scoped"), None)
+        self.assertIsNotNone(f, [x["check"] for x in fs])
+        self.assertIn("either", f["detail"])
+        self.assertIn("does not cover this check", f["detail"])
+
+    def test_a_decompose_run_that_scaffolds_nothing_says_so(self):  # verifies: ARCH-DECOMPOSE-050#CASE-8  # verifies: REQ-DECOMPOSE-839#CASE-6
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-OK-001.md"),
+                   _spec("A-OK-001", ["`gate` writes the lock file."]))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_lint(R.Workspace(R.load_requirements(rd), {}, rd, d),
+                           decompose=True, only="A-OK-001")
+            out = buf.getvalue()
+        self.assertIn("nothing scaffolded", out)
+        self.assertIn("statement-size", out)
+
+    def test_a_decompose_run_that_scaffolds_says_nothing_of_the_kind(self):
+        # The disclosure must not fire on a run that DID scaffold, or it becomes noise.
+        long_clause = " ".join("word{}".format(i) for i in range(R.LINT_STATEMENT_WORDS + 20))
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-LONG-001.md"),
+                   _spec("A-LONG-001", [long_clause + "."]))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_lint(R.Workspace(R.load_requirements(rd), {}, rd, d),
+                           decompose=True, only="A-LONG-001")
+            out = buf.getvalue()
+        self.assertIn("scaffolded", out)
+        self.assertNotIn("nothing scaffolded", out)
 
 
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963

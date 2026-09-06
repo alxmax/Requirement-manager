@@ -22,7 +22,7 @@ satisfies: [SYS-AUTHOR-101]
 Every bullet below is binding.
 - `lint` writes no file during the default run; only the opt-in `--decompose` flag creates one draft per reported `statement-size` clause, and no invocation site (the gate, the pre-commit hook, CI) ever passes it. [[REQ-DECOMPOSE-837]]
 - Each created draft carries `status: draft`, a `depends_on` entry naming its parent, the offending clause seeded verbatim, and an id that reuses the parent's area/name at the next free corpus number. [[REQ-DECOMPOSE-838]]
-- `lint --decompose` leaves the parent byte-identical, discloses that the split was chosen by word count and not by obligation, skips a clause already decomposed, and never scaffolds from an `ac-count-high` finding. [[REQ-DECOMPOSE-839]]
+- `lint --decompose` leaves the parent byte-identical, discloses that the split was chosen by word count and not by obligation, skips a clause already decomposed, never scaffolds from an `ac-count-high` finding, and says so when it scaffolds nothing. [[REQ-DECOMPOSE-839]]
 
 ## Cases
 CASE-1
@@ -231,6 +231,8 @@ Every bullet below is binding.
 - `lint --decompose` scaffolds from `statement-size` findings only; an `ac-count-high` finding is reported and nothing is written for it.
 - Deleting a created draft restores the corpus exactly, because the parent was never edited.
 - `lint --decompose` skips a clause whose target file already exists, and reports the skip.
+- A run that scaffolds nothing says which finding the flag acts on, so silence cannot be
+  read as agreement by an author the same run has just told to split something.
 
 ## Cases
 CASE-1 — the parent file is byte-identical after a decompose run
@@ -258,4 +260,10 @@ CASE-5 — an ac-count-high finding is reported but never scaffolded
   Given  a non-exempt requirement above `LINT_AC_MAX` acceptance criteria
   When   `lint --decompose` runs
   Then   the `ac-count-high` finding still prints and no file is created for it
+
+CASE-6 — a run that scaffolds nothing says so
+  Given  a requirement carrying no `statement-size` finding
+  When   `lint --decompose` runs on it
+  Then   the output states that nothing was scaffolded and which finding the flag acts on,
+         so a no-op cannot be read as a clean bill of health
 

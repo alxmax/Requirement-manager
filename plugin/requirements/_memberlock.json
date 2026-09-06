@@ -23,7 +23,7 @@
       "plugin/scripts/reqmap.py#warn_if_stale": "4e5ef714ff765bda045095887e7ac681e7d907079064fe21abba3dff8b738fc6"
     },
     "ARCH-CMDREGISTRY-033": {
-      "plugin/scripts/reqmap.py#_build_parser": "191a6dcc7f265ebdfb5ff3f4eb6c69285a21e4e1deead409884bf49eb396d3f4",
+      "plugin/scripts/reqmap.py#_build_parser": "61f6eaa68656debb4a1cf90434643c40ebece81f01686cd3477e1005e42d450a",
       "plugin/scripts/reqmap.py#_generate_schema": "3ea8c52d84c2512eb470f90a5b7a1db19f31db63848f5cd3c5ba37295c7018a2"
     },
     "ARCH-DESCRIPTION-057": {
@@ -181,6 +181,11 @@
     "REQ-DESIGN-980": {
       "plugin/scripts/reqmap.py#_design_lcom": "0b70c81c79c07f3b77b091e9fbfd5474a1fff65751504ebcb3071046c5856efb"
     },
+    "REQ-DRIFT-988": {
+      "plugin/scripts/reqmap.py#_driftlog_path": "2342c7d88fa2bd4f84b618770a92411413003e13f75e0dc3579087d42aee38df",
+      "plugin/scripts/reqmap.py#load_driftlog": "228287ef550c436c60cd1da85ddc4cf5c0259b69e33e42106e0caa2c175b62a4",
+      "plugin/scripts/reqmap.py#save_driftlog": "1b647afb1e992dbde77c25e7796f6fefd375912c5121d7377d214e4e8699bd47"
+    },
     "REQ-EXCALIDRAW-844": {
       "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py#Rect": "cb0903533534e2d4ea9f371616f25b3d1e592f0abcbf4e4d3edf2e89a8fde361",
       "plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py#Style": "f903aeff80d7b6710b95541403e1a3de83186f76a8802b5cdffd5df0074f5ad0",
@@ -220,6 +225,9 @@
     },
     "REQ-SEARCH-965": {
       "plugin/scripts/reqmap.py#_text_matches": "dddae0f5fed0799b9704a5e7e633bbbb5706adbd358c1e0f4dbadd3da1953f95"
+    },
+    "REQ-SELFGATE-990": {
+      "plugin/scripts/test_reqmap.py#DocsAreTrue": "6d10af83efd0ce931a087bacf5484d276dce70ac519ad2097170abe283b98539"
     },
     "REQ-SIMILAR-921": {
       "plugin/scripts/reqmap.py#_test_suite_pairs": "e88b32339204f303f89cab7a592f52c5adcd39a7ae015bc7b474327850fb65f8"

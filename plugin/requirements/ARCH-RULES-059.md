@@ -23,6 +23,7 @@ satisfies: [SYS-GATE-102]
 Every bullet below is binding.
 - `GATE_RULES` holds every gate rule as a `Rule` with a unique `RMnnn` code, a default severity, a `--strict` promotion flag and the function that produces its findings. [[REQ-RULES-947]]
 - Every printed gate line carries its rule code, `--json` carries the same findings as records, and `gate_exempt: [RMnnn]` in a requirement's frontmatter silences that one rule for that one requirement. [[REQ-RULES-948]]
+- A repo may raise the drift rules to errors for itself through its own config, without `--strict` and without moving anyone else's default; a requirement's own exemption still wins. [[REQ-RULES-989]]
 
 ## Cases
 CASE-1
@@ -39,6 +40,21 @@ CASE-3
   Given  a requirement whose `gate_exempt:` names `RM013`
   When   `gate` runs
   Then   no RM013 line names that requirement, and every other rule still applies to it
+
+CASE-4
+  Given  a drifted confirmed requirement and no per-repo config
+  When   the rules run without `--strict`
+  Then   the drift finding is a warning
+
+CASE-5
+  Given  the same corpus, with a config raising drift to error
+  When   the rules run without `--strict`
+  Then   the drift finding is an error
+
+CASE-6
+  Given  the same config and a requirement exempting itself from the drift rule
+  When   the rules run
+  Then   that requirement produces neither an error nor a warning for it
 
 ## Context
 **Notes**
@@ -148,3 +164,60 @@ CASE-4 — an exemption does not reach another rule
   Given  a requirement carrying `gate_exempt: [RM004]` that is also confirmed without a `tested-by` member
   When   `gate` runs
   Then   its RM007 warning is still printed
+
+
+---
+id: REQ-RULES-989
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-RULES-059]
+---
+
+# Drift severity is a repo's own call
+
+## Description
+> Whether an out-of-date contract should fail a build or only warn is a real disagreement
+> with no universal answer, and this tool had only one setting for everybody. The default
+> stays `warn` on recorded evidence — a spec-first edit legitimately puts the contract ahead
+> of the code, and a check that fails on correct work gets `continue-on-error` bolted onto it
+> and is never read again. A repo that wants the harder line should be able to take it
+> without arguing with the tool, and without moving anyone else's default.
+
+Every bullet below is binding.
+- `DRIFT_SEVERITY: "error"` in a repo's `_config.json` promotes the drift rules to errors for
+  that repo, without `--strict`.
+- The default is `warn` and does not move.
+- A requirement's own `gate_exempt:` is honoured first: a repo-wide dial never overrules a
+  decision written down per requirement.
+- The promotion is resolved per run and never written back onto the registered rule, because
+  the rule registry is module state that two checks inside one `audit` share.
+- A value outside the accepted spellings is reported and skipped, never silently treated as
+  the default.
+
+## Cases
+CASE-1 — the default is still warn
+  Given  a drifted confirmed requirement and no `_config.json`
+  When   the rules run without `--strict`
+  Then   the drift finding is a warning
+
+CASE-2 — a repo may promote it for itself
+  Given  `_config.json` setting `DRIFT_SEVERITY` to `error`
+  When   the rules run without `--strict`
+  Then   the drift finding is an error
+
+CASE-3 — a requirement's own exemption still wins
+  Given  the same config and a requirement whose `gate_exempt:` names the drift rule
+  When   the rules run
+  Then   that requirement produces neither an error nor a warning for it
+
+CASE-4 — a mistyped value is reported
+  Given  `_config.json` setting `DRIFT_SEVERITY` to an unrecognised spelling
+  When   the config is applied
+  Then   the key is named on stderr and the default is unchanged
+
+CASE-5 — the registry is not mutated
+  Given  a promoted run
+  When   it finishes
+  Then   every registered rule carries the severity it was declared with

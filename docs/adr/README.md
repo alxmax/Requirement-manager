@@ -1,7 +1,8 @@
 # Architecture decision records
 
-Twenty-three decisions that shape this project, pulled out of `CHANGELOG.md` prose where they
-were previously findable only by reading every release note in order.
+The decisions that shape this project, pulled out of `CHANGELOG.md` prose where they were
+previously findable only by reading every release note in order. The index below is the count —
+a number written out in words here would be one more thing to keep true by hand.
 
 An ADR here records a decision that is **expensive to reverse** or that a reader would
 otherwise mistake for an oversight. Routine choices stay in the changelog entry that made
@@ -36,10 +37,12 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0024](0024-architecture-level-promoted-into-system.md) | The `architecture` level is promoted into `system`; `fan-out`'s `system` ceiling becomes fifty | Superseded by 0025 |
 | [0025](0025-three-levels-restored-corpus-folded-to-two-hundred.md) | Three levels restored, the corpus folded from 644 to ~200, and the lean requirement form | Accepted |
 | [0026](0026-gate-rule-registry-and-config-file.md) | The gate is a rule registry; thresholds come from a config file | Accepted |
+| [0027](0027-retiring-a-requirement-supersedes-grow-only.md) | A requirement can be retired, and the engine removes only what it can prove | Accepted |
 | [0028](0028-one-inbox-for-every-open-signal.md) | One inbox for every open signal, with origin as a tab | Accepted |
 | [0029](0029-action-alias-tracks-the-plugin-major.md) | The Action's major alias tracks the plugin's major | Accepted |
 | [0030](0030-the-engine-drafts-the-pyramid.md) | The engine drafts the pyramid; the author corrects it | Accepted |
 | [0031](0031-a-tagged-corpus-can-be-given-the-rungs.md) | A corpus that was already tagged can be given the rungs | Accepted |
+| [0032](0032-the-eight-thousand-line-trigger-fired.md) | ADR-0014's line-count trigger fired; the audit is scheduled, not pre-empted | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

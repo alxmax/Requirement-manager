@@ -190,8 +190,8 @@
             "description": "Also regenerate the aggregated open-questions file."
           },
           "accept_drift": {
-            "type": "boolean",
-            "description": "Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it."
+            "type": "string",
+            "description": "Explicitly advance the baseline when a confirmed or implemented contract changed. Required when those contracts differ from the lock; sync exits non-zero without it. Takes an optional reason, recorded in requirements/_driftlog.json so the waiver and its justification land in the diff."
           },
           "strict": {
             "type": "boolean",

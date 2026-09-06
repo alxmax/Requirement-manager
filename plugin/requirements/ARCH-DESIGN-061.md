@@ -63,7 +63,7 @@ CASE-5
 ## Context
 **Notes**
 - Python is the only language read through a real parser (`ast`); the brace languages go through heuristics, so a candidate there is a stronger invitation to look than a fact.
-- A candidate is a shape worth a look, never a defect. Run on this repo it reports the engine's own long functions and its 7,800-line file honestly; ADR-0014 keeps that file whole on purpose, and an advisory line does not reopen a decision.
+- A candidate is a shape worth a look, never a defect. Run on this repo it reports the engine's own long functions and its ten-thousand-line file honestly; ADR-0014 keeps that file whole on purpose and an advisory line does not reopen a decision — the thing that DID reopen the question is ADR-0014's own numeric trigger firing, recorded in ADR-0032.
 
 --------------------
 

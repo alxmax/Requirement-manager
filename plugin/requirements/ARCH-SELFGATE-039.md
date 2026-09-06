@@ -24,6 +24,7 @@ test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-t
 
 Every bullet below is binding.
 - Five repo-root files — `ci.yml`, `check/action.yml`, both dev git hooks, and `sync_reqmap.sh` — each wire the gate into a real entry point (CI, a consumer's Action, a local commit/push, the cache-sync script), and each carries a member tag pointing back at this requirement. [[REQ-SELFGATE-916]]
+- The repo's own documentation is checked against the code it describes, because a drift detector whose own front page has drifted is an argument against itself. [[REQ-SELFGATE-990]]
 
 ## Cases
 CASE-1  <!-- verifiable by: inspection -->
@@ -68,6 +69,16 @@ CASE-8
   When   `scripts/check_versions.py` runs in the `gate-and-tests` job
   Then   it exits 1 and says the alias must track the plugin's major, so `v4.0.0` cannot
          ship advertised as `@v3`
+
+CASE-9
+  Given  a README stating an engine line count the file no longer has
+  When   the suite runs in the source repo
+  Then   it fails and names both numbers
+
+CASE-10
+  Given  an ADR file with no row in the ADR index
+  When   the suite runs in the source repo
+  Then   it fails and names the file
 
 ## Context
 **Notes**
@@ -165,3 +176,47 @@ CASE-6 — sync_reqmap.sh propagates the engine to the local cache and named con
 - `lint_exempt: file-spread` — the five files ARE this requirement. Spanning CI, the
   composite action, both dev hooks and the sync script is the capability, not a sign it is
   diffuse; a version of it that touched one file would assert nothing.
+
+
+---
+id: REQ-SELFGATE-990
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-SELFGATE-039]
+---
+
+# The repo's own documentation is checked, not trusted
+
+## Description
+> This tool exists because a claim about code decays the moment the code moves. Its own front
+> page asserted an engine line count that was wrong by 843 lines, and an ADR index that named
+> a decision count fixed eight records earlier; one ADR sat on disk for nine days in no index
+> at all. Nothing noticed, because nothing read them. A drift detector whose own documents
+> drift is an argument against itself.
+
+Every bullet below is binding.
+- The engine line count stated in `README.md` is asserted against the file, and a stale number
+  fails the suite.
+- Every ADR file on disk has a row in the ADR index, and one that does not fails the suite.
+- The ADR index states no decision count, because a hand-maintained total is one more claim to
+  keep true; the index itself is the count.
+- These checks are skipped, not failed, when the suite runs from a seeded copy that has no
+  repo root to read.
+
+## Cases
+CASE-1 — a stale line count fails
+  Given  a README whose stated engine line count differs from the file
+  When   the suite runs in the source repo
+  Then   it fails and names both numbers
+
+CASE-2 — an unindexed ADR fails
+  Given  an ADR file with no row in the index
+  When   the suite runs in the source repo
+  Then   it fails and names the file
+
+CASE-3 — the index carries no count to maintain
+  Given  the ADR index
+  When   its prose above the table is read
+  Then   it states no number of decisions
