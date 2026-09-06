@@ -1,5 +1,34 @@
 # Changelog
 
+## plugin `v5.19.1` — 2026-09-06
+
+**The regression suite is five files.** `test_reqmap.py` had reached 12,132 lines and 177
+classes: finding the class that covered a behaviour meant grepping, and adding one meant
+appending to the bottom whatever the subject — which is how a `v_tag` helper came to be
+defined twice, 4,000 lines apart, with the second silently shadowing the first.
+
+ADR-0014 is about the ENGINE. It argues for one file on the grounds of hermetic
+deployment — a consumer vendors `reqmap.py` and nothing else — and that argument says
+nothing about a test suite no consumer ever receives.
+
+`test_reqmap.py` is now the entry point and re-exports four parts:
+
+| part | lines | subject |
+|---|---|---|
+| `test_reqmap_common` | 87 | fixtures the parts share (runtime-built tag strings) |
+| `test_reqmap_scan` | 1,621 | reading the tree: parser, scanning, masking, walk, git |
+| `test_reqmap_gate` | 2,824 | the verdict: gate rules, drift, `--since`, test links |
+| `test_reqmap_author` | 2,958 | writing requirements: new, init, lint, clarify, retire |
+| `test_reqmap_report` | 4,740 | what it prints: map, viewer, site, health, audit, design |
+
+Every documented invocation is unchanged — `python scripts/test_reqmap.py`, `python -m
+unittest test_reqmap`, `python -m unittest test_reqmap.Gate.test_name` — and CI needs no
+edit. A part also runs on its own (`python -m unittest test_reqmap_gate`).
+
+No test was rewritten: the split moves source text verbatim and the same 1,056 tests run
+with the same result. No engine change, so `MAP_ENGINE_VERSION` does not move; the semver
+does, because the shipped plugin's file list did.
+
 ## plugin `v5.19.0` — 2026-09-06
 
 **One section reader instead of nine** (`ARCH-SECTIONS-068`). A requirement body is read

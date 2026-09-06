@@ -86,19 +86,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4047"
+          "loc": "plugin/scripts/test_reqmap_gate.py:689"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4145"
+          "loc": "plugin/scripts/test_reqmap_gate.py:787"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4186"
+          "loc": "plugin/scripts/test_reqmap_scan.py:544"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6395"
+          "loc": "plugin/scripts/test_reqmap_scan.py:890"
         }
       ],
       "test_exempt": null,
@@ -157,7 +157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4047"
+          "loc": "plugin/scripts/test_reqmap_gate.py:689"
         }
       ],
       "test_exempt": null,
@@ -218,7 +218,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4047"
+          "loc": "plugin/scripts/test_reqmap_gate.py:689"
         }
       ],
       "test_exempt": null,
@@ -276,7 +276,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4186"
+          "loc": "plugin/scripts/test_reqmap_gate.py:787"
         }
       ],
       "test_exempt": null,
@@ -376,7 +376,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7553"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1020"
         }
       ],
       "test_exempt": null,
@@ -460,11 +460,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7158"
+          "loc": "plugin/scripts/test_reqmap_author.py:1465"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9601"
+          "loc": "plugin/scripts/test_reqmap_author.py:1929"
         }
       ],
       "test_exempt": null,
@@ -532,11 +532,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7158"
+          "loc": "plugin/scripts/test_reqmap_author.py:1465"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9601"
+          "loc": "plugin/scripts/test_reqmap_author.py:1929"
         }
       ],
       "test_exempt": null,
@@ -604,11 +604,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7158"
+          "loc": "plugin/scripts/test_reqmap_author.py:1465"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9601"
+          "loc": "plugin/scripts/test_reqmap_author.py:1929"
         }
       ],
       "test_exempt": null,
@@ -711,11 +711,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8256"
+          "loc": "plugin/scripts/test_reqmap_report.py:2800"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11946"
+          "loc": "plugin/scripts/test_reqmap_report.py:4709"
         }
       ],
       "test_exempt": null,
@@ -780,11 +780,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8256"
+          "loc": "plugin/scripts/test_reqmap_report.py:2800"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11946"
+          "loc": "plugin/scripts/test_reqmap_report.py:4709"
         }
       ],
       "test_exempt": null,
@@ -843,7 +843,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8256"
+          "loc": "plugin/scripts/test_reqmap_report.py:2800"
         }
       ],
       "test_exempt": null,
@@ -892,7 +892,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8256"
+          "loc": "plugin/scripts/test_reqmap_report.py:2800"
         }
       ],
       "test_exempt": null,
@@ -955,7 +955,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8256"
+          "loc": "plugin/scripts/test_reqmap_report.py:2800"
         }
       ],
       "test_exempt": null,
@@ -1052,35 +1052,35 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1210"
+          "loc": "plugin/scripts/test_reqmap_author.py:166"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1529"
+          "loc": "plugin/scripts/test_reqmap_author.py:228"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1862"
+          "loc": "plugin/scripts/test_reqmap_author.py:250"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1884"
+          "loc": "plugin/scripts/test_reqmap_author.py:306"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1971"
+          "loc": "plugin/scripts/test_reqmap_author.py:1403"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2834"
+          "loc": "plugin/scripts/test_reqmap_author.py:2112"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7050"
+          "loc": "plugin/scripts/test_reqmap_scan.py:466"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10036"
+          "loc": "plugin/scripts/test_reqmap_scan.py:507"
         }
       ],
       "test_exempt": null,
@@ -1159,15 +1159,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1210"
+          "loc": "plugin/scripts/test_reqmap_author.py:166"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2834"
+          "loc": "plugin/scripts/test_reqmap_author.py:1403"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7050"
+          "loc": "plugin/scripts/test_reqmap_scan.py:507"
         }
       ],
       "test_exempt": null,
@@ -1248,19 +1248,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1210"
+          "loc": "plugin/scripts/test_reqmap_author.py:166"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1884"
+          "loc": "plugin/scripts/test_reqmap_author.py:250"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7050"
+          "loc": "plugin/scripts/test_reqmap_author.py:1403"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10036"
+          "loc": "plugin/scripts/test_reqmap_author.py:2112"
         }
       ],
       "test_exempt": null,
@@ -1409,79 +1409,79 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:148"
+          "loc": "plugin/scripts/test_reqmap_gate.py:42"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:212"
+          "loc": "plugin/scripts/test_reqmap_gate.py:106"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:219"
+          "loc": "plugin/scripts/test_reqmap_gate.py:113"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:236"
+          "loc": "plugin/scripts/test_reqmap_gate.py:130"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:249"
+          "loc": "plugin/scripts/test_reqmap_gate.py:143"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:262"
+          "loc": "plugin/scripts/test_reqmap_gate.py:156"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1543"
+          "loc": "plugin/scripts/test_reqmap_gate.py:492"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1587"
+          "loc": "plugin/scripts/test_reqmap_gate.py:536"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2042"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1124"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4523"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1191"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4590"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1327"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4758"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1929"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6081"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2004"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6156"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2068"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6411"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2091"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6434"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2132"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6593"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9993"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2798"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11917"
+          "loc": "plugin/scripts/test_reqmap_report.py:589"
         }
       ],
       "test_exempt": null,
@@ -1557,7 +1557,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1587"
+          "loc": "plugin/scripts/test_reqmap_gate.py:536"
         }
       ],
       "test_exempt": null,
@@ -1631,11 +1631,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1587"
+          "loc": "plugin/scripts/test_reqmap_gate.py:536"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9993"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
         }
       ],
       "test_exempt": null,
@@ -1701,7 +1701,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1587"
+          "loc": "plugin/scripts/test_reqmap_gate.py:536"
         }
       ],
       "test_exempt": null,
@@ -1778,11 +1778,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4523"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1124"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11917"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2798"
         }
       ],
       "test_exempt": null,
@@ -1831,11 +1831,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1365"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2582"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9993"
+          "loc": "plugin/scripts/test_reqmap_report.py:235"
         }
       ],
       "test_exempt": null,
@@ -1892,7 +1892,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1587"
+          "loc": "plugin/scripts/test_reqmap_gate.py:536"
         }
       ],
       "test_exempt": null,
@@ -1962,15 +1962,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10526"
+          "loc": "plugin/scripts/test_reqmap_author.py:2202"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11601"
+          "loc": "plugin/scripts/test_reqmap_author.py:2830"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11685"
+          "loc": "plugin/scripts/test_reqmap_author.py:2895"
         }
       ],
       "test_exempt": null,
@@ -2034,11 +2034,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10526"
+          "loc": "plugin/scripts/test_reqmap_author.py:2202"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11685"
+          "loc": "plugin/scripts/test_reqmap_author.py:2895"
         }
       ],
       "test_exempt": null,
@@ -2089,7 +2089,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10526"
+          "loc": "plugin/scripts/test_reqmap_author.py:2202"
         }
       ],
       "test_exempt": null,
@@ -2157,7 +2157,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11601"
+          "loc": "plugin/scripts/test_reqmap_author.py:2830"
         }
       ],
       "test_exempt": null,
@@ -2243,15 +2243,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6220"
+          "loc": "plugin/scripts/test_reqmap_report.py:1970"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9274"
+          "loc": "plugin/scripts/test_reqmap_report.py:3642"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11351"
+          "loc": "plugin/scripts/test_reqmap_report.py:4491"
         }
       ],
       "test_exempt": null,
@@ -2335,11 +2335,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6220"
+          "loc": "plugin/scripts/test_reqmap_report.py:1970"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9274"
+          "loc": "plugin/scripts/test_reqmap_report.py:3642"
         }
       ],
       "test_exempt": null,
@@ -2389,7 +2389,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11351"
+          "loc": "plugin/scripts/test_reqmap_report.py:4491"
         }
       ],
       "test_exempt": null,
@@ -2460,7 +2460,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         }
       ],
       "test_exempt": null,
@@ -2523,7 +2523,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         }
       ],
       "test_exempt": null,
@@ -2592,11 +2592,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1703"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9255"
+          "loc": "plugin/scripts/test_reqmap_report.py:3623"
         }
       ],
       "test_exempt": null,
@@ -2656,11 +2656,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1703"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9255"
+          "loc": "plugin/scripts/test_reqmap_report.py:3623"
         }
       ],
       "test_exempt": null,
@@ -2736,7 +2736,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3755"
+          "loc": "plugin/scripts/test_reqmap_report.py:1444"
         }
       ],
       "test_exempt": null,
@@ -2806,15 +2806,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3756"
+          "loc": "plugin/scripts/test_reqmap_report.py:1445"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3772"
+          "loc": "plugin/scripts/test_reqmap_report.py:1461"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10176"
+          "loc": "plugin/scripts/test_reqmap_report.py:4155"
         }
       ],
       "test_exempt": null,
@@ -2914,31 +2914,31 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7236"
+          "loc": "plugin/scripts/test_reqmap_author.py:1543"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7322"
+          "loc": "plugin/scripts/test_reqmap_author.py:1629"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7416"
+          "loc": "plugin/scripts/test_reqmap_author.py:1723"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7996"
+          "loc": "plugin/scripts/test_reqmap_author.py:1817"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9710"
+          "loc": "plugin/scripts/test_reqmap_author.py:1969"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11149"
+          "loc": "plugin/scripts/test_reqmap_author.py:2634"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -2987,11 +2987,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7236"
+          "loc": "plugin/scripts/test_reqmap_author.py:1543"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9710"
+          "loc": "plugin/scripts/test_reqmap_author.py:1969"
         }
       ],
       "test_exempt": null,
@@ -3052,7 +3052,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7236"
+          "loc": "plugin/scripts/test_reqmap_author.py:1543"
         }
       ],
       "test_exempt": null,
@@ -3116,15 +3116,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7236"
+          "loc": "plugin/scripts/test_reqmap_author.py:1543"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7322"
+          "loc": "plugin/scripts/test_reqmap_author.py:1629"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11149"
+          "loc": "plugin/scripts/test_reqmap_author.py:2634"
         }
       ],
       "test_exempt": null,
@@ -3198,7 +3198,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7855"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1199"
         }
       ],
       "test_exempt": null,
@@ -3307,15 +3307,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11209"
+          "loc": "plugin/scripts/test_reqmap_report.py:4349"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -3376,7 +3376,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3449,7 +3449,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3510,7 +3510,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3566,7 +3566,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3637,7 +3637,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3701,7 +3701,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3764,7 +3764,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3830,7 +3830,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3887,7 +3887,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3942,7 +3942,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8563"
+          "loc": "plugin/scripts/test_reqmap_report.py:2959"
         }
       ],
       "test_exempt": null,
@@ -3995,7 +3995,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11209"
+          "loc": "plugin/scripts/test_reqmap_report.py:4349"
         }
       ],
       "test_exempt": null,
@@ -4063,7 +4063,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:590"
+          "loc": "plugin/scripts/test_reqmap_gate.py:239"
         }
       ],
       "test_exempt": null,
@@ -4125,7 +4125,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:590"
+          "loc": "plugin/scripts/test_reqmap_gate.py:239"
         }
       ],
       "test_exempt": null,
@@ -4228,31 +4228,31 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:158"
+          "loc": "plugin/scripts/test_reqmap_gate.py:52"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:183"
+          "loc": "plugin/scripts/test_reqmap_gate.py:77"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:200"
+          "loc": "plugin/scripts/test_reqmap_gate.py:94"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6411"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2068"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9146"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2463"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10958"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2654"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11666"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1401"
         }
       ],
       "test_exempt": null,
@@ -4303,19 +4303,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:136"
+          "loc": "plugin/scripts/test_reqmap_gate.py:30"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6411"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2068"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9146"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2463"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11666"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1401"
         }
       ],
       "test_exempt": null,
@@ -4382,11 +4382,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:136"
+          "loc": "plugin/scripts/test_reqmap_gate.py:30"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9146"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2463"
         }
       ],
       "test_exempt": null,
@@ -4460,7 +4460,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10958"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2654"
         }
       ],
       "test_exempt": null,
@@ -4521,11 +4521,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:805"
+          "loc": "plugin/scripts/test_reqmap_gate.py:454"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10054"
+          "loc": "plugin/scripts/test_reqmap_report.py:4081"
         }
       ],
       "test_exempt": null,
@@ -4585,11 +4585,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:805"
+          "loc": "plugin/scripts/test_reqmap_gate.py:454"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10054"
+          "loc": "plugin/scripts/test_reqmap_report.py:4081"
         }
       ],
       "test_exempt": null,
@@ -5268,19 +5268,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1059"
+          "loc": "plugin/scripts/test_reqmap_author.py:30"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1074"
+          "loc": "plugin/scripts/test_reqmap_author.py:1443"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7090"
+          "loc": "plugin/scripts/test_reqmap_author.py:1981"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9862"
+          "loc": "plugin/scripts/test_reqmap_scan.py:451"
         }
       ],
       "test_exempt": null,
@@ -5333,11 +5333,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1074"
+          "loc": "plugin/scripts/test_reqmap_author.py:30"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9862"
+          "loc": "plugin/scripts/test_reqmap_author.py:1981"
         }
       ],
       "test_exempt": null,
@@ -5402,11 +5402,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1074"
+          "loc": "plugin/scripts/test_reqmap_author.py:30"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9862"
+          "loc": "plugin/scripts/test_reqmap_author.py:1981"
         }
       ],
       "test_exempt": null,
@@ -5467,11 +5467,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7090"
+          "loc": "plugin/scripts/test_reqmap_author.py:1443"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9862"
+          "loc": "plugin/scripts/test_reqmap_author.py:1981"
         }
       ],
       "test_exempt": null,
@@ -5547,7 +5547,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8415"
+          "loc": "plugin/scripts/test_reqmap_author.py:1855"
         }
       ],
       "test_exempt": null,
@@ -5619,11 +5619,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7479"
+          "loc": "plugin/scripts/test_reqmap_author.py:1743"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1942"
         }
       ],
       "test_exempt": null,
@@ -5690,11 +5690,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7479"
+          "loc": "plugin/scripts/test_reqmap_author.py:1743"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9662"
+          "loc": "plugin/scripts/test_reqmap_author.py:1942"
         }
       ],
       "test_exempt": null,
@@ -5792,19 +5792,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1283"
+          "loc": "plugin/scripts/test_reqmap_report.py:153"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1940"
+          "loc": "plugin/scripts/test_reqmap_report.py:558"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6775"
+          "loc": "plugin/scripts/test_reqmap_report.py:2389"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9306"
+          "loc": "plugin/scripts/test_reqmap_report.py:3674"
         }
       ],
       "test_exempt": null,
@@ -5865,11 +5865,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1283"
+          "loc": "plugin/scripts/test_reqmap_report.py:153"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9306"
+          "loc": "plugin/scripts/test_reqmap_report.py:3674"
         }
       ],
       "test_exempt": null,
@@ -5932,7 +5932,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1283"
+          "loc": "plugin/scripts/test_reqmap_report.py:153"
         }
       ],
       "test_exempt": null,
@@ -5991,7 +5991,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1283"
+          "loc": "plugin/scripts/test_reqmap_report.py:153"
         }
       ],
       "test_exempt": null,
@@ -6057,7 +6057,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6775"
+          "loc": "plugin/scripts/test_reqmap_report.py:2389"
         }
       ],
       "test_exempt": null,
@@ -6122,7 +6122,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11980"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1482"
         }
       ],
       "test_exempt": null,
@@ -6182,7 +6182,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11980"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1482"
         }
       ],
       "test_exempt": null,
@@ -6269,19 +6269,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3906"
+          "loc": "plugin/scripts/test_reqmap_report.py:1595"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9474"
+          "loc": "plugin/scripts/test_reqmap_report.py:3819"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -6336,11 +6336,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9474"
+          "loc": "plugin/scripts/test_reqmap_report.py:3819"
         }
       ],
       "test_exempt": null,
@@ -6401,11 +6401,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9474"
+          "loc": "plugin/scripts/test_reqmap_report.py:3819"
         }
       ],
       "test_exempt": null,
@@ -6465,11 +6465,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9474"
+          "loc": "plugin/scripts/test_reqmap_report.py:3819"
         }
       ],
       "test_exempt": null,
@@ -6534,7 +6534,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         }
       ],
       "test_exempt": null,
@@ -6607,7 +6607,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2332"
         }
       ],
       "test_exempt": null,
@@ -6667,7 +6667,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2332"
         }
       ],
       "test_exempt": null,
@@ -6724,7 +6724,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2332"
         }
       ],
       "test_exempt": null,
@@ -6807,19 +6807,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2570"
+          "loc": "plugin/scripts/test_reqmap_author.py:432"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2727"
+          "loc": "plugin/scripts/test_reqmap_author.py:589"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6529"
+          "loc": "plugin/scripts/test_reqmap_report.py:2165"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -6872,11 +6872,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2570"
+          "loc": "plugin/scripts/test_reqmap_author.py:432"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10429"
+          "loc": "plugin/scripts/test_reqmap_author.py:2168"
         }
       ],
       "test_exempt": null,
@@ -6937,11 +6937,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2570"
+          "loc": "plugin/scripts/test_reqmap_author.py:432"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10429"
+          "loc": "plugin/scripts/test_reqmap_author.py:2168"
         }
       ],
       "test_exempt": null,
@@ -7020,11 +7020,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7436"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2194"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9722"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2560"
         }
       ],
       "test_exempt": null,
@@ -7089,11 +7089,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7436"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2194"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9722"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2560"
         }
       ],
       "test_exempt": null,
@@ -7182,7 +7182,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3239"
+          "loc": "plugin/scripts/test_reqmap_author.py:1053"
         }
       ],
       "test_exempt": null,
@@ -7233,7 +7233,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3239"
+          "loc": "plugin/scripts/test_reqmap_author.py:1053"
         }
       ],
       "test_exempt": null,
@@ -7287,7 +7287,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3239"
+          "loc": "plugin/scripts/test_reqmap_author.py:1053"
         }
       ],
       "test_exempt": null,
@@ -7337,7 +7337,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3239"
+          "loc": "plugin/scripts/test_reqmap_author.py:1053"
         }
       ],
       "test_exempt": null,
@@ -7418,7 +7418,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         }
       ],
       "test_exempt": null,
@@ -7509,11 +7509,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10138"
+          "loc": "plugin/scripts/test_reqmap_author.py:2130"
         }
       ],
       "test_exempt": null,
@@ -7581,11 +7581,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10138"
+          "loc": "plugin/scripts/test_reqmap_author.py:2130"
         }
       ],
       "test_exempt": null,
@@ -7709,15 +7709,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2855"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:1198"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4628"
+          "loc": "plugin/scripts/test_reqmap_scan.py:528"
         }
       ],
       "test_exempt": null,
@@ -7782,7 +7782,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         }
       ],
       "test_exempt": null,
@@ -7845,7 +7845,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         }
       ],
       "test_exempt": null,
@@ -7905,7 +7905,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4628"
+          "loc": "plugin/scripts/test_reqmap_author.py:1198"
         }
       ],
       "test_exempt": null,
@@ -7962,7 +7962,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         }
       ],
       "test_exempt": null,
@@ -8019,7 +8019,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2871"
+          "loc": "plugin/scripts/test_reqmap_author.py:685"
         }
       ],
       "test_exempt": null,
@@ -8186,55 +8186,55 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1388"
+          "loc": "plugin/scripts/test_reqmap_gate.py:936"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1450"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2154"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1703"
+          "loc": "plugin/scripts/test_reqmap_report.py:258"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2077"
+          "loc": "plugin/scripts/test_reqmap_report.py:320"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2265"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4145"
+          "loc": "plugin/scripts/test_reqmap_report.py:624"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4335"
+          "loc": "plugin/scripts/test_reqmap_report.py:812"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5614"
+          "loc": "plugin/scripts/test_reqmap_report.py:1667"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5972"
+          "loc": "plugin/scripts/test_reqmap_report.py:1911"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6529"
+          "loc": "plugin/scripts/test_reqmap_report.py:2165"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6956"
+          "loc": "plugin/scripts/test_reqmap_report.py:3603"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9235"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_scan.py:544"
         }
       ],
       "test_exempt": null,
@@ -8318,11 +8318,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1388"
+          "loc": "plugin/scripts/test_reqmap_report.py:258"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5972"
+          "loc": "plugin/scripts/test_reqmap_report.py:1911"
         }
       ],
       "test_exempt": null,
@@ -8391,19 +8391,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1450"
+          "loc": "plugin/scripts/test_reqmap_gate.py:936"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2265"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2154"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4335"
+          "loc": "plugin/scripts/test_reqmap_report.py:320"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6956"
+          "loc": "plugin/scripts/test_reqmap_report.py:812"
         }
       ],
       "test_exempt": null,
@@ -8464,7 +8464,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2077"
+          "loc": "plugin/scripts/test_reqmap_report.py:624"
         }
       ],
       "test_exempt": null,
@@ -8527,7 +8527,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1703"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         }
       ],
       "test_exempt": null,
@@ -8632,15 +8632,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10088"
+          "loc": "plugin/scripts/test_reqmap_report.py:4105"
         }
       ],
       "test_exempt": null,
@@ -8701,15 +8701,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10088"
+          "loc": "plugin/scripts/test_reqmap_report.py:4105"
         }
       ],
       "test_exempt": null,
@@ -8767,11 +8767,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         }
       ],
       "test_exempt": null,
@@ -8832,11 +8832,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         }
       ],
       "test_exempt": null,
@@ -8901,15 +8901,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         }
       ],
       "test_exempt": null,
@@ -8966,15 +8966,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:886"
+          "loc": "plugin/scripts/test_reqmap_report.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7686"
+          "loc": "plugin/scripts/test_reqmap_report.py:2530"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10088"
+          "loc": "plugin/scripts/test_reqmap_report.py:4105"
         }
       ],
       "test_exempt": null,
@@ -9083,7 +9083,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:645"
+          "loc": "plugin/scripts/test_reqmap_gate.py:294"
         }
       ],
       "test_exempt": null,
@@ -9146,7 +9146,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:645"
+          "loc": "plugin/scripts/test_reqmap_gate.py:294"
         }
       ],
       "test_exempt": null,
@@ -9207,7 +9207,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:645"
+          "loc": "plugin/scripts/test_reqmap_gate.py:294"
         }
       ],
       "test_exempt": null,
@@ -9276,7 +9276,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8489"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2389"
         }
       ],
       "test_exempt": null,
@@ -9351,7 +9351,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7766"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1110"
         }
       ],
       "test_exempt": null,
@@ -9432,15 +9432,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1143"
+          "loc": "plugin/scripts/test_reqmap_author.py:99"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6877"
+          "loc": "plugin/scripts/test_reqmap_author.py:1377"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11889"
+          "loc": "plugin/scripts/test_reqmap_author.py:2933"
         }
       ],
       "test_exempt": null,
@@ -9503,11 +9503,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1143"
+          "loc": "plugin/scripts/test_reqmap_author.py:99"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11889"
+          "loc": "plugin/scripts/test_reqmap_author.py:2933"
         }
       ],
       "test_exempt": null,
@@ -9558,11 +9558,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1143"
+          "loc": "plugin/scripts/test_reqmap_author.py:99"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6877"
+          "loc": "plugin/scripts/test_reqmap_author.py:1377"
         }
       ],
       "test_exempt": null,
@@ -9676,39 +9676,39 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_author.py:1629"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2532"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2541"
+          "loc": "plugin/scripts/test_reqmap_report.py:1024"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1033"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6475"
+          "loc": "plugin/scripts/test_reqmap_report.py:1039"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6837"
+          "loc": "plugin/scripts/test_reqmap_report.py:2111"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6942"
+          "loc": "plugin/scripts/test_reqmap_report.py:2451"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7322"
+          "loc": "plugin/scripts/test_reqmap_report.py:2491"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -9763,11 +9763,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -9837,11 +9837,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -9904,11 +9904,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -9972,15 +9972,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -10031,11 +10031,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2424"
+          "loc": "plugin/scripts/test_reqmap_report.py:916"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9000"
+          "loc": "plugin/scripts/test_reqmap_report.py:3396"
         }
       ],
       "test_exempt": null,
@@ -10112,11 +10112,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:745"
+          "loc": "plugin/scripts/test_reqmap_gate.py:394"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10078"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2608"
         }
       ],
       "test_exempt": null,
@@ -10181,11 +10181,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:745"
+          "loc": "plugin/scripts/test_reqmap_gate.py:394"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10078"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2608"
         }
       ],
       "test_exempt": null,
@@ -10264,11 +10264,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1508"
+          "loc": "plugin/scripts/test_reqmap_report.py:378"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2266"
+          "loc": "plugin/scripts/test_reqmap_report.py:813"
         }
       ],
       "test_exempt": null,
@@ -10323,7 +10323,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1508"
+          "loc": "plugin/scripts/test_reqmap_report.py:378"
         }
       ],
       "test_exempt": null,
@@ -10443,19 +10443,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:55"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1676"
+          "loc": "plugin/scripts/test_reqmap_scan.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6364"
+          "loc": "plugin/scripts/test_reqmap_scan.py:480"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_scan.py:859"
         }
       ],
       "test_exempt": null,
@@ -10512,11 +10512,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:55"
+          "loc": "plugin/scripts/test_reqmap_scan.py:31"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10459"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1392"
         }
       ],
       "test_exempt": null,
@@ -10579,7 +10579,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:55"
+          "loc": "plugin/scripts/test_reqmap_scan.py:31"
         }
       ],
       "test_exempt": null,
@@ -10640,7 +10640,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:55"
+          "loc": "plugin/scripts/test_reqmap_scan.py:31"
         }
       ],
       "test_exempt": null,
@@ -10710,7 +10710,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7137"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2173"
         }
       ],
       "test_exempt": null,
@@ -10758,7 +10758,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7137"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2173"
         }
       ],
       "test_exempt": null,
@@ -10825,27 +10825,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2369"
+          "loc": "plugin/scripts/test_reqmap_author.py:377"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4224"
+          "loc": "plugin/scripts/test_reqmap_author.py:2051"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5614"
+          "loc": "plugin/scripts/test_reqmap_author.py:2749"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6475"
+          "loc": "plugin/scripts/test_reqmap_gate.py:825"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9932"
+          "loc": "plugin/scripts/test_reqmap_report.py:1667"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11520"
+          "loc": "plugin/scripts/test_reqmap_report.py:2111"
         }
       ],
       "test_exempt": null,
@@ -10907,11 +10907,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:2369"
+          "loc": "plugin/scripts/test_reqmap_author.py:377"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9932"
+          "loc": "plugin/scripts/test_reqmap_author.py:2051"
         }
       ],
       "test_exempt": null,
@@ -10968,7 +10968,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11520"
+          "loc": "plugin/scripts/test_reqmap_author.py:2749"
         }
       ],
       "test_exempt": null,
@@ -11041,15 +11041,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4784"
+          "loc": "plugin/scripts/test_reqmap_author.py:1230"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6475"
+          "loc": "plugin/scripts/test_reqmap_author.py:2061"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9942"
+          "loc": "plugin/scripts/test_reqmap_report.py:2111"
         }
       ],
       "test_exempt": null,
@@ -11109,11 +11109,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4784"
+          "loc": "plugin/scripts/test_reqmap_author.py:1230"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9942"
+          "loc": "plugin/scripts/test_reqmap_author.py:2061"
         }
       ],
       "test_exempt": null,
@@ -11174,11 +11174,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4784"
+          "loc": "plugin/scripts/test_reqmap_author.py:1230"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9942"
+          "loc": "plugin/scripts/test_reqmap_author.py:2061"
         }
       ],
       "test_exempt": null,
@@ -11239,11 +11239,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4784"
+          "loc": "plugin/scripts/test_reqmap_author.py:1230"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9942"
+          "loc": "plugin/scripts/test_reqmap_author.py:2061"
         }
       ],
       "test_exempt": null,
@@ -11322,27 +11322,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:843"
+          "loc": "plugin/scripts/test_reqmap_scan.py:357"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:861"
+          "loc": "plugin/scripts/test_reqmap_scan.py:375"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1008"
+          "loc": "plugin/scripts/test_reqmap_scan.py:400"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1059"
+          "loc": "plugin/scripts/test_reqmap_scan.py:451"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7035"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1005"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9321"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1263"
         }
       ],
       "test_exempt": null,
@@ -11400,11 +11400,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:843"
+          "loc": "plugin/scripts/test_reqmap_scan.py:357"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1008"
+          "loc": "plugin/scripts/test_reqmap_scan.py:400"
         }
       ],
       "test_exempt": null,
@@ -11463,15 +11463,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:861"
+          "loc": "plugin/scripts/test_reqmap_scan.py:375"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1008"
+          "loc": "plugin/scripts/test_reqmap_scan.py:400"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9321"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1263"
         }
       ],
       "test_exempt": null,
@@ -11540,11 +11540,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6031"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1879"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9736"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2574"
         }
       ],
       "test_exempt": null,
@@ -11615,11 +11615,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6031"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1879"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9736"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2574"
         }
       ],
       "test_exempt": null,
@@ -11690,7 +11690,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7919"
+          "loc": "plugin/scripts/test_reqmap_report.py:2610"
         }
       ],
       "test_exempt": null,
@@ -11764,7 +11764,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3779"
+          "loc": "plugin/scripts/test_reqmap_report.py:1468"
         }
       ],
       "test_exempt": null,
@@ -11819,11 +11819,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3791"
+          "loc": "plugin/scripts/test_reqmap_report.py:1480"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10250"
+          "loc": "plugin/scripts/test_reqmap_report.py:4229"
         }
       ],
       "test_exempt": null,
@@ -11886,11 +11886,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3791"
+          "loc": "plugin/scripts/test_reqmap_report.py:1480"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10250"
+          "loc": "plugin/scripts/test_reqmap_report.py:4229"
         }
       ],
       "test_exempt": null,
@@ -12104,15 +12104,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7996"
+          "loc": "plugin/scripts/test_reqmap_author.py:1817"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10750"
+          "loc": "plugin/scripts/test_reqmap_author.py:2426"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -12169,7 +12169,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10750"
+          "loc": "plugin/scripts/test_reqmap_author.py:2426"
         }
       ],
       "test_exempt": null,
@@ -12242,7 +12242,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10750"
+          "loc": "plugin/scripts/test_reqmap_author.py:2426"
         }
       ],
       "test_exempt": null,
@@ -12302,7 +12302,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10750"
+          "loc": "plugin/scripts/test_reqmap_author.py:2426"
         }
       ],
       "test_exempt": null,
@@ -12368,7 +12368,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10750"
+          "loc": "plugin/scripts/test_reqmap_author.py:2426"
         }
       ],
       "test_exempt": null,
@@ -12430,7 +12430,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4870"
+          "loc": "plugin/scripts/test_reqmap_author.py:1316"
         },
         {
           "role": "implements",
@@ -12502,7 +12502,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4870"
+          "loc": "plugin/scripts/test_reqmap_author.py:1316"
         },
         {
           "role": "implements",
@@ -12585,7 +12585,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3627"
+          "loc": "plugin/scripts/test_reqmap_report.py:1316"
         }
       ],
       "test_exempt": null,
@@ -12671,11 +12671,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6615"
+          "loc": "plugin/scripts/test_reqmap_report.py:2229"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10019"
+          "loc": "plugin/scripts/test_reqmap_report.py:4064"
         }
       ],
       "test_exempt": null,
@@ -12741,11 +12741,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6615"
+          "loc": "plugin/scripts/test_reqmap_report.py:2229"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10019"
+          "loc": "plugin/scripts/test_reqmap_report.py:4064"
         }
       ],
       "test_exempt": null,
@@ -12799,7 +12799,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6615"
+          "loc": "plugin/scripts/test_reqmap_report.py:2229"
         }
       ],
       "test_exempt": null,
@@ -12889,11 +12889,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8039"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2285"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11039"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2735"
         }
       ],
       "test_exempt": null,
@@ -12967,7 +12967,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8039"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2285"
         }
       ],
       "test_exempt": null,
@@ -13035,7 +13035,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8039"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2285"
         }
       ],
       "test_exempt": null,
@@ -13096,7 +13096,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11039"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2735"
         }
       ],
       "test_exempt": null,
@@ -13221,27 +13221,27 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:345"
+          "loc": "plugin/scripts/test_reqmap_scan.py:112"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:551"
+          "loc": "plugin/scripts/test_reqmap_scan.py:318"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5861"
+          "loc": "plugin/scripts/test_reqmap_scan.py:745"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6903"
+          "loc": "plugin/scripts/test_reqmap_scan.py:906"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7028"
+          "loc": "plugin/scripts/test_reqmap_scan.py:998"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11827"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1420"
         }
       ],
       "test_exempt": null,
@@ -13314,7 +13314,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:345"
+          "loc": "plugin/scripts/test_reqmap_scan.py:112"
         }
       ],
       "test_exempt": null,
@@ -13388,11 +13388,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:345"
+          "loc": "plugin/scripts/test_reqmap_scan.py:112"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5861"
+          "loc": "plugin/scripts/test_reqmap_scan.py:745"
         }
       ],
       "test_exempt": null,
@@ -13449,7 +13449,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11827"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1420"
         }
       ],
       "test_exempt": null,
@@ -13521,7 +13521,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4931"
+          "loc": "plugin/scripts/test_reqmap_scan.py:585"
         }
       ],
       "test_exempt": null,
@@ -13593,11 +13593,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4931"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_scan.py:585"
         }
       ],
       "test_exempt": null,
@@ -13690,15 +13690,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1236"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3689"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11386"
+          "loc": "plugin/scripts/test_reqmap_report.py:4526"
         }
       ],
       "test_exempt": null,
@@ -13767,11 +13767,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1236"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3689"
         }
       ],
       "test_exempt": null,
@@ -13832,11 +13832,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1236"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3689"
         }
       ],
       "test_exempt": null,
@@ -13895,11 +13895,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1236"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3689"
         }
       ],
       "test_exempt": null,
@@ -13956,11 +13956,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3547"
+          "loc": "plugin/scripts/test_reqmap_report.py:1236"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9344"
+          "loc": "plugin/scripts/test_reqmap_report.py:3689"
         }
       ],
       "test_exempt": null,
@@ -14038,7 +14038,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11386"
+          "loc": "plugin/scripts/test_reqmap_report.py:4526"
         }
       ],
       "test_exempt": null,
@@ -14103,7 +14103,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:12039"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1541"
         }
       ],
       "test_exempt": null,
@@ -14164,7 +14164,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:12039"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1541"
         }
       ],
       "test_exempt": null,
@@ -14254,7 +14254,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11113"
+          "loc": "plugin/scripts/test_reqmap_report.py:4313"
         },
         {
           "role": "implements",
@@ -14399,11 +14399,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap.py:11113"
+          "loc": "plugin/scripts/test_reqmap_report.py:4313"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11113"
+          "loc": "plugin/scripts/test_reqmap_report.py:4313"
         }
       ],
       "test_exempt": null,
@@ -14472,11 +14472,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3384"
+          "loc": "plugin/scripts/test_reqmap_report.py:1073"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9174"
+          "loc": "plugin/scripts/test_reqmap_report.py:3542"
         }
       ],
       "test_exempt": null,
@@ -14543,11 +14543,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3384"
+          "loc": "plugin/scripts/test_reqmap_report.py:1073"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9174"
+          "loc": "plugin/scripts/test_reqmap_report.py:3542"
         }
       ],
       "test_exempt": null,
@@ -14604,7 +14604,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3384"
+          "loc": "plugin/scripts/test_reqmap_report.py:1073"
         }
       ],
       "test_exempt": null,
@@ -14661,11 +14661,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3384"
+          "loc": "plugin/scripts/test_reqmap_report.py:1073"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9174"
+          "loc": "plugin/scripts/test_reqmap_report.py:3542"
         }
       ],
       "test_exempt": null,
@@ -14773,15 +14773,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1155"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7112"
+          "loc": "plugin/scripts/test_reqmap_report.py:2505"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9744"
+          "loc": "plugin/scripts/test_reqmap_report.py:3946"
         }
       ],
       "test_exempt": null,
@@ -14835,11 +14835,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1155"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9744"
+          "loc": "plugin/scripts/test_reqmap_report.py:3946"
         }
       ],
       "test_exempt": null,
@@ -14912,19 +14912,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1155"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7112"
+          "loc": "plugin/scripts/test_reqmap_report.py:2505"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:8143"
+          "loc": "plugin/scripts/test_reqmap_report.py:2687"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9744"
+          "loc": "plugin/scripts/test_reqmap_report.py:3946"
         }
       ],
       "test_exempt": null,
@@ -14985,11 +14985,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1155"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9744"
+          "loc": "plugin/scripts/test_reqmap_report.py:3946"
         }
       ],
       "test_exempt": null,
@@ -15052,11 +15052,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3466"
+          "loc": "plugin/scripts/test_reqmap_report.py:1155"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9744"
+          "loc": "plugin/scripts/test_reqmap_report.py:3946"
         }
       ],
       "test_exempt": null,
@@ -15193,7 +15193,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5653"
+          "loc": "plugin/scripts/test_reqmap_report.py:1706"
         }
       ],
       "test_exempt": null,
@@ -15266,7 +15266,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5653"
+          "loc": "plugin/scripts/test_reqmap_report.py:1706"
         }
       ],
       "test_exempt": null,
@@ -15579,15 +15579,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4378"
+          "loc": "plugin/scripts/test_reqmap_gate.py:979"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9614"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2491"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11723"
+          "loc": "plugin/scripts/test_reqmap_report.py:4605"
         }
       ],
       "test_exempt": null,
@@ -15650,11 +15650,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4378"
+          "loc": "plugin/scripts/test_reqmap_gate.py:979"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9614"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2491"
         }
       ],
       "test_exempt": null,
@@ -15717,7 +15717,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4378"
+          "loc": "plugin/scripts/test_reqmap_gate.py:979"
         }
       ],
       "test_exempt": null,
@@ -15778,11 +15778,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4378"
+          "loc": "plugin/scripts/test_reqmap_gate.py:979"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9614"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2491"
         }
       ],
       "test_exempt": null,
@@ -15869,19 +15869,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3978"
+          "loc": "plugin/scripts/test_reqmap_gate.py:625"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4266"
+          "loc": "plugin/scripts/test_reqmap_gate.py:867"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4301"
+          "loc": "plugin/scripts/test_reqmap_gate.py:902"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9689"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         }
       ],
       "test_exempt": null,
@@ -15936,11 +15936,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3978"
+          "loc": "plugin/scripts/test_reqmap_gate.py:625"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4301"
+          "loc": "plugin/scripts/test_reqmap_gate.py:902"
         }
       ],
       "test_exempt": null,
@@ -16001,11 +16001,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3978"
+          "loc": "plugin/scripts/test_reqmap_gate.py:625"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9689"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         }
       ],
       "test_exempt": null,
@@ -16068,11 +16068,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3978"
+          "loc": "plugin/scripts/test_reqmap_gate.py:625"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4266"
+          "loc": "plugin/scripts/test_reqmap_gate.py:867"
         }
       ],
       "test_exempt": null,
@@ -16132,11 +16132,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4301"
+          "loc": "plugin/scripts/test_reqmap_gate.py:902"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9689"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2539"
         }
       ],
       "test_exempt": null,
@@ -16241,11 +16241,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4224"
+          "loc": "plugin/scripts/test_reqmap_gate.py:825"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4660"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1229"
         }
       ],
       "test_exempt": null,
@@ -16306,7 +16306,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4660"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1229"
         }
       ],
       "test_exempt": null,
@@ -16382,11 +16382,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4224"
+          "loc": "plugin/scripts/test_reqmap_gate.py:825"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:4660"
+          "loc": "plugin/scripts/test_reqmap_gate.py:1229"
         }
       ],
       "test_exempt": null,
@@ -16452,7 +16452,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5919"
+          "loc": "plugin/scripts/test_reqmap_scan.py:803"
         }
       ],
       "test_exempt": null,
@@ -16510,11 +16510,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5919"
+          "loc": "plugin/scripts/test_reqmap_scan.py:803"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10385"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1348"
         }
       ],
       "test_exempt": null,
@@ -16619,11 +16619,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3150"
+          "loc": "plugin/scripts/test_reqmap_author.py:964"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11465"
+          "loc": "plugin/scripts/test_reqmap_author.py:2694"
         }
       ],
       "test_exempt": null,
@@ -16672,7 +16672,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3150"
+          "loc": "plugin/scripts/test_reqmap_author.py:964"
         }
       ],
       "test_exempt": null,
@@ -16749,7 +16749,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3150"
+          "loc": "plugin/scripts/test_reqmap_author.py:964"
         }
       ],
       "test_exempt": null,
@@ -16799,7 +16799,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:11465"
+          "loc": "plugin/scripts/test_reqmap_author.py:2694"
         }
       ],
       "test_exempt": null,
@@ -16872,7 +16872,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6975"
+          "loc": "plugin/scripts/test_reqmap_scan.py:945"
         }
       ],
       "test_exempt": null,
@@ -16936,11 +16936,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6975"
+          "loc": "plugin/scripts/test_reqmap_scan.py:945"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10323"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1286"
         }
       ],
       "test_exempt": null,
@@ -17151,19 +17151,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1481"
+          "loc": "plugin/scripts/test_reqmap_report.py:351"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5990"
+          "loc": "plugin/scripts/test_reqmap_report.py:1929"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:6674"
+          "loc": "plugin/scripts/test_reqmap_report.py:2288"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9542"
+          "loc": "plugin/scripts/test_reqmap_report.py:3887"
         }
       ],
       "test_exempt": null,
@@ -17221,11 +17221,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1481"
+          "loc": "plugin/scripts/test_reqmap_report.py:351"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9542"
+          "loc": "plugin/scripts/test_reqmap_report.py:3887"
         }
       ],
       "test_exempt": null,
@@ -17287,15 +17287,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:1481"
+          "loc": "plugin/scripts/test_reqmap_report.py:351"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:5972"
+          "loc": "plugin/scripts/test_reqmap_report.py:1911"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:9542"
+          "loc": "plugin/scripts/test_reqmap_report.py:3887"
         }
       ],
       "test_exempt": null,
@@ -17966,55 +17966,55 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:277"
+          "loc": "plugin/scripts/test_reqmap_gate.py:171"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:291"
+          "loc": "plugin/scripts/test_reqmap_gate.py:185"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:301"
+          "loc": "plugin/scripts/test_reqmap_gate.py:195"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:311"
+          "loc": "plugin/scripts/test_reqmap_gate.py:205"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:322"
+          "loc": "plugin/scripts/test_reqmap_gate.py:216"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:333"
+          "loc": "plugin/scripts/test_reqmap_gate.py:227"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:483"
+          "loc": "plugin/scripts/test_reqmap_report.py:1136"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:494"
+          "loc": "plugin/scripts/test_reqmap_report.py:1145"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:506"
+          "loc": "plugin/scripts/test_reqmap_scan.py:250"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:524"
+          "loc": "plugin/scripts/test_reqmap_scan.py:261"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:545"
+          "loc": "plugin/scripts/test_reqmap_scan.py:273"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3447"
+          "loc": "plugin/scripts/test_reqmap_scan.py:291"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:3456"
+          "loc": "plugin/scripts/test_reqmap_scan.py:312"
         },
         {
           "role": "tested-by",
@@ -18077,7 +18077,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:483"
+          "loc": "plugin/scripts/test_reqmap_scan.py:250"
         }
       ],
       "test_exempt": null,
@@ -18136,7 +18136,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:524"
+          "loc": "plugin/scripts/test_reqmap_scan.py:291"
         }
       ],
       "test_exempt": null,
@@ -18202,11 +18202,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:277"
+          "loc": "plugin/scripts/test_reqmap_gate.py:171"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:10468"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2618"
         }
       ],
       "test_exempt": null,
@@ -18269,7 +18269,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap.py:7643"
+          "loc": "plugin/scripts/test_reqmap_gate.py:2237"
         }
       ],
       "test_exempt": null,

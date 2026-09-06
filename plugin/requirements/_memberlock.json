@@ -229,7 +229,7 @@
       "plugin/scripts/reqmap.py#_text_matches": "dddae0f5fed0799b9704a5e7e633bbbb5706adbd358c1e0f4dbadd3da1953f95"
     },
     "REQ-SELFGATE-990": {
-      "plugin/scripts/test_reqmap.py#DocsAreTrue": "6d10af83efd0ce931a087bacf5484d276dce70ac519ad2097170abe283b98539"
+      "plugin/scripts/test_reqmap_report.py#DocsAreTrue": "6d10af83efd0ce931a087bacf5484d276dce70ac519ad2097170abe283b98539"
     },
     "REQ-SIMILAR-921": {
       "plugin/scripts/reqmap.py#_test_suite_pairs": "e88b32339204f303f89cab7a592f52c5adcd39a7ae015bc7b474327850fb65f8"
