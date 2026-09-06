@@ -181,6 +181,9 @@
     "REQ-DESIGN-980": {
       "plugin/scripts/reqmap.py#_design_lcom": "0b70c81c79c07f3b77b091e9fbfd5474a1fff65751504ebcb3071046c5856efb"
     },
+    "REQ-DESIGN-991": {
+      "plugin/scripts/reqmap.py#_strip_generated": "6a286f5ea7f0e7159d6a1bfe77557a4eff37a6cb5100a82dc24c26372f8faf8f"
+    },
     "REQ-DRIFT-988": {
       "plugin/scripts/reqmap.py#_driftlog_path": "2342c7d88fa2bd4f84b618770a92411413003e13f75e0dc3579087d42aee38df",
       "plugin/scripts/reqmap.py#load_driftlog": "228287ef550c436c60cd1da85ddc4cf5c0259b69e33e42106e0caa2c175b62a4",

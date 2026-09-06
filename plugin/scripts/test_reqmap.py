@@ -11210,6 +11210,148 @@ class RemedyCanAct(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # teste
         self.assertNotIn("nothing scaffolded", out)
 
 
+class AdvisoryDataCarriesNoVerdict(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-991
+    """Issue #243. `_map.json` is ONE freshness-gated artifact carrying three classes of
+    data with three severities: the graph is normative, `health` derived, `design`
+    advisory by its own contract (ARCH-DESIGN-061). The comparison was all-or-nothing,
+    so one blank line in a file no requirement claims moved a `line:` in
+    `design.findings`, made the committed map stale, and failed `gate` with zero
+    requirement errors."""
+
+    def _repo(self, d):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "A-M-001.md"), _spec("A-M-001", ["`gate` writes the lock."]))
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
+        reqs = R.load_requirements(rd)
+        data = R._build_map_data(reqs, R.scan_members(d, rd))
+        data["design"] = {"files": 2, "clean_files": 1, "score": 50,
+                          "candidates": {"encapsulation": 1},
+                          "findings": [{"pillar": "encapsulation", "kind": "long-function",
+                                        "file": "untagged.py", "line": 12, "name": "f",
+                                        "detail": "42 lines"}],
+                          "advice": {"long-function": "shorten it"}}
+        data["health"] = {"score": 90, "total": 1}
+        R.render_json(data, rd)
+        R.render_md(data, rd)
+        return rd, data
+
+    def _stale(self, rd, data, root):
+        return R._stale_artifacts(data, rd, root)
+
+    def test_baseline_is_fresh(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_moved_advisory_line_number_is_not_staleness(self):  # verifies: REQ-DESIGN-991#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["design"]["findings"][0]["line"] = 999
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_changed_design_score_is_not_staleness(self):  # verifies: REQ-DESIGN-991#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["design"]["score"] = 3
+            data["design"]["clean_files"] = 0
+            self.assertEqual([], self._stale(rd, data, d))
+
+    def test_a_changed_requirement_still_is(self):  # verifies: REQ-DESIGN-991#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["nodes"][0]["title"] = "something else entirely"
+            self.assertIn("_map.json", self._stale(rd, data, d))
+
+    def test_a_changed_health_number_still_is(self):  # verifies: REQ-DESIGN-991#CASE-4
+        # health is derived from the corpus, not from line numbers in files nothing
+        # claims, so it stays inside the verdict.
+        with tempfile.TemporaryDirectory() as d:
+            rd, data = self._repo(d)
+            data["health"]["score"] = 12
+            self.assertIn("_map.json", self._stale(rd, data, d))
+
+    def test_the_design_rows_stay_in_the_artifact(self):
+        # Excluding them from the COMPARISON must not delete them from the file: the
+        # viewer renders them in its Design tab (app/src/views/ProblemsView.jsx).
+        with tempfile.TemporaryDirectory() as d:
+            rd, _data = self._repo(d)
+            doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+        self.assertEqual(1, len(doc["design"]["findings"]))
+        self.assertEqual(12, doc["design"]["findings"][0]["line"])
+
+    def test_the_stripper_drops_the_block_and_keeps_what_follows(self):
+        # The block closes at the first line that is exactly two-space `}` or `},`;
+        # everything nested inside it is deeper, and `health` must survive.
+        text = "\n".join([
+            '{',
+            '  "nodes": [],',
+            '  "design": {',
+            '    "score": 50,',
+            '    "findings": [',
+            '      {',
+            '        "line": 12',
+            '      }',
+            '    ]',
+            '  },',
+            '  "health": {',
+            '    "score": 90',
+            '  }',
+            '}',
+        ])
+        out = R._strip_generated(text)
+        self.assertNotIn("findings", out)
+        self.assertNotIn('"score": 50', out)
+        self.assertIn('"health"', out)
+        self.assertIn('"score": 90', out)
+        self.assertIn('"nodes": []', out)
+
+    def test_a_blank_line_in_an_untagged_file_does_not_fail_the_gate(self):  # verifies: REQ-DESIGN-991#CASE-5
+        """The reproduction from issue #243, end to end. The file carries no membership
+        tag, so no requirement claims it and no member `loc` moves — the only thing that
+        changes is a `line:` inside the advisory design payload."""
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "A-M-001.md"), _spec("A-M-001", ["`gate` writes the lock."]))
+            _write(os.path.join(d, "impl.py"), "x = 1  " + tag("A-M-001"))
+            # long enough to be a design candidate, and tagged by nobody
+            long_fn = ("def sprawling():\n"
+                       + "".join("    v{} = {}\n".format(i, i)
+                                 for i in range(R.DESIGN_FUNC_MAX_LINES + 10))
+                       + "    return v0\n")
+            untagged = os.path.join(d, "untagged.py")
+            _write(untagged, long_fn)
+
+            def render():
+                ws = R.Workspace.load(rd, d)
+                data = ws.map_data(d)
+                R.render_json(data, rd)
+                R.render_md(data, rd)
+                return data
+            data = render()
+            self.assertTrue(data.get("design", {}).get("findings"),
+                            "fixture produced no design finding to move")
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(0, R.cmd_map(R.Workspace.load(rd, d), d, True))
+
+            _write(untagged, "\n" + long_fn)      # one blank line at the top
+            ws2 = R.Workspace.load(rd, d)
+            moved = ws2.map_data(d)["design"]["findings"][0]["line"]
+            self.assertEqual(data["design"]["findings"][0]["line"] + 1, moved,
+                             "the advisory line number did not move; the fixture proves nothing")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_map(ws2, d, True)
+        self.assertEqual(0, rc, buf.getvalue())
+        self.assertNotIn("stale", buf.getvalue())
+
+    def test_the_md_design_summary_line_is_dropped(self):
+        text = "\n".join(["---", "generated: 2026-01-01", "nodes: 3",
+                          "design OOP: 29/100 (9/31 files)", "---", "# Map"])
+        out = R._strip_generated(text)
+        self.assertNotIn("design OOP", out)
+        self.assertIn("nodes: 3", out)
+
+
 class CommandsManifest(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  # tested-by: REQ-CMDREGISTRY-963
     """The CLI, emitted as data for any surface that documents it without running it."""
 

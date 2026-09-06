@@ -64,6 +64,7 @@ CASE-5
 **Notes**
 - Python is the only language read through a real parser (`ast`); the brace languages go through heuristics, so a candidate there is a stronger invitation to look than a fact.
 - A candidate is a shape worth a look, never a defect. Run on this repo it reports the engine's own long functions and its ten-thousand-line file honestly; ADR-0014 keeps that file whole on purpose and an advisory line does not reopen a decision — the thing that DID reopen the question is ADR-0014's own numeric trigger firing, recorded in ADR-0032.
+- "Advisory" is a property of the whole path, not of the printer. `cmd_design` always exited 0 and no gate rule read its output, and the review could still fail a build: it was written into `_map.json`, `_map.md` and `docs/map.html`, and those are compared byte-for-byte by the freshness check. Severity is inherited by whatever an artifact is gated on, so the claim has to be defended where the data lands, not only where it is printed (issue #243).
 
 --------------------
 
@@ -422,7 +423,7 @@ Every bullet below is binding.
 - The output names what the pillar did not measure whenever it renders, and when the review renders empty. An absent finding therefore never reads as a measured pass on DIT, NOC or CBO.
 - The pillar reads Python only, through `ast`, since counting methods and field access needs a parser rather than the brace-language heuristics.
 - DIT, NOC and CBO are not reported. Their absence is a decision, not a gap: the first two measure an inheritance tree a composing codebase does not have. The third needs type inference this engine does not do.
-- `DESIGN_RFC_MAX` is a `CONFIG_KEYS` entry, so a repo can retune it like every other number in the review; the pillar stays advisory and never enters the gate.
+- `DESIGN_RFC_MAX` is a `CONFIG_KEYS` entry, so a repo can retune it like every other number in the review; the pillar stays advisory and never enters the gate — including through the committed artifacts the review is written into, which is where it leaked. [[REQ-DESIGN-991]]
 - The pillar names its own known weakness where it prints: RFC counts every distinct method name a class calls, including library calls, so it over-reports routers, GUI callback classes and builder DSLs.
 
 ## Cases
@@ -556,3 +557,63 @@ CASE-3 — the dropped kinds are gone
 - The independent review: 10 of 14 flags confirmed, 4 refused — 71%, below the 8-in-10 an independent confirmation is expected to clear. Per metric before the repair: `wide-class` 0 confirmed of 2, `high-response` 10 of 14, `low-field-sharing` 2 of 5. After excluding field-less methods `low-field-sharing` stopped firing on both classes it was right about and kept firing on the two it was wrong about.
 - RFC's own precision is 10 of 14 and it is kept anyway, with its weakness printed rather than hidden: all four refusals are classes whose call count is library calls — a request router delegating to free functions, a GUI callback class, and a builder DSL over one shared accumulator. A reader who meets one of those three shapes can dismiss the flag in seconds, which is the most an advisory signal at 71% can honestly ask for.
 - Six of the ten confirmed flags are copies of three distinct classes across corpora, so the distinct-finding count is nearer three. The reviewer also noted that all ten sit in throwaway analysis scripts. Both facts are recorded here rather than netted out of the headline.
+
+
+---
+id: REQ-DESIGN-991
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DESIGN-061]
+---
+
+# Advisory data cannot inherit a verdict
+
+## Description
+> `_map.json` is one freshness-gated artifact carrying three classes of data with three
+> different severities: the requirement graph is normative, `health` is derived, and `design`
+> is advisory by its own contract. The freshness comparison was all-or-nothing, so anything
+> that landed in that document acquired ERROR severity by construction, whatever its own
+> contract said about itself. One blank line inserted into a file no requirement claims moved
+> a `line:` in `design.findings`, which made the committed map stale, which failed `gate` with
+> zero requirement errors and zero lint errors.
+
+Every bullet below is binding.
+- The design payload is excluded from every freshness comparison: the `design` block of
+  `_map.json` and of the injected viewer blob, and `_map.md`'s one-line design summary.
+- The data itself stays in the artifacts. The viewer renders those rows in its Design tab, so
+  removing them would delete a feature to fix a severity mistake.
+- Determinism is not the test for what may be gated. A freshness-checked payload stays
+  stable under edits that change nothing it describes, and per-line findings do not.
+- Excluding it is the same exclusion `"repo":` already carries, for the same reason: a value
+  that legitimately differs without the corpus having changed is not a verdict.
+- The accepted cost is that committed design rows may lag the code until the next `sync`. That
+  is the correct trade for advice nobody should be blocked by.
+
+## Cases
+CASE-1 — a moved advisory line number is not staleness
+  Given  a committed map and a design finding whose `line` has changed
+  When   the freshness check runs
+  Then   no artifact is reported stale
+
+CASE-2 — a changed design score is not staleness
+  Given  a committed map and a different design score
+  When   the freshness check runs
+  Then   no artifact is reported stale
+
+CASE-3 — a changed requirement still is
+  Given  a committed map and a requirement whose title has changed
+  When   the freshness check runs
+  Then   `_map.json` and the published viewer copy are reported stale
+
+CASE-4 — a changed health number still is
+  Given  a committed map and a different health score
+  When   the freshness check runs
+  Then   `_map.json` is reported stale, because health is derived from the corpus and not
+         from line numbers in files no requirement claims
+
+CASE-5 — a blank line in an untagged file does not fail the gate
+  Given  a source file carrying no membership tag
+  When   a blank line is inserted at its top and `gate` runs
+  Then   it exits 0 and reports no stale artifact
