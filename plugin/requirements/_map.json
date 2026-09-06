@@ -1072,7 +1072,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2117"
+          "loc": "plugin/scripts/test_reqmap_author.py:2134"
         },
         {
           "role": "tested-by",
@@ -1260,7 +1260,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2117"
+          "loc": "plugin/scripts/test_reqmap_author.py:2134"
         }
       ],
       "test_exempt": null,
@@ -1958,15 +1958,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2207"
+          "loc": "plugin/scripts/test_reqmap_author.py:2224"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2835"
+          "loc": "plugin/scripts/test_reqmap_author.py:2852"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2900"
+          "loc": "plugin/scripts/test_reqmap_author.py:2917"
         }
       ],
       "test_exempt": null,
@@ -2030,11 +2030,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2207"
+          "loc": "plugin/scripts/test_reqmap_author.py:2224"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2900"
+          "loc": "plugin/scripts/test_reqmap_author.py:2917"
         }
       ],
       "test_exempt": null,
@@ -2085,7 +2085,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2207"
+          "loc": "plugin/scripts/test_reqmap_author.py:2224"
         }
       ],
       "test_exempt": null,
@@ -2099,7 +2099,7 @@
       "id": "REQ-CLARIFY-975",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "An answer can raise a question the old text never had",
       "intent": "Clarifying a requirement means editing it, and an edit is new text: a clause that answers one question can introduce an unbounded quantity, a number with no unit, or a case with no failure path. Nobody re-reads the whole corpus after an edit, so the new question sits unread. `sync` runs after every edit anyway, which makes it the one place the comparison costs nothing.",
@@ -2153,18 +2153,13 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2835"
+          "loc": "plugin/scripts/test_reqmap_author.py:2852"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -2940,11 +2935,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2639"
+          "loc": "plugin/scripts/test_reqmap_author.py:2656"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3021"
+          "loc": "plugin/scripts/test_reqmap_author.py:3038"
         },
         {
           "role": "tested-by",
@@ -3134,7 +3129,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2639"
+          "loc": "plugin/scripts/test_reqmap_author.py:2656"
         }
       ],
       "test_exempt": null,
@@ -3231,7 +3226,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3021"
+          "loc": "plugin/scripts/test_reqmap_author.py:3038"
         }
       ],
       "test_exempt": null,
@@ -4710,7 +4705,7 @@
       "id": "ARCH-EXTRACT-008",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Legacy extraction",
       "intent": "When an existing project has lots of code but no requirements written down, this gives you a running start: it reads each untagged file and writes a rough draft requirement for it, clearly marked as a draft so no one mistakes a guess for a settled decision. Without it, someone would have to sit down and describe every existing capability from scratch before the tool was useful on an older project. Spec and prompt documents get the same treatment from the companion capability [[ARCH-PROSE-024]].",
@@ -4814,12 +4809,7 @@
       "test_exempt": null,
       "milestone": "v1.06",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ]
+      "risks": []
     },
     {
       "id": "REQ-EXTRACT-849",
@@ -6135,7 +6125,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2337"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         }
       ],
       "test_exempt": null,
@@ -6195,7 +6185,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2337"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         }
       ],
       "test_exempt": null,
@@ -6252,7 +6242,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2337"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         }
       ],
       "test_exempt": null,
@@ -6404,7 +6394,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2173"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         }
       ],
       "test_exempt": null,
@@ -6469,7 +6459,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2173"
+          "loc": "plugin/scripts/test_reqmap_author.py:2190"
         }
       ],
       "test_exempt": null,
@@ -7037,7 +7027,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2135"
+          "loc": "plugin/scripts/test_reqmap_author.py:2152"
         }
       ],
       "test_exempt": null,
@@ -7109,7 +7099,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2135"
+          "loc": "plugin/scripts/test_reqmap_author.py:2152"
         }
       ],
       "test_exempt": null,
@@ -8959,7 +8949,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2938"
+          "loc": "plugin/scripts/test_reqmap_author.py:2955"
         }
       ],
       "test_exempt": null,
@@ -9026,7 +9016,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2938"
+          "loc": "plugin/scripts/test_reqmap_author.py:2955"
         }
       ],
       "test_exempt": null,
@@ -10149,7 +10139,7 @@
       "id": "ARCH-PROMOTE-011",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Confirmation is a human's answer, and an edit takes it back",
       "intent": "A requirement is `confirmed` when a human has read it and said so. That was a command for a long time, and a command is the wrong shape for it: `confirm <ID>` let anything that could type — a script, an agent, a habit — record a human's judgement. Worse, the judgement then outlived the thing it was about. A contract could be rewritten line by line and keep the `confirmed` its old text earned, because nothing connected editing to re-validating. Confirmation is now asked for and written by hand, and an edit takes it back automatically.",
@@ -10210,7 +10200,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2754"
+          "loc": "plugin/scripts/test_reqmap_author.py:2771"
         },
         {
           "role": "tested-by",
@@ -10228,29 +10218,23 @@
       "test_exempt": null,
       "milestone": "v1.08",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
-      "covered": 2,
-      "gap": "no `verifies:` tag for CASE-3"
+      "covered": 3
     },
     {
       "id": "REQ-PROMOTE-894",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "A surgical edit to the status line",
       "intent": "Rewriting `status: confirmed` to `status: draft` risks touching the wrong line, losing a trailing comment, or nudging the file's formatting — and on Windows, silently flipping a CRLF file to LF. The engine finds and rewrites only the frontmatter's first `status:` line, so the rest of the file is guaranteed untouched.",
       "contract": [
         "`_write_frontmatter_status` edits only the value of the first `status:` line in the leading frontmatter.",
-        "It preserves that line's indentation and any trailing inline comment.",
-        "It leaves the body untouched, byte for byte.",
-        "It preserves the file's own line endings, per line, so a file with mixed endings keeps every line it did not touch exactly as it was.",
+        "The rewrite preserves that line's indentation and any trailing inline comment.",
+        "The rewrite leaves the body untouched, byte for byte.",
+        "The rewrite preserves the file's own line endings, per line, so a file with mixed endings keeps every line it did not touch exactly as it was.",
         "In a module file holding several requirements, it edits the block of the requirement it was given, not the first block in the file."
       ],
       "verify": [],
@@ -10294,12 +10278,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -10307,7 +10286,7 @@
       "id": "REQ-PROMOTE-974",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "An edited contract loses its confirmation",
       "intent": "A `confirmed` status is a claim that a human read THIS text. Once the text changes, the claim is about something that no longer exists. Before this, `sync` refused to advance the baseline and told the caller to pass `--accept-drift`, which made accepting the edit the easy path and re-reading it the hard one. Now the safe outcome is the default.",
@@ -10345,18 +10324,13 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2754"
+          "loc": "plugin/scripts/test_reqmap_author.py:2771"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -10422,7 +10396,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2066"
+          "loc": "plugin/scripts/test_reqmap_author.py:2083"
         },
         {
           "role": "tested-by",
@@ -10490,7 +10464,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2066"
+          "loc": "plugin/scripts/test_reqmap_author.py:2083"
         }
       ],
       "test_exempt": null,
@@ -10555,7 +10529,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2066"
+          "loc": "plugin/scripts/test_reqmap_author.py:2083"
         }
       ],
       "test_exempt": null,
@@ -10620,7 +10594,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2066"
+          "loc": "plugin/scripts/test_reqmap_author.py:2083"
         }
       ],
       "test_exempt": null,
@@ -11462,11 +11436,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2431"
+          "loc": "plugin/scripts/test_reqmap_author.py:2448"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2966"
+          "loc": "plugin/scripts/test_reqmap_author.py:2983"
         },
         {
           "role": "tested-by",
@@ -11527,7 +11501,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2431"
+          "loc": "plugin/scripts/test_reqmap_author.py:2448"
         }
       ],
       "test_exempt": null,
@@ -11600,7 +11574,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2431"
+          "loc": "plugin/scripts/test_reqmap_author.py:2448"
         }
       ],
       "test_exempt": null,
@@ -11664,11 +11638,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2431"
+          "loc": "plugin/scripts/test_reqmap_author.py:2448"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2966"
+          "loc": "plugin/scripts/test_reqmap_author.py:2983"
         }
       ],
       "test_exempt": null,
@@ -11734,7 +11708,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2431"
+          "loc": "plugin/scripts/test_reqmap_author.py:2448"
         }
       ],
       "test_exempt": null,
@@ -13117,7 +13091,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:153"
+          "loc": "app/scripts/ssr-smoke.jsx:139"
         },
         {
           "role": "implements",
@@ -15989,11 +15963,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2699"
+          "loc": "plugin/scripts/test_reqmap_author.py:2716"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3199"
+          "loc": "plugin/scripts/test_reqmap_author.py:3216"
         }
       ],
       "test_exempt": null,
@@ -16169,7 +16143,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2699"
+          "loc": "plugin/scripts/test_reqmap_author.py:2716"
         }
       ],
       "test_exempt": null,
@@ -16226,7 +16200,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:106"
+          "loc": "app/scripts/ssr-smoke.jsx:92"
         },
         {
           "role": "implements",
@@ -16258,7 +16232,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3199"
+          "loc": "plugin/scripts/test_reqmap_author.py:3216"
         }
       ],
       "test_exempt": null,
@@ -16429,7 +16403,7 @@
         "The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]",
         "The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]",
         "The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]",
-        "The roadmap has two lanes: Bugs, for `TODO.md` items marked `lane: bug`; Features, for every other item plus every milestoned requirement. [[REQ-VIEWER-995]]"
+        "The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]"
       ],
       "verify": [],
       "notes": [
@@ -17348,24 +17322,23 @@
       "level": "code",
       "status": "confirmed",
       "area": "REQ",
-      "title": "What the roadmap's two lanes mean",
-      "intent": "The roadmap had four swim lanes — bus, feature, need, ops — which is the engine's own taxonomy, a requirement's position in the graph, laid on the Y axis. A roadmap answers a different question: what is broken and what is coming. Four thin rows nobody read as a plan answered neither, and a reader asked for two.",
+      "title": "The roadmap has one lane, and it is named for what the chips are",
+      "intent": "The Y axis carried four swim lanes — bus, feature, need, ops — which is the engine's own taxonomy, a requirement's position in the graph. That answered a question no reader was asking, so it became two: Bugs and Features. Bugs then rendered empty, and stayed empty, because nothing on this roadmap is a defect — the items are work that was not specified up front, which is a different thing. An axis with one populated value sorts nothing and still costs a row, so the lane stops classifying and names what the chips are.",
       "contract": [
-        "The roadmap renders exactly two lanes, labelled Bugs and Features, in that order.",
-        "A `TODO.md` item whose lane is `bug` renders under Bugs.",
-        "Every other open `TODO.md` item renders under Features, whatever its lane says — the older `bus` and `ops` values still parse and are never rejected.",
-        "Every requirement with a `milestone:` that is not deprecated renders under Features. A requirement describes a capability; a bug is a TODO until it is fixed.",
-        "The lane is read from the `lane` field the engine already emits in `_map.json`, so no engine data changes and a vendored engine files `lane: bug` correctly as soon as its viewer is rebuilt."
+        "The roadmap renders exactly one lane, labelled `Implementations`, and no other lane label appears.",
+        "Every open `TODO.md` item renders in it, whatever its `lane` field says — `bug`, `feature` and the older `bus`/`ops` values all still parse and are never rejected. A completed item (`[x]`) still renders nowhere.",
+        "Every requirement with a `milestone:` that is not deprecated renders in it.",
+        "`lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted in `_map.json`, so a repo that files its items by lane loses the split and nothing else, and no engine data changes for this."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — two lanes, Bugs above Features Given  a registry with at least one milestone When   the roadmap renders Then   the lane column reads Bugs then Features, and no other lane label appears",
-        "CASE-2 — — a bug item lands under Bugs Given  an open `TODO.md` item `Crash on empty stdin | lane: bug` under a milestone When   the roadmap renders Then   that title appears in the Bugs lane and not in the Features lane",
-        "CASE-3 — — a legacy lane and a requirement land under Features Given  an open item `Old style | lane: ops` and a confirmed requirement with the same milestone When   the roadmap renders Then   both appear in the Features lane"
+        "CASE-1 — — one lane, named Implementations Given  a registry with at least one milestone When   the roadmap renders Then   exactly one lane label is rendered and it reads `Implementations`",
+        "CASE-2 — — every lane value lands in that one lane Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one milestone, and a completed item beside them When   the roadmap renders Then   all three open titles appear and the completed one does not",
+        "CASE-3 — — a milestoned requirement lands in it too Given  a confirmed requirement carrying that same milestone When   the roadmap renders Then   its title appears in the lane"
       ],
-      "accept": "CASE-1 — two lanes, Bugs above Features\n  Given  a registry with at least one milestone\n  When   the roadmap renders\n  Then   the lane column reads Bugs then Features, and no other lane label appears\n\nCASE-2 — a bug item lands under Bugs\n  Given  an open `TODO.md` item `Crash on empty stdin | lane: bug` under a milestone\n  When   the roadmap renders\n  Then   that title appears in the Bugs lane and not in the Features lane\n\nCASE-3 — a legacy lane and a requirement land under Features\n  Given  an open item `Old style | lane: ops` and a confirmed requirement with the same milestone\n  When   the roadmap renders\n  Then   both appear in the Features lane",
+      "accept": "CASE-1 — one lane, named Implementations\n  Given  a registry with at least one milestone\n  When   the roadmap renders\n  Then   exactly one lane label is rendered and it reads `Implementations`\n\nCASE-2 — every lane value lands in that one lane\n  Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one\n         milestone, and a completed item beside them\n  When   the roadmap renders\n  Then   all three open titles appear and the completed one does not\n\nCASE-3 — a milestoned requirement lands in it too\n  Given  a confirmed requirement carrying that same milestone\n  When   the roadmap renders\n  Then   its title appears in the lane",
       "input": "",
       "output": "",
       "desc": "",
@@ -17387,7 +17360,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/RoadmapView.jsx:54"
+          "loc": "app/src/views/RoadmapView.jsx:56"
         }
       ],
       "test_exempt": null,
@@ -20353,6 +20326,12 @@
       "lane": "feature",
       "milestone": "v5.13",
       "done": true
+    },
+    {
+      "name": "Refactor reqmap.py",
+      "lane": "ops",
+      "milestone": "v6.5",
+      "done": false
     }
   ],
   "commands": [
@@ -20568,7 +20547,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "565 lines (over 500)"
+        "detail": "551 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -20768,7 +20747,7 @@
         "file": "app/src/views/RoadmapView.jsx",
         "line": 163,
         "name": "RoadmapView",
-        "detail": "`RoadmapView` is 187 lines (over 80)"
+        "detail": "`RoadmapView` is 183 lines (over 80)"
       },
       {
         "pillar": "standards",
@@ -21232,20 +21211,18 @@
     }
   },
   "health": {
-    "score": 98,
+    "score": 100,
     "total": 247,
-    "healthy": 242,
-    "confirmed": 242,
+    "healthy": 247,
+    "confirmed": 247,
     "implemented": 238,
     "tested": 235,
-    "drafts": 5,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 242
+    "gate_link_sync_clean": true
   }
 }

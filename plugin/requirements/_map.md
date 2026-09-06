@@ -425,7 +425,7 @@ graph LR
     REQ_VIEWER_969["Two engine-emitted readings in the rail<br><small>REQ-VIEWER-969</small>"]
     REQ_VIEWER_977["The advisory design tab<br><small>REQ-VIEWER-977</small>"]
     REQ_VIEWER_984["Reading a roadmap wider than the screen<br><small>REQ-VIEWER-984</small>"]
-    REQ_VIEWER_995["What the roadmap's two lanes mean<br><small>REQ-VIEWER-995</small>"]
+    REQ_VIEWER_995["The roadmap has one lane, and it is named for what the chips are<br><small>REQ-VIEWER-995</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
     REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
     REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]
@@ -536,8 +536,8 @@ graph LR
   ARCH_CANDIDATES_009["Capability candidates (extraction plan)<br><small>ARCH-CANDIDATES-009</small>"]
   f_plugin_scripts_reqmap_py_3874_4034["plugin/scripts/reqmap.py:3874-4034"]
   ARCH_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_3874_4034
-  f_plugin_scripts_test_reqmap_author_py_166_2117["plugin/scripts/test_reqmap_author.py:166-2117"]
-  ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_166_2117
+  f_plugin_scripts_test_reqmap_author_py_166_2134["plugin/scripts/test_reqmap_author.py:166-2134"]
+  ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_166_2134
   f_plugin_scripts_test_reqmap_scan_py_466_507["plugin/scripts/test_reqmap_scan.py:466-507"]
   ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_466_507
   ARCH_CHECK_006["The gate<br><small>ARCH-CHECK-006</small>"]
@@ -550,8 +550,8 @@ graph LR
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
   f_plugin_scripts_reqmap_py_8736_8833["plugin/scripts/reqmap.py:8736-8833"]
   ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_py_8736_8833
-  f_plugin_scripts_test_reqmap_author_py_2207_2900["plugin/scripts/test_reqmap_author.py:2207-2900"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2207_2900
+  f_plugin_scripts_test_reqmap_author_py_2224_2917["plugin/scripts/test_reqmap_author.py:2224-2917"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2224_2917
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
   f_plugin_scripts_reqmap_py_262_10354["plugin/scripts/reqmap.py:262-10354"]
   ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_262_10354
@@ -575,8 +575,8 @@ graph LR
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
   f_plugin_scripts_reqmap_py_2498_5850["plugin/scripts/reqmap.py:2498-5850"]
   ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2498_5850
-  f_plugin_scripts_test_reqmap_author_py_1548_3021["plugin/scripts/test_reqmap_author.py:1548-3021"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1548_3021
+  f_plugin_scripts_test_reqmap_author_py_1548_3038["plugin/scripts/test_reqmap_author.py:1548-3038"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1548_3038
   f_plugin_scripts_test_reqmap_report_py_4524["plugin/scripts/test_reqmap_report.py:4524"]
   ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4524
   ARCH_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>ARCH-DESCRIPTION-057</small>"]
@@ -638,8 +638,8 @@ graph LR
   ARCH_IMPLEMENT_063["The brief for implementing a requirement<br><small>ARCH-IMPLEMENT-063</small>"]
   f_plugin_scripts_reqmap_py_8889_8910["plugin/scripts/reqmap.py:8889-8910"]
   ARCH_IMPLEMENT_063 -->|implements| f_plugin_scripts_reqmap_py_8889_8910
-  f_plugin_scripts_test_reqmap_author_py_2337["plugin/scripts/test_reqmap_author.py:2337"]
-  ARCH_IMPLEMENT_063 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2337
+  f_plugin_scripts_test_reqmap_author_py_2354["plugin/scripts/test_reqmap_author.py:2354"]
+  ARCH_IMPLEMENT_063 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_2354
   ARCH_INIT_012["First-use bootstrap<br><small>ARCH-INIT-012</small>"]
   f_plugin_scripts_reqmap_py_7020_7056["plugin/scripts/reqmap.py:7020-7056"]
   ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_7020_7056
@@ -696,8 +696,8 @@ graph LR
   ARCH_NEW_004["Scaffold a requirement<br><small>ARCH-NEW-004</small>"]
   f_plugin_scripts_reqmap_py_3361_3399["plugin/scripts/reqmap.py:3361-3399"]
   ARCH_NEW_004 -->|implements| f_plugin_scripts_reqmap_py_3361_3399
-  f_plugin_scripts_test_reqmap_author_py_99_2938["plugin/scripts/test_reqmap_author.py:99-2938"]
-  ARCH_NEW_004 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_99_2938
+  f_plugin_scripts_test_reqmap_author_py_99_2955["plugin/scripts/test_reqmap_author.py:99-2955"]
+  ARCH_NEW_004 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_99_2955
   ARCH_NEXT_013["What-should-I-do-next report<br><small>ARCH-NEXT-013</small>"]
   f_plugin_scripts_reqmap_py_1655_4820["plugin/scripts/reqmap.py:1655-4820"]
   ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1655_4820
@@ -725,8 +725,8 @@ graph LR
   ARCH_PROMOTE_011["Confirmation is a human's answer, and an edit takes it back<br><small>ARCH-PROMOTE-011</small>"]
   f_plugin_scripts_reqmap_py_3518_3544["plugin/scripts/reqmap.py:3518-3544"]
   ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_3518_3544
-  f_plugin_scripts_test_reqmap_author_py_377_2754["plugin/scripts/test_reqmap_author.py:377-2754"]
-  ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_377_2754
+  f_plugin_scripts_test_reqmap_author_py_377_2771["plugin/scripts/test_reqmap_author.py:377-2771"]
+  ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_377_2771
   f_plugin_scripts_test_reqmap_gate_py_825["plugin/scripts/test_reqmap_gate.py:825"]
   ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_825
   f_plugin_scripts_test_reqmap_report_py_1586_2030["plugin/scripts/test_reqmap_report.py:1586-2030"]
@@ -734,8 +734,8 @@ graph LR
   ARCH_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>ARCH-PROMOTE-TODO-001</small>"]
   f_plugin_scripts_reqmap_py_3425_3486["plugin/scripts/reqmap.py:3425-3486"]
   ARCH_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_3425_3486
-  f_plugin_scripts_test_reqmap_author_py_1235_2066["plugin/scripts/test_reqmap_author.py:1235-2066"]
-  ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1235_2066
+  f_plugin_scripts_test_reqmap_author_py_1235_2083["plugin/scripts/test_reqmap_author.py:1235-2083"]
+  ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1235_2083
   f_plugin_scripts_test_reqmap_report_py_2030["plugin/scripts/test_reqmap_report.py:2030"]
   ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2030
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
@@ -766,8 +766,8 @@ graph LR
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
   f_plugin_scripts_reqmap_py_8995_9111["plugin/scripts/reqmap.py:8995-9111"]
   ARCH_RETIRE_064 -->|implements| f_plugin_scripts_reqmap_py_8995_9111
-  f_plugin_scripts_test_reqmap_author_py_1822_2966["plugin/scripts/test_reqmap_author.py:1822-2966"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1822_2966
+  f_plugin_scripts_test_reqmap_author_py_1822_2983["plugin/scripts/test_reqmap_author.py:1822-2983"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1822_2983
   f_plugin_scripts_test_reqmap_report_py_4524["plugin/scripts/test_reqmap_report.py:4524"]
   ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_4524
   ARCH_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>ARCH-REVIEW-022</small>"]
@@ -892,8 +892,8 @@ graph LR
   ARCH_TRANSLATE_044 -->|implements| f_app_src_views_SpecView_jsx_2
   f_plugin_scripts_reqmap_py_2883_4654["plugin/scripts/reqmap.py:2883-4654"]
   ARCH_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_2883_4654
-  f_plugin_scripts_test_reqmap_author_py_969_3199["plugin/scripts/test_reqmap_author.py:969-3199"]
-  ARCH_TRANSLATE_044 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_969_3199
+  f_plugin_scripts_test_reqmap_author_py_969_3216["plugin/scripts/test_reqmap_author.py:969-3216"]
+  ARCH_TRANSLATE_044 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_969_3216
   ARCH_UNSCANNEDTAG_045["Tags in unscanned file types reported<br><small>ARCH-UNSCANNEDTAG-045</small>"]
   f_plugin_scripts_reqmap_py_1576_2995["plugin/scripts/reqmap.py:1576-2995"]
   ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_py_1576_2995
@@ -1001,28 +1001,5 @@ _Requirements needing attention: red = unimplemented (confirmed, no code); orang
 
 ```mermaid
 graph LR
-  subgraph sg_ARCH["ARCH"]
-    ARCH_EXTRACT_008["Legacy extraction<br><small>ARCH-EXTRACT-008</small><br>unreviewed"]
-    ARCH_PROMOTE_011["Confirmation is a human's answer, and an edit takes it back<br><small>ARCH-PROMOTE-011</small><br>unreviewed"]
-  end
-  subgraph sg_REQ["REQ"]
-    REQ_CLARIFY_975["An answer can raise a question the old text never had<br><small>REQ-CLARIFY-975</small><br>unreviewed"]
-    REQ_PROMOTE_894["A surgical edit to the status line<br><small>REQ-PROMOTE-894</small><br>unreviewed"]
-    REQ_PROMOTE_974["An edited contract loses its confirmation<br><small>REQ-PROMOTE-974</small><br>unreviewed"]
-  end
-  style REQ_CLARIFY_975 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_EXTRACT_008 fill:#fff3cd,stroke:#a66,color:#630
-  style ARCH_PROMOTE_011 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_894 fill:#fff3cd,stroke:#a66,color:#630
-  style REQ_PROMOTE_974 fill:#fff3cd,stroke:#a66,color:#630
+  ok["No risk signals detected"]
 ```
-
-### Risk Table
-
-| ID | status | members | dependents | risks | recommendation |
-| --- | --- | --- | --- | --- | --- |
-| REQ-CLARIFY-975 | draft | 6 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-EXTRACT-008 | draft | 12 | 2 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| ARCH-PROMOTE-011 | draft | 8 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-894 | draft | 4 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |
-| REQ-PROMOTE-974 | draft | 2 | 0 | unreviewed | Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced. |

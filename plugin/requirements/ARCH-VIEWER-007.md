@@ -30,7 +30,7 @@ Every bullet below is binding.
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
-- The roadmap has two lanes: Bugs, for `TODO.md` items marked `lane: bug`; Features, for every other item plus every milestoned requirement. [[REQ-VIEWER-995]]
+- The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
 
 ## Cases
 CASE-1
@@ -781,37 +781,40 @@ owner: Alex
 satisfies: [ARCH-VIEWER-007]
 ---
 
-# What the roadmap's two lanes mean
+# The roadmap has one lane, and it is named for what the chips are
 
 ## Description
-> The roadmap had four swim lanes — bus, feature, need, ops — which is the engine's own
-> taxonomy, a requirement's position in the graph, laid on the Y axis. A roadmap answers a
-> different question: what is broken and what is coming. Four thin rows nobody read as a
-> plan answered neither, and a reader asked for two.
+> The Y axis carried four swim lanes — bus, feature, need, ops — which is the engine's own
+> taxonomy, a requirement's position in the graph. That answered a question no reader was
+> asking, so it became two: Bugs and Features. Bugs then rendered empty, and stayed empty,
+> because nothing on this roadmap is a defect — the items are work that was not specified
+> up front, which is a different thing. An axis with one populated value sorts nothing and
+> still costs a row, so the lane stops classifying and names what the chips are.
 
 Every bullet below is binding.
-- The roadmap renders exactly two lanes, labelled Bugs and Features, in that order.
-- A `TODO.md` item whose lane is `bug` renders under Bugs.
-- Every other open `TODO.md` item renders under Features, whatever its lane says — the
-  older `bus` and `ops` values still parse and are never rejected.
-- Every requirement with a `milestone:` that is not deprecated renders under Features. A
-  requirement describes a capability; a bug is a TODO until it is fixed.
-- The lane is read from the `lane` field the engine already emits in `_map.json`, so no
-  engine data changes and a vendored engine files `lane: bug` correctly as soon as its
-  viewer is rebuilt.
+- The roadmap renders exactly one lane, labelled `Implementations`, and no other lane
+  label appears.
+- Every open `TODO.md` item renders in it, whatever its `lane` field says — `bug`,
+  `feature` and the older `bus`/`ops` values all still parse and are never rejected. A
+  completed item (`[x]`) still renders nowhere.
+- Every requirement with a `milestone:` that is not deprecated renders in it.
+- `lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted
+  in `_map.json`, so a repo that files its items by lane loses the split and nothing else,
+  and no engine data changes for this.
 
 ## Cases
-CASE-1 — two lanes, Bugs above Features
+CASE-1 — one lane, named Implementations
   Given  a registry with at least one milestone
   When   the roadmap renders
-  Then   the lane column reads Bugs then Features, and no other lane label appears
+  Then   exactly one lane label is rendered and it reads `Implementations`
 
-CASE-2 — a bug item lands under Bugs
-  Given  an open `TODO.md` item `Crash on empty stdin | lane: bug` under a milestone
+CASE-2 — every lane value lands in that one lane
+  Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one
+         milestone, and a completed item beside them
   When   the roadmap renders
-  Then   that title appears in the Bugs lane and not in the Features lane
+  Then   all three open titles appear and the completed one does not
 
-CASE-3 — a legacy lane and a requirement land under Features
-  Given  an open item `Old style | lane: ops` and a confirmed requirement with the same milestone
+CASE-3 — a milestoned requirement lands in it too
+  Given  a confirmed requirement carrying that same milestone
   When   the roadmap renders
-  Then   both appear in the Features lane
+  Then   its title appears in the lane

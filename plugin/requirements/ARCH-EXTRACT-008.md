@@ -1,6 +1,6 @@
 ---
 id: ARCH-EXTRACT-008
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex

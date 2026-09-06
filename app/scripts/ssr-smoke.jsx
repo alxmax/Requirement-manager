@@ -57,46 +57,32 @@ for (const [name, el] of Object.entries(cases)) {
   }
 }
 
-// Roadmap lanes: two, and what lands where.  // tested-by: REQ-VIEWER-995
+// The roadmap's one lane, and that every item lands in it.  // tested-by: REQ-VIEWER-995
 // Rendered against a tiny synthetic registry so the assertion is about the RULE, not
-// about whatever TODO.md happens to hold today.
+// about whatever TODO.md happens to hold today. Every legacy lane value is present in
+// the fixture on purpose: `lane:` must still PARSE and still be ignored by the chart.
 {
   const ms = "v9.9";
   setRegistry([
     adaptNode({ id: "LANE-REQ-001", title: "A shipped capability", status: "confirmed",
                 layer: "bus", milestone: ms, deps: [], used_by: [], depends_on: [] }),
   ]);
+  const todoNames = ["Crash on empty stdin", "Old style item", "Plain feature item"];
   setTodos([
-    { name: "Crash on empty stdin", lane: "bug",     milestone: ms, done: false },
-    { name: "Old style item",       lane: "ops",     milestone: ms, done: false },
-    { name: "Plain feature item",   lane: "feature", milestone: ms, done: false },
+    { name: todoNames[0], lane: "bug",     milestone: ms, done: false },
+    { name: todoNames[1], lane: "ops",     milestone: ms, done: false },
+    { name: todoNames[2], lane: "feature", milestone: ms, done: false },
+    { name: "Already shipped", lane: "feature", milestone: ms, done: true },
   ]);
   const html = renderToString(<RoadmapView openSpec={noop} />);
-  const rows = html.split(/<tr[\s>]/);
-  const laneOf = (needle) => {
-    const row = rows.find(r => r.includes(needle));
-    if (!row) return null;
-    // the lane label cell is on the lane's FIRST row; walk back to it
-    const idx = rows.indexOf(row);
-    for (let i = idx; i >= 0; i--) {
-      if (rows[i].includes(">Bugs<")) return "Bugs";
-      if (rows[i].includes(">Features<")) return "Features";
-    }
-    return null;
-  };
+  const laneLabels = (html.match(/>(Implementations|Bugs|Features|Bus|Need|Ops)</g) || []);
   const laneChecks = [
-    ["roadmap shows exactly the Bugs and Features lanes",        // verifies: REQ-VIEWER-995#CASE-1
-      html.includes(">Bugs<") && html.includes(">Features<")
-      && !/>(Bus|Need|Ops)</.test(html)
-      && html.indexOf(">Bugs<") < html.indexOf(">Features<")],
-    ["lane: bug item renders under Bugs",                         // verifies: REQ-VIEWER-995#CASE-2
-      laneOf("Crash on empty stdin") === "Bugs"],
-    ["legacy ops item renders under Features",                    // verifies: REQ-VIEWER-995#CASE-3
-      laneOf("Old style item") === "Features"],
-    ["milestoned requirement renders under Features",             // verifies: REQ-VIEWER-995#CASE-3
-      laneOf("A shipped capability") === "Features"],
-    ["plain feature item renders under Features",
-      laneOf("Plain feature item") === "Features"],
+    ["roadmap shows exactly one lane, labelled Implementations",  // verifies: REQ-VIEWER-995#CASE-1
+      laneLabels.length === 1 && laneLabels[0] === ">Implementations<"],
+    ["every open TODO item lands in it, whatever its lane says",  // verifies: REQ-VIEWER-995#CASE-2
+      todoNames.every(n => html.includes(n)) && !html.includes("Already shipped")],
+    ["a milestoned requirement lands in it",                      // verifies: REQ-VIEWER-995#CASE-3
+      html.includes("A shipped capability")],
   ];
   for (const [label, ok] of laneChecks) test(label, ok);
   setRegistry(json.nodes.map(adaptNode));           // back to the live registry

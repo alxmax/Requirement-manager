@@ -2063,6 +2063,23 @@ class CasesPromote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-
         self.assertNotIn("status: draft", new_text)
         self.assertIn("The deployment status: pending is tracked elsewhere.\n", new_text)
 
+    def test_hand_written_confirmed_with_no_code_is_an_error(self):  # verifies: ARCH-PROMOTE-011#CASE-3
+        """Nothing stops a human typing `status: confirmed` into the frontmatter of a
+        requirement no code implements — that is the cost of making confirmation an
+        edit rather than a command. The gate is what catches it, as an error."""
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="confirmed", layer="feature",
+                              extra="", title="Hand-confirmed"))
+            reqs = R.load_requirements(d)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_check(R.Workspace(reqs, {}, d, d), False)
+        out = buf.getvalue()
+        self.assertIn("RM006", out)
+        self.assertIn("AREA-A-001", out)
+        self.assertNotEqual(rc, 0, "RM006 is an error — the gate must fail")
+
 class CasesPromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  # tested-by: REQ-PROMOTE-TODO-897  # tested-by: REQ-PROMOTE-TODO-898  # tested-by: REQ-PROMOTE-TODO-899
     def test_matching_is_case_insensitive_and_trims(self):  # verifies: REQ-PROMOTE-TODO-897#CASE-2
         with tempfile.TemporaryDirectory() as d:

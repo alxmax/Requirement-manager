@@ -407,8 +407,9 @@ TODO.md                                     optional planning file — feeds the
 [`plugin/skills/requirement-manager/SKILL.md`](plugin/skills/requirement-manager/SKILL.md).
 
 **`TODO.md` format** — group items under `## vX.Y` milestone headings; each item is
-a checkbox with an optional `| lane: bug|feature` suffix (the older `bus`/`ops` values still parse and file as features). Completed items (`[x]`)
-are hidden in the chart.
+a checkbox with an optional `| lane: <label>` suffix. The lane is parsed and carried into
+`_map.json`, but the Roadmap tab renders one lane, `Implementations`, so it no longer
+splits the chart. Completed items (`[x]`) are hidden in the chart.
 
 ```markdown
 ## v1.14
