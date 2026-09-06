@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-06
-engine: 2026-09-06.10
-nodes: 249
+engine: 2026-09-06.11
+nodes: 250
 edges: 119
 design OOP: 29/100 (9/31 source files without a design candidate)
 ---
@@ -66,7 +66,7 @@ graph TD
   ARCH_REVIEWEDSCORE_109[[ARCH-REVIEWEDSCORE-109]]
   ARCH_ROADMAP_038[ARCH-ROADMAP-038<br/>2 code]
   ARCH_RULES_059[ARCH-RULES-059<br/>3 code]
-  ARCH_SCAN_002[ARCH-SCAN-002<br/>2 code]
+  ARCH_SCAN_002[ARCH-SCAN-002<br/>3 code]
   ARCH_SCANCACHE_023[ARCH-SCANCACHE-023<br/>1 code]
   ARCH_SEARCH_036[ARCH-SEARCH-036<br/>5 code]
   ARCH_SELFGATE_039[ARCH-SELFGATE-039<br/>2 code]
@@ -389,6 +389,7 @@ graph LR
     REQ_RULES_989["Drift severity is a repo's own call<br><small>REQ-RULES-989</small>"]
     REQ_SCAN_908["scan_members walks the tree and collects role: ID tags<br><small>REQ-SCAN-908</small>"]
     REQ_SCAN_909["One tag can bind several requirements, and directories are pruned<br><small>REQ-SCAN-909</small>"]
+    REQ_SCAN_992["Which lines a tag may live on<br><small>REQ-SCAN-992</small>"]
     REQ_SCANCACHE_911["Caching scan results without changing them<br><small>REQ-SCANCACHE-911</small>"]
     REQ_SEARCH_912["Ranking a query against the corpus<br><small>REQ-SEARCH-912</small>"]
     REQ_SEARCH_913["Printing ranked matches with their score<br><small>REQ-SEARCH-913</small>"]
@@ -500,6 +501,7 @@ graph LR
   style ARCH_SCAN_002 stroke-width:3px
   style REQ_SCAN_908 stroke-width:3px
   style REQ_SCAN_909 stroke-width:3px
+  style REQ_SCAN_992 stroke-width:3px
 ```
 
 ## Requirement-to-Code
@@ -509,96 +511,96 @@ _Each system/architecture requirement → its code; arrow label = role (`impleme
 ```mermaid
 graph LR
   ARCH_ACVERIFY_019["Per-criterion test coverage<br><small>ARCH-ACVERIFY-019</small>"]
-  f_plugin_scripts_reqmap_py_1297_4221["plugin/scripts/reqmap.py:1297-4221"]
-  ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_py_1297_4221
-  f_plugin_scripts_test_reqmap_py_4051_6399["plugin/scripts/test_reqmap.py:4051-6399"]
-  ARCH_ACVERIFY_019 -->|tested-by| f_plugin_scripts_test_reqmap_py_4051_6399
+  f_plugin_scripts_reqmap_py_1304_4237["plugin/scripts/reqmap.py:1304-4237"]
+  ARCH_ACVERIFY_019 -->|implements| f_plugin_scripts_reqmap_py_1304_4237
+  f_plugin_scripts_test_reqmap_py_4056_6404["plugin/scripts/test_reqmap.py:4056-6404"]
+  ARCH_ACVERIFY_019 -->|tested-by| f_plugin_scripts_test_reqmap_py_4056_6404
   ARCH_ATOMICFORM_053["The atomic requirement form<br><small>ARCH-ATOMICFORM-053</small>"]
-  f_plugin_scripts_reqmap_py_1730_6811["plugin/scripts/reqmap.py:1730-6811"]
-  ARCH_ATOMICFORM_053 -->|implements| f_plugin_scripts_reqmap_py_1730_6811
-  f_plugin_scripts_test_reqmap_py_7557["plugin/scripts/test_reqmap.py:7557"]
-  ARCH_ATOMICFORM_053 -->|tested-by| f_plugin_scripts_test_reqmap_py_7557
+  f_plugin_scripts_reqmap_py_1716_6832["plugin/scripts/reqmap.py:1716-6832"]
+  ARCH_ATOMICFORM_053 -->|implements| f_plugin_scripts_reqmap_py_1716_6832
+  f_plugin_scripts_test_reqmap_py_7562["plugin/scripts/test_reqmap.py:7562"]
+  ARCH_ATOMICFORM_053 -->|tested-by| f_plugin_scripts_test_reqmap_py_7562
   ARCH_ATOMICITY_049["Statement atomicity<br><small>ARCH-ATOMICITY-049</small>"]
-  f_plugin_scripts_reqmap_py_4842_4850["plugin/scripts/reqmap.py:4842-4850"]
-  ARCH_ATOMICITY_049 -->|implements| f_plugin_scripts_reqmap_py_4842_4850
-  f_plugin_scripts_test_reqmap_py_7162_9605["plugin/scripts/test_reqmap.py:7162-9605"]
-  ARCH_ATOMICITY_049 -->|tested-by| f_plugin_scripts_test_reqmap_py_7162_9605
+  f_plugin_scripts_reqmap_py_4858_4866["plugin/scripts/reqmap.py:4858-4866"]
+  ARCH_ATOMICITY_049 -->|implements| f_plugin_scripts_reqmap_py_4858_4866
+  f_plugin_scripts_test_reqmap_py_7167_9610["plugin/scripts/test_reqmap.py:7167-9610"]
+  ARCH_ATOMICITY_049 -->|tested-by| f_plugin_scripts_test_reqmap_py_7167_9610
   ARCH_AUDIT_065["One report of everything the engine can discover<br><small>ARCH-AUDIT-065</small>"]
-  f_plugin_scripts_reqmap_py_2849_5942["plugin/scripts/reqmap.py:2849-5942"]
-  ARCH_AUDIT_065 -->|implements| f_plugin_scripts_reqmap_py_2849_5942
-  f_plugin_scripts_test_reqmap_py_8260["plugin/scripts/test_reqmap.py:8260"]
-  ARCH_AUDIT_065 -->|tested-by| f_plugin_scripts_test_reqmap_py_8260
+  f_plugin_scripts_reqmap_py_2842_5963["plugin/scripts/reqmap.py:2842-5963"]
+  ARCH_AUDIT_065 -->|implements| f_plugin_scripts_reqmap_py_2842_5963
+  f_plugin_scripts_test_reqmap_py_8265_11955["plugin/scripts/test_reqmap.py:8265-11955"]
+  ARCH_AUDIT_065 -->|tested-by| f_plugin_scripts_test_reqmap_py_8265_11955
   ARCH_CANDIDATES_009["Capability candidates (extraction plan)<br><small>ARCH-CANDIDATES-009</small>"]
-  f_plugin_scripts_reqmap_py_3792_3958["plugin/scripts/reqmap.py:3792-3958"]
-  ARCH_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_3792_3958
-  f_plugin_scripts_test_reqmap_py_1207_10040["plugin/scripts/test_reqmap.py:1207-10040"]
-  ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_py_1207_10040
+  f_plugin_scripts_reqmap_py_3808_3974["plugin/scripts/reqmap.py:3808-3974"]
+  ARCH_CANDIDATES_009 -->|implements| f_plugin_scripts_reqmap_py_3808_3974
+  f_plugin_scripts_test_reqmap_py_1212_10045["plugin/scripts/test_reqmap.py:1212-10045"]
+  ARCH_CANDIDATES_009 -->|tested-by| f_plugin_scripts_test_reqmap_py_1212_10045
   ARCH_CHECK_006["The gate<br><small>ARCH-CHECK-006</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_CHECK_006 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1860_7758["plugin/scripts/reqmap.py:1860-7758"]
-  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1860_7758
-  f_plugin_scripts_test_reqmap_py_145_9997["plugin/scripts/test_reqmap.py:145-9997"]
-  ARCH_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_145_9997
+  f_plugin_scripts_reqmap_py_1846_7779["plugin/scripts/reqmap.py:1846-7779"]
+  ARCH_CHECK_006 -->|implements| f_plugin_scripts_reqmap_py_1846_7779
+  f_plugin_scripts_test_reqmap_py_150_11926["plugin/scripts/test_reqmap.py:150-11926"]
+  ARCH_CHECK_006 -->|tested-by| f_plugin_scripts_test_reqmap_py_150_11926
   ARCH_CLARIFY_062["Questions a requirement has not answered<br><small>ARCH-CLARIFY-062</small>"]
-  f_plugin_scripts_reqmap_py_8290_8387["plugin/scripts/reqmap.py:8290-8387"]
-  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_py_8290_8387
-  f_plugin_scripts_test_reqmap_py_10530_11689["plugin/scripts/test_reqmap.py:10530-11689"]
-  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_py_10530_11689
+  f_plugin_scripts_reqmap_py_8311_8408["plugin/scripts/reqmap.py:8311-8408"]
+  ARCH_CLARIFY_062 -->|implements| f_plugin_scripts_reqmap_py_8311_8408
+  f_plugin_scripts_test_reqmap_py_10535_11694["plugin/scripts/test_reqmap.py:10535-11694"]
+  ARCH_CLARIFY_062 -->|tested-by| f_plugin_scripts_test_reqmap_py_10535_11694
   ARCH_CMDREGISTRY_033["CLI command registry + generated integration artifacts<br><small>ARCH-CMDREGISTRY-033</small>"]
-  f_plugin_scripts_reqmap_py_262_9891["plugin/scripts/reqmap.py:262-9891"]
-  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_262_9891
-  f_plugin_scripts_test_reqmap_py_6224_11355["plugin/scripts/test_reqmap.py:6224-11355"]
-  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_6224_11355
+  f_plugin_scripts_reqmap_py_262_9912["plugin/scripts/reqmap.py:262-9912"]
+  ARCH_CMDREGISTRY_033 -->|implements| f_plugin_scripts_reqmap_py_262_9912
+  f_plugin_scripts_test_reqmap_py_6229_11360["plugin/scripts/test_reqmap.py:6229-11360"]
+  ARCH_CMDREGISTRY_033 -->|tested-by| f_plugin_scripts_test_reqmap_py_6229_11360
   ARCH_CONFIG_060["Per-repo configuration file<br><small>ARCH-CONFIG-060</small>"]
-  f_plugin_scripts_reqmap_py_9828_10157["plugin/scripts/reqmap.py:9828-10157"]
-  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_9828_10157
-  f_plugin_scripts_test_reqmap_py_8147["plugin/scripts/test_reqmap.py:8147"]
-  ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_py_8147
+  f_plugin_scripts_reqmap_py_9849_10178["plugin/scripts/reqmap.py:9849-10178"]
+  ARCH_CONFIG_060 -->|implements| f_plugin_scripts_reqmap_py_9849_10178
+  f_plugin_scripts_test_reqmap_py_8152["plugin/scripts/test_reqmap.py:8152"]
+  ARCH_CONFIG_060 -->|tested-by| f_plugin_scripts_test_reqmap_py_8152
   ARCH_CONTEXT_048["Consolidated Context section<br><small>ARCH-CONTEXT-048</small>"]
-  f_plugin_scripts_reqmap_py_6894["plugin/scripts/reqmap.py:6894"]
-  ARCH_CONTEXT_048 -->|implements| f_plugin_scripts_reqmap_py_6894
-  f_plugin_scripts_test_reqmap_py_1700_9259["plugin/scripts/test_reqmap.py:1700-9259"]
-  ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_py_1700_9259
+  f_plugin_scripts_reqmap_py_6915["plugin/scripts/reqmap.py:6915"]
+  ARCH_CONTEXT_048 -->|implements| f_plugin_scripts_reqmap_py_6915
+  f_plugin_scripts_test_reqmap_py_1705_9264["plugin/scripts/test_reqmap.py:1705-9264"]
+  ARCH_CONTEXT_048 -->|tested-by| f_plugin_scripts_test_reqmap_py_1705_9264
   ARCH_COVERAGE_029["Untagged-code coverage signal<br><small>ARCH-COVERAGE-029</small>"]
-  f_plugin_scripts_reqmap_py_1606_6324["plugin/scripts/reqmap.py:1606-6324"]
-  ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_py_1606_6324
-  f_plugin_scripts_test_reqmap_py_3752["plugin/scripts/test_reqmap.py:3752"]
-  ARCH_COVERAGE_029 -->|tested-by| f_plugin_scripts_test_reqmap_py_3752
+  f_plugin_scripts_reqmap_py_1603_6345["plugin/scripts/reqmap.py:1603-6345"]
+  ARCH_COVERAGE_029 -->|implements| f_plugin_scripts_reqmap_py_1603_6345
+  f_plugin_scripts_test_reqmap_py_3757["plugin/scripts/test_reqmap.py:3757"]
+  ARCH_COVERAGE_029 -->|tested-by| f_plugin_scripts_test_reqmap_py_3757
   ARCH_DECOMPOSE_050["Clause decomposition scaffold<br><small>ARCH-DECOMPOSE-050</small>"]
-  f_plugin_scripts_reqmap_py_2438_5337["plugin/scripts/reqmap.py:2438-5337"]
-  ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2438_5337
-  f_plugin_scripts_test_reqmap_py_7240_11727["plugin/scripts/test_reqmap.py:7240-11727"]
-  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7240_11727
+  f_plugin_scripts_reqmap_py_2424_5353["plugin/scripts/reqmap.py:2424-5353"]
+  ARCH_DECOMPOSE_050 -->|implements| f_plugin_scripts_reqmap_py_2424_5353
+  f_plugin_scripts_test_reqmap_py_7245_11732["plugin/scripts/test_reqmap.py:7245-11732"]
+  ARCH_DECOMPOSE_050 -->|tested-by| f_plugin_scripts_test_reqmap_py_7245_11732
   ARCH_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>ARCH-DESCRIPTION-057</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_DESCRIPTION_057 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1831_2336["plugin/scripts/reqmap.py:1831-2336"]
-  ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1831_2336
-  f_plugin_scripts_test_reqmap_py_7859["plugin/scripts/test_reqmap.py:7859"]
-  ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7859
+  f_plugin_scripts_reqmap_py_1817_2322["plugin/scripts/reqmap.py:1817-2322"]
+  ARCH_DESCRIPTION_057 -->|implements| f_plugin_scripts_reqmap_py_1817_2322
+  f_plugin_scripts_test_reqmap_py_7864["plugin/scripts/test_reqmap.py:7864"]
+  ARCH_DESCRIPTION_057 -->|tested-by| f_plugin_scripts_test_reqmap_py_7864
   ARCH_DESIGN_061["Advisory design review<br><small>ARCH-DESIGN-061</small>"]
-  f_plugin_scripts_reqmap_py_9224_9755["plugin/scripts/reqmap.py:9224-9755"]
-  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_9224_9755
-  f_plugin_scripts_test_reqmap_py_8567_11727["plugin/scripts/test_reqmap.py:8567-11727"]
-  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_py_8567_11727
+  f_plugin_scripts_reqmap_py_9245_9776["plugin/scripts/reqmap.py:9245-9776"]
+  ARCH_DESIGN_061 -->|implements| f_plugin_scripts_reqmap_py_9245_9776
+  f_plugin_scripts_test_reqmap_py_8572_11732["plugin/scripts/test_reqmap.py:8572-11732"]
+  ARCH_DESIGN_061 -->|tested-by| f_plugin_scripts_test_reqmap_py_8572_11732
   ARCH_DOCBUNDLE_026["Untagged doc-bundle warning<br><small>ARCH-DOCBUNDLE-026</small>"]
-  f_plugin_scripts_reqmap_py_1566_2908["plugin/scripts/reqmap.py:1566-2908"]
-  ARCH_DOCBUNDLE_026 -->|implements| f_plugin_scripts_reqmap_py_1566_2908
-  f_plugin_scripts_test_reqmap_py_587["plugin/scripts/test_reqmap.py:587"]
-  ARCH_DOCBUNDLE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_587
+  f_plugin_scripts_reqmap_py_1563_2901["plugin/scripts/reqmap.py:1563-2901"]
+  ARCH_DOCBUNDLE_026 -->|implements| f_plugin_scripts_reqmap_py_1563_2901
+  f_plugin_scripts_test_reqmap_py_592["plugin/scripts/test_reqmap.py:592"]
+  ARCH_DOCBUNDLE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_592
   ARCH_DRIFT_003["Contract hashing & lock<br><small>ARCH-DRIFT-003</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_DRIFT_003 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1942_2879["plugin/scripts/reqmap.py:1942-2879"]
-  ARCH_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_1942_2879
-  f_plugin_scripts_test_reqmap_py_155_11670["plugin/scripts/test_reqmap.py:155-11670"]
-  ARCH_DRIFT_003 -->|tested-by| f_plugin_scripts_test_reqmap_py_155_11670
+  f_plugin_scripts_reqmap_py_1928_2872["plugin/scripts/reqmap.py:1928-2872"]
+  ARCH_DRIFT_003 -->|implements| f_plugin_scripts_reqmap_py_1928_2872
+  f_plugin_scripts_test_reqmap_py_160_11675["plugin/scripts/test_reqmap.py:160-11675"]
+  ARCH_DRIFT_003 -->|tested-by| f_plugin_scripts_test_reqmap_py_160_11675
   ARCH_DRIFTIMPACT_035["Drift blast-radius: name dependents<br><small>ARCH-DRIFTIMPACT-035</small>"]
-  f_plugin_scripts_reqmap_py_2879["plugin/scripts/reqmap.py:2879"]
-  ARCH_DRIFTIMPACT_035 -->|implements| f_plugin_scripts_reqmap_py_2879
-  f_plugin_scripts_test_reqmap_py_802_10058["plugin/scripts/test_reqmap.py:802-10058"]
-  ARCH_DRIFTIMPACT_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_802_10058
+  f_plugin_scripts_reqmap_py_2872["plugin/scripts/reqmap.py:2872"]
+  ARCH_DRIFTIMPACT_035 -->|implements| f_plugin_scripts_reqmap_py_2872
+  f_plugin_scripts_test_reqmap_py_807_10063["plugin/scripts/test_reqmap.py:807-10063"]
+  ARCH_DRIFTIMPACT_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_807_10063
   ARCH_EXCALIDRAW_030["Excalidraw scene builder — core API<br><small>ARCH-EXCALIDRAW-030</small>"]
   f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2["plugin/skills/excalidraw-diagram/scripts/excalidraw_builder.py:2"]
   ARCH_EXCALIDRAW_030 -->|implements| f_plugin_skills_excalidraw_diagram_scripts_excalidraw_builder_py_2
@@ -615,196 +617,196 @@ graph LR
   f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4["plugin/skills/excalidraw-diagram/scripts/test_excalidraw.py:4"]
   ARCH_EXCALIDRAW_032 -->|tested-by| f_plugin_skills_excalidraw_diagram_scripts_test_excalidraw_py_4
   ARCH_EXTRACT_008["Legacy extraction<br><small>ARCH-EXTRACT-008</small>"]
-  f_plugin_scripts_reqmap_py_3490_3770["plugin/scripts/reqmap.py:3490-3770"]
-  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_py_3490_3770
-  f_plugin_scripts_test_reqmap_py_1056_9866["plugin/scripts/test_reqmap.py:1056-9866"]
-  ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_py_1056_9866
+  f_plugin_scripts_reqmap_py_3506_3786["plugin/scripts/reqmap.py:3506-3786"]
+  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_py_3506_3786
+  f_plugin_scripts_test_reqmap_py_1061_9871["plugin/scripts/test_reqmap.py:1061-9871"]
+  ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_py_1061_9871
   ARCH_FANOUT_052["Hierarchy breadth<br><small>ARCH-FANOUT-052</small>"]
-  f_plugin_scripts_reqmap_py_5179_5363["plugin/scripts/reqmap.py:5179-5363"]
-  ARCH_FANOUT_052 -->|implements| f_plugin_scripts_reqmap_py_5179_5363
-  f_plugin_scripts_test_reqmap_py_7483_9666["plugin/scripts/test_reqmap.py:7483-9666"]
-  ARCH_FANOUT_052 -->|tested-by| f_plugin_scripts_test_reqmap_py_7483_9666
+  f_plugin_scripts_reqmap_py_5195_5379["plugin/scripts/reqmap.py:5195-5379"]
+  ARCH_FANOUT_052 -->|implements| f_plugin_scripts_reqmap_py_5195_5379
+  f_plugin_scripts_test_reqmap_py_7488_9671["plugin/scripts/test_reqmap.py:7488-9671"]
+  ARCH_FANOUT_052 -->|tested-by| f_plugin_scripts_test_reqmap_py_7488_9671
   ARCH_FINDINGS_010["Open-findings report<br><small>ARCH-FINDINGS-010</small>"]
-  f_plugin_scripts_reqmap_py_4087_6874["plugin/scripts/reqmap.py:4087-6874"]
-  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_py_4087_6874
-  f_plugin_scripts_test_reqmap_py_1280_9310["plugin/scripts/test_reqmap.py:1280-9310"]
-  ARCH_FINDINGS_010 -->|tested-by| f_plugin_scripts_test_reqmap_py_1280_9310
+  f_plugin_scripts_reqmap_py_4103_6895["plugin/scripts/reqmap.py:4103-6895"]
+  ARCH_FINDINGS_010 -->|implements| f_plugin_scripts_reqmap_py_4103_6895
+  f_plugin_scripts_test_reqmap_py_1285_9315["plugin/scripts/test_reqmap.py:1285-9315"]
+  ARCH_FINDINGS_010 -->|tested-by| f_plugin_scripts_test_reqmap_py_1285_9315
   ARCH_HEALTH_017["Corpus health snapshot<br><small>ARCH-HEALTH-017</small>"]
-  f_plugin_scripts_reqmap_py_3022_6293["plugin/scripts/reqmap.py:3022-6293"]
-  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_py_3022_6293
-  f_plugin_scripts_test_reqmap_py_3624_11727["plugin/scripts/test_reqmap.py:3624-11727"]
-  ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_py_3624_11727
+  f_plugin_scripts_reqmap_py_3015_6314["plugin/scripts/reqmap.py:3015-6314"]
+  ARCH_HEALTH_017 -->|implements| f_plugin_scripts_reqmap_py_3015_6314
+  f_plugin_scripts_test_reqmap_py_3629_11732["plugin/scripts/test_reqmap.py:3629-11732"]
+  ARCH_HEALTH_017 -->|tested-by| f_plugin_scripts_test_reqmap_py_3629_11732
   ARCH_IMPLEMENT_063["The brief for implementing a requirement<br><small>ARCH-IMPLEMENT-063</small>"]
-  f_plugin_scripts_reqmap_py_8443_8464["plugin/scripts/reqmap.py:8443-8464"]
-  ARCH_IMPLEMENT_063 -->|implements| f_plugin_scripts_reqmap_py_8443_8464
-  f_plugin_scripts_test_reqmap_py_10660["plugin/scripts/test_reqmap.py:10660"]
-  ARCH_IMPLEMENT_063 -->|tested-by| f_plugin_scripts_test_reqmap_py_10660
+  f_plugin_scripts_reqmap_py_8464_8485["plugin/scripts/reqmap.py:8464-8485"]
+  ARCH_IMPLEMENT_063 -->|implements| f_plugin_scripts_reqmap_py_8464_8485
+  f_plugin_scripts_test_reqmap_py_10665["plugin/scripts/test_reqmap.py:10665"]
+  ARCH_IMPLEMENT_063 -->|tested-by| f_plugin_scripts_test_reqmap_py_10665
   ARCH_INIT_012["First-use bootstrap<br><small>ARCH-INIT-012</small>"]
-  f_plugin_scripts_reqmap_py_6480_6516["plugin/scripts/reqmap.py:6480-6516"]
-  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_6480_6516
-  f_plugin_scripts_test_reqmap_py_2567_11727["plugin/scripts/test_reqmap.py:2567-11727"]
-  ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_py_2567_11727
+  f_plugin_scripts_reqmap_py_6501_6537["plugin/scripts/reqmap.py:6501-6537"]
+  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_py_6501_6537
+  f_plugin_scripts_test_reqmap_py_2572_11732["plugin/scripts/test_reqmap.py:2572-11732"]
+  ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_py_2572_11732
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_LEVEL_051 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_149_4263["plugin/scripts/reqmap.py:149-4263"]
-  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_149_4263
-  f_plugin_scripts_test_reqmap_py_7440_9726["plugin/scripts/test_reqmap.py:7440-9726"]
-  ARCH_LEVEL_051 -->|tested-by| f_plugin_scripts_test_reqmap_py_7440_9726
+  f_plugin_scripts_reqmap_py_149_4279["plugin/scripts/reqmap.py:149-4279"]
+  ARCH_LEVEL_051 -->|implements| f_plugin_scripts_reqmap_py_149_4279
+  f_plugin_scripts_test_reqmap_py_7445_9731["plugin/scripts/test_reqmap.py:7445-9731"]
+  ARCH_LEVEL_051 -->|tested-by| f_plugin_scripts_test_reqmap_py_7445_9731
   ARCH_LEVELRETROFIT_066["Giving an existing corpus the three rungs<br><small>ARCH-LEVELRETROFIT-066</small>"]
-  f_plugin_scripts_reqmap_py_8926_9038["plugin/scripts/reqmap.py:8926-9038"]
-  ARCH_LEVELRETROFIT_066 -->|implements| f_plugin_scripts_reqmap_py_8926_9038
-  f_plugin_scripts_test_reqmap_py_3236["plugin/scripts/test_reqmap.py:3236"]
-  ARCH_LEVELRETROFIT_066 -->|tested-by| f_plugin_scripts_test_reqmap_py_3236
+  f_plugin_scripts_reqmap_py_8947_9059["plugin/scripts/reqmap.py:8947-9059"]
+  ARCH_LEVELRETROFIT_066 -->|implements| f_plugin_scripts_reqmap_py_8947_9059
+  f_plugin_scripts_test_reqmap_py_3241["plugin/scripts/test_reqmap.py:3241"]
+  ARCH_LEVELRETROFIT_066 -->|tested-by| f_plugin_scripts_test_reqmap_py_3241
   ARCH_LINT_014["Requirement readability linter<br><small>ARCH-LINT-014</small>"]
-  f_plugin_scripts_reqmap_py_4802_5337["plugin/scripts/reqmap.py:4802-5337"]
-  ARCH_LINT_014 -->|implements| f_plugin_scripts_reqmap_py_4802_5337
-  f_plugin_scripts_test_reqmap_py_2868["plugin/scripts/test_reqmap.py:2868"]
-  ARCH_LINT_014 -->|tested-by| f_plugin_scripts_test_reqmap_py_2868
+  f_plugin_scripts_reqmap_py_4818_5353["plugin/scripts/reqmap.py:4818-5353"]
+  ARCH_LINT_014 -->|implements| f_plugin_scripts_reqmap_py_4818_5353
+  f_plugin_scripts_test_reqmap_py_2873["plugin/scripts/test_reqmap.py:2873"]
+  ARCH_LINT_014 -->|tested-by| f_plugin_scripts_test_reqmap_py_2873
   ARCH_LINTCHECKS_025["Readability & scope checks<br><small>ARCH-LINTCHECKS-025</small>"]
-  f_plugin_scripts_reqmap_py_4831_5362["plugin/scripts/reqmap.py:4831-5362"]
-  ARCH_LINTCHECKS_025 -->|implements| f_plugin_scripts_reqmap_py_4831_5362
-  f_plugin_scripts_test_reqmap_py_2852_4632["plugin/scripts/test_reqmap.py:2852-4632"]
-  ARCH_LINTCHECKS_025 -->|tested-by| f_plugin_scripts_test_reqmap_py_2852_4632
+  f_plugin_scripts_reqmap_py_4847_5378["plugin/scripts/reqmap.py:4847-5378"]
+  ARCH_LINTCHECKS_025 -->|implements| f_plugin_scripts_reqmap_py_4847_5378
+  f_plugin_scripts_test_reqmap_py_2857_4637["plugin/scripts/test_reqmap.py:2857-4637"]
+  ARCH_LINTCHECKS_025 -->|tested-by| f_plugin_scripts_test_reqmap_py_2857_4637
   ARCH_MAP_007["Requirement graph (_map.json)<br><small>ARCH-MAP-007</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_MAP_007 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1792_7858["plugin/scripts/reqmap.py:1792-7858"]
-  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_1792_7858
-  f_plugin_scripts_test_reqmap_py_1385_11727["plugin/scripts/test_reqmap.py:1385-11727"]
-  ARCH_MAP_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1385_11727
+  f_plugin_scripts_reqmap_py_1778_7879["plugin/scripts/reqmap.py:1778-7879"]
+  ARCH_MAP_007 -->|implements| f_plugin_scripts_reqmap_py_1778_7879
+  f_plugin_scripts_test_reqmap_py_1390_11732["plugin/scripts/test_reqmap.py:1390-11732"]
+  ARCH_MAP_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1390_11732
   ARCH_MAPDIAGRAMS_055["Mermaid diagrams (_map.md)<br><small>ARCH-MAPDIAGRAMS-055</small>"]
-  f_plugin_scripts_reqmap_py_6974_7316["plugin/scripts/reqmap.py:6974-7316"]
-  ARCH_MAPDIAGRAMS_055 -->|implements| f_plugin_scripts_reqmap_py_6974_7316
-  f_plugin_scripts_test_reqmap_py_883_10092["plugin/scripts/test_reqmap.py:883-10092"]
-  ARCH_MAPDIAGRAMS_055 -->|tested-by| f_plugin_scripts_test_reqmap_py_883_10092
+  f_plugin_scripts_reqmap_py_6995_7337["plugin/scripts/reqmap.py:6995-7337"]
+  ARCH_MAPDIAGRAMS_055 -->|implements| f_plugin_scripts_reqmap_py_6995_7337
+  f_plugin_scripts_test_reqmap_py_888_10097["plugin/scripts/test_reqmap.py:888-10097"]
+  ARCH_MAPDIAGRAMS_055 -->|tested-by| f_plugin_scripts_test_reqmap_py_888_10097
   ARCH_MEMBERDRIFT_027["Reverse-direction member drift<br><small>ARCH-MEMBERDRIFT-027</small>"]
-  f_plugin_scripts_reqmap_py_2031_2892["plugin/scripts/reqmap.py:2031-2892"]
-  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_scripts_reqmap_py_2031_2892
-  f_plugin_scripts_test_reqmap_py_642["plugin/scripts/test_reqmap.py:642"]
-  ARCH_MEMBERDRIFT_027 -->|tested-by| f_plugin_scripts_test_reqmap_py_642
+  f_plugin_scripts_reqmap_py_2017_2885["plugin/scripts/reqmap.py:2017-2885"]
+  ARCH_MEMBERDRIFT_027 -->|implements| f_plugin_scripts_reqmap_py_2017_2885
+  f_plugin_scripts_test_reqmap_py_647["plugin/scripts/test_reqmap.py:647"]
+  ARCH_MEMBERDRIFT_027 -->|tested-by| f_plugin_scripts_test_reqmap_py_647
   ARCH_MODULEFILE_056["Several requirements in one file<br><small>ARCH-MODULEFILE-056</small>"]
-  f_plugin_scripts_reqmap_py_993_4590["plugin/scripts/reqmap.py:993-4590"]
-  ARCH_MODULEFILE_056 -->|implements| f_plugin_scripts_reqmap_py_993_4590
-  f_plugin_scripts_test_reqmap_py_7770["plugin/scripts/test_reqmap.py:7770"]
-  ARCH_MODULEFILE_056 -->|tested-by| f_plugin_scripts_test_reqmap_py_7770
+  f_plugin_scripts_reqmap_py_993_4606["plugin/scripts/reqmap.py:993-4606"]
+  ARCH_MODULEFILE_056 -->|implements| f_plugin_scripts_reqmap_py_993_4606
+  f_plugin_scripts_test_reqmap_py_7775["plugin/scripts/test_reqmap.py:7775"]
+  ARCH_MODULEFILE_056 -->|tested-by| f_plugin_scripts_test_reqmap_py_7775
   ARCH_NEW_004["Scaffold a requirement<br><small>ARCH-NEW-004</small>"]
-  f_plugin_scripts_reqmap_py_3291_3313["plugin/scripts/reqmap.py:3291-3313"]
-  ARCH_NEW_004 -->|implements| f_plugin_scripts_reqmap_py_3291_3313
-  f_plugin_scripts_test_reqmap_py_1140_6881["plugin/scripts/test_reqmap.py:1140-6881"]
-  ARCH_NEW_004 -->|tested-by| f_plugin_scripts_test_reqmap_py_1140_6881
+  f_plugin_scripts_reqmap_py_3287_3325["plugin/scripts/reqmap.py:3287-3325"]
+  ARCH_NEW_004 -->|implements| f_plugin_scripts_reqmap_py_3287_3325
+  f_plugin_scripts_test_reqmap_py_1145_11898["plugin/scripts/test_reqmap.py:1145-11898"]
+  ARCH_NEW_004 -->|tested-by| f_plugin_scripts_test_reqmap_py_1145_11898
   ARCH_NEXT_013["What-should-I-do-next report<br><small>ARCH-NEXT-013</small>"]
-  f_plugin_scripts_reqmap_py_1606_4662["plugin/scripts/reqmap.py:1606-4662"]
-  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1606_4662
-  f_plugin_scripts_test_reqmap_py_2421_9004["plugin/scripts/test_reqmap.py:2421-9004"]
-  ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_py_2421_9004
+  f_plugin_scripts_reqmap_py_1603_4678["plugin/scripts/reqmap.py:1603-4678"]
+  ARCH_NEXT_013 -->|implements| f_plugin_scripts_reqmap_py_1603_4678
+  f_plugin_scripts_test_reqmap_py_2426_9009["plugin/scripts/test_reqmap.py:2426-9009"]
+  ARCH_NEXT_013 -->|tested-by| f_plugin_scripts_test_reqmap_py_2426_9009
   ARCH_ORPHANCODE_034["Orphan-code warning<br><small>ARCH-ORPHANCODE-034</small>"]
-  f_plugin_scripts_reqmap_py_1630_2939["plugin/scripts/reqmap.py:1630-2939"]
-  ARCH_ORPHANCODE_034 -->|implements| f_plugin_scripts_reqmap_py_1630_2939
-  f_plugin_scripts_test_reqmap_py_742_10082["plugin/scripts/test_reqmap.py:742-10082"]
-  ARCH_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_py_742_10082
+  f_plugin_scripts_reqmap_py_1627_2932["plugin/scripts/reqmap.py:1627-2932"]
+  ARCH_ORPHANCODE_034 -->|implements| f_plugin_scripts_reqmap_py_1627_2932
+  f_plugin_scripts_test_reqmap_py_747_10087["plugin/scripts/test_reqmap.py:747-10087"]
+  ARCH_ORPHANCODE_034 -->|tested-by| f_plugin_scripts_test_reqmap_py_747_10087
   ARCH_PAGES_021["Publish & gate the GitHub Pages map copy<br><small>ARCH-PAGES-021</small>"]
-  f_plugin_scripts_reqmap_py_4523_7876["plugin/scripts/reqmap.py:4523-7876"]
-  ARCH_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_4523_7876
-  f_plugin_scripts_test_reqmap_py_1505_2263["plugin/scripts/test_reqmap.py:1505-2263"]
-  ARCH_PAGES_021 -->|tested-by| f_plugin_scripts_test_reqmap_py_1505_2263
+  f_plugin_scripts_reqmap_py_4539_7897["plugin/scripts/reqmap.py:4539-7897"]
+  ARCH_PAGES_021 -->|implements| f_plugin_scripts_reqmap_py_4539_7897
+  f_plugin_scripts_test_reqmap_py_1510_2268["plugin/scripts/test_reqmap.py:1510-2268"]
+  ARCH_PAGES_021 -->|tested-by| f_plugin_scripts_test_reqmap_py_1510_2268
   ARCH_PARSE_001["Requirement reading<br><small>ARCH-PARSE-001</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_PARSE_001 -->|generated-from| f_docs_full_architecture_html_4
   f_plugin_scripts_reqmap_py_813_1012["plugin/scripts/reqmap.py:813-1012"]
   ARCH_PARSE_001 -->|implements| f_plugin_scripts_reqmap_py_813_1012
-  f_plugin_scripts_test_reqmap_py_52_11727["plugin/scripts/test_reqmap.py:52-11727"]
-  ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_52_11727
+  f_plugin_scripts_test_reqmap_py_57_11732["plugin/scripts/test_reqmap.py:57-11732"]
+  ARCH_PARSE_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_57_11732
   ARCH_PIPE_046["A closed output pipe ends a command quietly<br><small>ARCH-PIPE-046</small>"]
-  f_plugin_scripts_reqmap_py_10203_10222["plugin/scripts/reqmap.py:10203-10222"]
-  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_10203_10222
-  f_plugin_scripts_test_reqmap_py_7141["plugin/scripts/test_reqmap.py:7141"]
-  ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_py_7141
+  f_plugin_scripts_reqmap_py_10224_10243["plugin/scripts/reqmap.py:10224-10243"]
+  ARCH_PIPE_046 -->|implements| f_plugin_scripts_reqmap_py_10224_10243
+  f_plugin_scripts_test_reqmap_py_7146["plugin/scripts/test_reqmap.py:7146"]
+  ARCH_PIPE_046 -->|tested-by| f_plugin_scripts_test_reqmap_py_7146
   ARCH_PROMOTE_011["Confirmation is a human's answer, and an edit takes it back<br><small>ARCH-PROMOTE-011</small>"]
-  f_plugin_scripts_reqmap_py_3428_3454["plugin/scripts/reqmap.py:3428-3454"]
-  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_3428_3454
-  f_plugin_scripts_test_reqmap_py_2366_11524["plugin/scripts/test_reqmap.py:2366-11524"]
-  ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2366_11524
+  f_plugin_scripts_reqmap_py_3444_3470["plugin/scripts/reqmap.py:3444-3470"]
+  ARCH_PROMOTE_011 -->|implements| f_plugin_scripts_reqmap_py_3444_3470
+  f_plugin_scripts_test_reqmap_py_2371_11529["plugin/scripts/test_reqmap.py:2371-11529"]
+  ARCH_PROMOTE_011 -->|tested-by| f_plugin_scripts_test_reqmap_py_2371_11529
   ARCH_PROMOTE_TODO_001["Promote a TODO item into a requirement draft<br><small>ARCH-PROMOTE-TODO-001</small>"]
-  f_plugin_scripts_reqmap_py_3337_3396["plugin/scripts/reqmap.py:3337-3396"]
-  ARCH_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_3337_3396
-  f_plugin_scripts_test_reqmap_py_4788_9946["plugin/scripts/test_reqmap.py:4788-9946"]
-  ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_4788_9946
+  f_plugin_scripts_reqmap_py_3351_3412["plugin/scripts/reqmap.py:3351-3412"]
+  ARCH_PROMOTE_TODO_001 -->|implements| f_plugin_scripts_reqmap_py_3351_3412
+  f_plugin_scripts_test_reqmap_py_4793_9951["plugin/scripts/test_reqmap.py:4793-9951"]
+  ARCH_PROMOTE_TODO_001 -->|tested-by| f_plugin_scripts_test_reqmap_py_4793_9951
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
-  f_plugin_scripts_reqmap_py_3498_3642["plugin/scripts/reqmap.py:3498-3642"]
-  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_py_3498_3642
-  f_plugin_scripts_test_reqmap_py_840_9325["plugin/scripts/test_reqmap.py:840-9325"]
-  ARCH_PROSE_024 -->|tested-by| f_plugin_scripts_test_reqmap_py_840_9325
+  f_plugin_scripts_reqmap_py_3514_3658["plugin/scripts/reqmap.py:3514-3658"]
+  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_py_3514_3658
+  f_plugin_scripts_test_reqmap_py_845_9330["plugin/scripts/test_reqmap.py:845-9330"]
+  ARCH_PROSE_024 -->|tested-by| f_plugin_scripts_test_reqmap_py_845_9330
   ARCH_PYFLOOR_040["Declared Python support floor<br><small>ARCH-PYFLOOR-040</small>"]
   f__github_workflows_ci_yml_3[".github/workflows/ci.yml:3"]
   ARCH_PYFLOOR_040 -->|implements| f__github_workflows_ci_yml_3
   f_plugin_scripts_reqmap_py_236["plugin/scripts/reqmap.py:236"]
   ARCH_PYFLOOR_040 -->|implements| f_plugin_scripts_reqmap_py_236
-  f_plugin_scripts_test_reqmap_py_6035_9740["plugin/scripts/test_reqmap.py:6035-9740"]
-  ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_6035_9740
+  f_plugin_scripts_test_reqmap_py_6040_9745["plugin/scripts/test_reqmap.py:6040-9745"]
+  ARCH_PYFLOOR_040 -->|tested-by| f_plugin_scripts_test_reqmap_py_6040_9745
   ARCH_REDUNDANCY_058["Requirements that say the same thing<br><small>ARCH-REDUNDANCY-058</small>"]
-  f_plugin_scripts_reqmap_py_5587_10113["plugin/scripts/reqmap.py:5587-10113"]
-  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5587_10113
-  f_plugin_scripts_test_reqmap_py_7923["plugin/scripts/test_reqmap.py:7923"]
-  ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7923
+  f_plugin_scripts_reqmap_py_5603_10134["plugin/scripts/reqmap.py:5603-10134"]
+  ARCH_REDUNDANCY_058 -->|implements| f_plugin_scripts_reqmap_py_5603_10134
+  f_plugin_scripts_test_reqmap_py_7928["plugin/scripts/test_reqmap.py:7928"]
+  ARCH_REDUNDANCY_058 -->|tested-by| f_plugin_scripts_test_reqmap_py_7928
   ARCH_REGISTRYLAG_035["Registry-lag signal — commits since the requirements dir was last touched<br><small>ARCH-REGISTRYLAG-035</small>"]
-  f_plugin_scripts_reqmap_py_6176_6330["plugin/scripts/reqmap.py:6176-6330"]
-  ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_6176_6330
-  f_plugin_scripts_test_reqmap_py_3776["plugin/scripts/test_reqmap.py:3776"]
-  ARCH_REGISTRYLAG_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_3776
+  f_plugin_scripts_reqmap_py_6197_6351["plugin/scripts/reqmap.py:6197-6351"]
+  ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_py_6197_6351
+  f_plugin_scripts_test_reqmap_py_3781["plugin/scripts/test_reqmap.py:3781"]
+  ARCH_REGISTRYLAG_035 -->|tested-by| f_plugin_scripts_test_reqmap_py_3781
   ARCH_REPRO_041["Committed build artifacts stay re-derivable<br><small>ARCH-REPRO-041</small>"]
   f__github_workflows_ci_yml_4[".github/workflows/ci.yml:4"]
   ARCH_REPRO_041 -->|implements| f__github_workflows_ci_yml_4
   ARCH_RETIRE_064["Taking a requirement out of service<br><small>ARCH-RETIRE-064</small>"]
-  f_plugin_scripts_reqmap_py_8549_8665["plugin/scripts/reqmap.py:8549-8665"]
-  ARCH_RETIRE_064 -->|implements| f_plugin_scripts_reqmap_py_8549_8665
-  f_plugin_scripts_test_reqmap_py_8000_11727["plugin/scripts/test_reqmap.py:8000-11727"]
-  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_py_8000_11727
+  f_plugin_scripts_reqmap_py_8570_8686["plugin/scripts/reqmap.py:8570-8686"]
+  ARCH_RETIRE_064 -->|implements| f_plugin_scripts_reqmap_py_8570_8686
+  f_plugin_scripts_test_reqmap_py_8005_11732["plugin/scripts/test_reqmap.py:8005-11732"]
+  ARCH_RETIRE_064 -->|tested-by| f_plugin_scripts_test_reqmap_py_8005_11732
   ARCH_REVIEW_022["AI requirement-quality review (deterministic plan + advisory pass)<br><small>ARCH-REVIEW-022</small>"]
-  f_plugin_scripts_reqmap_py_9092["plugin/scripts/reqmap.py:9092"]
-  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_9092
-  f_plugin_scripts_test_reqmap_py_4874["plugin/scripts/test_reqmap.py:4874"]
-  ARCH_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_py_4874
+  f_plugin_scripts_reqmap_py_9113["plugin/scripts/reqmap.py:9113"]
+  ARCH_REVIEW_022 -->|implements| f_plugin_scripts_reqmap_py_9113
+  f_plugin_scripts_test_reqmap_py_4879["plugin/scripts/test_reqmap.py:4879"]
+  ARCH_REVIEW_022 -->|tested-by| f_plugin_scripts_test_reqmap_py_4879
   f_plugin_skills_requirement_quality_review_SKILL_md_6["plugin/skills/requirement-quality-review/SKILL.md:6"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_md_6
   f_plugin_skills_requirement_quality_review_SKILL_universal_md_9["plugin/skills/requirement-quality-review/SKILL.universal.md:9"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_9
   ARCH_REVIEWEDSCORE_109["Reviewed-only health score<br><small>ARCH-REVIEWEDSCORE-109</small>"]
-  f_plugin_scripts_reqmap_py_6268_6279["plugin/scripts/reqmap.py:6268-6279"]
-  ARCH_REVIEWEDSCORE_109 -->|implements| f_plugin_scripts_reqmap_py_6268_6279
-  f_plugin_scripts_test_reqmap_py_3624["plugin/scripts/test_reqmap.py:3624"]
-  ARCH_REVIEWEDSCORE_109 -->|tested-by| f_plugin_scripts_test_reqmap_py_3624
+  f_plugin_scripts_reqmap_py_6289_6300["plugin/scripts/reqmap.py:6289-6300"]
+  ARCH_REVIEWEDSCORE_109 -->|implements| f_plugin_scripts_reqmap_py_6289_6300
+  f_plugin_scripts_test_reqmap_py_3629["plugin/scripts/test_reqmap.py:3629"]
+  ARCH_REVIEWEDSCORE_109 -->|tested-by| f_plugin_scripts_test_reqmap_py_3629
   ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
-  f_plugin_scripts_reqmap_py_4316_6336["plugin/scripts/reqmap.py:4316-6336"]
-  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_py_4316_6336
-  f_plugin_scripts_test_reqmap_py_6619_10023["plugin/scripts/test_reqmap.py:6619-10023"]
-  ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_py_6619_10023
+  f_plugin_scripts_reqmap_py_4332_6357["plugin/scripts/reqmap.py:4332-6357"]
+  ARCH_ROADMAP_038 -->|implements| f_plugin_scripts_reqmap_py_4332_6357
+  f_plugin_scripts_test_reqmap_py_6624_10028["plugin/scripts/test_reqmap.py:6624-10028"]
+  ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_py_6624_10028
   ARCH_RULES_059["The gate rule registry<br><small>ARCH-RULES-059</small>"]
-  f_plugin_scripts_reqmap_py_864_3046["plugin/scripts/reqmap.py:864-3046"]
-  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_py_864_3046
-  f_plugin_scripts_test_reqmap_py_8043_11043["plugin/scripts/test_reqmap.py:8043-11043"]
-  ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_py_8043_11043
+  f_plugin_scripts_reqmap_py_864_3039["plugin/scripts/reqmap.py:864-3039"]
+  ARCH_RULES_059 -->|implements| f_plugin_scripts_reqmap_py_864_3039
+  f_plugin_scripts_test_reqmap_py_8048_11048["plugin/scripts/test_reqmap.py:8048-11048"]
+  ARCH_RULES_059 -->|tested-by| f_plugin_scripts_test_reqmap_py_8048_11048
   ARCH_SCAN_002["Member discovery<br><small>ARCH-SCAN-002</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_SCAN_002 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_120_1659["plugin/scripts/reqmap.py:120-1659"]
-  ARCH_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_120_1659
-  f_plugin_scripts_test_reqmap_py_342_7032["plugin/scripts/test_reqmap.py:342-7032"]
-  ARCH_SCAN_002 -->|tested-by| f_plugin_scripts_test_reqmap_py_342_7032
+  f_plugin_scripts_reqmap_py_120_1656["plugin/scripts/reqmap.py:120-1656"]
+  ARCH_SCAN_002 -->|implements| f_plugin_scripts_reqmap_py_120_1656
+  f_plugin_scripts_test_reqmap_py_347_11836["plugin/scripts/test_reqmap.py:347-11836"]
+  ARCH_SCAN_002 -->|tested-by| f_plugin_scripts_test_reqmap_py_347_11836
   ARCH_SCANCACHE_023["Opt-in scan cache<br><small>ARCH-SCANCACHE-023</small>"]
-  f_plugin_scripts_reqmap_py_1252_1325["plugin/scripts/reqmap.py:1252-1325"]
-  ARCH_SCANCACHE_023 -->|implements| f_plugin_scripts_reqmap_py_1252_1325
-  f_plugin_scripts_test_reqmap_py_4935["plugin/scripts/test_reqmap.py:4935"]
-  ARCH_SCANCACHE_023 -->|tested-by| f_plugin_scripts_test_reqmap_py_4935
+  f_plugin_scripts_reqmap_py_1259_1322["plugin/scripts/reqmap.py:1259-1322"]
+  ARCH_SCANCACHE_023 -->|implements| f_plugin_scripts_reqmap_py_1259_1322
+  f_plugin_scripts_test_reqmap_py_4940["plugin/scripts/test_reqmap.py:4940"]
+  ARCH_SCANCACHE_023 -->|tested-by| f_plugin_scripts_test_reqmap_py_4940
   ARCH_SEARCH_036["Free-text requirement search<br><small>ARCH-SEARCH-036</small>"]
   f_app_scripts_ssr_smoke_jsx_2["app/scripts/ssr-smoke.jsx:2"]
   ARCH_SEARCH_036 -->|tested-by| f_app_scripts_ssr_smoke_jsx_2
   f_app_src_lib_search_js_1["app/src/lib/search.js:1"]
   ARCH_SEARCH_036 -->|implements| f_app_src_lib_search_js_1
-  f_plugin_scripts_reqmap_py_5764_5812["plugin/scripts/reqmap.py:5764-5812"]
-  ARCH_SEARCH_036 -->|implements| f_plugin_scripts_reqmap_py_5764_5812
-  f_plugin_scripts_test_reqmap_py_3544_11390["plugin/scripts/test_reqmap.py:3544-11390"]
-  ARCH_SEARCH_036 -->|tested-by| f_plugin_scripts_test_reqmap_py_3544_11390
+  f_plugin_scripts_reqmap_py_5780_5828["plugin/scripts/reqmap.py:5780-5828"]
+  ARCH_SEARCH_036 -->|implements| f_plugin_scripts_reqmap_py_5780_5828
+  f_plugin_scripts_test_reqmap_py_3549_11395["plugin/scripts/test_reqmap.py:3549-11395"]
+  ARCH_SEARCH_036 -->|tested-by| f_plugin_scripts_test_reqmap_py_3549_11395
   ARCH_SELFGATE_039["This repo's own gate wiring<br><small>ARCH-SELFGATE-039</small>"]
   f_sync_reqmap_sh_2["sync_reqmap.sh:2"]
   ARCH_SELFGATE_039 -->|implements| f_sync_reqmap_sh_2
@@ -816,8 +818,8 @@ graph LR
   ARCH_SELFGATE_039 -->|implements| f__github_workflows_ci_yml_2
   f_check_action_yml_2["check/action.yml:2"]
   ARCH_SELFGATE_039 -->|implements| f_check_action_yml_2
-  f_plugin_scripts_test_reqmap_py_11117["plugin/scripts/test_reqmap.py:11117"]
-  ARCH_SELFGATE_039 -->|tested-by| f_plugin_scripts_test_reqmap_py_11117
+  f_plugin_scripts_test_reqmap_py_11122["plugin/scripts/test_reqmap.py:11122"]
+  ARCH_SELFGATE_039 -->|tested-by| f_plugin_scripts_test_reqmap_py_11122
   f_scripts_check_engine_bump_py_2["scripts/check_engine_bump.py:2"]
   ARCH_SELFGATE_039 -->|implements| f_scripts_check_engine_bump_py_2
   f_scripts_check_retired_verbs_py_2["scripts/check_retired_verbs.py:2"]
@@ -829,20 +831,20 @@ graph LR
   f_scripts_test_check_versions_py_93_100["scripts/test_check_versions.py:93-100"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_93_100
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]
-  f_plugin_scripts_reqmap_py_5421["plugin/scripts/reqmap.py:5421"]
-  ARCH_SHOW_015 -->|implements| f_plugin_scripts_reqmap_py_5421
-  f_plugin_scripts_test_reqmap_py_3381_9178["plugin/scripts/test_reqmap.py:3381-9178"]
-  ARCH_SHOW_015 -->|tested-by| f_plugin_scripts_test_reqmap_py_3381_9178
+  f_plugin_scripts_reqmap_py_5437["plugin/scripts/reqmap.py:5437"]
+  ARCH_SHOW_015 -->|implements| f_plugin_scripts_reqmap_py_5437
+  f_plugin_scripts_test_reqmap_py_3386_9183["plugin/scripts/test_reqmap.py:3386-9183"]
+  ARCH_SHOW_015 -->|tested-by| f_plugin_scripts_test_reqmap_py_3386_9183
   ARCH_SIMILAR_016["Duplicate-capability detector<br><small>ARCH-SIMILAR-016</small>"]
-  f_plugin_scripts_reqmap_py_5511_5685["plugin/scripts/reqmap.py:5511-5685"]
-  ARCH_SIMILAR_016 -->|implements| f_plugin_scripts_reqmap_py_5511_5685
-  f_plugin_scripts_test_reqmap_py_3463_9748["plugin/scripts/test_reqmap.py:3463-9748"]
-  ARCH_SIMILAR_016 -->|tested-by| f_plugin_scripts_test_reqmap_py_3463_9748
+  f_plugin_scripts_reqmap_py_5527_5701["plugin/scripts/reqmap.py:5527-5701"]
+  ARCH_SIMILAR_016 -->|implements| f_plugin_scripts_reqmap_py_5527_5701
+  f_plugin_scripts_test_reqmap_py_3468_9753["plugin/scripts/test_reqmap.py:3468-9753"]
+  ARCH_SIMILAR_016 -->|tested-by| f_plugin_scripts_test_reqmap_py_3468_9753
   ARCH_SITE_026["Generate & maintain a project presentation page<br><small>ARCH-SITE-026</small>"]
-  f_plugin_scripts_reqmap_py_6544_7941["plugin/scripts/reqmap.py:6544-7941"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_6544_7941
-  f_plugin_scripts_test_reqmap_py_5657["plugin/scripts/test_reqmap.py:5657"]
-  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_5657
+  f_plugin_scripts_reqmap_py_6565_7962["plugin/scripts/reqmap.py:6565-7962"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_py_6565_7962
+  f_plugin_scripts_test_reqmap_py_5662["plugin/scripts/test_reqmap.py:5662"]
+  ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_py_5662
   ARCH_STALEENGINE_043["Stale vendored engine, reported in CI<br><small>ARCH-STALEENGINE-043</small>"]
   f_check_action_yml_3["check/action.yml:3"]
   ARCH_STALEENGINE_043 -->|implements| f_check_action_yml_3
@@ -851,41 +853,41 @@ graph LR
   f_scripts_test_engine_staleness_py_49_154["scripts/test_engine_staleness.py:49-154"]
   ARCH_STALEENGINE_043 -->|tested-by| f_scripts_test_engine_staleness_py_49_154
   ARCH_SUGGESTVERIFIES_047["Suggest per-criterion 'verifies:' tags<br><small>ARCH-SUGGESTVERIFIES-047</small>"]
-  f_plugin_scripts_reqmap_py_8046_8179["plugin/scripts/reqmap.py:8046-8179"]
-  ARCH_SUGGESTVERIFIES_047 -->|implements| f_plugin_scripts_reqmap_py_8046_8179
-  f_plugin_scripts_test_reqmap_py_4382_11727["plugin/scripts/test_reqmap.py:4382-11727"]
-  ARCH_SUGGESTVERIFIES_047 -->|tested-by| f_plugin_scripts_test_reqmap_py_4382_11727
+  f_plugin_scripts_reqmap_py_8067_8200["plugin/scripts/reqmap.py:8067-8200"]
+  ARCH_SUGGESTVERIFIES_047 -->|implements| f_plugin_scripts_reqmap_py_8067_8200
+  f_plugin_scripts_test_reqmap_py_4387_11732["plugin/scripts/test_reqmap.py:4387-11732"]
+  ARCH_SUGGESTVERIFIES_047 -->|tested-by| f_plugin_scripts_test_reqmap_py_4387_11732
   ARCH_TESTLINK_018["Test-link integrity check<br><small>ARCH-TESTLINK-018</small>"]
-  f_plugin_scripts_reqmap_py_2462_2734["plugin/scripts/reqmap.py:2462-2734"]
-  ARCH_TESTLINK_018 -->|implements| f_plugin_scripts_reqmap_py_2462_2734
-  f_plugin_scripts_test_reqmap_py_3975_9693["plugin/scripts/test_reqmap.py:3975-9693"]
-  ARCH_TESTLINK_018 -->|tested-by| f_plugin_scripts_test_reqmap_py_3975_9693
+  f_plugin_scripts_reqmap_py_2448_2727["plugin/scripts/reqmap.py:2448-2727"]
+  ARCH_TESTLINK_018 -->|implements| f_plugin_scripts_reqmap_py_2448_2727
+  f_plugin_scripts_test_reqmap_py_3980_9698["plugin/scripts/test_reqmap.py:3980-9698"]
+  ARCH_TESTLINK_018 -->|tested-by| f_plugin_scripts_test_reqmap_py_3980_9698
   ARCH_TRACE_020["Upstream traceability<br><small>ARCH-TRACE-020</small>"]
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_TRACE_020 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_2427_5457["plugin/scripts/reqmap.py:2427-5457"]
-  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2427_5457
-  f_plugin_scripts_test_reqmap_py_4228_4664["plugin/scripts/test_reqmap.py:4228-4664"]
-  ARCH_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_4228_4664
+  f_plugin_scripts_reqmap_py_2413_5473["plugin/scripts/reqmap.py:2413-5473"]
+  ARCH_TRACE_020 -->|implements| f_plugin_scripts_reqmap_py_2413_5473
+  f_plugin_scripts_test_reqmap_py_4233_4669["plugin/scripts/test_reqmap.py:4233-4669"]
+  ARCH_TRACE_020 -->|tested-by| f_plugin_scripts_test_reqmap_py_4233_4669
   ARCH_TRACKED_042["Untracked members reported<br><small>ARCH-TRACKED-042</small>"]
-  f_plugin_scripts_reqmap_py_1472_2916["plugin/scripts/reqmap.py:1472-2916"]
-  ARCH_TRACKED_042 -->|implements| f_plugin_scripts_reqmap_py_1472_2916
-  f_plugin_scripts_test_reqmap_py_5923["plugin/scripts/test_reqmap.py:5923"]
-  ARCH_TRACKED_042 -->|tested-by| f_plugin_scripts_test_reqmap_py_5923
+  f_plugin_scripts_reqmap_py_1469_2909["plugin/scripts/reqmap.py:1469-2909"]
+  ARCH_TRACKED_042 -->|implements| f_plugin_scripts_reqmap_py_1469_2909
+  f_plugin_scripts_test_reqmap_py_5928["plugin/scripts/test_reqmap.py:5928"]
+  ARCH_TRACKED_042 -->|tested-by| f_plugin_scripts_test_reqmap_py_5928
   ARCH_TRANSLATE_044["Reading a cached requirement translation into the map<br><small>ARCH-TRANSLATE-044</small>"]
   f_app_src_lib_i18n_jsx_2["app/src/lib/i18n.jsx:2"]
   ARCH_TRANSLATE_044 -->|implements| f_app_src_lib_i18n_jsx_2
   f_app_src_views_SpecView_jsx_2["app/src/views/SpecView.jsx:2"]
   ARCH_TRANSLATE_044 -->|implements| f_app_src_views_SpecView_jsx_2
-  f_plugin_scripts_reqmap_py_2816_4495["plugin/scripts/reqmap.py:2816-4495"]
-  ARCH_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_2816_4495
-  f_plugin_scripts_test_reqmap_py_3147_11469["plugin/scripts/test_reqmap.py:3147-11469"]
-  ARCH_TRANSLATE_044 -->|tested-by| f_plugin_scripts_test_reqmap_py_3147_11469
+  f_plugin_scripts_reqmap_py_2809_4511["plugin/scripts/reqmap.py:2809-4511"]
+  ARCH_TRANSLATE_044 -->|implements| f_plugin_scripts_reqmap_py_2809_4511
+  f_plugin_scripts_test_reqmap_py_3152_11474["plugin/scripts/test_reqmap.py:3152-11474"]
+  ARCH_TRANSLATE_044 -->|tested-by| f_plugin_scripts_test_reqmap_py_3152_11474
   ARCH_UNSCANNEDTAG_045["Tags in unscanned file types reported<br><small>ARCH-UNSCANNEDTAG-045</small>"]
-  f_plugin_scripts_reqmap_py_1515_2928["plugin/scripts/reqmap.py:1515-2928"]
-  ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_py_1515_2928
-  f_plugin_scripts_test_reqmap_py_6979["plugin/scripts/test_reqmap.py:6979"]
-  ARCH_UNSCANNEDTAG_045 -->|tested-by| f_plugin_scripts_test_reqmap_py_6979
+  f_plugin_scripts_reqmap_py_1512_2921["plugin/scripts/reqmap.py:1512-2921"]
+  ARCH_UNSCANNEDTAG_045 -->|implements| f_plugin_scripts_reqmap_py_1512_2921
+  f_plugin_scripts_test_reqmap_py_6984["plugin/scripts/test_reqmap.py:6984"]
+  ARCH_UNSCANNEDTAG_045 -->|tested-by| f_plugin_scripts_test_reqmap_py_6984
   ARCH_VIEWER_007["Self-contained HTML map viewer<br><small>ARCH-VIEWER-007</small>"]
   f_app_vite_viewer_config_js_1["app/vite.viewer.config.js:1"]
   ARCH_VIEWER_007 -->|implements| f_app_vite_viewer_config_js_1
@@ -931,22 +933,22 @@ graph LR
   ARCH_VIEWER_007 -->|implements| f_app_src_views_SpecView_jsx_1
   f_docs_full_architecture_html_4["docs/full_architecture.html:4"]
   ARCH_VIEWER_007 -->|generated-from| f_docs_full_architecture_html_4
-  f_plugin_scripts_reqmap_py_1444_8020["plugin/scripts/reqmap.py:1444-8020"]
-  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1444_8020
-  f_plugin_scripts_test_reqmap_py_1478_9546["plugin/scripts/test_reqmap.py:1478-9546"]
-  ARCH_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1478_9546
+  f_plugin_scripts_reqmap_py_1441_8041["plugin/scripts/reqmap.py:1441-8041"]
+  ARCH_VIEWER_007 -->|implements| f_plugin_scripts_reqmap_py_1441_8041
+  f_plugin_scripts_test_reqmap_py_1483_9551["plugin/scripts/test_reqmap.py:1483-9551"]
+  ARCH_VIEWER_007 -->|tested-by| f_plugin_scripts_test_reqmap_py_1483_9551
   ARCH_VLEVEL_037["Verification levels<br><small>ARCH-VLEVEL-037</small>"]
-  f_plugin_scripts_reqmap_py_1700_5421["plugin/scripts/reqmap.py:1700-5421"]
-  ARCH_VLEVEL_037 -->|implements| f_plugin_scripts_reqmap_py_1700_5421
-  f_plugin_scripts_test_reqmap_py_274_3453["plugin/scripts/test_reqmap.py:274-3453"]
-  ARCH_VLEVEL_037 -->|tested-by| f_plugin_scripts_test_reqmap_py_274_3453
+  f_plugin_scripts_reqmap_py_1686_5437["plugin/scripts/reqmap.py:1686-5437"]
+  ARCH_VLEVEL_037 -->|implements| f_plugin_scripts_reqmap_py_1686_5437
+  f_plugin_scripts_test_reqmap_py_279_3458["plugin/scripts/test_reqmap.py:279-3458"]
+  ARCH_VLEVEL_037 -->|tested-by| f_plugin_scripts_test_reqmap_py_279_3458
   f_scripts_test_cross_tool_py_84["scripts/test_cross_tool.py:84"]
   ARCH_VLEVEL_037 -->|tested-by| f_scripts_test_cross_tool_py_84
   ARCH_VRUNGS_054["Level-to-verification correspondence<br><small>ARCH-VRUNGS-054</small>"]
-  f_plugin_scripts_reqmap_py_2713["plugin/scripts/reqmap.py:2713"]
-  ARCH_VRUNGS_054 -->|implements| f_plugin_scripts_reqmap_py_2713
-  f_plugin_scripts_test_reqmap_py_7647["plugin/scripts/test_reqmap.py:7647"]
-  ARCH_VRUNGS_054 -->|tested-by| f_plugin_scripts_test_reqmap_py_7647
+  f_plugin_scripts_reqmap_py_2706["plugin/scripts/reqmap.py:2706"]
+  ARCH_VRUNGS_054 -->|implements| f_plugin_scripts_reqmap_py_2706
+  f_plugin_scripts_test_reqmap_py_7652["plugin/scripts/test_reqmap.py:7652"]
+  ARCH_VRUNGS_054 -->|tested-by| f_plugin_scripts_test_reqmap_py_7652
   SYS_AUTHOR_101["Authoring and evolving a requirement<br><small>SYS-AUTHOR-101</small>"]
   style SYS_AUTHOR_101 fill:#fee,stroke:#c66
   SYS_GATE_102["Keeping code and specification in step<br><small>SYS-GATE-102</small>"]
@@ -974,7 +976,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>69 caps</small>"]
-  a_REQ["REQ<br><small>171 caps</small>"]
+  a_REQ["REQ<br><small>172 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   style a_ARCH stroke-width:3px
   style a_REQ stroke-width:3px

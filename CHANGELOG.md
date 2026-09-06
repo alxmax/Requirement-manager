@@ -1,5 +1,57 @@
 # Changelog
 
+## plugin `v5.17.0` — 2026-09-06
+
+Four bugs found by reading the engine rather than running it. Three of them made a check
+report a green answer it had not earned; the fourth let a bad id into the corpus with no
+legal way out.
+
+**A `verifies:` tag inside a code fence counted as real coverage.** The engine has three
+tag scanners, and each carried its own hand-copied masking pass. They had already drifted:
+only member discovery knew what a Markdown fence was, so this —
+
+```markdown
+Show your team how to link a case to its test:
+
+    ```python
+    # verifies: REQ-LOGIN-042#CASE-3
+    ```
+```
+
+— registered `CASE-3` as tested. `RM013` warns once per requirement naming every *untagged*
+case; the example silenced the warning for the one case nobody had written a test for. A
+masking rule that lives in three places cannot be half-applied to two of them.
+
+The fix is one generator, `_visible_lines`, that yields the lines a tag may legitimately
+live on: prose fences and Markdown indented blocks dropped, Python string literals blanked,
+comments kept. `_scan_file_tags`, `_extract_coverage` and `_walk_code_lines` all read
+through it, so `scan_all` and the three standalone scanners cannot disagree about a
+position. `REQ-SCAN-992` states the rule; there had been no clause for it anywhere.
+
+Verified against this corpus: 1031 `verifies:` hits and 14 levelled `tested-by:` hits before
+and after, byte-identical — no requirement here was leaning on a phantom tag. The hole was
+open; nothing had fallen through it yet.
+
+**`--since` could fail CI on half a tag pair.** `RM008` (a confirmed `need` with no
+`validated-against:` member) read the `--since`-*narrowed* member set, and so did the
+`any_validation` opt-in probe. A push touching one validation file therefore switched the
+rule on corpus-wide and reported every *other* need as unvalidated — its tag was outside the
+diff, not absent. `--since` narrows which requirements a rule REPORTS on; it must never
+narrow the facts a rule reads. `GateContext.roles()` now has no way to ask for the narrowed
+set, and the rule carries the `in_scope` guard the neighbouring rules already had.
+
+**`new` accepted an id no tag could ever spell.** `reqmap.py new "my req"` wrote
+`requirements/my req.md` with `id: my req` — a requirement `TAG_RE` can never match, so
+`RM006` errored forever and the only legal fix was deleting the file. `new --id ../evil`
+wrote outside the requirements directory. Both are refused at the door now, exit 2, nothing
+written.
+
+**`gate --audit` could exit 0 after the gate crashed.** `_audit_section` swallows a section
+that raises, because advice must not fail a build — and it returned rc 0 for the *gate*
+section too, whose rc IS the audit's exit code. A crashed gate printed `Gate  clean` and
+exited 0. Advice that crashes is missing advice; a gate that crashes reached no verdict, and
+reporting one is worse than reporting nothing.
+
 ## plugin `v5.16.0` — 2026-09-06
 
 **`gate` could exit 1 on a purely advisory metric.** Closes

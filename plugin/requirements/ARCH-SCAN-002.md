@@ -20,6 +20,7 @@ satisfies: [SYS-READ-103]
 Every bullet below is binding.
 - `scan_members` walks a code root and, in every source file with a known extension, finds inline `role: <ID>` tags and returns `cap_id -> [(role, relative_file, line), ...]`. [[REQ-SCAN-908]]
 - A single tag may bind several requirements through a comma-separated id list, written `role: <ID>, <ID>, ...`, and `scan_all` runs member, per-criterion and test-level scanning in one walk. [[REQ-SCAN-909]]
+- Every scanner reads the same masked view of a file, so a tag written inside a code fence or a string literal is an example to all of them and a member to none. [[REQ-SCAN-992]]
 
 ## Cases
 CASE-1
@@ -235,3 +236,68 @@ CASE-7 — scan_all's triple equals the three scanners run separately
   When   `scan_all(root, reqs_dir)` runs
   Then   it equals `(scan_members(...), scan_ac_verifies(...), scan_test_levels(...))`
 
+
+--------------------
+
+
+---
+id: REQ-SCAN-992
+status: confirmed
+level: code
+layer: bus
+owner: Alex
+satisfies: [ARCH-SCAN-002]
+---
+
+# Which lines a tag may live on
+
+## Description
+> Documentation shows people how to tag their code, and a test file shows what a tag looks
+> like — so the text `# implements: LOGIN-001` appears in places that are demonstrating a
+> tag, not writing one. The scanners mask those places out. The rule has to be one rule:
+> when each scanner carried its own copy, only the member scan knew what a Markdown fence
+> was, and a `# verifies: <ID>#CASE-1` written inside a ```-fenced example counted as real
+> per-criterion coverage — silencing the very warning that says the case is untested.
+
+Every bullet below is binding.
+- `_visible_lines` is the single masking pass. Member discovery, per-criterion `verifies:`
+  coverage and levelled `tested-by:` coverage all read a file through it, so no scanner can
+  admit a position another one excludes.
+- In a `.md` or `.html` file, a line inside a fenced code block (``` or ~~~, CommonMark
+  length-matched, the closer bare) carries no tag of any kind.
+- In a `.md` file, a line indented by four spaces or a tab is an indented code block and
+  carries no tag. The check runs before fence detection, so an indented fence marker cannot
+  open a fence that swallows the rest of the file.
+- In a `.py` file, string-literal content — including a docstring spanning many lines — is
+  blanked before the search, and comment text is not.
+- Stripping inline backtick spans is the caller's decision, not the masking pass's: member
+  discovery strips them in prose, the levelled `tested-by:` scan strips them everywhere, and
+  the `verifies:` scan does not.
+
+## Cases
+CASE-1 — a verifies tag inside a Markdown fence is not coverage
+  Given  a `.md` file whose ```-fenced example contains `# verifies: REQ-FAKE-999#CASE-1`
+  When   the per-criterion coverage scan runs
+  Then   `REQ-FAKE-999` is absent from the coverage map
+
+CASE-2 — a tag outside the fence in the same file is still real
+  Given  the same file also carrying `<!-- verifies: REQ-REAL-001#CASE-2 -->` outside any fence
+  When   the per-criterion coverage scan runs
+  Then   `REQ-REAL-001` maps `CASE-2` to that file and line
+
+CASE-3 — a tag in a Python docstring is masked, one in a comment is not
+  Given  a `.py` file with `# verifies: REQ-DOC-1#CASE-1` inside a triple-quoted string and
+         `# verifies: REQ-CODE-1#CASE-1` on a comment line
+  When   the per-criterion coverage scan runs
+  Then   only `REQ-CODE-1` is recorded
+
+CASE-4 — an indented fence marker does not open a fence
+  Given  a `.md` file whose four-space-indented line begins with ``` and whose later lines
+         carry a real `<!-- implements: <ID> -->` tag
+  When   member discovery runs
+  Then   the later tag is still recorded
+
+CASE-5 — the three scanners agree on every position
+  Given  a tree mixing fenced examples, docstring examples and real tags
+  When   `scan_all` and the three standalone scanners run over it
+  Then   they return the same members, the same `verifies:` coverage and the same levels

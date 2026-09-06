@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.10"
+MAP_ENGINE_VERSION = "2026-09-06.11"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1157,36 +1157,30 @@ def _strip_py_strings(s):
     return ''.join(out), None
 
 
-def _scan_file_tags(fp, lines=None):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
-    """Membership tags in one file as [[role, cap, line], ...], or None on read error.
+def _visible_lines(fp, lines):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908  # implements: REQ-SCAN-992
+    """Yield `(lineno, text)` for every line of `fp` a tag may legitimately live on,
+    with the excluded zones already removed or blanked.
 
-    `lines` lets a caller that has already read the file hand the content over, so the
-    single-walk scanner (`scan_all`) reads each file once for all three extractors
-    instead of three times. `fp` is still required: the masking rules key off its
-    extension. Reading it here when `lines` is None keeps every existing caller working.
+    ONE masking pass for every scanner in the engine. There used to be three
+    hand-copied ones — `_scan_file_tags`, `_extract_coverage` and `_walk_code_lines` —
+    and they had already drifted: only the first knew what a Markdown fence was, so a
+    `# verifies: ID#CASE-1` written inside a ```-fenced EXAMPLE counted as real
+    per-criterion coverage and silenced the very warning that says the case is
+    untested. A masking rule that lives in one place cannot be half-applied.
 
-    Context-aware per file class — admits a tag only when NOT in an excluded zone:
+    PROSE (.md, .html): a fenced code block (``` / ~~~, CommonMark length-matched)
+      and, in Markdown only, a >=4-space / tab indented block are code — those lines
+      are not yielded at all. `<!-- implements: X -->` outside any such zone is a
+      valid tag position and is yielded.
+    PY: a triple-quoted string (state carried across lines) and single-line string
+      literals are blanked. Comments are kept — `code()  # implements: X` is a real tag.
+    Anything else: yielded unchanged.
 
-    PROSE (.md, .html):  excluded if in a fenced code block (``` / ~~~, CommonMark
-      length-matched), a backtick span, or a >=4-space / tab indent block.
-      <!-- implements: X --> in prose (outside any exclusion zone) remains valid.
-
-    PY:  excluded if in a triple-quoted string (state carried across lines) or a
-      single-line string literal. Comment tags (code()  # implements: X) are kept.
-
-    Other extensions: no filtering — all positions valid (original behavior).
-
-    State is local — resets per file call (no cross-file leak).
+    Backtick spans are deliberately NOT stripped here. The callers disagree on that
+    (see `_extract_coverage`), and folding it in would hide a difference that is
+    load-bearing. State is local, so nothing leaks between files.
     """
     ext = os.path.splitext(fp)[1].lower()
-    out = []
-    if lines is None:
-        try:
-            with open(fp, encoding="utf-8", errors="ignore") as f:
-                lines = f.readlines()
-        except OSError:
-            return None
-
     if ext in PROSE_EXTS:
         fence = None   # None = not fenced; else the opening fence string e.g. "```"
         for i, raw in enumerate(lines, 1):
@@ -1209,15 +1203,8 @@ def _scan_file_tags(fp, lines=None):  # implements: ARCH-SCAN-002  # implements:
                 elif marker[0] == fence[0] and len(marker) >= len(fence) and not rest:
                     fence = None    # closer must be bare (no info string)
                     continue
-            if fence is not None:
-                continue
-            clean = _BACKTICK_RE.sub("", s)
-            seen = set()
-            for role, cap in _findall_tags(clean):
-                key = (role, cap)
-                if key not in seen:
-                    seen.add(key)
-                    out.append([role, cap, i])
+            if fence is None:
+                yield i, s
 
     elif ext == ".py":
         in_triple = None   # None or the opening triple-quote delimiter
@@ -1230,22 +1217,42 @@ def _scan_file_tags(fp, lines=None):  # implements: ARCH-SCAN-002  # implements:
                 s = s[idx + len(in_triple):]
                 in_triple = None
             s, in_triple = _strip_py_strings(s)
-            seen = set()
-            for role, cap in _findall_tags(s):
-                key = (role, cap)
-                if key not in seen:
-                    seen.add(key)
-                    out.append([role, cap, i])
+            yield i, s
 
     else:
         for i, raw in enumerate(lines, 1):
-            seen = set()
-            for role, cap in _findall_tags(raw):
-                key = (role, cap)
-                if key not in seen:
-                    seen.add(key)
-                    out.append([role, cap, i])
+            yield i, raw.rstrip("\n\r")
 
+
+def _scan_file_tags(fp, lines=None):  # implements: ARCH-SCAN-002  # implements: REQ-SCAN-908
+    """Membership tags in one file as [[role, cap, line], ...], or None on read error.
+
+    `lines` lets a caller that has already read the file hand the content over, so the
+    single-walk scanner (`scan_all`) reads each file once for all three extractors
+    instead of three times. `fp` is still required: the masking rules key off its
+    extension. Reading it here when `lines` is None keeps every existing caller working.
+
+    Which positions count is `_visible_lines`' business; this adds the one rule that is
+    its own — a prose backtick span is an example, not a tag — and de-duplicates the
+    same (role, id) pair repeated on one line.
+    """
+    out = []
+    if lines is None:
+        try:
+            with open(fp, encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+        except OSError:
+            return None
+    prose = os.path.splitext(fp)[1].lower() in PROSE_EXTS
+    for i, s in _visible_lines(fp, lines):
+        if prose:
+            s = _BACKTICK_RE.sub("", s)
+        seen = set()
+        for role, cap in _findall_tags(s):
+            key = (role, cap)
+            if key not in seen:
+                seen.add(key)
+                out.append([role, cap, i])
     return out
 
 
@@ -1294,27 +1301,17 @@ def _walk_code(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
             yield fp, rel
 
 
-def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: ARCH-ACVERIFY-019
+def _extract_coverage(fp, rel, lines, ac_out, level_out):  # implements: ARCH-ACVERIFY-019  # implements: REQ-SCAN-992
     """Accumulate `verifies:` and levelled `tested-by:` hits from one file's lines.
 
-    One masking pass feeding both regexes, because the two scanners this replaces did
-    the identical per-line work twice. The asymmetry is preserved exactly: only the
-    levelled scan strips backticked spans first, so a documented EXAMPLE of a levelled
-    tag does not register as real coverage, while `verifies:` keeps its raw scan.
+    One `_visible_lines` pass feeding both regexes, because the two scanners this
+    replaces did the identical per-line work twice. The asymmetry between them is
+    preserved exactly: only the levelled scan strips backticked spans first, so a
+    documented EXAMPLE of a levelled tag does not register as real coverage, while
+    `verifies:` keeps its raw scan. Both now see prose fences, which they did not
+    before — an example inside a ``` block is an example in either spelling.
     """
-    is_py = fp.endswith(".py")
-    in_triple = None
-    for i, line in enumerate(lines, 1):
-        s = line
-        if is_py:
-            s = s.rstrip("\n\r")
-            if in_triple is not None:
-                idx = s.find(in_triple)
-                if idx == -1:
-                    continue
-                s = s[idx + len(in_triple):]
-                in_triple = None
-            s, in_triple = _strip_py_strings(s)
+    for i, s in _visible_lines(fp, lines):
         for cap, ac in AC_VERIFY_RE.findall(s):
             ac_out.setdefault(cap, {}).setdefault(ac, []).append((rel, i))
         for idlist, level in TEST_LEVEL_RE.findall(_BACKTICK_RE.sub("", s)):
@@ -1660,28 +1657,17 @@ def _walk_code_lines(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002  # 
     """Yield `(rel_path, lineno, line)` for every scannable line under `code_root`.
 
     The one walk the tag scanners share: it prunes the same directories, honours the
-    same `.reqmapignore`, descends in the same sorted order, and — for `.py` — masks
-    string-literal content so a tag inside a docstring is not read as a real tag. A
-    caller receives lines already masked and only has to say what a tag means."""
+    same `.reqmapignore`, descends in the same sorted order, and masks every excluded
+    zone through `_visible_lines`, so a tag inside a Python docstring or a Markdown
+    fence is not read as a real tag. A caller receives lines already masked and only
+    has to say what a tag means."""
     for fp, rel in _walk_code(code_root, reqs_dir):
         try:
             with open(fp, encoding="utf-8", errors="ignore") as f:
                 lines = f.readlines()
         except OSError:
             continue
-        is_py = fp.endswith(".py")
-        in_triple = None
-        for i, line in enumerate(lines, 1):
-            masked = line
-            if is_py:
-                masked = masked.rstrip("\n\r")
-                if in_triple is not None:
-                    idx = masked.find(in_triple)
-                    if idx == -1:
-                        continue          # still inside the literal
-                    masked = masked[idx + len(in_triple):]
-                    in_triple = None
-                masked, in_triple = _strip_py_strings(masked)
+        for i, masked in _visible_lines(fp, lines):
             yield rel, i, masked
 
 
@@ -2568,8 +2554,12 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
                          if ws.ac_cover is None else ws.ac_cover)
         self.level_cover = (scan_test_levels(code_root, reqs_dir)
                             if ws.level_cover is None else ws.level_cover)
+        # the FULL scan, not the --since-narrowed one: whether this repo has adopted
+        # `validated-against:` at all is a property of the repo, not of one diff. Read
+        # narrowed, a push that happened to touch one validation file switched the rule
+        # on for every OTHER need — half a pair is not a corpus-wide opt-in.
         self.any_validation = any(x[0] == "validated-against"
-                                  for hits in self.members.values() for x in hits)
+                                  for hits in self.full_members.values() for x in hits)
         self.satisfied_by = {rid: [] for rid in reqs}
         self.dependents = {}
         for rid, r in reqs.items():
@@ -2591,9 +2581,12 @@ class GateContext(object):  # implements: ARCH-RULES-059  # implements: REQ-RULE
         requirement's members are in the diff, or when there is no --since at all."""
         return rid in self.members or not self.since
 
-    def roles(self, rid, full=True):
-        src = self.full_members if full else self.members
-        return [x[0] for x in src.get(rid, [])]
+    def roles(self, rid):
+        """Tag roles a requirement carries, always over the FULL scan. A rule asks
+        `--since` for its SCOPE (`in_scope`), never for its FACTS: the narrowed member
+        set is missing every unchanged file, so reading a fact from it reports the
+        absence of a tag that is sitting in the tree."""
+        return [x[0] for x in self.full_members.get(rid, [])]
 
 
 @gate_rule("RM001", "error")
@@ -2694,7 +2687,7 @@ def _rule_need_not_validated(ctx):  # implements: ARCH-VLEVEL-037  # implements:
     for rid, r in ctx.reqs.items():
         m = r["meta"]
         if m.get("layer") == "need" and m.get("status") == "confirmed" \
-                and "validated-against" not in ctx.roles(rid, full=False):
+                and "validated-against" not in ctx.roles(rid) and ctx.in_scope(rid):
             yield rid, (f"{rid}: confirmed need with no `validated-against:` tag — "
                         "nothing shows the need was actually met")
 
@@ -3288,6 +3281,25 @@ CASE-1  <!-- verifiable by: automated test | manual | inspection | load test -->
 """
 
 
+_REQ_ID_RE = re.compile(r"\A" + _ID_PAT + r"\Z")
+
+
+def _reject_bad_id(cap_id):  # implements: ARCH-NEW-004  # implements: REQ-NEW-881
+    """Print why `cap_id` cannot be a requirement id and return True, or return False.
+
+    The id is not decoration: it is the string a `# implements:` tag has to spell, and
+    `TAG_RE` only ever matches `_ID_PAT`. Scaffolding `my req.md` therefore minted a
+    requirement no tag could ever name — a permanent RM006 error with no legal fix but
+    deleting the file — and a `../` or `A/B` id wrote outside the requirements
+    directory entirely. Both are refused at the door instead."""
+    if _REQ_ID_RE.match(cap_id or ""):
+        return False
+    print("invalid id {!r}: a requirement id is what a `# implements:` tag must spell — "
+          "two or more UPPERCASE parts joined by '-' (AREA-NAME-NNN), letters and digits "
+          "only. Nothing else can ever be tagged in code.".format(cap_id))
+    return True
+
+
 def _warn_number_collision(reqs_dir, cap_id):  # implements: ARCH-NEW-004
     """Advisory: another requirement in the same area already uses this NNN. Ids are
     unique by their full text, so nothing breaks — but ARCH-MAP-007 beside
@@ -3313,6 +3325,8 @@ def _warn_number_collision(reqs_dir, cap_id):  # implements: ARCH-NEW-004
 def cmd_new(reqs_dir, tmpl_path, cap_id):  # implements: ARCH-NEW-004  # implements: REQ-NEW-881  # implements: REQ-NEW-882
     """Scaffold one blank requirement from the template and return an exit code;
     refuses rather than overwriting a file that already exists."""
+    if _reject_bad_id(cap_id):
+        return 2
     dest = os.path.join(reqs_dir, cap_id + ".md")
     if os.path.exists(dest):
         print(f"exists: {dest}"); return 1
@@ -3341,6 +3355,8 @@ def cmd_promote_todo(reqs_dir, tmpl_path, name, cap_id, mark_done=False, root=".
     mark_done it flips the matched TODO line to [x]; otherwise TODO.md is never touched."""
     if not cap_id:
         print('usage: reqmap new --from-todo "<todo name>" --id AREA-NAME-NNN [--mark-done]'); return 2
+    if _reject_bad_id(cap_id):
+        return 2
     key = name.strip().casefold()
     open_todos = [t for t in _parse_todos(root) if not t["done"]]
     matches = [t for t in open_todos if t["name"].strip().casefold() == key]
@@ -5859,15 +5875,20 @@ def cmd_search(reqs, query, top=SEARCH_TOP, floor=SEARCH_FLOOR, reqs_dir=None): 
 
 
 # ---------- health (corpus coherence snapshot) ----------
-def _audit_section(title, remedy, fn):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
+def _audit_section(title, remedy, fn, fail_rc=0):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
     """Run one discovery pass with its output captured, so the summary can be printed
-    before the detail it summarises. Returns (title, remedy, text, rc)."""
+    before the detail it summarises. Returns (title, remedy, text, rc).
+
+    A crashing section is swallowed because advice must not fail a build — but the Gate
+    section is not advice, it IS the exit code, and swallowing its crash to rc 0 printed
+    `Gate  clean` for a run that never reached a verdict. `fail_rc` is how a section says
+    what its own failure means; only the gate passes 1."""
     buf = io.StringIO()
     try:
         with contextlib.redirect_stdout(buf):
             rc = fn()
     except Exception as e:                      # a section is advice, never a crash
-        return (title, remedy, "  (section failed: {})".format(e), 0)
+        return (title, remedy, "  (section failed: {})".format(e), fail_rc)
     return (title, remedy, buf.getvalue().rstrip(), rc or 0)
 
 
@@ -5976,7 +5997,7 @@ def cmd_audit(ws, strict=False, as_json=False):  # implements: ARCH-AUDIT-065  #
 
     sections = [
         _audit_section("Gate", "reqmap.py gate",
-                       lambda: cmd_check(ws, False, strict=strict)),
+                       lambda: cmd_check(ws, False, strict=strict), fail_rc=1),
         _audit_section("Risk", "reqmap.py gate --risk", lambda: cmd_next(ws, False)),
         _audit_section("Duplicates", "reqmap.py gate --dupes",
                        lambda: cmd_similar(reqs, SIMILAR_THRESHOLD, members)),

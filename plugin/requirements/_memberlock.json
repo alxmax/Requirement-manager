@@ -2,7 +2,6 @@
   "_schema": 2,
   "members": {
     "ARCH-ACVERIFY-019": {
-      "plugin/scripts/reqmap.py#_extract_coverage": "577ebc5d73bbe44a1ef065dc1809949db3801f6a4ca4d124178f0a219aefe40c",
       "plugin/scripts/reqmap.py#_rule_case_coverage": "eb3fb08d6e7c339e2bbaad99c55a56564cc33efff2110d6f7be40aca9c8a2bb4"
     },
     "ARCH-ATOMICFORM-053": {

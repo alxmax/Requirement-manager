@@ -390,6 +390,9 @@ Every bullet below is binding.
 - The legacy-schema warning does not affect the exit code.
 - A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at
   least one such tag (see [[ARCH-VLEVEL-037]]).
+- Whether the repo carries such a tag, and whether a given need carries one, are read from
+  the whole tree. `--since` narrows which requirements are REPORTED on, never the facts a
+  rule reads: half a tag pair inside a diff must not warn about the half outside it.
 - A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.
 - A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.
 - The cycle warning stays a warning under `--strict`, so an existing corpus keeps its
@@ -428,6 +431,12 @@ CASE-6 — --strict does not promote the cycle warning to an error
   Given  two requirements whose `depends_on` fields point at each other
   When   `gate --strict` runs
   Then   it still exits 0
+
+CASE-7 — --since narrows the scope, not the facts
+  Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff
+         touching only the first one's member file
+  When   `gate --since` runs
+  Then   neither need is warned about: the second's tag is outside the diff, not absent
 
 
 --------------------

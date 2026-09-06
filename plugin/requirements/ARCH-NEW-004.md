@@ -91,6 +91,8 @@ Every bullet below is binding.
 - `new` creates the requirements directory if it is absent.
 - The scaffold is the engine's built-in template.
 - An on-disk `templates/requirement.md`, when present, overrides the built-in template.
+- `new` refuses an id that no `# implements:` tag could ever spell — anything outside
+  `[A-Z][A-Z0-9]*(-[A-Z0-9]+)+` — printing why and exiting 2 without writing a file.
 
 ## Cases
 CASE-1 — new stamps the scaffold with the given id
@@ -115,6 +117,11 @@ CASE-4 — an on-disk template wins over the built-in scaffold
   When   `new CORE-FOO-001` runs with that template's path
   Then   the written file is stamped from the on-disk template's content, not the
          built-in one
+
+CASE-5 — an id no tag could spell is refused before anything is written
+  Given  an id such as `my req`, `lower-case-1`, `NOPARTS` or `../evil`
+  When   `new` runs with it
+  Then   it exits 2, says why, and the requirements directory gains no file
 
 
 --------------------

@@ -40,6 +40,11 @@ def gtag_html(cap):  # runtime-built so THIS .py source registers no phantom mem
 
 
 _TB_ROLE = "tested" + "-by"
+_V_ROLE = "veri" + "fies"
+
+
+def v_tag(cap, case):   # runtime-built: a fixture tag must not become real coverage here
+    return "# {}: {}#{}".format(_V_ROLE, cap, case)
 
 
 def tb_tag(cap):
@@ -11826,6 +11831,159 @@ class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-
         self.assertTrue(rx.search("test_case_3_reads"))
         self.assertTrue(rx.search("test_ac3_reads"))
         self.assertFalse(rx.search("test_case30_reads"))
+
+
+class FencedTagsAreExamples(unittest.TestCase):  # tested-by: ARCH-SCAN-002  # tested-by: REQ-SCAN-992
+    """One masking pass, so a tag shown as an example is an example to every scanner."""
+
+    def _md(self):
+        return ("# doc\n"
+                "How to tag a case:\n"
+                "\n"
+                "```python\n"
+                + v_tag("REQ-FAKE-999", "CASE-1") + "\n"
+                + tag("REQ-FAKE-999") + "\n"
+                "```\n"
+                "\n"
+                "<!-- " + _V_ROLE + ": REQ-REAL-001#CASE-2 -->\n"
+                "<!-- " + _ROLE + ": REQ-REAL-001 -->\n")
+
+    def test_fenced_verifies_is_not_coverage(self):  # verifies: REQ-SCAN-992#CASE-1
+        ac, lv = {}, {}
+        R._extract_coverage("x.md", "x.md", self._md().splitlines(True), ac, lv)
+        self.assertNotIn("REQ-FAKE-999", ac)
+
+    def test_a_tag_outside_the_fence_is_still_real(self):  # verifies: REQ-SCAN-992#CASE-2
+        ac, lv = {}, {}
+        R._extract_coverage("x.md", "x.md", self._md().splitlines(True), ac, lv)
+        self.assertEqual(ac, {"REQ-REAL-001": {"CASE-2": [("x.md", 9)]}})
+
+    def test_fenced_implements_is_not_a_member_either(self):  # verifies: REQ-SCAN-992#CASE-2
+        found = R._scan_file_tags("x.md", self._md().splitlines(True))
+        self.assertEqual(found, [[_ROLE, "REQ-REAL-001", 10]])
+
+    def test_docstring_is_masked_and_a_comment_is_not(self):  # verifies: REQ-SCAN-992#CASE-3
+        src = ('def f():\n'
+               '    """\n'
+               '    ' + v_tag("REQ-DOC-1", "CASE-1") + '\n'
+               '    """\n'
+               + v_tag("REQ-CODE-1", "CASE-1") + '\n')
+        ac = {}
+        R._extract_coverage("t.py", "t.py", src.splitlines(True), ac, {})
+        self.assertEqual(ac, {"REQ-CODE-1": {"CASE-1": [("t.py", 5)]}})
+
+    def test_an_indented_fence_marker_opens_no_fence(self):  # verifies: REQ-SCAN-992#CASE-4
+        md = ("# doc\n"
+              "    ```\n"
+              "\n"
+              "<!-- " + _ROLE + ": REQ-AFTER-001 -->\n")
+        self.assertEqual(R._scan_file_tags("x.md", md.splitlines(True)),
+                         [[_ROLE, "REQ-AFTER-001", 4]])
+
+    def test_every_scanner_agrees_on_every_position(self):  # verifies: REQ-SCAN-992#CASE-5
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        _write(os.path.join(d, "doc.md"), self._md())
+        _write(os.path.join(d, "t.py"),
+               '"""\n' + v_tag("REQ-DOC-1", "CASE-1") + '\n"""\n'
+               + v_tag("REQ-CODE-1", "CASE-1") + '\n' + tag("REQ-CODE-1") + '\n')
+        members, ac, lv = R.scan_all(d, os.path.join(d, "requirements"))
+        self.assertEqual(members, R.scan_members(d, os.path.join(d, "requirements")))
+        self.assertEqual(ac, R.scan_ac_verifies(d, os.path.join(d, "requirements")))
+        self.assertEqual(lv, R.scan_test_levels(d, os.path.join(d, "requirements")))
+        self.assertNotIn("REQ-FAKE-999", ac)
+        self.assertNotIn("REQ-FAKE-999", members)
+        self.assertNotIn("REQ-DOC-1", ac)
+
+
+class NewRefusesANonId(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-881
+    """An id is what a tag must spell; anything else mints a requirement no code can name."""
+
+    def test_a_non_id_is_refused_and_writes_nothing(self):  # verifies: REQ-NEW-881#CASE-5
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        for bad in ("my req", "lower-case-1", "NOPARTS", "../evil", "A/B-1", ""):
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = R.cmd_new(d, None, bad)
+            self.assertEqual(rc, 2, bad)
+            self.assertIn("invalid id", buf.getvalue())
+        self.assertEqual(os.listdir(d), [])
+
+    def test_a_real_id_still_scaffolds(self):  # verifies: REQ-NEW-881#CASE-1
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(R.cmd_new(d, None, "AREA-NAME-001"), 0)
+        self.assertEqual(os.listdir(d), ["AREA-NAME-001.md"])
+
+    def test_promote_todo_refuses_the_same_ids(self):  # verifies: REQ-NEW-881#CASE-5
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = R.cmd_promote_todo(d, None, "some todo", "my req", root=d)
+        self.assertEqual(rc, 2)
+        self.assertIn("invalid id", buf.getvalue())
+
+
+class SinceScopesNotFacts(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested-by: REQ-CHECK-831
+    """--since says which requirements are reported on, never what a rule may read."""
+
+    BODY = "## Description\n- x\n\n## Cases\nCASE-1 x\n"
+
+    def _ctx(self, narrowed, full):
+        reqs = {rid: {"meta": {"id": rid, "layer": "need", "status": "confirmed"},
+                      "body": self.BODY} for rid in full}
+        ws = R.Workspace(reqs, narrowed, "requirements", ".", {}, {})
+        return R.GateContext(ws, since="HEAD~1", full_members=full)
+
+    def test_a_validated_need_outside_the_diff_is_not_warned_about(self):  # verifies: REQ-CHECK-831#CASE-7
+        full = {"SYS-A-001": [("validated-against", "a.md", 1)],
+                "SYS-B-002": [("validated-against", "b.md", 1)]}
+        ctx = self._ctx({"SYS-A-001": full["SYS-A-001"]}, full)
+        self.assertEqual(list(R._rule_need_not_validated(ctx)), [])
+
+    def test_a_genuinely_unvalidated_need_in_the_diff_still_warns(self):  # verifies: REQ-CHECK-831#CASE-3
+        full = {"SYS-A-001": [("validated-against", "a.md", 1)],
+                "SYS-B-002": [("implements", "b.py", 1)]}
+        ctx = self._ctx({"SYS-B-002": full["SYS-B-002"]}, full)
+        self.assertEqual([rid for rid, _ in R._rule_need_not_validated(ctx)], ["SYS-B-002"])
+
+    def test_the_opt_in_is_read_from_the_whole_tree(self):
+        full = {"SYS-A-001": [("validated-against", "a.md", 1)]}
+        self.assertTrue(self._ctx({}, full).any_validation)
+        self.assertFalse(self._ctx({}, {"SYS-A-001": [("implements", "a.py", 1)]}).any_validation)
+
+
+class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-AUDIT-970
+    """Advice that crashes is missing advice; a gate that crashes reached no verdict."""
+
+    @staticmethod
+    def _boom():
+        raise RuntimeError("gate exploded")
+
+    def test_an_advice_section_that_raises_still_reports_zero(self):  # verifies: REQ-AUDIT-970#CASE-4
+        _t, _r, text, rc = R._audit_section("Risk", "reqmap.py gate --risk", self._boom)
+        self.assertEqual(rc, 0)
+        self.assertIn("gate exploded", text)
+
+    def test_a_gate_section_that_raises_fails_the_audit(self):  # verifies: REQ-AUDIT-970#CASE-6
+        _t, _r, text, rc = R._audit_section("Gate", "reqmap.py gate", self._boom, fail_rc=1)
+        self.assertEqual(rc, 1)
+        self.assertIn("gate exploded", text)
+
+    def test_the_report_says_FAIL_and_exits_1_when_the_gate_crashes(self):  # verifies: REQ-AUDIT-970#CASE-6
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "AREA-A-001.md"),
+               REQ.format(id="AREA-A-001", status="draft", layer="feature", extra="",
+                          title="A") + "\n## Description\n- x\n\n## Cases\nCASE-1 x\n")
+        ws = R.Workspace.load(rdir, d)
+        buf = io.StringIO()
+        with mock.patch.object(R, "cmd_check", side_effect=RuntimeError("gate exploded")):
+            with redirect_stdout(buf):
+                rc = R.cmd_audit(ws)
+        self.assertEqual(rc, 1)
+        out = buf.getvalue()
+        self.assertIn("FAIL", out)
+        self.assertIn("gate exploded", out)
 
 
 if __name__ == "__main__":
