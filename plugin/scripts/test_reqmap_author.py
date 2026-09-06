@@ -646,6 +646,11 @@ class ParseTodos(unittest.TestCase):
         self.assertEqual(todos[1], {"name": "Done item",  "lane": "ops",     "milestone": "v1.14", "done": True})
         self.assertEqual(todos[2], {"name": "Feature B",  "lane": "feature", "milestone": "v1.15", "done": False})
 
+    def test_bug_lane_parses_and_legacy_lanes_still_do(self):
+        todos = R._parse_todos_from_text("## v2.0\n- [ ] Crash on empty stdin | lane: bug\n"
+                                         "- [ ] Old style | lane: ops\n- [ ] Bare item\n")
+        self.assertEqual([t["lane"] for t in todos], ["bug", "ops", "feature"])
+
     def test_missing_file_returns_empty(self):
         import tempfile
         with tempfile.TemporaryDirectory() as d:

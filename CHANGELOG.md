@@ -1,6 +1,22 @@
 # Changelog
 
-# Changelog
+## plugin `v6.3.0` — 2026-09-06
+
+**The Roadmap has two lanes: Bugs and Features.** It had four — bus, feature, need, ops —
+which is the engine's own taxonomy (a requirement's position in the graph) laid on the Y
+axis. A roadmap answers a different question, *what is broken and what is coming*, and four
+thin rows nobody read as a plan answered neither.
+
+- `lane: bug` on a `TODO.md` item files it under **Bugs**.
+- Everything else is a **Feature**: a TODO item with any other lane (`feature`, and the
+  older `bus`/`ops`, which still parse and are never rejected), and every requirement with a
+  `milestone:`. A requirement describes a capability by definition; a bug is a TODO until it
+  is fixed, at which point it stops being on the roadmap.
+
+No engine data changed — `lane` already travelled to the viewer in `_map.json`, so a
+vendored engine that reads `TODO.md` today files `lane: bug` correctly the moment its viewer
+is rebuilt. `MAP_ENGINE_VERSION` moves for one comment. Also folds a doubled `# Changelog`
+heading that the v6.2.0 rebase left at the top of this file.
 
 ## plugin `v6.2.0` — 2026-09-06
 

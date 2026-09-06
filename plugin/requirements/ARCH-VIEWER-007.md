@@ -30,6 +30,7 @@ Every bullet below is binding.
 - The viewer shows the engine's health and design readings as two rings in the rail, displaying the numbers it was given rather than computing its own. [[REQ-VIEWER-969]]
 - The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
+- The roadmap has two lanes: Bugs, for `TODO.md` items marked `lane: bug`; Features, for every other item plus every milestoned requirement. [[REQ-VIEWER-995]]
 
 ## Cases
 CASE-1
@@ -766,3 +767,51 @@ CASE-3 — the defaults are the view that existed before the controls
 **Current implementation**
 - `app/src/views/RoadmapView.jsx` — `RoadmapView`, `ZoomControl`, the `DENSITY` table.
 - `app/scripts/ssr-smoke.jsx` — the three cases above.
+
+
+--------------------
+
+
+---
+id: REQ-VIEWER-995
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# What the roadmap's two lanes mean
+
+## Description
+> The roadmap had four swim lanes — bus, feature, need, ops — which is the engine's own
+> taxonomy, a requirement's position in the graph, laid on the Y axis. A roadmap answers a
+> different question: what is broken and what is coming. Four thin rows nobody read as a
+> plan answered neither, and a reader asked for two.
+
+Every bullet below is binding.
+- The roadmap renders exactly two lanes, labelled Bugs and Features, in that order.
+- A `TODO.md` item whose lane is `bug` renders under Bugs.
+- Every other open `TODO.md` item renders under Features, whatever its lane says — the
+  older `bus` and `ops` values still parse and are never rejected.
+- Every requirement with a `milestone:` that is not deprecated renders under Features. A
+  requirement describes a capability; a bug is a TODO until it is fixed.
+- The lane is read from the `lane` field the engine already emits in `_map.json`, so no
+  engine data changes and a vendored engine files `lane: bug` correctly as soon as its
+  viewer is rebuilt.
+
+## Cases
+CASE-1 — two lanes, Bugs above Features
+  Given  a registry with at least one milestone
+  When   the roadmap renders
+  Then   the lane column reads Bugs then Features, and no other lane label appears
+
+CASE-2 — a bug item lands under Bugs
+  Given  an open `TODO.md` item `Crash on empty stdin | lane: bug` under a milestone
+  When   the roadmap renders
+  Then   that title appears in the Bugs lane and not in the Features lane
+
+CASE-3 — a legacy lane and a requirement land under Features
+  Given  an open item `Old style | lane: ops` and a confirmed requirement with the same milestone
+  When   the roadmap renders
+  Then   both appear in the Features lane
