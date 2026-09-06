@@ -742,6 +742,41 @@
            a reader. Either build the retrofit before that date, or record in ADR-0019 that
            fully-tagged corpora are excluded from the denominator.
 
+           SECOND POINT, added 2026-09-06 after checking the engine: this does not need a
+           detection built. Two already exist, and both stop one sentence short of being
+           useful.
+
+             - RM025 (`_rule_legacy_schema`) already finds the old schema PER REQUIREMENT,
+               as a gate rule, by looking at the thing itself — does this body carry the
+               Input/Output triad. Its message ends at "`findings` is inactive for them"
+               and names no command.
+             - The flat-corpus block in `gate --audit` already reports that a corpus
+               declares no `level:`, explains the three rungs, and ends at "Adopting it is
+               a decision, not a defect". Also names no command.
+
+           Cite the RULE CODE, not a line number: the engine is vendored per consumer, so
+           the same rule sits at reqmap.py:2871 here and :2864 in a repo one release
+           behind.
+
+           A version check would be a WORSE trigger than what is already there, on three
+           counts. It correlates positively with damage — the oldest repos have the most
+           hand-written WHY to lose, so it fires hardest where a wipe hurts most. `sync` is
+           the wrong host for the same reason as above: it runs on every commit through
+           the hook. And a version number is a proxy for what RM025 measures directly; a
+           repo can install v5 and keep v2-shaped requirements, or the reverse. Do not
+           replace a direct signal with an indirect one.
+
+           So the ask is smaller and better founded than a new feature: make the two
+           existing rules name the retrofit command this item is about. Detection with no
+           migration path is what both of them are.
+
+           And it is a house habit, not two isolated cases. `roadmap_unmapped`, shipped in
+           v5.11.0 the same week, ends at "the roadmap chart ends before the product does"
+           and names no command either. Twenty-five gate messages DO name `reqmap.py gate`
+           and thirteen name `sync`, so the codebase knows how — these three are the ones
+           that forgot. Worth one pass, not one at a time.
+
+
            Deming's STOP from the original audit still stands unanswered and is not
            answered by this item either. Do not cite the audit as endorsement — it was
            MODIFY, GO 1 / MODIFY 6 / STOP 2, bundle
