@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.19
 depends_on: [ARCH-SELFGATE-039]
 satisfies: [SYS-SHIP-108]
 test_exempt: pipeline wiring (a CI job that rebuilds and compares) — the behavior IS the comparison, observed by CI running it; a unit test would only re-assert that a byte compare compares

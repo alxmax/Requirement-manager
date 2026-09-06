@@ -91,6 +91,7 @@
       "plugin/scripts/reqmap.py#_walk_code": "1878d3f8f9e3dc95e2ed8f757e1a0a861a0f9b10489afb4a1ab31b12d19968e1"
     },
     "ARCH-SELFGATE-039": {
+      "scripts/check_engine_bump.py": "64790fbdbefdb34794e037121006b0bbb451c9828a8efcc0ad3f448acb9d29df",
       "scripts/check_retired_verbs.py": "35889ad2eaaaf64561324bf7e7470ddbe213efe19af682a6063ba938ee7c091c",
       "scripts/check_versions.py": "affa8e2d84717506329dbe0a4b1a7ec8faa3f691c87c4e7644808bec30abcc91"
     },

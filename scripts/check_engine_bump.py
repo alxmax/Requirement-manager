@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# implements: ARCH-SELFGATE-039
 """Fail when plugin/scripts/reqmap.py changed but MAP_ENGINE_VERSION did not.
 
 Why this exists: `MAP_ENGINE_VERSION` is the only thing a seeded copy of the engine

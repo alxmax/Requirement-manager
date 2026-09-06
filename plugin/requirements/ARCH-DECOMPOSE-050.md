@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.31
 priority: could-have
 depends_on: [ARCH-ATOMICITY-049, ARCH-LINT-014, ARCH-NEW-004]
 satisfies: [SYS-AUTHOR-101]

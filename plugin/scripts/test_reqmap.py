@@ -3197,7 +3197,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         out = R._load_translations(reqs, reqs_dir)
         self.assertNotIn("REQ-A-001", out)
 
-    def test_load_translations_malformed_cache_fails_open(self):  # bug: load-translations-not-dict-guarded
+    def test_load_translations_malformed_cache_fails_open(self):  # verifies: REQ-TRANSLATE-938#CASE-3  # bug: load-translations-not-dict-guarded
         reqs_dir = self._tmp_reqs_dir()
         i18n_dir = os.path.join(reqs_dir, "_i18n")
         os.makedirs(i18n_dir)
@@ -3206,6 +3206,15 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         reqs = {"REQ-A-001": self._req(self.RO_BODY)}
         out = R._load_translations(reqs, reqs_dir)
         self.assertEqual(out, {})
+
+    def test_translator_version_bump_invalidates_every_entry(self):  # verifies: REQ-TRANSLATE-937#CASE-3
+        # The version is folded into the key, so ONE bump retires the whole cache;
+        # without it each stale entry would have to be invalidated file by file.
+        body = self.RO_BODY
+        before = R.translation_hash(body, R._title(body))
+        with mock.patch.object(R, "TRANSLATOR_VERSION", R.TRANSLATOR_VERSION + "-next"):
+            after = R.translation_hash(body, R._title(body))
+        self.assertNotEqual(before, after)
 
 
 class Show(unittest.TestCase):  # tested-by: ARCH-SHOW-015  # tested-by: REQ-SHOW-917  # tested-by: REQ-SHOW-918  # tested-by: REQ-SHOW-919
@@ -6446,7 +6455,7 @@ class BugHuntSince(unittest.TestCase):  # tested-by: ARCH-CHECK-006
             self.assertIn(R._path_key(fp), files)   # not abspath: 8.3 short names
 
 
-class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-907
+class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-907  # tested-by: REQ-ROADMAP-983
     REQ_MS = "---\nid: {id}\nstatus: confirmed\nlayer: feature\nmilestone: {ms}\n---\n\n# T\n"
 
     def _health(self, todo_text, req_ms="v2.13"):
@@ -6487,6 +6496,22 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # teste
     def test_versions_compare_numerically_not_as_strings(self):  # verifies: ARCH-ROADMAP-038#CASE-5  # verifies: REQ-ROADMAP-907#CASE-5
         self.assertGreater(R._version_key("v2.10"), R._version_key("v2.9"))
         self.assertLess("v2.10", "v2.9")   # the string compare this guards against
+
+    def test_unmapped_signal_when_the_requirements_lag_shipped_work(self):  # verifies: ARCH-ROADMAP-038#CASE-6  # verifies: REQ-ROADMAP-983#CASE-1
+        # The direction the behind-signal alone could not see: the roadmap says v2.16
+        # shipped, the corpus stops at v2.13, and `roadmap_behind` is correctly silent.
+        data = self._health("# TODO\n\n## v2.16\n- [x] shipped | lane: feature\n", req_ms="v2.13")
+        self.assertEqual(data["roadmap_unmapped"], {"shipped": "v2.16", "requirements": "v2.13"})
+        self.assertNotIn("roadmap_behind", data)
+
+    def test_an_open_item_under_a_later_heading_is_a_plan_not_a_gap(self):  # verifies: REQ-ROADMAP-983#CASE-2
+        # Warning here would fire on every roadmap that plans ahead, which is every one.
+        data = self._health("# TODO\n\n## v2.16\n- [ ] planned | lane: feature\n", req_ms="v2.13")
+        self.assertNotIn("roadmap_unmapped", data)
+
+    def test_no_unmapped_signal_when_the_corpus_is_level_with_shipped_work(self):  # verifies: REQ-ROADMAP-983#CASE-3
+        data = self._health("# TODO\n\n## v2.13\n- [x] shipped | lane: feature\n", req_ms="v2.13")
+        self.assertNotIn("roadmap_unmapped", data)
 
 
 class ViewerDataSync(unittest.TestCase):  # tested-by: ARCH-VIEWER-007

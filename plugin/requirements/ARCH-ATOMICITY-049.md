@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.31
 priority: should-have
 depends_on: [ARCH-PARSE-001, ARCH-LINT-014]
 satisfies: [SYS-AUTHOR-101]

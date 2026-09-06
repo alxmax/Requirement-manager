@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.34
 priority: should-have
 depends_on: [ARCH-NEXT-013, ARCH-SIMILAR-016]
 satisfies: [SYS-QUALITY-104]

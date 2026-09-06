@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v4.2
 depends_on: [ARCH-CHECK-006, ARCH-NEXT-013, ARCH-SIMILAR-016, ARCH-COVERAGE-029, ARCH-DESIGN-061]
 satisfies: [SYS-REPORT-105]
 ---

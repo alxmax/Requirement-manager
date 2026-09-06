@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.25
 depends_on: [ARCH-PARSE-001, ARCH-MAP-007, ARCH-VIEWER-007]
 satisfies: [SYS-SHIP-108]
 lint_exempt: [file-spread]
@@ -132,6 +133,14 @@ CASE-2 — a title-only edit invalidates the cached translation
   Then   the `translation_hash` values differ while the `binding_hash` values stay
          equal
 
+CASE-3 — bumping `TRANSLATOR_VERSION` invalidates every cached entry at once
+  Given  one requirement body and title, hashed with the shipped
+         `TRANSLATOR_VERSION`
+  When   `translation_hash` runs again on the same body with `TRANSLATOR_VERSION`
+         set to a different value
+  Then   the two hashes differ, so one bump retires the whole cache instead of the
+         entries having to be invalidated file by file
+
 
 --------------------
 
@@ -182,6 +191,13 @@ CASE-2 — a stale cache entry is dropped, never served
   When   `_load_translations` runs
   Then   that entry is absent from the result, so `map`/`export` never attach it to
          the node
+
+CASE-3 — a malformed cache file yields no translations, never an exception
+  Given  a `requirements/_i18n/en.json` that holds valid JSON which is not an
+         object (a list, say)
+  When   `_load_translations` runs
+  Then   it returns no translations at all and raises nothing, so the map still
+         builds
 
 ## Context
 **Notes**

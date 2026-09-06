@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v2.22
 depends_on: [ARCH-CHECK-006, ARCH-SELFGATE-039]
 satisfies: [SYS-SHIP-108]
 ---
