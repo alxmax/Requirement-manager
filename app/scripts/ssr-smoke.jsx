@@ -1,7 +1,7 @@
 // tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
 // tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
 // tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
-// tested-by: REQ-VIEWER-984
+// tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -11,7 +11,7 @@ import { resolve } from "node:path";
 
 import App from "../src/App.jsx";
 import { rankRequirements, searchRequirements } from "../src/lib/search.js";
-import { setRegistry, REQUIREMENTS } from "../src/lib/data.js";
+import { setRegistry, setTodos, REQUIREMENTS } from "../src/lib/data.js";
 import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
@@ -55,6 +55,52 @@ for (const [name, el] of Object.entries(cases)) {
   } catch (e) {
     console.error(`FAIL ${name}: ${e.message}`); failures++;
   }
+}
+
+// Roadmap lanes: two, and what lands where.  // tested-by: REQ-VIEWER-995
+// Rendered against a tiny synthetic registry so the assertion is about the RULE, not
+// about whatever TODO.md happens to hold today.
+{
+  const ms = "v9.9";
+  setRegistry([
+    adaptNode({ id: "LANE-REQ-001", title: "A shipped capability", status: "confirmed",
+                layer: "bus", milestone: ms, deps: [], used_by: [], depends_on: [] }),
+  ]);
+  setTodos([
+    { name: "Crash on empty stdin", lane: "bug",     milestone: ms, done: false },
+    { name: "Old style item",       lane: "ops",     milestone: ms, done: false },
+    { name: "Plain feature item",   lane: "feature", milestone: ms, done: false },
+  ]);
+  const html = renderToString(<RoadmapView openSpec={noop} />);
+  const rows = html.split(/<tr[\s>]/);
+  const laneOf = (needle) => {
+    const row = rows.find(r => r.includes(needle));
+    if (!row) return null;
+    // the lane label cell is on the lane's FIRST row; walk back to it
+    const idx = rows.indexOf(row);
+    for (let i = idx; i >= 0; i--) {
+      if (rows[i].includes(">Bugs<")) return "Bugs";
+      if (rows[i].includes(">Features<")) return "Features";
+    }
+    return null;
+  };
+  const laneChecks = [
+    ["roadmap shows exactly the Bugs and Features lanes",        // verifies: REQ-VIEWER-995#CASE-1
+      html.includes(">Bugs<") && html.includes(">Features<")
+      && !/>(Bus|Need|Ops)</.test(html)
+      && html.indexOf(">Bugs<") < html.indexOf(">Features<")],
+    ["lane: bug item renders under Bugs",                         // verifies: REQ-VIEWER-995#CASE-2
+      laneOf("Crash on empty stdin") === "Bugs"],
+    ["legacy ops item renders under Features",                    // verifies: REQ-VIEWER-995#CASE-3
+      laneOf("Old style item") === "Features"],
+    ["milestoned requirement renders under Features",             // verifies: REQ-VIEWER-995#CASE-3
+      laneOf("A shipped capability") === "Features"],
+    ["plain feature item renders under Features",
+      laneOf("Plain feature item") === "Features"],
+  ];
+  for (const [label, ok] of laneChecks) test(label, ok);
+  setRegistry(json.nodes.map(adaptNode));           // back to the live registry
+  setTodos(json.todos || []);
 }
 
 // content assertions against the live (engine) registry

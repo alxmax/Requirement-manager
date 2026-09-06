@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.17"
+MAP_ENGINE_VERSION = "2026-09-06.18"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -4464,7 +4464,7 @@ def _parse_todos_from_text(text):
             if "|" in rest:
                 name_part, meta = rest.rsplit("|", 1)
                 name = name_part.strip()
-                lane_m = re.search(r"lane:\s*(\w+)", meta)  # lane must be a single word (bus|feature|ops)
+                lane_m = re.search(r"lane:\s*(\w+)", meta)  # one word: bug|feature (bus|ops still parse; the roadmap files them as features)
                 lane = lane_m.group(1) if lane_m else "feature"
             else:
                 name, lane = rest.strip(), "feature"

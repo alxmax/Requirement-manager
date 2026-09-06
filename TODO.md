@@ -1,7 +1,7 @@
 # TODO
 
 <!-- Items here appear in the Roadmap tab of the viewer.
-     Format: - [ ] Name | lane: bus|feature|ops
+     Format: - [ ] Name | lane: bug|feature   (older bus|ops values still parse, filed as features)
      Group by milestone version: ## vX.Y -->
 
 ## v1.13

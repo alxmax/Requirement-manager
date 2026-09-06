@@ -45,8 +45,15 @@ function barVariant(status) {
   return "planned";
 }
 
-const LANES      = ["bus", "feature", "need", "ops"];
-const LANE_LABEL = { bus: "Bus", feature: "Feature", need: "Need", ops: "Ops" };
+// Two lanes, not one per layer. A roadmap answers "what is broken, what is coming" — the
+// bus/feature/need/ops split is the ENGINE's taxonomy (graph position), and putting it on
+// the Y axis made four thin rows nobody read as a plan. `lane: bug` on a TODO item marks a
+// bug; every other TODO lane (feature, bus, ops — still parsed, never rejected) and every
+// milestoned requirement is a feature, because a requirement describes a capability by
+// definition and a bug is a TODO until it is fixed.
+const LANES      = ["bug", "feature"];   // implements: REQ-VIEWER-995
+const LANE_LABEL = { bug: "Bugs", feature: "Features" };
+const laneOfTodo = t => (t.lane === "bug" ? "bug" : "feature");
 
 const ARROW = "polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)";
 
@@ -230,8 +237,10 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
   }
 
   const rows = LANES.flatMap(lane => {
-    const reqs  = REQUIREMENTS.filter(r => r.layer === lane && r.milestone && r.status !== "deprecated");
-    const todos = TODOS.filter(t => t.lane === lane && !t.done);
+    const reqs  = lane === "feature"
+      ? REQUIREMENTS.filter(r => r.milestone && r.status !== "deprecated")
+      : [];
+    const todos = TODOS.filter(t => laneOfTodo(t) === lane && !t.done);
     const byMs  = Object.fromEntries(milestones.map(ms => [ms, []]));
     reqs.forEach(r  => { if (byMs[r.milestone])  byMs[r.milestone].push({ type: "req",  r  }); });
     todos.forEach(t => { if (byMs[t.milestone])  byMs[t.milestone].push({ type: "todo", t  }); });
