@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.13"
+MAP_ENGINE_VERSION = "2026-09-06.14"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -5942,13 +5942,25 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         lines.append("readability: {} error(s) across the non-draft corpus ({} warning(s) "
                      "too) - run `reqmap.py gate` for the lines".format(lint_errors, lint_warns))
     shape = _corpus_shape(reqs)
-    if shape["flat"]:
-        lines.append("{} of {} requirements declare no `level:` - the corpus is flat".format(
-            shape["total"] - shape["levelled"], shape["total"]))
-    elif shape.get("auto"):
+    unlevelled = shape["total"] - shape["levelled"]
+    if unlevelled:
+        # Reported at ANY ratio, not only under `flat`. `flat` is `levelled * 10 < total`,
+        # so a corpus 85% of the way through a retrofit said nothing at all — and a
+        # partly-levelled corpus is precisely what a retrofit leaves behind, so the one
+        # state this tail could not see was the one it exists to report. The remedy is
+        # named here rather than left in `audit`: a signal whose command the reader has to
+        # go and find is a signal most readers will not act on.
+        lines.append("{} of {} requirements declare no `level:`{} - "
+                     "`reqmap.py clarify --levels` proposes a rung for each and writes "
+                     "nothing without --apply".format(
+                         unlevelled, shape["total"],
+                         " - the corpus is flat" if shape["flat"] else ""))
+    if shape.get("auto"):
         # A corpus can be fully levelled and still be nothing but the engine's guesses,
         # in which case every other number here reads as healthy. ADR-0030's revisit
-        # trigger is exactly this ratio.
+        # trigger is exactly this ratio. Reported beside the line above rather than
+        # instead of it: "some rungs are missing" and "some rungs are guesses" are two
+        # facts, and a corpus mid-retrofit is usually both.
         lines.append("{} of {} levelled requirement(s) still carry the rung the engine "
                      "proposed (`level_source: auto`) - rename, merge or accept them"
                      .format(shape["auto"], shape["levelled"]))
@@ -6592,6 +6604,19 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
         print("created: " + ", ".join(created))
     print("\nNext: run `reqmap.py gate --risk` — it shows what to do, most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
+    # `init` drafts the three rungs only for code it EXTRACTED, and it extracts only
+    # untagged files (ARCH-EXTRACT-008). On a repo that already carries membership tags
+    # it therefore proposes nothing and says so — which reads as "nothing to do" when the
+    # truth is "this run could not reach your existing requirements". `clarify --levels`
+    # is the path that can (ADR-0031); naming it here is the difference between a gap a
+    # reader can close and one they never learn about.
+    _unlevelled = sum(1 for r in reqs.values() if not r["meta"].get("level"))
+    if _unlevelled:
+        print("\nNote: {} of {} requirement(s) declare no `level:`. `init` proposes rungs "
+              "only for code it extracted, and it skips files that already carry a tag, so "
+              "it cannot reach those.".format(_unlevelled, len(reqs)))
+        print("Run `reqmap.py clarify --levels` to see a proposed rung for each "
+              "(read-only; --apply writes them, marked `level_source: auto`).")
     return 0
 
 

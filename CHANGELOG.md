@@ -1,5 +1,30 @@
 # Changelog
 
+## plugin `v5.20.0` — 2026-09-06
+
+**A corpus mid-retrofit was the one shape `sync` could not see.** The tail that reports
+corpus health keyed its level line on `_corpus_shape`'s `flat`, which is
+`levelled * 10 < total` — fewer than 10% of requirements carrying a rung. A repo 85% of
+the way through adopting the axis therefore got **no line at all**, and a partly-levelled
+corpus is precisely what a retrofit leaves behind. The state the signal exists to report
+was the state it was blind to.
+
+It now reports at any ratio, and names the command: `reqmap.py clarify --levels`. The
+`level_source: auto` line is reported beside it rather than instead of it — "some rungs
+are missing" and "some rungs are guesses" are two facts, and a corpus mid-retrofit is
+usually both.
+
+**`init` on an already-tagged repo said "nothing to do" when it meant "I could not reach
+your requirements".** `init` proposes rungs only for code it extracted, and it extracts
+only untagged files (`ARCH-EXTRACT-008`), so on a repo that already carries membership
+tags it writes nothing — and `by_dir` being empty takes the architecture and system rungs
+down with it, which is the chain [ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md)
+recorded. It now says so, with the count and the command that can reach them.
+
+Both are read-only. Nothing writes a `level:` without `--apply`, which is what
+[ADR-0030](docs/adr/0030-the-engine-drafts-the-pyramid.md) rule 4 and the nine-senator
+audit behind it require.
+
 ## plugin `v5.19.1` — 2026-09-06
 
 **The regression suite is five files.** `test_reqmap.py` had reached 12,132 lines and 177
