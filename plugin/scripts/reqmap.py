@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.13"
+MAP_ENGINE_VERSION = "2026-09-06.15"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -1509,9 +1509,9 @@ def _git(args, cwd=None, timeout=10):  # implements: ARCH-GITRUN-067  # implemen
 def _git_root(root):  # implements: ARCH-GITRUN-067  # implements: REQ-GITRUN-993
     """The work-tree root containing `root`, or `root` itself when git cannot say.
 
-    Three call sites resolved the toplevel with three spellings; a repo where they
-    disagreed would publish `docs/map.html` to one directory and check its freshness
-    against another."""
+    Three call sites resolved the toplevel with three spellings, which is one more than
+    a repo entered from a sub-directory can afford: the site page and the scan root have
+    to agree on where the project starts."""
     return (_git(["-C", root, "rev-parse", "--show-toplevel"], timeout=3) or "").strip() or root
 
 
@@ -4565,9 +4565,12 @@ def _attach_translations(data, reqs, reqs_dir):  # implements: ARCH-TRANSLATE-04
 
 
 def cmd_map(ws, root=".", check=False):  # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-870
-    """Regenerate every derived view of the corpus — `_map.md`, `_map.json`, the
-    single-file viewer and the published `docs/map.html` — or, with `check`,
-    write nothing and return non-zero when the committed copies are stale."""
+    """Regenerate every derived view of the corpus — `_map.md`, `_map.json` and the
+    single-file viewer `_map.html` — or, with `check`, write nothing and return non-zero
+    when the committed copies are stale.
+
+    One rendered viewer, and it never leaves `requirements/`. A published copy is built
+    where it is published (ADR-0034)."""
     reqs, reqs_dir = ws.reqs, ws.reqs_dir
     data = ws.map_data(root)
 
@@ -4581,11 +4584,6 @@ def cmd_map(ws, root=".", check=False):  # implements: ARCH-MAP-007  # implement
     print("wrote {}".format(json_out))
     if html_out:
         print("wrote {}".format(html_out))
-        docs_out = _docs_publish_path(root)  # implements: ARCH-PAGES-021
-        if docs_out:
-            with open(html_out, "rb") as src, open(docs_out, "wb") as dst:
-                dst.write(src.read())
-            print("wrote {}".format(docs_out))
     print("({} nodes, {} edges)".format(len(data["nodes"]), len(data["edges"])))
     if os.path.exists(os.path.join(reqs_dir, "_findings.md")):  # implements: ARCH-FINDINGS-010
         cmd_findings(reqs, reqs_dir)   # a committed report follows the requirements it summarizes
@@ -5942,13 +5940,25 @@ def _audit_summary(reqs, members, reqs_dir, code_root):  # implements: ARCH-AUDI
         lines.append("readability: {} error(s) across the non-draft corpus ({} warning(s) "
                      "too) - run `reqmap.py gate` for the lines".format(lint_errors, lint_warns))
     shape = _corpus_shape(reqs)
-    if shape["flat"]:
-        lines.append("{} of {} requirements declare no `level:` - the corpus is flat".format(
-            shape["total"] - shape["levelled"], shape["total"]))
-    elif shape.get("auto"):
+    unlevelled = shape["total"] - shape["levelled"]
+    if unlevelled:
+        # Reported at ANY ratio, not only under `flat`. `flat` is `levelled * 10 < total`,
+        # so a corpus 85% of the way through a retrofit said nothing at all — and a
+        # partly-levelled corpus is precisely what a retrofit leaves behind, so the one
+        # state this tail could not see was the one it exists to report. The remedy is
+        # named here rather than left in `audit`: a signal whose command the reader has to
+        # go and find is a signal most readers will not act on.
+        lines.append("{} of {} requirements declare no `level:`{} - "
+                     "`reqmap.py clarify --levels` proposes a rung for each and writes "
+                     "nothing without --apply".format(
+                         unlevelled, shape["total"],
+                         " - the corpus is flat" if shape["flat"] else ""))
+    if shape.get("auto"):
         # A corpus can be fully levelled and still be nothing but the engine's guesses,
         # in which case every other number here reads as healthy. ADR-0030's revisit
-        # trigger is exactly this ratio.
+        # trigger is exactly this ratio. Reported beside the line above rather than
+        # instead of it: "some rungs are missing" and "some rungs are guesses" are two
+        # facts, and a corpus mid-retrofit is usually both.
         lines.append("{} of {} levelled requirement(s) still carry the rung the engine "
                      "proposed (`level_source: auto`) - rename, merge or accept them"
                      .format(shape["auto"], shape["levelled"]))
@@ -6592,6 +6602,19 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
         print("created: " + ", ".join(created))
     print("\nNext: run `reqmap.py gate --risk` — it shows what to do, most important first.")
     print("Then wire the gate: add `python scripts/reqmap.py gate` to your pre-commit hook.")
+    # `init` drafts the three rungs only for code it EXTRACTED, and it extracts only
+    # untagged files (ARCH-EXTRACT-008). On a repo that already carries membership tags
+    # it therefore proposes nothing and says so — which reads as "nothing to do" when the
+    # truth is "this run could not reach your existing requirements". `clarify --levels`
+    # is the path that can (ADR-0031); naming it here is the difference between a gap a
+    # reader can close and one they never learn about.
+    _unlevelled = sum(1 for r in reqs.values() if not r["meta"].get("level"))
+    if _unlevelled:
+        print("\nNote: {} of {} requirement(s) declare no `level:`. `init` proposes rungs "
+              "only for code it extracted, and it skips files that already carry a tag, so "
+              "it cannot reach those.".format(_unlevelled, len(reqs)))
+        print("Run `reqmap.py clarify --levels` to see a proposed rung for each "
+              "(read-only; --apply writes them, marked `level_source: auto`).")
     return 0
 
 
@@ -6679,21 +6702,11 @@ def _stale_artifacts(data, reqs_dir, root=".", reqs=None):  # implements: ARCH-M
             on_disk = f.read()
         if on_disk != _render_findings(reqs, reqs_dir)[0]:
             stale.append("_findings.md")
-    # Published GitHub Pages copy: docs/map.html must equal a fresh viewer render.
-    # Reading text-mode (not bytes) normalises CRLF/LF so a copy written on Windows
-    # is not falsely flagged against the LF in-memory render. The comparison runs
-    # through _strip_generated for the same reason _map.json does: the injected blob
-    # embeds the git-derived `repo` field, which differs across forks/clones — left
-    # in, it would make `map --check` spuriously fail on any fork.
-    docs_out = _docs_publish_path(root)  # implements: ARCH-PAGES-021
-    tpl = _viewer_template_path()
-    if docs_out and os.path.exists(docs_out) and os.path.exists(tpl):
-        with open(tpl, encoding="utf-8") as f:
-            fresh_html = _inject_viewer(f.read(), data)
-        with open(docs_out, encoding="utf-8") as f:
-            docs_html = f.read()
-        if _strip_generated(docs_html) != _strip_generated(fresh_html):
-            stale.append(os.path.basename(docs_out))
+    # There is no second copy of the map to check. `requirements/_map.html` is the only
+    # rendered viewer the engine writes, it is regenerable from two committed inputs
+    # (`_map.json` and the vendored template) and is therefore gitignored — so nothing
+    # here can go stale in a commit. A published copy is built where it is published:
+    # see the `deploy-map` job.
     # Site presentation page: gate the deterministic STATS region only. NAV embeds
     # the git-derived repo URL (fork-specific) and is excluded, mirroring the
     # `repo`-field exclusion in _strip_generated.  # implements: ARCH-SITE-026
@@ -7829,24 +7842,6 @@ VIEWER_TEMPLATE = "_map_viewer.html"
 _REQMAP_DATA_MARKER = "<!--REQMAP_DATA-->"
 
 
-def _docs_publish_path(root):  # implements: ARCH-PAGES-021  # implements: REQ-PAGES-889
-    """Return docs/map.html path when docs/ carries a GitHub Pages signal
-    (.nojekyll or index.html present), else None. Opt-in by folder contents —
-    repos without the signal are unaffected.
-
-    Uses the git root so repos where reqmap runs from a sub-directory (e.g.
-    plugin/) still find docs/ at the project root. Falls back to root itself
-    when git is absent or the tree is not a checkout."""
-    git_root = _git_root(root)
-    docs = os.path.join(git_root, "docs")
-    if not os.path.isdir(docs):
-        return None
-    if (os.path.exists(os.path.join(docs, ".nojekyll")) or
-            os.path.exists(os.path.join(docs, "index.html"))):
-        return os.path.join(docs, "map.html")
-    return None
-
-
 def _site_pages_bootstrap(docs_dir):  # implements: ARCH-SITE-026  # implements: REQ-SITE-924
     """Ensure docs/ carries a GitHub Pages signal so ARCH-PAGES-021 publishes and
     the page is servable: write .nojekyll and an index.html redirect when absent.
@@ -7875,8 +7870,11 @@ def _site_diagram_ok(target_path, diagram_rel):  # implements: ARCH-SITE-026
 
 def _site_default_target(root):  # implements: ARCH-SITE-026
     """docs/architecture.html at the git root (so running from plugin/ still finds
-    the project-root docs/), or None when there is no docs/. Mirrors
-    _docs_publish_path's git-root resolution."""
+    the project-root docs/), or None when there is no docs/.
+
+    The site page is the ONE thing the engine writes into docs/. The map used to be
+    copied there too; it is not any more — `requirements/_map.html` is the only
+    rendered viewer, and a published copy is built where it is published."""
     git_root = _git_root(root)
     docs = os.path.join(git_root, "docs")
     return os.path.join(docs, "architecture.html") if os.path.isdir(docs) else None
@@ -8738,6 +8736,20 @@ def _git_dirty(root):  # implements: REQ-RETIRE-961
     return bool((_git(["status", "--porcelain"], cwd=root or ".", timeout=20) or "").strip())
 
 
+_EMPTIED_COMMENT_RE = re.compile(r"[^\S\r\n]*(?:\#|//)[^\S\r\n]*(\r?\n?)$")
+
+
+def _trim_emptied_comment(line):  # implements: REQ-RETIRE-962
+    """Drop a comment marker the tag strip left with nothing after it.
+
+    `x = f()  # implements: X` must come back as `x = f()`, not as `x = f()  #`. The
+    marker only ever opened the comment the tag lived in, so leaving it behind litters
+    every consumer file a retire touches. Anchored to end-of-line and requiring nothing
+    but horizontal space after the marker, so a real trailing comment — and a second tag
+    on the same line — is untouched."""
+    return _EMPTIED_COMMENT_RE.sub(r"\1", line)
+
+
 def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
     """Remove `# implements: <id>` / `tested-by` / `verifies` tokens for one id from
     the files that carry them. Pure text: a line that carried ONLY this tag goes; a
@@ -8752,8 +8764,16 @@ def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
     # Same left guard as TAG_RE and no `#` requirement, so a `// implements:` in a JS
     # or Go member is stripped too (it used to survive and fail the next gate as a
     # dangling tag); the right guard keeps `X-001` from eating the tag of `X-0011`.
+    # The trailing run is HORIZONTAL whitespace only. `\s` matches `\n`, and these lines
+    # carry their own terminator (splitlines(keepends=True)) — so a tag at the END of a
+    # line of code took the newline with it and glued the next line into the comment:
+    #     x = compute()  # implements: X   ->   x = compute()  #     if x:
+    #     if x:                                 (the branch is now comment text)
+    # Silent whenever the swallowed line happened to keep the file parseable. A tag
+    # trailing a line of code is the shape SKILL.md documents, and every fixture in the
+    # suite put its tag on a line of its own, which is why nothing caught it.
     tag_re = re.compile(r"(?<![\w-])(?:" + _ROLE_ALT + r"|verifies)\s*:\s*" + re.escape(cap_id) +
-                        r"(?![\w-])(?:#[A-Za-z]+-\d+)?\s*")
+                        r"(?![\w-])(?:#[A-Za-z]+-\d+)?[^\S\r\n]*")
     for rel in sorted(by_file):
         path = os.path.join(code_root or ".", rel.replace("/", os.sep))
         try:
@@ -8773,7 +8793,7 @@ def _strip_member_tags(code_root, mem, cap_id):  # implements: REQ-RETIRE-962
             # a line that was nothing but this tag (in whatever comment syntax) goes
             if re.fullmatch(r"[\s/*#<!\-]*", stripped.replace("\r", "").replace("\n", "")):
                 continue
-            out.append(stripped)
+            out.append(_trim_emptied_comment(stripped))
         try:
             with open(path, "w", encoding="utf-8", newline="") as f:
                 f.write("".join(out))

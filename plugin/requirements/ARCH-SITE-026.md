@@ -5,7 +5,7 @@ level: architecture
 layer: feature
 owner: Alex
 milestone: v1.35
-depends_on: [ARCH-MAP-007, ARCH-VIEWER-007, ARCH-PAGES-021]
+depends_on: [ARCH-MAP-007, ARCH-VIEWER-007]
 satisfies: [SYS-VISUAL-106]
 ---
 

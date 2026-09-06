@@ -5,7 +5,7 @@
 # Placed in check/ on purpose: GitHub resolves `owner/repo/<dir>@ref` to
 # `<dir>/action.yml`, so this file is consumed as:
 #
-#     uses: alxmax/requirement-manager/check@v5
+#     uses: alxmax/requirement-manager/check@v6
 #
 # Usage (in a consumer repo that has vendored scripts/reqmap.py per the skill setup):
 #
@@ -18,7 +18,7 @@
 #         runs-on: ubuntu-latest
 #         steps:
 #           - uses: actions/checkout@v4
-#           - uses: alxmax/requirement-manager/check@v5
+#           - uses: alxmax/requirement-manager/check@v6
 #
 # Versioning: `@vN` is a MAJOR-ALIAS tag naming the action's interface line, not a
 # release. The `uses:` reference above IS its source of truth — there is no separate

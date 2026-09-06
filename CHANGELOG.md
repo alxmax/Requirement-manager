@@ -1,5 +1,110 @@
 # Changelog
 
+## plugin `v6.0.0` — 2026-09-06
+
+### Breaking: the engine writes one rendered map, not two
+
+`sync` no longer writes `docs/map.html`. `requirements/_map.html` is the only rendered
+viewer it produces. See [ADR-0034](docs/adr/0034-one-rendered-map-built-where-it-is-published.md).
+
+**If your repo published that copy, it will now silently freeze at its last committed
+content** — nothing errors, the page just stops being current. That is the whole reason
+this is a major. Build it where you publish it instead; in a Pages workflow that is three
+lines before the upload step:
+
+```yaml
+- run: |
+    python scripts/reqmap.py sync
+    cp requirements/_map.html docs/map.html
+```
+
+**Why.** The second copy was byte-identical to the first, and committed. In this repo it
+is 2.1 MB and appears in **249 commits** — every requirement edit rewrote it. It also
+needed machinery to stay honest: `map --check` compared it against a fresh render, `RM027`
+failed the gate when it drifted, and `_strip_generated` had to exclude the git-derived
+`repo` field so forks did not fail spuriously. All of that existed because a *derived*
+artifact was being stored rather than built. A file built at publish time cannot drift, so
+the rule is not lost — it is unnecessary.
+
+`ARCH-PAGES-021` and `REQ-PAGES-889` were retired through `sync --retire --apply --delete`
+(the ADR-0027 path), `_docs_publish_path` is gone with the copy write and the freshness
+comparison, and `docs/map.html` is untracked and gitignored. Per
+[ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md) the Action alias moves
+with the major: **`alxmax/requirement-manager/check@v6`**. `@v5` stays where it points.
+
+Your site page needs no change: `_region_markers` emits the Live Map link only when
+`map.html` resolves beside it, so a page without a published copy loses the link rather
+than serving a 404.
+
+### `retire --delete` corrupted source files
+
+The tag strip ended its regex in `\s*`. `\s` matches a newline, and the lines it edits
+carry their own terminator — so a tag at the **end of a line of code** took the newline
+with it and glued the next line into the comment:
+
+```
+    x = compute()  # implements: X          x = compute()  #     if x:
+    if x:                            ->     (the branch is now comment text)
+        return x                                return x
+```
+
+Found by running `retire --delete` on this repo's own `ARCH-PAGES-021`, which produced an
+`IndentationError` in `reqmap.py`. Loud there; **silent whenever the swallowed line left
+the file parseable** — a deleted statement that still compiles.
+
+`code()  # implements: X` is the shape `SKILL.md` documents, and every `Retire` fixture in
+the suite put its tag on a line of its own, which is why nothing caught it. The trailing
+run is now horizontal whitespace only, a comment marker the strip empties goes with the
+tag, and seven cases cover the shapes — inline, alone, two tags on one line, a real
+trailing comment, JS `//`, and CRLF sources.
+
+Two cosmetic leftovers are known and unfixed: stripping one of two tags on a line leaves a
+doubled `# #`, and an emptied `<!-- -->` survives because `>` is not in the blank-line
+character class. Neither affects correctness or the scanner.
+
+### A half-levelled corpus is now visible
+
+`sync`'s tail keyed its level line on `_corpus_shape`'s `flat` — `levelled * 10 < total`.
+A repo 85% of the way through adopting the axis got **no line at all**, and a partly
+levelled corpus is exactly what a retrofit leaves behind, so the one state this signal
+exists to report was the state it could not see. It now reports at any ratio and names
+`reqmap.py clarify --levels`, instead of leaving the remedy in `gate --audit` to be found.
+
+The `level_source: auto` line prints beside it rather than instead of it: "some rungs are
+missing" and "some rungs are guesses" are two facts, and a corpus mid-retrofit is usually
+both.
+
+`init` on an already-tagged repo printed "nothing to do" when it meant "I could not reach
+your existing requirements" — it proposes rungs only for code it extracted and extracts
+only untagged files, so `by_dir` comes back empty and takes the architecture and system
+rungs down with it, the chain
+[ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md) recorded. It now prints
+the count and points at the command that can reach them. Both are read-only; nothing writes
+a `level:` without `--apply`.
+
+**A corpus mid-retrofit was the one shape `sync` could not see.** The tail that reports
+corpus health keyed its level line on `_corpus_shape`'s `flat`, which is
+`levelled * 10 < total` — fewer than 10% of requirements carrying a rung. A repo 85% of
+the way through adopting the axis therefore got **no line at all**, and a partly-levelled
+corpus is precisely what a retrofit leaves behind. The state the signal exists to report
+was the state it was blind to.
+
+It now reports at any ratio, and names the command: `reqmap.py clarify --levels`. The
+`level_source: auto` line is reported beside it rather than instead of it — "some rungs
+are missing" and "some rungs are guesses" are two facts, and a corpus mid-retrofit is
+usually both.
+
+**`init` on an already-tagged repo said "nothing to do" when it meant "I could not reach
+your requirements".** `init` proposes rungs only for code it extracted, and it extracts
+only untagged files (`ARCH-EXTRACT-008`), so on a repo that already carries membership
+tags it writes nothing — and `by_dir` being empty takes the architecture and system rungs
+down with it, which is the chain [ADR-0031](docs/adr/0031-a-tagged-corpus-can-be-given-the-rungs.md)
+recorded. It now says so, with the count and the command that can reach them.
+
+Both are read-only. Nothing writes a `level:` without `--apply`, which is what
+[ADR-0030](docs/adr/0030-the-engine-drafts-the-pyramid.md) rule 4 and the nine-senator
+audit behind it require.
+
 ## plugin `v5.19.1` — 2026-09-06
 
 **The regression suite is five files.** `test_reqmap.py` had reached 12,132 lines and 177

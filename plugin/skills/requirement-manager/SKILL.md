@@ -375,7 +375,7 @@ unknown or mistyped key is reported on stderr and ignored.
 | drift (confirmed contract changed vs lock, members not re-touched) | **WARN** | exit 0 |
 | missing `satisfies:` for a `need` layer requirement | **WARN** | exit 0 |
 | AC-coverage gap (one line per requirement: `N/M automatable criteria carry a verifies: tag`) | **WARN** | exit 0 |
-| committed map stale (`_map.*`, `_findings.md`, published `docs/map.html`) | **WARN** | exit 0 |
+| committed map stale (`_map.*`, `_findings.md`) | **WARN** | exit 0 |
 | `depends_on` cycle (the dependency order is unsatisfiable) | **WARN** | exit 0 |
 | member drift (dedicated member changed, contract not re-touched) | **WARN** | exit 0 |
 | untagged doc bundle (large `docs/` HTML with no `generated-from:`) | **WARN** | exit 0 |
@@ -457,7 +457,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v5
+      - uses: alxmax/requirement-manager/check@v6
         # with:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives

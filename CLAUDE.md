@@ -23,7 +23,7 @@ python scripts/reqmap.py clarify --levels       # propose a V-model rung for eve
 # --- build ----------------------------------------------------------------
 python scripts/reqmap.py gate --implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
 python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
-python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, docs/map.html, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
+python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
 python scripts/reqmap.py sync --retire AREA-NAME-NNN [ID ...]  # take one requirement — or a whole class — out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents. A batch retires in a graph-computed order (consumers first) under ONE working-tree check; a dependent that is already deprecated, or that is in the same batch, never blocks
 
 # --- read -----------------------------------------------------------------
@@ -40,7 +40,7 @@ python scripts/reqmap.py gate --show AREA-NAME-NNN  # one requirement's dossier.
 **`gate` and `sync` above already carry `--code ..`** so the scan reaches the repo root
 (`docs/`, `.github/`, `.githooks/`, root-level `scripts/`), per a NEW repo-root `.reqmapignore`
 (kept separate from `plugin/.reqmapignore` — see that file's own comment for why). This is not
-optional for these two: the *committed* `_reqlock.json`/`_map.json`/`_map.md`/`docs/map.html`
+optional for these two: the *committed* `_reqlock.json`/`_map.json`/`_map.md`
 are generated from the widened scan (member `loc` paths are `code_root`-relative, so a copy
 generated without `--code ..` reports every existing member's path one level off and fails
 freshness checks against the real committed files). `.githooks/pre-commit` already runs from
@@ -71,7 +71,7 @@ Run tests (stdlib unittest, no install needed). On Windows always pass `-X utf8`
 python scripts/test_reqmap.py                                      # from plugin/scripts/ or plugin/
 python -X utf8 -m unittest test_reqmap.Gate.test_name -v           # single test/class (run from plugin/scripts/)
 python -X utf8 -m unittest test_reqmap_gate -v                     # one part on its own
-python scripts/reqmap.py gate --code ..                            # includes the freshness check: fails if committed _map.* (or docs/map.html) is stale
+python scripts/reqmap.py gate --code ..                            # includes the freshness check: fails if the committed _map.* is stale
 ```
 
 From the **repo root** (not `plugin/`) — the packaging/release side:
@@ -114,7 +114,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 
 **Design decisions live in `docs/adr/`** (31 records, index at `docs/adr/README.md`) — the single-file engine (and `0014`, why it is not split and carries no size gate), the error-versus-warning split, the drift-baseline shape, the V-model (`0007` parked it, `0019` supersedes it by adopting the left arm warn-only), and four rejected proposals. Read the relevant record before proposing a change that reverses one; each names the evidence it was decided on and its revisit condition. A decision that changes gains a NEW record superseding the old one — never an edit to the old one.
 
-**Single engine file:** `plugin/scripts/reqmap.py` — 10,178 lines measured 2026-09-06, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
+**Single engine file:** `plugin/scripts/reqmap.py` — 10,198 lines measured 2026-09-06, stdlib only, no external dependencies. Its size is a settled question, not an open one: see `docs/adr/0014` (no split, no line-count gate, numeric re-open triggers). All logic (parse, scan, gate, map, draft, plan, findings, init, next) lives here. This is intentional — hermetic deployment into any repo without install friction.
 
 **Command registry is the CLI's SSOT** (`COMMANDS` dict near the top of `reqmap.py`, `ARCH-CMDREGISTRY-033`): one entry per command (summary, positional arg, flags). `plugin/tool_definition.json` (OpenAI function-calling schema, for non-Claude assistants) and the command-table region in `skills/requirement-manager/SKILL.universal.md` are **generated** from it by `gen-integration` — never hand-edit those two. `gate` warns when they are stale relative to the registry.
 
@@ -163,7 +163,7 @@ The repo dogfoods itself: `plugin/requirements/` describes the engine's own capa
 - `_memberlock.json` — versioned sidecar (`{_schema, members}`) of dedicated-member content hashes for reverse-direction (member-ahead-of-spec) drift; kept separate so `_reqlock.json` stays a byte-stable cross-repo contract an older seeded engine reads unchanged (`ARCH-MEMBERDRIFT-027`) *(committed)*
 - `_findings.md` — aggregated verify-intent triage *(committed; `map`/`sync` refresh it once it exists, `map --check` flags it stale)*
 
-**`map` writes outside `plugin/` too.** `_docs_publish_path` (`ARCH-PAGES-021`) resolves the **git root**, so a `map` run from `plugin/` also rewrites repo-root `docs/map.html` whenever `docs/` carries a Pages signal (`.nojekyll` or `index.html`) — and `map --check` fails if that published copy drifted. `docs/` is the GitHub Pages root (committed: `map.html`, `architecture.html`, `full_architecture.html`, `index.html`, `.nojekyll`); the `deploy-map` CI job publishes it via OIDC on pushes to `main` and refuses to publish a `map.html` under 10 KB.
+**One rendered map, and `docs/map.html` is not committed** ([ADR-0034](docs/adr/0034-one-rendered-map-built-where-it-is-published.md), plugin `v6.0.0`). The engine writes exactly one viewer, `requirements/_map.html`, and never writes into `docs/`. The published copy is BUILT in the `deploy-map` job — `sync`, then `cp _map.html docs/map.html`, then `sync` again so the site page's NAV sees it — immediately before the Pages artifact is uploaded, so it cannot go stale and never enters a commit. It was a byte-identical 2.1 MB duplicate rewritten in 249 commits. `docs/` is still the Pages root (committed: `architecture.html`, `full_architecture.html`, `index.html`, `.nojekyll`); the job publishes via OIDC on pushes to `main` and still refuses to publish a `map.html` under 10 KB.
 
 The viewer is the Vite + React app under `app/`. Its single-file build is vendored beside the engine as `plugin/scripts/_map_viewer.html` (carries a `<!--REQMAP_DATA-->` marker); the stdlib engine injects each repo's `_map.json` into that marker to produce `_map.html`. So the engine ships a rich UI without itself depending on Node/npm — and emits only `_map.md` + `_map.json` if the template is absent.
 
@@ -185,9 +185,9 @@ See `app/CLAUDE.md` for rebuilding the vendored viewer after `app/` changes.
 
 The skill contract (authoritative on authoring rules, statuses, and the gate) is `plugin/skills/requirement-manager/SKILL.md`.
 
-**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v5`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v5` ships with plugin `4.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
+**GitHub Action (`check/action.yml`):** published as `alxmax/requirement-manager/check@v6`. The `@vN` alias **tracks the plugin's major** since [ADR-0029](docs/adr/0029-action-alias-tracks-the-plugin-major.md): `check@v6` ships with plugin `4.x`. It was a third, independent axis until then, which is why `@v2` lived across 2.x through 3.4 — sound in itself, and one number too many to hold. It is **not** hand-pushed any more: the `release` job force-moves it onto every commit it tags, and `check_versions.py` asserts the major named in `check/action.yml`, `README.md`, this file and the two `requirement-manager` `SKILL*.md` files agree (the documented `uses:` line is the source of truth — there is no separate version file). The major moves with every plugin major, whether or not the Action's own interface changed; `check_versions.py` now asserts the two agree. Older aliases stay where they point (`@v1` is gate-only, frozen at v2.1.0 content), so a pinned consumer keeps the engine that was current then. Consumer repos use it as:
 ```yaml
-- uses: alxmax/requirement-manager/check@v5
+- uses: alxmax/requirement-manager/check@v6
 ```
 
 The action also ships `check/engine_staleness.py` (`ARCH-STALEENGINE-043`): it compares the
