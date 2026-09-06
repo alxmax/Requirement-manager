@@ -33,6 +33,7 @@ Every bullet below is binding.
   translation, never to a wrong one. [[REQ-TRANSLATE-938]]
 - The gate reports a cached translation that carries a field the requirement
   itself does not emit. [[REQ-TRANSLATE-967]]
+- A repository declares its requirements language as `LANGUAGE` (`en`, `ro`, `both`) in `_config.json`. Under `ro` or `both` the engine reports every requirement without a fresh translation, hands over the source text plus cache key on request, has the viewer open in that language — while still translating nothing itself. [[REQ-TRANSLATE-996]]
 
 ## Cases
 CASE-1 — a title-only edit invalidates the cached translation
@@ -253,3 +254,94 @@ CASE-3 — a corpus with no cache raises nothing
   Given  a requirements directory with no `_i18n` at all
   When   `gate` runs
   Then   the check contributes no finding
+
+
+--------------------
+
+
+---
+id: REQ-TRANSLATE-996
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-TRANSLATE-044]
+lint_exempt: [file-spread]
+---
+
+# Declaring the requirements language
+
+## Description
+> The Romanian layer existed — a cache the map reads, a toggle in the viewer — but nothing
+> said whether a repository *wanted* it, so nothing could say it had fallen behind: 67 of
+> 246 entries here were missing or stale and no command noticed. A repository that writes
+> in English and wants the viewer read in Romanian, or in both, declares that once. The
+> engine then knows what is owed. It still translates nothing; it says which entries are
+> owed and hands over exactly what to translate and the key to write back.
+>
+> `lint_exempt: [file-spread]`, for the same reason its parent carries it: the setting is
+> declared by the engine and honoured by the viewer, so its members are one engine function
+> and the three viewer files that read the value. That is the shape of the feature, not a
+> diffuse capability; splitting it would put the declaration and its effect in different
+> requirements.
+
+Every bullet below is binding.
+- `LANGUAGE` in `requirements/_config.json` accepts exactly `en`, `ro` or `both`; any
+  other value is reported and ignored, and the default is `en`.
+- `_map.json` carries the setting as a top-level `language` field.
+- Under `ro` or `both`, a requirement that is not deprecated and has no `_i18n/ro.json`
+  entry whose `hash` equals its current `translation_hash` is a gap; the gap is `missing`
+  when there is no entry and `stale` when the entry's hash differs.
+- Under `en` there are no gaps, `sync` says nothing about translation, and `gate --i18n`
+  says that nothing is expected and how to change that.
+- `gate --i18n` lists every gap with its locale, id, reason and title; `--json` emits each
+  gap's `title`, `intent`, `contract` and `acceptance` exactly as `translation_hash` was
+  computed over them, plus that `hash`, so the writer stores the four translated fields
+  under the id with the same key.
+- `sync`'s tail names the gap count, the missing/stale split and the `--i18n --json`
+  command whenever there is at least one gap.
+- The viewer opens in Romanian under `ro` and in English under `en` and `both`, with the
+  toggle offered whenever a translation exists; a locale the reader chose earlier is kept
+  over the engine's default.
+
+## Cases
+CASE-1 — the setting is an enum
+  Given  `_config.json` with `"LANGUAGE": "ro"`, then with `"LANGUAGE": "romanian"`
+  When   the config is applied
+  Then   the first sets `LANGUAGE` to `ro` and the second is reported on stderr and leaves
+         it unchanged
+
+CASE-2 — the map carries the setting
+  Given  `LANGUAGE` set to `both`
+  When   the map data is assembled
+  Then   its top-level `language` is `both`
+
+CASE-3 — missing and stale are told apart
+  Given  `LANGUAGE` `ro`, one requirement with a fresh `ro` entry, one whose entry's hash
+         no longer matches, and one with no entry
+  When   the gaps are computed
+  Then   exactly two gaps come back, reasons `stale` and `missing`, and the fresh one is absent
+
+CASE-4 — English means nothing is owed
+  Given  `LANGUAGE` `en` and a corpus with no translation at all
+  When   `gate --i18n` and the `sync` tail run
+  Then   no gap is reported and `gate --i18n` says nothing is expected and names the key to
+         change
+
+CASE-5 — the JSON hand-off carries the source and the key
+  Given  one gap under `ro`
+  When   `gate --i18n --json` runs
+  Then   the entry carries `id`, `locale`, `reason`, `hash`, `title`, `intent`, `contract`
+         and `acceptance`, and writing those four fields under the id with that hash makes
+         the next gap computation empty
+
+CASE-6 — the sync tail names the gap
+  Given  `LANGUAGE` `ro` and two gaps
+  When   the `sync` tail prints
+  Then   one line reports 2 with the missing/stale split and names `gate --i18n --json`
+
+CASE-7 — the viewer's default follows the setting, the reader's choice beats it
+  Given  the single-file viewer's inlined data with `language` `ro`, then `en`, then `both`
+  When   the viewer mounts with no stored locale
+  Then   it opens in Romanian, then English, then English; a stored or explicit locale
+         is kept regardless

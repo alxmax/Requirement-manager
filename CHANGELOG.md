@@ -1,5 +1,38 @@
 # Changelog
 
+## plugin `v6.4.0` — 2026-09-07
+
+**A repository declares its requirements language.** `"LANGUAGE": "en" | "ro" | "both"` in
+`requirements/_config.json`, default `en`, any other spelling reported and ignored like the
+other enum keys.
+
+The Romanian layer already existed — a cache the map reads, a toggle in the viewer — but
+nothing said whether a repository *wanted* it, so nothing could say it had fallen behind.
+Measured here before this change: **67 of 246 entries missing or stale**, and no command
+noticed. Now, under `ro` or `both`:
+
+- **`sync`'s tail reports the gap**: *"N requirement(s) have no fresh translation for
+  LANGUAGE `ro` (M missing, K stale) — `reqmap.py gate --i18n --json` emits the entries to
+  fill."* Under `en` it says nothing, because nothing is owed.
+- **`gate --i18n`** lists every gap with locale, id, reason and title. **`--json`** is the
+  hand-off: each entry carries `title`, `intent`, `contract`, `acceptance` exactly as the
+  cache key was computed over them, plus that `hash`. Whoever translates — the skill, an
+  assistant, a person — writes the four translated fields under the id with the same key,
+  and the next `sync` serves it.
+- **The viewer opens in Romanian** under `ro`, in English under `en` and `both`, with the
+  EN/RO toggle offered whenever a translation exists. A locale the reader chose earlier is
+  kept — a preference beats a default. Read from the inlined blob at mount time, so the
+  single-file viewer consumers actually open gets it right on first paint.
+- `_map.json` carries `language` at the top level.
+
+**The engine still translates nothing.** That is `REQ-TRANSLATE-937` and it holds: the
+emitter says what is owed and by what key. `SKILL.md` gains a *Language* section telling an
+assistant exactly how to fill the cache — translate the prose, keep ids, `CASE-N` labels,
+`Given`/`When`/`Then`, backticks, paths and numbers verbatim.
+
+Authoring requirements *in* Romanian — the linter reading Romanian modals, connectors and
+vague terms — is a different feature and deliberately not this one. `REQ-TRANSLATE-996`.
+
 ## plugin `v6.3.0` — 2026-09-06
 
 **The Roadmap has two lanes: Bugs and Features.** It had four — bus, feature, need, ops —

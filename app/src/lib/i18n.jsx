@@ -226,8 +226,20 @@ const Ctx = createContext({
 
 /* `initialLocale` lets a host (or a test) preset the language; otherwise the
  * viewer remembers the reader's last choice, and falls back to English. */
+/* The default the ENGINE declares. Read straight from the inlined blob rather than from
+ * data.js: the provider mounts before App's effect runs loadData, so the module-level
+ * LANGUAGE is still its default at the moment the initial locale is chosen. The single-file
+ * viewer — the artifact consumers actually open — always has the blob at mount time. `both`
+ * opens in English with the toggle offered; `ro` opens in Romanian. */
+function engineDefault() {                                   // implements: REQ-TRANSLATE-996
+  try {
+    const d = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
+    return d && d.language === "ro" ? "ro" : "en";
+  } catch { return "en"; }
+}
+
 export function I18nProvider({ children, initialLocale }) {  // implements: REQ-VIEWER-943
-  const [locale, setLocale] = useState(() => initialLocale || readStored() || "en");
+  const [locale, setLocale] = useState(() => initialLocale || readStored() || engineDefault());
   useEffect(() => {
     try { window.localStorage.setItem(STORAGE_KEY, locale); } catch { /* not fatal */ }
     // Keep the document language honest for screen readers and hyphenation.

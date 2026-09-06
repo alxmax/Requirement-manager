@@ -1,7 +1,7 @@
 // tested-by: ARCH-VIEWER-007  // tested-by: REQ-TRANSLATE-938  // tested-by: REQ-VIEWER-942  // tested-by: REQ-VIEWER-943
 // tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
 // tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
-// tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995
+// tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995  // tested-by: REQ-TRANSLATE-996
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -101,6 +101,28 @@ for (const [name, el] of Object.entries(cases)) {
   for (const [label, ok] of laneChecks) test(label, ok);
   setRegistry(json.nodes.map(adaptNode));           // back to the live registry
   setTodos(json.todos || []);
+}
+
+// LANGUAGE sets the viewer's default locale.  // tested-by: REQ-TRANSLATE-996
+// SSR has no window; a minimal one with only the inlined blob is exactly the state the
+// provider sees at mount time in the single-file viewer (no localStorage = no reader choice).
+{
+  const RO_MARKERS = ["verzi", "Întrebări", "Nicio", "deschis", "cerin"];
+  const renderWith = (language) => {
+    globalThis.window = { __REQMAP_DATA__: { language } };
+    try { return renderToString(<I18nProvider><App /></I18nProvider>); }
+    finally { delete globalThis.window; }
+  };
+  const roHtml = renderWith("ro"), enHtml = renderWith("en"), bothHtml = renderWith("both");
+  const hasRo = (h) => RO_MARKERS.some(m => h.includes(m));
+  const langChecks = [
+    ["LANGUAGE ro opens the viewer in Romanian",            hasRo(roHtml)],     // verifies: REQ-TRANSLATE-996#CASE-7
+    ["LANGUAGE en opens the viewer in English",             !hasRo(enHtml)],    // verifies: REQ-TRANSLATE-996#CASE-7
+    ["LANGUAGE both opens in English",                      !hasRo(bothHtml)],  // verifies: REQ-TRANSLATE-996#CASE-7
+    ["a reader's own choice beats the engine default",
+      !hasRo(renderToString(<I18nProvider initialLocale="en"><App /></I18nProvider>))],
+  ];
+  for (const [label, ok] of langChecks) test(label, ok);
 }
 
 // content assertions against the live (engine) registry

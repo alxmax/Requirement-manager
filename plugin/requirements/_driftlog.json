@@ -29,6 +29,10 @@
       "hash": "2c71a3dd7141",
       "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
     },
+    "ARCH-TRANSLATE-044": {
+      "hash": "7437837e022f",
+      "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
+    },
     "ARCH-VIEWER-007": {
       "hash": "c9960b4fcf98",
       "reason": "v6.3.0: the roadmap has two lanes (REQ-VIEWER-995)"
@@ -64,6 +68,10 @@
     "REQ-REPRO-905": {
       "hash": "34bdcb2ea67a",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
+    },
+    "REQ-TRANSLATE-996": {
+      "hash": "4f6e6771dd73",
+      "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     }
   }
 }

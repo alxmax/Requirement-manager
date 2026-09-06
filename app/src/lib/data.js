@@ -224,6 +224,10 @@ export let REQ_BY_ID = {};
 // header falls back to a generic label.
 export let REPO = null;
 export let TODOS = [];
+// The repository's declared requirements language (`en` | `ro` | `both`), emitted by the
+// engine from requirements/_config.json. It sets the viewer's DEFAULT locale; a reader's
+// own choice (localStorage) still wins, because a preference beats a default.
+export let LANGUAGE = "en";                          // implements: REQ-TRANSLATE-996
 // The CLI as data, straight off _map.json (generated from the engine's command
 // registry). Empty in the baked fallback: a map produced before v4.0.0 carries none.
 export let COMMANDS = [];
@@ -258,6 +262,7 @@ export function setScores(health, design) {          // implements: REQ-VIEWER-9
 export function setCommands(list) { COMMANDS = Array.isArray(list) ? list : []; }
 
 /** Set the owner/repo name the loaded map describes (engine-emitted). */
+export function setLanguage(v) { LANGUAGE = (v === "ro" || v === "both") ? v : "en"; }  // implements: REQ-TRANSLATE-996
 export function setRepo(name) {
   REPO = name || null;
 }

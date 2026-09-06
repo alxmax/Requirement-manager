@@ -7,7 +7,7 @@
  * the app's requirement shape; on any miss it leaves the baked fallback in
  * place, so the app always renders. */
 
-import { setRegistry, setRepo, setTodos, setCommands, setScores } from "./data.js";
+import { setRegistry, setRepo, setTodos, setCommands, setScores, setLanguage } from "./data.js";
 
 /** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
 export function adaptNode(n) {
@@ -81,6 +81,7 @@ export async function loadData() {
   if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
     setRegistry(inl.nodes.map(adaptNode));
     setRepo(inl.repo);
+    setLanguage(inl.language);
     setTodos(inl.todos || []);
     setCommands(inl.commands);
     setScores(inl.health, inl.design);
@@ -94,6 +95,7 @@ export async function loadData() {
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) return { source: "baked" };
     setRegistry(json.nodes.map(adaptNode));
     setRepo(json.repo);
+    setLanguage(json.language);
     setTodos(json.todos || []);
     setCommands(json.commands);
     setScores(json.health, json.design);
