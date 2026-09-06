@@ -34,3 +34,8 @@ docs/*.excalidraw
 
 # Feedback local din consum real (Management_Dashboard) — nu se versionează
 TODO-feedback-*.md
+
+# The published map is BUILT by the deploy-map job from the committed _map.json
+# and the vendored viewer template. One rendered viewer exists (requirements/_map.html,
+# itself gitignored); a second committed copy was 2 MB of churn per requirement edit.
+docs/map.html

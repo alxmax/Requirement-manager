@@ -262,7 +262,7 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 
 | Flag | What it does |
 |---|---|
-| *(bare)* | Rebuild everything derived: lock, `_map.*`, `docs/map.html`, `_findings.md`, the site regions, the integration artifacts. |
+| *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the site regions, the integration artifacts. |
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
 | `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
 | `--suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. `--apply` writes them; ambiguous matches never are. |
@@ -334,7 +334,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v5
+      - uses: alxmax/requirement-manager/check@v6
 ```
 
 The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`
@@ -411,7 +411,7 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 10,203 lines)
+  scripts/reqmap.py                         the engine (Python stdlib only, 10,198 lines)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git

@@ -2956,3 +2956,58 @@ class NewRefusesANonId(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-
             rc = R.cmd_promote_todo(d, None, "some todo", "my req", root=d)
         self.assertEqual(rc, 2)
         self.assertIn("invalid id", buf.getvalue())
+
+
+class RetireKeepsTheLineBreak(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-962
+    """`retire --delete` strips a tag out of source. It must take the tag and nothing else.
+
+    Every Retire fixture put its tag on a line of ITS OWN, so the shape SKILL.md actually
+    documents — `code()  # implements: X`, a tag trailing a line of code — was never
+    exercised. The strip regex ended in `\\s*`, `\\s` matches a newline, and these lines
+    carry their own terminator: the tag took the newline with it and the NEXT line was
+    glued into the comment. Loud here (IndentationError); silent whenever the swallowed
+    line left the file parseable."""
+
+    def _strip(self, src, name="m.py", cap="AREA-X-001"):
+        d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
+        with io.open(os.path.join(d, name), "w", encoding="utf-8", newline="") as f:
+            f.write(src)
+        R._strip_member_tags(d, [{"file": name, "line": 1}], cap)
+        with io.open(os.path.join(d, name), encoding="utf-8", newline="") as f:
+            return f.read()
+
+    def test_a_tag_trailing_code_does_not_swallow_the_next_line(self):
+        got = self._strip("def f():\n"
+                          "    x = compute()  " + tag("AREA-X-001") + "\n"
+                          "    if x:\n"
+                          "        return x\n")
+        self.assertEqual(got, "def f():\n    x = compute()\n    if x:\n        return x\n")
+        compile(got, "m.py", "exec")     # the whole point: it still parses
+
+    def test_the_emptied_comment_marker_goes_with_the_tag(self):
+        self.assertEqual(self._strip("x = 1  " + tag("AREA-X-001") + "\n"), "x = 1\n")
+
+    def test_a_real_trailing_comment_survives(self):
+        got = self._strip("x = 1  " + tag("AREA-X-001") + "  # keep me\n")
+        self.assertIn("keep me", got)
+        self.assertTrue(got.endswith("\n"))
+
+    def test_a_second_tag_on_the_same_line_survives(self):
+        got = self._strip("def g():  " + tag("AREA-X-001") + "  " + tag("AREA-Y-002") + "\n"
+                          "    return 2\n")
+        self.assertIn("AREA-Y-002", got)
+        self.assertNotIn("AREA-X-001", got)
+        self.assertIn("    return 2\n", got)     # the body line is still its own line
+
+    def test_a_tag_alone_on_its_line_still_removes_the_line(self):
+        self.assertEqual(self._strip(tag("AREA-X-001") + "\ndef dead():\n    return 1\n"),
+                         "def dead():\n    return 1\n")
+
+    def test_a_js_line_comment_tag_leaves_the_code_intact(self):
+        got = self._strip("function f() {  // " + "implements" + ": AREA-X-001\n"
+                          "  return 1;\n}\n", name="m.js")
+        self.assertEqual(got, "function f() {\n  return 1;\n}\n")
+
+    def test_crlf_source_keeps_its_line_endings(self):
+        got = self._strip("def f():\r\n    x = 1  " + tag("AREA-X-001") + "\r\n    return x\r\n")
+        self.assertEqual(got, "def f():\r\n    x = 1\r\n    return x\r\n")
