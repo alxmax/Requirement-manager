@@ -1,5 +1,65 @@
 # Changelog
 
+## plugin `v5.16.0` — 2026-09-06
+
+**`gate` could exit 1 on a purely advisory metric.** Closes
+[#243](https://github.com/alxmax/Requirement-manager/issues/243), found by the post-vote
+skeptic of the deliberation that produced `v5.15.0` — the three voices before it had all
+measured `RM027`'s severity and concluded, wrongly, that the design pass was contained.
+
+`ARCH-DESIGN-061` says in a binding clause that *"the pillar stays advisory and never
+enters the gate"*, and `cmd_design`'s docstring says the same. It was not true:
+
+```
+$ printf '\n' | cat - scripts/benchmark_scan.py > /tmp/b && mv /tmp/b scripts/benchmark_scan.py
+$ cd plugin && python -X utf8 scripts/reqmap.py gate --code ..
+249 requirements (244 confirmed), 1179 members, 0 errors, 0 warnings.
+244 non-draft requirement(s) linted · 0 error(s) · 0 warning(s)
+FAIL  map is stale: _map.json, map.html
+$ echo $?
+1
+```
+
+Zero requirement errors, zero lint errors, exit 1 — from one blank line inserted into a
+file **no requirement claims**.
+
+**Why** (`REQ-DESIGN-991`). `_map.json` is *one* freshness-gated artifact carrying three
+classes of data with three different severities: the requirement graph (normative),
+`health` (derived), and `design` (advisory by its own contract). `_strip_generated`
+excluded only four environment-derived lines, so the comparison was all-or-nothing — and
+**any number that landed in that document acquired ERROR severity by construction**,
+whatever its own contract said. A design finding carries a per-`line:` row; inserting a
+blank line above it moves that number; the committed map goes stale; the gate fails.
+
+`_design_summary`'s docstring held the confusion in one sentence: *"Deterministic, so it
+can live in the committed `_map.json` and be checked for freshness."* Determinism was the
+wrong test. What a freshness-checked payload needs is **stability under unrelated edits**,
+and per-line findings have none.
+
+**The fix.** The design payload is excluded from every freshness comparison — the `design`
+block of `_map.json` and of the injected viewer blob, and `_map.md`'s one-line
+`design OOP:` summary. It is the same exclusion `"repo":` already carried, for the same
+reason: a value that legitimately differs without the corpus having changed must not be a
+verdict.
+
+- **The data stays in the artifacts.** The viewer renders those rows in its Design tab
+  (`app/src/views/ProblemsView.jsx`), so dropping them would have deleted a feature to fix
+  a severity mistake.
+- **`health` stays inside the verdict.** It is derived from the corpus, not from line
+  numbers in files nothing claims, so it is stable under exactly the edits that broke
+  `design`.
+- A `try/except` around the design pass would have fixed nothing: that catches a crash, and
+  this was never a crash. `RM027` was *already* wrapped in `except Exception` — the crash
+  channel had been closed before anyone noticed the content channel was open.
+- Accepted cost, stated plainly: the committed design rows may lag the code until the next
+  `sync`. That is the correct trade for advice nobody should be blocked by.
+
+**Also corrected:** `ARCH-DESIGN-061` now says that "advisory" is a property of the whole
+path rather than of the printer. `cmd_design` always exited 0 and no gate rule read its
+output, and the review could still fail a build — because severity is inherited by whatever
+an artifact is gated on. The claim has to be defended where the data lands, not only where
+it is printed.
+
 ## plugin `v5.15.0` — 2026-09-06
 
 Three of the five prescriptions from an external competitive review, taken after a

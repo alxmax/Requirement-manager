@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.9"
+MAP_ENGINE_VERSION = "2026-09-06.10"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -6568,16 +6568,52 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):  # implements: ARC
     return 0
 
 
-def _strip_generated(text):
+# The top-level `"design"` key of `_map.json`, as `json.dumps(indent=2)` writes it.
+# The block closes at the first line that is exactly `  },` or `  }` — every line
+# inside it is nested deeper, so the two-space indent is what ends it.
+_DESIGN_BLOCK_OPEN = '  "design": {'
+_DESIGN_BLOCK_CLOSE = ("  },", "  }")
+
+
+def _strip_generated(text):  # implements: REQ-DESIGN-991
     """Drop volatile lines so a freshness diff compares content, not the
     environment: the `generated: <timestamp>` frontmatter line (`_map.md`) and the
     `"repo": ...` field (`_map.json`), which is git-derived and differs across
-    forks/clones — comparing it would make `map --check` spuriously fail on a fork."""
-    return "\n".join(l for l in text.splitlines()
-                     if not l.startswith("generated: ")
-                     and not l.startswith("engine: ")
-                     and not l.lstrip().startswith('"repo":')
-                     and not l.lstrip().startswith('"engine_version":'))
+    forks/clones — comparing it would make `map --check` spuriously fail on a fork.
+
+    The advisory design payload goes with them, and for a sharper reason than
+    volatility. `_map.json` is ONE freshness-gated artifact carrying three classes of
+    data with three different severities — the requirement graph (normative), `health`
+    (derived) and `design` (advisory by its own contract, ARCH-DESIGN-061). The
+    comparison was all-or-nothing, so anything landing in that document acquired ERROR
+    severity by construction, whatever its own contract said: one blank line inserted
+    into a file no requirement claims moved a `line:` number in `design.findings`,
+    which made the committed map stale, which failed `gate` with zero requirement
+    errors. Determinism was the wrong test for what may be gated — a freshness-checked
+    payload needs STABILITY UNDER UNRELATED EDITS, and per-line findings have none.
+
+    The data itself stays in the artifact: the viewer renders those rows in its Design
+    tab. What changes is that they no longer carry a verdict. The cost, taken with eyes
+    open, is that the committed design rows may lag the code until the next `sync`,
+    which is the correct trade for advice nobody should be blocked by."""
+    out, in_design = [], False
+    for l in text.splitlines():
+        if in_design:
+            in_design = l not in _DESIGN_BLOCK_CLOSE
+            continue
+        if l == _DESIGN_BLOCK_OPEN:
+            in_design = True
+            continue
+        if (l.startswith("generated: ")
+                or l.startswith("engine: ")
+                # `_map.md`'s one-line design summary: the same advisory number, and
+                # the same reason it must not be able to fail a build.
+                or l.startswith("design OOP: ")
+                or l.lstrip().startswith('"repo":')
+                or l.lstrip().startswith('"engine_version":')):
+            continue
+        out.append(l)
+    return "\n".join(out)
 
 
 _ENGINE_STAT_RE = re.compile(r'<div class="stat"><b>[^<]*</b><span>engine</span></div>')

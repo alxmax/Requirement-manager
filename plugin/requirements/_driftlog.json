@@ -24,6 +24,14 @@
     "REQ-DECOMPOSE-839": {
       "hash": "754c8d23f4ff",
       "reason": "the two split findings named a remedy that no-ops on them; message and behaviour now agree"
+    },
+    "REQ-DESIGN-978": {
+      "hash": "3bb3687f63b8",
+      "reason": "the advisory design payload no longer rides the freshness verdict (#243)"
+    },
+    "REQ-DESIGN-991": {
+      "hash": "3ce6caaa0842",
+      "reason": "plain present tense"
     }
   }
 }
