@@ -222,7 +222,7 @@ RISK_ADVICE = {
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-06.8"
+MAP_ENGINE_VERSION = "2026-09-06.9"
 
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -558,11 +558,13 @@ COMMANDS = {
             {
                 "name": "accept_drift",
                 "flag": "--accept-drift",
-                "type": "bool",
+                "type": "str",
                 "help": (
                     "Explicitly advance the baseline when a confirmed or implemented "
                     "contract changed. Required when those contracts differ from the "
-                    "lock; sync exits non-zero without it."
+                    "lock; sync exits non-zero without it. Takes an optional reason, "
+                    "recorded in requirements/_driftlog.json so the waiver and its "
+                    "justification land in the diff."
                 ),
             },
             {
@@ -2056,6 +2058,63 @@ def save_memberlock(reqs_dir, member_hashes):  # implements: ARCH-MEMBERDRIFT-02
         json.dump(payload, f, indent=2, sort_keys=True)
 
 
+DRIFTLOG_SCHEMA = 1
+
+
+def _driftlog_path(reqs_dir):  # implements: REQ-DRIFT-988
+    return os.path.join(reqs_dir, "_driftlog.json")
+
+
+def load_driftlog(reqs_dir):  # implements: REQ-DRIFT-988
+    """Return {rid: {"hash": ..., "reason": ...}} for every contract whose drift was
+    accepted, or {} when absent/corrupt or written by a NEWER schema — fail open like
+    the other sidecars, so a forward-incompatible file degrades to 'no reasons on
+    record' rather than crashing a gate."""
+    try:
+        with open(_driftlog_path(reqs_dir), encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    schema = data.get("_schema", 0) if isinstance(data, dict) else None
+    if not isinstance(schema, int) or schema > DRIFTLOG_SCHEMA:
+        return {}
+    got = data.get("accepted")
+    return got if isinstance(got, dict) else {}
+
+
+def save_driftlog(reqs_dir, accepted):  # implements: REQ-DRIFT-988
+    """Write the accepted-drift record, versioned by `_schema` and kept OUT of
+    `_reqlock.json` — that file is the byte-stable cross-repo contract an older seeded
+    engine still reads (ADR-0003), so nothing new may be added to it."""
+    os.makedirs(reqs_dir, exist_ok=True)
+    payload = {"_schema": DRIFTLOG_SCHEMA, "accepted": accepted}
+    with open(_driftlog_path(reqs_dir), "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, sort_keys=True)
+
+
+def record_accepted_drift(reqs_dir, accepted_ids, new_lock, reason,
+                          live_ids):  # implements: ARCH-DRIFT-003  # implements: REQ-DRIFT-988
+    """Record who waived the drift check and why, where a reviewer reads it: the diff.
+
+    `--accept-drift` advances the baseline on a contract nobody re-validated. That is
+    the one escape hatch in the gate, and until now it left no trace at all — the lock
+    hash moved and the reason lived in someone's head. The record is a file, not a log
+    line, precisely so it shows up in the pull request beside the hash it excuses.
+
+    A bare `--accept-drift` still works and is still recorded, with `reason: null`:
+    silence is a legible answer, and hiding it would make the unexplained waiver the
+    invisible one. Entries for requirements that have left the corpus are dropped, the
+    same way the lock prunes its own."""
+    if not accepted_ids:
+        return {}
+    log = {rid: e for rid, e in load_driftlog(reqs_dir).items()
+           if rid in live_ids and isinstance(e, dict)}
+    for rid in accepted_ids:
+        log[rid] = {"hash": new_lock.get(rid), "reason": reason}
+    save_driftlog(reqs_dir, log)
+    return log
+
+
 CLARIFYLOCK_SCHEMA = 1
 
 
@@ -2805,6 +2864,17 @@ def _rule_exemption_without_reason(ctx):
                                 "exemption and fix what it hides".format(rid, field, check))
 
 
+# The two rules that say "the spec and the code no longer agree". They warn by default
+# and promote under `--strict`; a repo may also promote them for itself with
+# `DRIFT_SEVERITY: "error"` in `_config.json`. The default stays `warn` because the
+# evidence for that is recorded and unchanged (ADR-0002): a spec-first edit legitimately
+# drifts the contract ahead of the code, and a check that fails on correct work is a
+# check someone bolts `continue-on-error` onto and never reads again. Which side of that
+# trade a repo wants is the repo's call, not the tool's.
+DRIFT_RULES = ("RM018", "RM019")
+DRIFT_SEVERITY = "warn"          # or "error", per repo, via `_config.json`
+
+
 @gate_rule("RM018", "warn", strict=True)
 def _rule_drift(ctx):  # implements: ARCH-DRIFT-003  # implements: ARCH-DRIFTIMPACT-035  # implements: REQ-CHECK-829  # implements: REQ-DRIFTIMPACT-843
     for rid, r in ctx.reqs.items():
@@ -2917,12 +2987,20 @@ def _rule_map_stale(ctx):  # implements: ARCH-MAP-007
                      + " — run `reqmap.py sync` (or `map`) and commit the result")
 
 
-def run_gate_rules(ctx, strict=False):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947  # implements: REQ-RULES-948
+def run_gate_rules(ctx, strict=False):  # implements: ARCH-RULES-059  # implements: REQ-RULES-947  # implements: REQ-RULES-948  # implements: REQ-RULES-989
     """Run every registered rule over `ctx` -> (errors, warns) as Finding lists, in
     registry order. A rule's `strict` flag promotes its findings to errors under
     `--strict`, except RM012 on a non-confirmed requirement, which stays a plain warn
     so a draft-heavy consumer's strict CI cannot start failing on it. A requirement
-    whose `gate_exempt:` names the rule's code is skipped for that rule."""
+    whose `gate_exempt:` names the rule's code is skipped for that rule.
+
+    `DRIFT_SEVERITY: "error"` in a repo's `_config.json` promotes the two drift rules
+    for THAT repo without `--strict` and without moving anyone else's default. The
+    promotion is resolved here, per run, and never written back onto the Rule: the
+    registry is module state shared by two `cmd_check` calls inside `audit`, and a
+    mutation would leak from the first into the second. `gate_exempt:` is checked
+    before any of this, so a requirement's own written-down exemption still wins —
+    a repo-wide dial must not silently overrule a decision made per requirement."""
     errors, warns = [], []
     for rule in GATE_RULES:
         if rule.only_source_repo and not ctx.source_repo:
@@ -2935,6 +3013,8 @@ def run_gate_rules(ctx, strict=False):  # implements: ARCH-RULES-059  # implemen
                 confirmed = rid is None or ctx.req(rid).status == "confirmed"
                 if rule.id != "RM012" or confirmed:
                     sev = "error"
+            if sev != "error" and rule.id in DRIFT_RULES and DRIFT_SEVERITY == "error":
+                sev = "error"
             (errors if sev == "error" else warns).append(Finding(rule.id, sev, rid, msg))
     return errors, warns
 
@@ -2963,9 +3043,14 @@ def _is_source_repo(code_root):
 
 
 def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
-              accept_drift=True):  # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-RULES-948
+              accept_drift=True, drift_reason=None):  # implements: ARCH-CHECK-006  # implements: ARCH-RULES-059  # implements: REQ-CHECK-832  # implements: REQ-CHECK-833  # implements: REQ-RULES-948
     """The gate: run GATE_RULES, print findings with their codes, advance the lock when
-    asked. Report-only unless `update_lock` (that is `sync`)."""
+    asked. Report-only unless `update_lock` (that is `sync`).
+
+    `accept_drift` stays a plain boolean and the reason travels beside it. Folding the
+    two into one value would have made `--accept-drift ""` falsy, and an empty string
+    is a caller who passed the flag — reading it as 'did not' would demote contracts
+    they meant to keep."""
     reqs, members, reqs_dir, code_root = ws.reqs, ws.members, ws.reqs_dir, ws.code_root
     code_root = code_root or "."   # a workspace built without one gates the cwd
     ac_cover, level_cover = ws.ac_cover, ws.level_cover
@@ -3019,6 +3104,11 @@ def cmd_check(ws, update_lock, strict=False, as_json=False, since=None,
         confirmed_drift = [rid for (rid, old_h, _h) in changed
                            if old_h is not None
                            and reqs.get(rid, {}).get("meta", {}).get("status") in ("confirmed", "implemented")]
+        if confirmed_drift and accept_drift:
+            record_accepted_drift(reqs_dir, confirmed_drift, new_lock,
+                                  drift_reason, set(new_lock))
+            print("  accepted drift on %d confirmed contract(s), reason: %s"
+                  % (len(confirmed_drift), drift_reason or "(none given)"))
         if confirmed_drift and not accept_drift:  # implements: REQ-PROMOTE-974
             # An edited contract has not been re-validated by anyone, so it stops
             # claiming it was: status goes back to `draft` and the baseline advances.
@@ -4913,13 +5003,20 @@ def _lint_acceptance(body, r, rid):  # implements: ARCH-LINTCHECKS-025  # implem
         elif _oversize(rid, r):
             findings.append({
                 "severity": "warn", "check": "ac-count-high",
-                # Name the remedy. The finding used to say only "consider splitting",
-                # while `lint_exempt:` was documented as the one-line escape hatch — so the
-                # cheapest visible action was to silence it, and that is what readers (and
-                # assistants) reached for. `clarify --decompose` scaffolds the clause out.
-                "detail": "{} AC (> {}): several capabilities in one requirement \u2014 split it "
-                          "with `reqmap.py clarify {} --decompose`".format(
-                              ac_n, LINT_AC_MAX, rid)})
+                # Name a remedy that EXISTS. The finding used to say only "consider
+                # splitting", while `lint_exempt:` was documented as the one-line escape
+                # hatch — so the cheapest visible action was to silence it, and that is
+                # what readers (and assistants) reached for. Naming `--decompose` was the
+                # fix for that, and it named the wrong thing: `--decompose` acts on
+                # `statement-size` findings only (see the NOTE above `cmd_lint`), so an
+                # author running it on an over-scoped requirement got `All clean` and no
+                # files, from a command the gate had just called an error. A remedy that
+                # no-ops is worse than no remedy: it sends the reader back to
+                # `lint_exempt:`, which the skill says must never be the reflex.
+                "detail": "{} AC (> {}): several capabilities in one requirement \u2014 move "
+                          "criteria onto the child requirements that own them until {} or "
+                          "fewer remain (`--decompose` does not cover this check)".format(
+                              ac_n, LINT_AC_MAX, LINT_AC_MAX)})
     # atomic bullet/Then parity (warn, --strict-promotable): the atomic form's `>` story
     # quote may enumerate up to LINT_ATOMIC_STORY_BULLETS_MAX facts, but every existing
     # signal is blind to whether each one is actually proven — `_count_ac` counts the ONE
@@ -4974,10 +5071,14 @@ def _lint_shape(rid, r, body, children):  # implements: ARCH-LINTCHECKS-025  # i
         if contract_n > LINT_CONTRACT_MAX and ac_count > LINT_AC_MAX:
             findings.append({
                 "severity": "warn", "check": "over-scoped",
+                # The trigger is an AND, so clearing EITHER number clears the finding —
+                # which is genuinely useful to an author and was nowhere in the output.
+                # Same correction as `ac-count-high`: `--decompose` cannot act on this.
                 "detail": "{} contract {} + {} AC (both over {}/{}): likely several "
-                          "capabilities \u2014 split it with `reqmap.py clarify {} --decompose`".format(
+                          "capabilities \u2014 bring either number under its ceiling and this "
+                          "clears (`--decompose` does not cover this check)".format(
                               contract_n, "groups" if groups else "clauses",
-                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX, rid)})
+                              ac_count, LINT_CONTRACT_MAX, LINT_AC_MAX)})
     # fan-out (warn): a parent in the `satisfies:` hierarchy normally carries 5-20 children.
     # Too few and the level buys no grouping; too many and it is a bucket, not a level.
     # Counted on the satisfies graph, NOT on `depends_on` — the two are different axes, and
@@ -5250,7 +5351,10 @@ def cmd_lint(ws, strict=False, decompose=False, only=None):  # implements: ARCH-
     the lint and the map-freshness check in one verdict, so a file written during the
     lint step would fail the freshness check of the same run (ARCH-DECOMPOSE-050).
     `only` narrows the run to one id — `clarify <ID> --decompose` promises to scaffold
-    for that requirement, not for every over-long clause in the corpus."""
+    for that requirement, not for every over-long clause in the corpus. A run that
+    scaffolds nothing says which findings the flag acts on: the two checks that are
+    ERRORS under `--strict` are not among them, and a reader who has just been told to
+    split something must not read `All clean` as agreement."""
     reqs, members, reqs_dir = ws.reqs, ws.members, ws.reqs_dir
     targets = [(rid, r) for rid, r in sorted(reqs.items())
                if r["meta"].get("status") in LINT_STATUSES
@@ -5300,6 +5404,12 @@ def cmd_lint(ws, strict=False, decompose=False, only=None):  # implements: ARCH-
         print("{} draft(s) scaffolded: {}".format(len(created), ", ".join(created)))
         print("note: each split point was chosen by word count, not by obligation \u2014 "
               "read each draft before confirming it.")
+    elif decompose:
+        # Silence here read as "nothing to split", which is the opposite of the truth when
+        # the same run has just printed an over-scoped ERROR. Say which findings the flag
+        # acts on, so a no-op is legible as a no-op rather than as a clean bill of health.
+        print("nothing scaffolded: `--decompose` acts on `statement-size` findings, and "
+              "{} none.".format("this requirement has" if only else "the corpus has"))
     if errors == 0 and warns == 0:
         print("All clean — every linted requirement is well-formed and readable.")
     if strict and errors:
@@ -9670,7 +9780,13 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_CLUMP_FUNCS", "DESIGN_PREFIX_GROUP", "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_RFC_MAX")
+               "DESIGN_RFC_MAX", "DRIFT_SEVERITY")
+
+# A string-valued config key names a behaviour, so its accepted spellings are declared
+# here and a value outside them is reported rather than applied. Without this, a repo
+# that wrote `"eror"` would get the default back in silence — precisely the failure the
+# whole config mechanism exists to avoid.
+CONFIG_ENUMS = {"DRIFT_SEVERITY": ("warn", "error")}
 
 
 def load_config(reqs_dir):  # implements: ARCH-CONFIG-060  # implements: REQ-CONFIG-949
@@ -9704,6 +9820,19 @@ def apply_config(cfg, out=None):  # implements: ARCH-CONFIG-060  # implements: R
             print("config: ignoring unknown key {!r}".format(key), file=out)
             continue
         default = g[key]
+        # A string-valued key is an ENUM, never free text: every one of them names a
+        # behaviour, so an unrecognised spelling is a typo that must be reported. The
+        # numeric branch below would otherwise reject strings outright and a repo
+        # could never set one at all.
+        if isinstance(default, str):
+            allowed = CONFIG_ENUMS.get(key, ())
+            if not isinstance(value, str) or (allowed and value not in allowed):
+                print("config: ignoring {} (expected one of {})".format(
+                    key, ", ".join(allowed) or "a string"), file=out)
+                continue
+            g[key] = value
+            applied.append(key)
+            continue
         if isinstance(default, dict):
             if not isinstance(value, dict):
                 print("config: ignoring {} (expected an object)".format(key), file=out)
@@ -9790,7 +9919,8 @@ def _build_parser():  # implements: ARCH-CMDREGISTRY-033
                     help="check|health|coverage|design: emit structured JSON output (for CI/badge consumption)")
     ap.add_argument("--badge", dest="as_badge", action="store_true",
                     help="health: emit Shields.io endpoint JSON (schemaVersion, label, message, color)")
-    ap.add_argument("--accept-drift", dest="accept_drift", action="store_true",
+    ap.add_argument("--accept-drift", dest="accept_drift", nargs="?", const=True,
+                    default=False, metavar="REASON",
                     help="sync: advance the drift baseline even when a confirmed/implemented "
                          "contract changed (otherwise sync refuses and exits non-zero)")
     ap.add_argument("--since", metavar="REF",
@@ -9919,8 +10049,14 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
     # rescan + regenerate map + advance the drift baseline (guarded). Members were
     # already scanned above; cmd_check rewrites the lock unless confirmed drift is
     # detected without --accept-drift, then map regenerates only on success.
+    _accepted = getattr(a, "accept_drift", False)
+    # `--accept-drift` alone yields True; with a reason it yields the string. An empty
+    # string is still a caller who passed the flag, so the boolean is `is not False`
+    # rather than a truthiness test.
     rc = cmd_check(ws, True, strict=a.strict,
-                   accept_drift=getattr(a, "accept_drift", False))
+                   accept_drift=_accepted is not False,
+                   drift_reason=(_accepted.strip() or None
+                                 if isinstance(_accepted, str) else None))
     if rc == 0:
         cmd_map(ws, code_root)
         # Everything derived is rebuilt in one place: there is no state of the world

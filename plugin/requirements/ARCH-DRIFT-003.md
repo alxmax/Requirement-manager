@@ -20,6 +20,7 @@ satisfies: [SYS-GATE-102]
 Every bullet below is binding.
 - `binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body. [[REQ-DRIFT-841]]
 - `load_lock`/`save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`, failing open to `{}` on a missing or corrupt file. [[REQ-DRIFT-842]]
+- Waiving the drift check records who was waived and why, in a versioned sidecar the diff shows, so the one escape hatch in the gate is not also the one thing nobody reviews. [[REQ-DRIFT-988]]
 
 ## Cases
 CASE-1
@@ -41,6 +42,16 @@ CASE-4
   Given  a hash mapping
   When   `save_lock` then `load_lock` run
   Then   the same mapping round-trips
+
+CASE-5
+  Given  a confirmed contract that changed
+  When   the drift is waived with a reason
+  Then   the reason is recorded beside the hash it excuses
+
+CASE-6
+  Given  the flag that waives drift
+  When   it is followed by another flag rather than a reason
+  Then   it reads as a bare waiver and the following flag keeps its own value
 
 ## Context
 **Terms**
@@ -171,3 +182,60 @@ CASE-4 — save_lock writes sorted, indented JSON
   When   `save_lock` writes it to disk
   Then   the written `_reqlock.json` lists keys alphabetically and spans multiple indented lines
 
+
+
+---
+id: REQ-DRIFT-988
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-DRIFT-003]
+---
+
+# The waiver leaves a trace
+
+## Description
+> `--accept-drift` advances the baseline on a contract nobody re-validated. It is the one
+> escape hatch in the gate, and it used to leave nothing behind: the lock hash moved, and
+> why it was allowed to move lived in someone's head. A waiver a reviewer cannot see is a
+> waiver nobody reviews.
+
+Every bullet below is binding.
+- `--accept-drift` takes an optional reason, and the reason is written to
+  `requirements/_driftlog.json` beside the hash it excuses, so both land in the diff.
+- A bare `--accept-drift` is recorded too, with a null reason. Recording only the explained
+  waivers would make the unexplained one the invisible one.
+- A demotion writes no entry: nothing was waived, so there is nothing to justify.
+- Entries for requirements that have left the corpus are dropped, the way the lock prunes
+  its own.
+- The record is a versioned sidecar, never a new key in `_reqlock.json` — that file is the
+  byte-stable cross-repo contract an older seeded engine still reads.
+- A sidecar written by a newer schema, or unreadable, loads as no reasons on record rather
+  than failing the run.
+
+## Cases
+CASE-1 — the reason is recorded beside the hash
+  Given  a confirmed contract that changed
+  When   `sync --accept-drift "renamed the flag"` runs
+  Then   `_driftlog.json` holds that requirement's new hash and that reason
+
+CASE-2 — a bare waiver is recorded with no reason
+  Given  the same contract
+  When   `sync --accept-drift` runs with no reason
+  Then   the entry exists and its reason is null
+
+CASE-3 — a demotion records nothing
+  Given  the same contract
+  When   `sync` runs without `--accept-drift`
+  Then   the requirement is demoted to draft and no `_driftlog.json` is written
+
+CASE-4 — a retired id is pruned
+  Given  a drift log holding an id no longer in the corpus
+  When   a later waiver is recorded
+  Then   that id is gone from the log
+
+CASE-5 — a forward schema fails open
+  Given  a `_driftlog.json` whose `_schema` is newer than this engine's
+  When   it is loaded
+  Then   it reads as an empty record and nothing raises

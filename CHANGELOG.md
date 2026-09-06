@@ -1,5 +1,90 @@
 # Changelog
 
+## plugin `v5.15.0` — 2026-09-06
+
+Three of the five prescriptions from an external competitive review, taken after a
+three-personality deliberation measured them against the code. The two it rejected —
+drift as an error by DEFAULT, and a =<1000-line `gate.py` — are recorded as rejected,
+with the measurements that decided it, in [ADR-0032](docs/adr/0032-the-eight-thousand-line-trigger-fired.md).
+
+**The escape hatch left no trace.** `--accept-drift` advances the baseline on a contract
+nobody re-validated. It is the one waiver in the gate, and until now the lock hash moved
+while the reason lived in someone's head. A waiver a reviewer cannot see is a waiver
+nobody reviews.
+
+**`--accept-drift` takes a reason** (`REQ-DRIFT-988`).
+
+- `sync --accept-drift "why"` writes the reason and the hash it excuses to
+  `requirements/_driftlog.json`, so both land in the pull request.
+- A bare `--accept-drift` still works and is still recorded, with a null reason —
+  recording only the *explained* waivers would make the unexplained one the invisible one.
+- A demotion writes nothing: nothing was waived, so there is nothing to justify.
+- The record is a versioned sidecar. Nothing new was added to `_reqlock.json`, which stays
+  the byte-stable cross-repo contract an older seeded engine still reads (ADR-0003).
+
+**Drift severity is a repo's own call** (`REQ-RULES-989`).
+
+- `"DRIFT_SEVERITY": "error"` in `requirements/_config.json` promotes `RM018`/`RM019` to
+  errors for that repo, without `--strict`.
+- **The default does not move.** ADR-0002's evidence is unchanged: a spec-first edit
+  legitimately puts the contract ahead of the code, and a check that fails on correct work
+  gets `continue-on-error` bolted onto it and is never read again. Which side of that trade
+  a repo wants is the repo's call, not the tool's.
+- A requirement's own `gate_exempt:` is honoured first — a repo-wide dial never overrules a
+  decision written down per requirement.
+- The promotion is resolved per run and never written back onto the registered rule: the
+  registry is module state that two checks inside one `audit` share.
+- `apply_config` learned string-valued keys, declared as enums in `CONFIG_ENUMS`. Before
+  this, its numeric type guard rejected every string outright, so no repo could have set
+  one at all — and a mistyped value is now named on stderr rather than silently ignored.
+
+**The repo's own documentation is checked, not trusted** (`REQ-SELFGATE-990`).
+
+A drift detector whose own front page has drifted is an argument against itself. Three
+claims were false and nothing noticed, because nothing read them:
+
+- `README.md` stated the engine at **9,223 lines** against a **10,066-line** file — stale by
+  843 lines. The suite now asserts that number against `wc -l` and fails when it rots.
+- The ADR index said **"Twenty-three decisions"** eight records after there were 23. The
+  count is gone: the index *is* the count.
+- **ADR-0027 existed on disk and in no index for nine days.** The suite now fails on any ADR
+  file with no index row.
+- `README.md` also called `requirements/*.md` "one file per capability", which
+  `ARCH-MODULEFILE-056` stopped being true of; and `ARCH-DESIGN-061`'s own notes described a
+  "7,800-line file". Both corrected.
+
+**A remedy that no-ops is worse than no remedy** (`REQ-DECOMPOSE-839`,
+`REQ-AUDIT-971`). Reported from a consumer repo where nine auditors hit it independently.
+
+`ac-count-high` and `over-scoped` are ERRORS under `--strict`, and `gate` runs the lint
+strict unconditionally. Both findings named `clarify <ID> --decompose` as the fix. That flag
+acts on `statement-size` findings **only** — a narrowing the engine's own NOTE and docstring
+already recorded — so an author who followed the advice got `All clean` and zero files, from a
+command the same run had just called an error. The only remaining route to exit 0 was
+`lint_exempt:`, which the skill names as the reflex to avoid. The tool routed every author of
+an over-scoped requirement into the one action it tells them not to take.
+
+- Both findings now name a remedy that can act on them, and say plainly that `--decompose`
+  does not cover them.
+- `over-scoped`'s trigger is a conjunction — `contract_n > 10 AND ac > 7` — so clearing
+  **either** number clears the finding. The message now says so; before, an author could not
+  tell that bringing the criteria under the ceiling was enough on its own.
+- A `--decompose` run that scaffolds nothing says which finding the flag acts on. Printing
+  `All clean` and stopping read as agreement, from a run that had just been told to split
+  something.
+
+**[ADR-0032](docs/adr/0032-the-eight-thousand-line-trigger-fired.md): ADR-0014's line-count
+trigger fired.**
+
+`wc -l plugin/scripts/reqmap.py` crossed 8,000 — the numeric condition ADR-0014 pre-committed
+to. It is recorded rather than acted on, because ADR-0014's own instruction on a trigger is to
+re-run the audit *with cost data*, and splitting on the strength of a number would repeat the
+error that record named. The audit is scheduled for **2026-12-06** with a named owner; a date
+with neither is a wish. What today's evidence already settles is in the record: the file went
+5,544 → 10,202 lines in sixteen days, the other two triggers are unmet, the bare gate executes
+2,297 of 10,066 lines (so =<1000 is arithmetic, not ambition), and the in-engine `implements:`
+count that a split would have to relocate has gone from 175 to 356.
+
 ## plugin `v5.14.0` — 2026-09-06
 
 **Retiring a class of requirements cost one commit per member, or `--force` on every

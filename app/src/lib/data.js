@@ -57,7 +57,8 @@ const BAKED = [
     intent:"Detect when a requirement's binding contract changes, so stale code can be re-checked.",
     contract:[
       "`binding_hash` computes a stable 12-character hex content hash over only the normative sections of a requirement body. [[REQ-DRIFT-841]]",
-      "`load_lock`/`save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`, failing open to `{}` on a missing or corrupt file. [[REQ-DRIFT-842]]" ],
+      "`load_lock`/`save_lock` read and write the per-id hash baseline at `requirements/_reqlock.json`, failing open to `{}` on a missing or corrupt file. [[REQ-DRIFT-842]]",
+      "Waiving the drift check records who was waived and why, in a versioned sidecar the diff shows, so the one escape hatch in the gate is not also the one thing nobody reviews. [[REQ-DRIFT-988]]" ],
     acc:[
       "Editing only the Description/Notes section does not change the hash.",
       "Editing the Contract section changes the hash.",

@@ -1,0 +1,29 @@
+{
+  "_schema": 1,
+  "accepted": {
+    "ARCH-DECOMPOSE-050": {
+      "hash": "71e95ce68b8a",
+      "reason": "the split findings name a remedy that acts on them; the no-op case lives with its child"
+    },
+    "ARCH-DRIFT-003": {
+      "hash": "d29eb01c1e04",
+      "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
+    },
+    "ARCH-RULES-059": {
+      "hash": "8fff0918ce55",
+      "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
+    },
+    "ARCH-SELFGATE-039": {
+      "hash": "2c71a3dd7141",
+      "reason": "recorded the waiver, made drift severity a repo's own call, and made the repo assert its own docs"
+    },
+    "REQ-AUDIT-971": {
+      "hash": "7b757f667fb5",
+      "reason": "reworded to the house's plain present tense"
+    },
+    "REQ-DECOMPOSE-839": {
+      "hash": "754c8d23f4ff",
+      "reason": "the two split findings named a remedy that no-ops on them; message and behaviour now agree"
+    }
+  }
+}

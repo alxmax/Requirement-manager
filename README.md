@@ -411,9 +411,9 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 9,223 lines on 2026-09-05)
+  scripts/reqmap.py                         the engine (Python stdlib only, 10,202 lines)
   scripts/test_reqmap.py                    the engine's own regression suite (importable: `python scripts/test_reqmap.py`)
-  requirements/*.md                         the source of truth (one file per capability)
+  requirements/*.md                         the source of truth (one file per architecture capability, its children beside it)
   requirements/_reqlock.json                the drift baseline (committed)
 scripts/
   check_versions.py                         version-coherence gate (plugin.json vs marketplace.json)
@@ -442,10 +442,10 @@ real requirement file.
 
 ## Why it works the way it does
 
-Fourteen decisions that shape the tool — the single-file engine, what may fail a build versus
-only warn, the deliberately parked half of the V-model, and three things considered and *not*
-built — are recorded as ADRs in [`docs/adr/`](docs/adr/README.md), with the evidence each was
-decided on and the condition that would justify revisiting it.
+The decisions that shape the tool — the single-file engine, what may fail a build versus only
+warn, the deliberately parked half of the V-model, and four things considered and *not* built —
+are recorded as ADRs in [`docs/adr/`](docs/adr/README.md), with the evidence each was decided on
+and the condition that would justify revisiting it.
 
 ## Contributing
 
