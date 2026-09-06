@@ -219,6 +219,10 @@
             "type": "boolean",
             "description": "Scaffold an over-scoped requirement's clauses into requirements of their own."
           },
+          "levels": {
+            "type": "boolean",
+            "description": "Propose a V-model rung for every requirement that declares no `level:`; --apply writes them, each marked `level_source: auto`."
+          },
           "as_json": {
             "type": "boolean",
             "description": "Emit the questions as JSON for an agent to answer."

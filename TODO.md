@@ -684,6 +684,21 @@
                build it. -->
 
 ## v5.13
+- [ ] RM025 and roadmap_unmapped still name no next step | lane: ops
+      <!-- The half of the v5.13 retrofit item that did not ship with it. The
+           flat-corpus block in `gate --audit` now names `clarify --levels`; these two
+           still stop at the finding.
+
+             - RM025 ends at "`findings` is inactive for them". What should it name?
+               There is no migration for the Input/Output triad yet, so this one needs
+               the command to exist before it can point at it — do not invent a
+               pointer to nothing.
+             - `roadmap_unmapped` ends at "the roadmap chart ends before the product
+               does". This one HAS an answer already: add `milestone:` to the
+               requirements that shipped in those versions. Say it.
+
+           25 gate messages name `reqmap.py gate` and 13 name `sync`, so the shape is
+           established; these are the exceptions, not a missing convention. -->
 - [ ] Split ARCH-VIEWER-007: the artifact and what it renders are two requirements | lane: feature
       <!-- Filed 2026-09-06 when REQ-VIEWER-984 became its eleventh child and the
            `over-scoped` lint went from silent to ERROR (11 contract clauses + 8 criteria,
@@ -702,7 +717,7 @@
            Needs an ADR: it renumbers nothing, but it moves nine `satisfies:` edges and
            splits a `confirmed` contract that six ADRs already cite. Do not do it as a
            side effect of the next viewer feature — which is exactly how it got to eleven. -->
-- [ ] An already-tagged corpus has no path to the three rungs | lane: feature
+- [x] An already-tagged corpus has no path to the three rungs | lane: feature  <!-- shipped v5.13.0: `clarify --levels`, ADR-0031 -->
       <!-- Filed from the Senate repo (a real consumer, 42 confirmed requirements) on
            2026-09-06, engine 2026-09-06.6. The request as the user put it: "generate the
            three levels at `sync` too, not just at `init`."
@@ -775,6 +790,13 @@
            and names no command either. Twenty-five gate messages DO name `reqmap.py gate`
            and thirteen name `sync`, so the codebase knows how — these three are the ones
            that forgot. Worth one pass, not one at a time.
+
+           SHIPPED v5.13.0 (`clarify --levels`, ARCH-LEVELRETROFIT-066, ADR-0031). The
+           retrofit is human-invoked, read-only without --apply, proposes `code` only on
+           evidence, and never writes a `satisfies:` edge. Of the second point, one of
+           the three mute messages now names it: the flat-corpus block in `gate --audit`.
+           RM025 and `roadmap_unmapped` still end without naming a command — see the
+           item below.
 
 
            Deming's STOP from the original audit still stands unanswered and is not
