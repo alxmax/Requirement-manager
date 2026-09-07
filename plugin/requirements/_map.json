@@ -20471,13 +20471,13 @@
       "name": "TO VERIFY: decide the system grouping — 5-8 needs instead of one",
       "lane": "ops",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: satisfies from 11 to 54",
       "lane": "ops",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: verifiable by: from 2 to 54",
@@ -20489,37 +20489,37 @@
       "name": "TO VERIFY: rename by alias — need->system, aggregate->architecture",
       "lane": "feature",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: decide the fate of the architecture layer — populate it or delete it",
       "lane": "ops",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: fan-out check 5-20, warn-only",
       "lane": "feature",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: split ARCH-MAP-007 (35 clauses)",
       "lane": "ops",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: decide the unit for long-sentence / statement-too-long",
       "lane": "bus",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now",
       "lane": "feature",
       "milestone": "v2.32",
-      "done": false
+      "done": true
     },
     {
       "name": "MCP server exposing reqmap commands as MCP tools — stdlib-only, generated from the command registry. Demand-gated; see conditions above.",
@@ -20867,7 +20867,7 @@
       "name": "Engine: the nine long functions still over 80 lines",
       "lane": "ops",
       "milestone": "v5.2",
-      "done": false
+      "done": true
     },
     {
       "name": "Implement ADR-0030: `init` emits the three rungs",
@@ -20903,7 +20903,7 @@
       "name": "Refactor reqmap.py",
       "lane": "ops",
       "milestone": "v6.5",
-      "done": false
+      "done": true
     },
     {
       "name": "Reduce the engine's command surface from 18 modes to 5 commands",
