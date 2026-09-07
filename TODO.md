@@ -123,13 +123,15 @@
 <!-- Nine proposals drafted 2026-09-02, in dependency order. Nothing here is decided.
      Audited the same day: runs/senate/2026-09-02_223252-senate-reqmap-ten-proposals-traceability-and-layers.json -->
 
-- [ ] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
+- [x] TO VERIFY: decide the system grouping — 5-8 needs instead of one | lane: ops
+      <!-- done: 9 SYS needs, every one with architecture members — ADR-0025 (2026-09-03), RM032 checks it since v7.1.0 -->
       <!-- SYS-SSOT-001 alone cannot be the apex: 54 architectures under one need violates any
            fan-out (54/20 = 2.7, 54/5 = 10.8). `area:` is at 0, so the grouping cannot be
            derived automatically. Blocks everything that follows.
            Cost: a decision, no code. -->
 
-- [ ] TO VERIFY: satisfies from 11 to 54 | lane: ops
+- [x] TO VERIFY: satisfies from 11 to 54 | lane: ops
+      <!-- done: 246 satisfies: edges on 2026-09-07, the level axis fully connected (v7.1.0, RM032) -->
       <!-- Depends on the item above. This is the real gain: 80% of requirements trace to
            nothing, and `depends_on` cannot substitute — it is a composition axis, not a level
            axis. Without it there is no pyramid, whatever the layers are called.
@@ -141,34 +143,40 @@
            Raising it is easy; keeping it raised is the unproven part. If it has decayed at 90
            days, the correct conclusion is to delete it, not to refill it. -->
 
-- [ ] TO VERIFY: rename by alias — need->system, aggregate->architecture | lane: feature
+- [x] TO VERIFY: rename by alias — need->system, aggregate->architecture | lane: feature
+      <!-- done: `level:` is its own axis and ids carry it (SYS-/ARCH-/REQ-) — ADR-0025 -->
       <!-- Both old names stay valid in VALID_LAYER. need->system costs 1 file,
            aggregate->architecture costs 0 (unused). `bus` and `feature` stay untouched — they
            are a fan-in axis, not a level axis. Zero consumers broken, no semver major.
            ~20 lines + tests. -->
 
-- [ ] TO VERIFY: decide the fate of the architecture layer — populate it or delete it | lane: ops
+- [x] TO VERIFY: decide the fate of the architecture layer — populate it or delete it | lane: ops
+      <!-- done: populated — 67 ARCH on 2026-09-07; the childless ones were lowered to code rung in v7.1.0 -->
       <!-- `aggregate` is built, tested (it has acceptance criteria in ARCH-PROMOTE-011 and
            ARCH-TRACE-020) and used by zero requirements. By this repo's own standard — ADR-0016
            rejected a mechanism at 4% adoption — a layer at 0% should be deleted, not kept
            "for later". -->
 
-- [ ] TO VERIFY: fan-out check 5-20, warn-only | lane: feature
+- [x] TO VERIFY: fan-out check 5-20, warn-only | lane: feature
+      <!-- done: LINT_FANOUT_BANDS per level, warn-only — ADR-0023 / ADR-0025 -->
       <!-- It would fire today on 9 of 54 (17%) — inside the 5-40% band ADR-0016 requires,
            unlike the 75-word ceiling which catches nothing. And retroactively validated: 3 of
            the 4 requirements over 20 clauses already carry a hand-written `lint_exempt:`. -->
 
-- [ ] TO VERIFY: split ARCH-MAP-007 (35 clauses) | lane: ops
+- [x] TO VERIFY: split ARCH-MAP-007 (35 clauses) | lane: ops
+      <!-- done: ARCH-MAP-007 has 4 clauses and 4 code children (2026-09-07) -->
       <!-- The only one over 20 without an exemption — so the only one whose size has never
            been judged in writing. -->
 
-- [ ] TO VERIFY: decide the unit for long-sentence / statement-too-long | lane: bus
+- [x] TO VERIFY: decide the unit for long-sentence / statement-too-long | lane: bus
+      <!-- done: long-sentence was measured at 0 corpus-wide and deleted — ADR-0022 -->
       <!-- The finding from the implementation: they measure physical lines, and the files are
            wrapped at ~95 columns, so they report 0 across the corpus — not because the prose
            is short. Switching to clauses would make them flag 107 and 154 clauses.
            A decision, not a bug — left alone deliberately. -->
 
-- [ ] TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now | lane: feature
+- [x] TO VERIFY: form: atomic — 54 -> ~665 nodes. Not now | lane: feature
+      <!-- closed as written ("Not now"): ADR-0025 folded the 573 leaves into behaviour groups instead -->
       <!-- Depends on items 1-5 and requires ~305 new scenarios, each with a test. The number
            that matters is not the file explosion (2x text, not 7x) but the acceptance work.
            Parked until 1-5 are closed. -->
@@ -584,7 +592,8 @@
            1 of 1 and the reviewer was the author. Tacitus's blocking finding is that this
            repo has retracted an author-graded finding set twice in four days. -->
 - [x] C&K pillar: are WMC and LCOM1 redundant with RFC? | lane: ops
-- [ ] Engine: the nine long functions still over 80 lines | lane: ops
+- [x] Engine: the nine long functions still over 80 lines | lane: ops
+      <!-- done in v7.0.0: the design pass left no function over 80 lines or nested past 4 (ADR-0035) -->
       <!-- v5.5.0 split the two with the clearest seams and proved each neutral:
            lint_requirement 241 -> 26 (six check families, 236 requirements compared
            old-vs-new with 0 differing findings) and cmd_next 128 -> 78 (analysis split
@@ -813,7 +822,8 @@
            — the gap is structural, not a threshold anyone can tune. -->
 
 ## v6.5
-- [ ] Refactor reqmap.py | lane: ops
+- [x] Refactor reqmap.py | lane: ops
+      <!-- done in v7.0.0: reqmap.py is a 499-line CLI over the 48-module reqmap_engine package (ADR-0035) -->
       <!-- Filed 2026-09-07 at the author's request. Decide the scope before touching
            anything, because the obvious reading is already settled: ADR-0014 says the
            engine stays ONE file, with no line-count gate and named numeric re-open
