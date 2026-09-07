@@ -6,7 +6,7 @@ layer: feature
 owner: Alex
 priority: should-have
 milestone: v4.0
-depends_on: [ARCH-PARSE-001, ARCH-SCAN-002, ARCH-DRIFT-003, ARCH-MODULEFILE-056]
+depends_on: [ARCH-PARSE-001, ARCH-SCAN-002, ARCH-DRIFT-003, REQ-MODULEFILE-056]
 satisfies: [SYS-GATE-102]
 ---
 

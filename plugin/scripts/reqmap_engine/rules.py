@@ -32,7 +32,7 @@ def _dangling_tag_rule(ctx):  # implements: REQ-CHECK-828  # implements: REQ-RUL
 
 @gate_rule("RM002", "error")
 def _frontmatter_rule(ctx):
-    # implements: ARCH-ATOMICFORM-053  # implements: ARCH-LEVEL-051
+    # implements: REQ-ATOMICFORM-053  # implements: ARCH-LEVEL-051
     # implements: REQ-CHECK-828  # implements: REQ-LEVEL-862
     for rid, r in ctx.reqs.items():
         m = r["meta"]
@@ -142,7 +142,7 @@ def _bus_only_system_level_rule(ctx):  # implements: ARCH-VLEVEL-037  # implemen
 
 
 @gate_rule("RM010", "warn")
-def _level_rung_rule(ctx):  # implements: ARCH-VRUNGS-054
+def _level_rung_rule(ctx):  # implements: REQ-VRUNGS-054
     for rid, r in ctx.reqs.items():
         m = r["meta"]
         _want = LEVEL_TEST_PAIR.get(m.get("level"))

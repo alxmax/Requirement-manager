@@ -1232,7 +1232,7 @@ class Search(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tested-by: REQ
         self.assertIn("No match for", none)
 
 
-class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-REVIEWEDSCORE-109  # tested-by: REQ-HEALTH-857  # tested-by: REQ-HEALTH-858  # tested-by: REQ-HEALTH-859  # tested-by: REQ-HEALTH-968
+class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: REQ-REVIEWEDSCORE-109  # tested-by: REQ-HEALTH-857  # tested-by: REQ-HEALTH-858  # tested-by: REQ-HEALTH-859  # tested-by: REQ-HEALTH-968
     def _health(self, reqs, members, as_json=False):
         buf = io.StringIO()
         with tempfile.TemporaryDirectory() as d, redirect_stdout(buf):
@@ -1299,7 +1299,7 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARC
     def _draft(self):
         return {"meta": {"status": "draft"}, "body": "# T\n"}
 
-    def test_reviewed_score_excludes_drafts(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-1
+    def test_reviewed_score_excludes_drafts(self):  # verifies: REQ-REVIEWEDSCORE-109#CASE-1
         reqs = {"REQ-A-001": self._green()}
         for n in (2, 3, 4):
             reqs["REQ-A-00%d" % n] = self._draft()
@@ -1310,26 +1310,26 @@ class Health(unittest.TestCase):  # tested-by: ARCH-HEALTH-017  # tested-by: ARC
         self.assertEqual(obj["reviewed_score"], 100)  # 1 green of 1 reviewed
         self.assertEqual(obj["reviewed_total"], 1)
 
-    def test_reviewed_score_absent_on_all_draft_corpus(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-2
+    def test_reviewed_score_absent_on_all_draft_corpus(self):  # verifies: REQ-REVIEWEDSCORE-109#CASE-2
         _, out = self._health({"REQ-A-001": self._draft()}, {}, as_json=True)
         obj = json.loads(out)
         self.assertNotIn("reviewed_score", obj)       # 0 of 0 is not 0%
         self.assertEqual(obj["score"], 0)             # CASE-2 still holds
 
-    def test_reviewed_score_absent_when_no_drafts(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-3
+    def test_reviewed_score_absent_when_no_drafts(self):  # verifies: REQ-REVIEWEDSCORE-109#CASE-3
         # with no draft it would restate `score` — a key that means nothing is a schema cost
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health({"REQ-A-001": self._green()}, members, as_json=True)
         self.assertNotIn("reviewed_score", json.loads(out))
 
-    def test_reviewed_score_line_names_the_unconfirmed(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-4
+    def test_reviewed_score_line_names_the_unconfirmed(self):  # verifies: REQ-REVIEWEDSCORE-109#CASE-4
         reqs = {"REQ-A-001": self._green(), "REQ-A-002": self._draft()}
         members = {"REQ-A-001": [("implements", "x.py", 1), ("tested-by", "t.py", 2)]}
         _, out = self._health(reqs, members)
         self.assertIn("reviewed only", out)
         self.assertIn("1 not confirmed yet", out)
 
-    def test_reviewed_score_denominator_is_confirmed_not_merely_non_draft(self):  # verifies: ARCH-REVIEWEDSCORE-109#CASE-5
+    def test_reviewed_score_denominator_is_confirmed_not_merely_non_draft(self):  # verifies: REQ-REVIEWEDSCORE-109#CASE-5
         """`healthy`'s first axis is `status == confirmed`, so a non-draft that is not
         yet `confirmed` can enter a "non-draft" denominator but never the numerator —
         it would depress the reviewed score with nothing rotting. `deprecated` is the
@@ -2526,7 +2526,7 @@ class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tes
         self.assertEqual(len(payload["upstream_edges"]), 3)
 
 
-class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
+class Redundancy(unittest.TestCase):  # tested-by: REQ-REDUNDANCY-058
     """`_redundant_groups` is the exact-match floor under `dupes`: no threshold, so a
     group is a duplicate by construction rather than a judgement call."""
 
@@ -2535,23 +2535,23 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
                 "body": "# T\n\n## Description\n- " + clause + "\n\n"
                         "## Cases (= tests)\nCASE-1\n  Then it holds\n"}
 
-    def test_identical_contracts_group_together(self):  # verifies: ARCH-REDUNDANCY-058#CASE-1
+    def test_identical_contracts_group_together(self):  # verifies: REQ-REDUNDANCY-058#CASE-1
         reqs = {"A-X-001": self._req("`x` does the thing."),
                 "A-Y-002": self._req("`x` does the thing."),
                 "A-Z-003": self._req("`y` does something else.")}
         self.assertEqual(R._redundant_groups(reqs), [["A-X-001", "A-Y-002"]])
 
-    def test_case_and_whitespace_do_not_hide_a_duplicate(self):  # verifies: ARCH-REDUNDANCY-058#CASE-2
+    def test_case_and_whitespace_do_not_hide_a_duplicate(self):  # verifies: REQ-REDUNDANCY-058#CASE-2
         reqs = {"A-X-001": self._req("`x` does   the thing."),
                 "A-Y-002": self._req("`X` DOES the thing.")}
         self.assertEqual(R._redundant_groups(reqs), [["A-X-001", "A-Y-002"]])
 
-    def test_a_different_clause_is_not_a_duplicate(self):  # verifies: ARCH-REDUNDANCY-058#CASE-3
+    def test_a_different_clause_is_not_a_duplicate(self):  # verifies: REQ-REDUNDANCY-058#CASE-3
         reqs = {"A-X-001": self._req("`x` does the thing."),
                 "A-Y-002": self._req("`x` does the thing, twice.")}
         self.assertEqual(R._redundant_groups(reqs), [])
 
-    def test_draft_placeholders_are_not_duplicates_of_each_other(self):  # verifies: ARCH-REDUNDANCY-058#CASE-4
+    def test_draft_placeholders_are_not_duplicates_of_each_other(self):  # verifies: REQ-REDUNDANCY-058#CASE-4
         # every scaffolded draft carries the same TODO line; counting those would report
         # the scaffold as a duplicate of itself once per draft and bury the real finding.
         reqs = {"A-X-001": self._req("TODO: the observed behavior.", status="draft"),
@@ -2569,7 +2569,7 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
         self.assertEqual(groups, [["A-A-001", "A-B-002", "A-C-003"]])
         self.assertEqual(sum(len(g) - 1 for g in groups), 2)   # two could be folded away
 
-    def test_next_reports_the_group_and_writes_nothing(self):  # verifies: ARCH-NEXT-013#CASE-12  # verifies: ARCH-REDUNDANCY-058#CASE-5
+    def test_next_reports_the_group_and_writes_nothing(self):  # verifies: ARCH-NEXT-013#CASE-12  # verifies: REQ-REDUNDANCY-058#CASE-5
         with tempfile.TemporaryDirectory() as d:
             for rid in ("AREA-A-001", "AREA-B-002"):
                 _write(os.path.join(d, rid + ".md"),
@@ -2587,7 +2587,7 @@ class Redundancy(unittest.TestCase):  # tested-by: ARCH-REDUNDANCY-058
             self.assertIn("identical contract", out)
             self.assertEqual(sorted(os.listdir(d)), before)     # read-only
 
-    def test_gate_stays_silent_about_redundancy(self):  # verifies: ARCH-REDUNDANCY-058#CASE-5
+    def test_gate_stays_silent_about_redundancy(self):  # verifies: REQ-REDUNDANCY-058#CASE-5
         # the hook runs `gate` on every commit; a corpus-shape advisory there is noise
         with tempfile.TemporaryDirectory() as d:
             for rid in ("AREA-A-001", "AREA-B-002"):
@@ -2693,6 +2693,20 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertIn("skipped 1 pair(s) linked by tested-by or satisfies", out)
         self.assertNotIn("<->", out)
 
+    def test_dupes_skips_two_children_of_one_parent(self):  # verifies: REQ-SIMILAR-921#CASE-7
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"ARCH-A-001": {"meta": {"id": "ARCH-A-001"}, "body": "## Description\n- unrelated\n"},
+                "REQ-A-002": {"meta": {"id": "REQ-A-002", "satisfies": ["ARCH-A-001"]}, "body": body},
+                "REQ-A-003": {"meta": {"id": "REQ-A-003", "satisfies": ["ARCH-A-001"]}, "body": body},
+                "REQ-B-004": {"meta": {"id": "REQ-B-004", "satisfies": ["ARCH-B-009"]}, "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        out = buf.getvalue()
+        # the two siblings are skipped; the cousin under another parent is still reported
+        self.assertIn("skipped 1 pair(s) linked by tested-by or satisfies, or siblings", out)
+        self.assertNotIn("REQ-A-002  <->  REQ-A-003", out)
+        self.assertIn("REQ-A-002  <->  REQ-B-004", out)
 
     def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
         body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"

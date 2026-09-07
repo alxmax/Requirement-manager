@@ -23,7 +23,7 @@ Every bullet below is binding.
 - An unauthored draft or a tested-by-linked pair is skipped and counted rather than compared. [[REQ-SIMILAR-921]]
 - Terms are weighted by a smoothed TF-IDF and pairs are scored by cosine similarity in the range zero to one. [[REQ-SIMILAR-922]]
 - Only pairs at or above the threshold (default `0.35`, overridable with `--threshold`) are reported, most-similar-first with their shared terms; `dupes` always exits zero. [[REQ-SIMILAR-923]]
-
+- Requirements whose clauses are byte-identical once normalised are reported as one redundancy group by `sync` and `next`, never by the gate. [[REQ-REDUNDANCY-058]]
 ## Cases
 CASE-1
   Given  two requirements with near-identical Contract text
@@ -164,6 +164,8 @@ Every bullet below is binding.
   and is a known link, not a duplicate.
 - `dupes` also skips a pair joined by a `satisfies:` edge: a child restates part of its parent's
   contract by construction, so a parent-child pair is a known link, not a duplicate.
+- `dupes` also skips two children of one parent — both restate that parent's clauses, so
+  siblings share vocabulary by construction; a cousin under another parent is still compared.
 
 ## Cases
 CASE-1 — the bag of words comes from title, intent and Contract only
@@ -196,10 +198,10 @@ CASE-6 — a tested-by-linked pair is skipped and counted
   When   `dupes` runs with the member map
   Then   the pair is excluded from the report and the linked-pairs count includes it
 
-CASE-7 — a parent and its child are never a duplicate finding
-  Given  two requirements with the same contract, one declaring `satisfies:` the other
+CASE-7 — a parent and its child, or two children of one parent, are never a duplicate finding
+  Given  requirements with the same contract: a parent, two children that `satisfies:` it, and a cousin under another parent
   When   `dupes` runs
-  Then   the pair is skipped and counted in the linked-pairs line
+  Then   the parent-child and sibling pairs are skipped and counted in the linked-pairs line, and the pair across parents is still reported
 
 
 --------------------
@@ -307,3 +309,64 @@ CASE-6 — --top truncates with a count
   Given  three mutually similar requirements and `--top 1`
   When   `dupes` runs
   Then   one pair is printed followed by `... 2 more pair(s)`
+
+--------------------
+
+
+---
+id: REQ-REDUNDANCY-058
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v2.34
+priority: should-have
+depends_on: [ARCH-NEXT-013]
+satisfies: [ARCH-SIMILAR-016]
+---
+
+# Requirements that say the same thing
+
+## Description
+> Decomposing several architecture requirements can mint the same obligation twice, and
+> nothing in the engine noticed — a corpus that only ever grows covers the same code with
+> more requirements each time. `_redundant_groups` reports requirements whose Description
+> clauses are byte-identical once case and whitespace are normalised, so the corpus can be
+> folded back down instead of growing without bound.
+
+Every bullet below is binding.
+- Two or more requirements whose Description clauses are identical once case and whitespace are normalised form one duplicate group.
+- Every scaffolded draft carries the same `TODO:` placeholder text, so draft-status requirements are excluded, or every draft would report as a duplicate of every other.
+- `next` reports each group once, naming its ids and how many could be folded away.
+- `gate` says nothing about redundancy — it runs on every commit, and corpus shape is not a commit-time concern.
+- The check is read-only: it never writes a file and never merges anything itself.
+
+## Cases
+CASE-1 — identical Description clauses group together
+  Given  two requirements whose Description clause reads exactly "`x` does the thing." and a
+         third with a different clause
+  When   `_redundant_groups` runs
+  Then   it returns one group holding only the two matching ids
+
+CASE-2 — case and whitespace differences do not hide a duplicate
+  Given  one requirement's clause reading "`x` does   the thing." and another reading
+         "`X` DOES the thing."
+  When   `_redundant_groups` runs
+  Then   the two are still grouped as one duplicate
+
+CASE-3 — a genuinely different clause is not flagged
+  Given  two requirements whose clauses differ by more than case or whitespace
+  When   `_redundant_groups` runs
+  Then   it returns no group for them
+
+CASE-4 — draft placeholders sharing the same TODO text are not duplicates of each other
+  Given  two `status: draft` requirements both carrying the identical scaffolded
+         `TODO: the observed behavior.` clause
+  When   `_redundant_groups` runs
+  Then   it returns no group for them
+
+CASE-5 — next reports each group once and writes nothing; gate stays silent
+  Given  two confirmed requirements sharing one identical Description clause
+  When   `next` runs, and separately `gate` runs on the same corpus
+  Then   `next`'s output names both ids under one "Redundancy" finding and the directory's
+         file listing is unchanged afterward; `gate`'s output says nothing about redundancy

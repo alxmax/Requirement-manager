@@ -144,7 +144,7 @@ def _requirement_health_flags(rid, r, members, lock, satisfied):
 
 def _reviewed_score(confirmed, drafts, healthy):
     # implements: ARCH-HEALTH-017  # implements: REQ-HEALTH-968
-    """The reviewed-subset score (ARCH-REVIEWEDSCORE-109) and its denominator, or
+    """The reviewed-subset score (REQ-REVIEWEDSCORE-109) and its denominator, or
     (None, confirmed) when there is nothing for it to add."""
     # Reviewed-subset score (read-only, ADDITIVE). `score` counts every requirement,
     # and a `draft` can never be green because the first axis is status `confirmed` —
@@ -156,7 +156,7 @@ def _reviewed_score(confirmed, drafts, healthy):
     # all-draft corpus to zero, and every consumer badge already reads `score`.
     # Absent (not zero) when nothing has been reviewed, like `untagged` above: 0 of 0
     # is not 0%, and a consumer's schema must not gain a meaningless key.
-    # implements: ARCH-REVIEWEDSCORE-109
+    # implements: REQ-REVIEWEDSCORE-109
     # Emitted only when drafts and reviewed requirements BOTH exist: with no reviewed
     # requirement it would be 0 of 0, and with no draft it would restate `score` under a
     # second name, which is how a consumer's schema quietly grows a key that means nothing.
@@ -167,7 +167,7 @@ def _reviewed_score(confirmed, drafts, healthy):
     # clearest case: retired, permanently un-green, and it would cap the score forever.
     # Invisible in THIS repo (all 72 non-drafts are `confirmed`, so the two readings
     # coincide at 100), which is exactly why it is pinned by a test instead of by luck.
-    reviewed_total = confirmed  # implements: ARCH-REVIEWEDSCORE-109
+    reviewed_total = confirmed  # implements: REQ-REVIEWEDSCORE-109
     reviewed_score = round(100 * healthy / reviewed_total) if (reviewed_total and drafts) else None
     return reviewed_score, reviewed_total
 

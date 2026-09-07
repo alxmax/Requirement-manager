@@ -74,10 +74,10 @@ def parse_frontmatter(text):
 # A block begins at a `---` line immediately followed by `id:`. That lookahead is what makes
 # the split unambiguous: a bare `---` is a markdown horizontal rule and a frontmatter close,
 # both of which appear inside a body, and neither is followed by an id line.
-_REQ_BLOCK_RE = re.compile(r"(?m)^---[ \t]*\r?\n(?=id:)")   # implements: ARCH-MODULEFILE-056
+_REQ_BLOCK_RE = re.compile(r"(?m)^---[ \t]*\r?\n(?=id:)")   # implements: REQ-MODULEFILE-056
 
 
-def split_requirement_blocks(text):  # implements: ARCH-MODULEFILE-056
+def split_requirement_blocks(text):  # implements: REQ-MODULEFILE-056
     """Split one file's text into its requirement blocks, each ready for
     `parse_frontmatter`. A single-requirement file yields exactly one block, byte-identical
     to the whole text, so nothing about the existing corpus changes."""
@@ -94,10 +94,10 @@ def split_requirement_blocks(text):  # implements: ARCH-MODULEFILE-056
 
 
 def load_requirements(reqs_dir):
-    # implements: ARCH-PARSE-001  # implements: ARCH-MODULEFILE-056
+    # implements: ARCH-PARSE-001  # implements: REQ-MODULEFILE-056
     # implements: REQ-PARSE-890  # implements: REQ-PARSE-892
     """Every requirement in the directory, keyed by id: `{id: {meta, body, path, ...}}`.
-    One file may hold several blocks (ARCH-MODULEFILE-056); an unreadable or
+    One file may hold several blocks (REQ-MODULEFILE-056); an unreadable or
     id-less file is skipped rather than raising, so one bad file cannot blind
     the whole corpus."""
     reqs = {}
@@ -118,7 +118,7 @@ def load_requirements(reqs_dir):
             meta, body = parse_frontmatter(_blk)
             # only the FIRST block may fall back to the filename; a later block without an
             # explicit id is a malformed block, not a second requirement named after the file.
-            # A file preamble (ARCH-MODULEFILE-056) can also land at index 0 when the real
+            # A file preamble (REQ-MODULEFILE-056) can also land at index 0 when the real
             # block 0 is preceded by prose — but a preamble never starts with the frontmatter
             # delimiter '---' (parse_frontmatter's own test for "this text has frontmatter"),
             # so gating the fallback on that same test keeps prose from minting a synthetic id

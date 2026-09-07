@@ -33,6 +33,7 @@ Every bullet below is binding.
 - A `metrics` pillar measures each Python class with the one Chidamber & Kemerer metric that survived calibration — RFC. [[REQ-DESIGN-978]]
 - The metrics that did not survive were measured, reviewed and removed on the evidence, and the measurement is on the record. [[REQ-DESIGN-980]]
 - The review reports how many classes it could not measure for cohesion, on every surface, so an absent finding is never read as a measured pass. [[REQ-DESIGN-979]]
+- The design payload is excluded from every freshness comparison, so advisory data can never fail the gate. [[REQ-DESIGN-991]]
 
 ## Cases
 CASE-1

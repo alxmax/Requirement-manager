@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# tested-by: ARCH-SELFGATE-039
 """Tests for changelog_notes.extract — the release-notes slice fed to `gh release`."""
 import unittest
 

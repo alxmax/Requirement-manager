@@ -25,6 +25,5 @@ Scenario: a repository is read end to end
 - `ARCH-SCAN-002` — Member discovery  (architecture)  ·  15 detailed design
 - `ARCH-CANDIDATES-009` — Capability candidates (extraction plan)  (architecture)  ·  14 detailed design
 - `ARCH-EXTRACT-008` — Legacy extraction  (architecture)  ·  14 detailed design
-- `ARCH-MODULEFILE-056` — Several requirements in one file  (architecture)
 - `ARCH-PROSE-024` — Prose capability classification & drafting  (architecture)  ·  9 detailed design
 - `ARCH-SCANCACHE-023` — Opt-in scan cache  (architecture)  ·  5 detailed design

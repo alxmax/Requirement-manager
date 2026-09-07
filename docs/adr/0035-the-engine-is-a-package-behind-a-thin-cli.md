@@ -36,7 +36,7 @@ build, and this is not one).
 | | before | after |
 |---|---|---|
 | `reqmap.py` | 10,711 lines | **499** |
-| engine modules | 1 | **47** (`reqmap_engine/*.py`, 12,035 lines in all) |
+| engine modules | 1 | **48** (`reqmap_engine/*.py`, 12,122 lines in all) |
 | largest module | — | `site.py`, 495 lines; median module 215 |
 | `gate --design` findings on the engine | 45 on the one file | **3**, each accepted below (78 on the first cut) |
 | import-time cycles between modules | — | **0** |

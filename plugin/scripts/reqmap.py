@@ -342,7 +342,7 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         # Deliberately here and not in cmd_check: `gate` runs on every commit via the
         # hook, and a corpus-shape advisory there is noise on work that is already
         # correct. `sync` is the moment the corpus was just rewritten, which is when
-        # a newly-minted duplicate appears.  # implements: ARCH-REDUNDANCY-058
+        # a newly-minted duplicate appears.  # implements: REQ-REDUNDANCY-058
         _dups = _redundant_groups(reqs)
         if _dups:
             print("info  {} group(s) of requirements share an identical contract "

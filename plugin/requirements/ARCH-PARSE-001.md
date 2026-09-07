@@ -20,7 +20,8 @@ Every bullet below is binding.
 - `load_requirements` parses each `requirements/*.md` file into a record `{meta, body, path}`, keyed by the frontmatter `id:` or the filename stem. [[REQ-PARSE-890]]
 - The hand-rolled frontmatter grammar accepts scalars, inline `[a, b]` lists, and block-style `key:` / indented `- item` lists — no external YAML library. [[REQ-PARSE-891]]
 - A file with no leading `---` block, an underscore-prefixed filename, or a leading UTF-8 BOM are all handled without raising. [[REQ-PARSE-892]]
-
+- The atomic form — a story quote plus a `Scenario:` block, no normative headings — is recognised and hashed beside the sectioned form. [[REQ-ATOMICFORM-053]]
+- One file may hold many requirements: a block starts at a `---` line immediately followed by `id:`, and only block 0 may take its id from the filename. [[REQ-MODULEFILE-056]]
 ## Cases
 CASE-1
   Given  a file with valid frontmatter
@@ -204,3 +205,125 @@ CASE-3 — a leading UTF-8 BOM does not break frontmatter parsing
   When   `load_requirements(dir)` runs
   Then   `"REQ-A-001"` is a key in the result, with `meta["status"]` read correctly
 
+--------------------
+
+
+---
+id: REQ-ATOMICFORM-053
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v2.32
+priority: should-have
+depends_on: [ARCH-DRIFT-003, ARCH-CHECK-006]
+satisfies: [ARCH-PARSE-001]
+---
+
+# The atomic requirement form
+
+## Description
+> One obligation per file makes the clause the unit a test answers to, and removes the two headings that only restated each other.
+
+Every bullet below is binding.
+- A requirement stating a single obligation may be written as one `>` story blockquote plus
+  one unlabelled `Scenario:` block, with no `## Contract` or `## Cases` heading at all — the
+  file then carries the obligation and its proof and nothing else.
+- The atomic form is detected from the body itself (a story quote immediately followed by a
+  `Scenario:` block, both before the first `## ` heading), never from `form: atomic` in the
+  frontmatter, so every consumer that only sees a body — the gate, the linter, the drift
+  hash — agrees on whether a given file is atomic.
+- `binding_hash` covers the story and the Scenario, never the empty string, so an atomic
+  requirement drifts like any other when its wording changes.
+- The linter treats a recognised atomic body as carrying both normative sections and one
+  acceptance criterion (the Scenario), raising no missing-section, legacy-schema or
+  under-specified finding — but it does check that every fact enumerated in the story has a
+  matching `Then` line in the Scenario, and that the story does not grow past a fixed bullet
+  ceiling.
+
+## Cases
+CASE-1 — an atomic body reads as both normative sections
+  Given  a body whose only content before the first `## ` heading is a `>` story followed by
+         a `Scenario:` block
+  When   the gate and linter read it
+  Then   both `## Contract` and `## Cases` count as present, and the Scenario counts as
+         exactly one acceptance criterion
+
+CASE-2 — the drift hash covers the statement and the Scenario
+  Given  an atomic body
+  When   `binding_hash` runs on it, and again after editing either the story or the Scenario
+  Then   the hash is never the hash of the empty string, and each edit changes it
+
+CASE-3 — a well-formed atomic requirement lints clean
+  Given  a confirmed requirement with `form: atomic` and a recognised story + Scenario body
+  When   the linter runs
+  Then   it raises no finding
+
+CASE-4 — a classic body with headings is never mistaken for atomic
+  Given  a body using `## WHAT — Contract` and `## HOW — Acceptance` headings
+  When   the atomic-form detector reads it
+  Then   it returns no match, and every existing classic-form code path is unchanged
+
+CASE-5 — a story fact with no matching Then line warns
+  Given  an atomic story enumerating more `- ` facts than the Scenario has `Then` lines
+  When   the linter runs
+  Then   it warns `atomic-bullet-then-mismatch`; a story past the bullet ceiling instead
+         warns `atomic-story-overlong`
+
+--------------------
+
+
+---
+id: REQ-MODULEFILE-056
+status: confirmed
+level: code
+layer: bus
+owner: Alex
+milestone: v2.32
+priority: should-have
+satisfies: [ARCH-PARSE-001]
+---
+
+# Several requirements in one file
+
+## Description
+> A capability and the detailed design beneath it belong in one document, the way a
+> requirements module holds many objects, instead of scattering one file per requirement
+> across the folder — 618 of them, before this.
+
+Every bullet below is binding.
+- A block starts at a `---` line immediately followed by `id:`; each block loads as its own requirement.
+- A file holding a single block is read exactly as before — unchanged for every pre-existing one-requirement file.
+- A bare `---` used as a horizontal rule, not followed by `id:`, starts no new block.
+- Confirming one requirement in a multi-block file changes that block's status alone.
+- Only the first block in a file may fall back to the filename for its id; a later block with no `id:` does not.
+
+## Cases
+CASE-1 — each id: block becomes its own requirement
+  Given  a file whose text holds three `---`/`id:` blocks
+  When   the engine loads the corpus
+  Then   each block is loaded as its own requirement, keeping its own body and block index
+
+CASE-2 — a single-block file is read exactly as before
+  Given  a file holding one requirement, no second `---`/`id:` block
+  When   `split_requirement_blocks` runs on its text
+  Then   it returns the whole text unchanged, byte for byte
+
+CASE-3 — a horizontal rule starts no new block
+  Given  a file whose body contains a bare `---` not followed by `id:`
+  When   the engine loads the corpus
+  Then   the file still yields exactly one requirement, and the text after the rule stays
+         part of that requirement's body
+
+CASE-4 — confirming one block changes only that block's status
+  Given  a two-block file, the second block carrying an `implements:` member
+  When   `confirm` runs on the second block's id
+  Then   only the second block's status becomes `confirmed`; the first block's status and
+         body are unchanged
+
+CASE-5 — only the first block may fall back to the filename for its id
+  Given  a file whose first block carries no `id:` (so it falls back to the filename) and
+         whose second block carries its own explicit `id:`
+  When   the engine loads the corpus
+  Then   the first block resolves to the filename's id and the second block keeps its own
+         distinct id — the fallback claims the filename once, not per block

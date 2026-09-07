@@ -95,6 +95,13 @@ Every bullet below is binding.
   upstream anchor may be authored later, or tracked outside this repo.
 - The gate warns when a confirmed `need` has no requirement satisfying it, so an unaddressed
   stakeholder need is visible.
+- The gate warns (RM032) when the level axis is incomplete in either direction, for every
+  enforced requirement that declares a `level:`: a `system` need whose satisfiers include no
+  `architecture` requirement, an `architecture` requirement no `code` requirement satisfies,
+  a `code` or `architecture` requirement that satisfies nothing, or one whose parent sits on
+  another rung. The pyramid is built upward — code into architecture groups, groups into
+  needs — and a group with no member is an organisation error, never a code error. A corpus
+  that declares no `level:` sees nothing.
 
 ## Cases
 CASE-1 — satisfies: parses into a frontmatter list like any other id field
@@ -111,6 +118,16 @@ CASE-3 — an unaddressed confirmed need warns at the gate
   Given  a confirmed `layer: need` requirement no other requirement satisfies
   When   `gate` runs
   Then   it warns "need has no requirement that satisfies it (upstream trace unaddressed)"
+
+CASE-4 — a group with no member one rung down warns
+  Given  a confirmed `level: architecture` requirement that satisfies a `level: system` need, and no `level: code` requirement satisfying it
+  When   `gate` runs
+  Then   it warns that the architecture requirement groups no `level: code` requirement, says nothing about the need, and exits 0
+
+CASE-5 — a requirement with no group one rung up warns, and an unlevelled corpus stays silent
+  Given  a confirmed `level: code` requirement declaring no `satisfies:`, and separately a corpus whose requirements declare no `level:`
+  When   `gate` runs on each
+  Then   the first is warned "satisfies nothing" and the second prints no RM032 line
 
 
 --------------------

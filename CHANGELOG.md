@@ -1,5 +1,51 @@
 # Changelog
 
+## plugin `v7.1.0` — 2026-09-07
+
+**The pyramid is built upward, and the gate says when a rung is empty.** The maintainer's
+model: the code is what matters; because there is a lot of it, it is grouped into
+architecture teams, and the teams into system needs. Every SYS has at least one ARCH, every
+ARCH at least one REQ, and every REQ and ARCH belongs to a group one rung up. A nine-senator
+Senate audit the same day ([ADR-0036](docs/adr/0036-decomposition-builds-downward-the-system-rung-is-the-authors.md))
+had refused to let the engine invent the missing top; this release keeps that refusal and adds
+the check.
+
+- **RM032: the level axis is complete in both directions.** A warn-only gate rule in its own
+  module `axis.py`: a `system` need whose satisfiers include no `architecture` requirement,
+  an `architecture` requirement no `code` requirement satisfies, a `code` or `architecture`
+  requirement that satisfies nothing, or a parent on the wrong rung. Only for enforced
+  requirements that declare a `level:`; a corpus without the axis sees nothing (ADR-0019).
+  It fired on 5 of 67 architecture requirements the day it was written; the Senate had
+  refused the upward half alone (A2) at 0 of 67, and ADR-0036 records both the refusal and
+  the maintainer's decision.
+- **Six childless architecture requirements became code-rung members of their teams.**
+  Each was its own leaf — cases and code, no `REQ-*` below it — so each moved down one rung
+  into the file of the group it belongs to, id prefix and all: `REQ-ATOMICFORM-053` and
+  `REQ-MODULEFILE-056` under `ARCH-PARSE-001`, `REQ-DESCRIPTION-057` under
+  `ARCH-SECTIONS-068`, `REQ-REDUNDANCY-058` under `ARCH-SIMILAR-016`, `REQ-VRUNGS-054` under
+  `ARCH-VLEVEL-037`, `REQ-REVIEWEDSCORE-109` under `ARCH-HEALTH-017`. Every parent gained the
+  one obligation sentence naming its new member; every `# implements:`/`# verifies:` tag and
+  wikilink was renamed with them (the tails `-053` … `-109` are unchanged, so an ADR citing
+  the old id still resolves). `ARCH-REVIEWEDSCORE-109`'s three-way `clarify --decompose` of
+  the same morning was undone: the requirement is one behaviour group of five cases.
+- **`dupes` skips siblings.** Two children of one parent restate that parent's clauses, so
+  they shared vocabulary by construction and were 23 of the 38 pairs the report named on the
+  committed corpus. They join the tested-by and parent-child pairs in the skipped count; a
+  cousin under another parent is still compared (`REQ-SIMILAR-921` CASE-7). The one lever
+  the Senate authorised from a five-lever menu.
+- **The corpus answers its own report.** `gate --risk` listed 16 files traced to no
+  requirement: the five that implement something are tagged (`reqmap_engine/__init__.py`,
+  the shipped `plugin/hooks/pre-commit`, `scripts/changelog_notes.py` and its test, the two
+  viewer scripts under `app/scripts/`); the README/page-shell/config/dev-tooling rest is
+  listed in `.reqmapignore`, and so are the suite's entry point and shared fixtures, which
+  hold no test function a `tested-by` tag could point at. The two architecture requirements
+  that did not name a child (`ARCH-CLARIFY-062`, `ARCH-DESIGN-061`) now do. The repo-root
+  Python tooling passes `gate --design` too; the viewer under `app/` is the one place the
+  review still reports, a separate, npm-bound pass.
+- `TODO.md` carries the next cut: reduce the engine's 18 mode flags (27 `cmd_*` entry
+  points) to 5 commands, retiring the rest with code, requirements and tests — the only lever
+  in this repo that reduces lines.
+
 ## plugin `v7.0.0` — 2026-09-07
 
 **The engine is a package behind a thin CLI.** `reqmap.py` was one 10,711-line file; it is

@@ -73,7 +73,11 @@ def _write_sys_placeholder(reqs_dir, arch_ids):
 
     A stakeholder need is not in the source — nothing in a repository says why a user
     wants the thing — so the engine refuses to guess one and mints a node whose title
-    says so. Skipped when the corpus already has a `layer: need`."""
+    says so. Skipped only when this file already exists (a second `init` never
+    overwrites it). A hand-named need elsewhere in the corpus does NOT suppress it:
+    every architecture draft is written pointing at this id, and the engine will not
+    guess which real need those drafts satisfy — that is the author's edit, and the
+    placeholder's title says so."""
     dest = os.path.join(reqs_dir, SYS_PLACEHOLDER_ID + ".md")
     if os.path.exists(dest) or not arch_ids:
         return 0

@@ -11,7 +11,7 @@ import hashlib, re
 # the same capability described twice, once as rationale and once as obligation, under two
 # headings that both said WHAT. The legacy name keeps working forever — a consumer repo's
 # existing files are not a migration this tool gets to demand.
-CONTRACT_LABELS = ("description", "contract")   # implements: ARCH-DESCRIPTION-057
+CONTRACT_LABELS = ("description", "contract")   # implements: REQ-DESCRIPTION-057
 
 # The acceptance-criteria section, current name first. `## Cases` and its `CASE-N` labels
 # replaced `## HOW — Acceptance (= tests)` and `AC-N`: a criterion IS a test case, and the
@@ -19,7 +19,7 @@ CONTRACT_LABELS = ("description", "contract")   # implements: ARCH-DESCRIPTION-0
 # run. Both names are honoured, and `# verifies: <ID>#AC-N` keeps working — the label is an
 # identifier a tag points at, so dropping the old spelling would break every consumer tag
 # already written against it.
-ACCEPTANCE_LABELS = ("cases", "acceptan")       # implements: ARCH-DESCRIPTION-057
+ACCEPTANCE_LABELS = ("cases", "acceptan")       # implements: REQ-DESCRIPTION-057
 
 # A normative section heading: the canonical `## Description` / `## Cases`, the older
 # `## WHAT — Contract …` / `## HOW — Acceptance …`, or a legacy bare
@@ -107,10 +107,10 @@ def _heading_label_is(heading, name):  # implements: ARCH-CHECK-006
 
 
 _ATOMIC_SCENARIO_RE = re.compile(r"^\s*Scenario\s*:", re.I)
-VALID_FORM = {"atomic"}                            # implements: ARCH-ATOMICFORM-053
+VALID_FORM = {"atomic"}                            # implements: REQ-ATOMICFORM-053
 
 
-def _atomic_spans(body):  # implements: ARCH-ATOMICFORM-053
+def _atomic_spans(body):  # implements: REQ-ATOMICFORM-053
     """`(statement_lines, scenario_lines)` for a body in the atomic form, else None.
 
     The atomic form carries no normative `## ` heading at all: a `>` blockquote states the
@@ -148,7 +148,7 @@ def _atomic_spans(body):  # implements: ARCH-ATOMICFORM-053
 _ATOMIC_THEN_RE = re.compile(r"^then\b", re.I)
 
 
-def _atomic_story_bullets(story_lines):  # implements: ARCH-ATOMICFORM-053
+def _atomic_story_bullets(story_lines):  # implements: REQ-ATOMICFORM-053
     """Count of `- ` facts enumerated inside an atomic story's `>` blockquote.
 
     Mirrors `_bullets`' `>`-marker normalization (strip, then only the leading
@@ -165,7 +165,7 @@ def _atomic_story_bullets(story_lines):  # implements: ARCH-ATOMICFORM-053
     return n
 
 
-def _atomic_scenario_then_count(scen_lines):  # implements: ARCH-ATOMICFORM-053
+def _atomic_scenario_then_count(scen_lines):  # implements: REQ-ATOMICFORM-053
     """Count of `Then`-led lines in an atomic Scenario block — one per proven fact.
     A wrapped continuation line of the same step does not open with the
     keyword and is not counted separately."""
@@ -176,7 +176,7 @@ _BLOCK_SEP_RE = re.compile(r"^-{3,}$")
 
 
 def binding_hash(body):
-    # implements: ARCH-DRIFT-003  # implements: ARCH-ATOMICFORM-053  # implements: REQ-DRIFT-841
+    # implements: ARCH-DRIFT-003  # implements: REQ-ATOMICFORM-053  # implements: REQ-DRIFT-841
     """Hash only the NORMATIVE sections — the Contract and the Acceptance criteria.
     Everything else (Verify-intent, Notes, Current-implementation, links) is
     commentary and may drift freely without tripping the gate. (Legacy docs used
@@ -236,21 +236,21 @@ def _has_section(body, name):  # implements: ARCH-CHECK-006
     Contract section, and a dash-less `## WHAT Contract` does. This keeps the gate's
     section-presence check in agreement with the drift hash, closing the
     silent-drift gap where a heading passed the gate but produced an empty hash.
-    The atomic form (ARCH-ATOMICFORM-053) has no normative headings by design; its statement
+    The atomic form (REQ-ATOMICFORM-053) has no normative headings by design; its statement
     and Scenario stand in for both, so it answers True for those two names."""
     if name in CONTRACT_LABELS + ACCEPTANCE_LABELS and _atomic_spans(body):
         return True
     return any(_heading_label_is(h, name) for h in _section_headings(body))
 
 
-def _has_any(body, names):  # implements: ARCH-DESCRIPTION-057
+def _has_any(body, names):  # implements: REQ-DESCRIPTION-057
     """True if the body carries any of `names` as a section. One requirement never uses two
     spellings of the same section at once, so 'any' is not a merge — it is 'whichever name
     this file happens to use'."""
     return any(_has_section(body, n) for n in names)
 
 
-def _from_any(fn, body, names):  # implements: ARCH-DESCRIPTION-057
+def _from_any(fn, body, names):  # implements: REQ-DESCRIPTION-057
     """`fn(body, name)` for the first of `names` that yields content, else the empty value
     `fn` returns for the first name — so the caller's type (list, str) is preserved."""
     for n in names:
@@ -260,7 +260,7 @@ def _from_any(fn, body, names):  # implements: ARCH-DESCRIPTION-057
     return fn(body, names[0])
 
 
-def _legacy_schema_ids(reqs):  # implements: ARCH-ATOMICFORM-053
+def _legacy_schema_ids(reqs):  # implements: REQ-ATOMICFORM-053
     """"Legacy" is the Input/Description/Output triad only. It used to be "no `## Verify
     intent` section", which made the lean form read as legacy and produced one warning
     naming every requirement in the corpus."""

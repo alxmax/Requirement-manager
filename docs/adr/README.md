@@ -46,6 +46,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0033](0033-the-costed-audit-the-split-is-blocked-by-one-representation.md) | The costed audit: still one file, and the split is blocked by one representation | Accepted |
 | [0034](0034-one-rendered-map-built-where-it-is-published.md) | One rendered map, built where it is published | Accepted |
 | [0035](0035-the-engine-is-a-package-behind-a-thin-cli.md) | The engine is a package behind a thin CLI | Accepted |
+| [0036](0036-decomposition-builds-downward-the-system-rung-is-the-authors.md) | Decomposition builds downward; the system rung is the author's | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

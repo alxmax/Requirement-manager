@@ -837,3 +837,29 @@
            No target number, on purpose: ADR-0014's re-open triggers are the numbers this
            repo agreed to act on, and inventing a second set here would quietly overrule
            them. -->
+
+## v7.1
+- [ ] Reduce the engine's command surface from 18 modes to 5 commands | lane: feature
+      <!-- Asked by the maintainer on 2026-09-07. Measured that day: the CLI has 5 verbs
+           (init, new, gate, sync, clarify) but 18 mode flags behind gate/sync (--audit,
+           --risk, --i18n, --show, --search, --review, --implement, --dupes, --design,
+           --suggest-verifies, --retire, --decompose, --levels, --findings, --untagged,
+           --plan, --wipe, --attach), served by 27 cmd_* entry points across the package —
+           the v5 "18-to-4" refactor folded the verbs and left every capability in place.
+           Target: 5 commands a reader can hold in their head, each doing one thing, with
+           the modes that survive as flags of those five and the rest RETIRED — code,
+           requirements and tests removed via `sync --retire`, not hidden behind a flag.
+           A retired capability takes hundreds of engine lines and 5–10 requirements with
+           it; that is the only lever in this repo that reduces lines (see the
+           2026-09-07 Senate bundle: every lint/shape lever in that audit added code).
+           Before any code:
+             - Record the outcome of the three 2026-09-05 Senate runs
+               `senate-reqmap-cli-surface-18-to-4` (all still PEND, verdict MODIFY):
+               their modify_requests are the conditions this item inherits.
+             - Measure per capability: engine lines, requirements, tests, and actual use
+               (which modes the maintainer and consumers run) — the ranking that decides
+               which 5 stay. Ship the table in the ADR that records the cut.
+             - Every survivor keeps its requirement; every retiree goes through
+               `sync --retire` plan-then-apply so no `# implements:`/`# verifies:` tag is
+               orphaned (Dimon, 2026-09-07: the retire path strips tags without
+               repointing them — check per capability, not once at the end). -->

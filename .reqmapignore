@@ -82,3 +82,19 @@ docs/map.html
 # requirements; excluding it here is a scope decision for this pass (matching
 # app/'s), not a claim that its content should never be drift-checked.
 docs/architecture.html
+
+# The suite's entry point and its shared fixtures hold no test function of their own
+# (the parts do, and carry the tested-by tags), so a tag here would fail RM012.
+plugin/scripts/test_reqmap.py
+plugin/scripts/test_reqmap_common.py
+
+# Prose, page shells, build config and dev tooling: not capability implementations.
+README.md
+app/README.md
+app/index.html
+app/viewer.html
+app/vite.config.js
+app/scripts/install-viewer.mjs
+docs/index.html
+docs/audit/**
+scripts/benchmark_scan.py

@@ -25,4 +25,3 @@ Scenario: a level and its verification are compared
 - `ARCH-LEVEL-051` — Specification level  (architecture)  ·  8 detailed design
 - `ARCH-TRACE-020` — Upstream traceability  (architecture)  ·  10 detailed design
 - `ARCH-VLEVEL-037` — Verification levels  (architecture)  ·  15 detailed design
-- `ARCH-VRUNGS-054` — Level-to-verification correspondence  (architecture)

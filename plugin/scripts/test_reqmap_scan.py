@@ -1017,7 +1017,7 @@ class ProseBuckets(unittest.TestCase):  # tested-by: ARCH-PROSE-024
         self.assertEqual(heads, ["Real section"])
 
 
-class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
+class AtomicForm(unittest.TestCase):  # tested-by: REQ-ATOMICFORM-053
     """A body with no normative headings: a story plus one Scenario."""
     ATOMIC = ("# T\n\n"
               "> As a developer, I want `scan` to list every member under its capability id,\n"
@@ -1028,14 +1028,14 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
               "  Then   both members print under its id\n\n"
               "## Members in code (auto)\n")
 
-    def test_the_atomic_body_is_read_as_both_normative_sections(self):  # verifies: ARCH-ATOMICFORM-053#CASE-1
+    def test_the_atomic_body_is_read_as_both_normative_sections(self):  # verifies: REQ-ATOMICFORM-053#CASE-1
         self.assertTrue(R._atomic_spans(self.ATOMIC))
         self.assertTrue(R._has_section(self.ATOMIC, "contract"))
         self.assertTrue(R._has_section(self.ATOMIC, "acceptan"))
         self.assertEqual(R._count_ac(self.ATOMIC), 1)
         self.assertEqual(len(R._bullets(self.ATOMIC, "contract")), 1)
 
-    def test_the_hash_covers_the_statement_and_the_scenario(self):  # verifies: ARCH-ATOMICFORM-053#CASE-2
+    def test_the_hash_covers_the_statement_and_the_scenario(self):  # verifies: REQ-ATOMICFORM-053#CASE-2
         # The whole point: without this, a heading-less body hashes the EMPTY STRING, every
         # such requirement collides, and no content change could ever drift.
         empty = R.hashlib.sha256(b"").hexdigest()[:12]
@@ -1045,12 +1045,12 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
         self.assertNotEqual(R.binding_hash(self.ATOMIC),
                             R.binding_hash(self.ATOMIC.replace("every member", "each member")))
 
-    def test_an_atomic_requirement_lints_clean(self):  # verifies: ARCH-ATOMICFORM-053#CASE-3
+    def test_an_atomic_requirement_lints_clean(self):  # verifies: REQ-ATOMICFORM-053#CASE-3
         fs = R.lint_requirement("REQ-A-001", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self.ATOMIC})
         self.assertEqual(fs, [], "atomic form should raise no finding, got %r" % fs)
 
-    def test_a_classic_body_is_untouched(self):  # verifies: ARCH-ATOMICFORM-053#CASE-4
+    def test_a_classic_body_is_untouched(self):  # verifies: REQ-ATOMICFORM-053#CASE-4
         classic = ("# T\n\n> why.\n\n## WHAT — Contract (normative)\n- `x` does one thing.\n"
                    "\n## HOW — Acceptance (= tests)\n- a.\n- b.\n- c.\n")
         self.assertIsNone(R._atomic_spans(classic))
@@ -1079,7 +1079,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
         scen += ["  Then   fact {} holds".format(i + 1) for i in range(thens)]
         return "# T\n\n" + "\n".join(quote) + "\n\n" + "\n".join(scen) + "\n\n## Members in code (auto)\n"
 
-    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11  # verifies: ARCH-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-1
+    def test_atomic_story_bullets_must_each_get_their_own_then(self):  # verifies: ARCH-LINTCHECKS-025#CASE-11  # verifies: REQ-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-1
         fs = R.lint_requirement("REQ-A-002", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(3, 1)})
         self.assertIn(("warn", "atomic-bullet-then-mismatch"),
@@ -1098,7 +1098,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX)})
         self.assertEqual(fs, [])
 
-    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12  # verifies: ARCH-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-2
+    def test_atomic_story_overlong_fires_past_the_ceiling(self):  # verifies: ARCH-LINTCHECKS-025#CASE-12  # verifies: REQ-ATOMICFORM-053#CASE-5  # verifies: REQ-LINTCHECKS-867#CASE-2
         fs = R.lint_requirement("REQ-A-005", {"meta": {"status": "confirmed", "form": "atomic"},
                                               "body": self._story(R.LINT_ATOMIC_STORY_BULLETS_MAX + 1,
                                                                    R.LINT_ATOMIC_STORY_BULLETS_MAX + 1)})
@@ -1107,7 +1107,7 @@ class AtomicForm(unittest.TestCase):  # tested-by: ARCH-ATOMICFORM-053
         self.assertNotIn(("warn", "atomic-bullet-then-mismatch"), checks)
 
 
-class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
+class ModuleFile(unittest.TestCase):  # tested-by: REQ-MODULEFILE-056
     """One .md may hold many requirements: a block starts at `---` followed by `id:`."""
 
     def _mod(self, *ids):
@@ -1116,12 +1116,12 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             + "\nbody of " + i + "\n"
             for i in ids)
 
-    def test_single_block_file_is_byte_identical(self):  # verifies: ARCH-MODULEFILE-056#CASE-2
+    def test_single_block_file_is_byte_identical(self):  # verifies: REQ-MODULEFILE-056#CASE-2
         # a one-block file must come back as the whole text, or every existing corpus shifts
         text = REQ.format(id="AREA-A-001", status="draft", layer="bus", extra="", title="A") + "\nprose\n"
         self.assertEqual(R.split_requirement_blocks(text), [text])
 
-    def test_each_block_becomes_its_own_requirement(self):  # verifies: ARCH-MODULEFILE-056#CASE-1  # verifies: REQ-PARSE-890#CASE-1
+    def test_each_block_becomes_its_own_requirement(self):  # verifies: REQ-MODULEFILE-056#CASE-1  # verifies: REQ-PARSE-890#CASE-1
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "AREA-A-001.md"), self._mod("AREA-A-001", "AREA-A-002", "AREA-A-003"))
             reqs = R.load_requirements(d)
@@ -1131,7 +1131,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
                 self.assertEqual(reqs[rid]["block"], i)
                 self.assertTrue(reqs[rid]["path"].endswith("AREA-A-001.md"))
 
-    def test_horizontal_rule_starts_no_block(self):  # verifies: ARCH-MODULEFILE-056#CASE-3
+    def test_horizontal_rule_starts_no_block(self):  # verifies: REQ-MODULEFILE-056#CASE-3
         # a bare `---` not followed by `id:` is a markdown rule, not a new requirement
         text = (REQ.format(id="AREA-B-001", status="draft", layer="bus", extra="", title="B")
                 + "\nbefore\n\n---\n\nafter\n")
@@ -1142,7 +1142,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             self.assertEqual(list(reqs), ["AREA-B-001"])
             self.assertIn("after", reqs["AREA-B-001"]["body"])
 
-    def test_only_the_first_block_falls_back_to_the_filename(self):  # verifies: ARCH-MODULEFILE-056#CASE-5
+    def test_only_the_first_block_falls_back_to_the_filename(self):  # verifies: REQ-MODULEFILE-056#CASE-5
         # block 0 may take its id from the file name; a later block with no id: must not,
         # or every module would mint a second copy of its own file name.
         with tempfile.TemporaryDirectory() as d:
@@ -1152,7 +1152,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             reqs = R.load_requirements(d)
             self.assertEqual(sorted(reqs), ["AREA-C-001", "AREA-C-002"])
 
-    def test_confirm_flips_only_the_named_block(self):  # verifies: ARCH-MODULEFILE-056#CASE-4
+    def test_confirm_flips_only_the_named_block(self):  # verifies: REQ-MODULEFILE-056#CASE-4
         with tempfile.TemporaryDirectory() as d:
             p = os.path.join(d, "AREA-D-001.md")
             _write(p, self._mod("AREA-D-001", "AREA-D-002"))
@@ -1196,7 +1196,7 @@ class ModuleFile(unittest.TestCase):  # tested-by: ARCH-MODULEFILE-056
             self.assertEqual(buf.getvalue(), "")  # no spurious duplicate-id warning
 
 
-class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
+class DescriptionSection(unittest.TestCase):  # tested-by: REQ-DESCRIPTION-057
     """`## Description` + `## Cases`/`CASE-N` are the current names; the older
     `## WHAT — Contract` + `## HOW — Acceptance`/`AC-N` keep working unchanged."""
 
@@ -1208,36 +1208,36 @@ class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
            "- `x` does the thing.\n\n"
            "## HOW — Acceptance (= tests)\nAC-1\n  Given a\n  When b\n  Then c\n")
 
-    def test_both_spellings_are_seen_as_the_same_sections(self):  # verifies: ARCH-DESCRIPTION-057#CASE-1
+    def test_both_spellings_are_seen_as_the_same_sections(self):  # verifies: REQ-DESCRIPTION-057#CASE-1
         for body in (self.CUR, self.OLD):
             self.assertTrue(R._has_any(body, R.CONTRACT_LABELS))
             self.assertTrue(R._has_any(body, R.ACCEPTANCE_LABELS))
             self.assertEqual([c for _n, c in R._contract_clauses(body)], ["`x` does the thing."])
             self.assertEqual(R._count_ac(body), 1)
 
-    def test_the_label_is_read_under_either_spelling(self):  # verifies: ARCH-DESCRIPTION-057#CASE-1
+    def test_the_label_is_read_under_either_spelling(self):  # verifies: REQ-DESCRIPTION-057#CASE-1
         self.assertEqual(R._labeled_acs(self.CUR), ["CASE-1"])
         self.assertEqual(R._labeled_acs(self.OLD), ["AC-1"])
 
-    def test_a_verifies_tag_may_name_either_label(self):  # verifies: ARCH-DESCRIPTION-057#CASE-2
+    def test_a_verifies_tag_may_name_either_label(self):  # verifies: REQ-DESCRIPTION-057#CASE-2
         for txt, want in (("# verifies: AREA-X-001#CASE-2", "CASE-2"),
                           ("# verifies: AREA-X-001#AC-2", "AC-2")):
             m = R.AC_VERIFY_RE.search(txt)
             self.assertIsNotNone(m, txt)
             self.assertEqual(m.group(2), want)
 
-    def test_the_intent_quote_is_not_part_of_the_drift_hash(self):  # verifies: ARCH-DESCRIPTION-057#CASE-3
+    def test_the_intent_quote_is_not_part_of_the_drift_hash(self):  # verifies: REQ-DESCRIPTION-057#CASE-3
         # the quote moved INSIDE the normative section; editing rationale must not drift a
         # confirmed contract, which is the whole reason blockquotes are skipped there.
         edited = self.CUR.replace("the intent, in one quoted line.", "a better explanation.")
         self.assertNotEqual(edited, self.CUR)
         self.assertEqual(R.binding_hash(edited), R.binding_hash(self.CUR))
 
-    def test_editing_a_clause_still_drifts(self):  # verifies: ARCH-DESCRIPTION-057#CASE-4
+    def test_editing_a_clause_still_drifts(self):  # verifies: REQ-DESCRIPTION-057#CASE-4
         edited = self.CUR.replace("`x` does the thing.", "`x` does another thing.")
         self.assertNotEqual(R.binding_hash(edited), R.binding_hash(self.CUR))
 
-    def test_editing_a_case_criterion_still_drifts(self):  # bug: cases-heading-excluded-from-drift-hash  # verifies: ARCH-DESCRIPTION-057#CASE-4
+    def test_editing_a_case_criterion_still_drifts(self):  # bug: cases-heading-excluded-from-drift-hash  # verifies: REQ-DESCRIPTION-057#CASE-4
         # _NORMATIVE_HEADING_RE used to hand-list keywords instead of reading
         # CONTRACT_LABELS/ACCEPTANCE_LABELS, and omitted "cases" — so `## Cases`
         # (the current spelling) was silently excluded from the drift hash: editing a
@@ -1246,7 +1246,7 @@ class DescriptionSection(unittest.TestCase):  # tested-by: ARCH-DESCRIPTION-057
         self.assertNotEqual(edited, self.CUR)
         self.assertNotEqual(R.binding_hash(edited), R.binding_hash(self.CUR))
 
-    def test_the_intent_is_still_read_from_inside_the_section(self):  # verifies: ARCH-DESCRIPTION-057#CASE-5
+    def test_the_intent_is_still_read_from_inside_the_section(self):  # verifies: REQ-DESCRIPTION-057#CASE-5
         self.assertEqual(R._first_quote(self.CUR), "the intent, in one quoted line.")
         self.assertEqual(R._first_quote(self.OLD), "the intent, in one quoted line.")
 
