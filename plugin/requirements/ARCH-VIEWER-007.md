@@ -678,7 +678,7 @@ satisfies: [ARCH-VIEWER-007]
 Every bullet below is binding.
 - `ProblemsView` offers a `Design` tab, labelled with the number of candidates the map carries, and offers it only when the map carries at least one.
 - The tab groups candidates by pillar, shows each one's kind, name, detail and `file:line`, and prints each kind's advice once per group — the same shape the CLI prints.
-- Design candidates are also rows of the `All` tab and of the warning count — a `WARN` about a file, naming the kind, the detail and the kind's advice, opening no requirement — so the inbox is the one place every open signal is read; they sort after the corpus warnings.
+- Design candidates count as problems — each is one computed signal, so the rail's Problems number includes them — but they are listed only under the `Design` tab: none is a row of `All`, of `Warnings` or of any other severity tab, and none opens a requirement.
 - The tab states that a candidate is advisory and never enters the gate, so a reader does not mistake the list for a build failure.
 - A map written before the engine carried candidates leaves the tab unoffered rather than rendering an empty one.
 
@@ -693,10 +693,10 @@ CASE-2 — an older map offers nothing
   When   `ProblemsView` renders
   Then   no `Design` tab is offered
 
-CASE-3 — the candidates are warnings in the inbox
+CASE-3 — the candidates are counted, and listed only in their tab
   Given  a map carrying both corpus signals and two design candidates
-  When   the open signals are computed
-  Then   exactly two rows carry the `design` signal, both at `WARN`, each with its `file:line`, and a map with no candidates adds none
+  When   the open signals are computed and the `All` tab renders
+  Then   exactly two computed signals carry the `design` signal at their own severity, each with its `file:line`; neither is rendered in `All`; and a map with no candidates adds none
 
 
 --------------------

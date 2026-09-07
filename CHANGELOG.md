@@ -1,5 +1,32 @@
 # Changelog
 
+## plugin `v7.2.0` — 2026-09-07
+
+- **`sync` tails a read-only re-level residue report.** New module `relevel.py` adds
+  five detectors over the `level:` axis — a `satisfies:` group's children split off its
+  shared file, an architecture parent's Description missing the `[[ID]]` wikilink to one
+  of its code children, a system requirement's prose still mentioning an id that no
+  longer satisfies it, a `satisfies:`/`depends_on:` edge naming the same id twice, and a
+  requirement satisfying a target at the wrong rung (reusing RM032's own `axis.py`
+  adjacency check rather than reimplementing it). Wired into `_audit_summary`, the same
+  tail `sync` already prints after a clean gate: stdout only, no lock write, no file
+  write, no exit-code effect, and not a `@gate_rule` — silent on a corpus that declares
+  no `level:` at all, because every detector is itself scoped to a `level:`-declaring
+  requirement rather than gated by a bolted-on early return. Stays report-only forever,
+  by design: ADR-0031's "Why not on sync" already refused a write path inside the hook
+  every commit runs, and ADR-0036 keeps the axis a decision the author makes by hand,
+  not one the engine infers and applies. From bundle `2026-09-07_163654`, Senate run
+  `senate-reqmap-relevel-promote-demote`.
+
+## plugin `v7.1.1` — 2026-09-07
+
+- **Design candidates are counted as problems and listed only under Design.** `v7.1.0`
+  made `gate --design`'s candidates `WARN` rows of the viewer's inbox, so each appeared
+  twice — under Warnings and under Design. Now each candidate is one computed signal at
+  its own severity: the rail's Problems number includes it, and it behaves like a warning
+  in that it blocks no CI run and no merge, but it is a row of the Design tab alone —
+  neither `All` nor `Warnings` lists it (`REQ-VIEWER-977` CASE-3).
+
 ## plugin `v7.1.0` — 2026-09-07
 
 **The pyramid is built upward, and the gate says when a rung is empty.** The maintainer's

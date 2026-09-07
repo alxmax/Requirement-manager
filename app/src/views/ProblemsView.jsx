@@ -12,11 +12,12 @@
  *
  * A third origin joined them: the advisory code review (`gate --design`), whose rows
  * are about a FILE rather than a requirement and which never gates anything. It gets its
- * own tab, grouped by pillar the way the CLI prints it, AND — since 2026-09-07, at the
- * maintainer's request — its candidates are rows of "All" and of the Warnings count too:
- * a warning with a file for an id, so the inbox is the one place every open signal is
- * read. They were kept out of "All" while there were 123 of them; at 32 they no longer
- * bury anything, and a reader who never opens the Design tab still sees them.
+ * own tab, grouped by pillar the way the CLI prints it. Since 2026-09-07, at the
+ * maintainer's request, the candidates COUNT as problems — the rail's Problems number
+ * includes them — but they are listed only under the Design tab: a candidate behaves like
+ * a warning (it blocks no CI run and no merge) without being one, so the Warnings tab and
+ * the "All" list stay the corpus's own signals. They were rows of "All" for one afternoon
+ * and read as a second copy of the same list.
  *
  * They were two screens until v4.0.0, because Problems was then ~618 rows of draft
  * review noise and a real question dropped in there was invisible. Two things ended
@@ -73,21 +74,21 @@ export function computeProblems() {
       fix:"Answer it, fold the answer into the Description, then delete the bullet.",
       loc:"" });
   });
-  // the advisory code review, as warnings about a file: never gating, never opening a
-  // spec, sorted after the corpus warnings so a WARN about a requirement reads first
+  // the advisory code review, one problem per candidate so the rail counts them: its
+  // own severity, never WARN, so the Warnings tab and the "All" list leave them to the
+  // Design tab; never gating, never opening a spec
   const design = (DESIGN && Array.isArray(DESIGN.findings)) ? DESIGN.findings : [];
   const advice = (DESIGN && DESIGN.advice) || {};
   design.forEach(f => {
     out.push({ id:f.file, title:(f.name && f.name !== f.file) ? `${f.kind} · ${f.name}` : f.kind,
-      signal:"design", sev:"WARN", noSpec:true,
+      signal:"design", sev:"DESIGN", noSpec:true,
       msg:f.detail,
       fix:advice[f.kind] || "Advisory: a shape worth a look, never a defect; `gate --design` names it.",
       loc:`${f.file}:${f.line}` });
   });
   // A question outranks an unreviewed draft: somebody wrote it down on purpose.
-  const order = { ERROR:0, WARN:1, QUESTION:2, REVIEW:3 };
-  const rank = p => order[p.sev] + (p.signal === "design" ? 0.5 : 0);
-  return out.sort((a,b)=> rank(a)-rank(b) || a.id.localeCompare(b.id));
+  const order = { ERROR:0, WARN:1, QUESTION:2, REVIEW:3, DESIGN:4 };
+  return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
 }
 
 /** Only the rows a human wrote — App's badge counts these separately. */
@@ -109,7 +110,9 @@ export function ProblemsView({ openSpec, problems }) {
   // `problems` lets a caller (App) share one computeProblems() result across the
   // rail badges and this view instead of recomputing it here too; a caller that
   // renders this view standalone (e.g. the SSR smoke test) gets the old behavior.
-  const all = problems || computeProblems();
+  // Design candidates are counted upstream (the rail's Problems number) and listed
+  // downstream (their own tab); the severity tabs and "All" are the corpus's signals.
+  const all = (problems || computeProblems()).filter(p => p.sev !== "DESIGN");
   const counts = all.reduce((a,p)=>{ a[p.sev]=(a[p.sev]||0)+1; return a; }, {});
   // Advisory code-review candidates, grouped the way the CLI prints them. Absent on a
   // map written before the engine carried them, which is why this is a guarded read.

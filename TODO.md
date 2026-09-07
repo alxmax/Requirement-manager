@@ -873,3 +873,33 @@
                `sync --retire` plan-then-apply so no `# implements:`/`# verifies:` tag is
                orphaned (Dimon, 2026-09-07: the retire path strips tags without
                repointing them — check per capability, not once at the end). -->
+- [ ] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
+      <!-- Senate 2026-09-07 `senate-reqmap-relevel-promote-demote` (Sonnet, MODIFY): a
+           code requirement may be promoted to architecture and an architecture to
+           system, and the reverse, but the engine gets the PLAN ONLY (R1) — no `--apply`,
+           no `--rename`, no `satisfies:` write into a human-authored file. The `--apply`
+           half collides with ADR-0031 / REQ-LEVELRETROFIT-987 clause 3 and with ADR-0036
+           (refused 9/9 the same morning) and would need a superseding ADR plus a
+           provenance marker; the cost case behind it is n=1 (commit 20071fe), so no ROI
+           number goes into a SKILL or an ADR. Maintainer's shape, same evening: not a new
+           mode flag — `sync` already runs on every corpus change, so the plan is a report
+           `sync` prints when the corpus shows a move that is not finished. Stateless,
+           read from `level:` and `satisfies:` alone, each line one observable residue:
+             - the block sits in its own file while its siblings under the same parent
+               share the parent's file (ADR-0025's module-file convention, observed, not
+               required — a one-file-per-requirement corpus never triggers it);
+             - the parent's Description carries no `[[child]]` obligation sentence;
+             - a `system` need's body still names the id by wikilink or backtick while the
+               id no longer satisfies it;
+             - `depends_on:` still names the `satisfies:` target (a redundant edge);
+             - a `satisfies:` target on the wrong rung — RM032's line, referenced, not
+               repeated.
+           The id prefix is NOT a residue: the engine does not parse it and the rename was
+           cosmetic (Musk). Drift (RM018) and the baked viewer fixture (RM017) already
+           report on their own; the report names them, it does not re-check them.
+           Conditions carried from the run: cite the bundle and its precedent
+           `2026-09-07_163654` in the CHANGELOG entry (Tacitus: 3 of the last 4 level-axis
+           MODIFYs shipped past their conditions — re-read the bundle before merging);
+           tests on a temp corpus for each residue line and for the silence of a corpus
+           that declares no `level:` (ADR-0019). Do this AFTER the 18-to-5 cut above, so
+           it lands in the `sync` that survives. -->

@@ -114,8 +114,8 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "REQ-VIEWER-977": {
-      "hash": "b4c1d522526f",
-      "reason": "REQ-VIEWER-977 CASE-3: design candidates join the Problems inbox as WARN rows (maintainer, 2026-09-07); the Design tab keeps the grouped reading"
+      "hash": "8c401c2200b5",
+      "reason": null
     },
     "REQ-VIEWER-995": {
       "hash": "f6bcd1e2cb0f",
