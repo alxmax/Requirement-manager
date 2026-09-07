@@ -11,7 +11,7 @@ Three independent axes are checked:
   - semver  — canonical source is plugin/.claude-plugin/plugin.json `version`.
               Every occurrence in .claude-plugin/marketplace.json must equal it
               (top-level `version` + each `plugins[].version`).
-  - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap.py is an ISO date with a
+  - engine  — MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py is an ISO date with a
               different purpose (staleness compare); it is only sanity-checked for
               valid YYYY-MM-DD shape, with an optional `.N` (N>=1) same-day revision
               suffix, never compared against the semver.
@@ -45,7 +45,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PLUGIN_JSON = REPO_ROOT / "plugin" / ".claude-plugin" / "plugin.json"
 MARKETPLACE_JSON = REPO_ROOT / ".claude-plugin" / "marketplace.json"
-REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap.py"
+REQMAP_PY = REPO_ROOT / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
 # Files that quote the action's major-alias tag. action.yml is listed first: it is the
 # file the tag actually publishes, so it is reported as the canonical one on a mismatch.
 ACTION_REF_FILES = (
@@ -89,28 +89,9 @@ def _fix(canonical: str) -> int:
     return 0
 
 
-def main(argv=None) -> int:
-    """Assert that every manifest agrees on the version (or rewrite them under
-    `--fix`), and return an exit code."""
-    ap = argparse.ArgumentParser(description="Assert (or --fix) version coherence across the manifests.")
-    ap.add_argument("--fix", action="store_true",
-                    help="rewrite marketplace.json to match plugin.json's version, then verify")
-    a = ap.parse_args(argv)
-
+def _marketplace_checks(canonical: str) -> tuple:
+    """(occurrences, errors): every semver in marketplace.json against plugin.json's."""
     errors: list[str] = []
-
-    plugin = _load_json(PLUGIN_JSON)
-    canonical = plugin.get("version")
-    if not canonical:
-        print(f"ERROR  no `version` in {PLUGIN_JSON.relative_to(REPO_ROOT)}")
-        return 2
-
-    if a.fix:
-        rc = _fix(canonical)
-        if rc:
-            return rc
-
-    # Every semver occurrence in marketplace.json must equal the canonical source.
     market = _load_json(MARKETPLACE_JSON)
     occurrences = [("marketplace.version", market.get("version"))]
     for i, plug in enumerate(market.get("plugins", [])):
@@ -121,38 +102,39 @@ def main(argv=None) -> int:
     for label, value in occurrences:
         if value != canonical:
             errors.append(f"  {label}: {value!r} != plugin.json version {canonical!r}")
+    return occurrences, errors
 
-    # Engine version is a separate axis — only validate it is a real ISO date.
-    try:
-        text = REQMAP_PY.read_text(encoding="utf-8")
-    except OSError as e:
-        print(f"ERROR  cannot read {REQMAP_PY.relative_to(REPO_ROOT)}: {e}")
-        return 2
+
+def _engine_checks(text: str) -> tuple:
+    """(engine, errors): MAP_ENGINE_VERSION is present and a real `YYYY-MM-DD[.N]`."""
     m = MAP_ENGINE_RE.search(text)
     if not m:
-        errors.append("  reqmap.py: MAP_ENGINE_VERSION not found")
-        engine = None
-    else:
-        engine = m.group(1)
-        # YYYY-MM-DD with an optional `.N` same-day revision suffix (N a positive
-        # integer) — lets a second engine bump on the same calendar day get a
-        # distinct, still lexicographically-ordered version.
-        base, sep, rev = engine.partition(".")
-        # Shape first: on Python 3.11+ `fromisoformat` also accepts `20260906` and
-        # `2026-W36-1`, and the staleness probe string-compares this value.
-        valid = re.fullmatch(r"\d{4}-\d{2}-\d{2}", base) is not None
-        try:
-            dt.date.fromisoformat(base)
-        except ValueError:
-            valid = False
-        if sep and not (rev.isdigit() and int(rev) >= 1):
-            valid = False
-        if not valid:
-            errors.append(f"  reqmap.py: MAP_ENGINE_VERSION {engine!r} is not a valid YYYY-MM-DD date "
-                          f"with an optional .N (N>=1) same-day revision")
+        return None, ["  reqmap_engine/__init__.py: MAP_ENGINE_VERSION not found"]
+    engine = m.group(1)
+    # YYYY-MM-DD with an optional `.N` same-day revision suffix (N a positive
+    # integer) — lets a second engine bump on the same calendar day get a
+    # distinct, still lexicographically-ordered version.
+    base, sep, rev = engine.partition(".")
+    # Shape first: on Python 3.11+ `fromisoformat` also accepts `20260906` and
+    # `2026-W36-1`, and the staleness probe string-compares this value.
+    valid = re.fullmatch(r"\d{4}-\d{2}-\d{2}", base) is not None
+    try:
+        dt.date.fromisoformat(base)
+    except ValueError:
+        valid = False
+    if sep and not (rev.isdigit() and int(rev) >= 1):
+        valid = False
+    if not valid:
+        return engine, [f"  reqmap_engine/__init__.py: MAP_ENGINE_VERSION {engine!r} "
+                        f"is not a valid YYYY-MM-DD date with an optional .N (N>=1) "
+                        f"same-day revision"]
+    return engine, []
 
-    # Action alias — tracks the plugin's major (ADR-0029). Every documented `uses:`
-    # reference must name one major, and that major must be the plugin's.
+
+def _action_alias_checks(canonical: str) -> tuple:
+    """(action_major, action_refs, errors): every documented `check@vN` names one major,
+    and that major is the plugin's (ADR-0029)."""
+    errors: list[str] = []
     action_major, action_refs = None, []
     for rel in ACTION_REF_FILES:
         path = REPO_ROOT / rel
@@ -178,6 +160,45 @@ def main(argv=None) -> int:
         if action_major != plugin_major:
             errors.append(f"  action alias {action_major!r} != plugin major {plugin_major!r} "
                           f"(ADR-0029: the alias tracks the plugin's major)")
+    return action_major, action_refs, errors
+
+
+def main(argv=None) -> int:
+    """Assert that every manifest agrees on the version (or rewrite them under
+    `--fix`), and return an exit code."""
+    ap = argparse.ArgumentParser(
+        description="Assert (or --fix) version coherence across the manifests.")
+    ap.add_argument("--fix", action="store_true",
+                    help="rewrite marketplace.json to match plugin.json's version, then verify")
+    a = ap.parse_args(argv)
+
+    plugin = _load_json(PLUGIN_JSON)
+    canonical = plugin.get("version")
+    if not canonical:
+        print(f"ERROR  no `version` in {PLUGIN_JSON.relative_to(REPO_ROOT)}")
+        return 2
+
+    if a.fix:
+        rc = _fix(canonical)
+        if rc:
+            return rc
+
+    # Every semver occurrence in marketplace.json must equal the canonical source.
+    occurrences, errors = _marketplace_checks(canonical)
+
+    # Engine version is a separate axis — only validate it is a real ISO date.
+    try:
+        text = REQMAP_PY.read_text(encoding="utf-8")
+    except OSError as e:
+        print(f"ERROR  cannot read {REQMAP_PY.relative_to(REPO_ROOT)}: {e}")
+        return 2
+    engine, engine_errors = _engine_checks(text)
+    errors += engine_errors
+
+    # Action alias — tracks the plugin's major (ADR-0029). Every documented `uses:`
+    # reference must name one major, and that major must be the plugin's.
+    action_major, action_refs, alias_errors = _action_alias_checks(canonical)
+    errors += alias_errors
 
     if errors:
         print("FAIL  version drift detected:")

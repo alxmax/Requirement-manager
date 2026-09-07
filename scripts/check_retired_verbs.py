@@ -36,12 +36,21 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # The engine is the source of truth for what exists; anything else that looks
 # like a verb in an invocation is retired by definition.
 def live_verbs():
-    """The verbs the engine currently registers, read from its COMMANDS registry."""
-    src = io.open(os.path.join(ROOT, "plugin", "scripts", "reqmap.py"),
-                  encoding="utf-8").read()
-    block = re.search(r"^COMMANDS = \{(.*?)^\}", src, re.M | re.S)
+    """The verbs the engine currently registers, read from its COMMANDS registry —
+    `reqmap_engine/commands.py` since the engine became a package (ADR-0035), with the
+    single-file `reqmap.py` still accepted for an older checkout."""
+    block = None
+    for rel in (("plugin", "scripts", "reqmap_engine", "commands.py"),
+                ("plugin", "scripts", "reqmap.py")):
+        path = os.path.join(ROOT, *rel)
+        if os.path.exists(path):
+            src = io.open(path, encoding="utf-8").read()
+            block = re.search(r"^COMMANDS = \{(.*?)^\}", src, re.M | re.S)
+            if block:
+                break
     if not block:
-        print("cannot find the COMMANDS registry in reqmap.py", file=sys.stderr)
+        print("cannot find the COMMANDS registry in reqmap_engine/commands.py or reqmap.py",
+              file=sys.stderr)
         sys.exit(2)
     return set(re.findall(r'^    "([a-z-]+)": \{', block.group(1), re.M))
 
@@ -64,7 +73,9 @@ INSTRUCTION_FILES = [
     ".github/workflows/ci.yml",
     "sync_reqmap.sh",
 ]
-INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml")]
+# The engine package prints instructions too (audit sections, decompose, next steps).
+INSTRUCTION_GLOBS = [("plugin/requirements", ".md"), ("check", ".yml"),
+                     ("plugin/scripts/reqmap_engine", ".py")]
 # Every skill the plugin ships, at any depth: each one instructs a reader to run the
 # engine, and each goes stale the same way.
 INSTRUCTION_TREES = [("plugin/skills", "SKILL", ".md")]

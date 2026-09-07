@@ -1,6 +1,6 @@
 """The reqmap regression suite — the aggregator.
 
-ADR-0014 keeps the ENGINE in one file. It says nothing about the tests, and at 12,000
+The ENGINE is a package since ADR-0035 (one file before). Neither says anything about the tests, and at 12,000
 lines this suite had stopped being something a person could navigate: finding the class
 that covered a behaviour meant grepping, and adding one meant appending to the bottom
 whatever the subject. The classes now live in four modules by subject and are re-exported

@@ -139,9 +139,13 @@ def main():
 
         engine = os.path.join(scripts_dir, "reqmap.py")
         shutil.copy2(ENGINE_SRC, engine)
+        # the engine is the CLI module plus the package beside it
+        shutil.copytree(os.path.join(os.path.dirname(ENGINE_SRC), "reqmap_engine"),
+                        os.path.join(scripts_dir, "reqmap_engine"),
+                        ignore=shutil.ignore_patterns("__pycache__"))
 
         with open(os.path.join(tmpdir, ".reqmapignore"), "w", encoding="utf-8") as f:
-            f.write("scripts/reqmap.py\n")
+            f.write("scripts/reqmap.py\nscripts/reqmap_engine/**\n")
 
         with open(os.path.join(req_dir, REQ_ID + ".md"), "w", encoding="utf-8") as f:
             f.write(REQUIREMENT_MD)

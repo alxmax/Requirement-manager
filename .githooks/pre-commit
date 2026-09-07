@@ -3,7 +3,7 @@
 # requirement-manager DEV pre-commit (this repo only — not the seeded consumer hook).
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
-#   2. engine bump    — reqmap.py staged without a MAP_ENGINE_VERSION change (fix: bump it)
+#   2. engine bump    — reqmap.py / reqmap_engine/ staged without a MAP_ENGINE_VERSION change (fix: bump it)
 #   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py map --root plugin --code .)
 #   4. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
@@ -20,7 +20,7 @@ if ! "$PY" scripts/check_versions.py; then
 fi
 if ! "$PY" -X utf8 scripts/check_engine_bump.py --staged; then
   echo "" >&2
-  echo "engine changed without a MAP_ENGINE_VERSION bump — set it to today's date in reqmap.py and re-stage." >&2
+  echo "engine changed without a MAP_ENGINE_VERSION bump — set it to today's date in reqmap_engine/__init__.py and re-stage." >&2
   exit 1
 fi
 if ! "$PY" -X utf8 scripts/check_retired_verbs.py; then

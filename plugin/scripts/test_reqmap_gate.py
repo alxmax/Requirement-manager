@@ -2739,7 +2739,7 @@ class DriftSeverityConfig(unittest.TestCase):  # tested-by: ARCH-RULES-059  # te
         self._saved = R.DRIFT_SEVERITY
 
     def tearDown(self):
-        R.DRIFT_SEVERITY = self._saved
+        R.config.DRIFT_SEVERITY = self._saved
 
     def _drifted_ctx(self, d, exempt=""):
         rdir = os.path.join(d, "requirements")
@@ -2810,13 +2810,13 @@ class SinceScopesNotFacts(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # te
         full = {"SYS-A-001": [("validated-against", "a.md", 1)],
                 "SYS-B-002": [("validated-against", "b.md", 1)]}
         ctx = self._ctx({"SYS-A-001": full["SYS-A-001"]}, full)
-        self.assertEqual(list(R._rule_need_not_validated(ctx)), [])
+        self.assertEqual(list(R._need_not_validated_rule(ctx)), [])
 
     def test_a_genuinely_unvalidated_need_in_the_diff_still_warns(self):  # verifies: REQ-CHECK-831#CASE-3
         full = {"SYS-A-001": [("validated-against", "a.md", 1)],
                 "SYS-B-002": [("implements", "b.py", 1)]}
         ctx = self._ctx({"SYS-B-002": full["SYS-B-002"]}, full)
-        self.assertEqual([rid for rid, _ in R._rule_need_not_validated(ctx)], ["SYS-B-002"])
+        self.assertEqual([rid for rid, _ in R._need_not_validated_rule(ctx)], ["SYS-B-002"])
 
     def test_the_opt_in_is_read_from_the_whole_tree(self):
         full = {"SYS-A-001": [("validated-against", "a.md", 1)]}
