@@ -43,3 +43,8 @@ docs/superpowers/specs/*.md
 # (app/**), so this comment documents intent for the narrow invocation too.
 # The version-gate script is dev-CI tooling described in CLAUDE.md and
 # cross-referenced in ARCH-CHECK-006.
+
+# The suite's entry point and its shared fixtures hold no test function of their own
+# (the parts do, and carry the tested-by tags), so a tag here would fail RM012.
+scripts/test_reqmap.py
+scripts/test_reqmap_common.py

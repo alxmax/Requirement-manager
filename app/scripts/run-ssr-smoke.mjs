@@ -1,3 +1,4 @@
+// implements: ARCH-VIEWER-007
 /* Bundle ssr-smoke.jsx with esbuild (JSX automatic runtime) and run it. */
 import { build } from "esbuild";
 import { dirname, resolve } from "node:path";

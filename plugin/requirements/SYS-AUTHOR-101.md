@@ -21,7 +21,6 @@ Scenario: a capability goes from idea to confirmed
   Then   the file carries the schema the gate reads, and its status reflects that code now backs it
 
 ## Requirements in this system (auto)
-- `ARCH-ATOMICFORM-053` — The atomic requirement form  (architecture)
 - `ARCH-ATOMICITY-049` — Statement atomicity  (architecture)  ·  13 detailed design
 - `ARCH-CONTEXT-048` — Consolidated Context section  (architecture)  ·  6 detailed design
 - `ARCH-DECOMPOSE-050` — Clause decomposition scaffold  (architecture)  ·  11 detailed design

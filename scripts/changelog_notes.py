@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# implements: ARCH-SELFGATE-039
 """Print the CHANGELOG.md section for one plugin version — the release notes.
 
 Usage: python scripts/changelog_notes.py 2.13.0   (reads ./CHANGELOG.md)

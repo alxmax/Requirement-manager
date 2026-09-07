@@ -92,7 +92,7 @@ def _corpus_shape(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-
             "flat": bool(total) and levelled * 10 < total}
 
 
-def _redundant_groups(reqs):  # implements: ARCH-REDUNDANCY-058
+def _redundant_groups(reqs):  # implements: REQ-REDUNDANCY-058
     """Requirements whose Description clauses are IDENTICAL once case and whitespace are
     normalised, grouped, each group sorted and the groups ordered by their first id.
 
@@ -197,6 +197,24 @@ def _test_suite_pairs(members):  # implements: REQ-SIMILAR-921
     return linked
 
 
+def _hierarchy_pairs(reqs):
+    # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-921
+    """Pairs the level axis already explains: a child with its parent (the parent's
+    summary clause names it) and two children of one parent (both restate that parent's
+    clauses). 25 of the 40 pairs `dupes` reported on this corpus were siblings; a known
+    link is not a duplicate finding."""
+    linked, kids_of = set(), {}
+    for rid, r in reqs.items():
+        for up in _as_list((r.get("meta") or {}).get("satisfies")):
+            linked.add(frozenset((rid, up)))
+            kids_of.setdefault(up, []).append(rid)
+    for kids in kids_of.values():
+        for i in range(len(kids)):
+            for j in range(i + 1, len(kids)):
+                linked.add(frozenset((kids[i], kids[j])))
+    return linked
+
+
 def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-920  # implements: REQ-SIMILAR-923
     """Report requirement pairs whose contracts overlap at or above `threshold`
@@ -206,12 +224,7 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     does not inflate the score. Callers pass a validated threshold in (0, 1].
     With `members`, a pair linked by `tested-by` (one requirement is the other's test
     suite) is skipped and counted instead of reported."""
-    linked = set(_test_suite_pairs(members))
-    # a child restates part of its parent's contract by construction (the parent's
-    # summary clause names it), so a parent-child pair is never a duplicate finding
-    for rid, r in reqs.items():
-        for up in _as_list((r.get("meta") or {}).get("satisfies")):
-            linked.add(frozenset((rid, up)))
+    linked = set(_test_suite_pairs(members)) | _hierarchy_pairs(reqs)
     placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
     docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()
             if rid not in placeholder}
@@ -238,8 +251,9 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
     if skipped_linked:
-        print(("skipped {} pair(s) linked by tested-by or satisfies (a requirement and its own "
-               "test suite, or a parent and its child, share vocabulary by construction).\n")
+        print(("skipped {} pair(s) linked by tested-by or satisfies, or siblings under one "
+               "parent (a requirement and its own test suite, a parent and its child, and two "
+               "children of one parent share vocabulary by construction).\n")
               .format(skipped_linked))
     if not pairs:
         print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared."

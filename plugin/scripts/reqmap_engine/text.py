@@ -16,7 +16,7 @@ def _req_title(body, rid):
     return rid
 
 
-def _req_file(reqs, rid):  # implements: ARCH-MODULEFILE-056
+def _req_file(reqs, rid):  # implements: REQ-MODULEFILE-056
     """Where to open `rid`, as `requirements/<file>`. One file may hold many requirements,
     so the id is NOT the filename: `load_requirements` records the real path per block and
     that is the only thing worth printing at a reader."""
@@ -36,7 +36,7 @@ def _title(body):  # implements: ARCH-MAP-007
 def _distinct_intent(body):  # implements: ARCH-MAP-007  # implements: REQ-MAP-873
     """The intent quote, but only when it says something the Contract does not.
 
-    In the atomic form ([[ARCH-ATOMICFORM-053]]) the `>` quote IS the obligation —
+    In the atomic form ([[REQ-ATOMICFORM-053]]) the `>` quote IS the obligation —
     `_atomic_spans` makes the same span both the intent and the single contract
     clause. Emitting it under both names makes every surface print one sentence
     twice: the viewer draws a `Why — Intent` blockquote directly above an identical
@@ -106,7 +106,7 @@ def _is_label_line(line):  # implements: ARCH-MAP-007  # implements: REQ-MAP-872
 
 
 def _bullets(body, name):
-    # implements: ARCH-MAP-007  # implements: ARCH-ATOMICFORM-053  # implements: REQ-MAP-872
+    # implements: ARCH-MAP-007  # implements: REQ-ATOMICFORM-053  # implements: REQ-MAP-872
     if name in CONTRACT_LABELS:
         _sp = _atomic_spans(body)
         if _sp:                                    # the atomic statement is the one clause

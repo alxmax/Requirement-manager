@@ -23,6 +23,7 @@ satisfies: [SYS-AUTHOR-101]
 Every bullet below is binding.
 - `clarify` detects the shapes that cannot be verified as written and turns each into one question about the requirement's own text. [[REQ-CLARIFY-956]]
 - `clarify` prints the questions grouped by severity, or emits them as JSON, writes nothing, and always exits 0. [[REQ-CLARIFY-957]]
+- `sync` snapshots each requirement's blocking questions, so an edit that answers one question and raises another is reported instead of sitting unread. [[REQ-CLARIFY-975]]
 
 ## Cases
 CASE-1 — a requirement with nothing detectable says so
@@ -110,7 +111,7 @@ CASE-6 — the corpus's own subject is not that signal
 ## Context
 **Fire rate, measured 2026-09-04**
 - Over this repository's 223 requirements, `case-monoculture` fires on 20 — 8.9% of the corpus,
-- above the 5% floor [[ARCH-REDUNDANCY-058]] was weighed against. Without excluding the corpus's
+- above the 5% floor [[REQ-REDUNDANCY-058]] was weighed against. Without excluding the corpus's
 - own subject word it fires on 38 (17%), and 60% of those are requirements about requirements:
 - the exclusion is what turns the signal from noise into a question.
 - It is the detector that would have asked the question nobody asked about `search`, whose four

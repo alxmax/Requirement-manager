@@ -13,6 +13,7 @@ from .mapjson import _path_key, _since_changed_files
 from .model import Finding, GATE_RULES
 from .registry import _check_integration_fresh
 from .rules import DRIFT_RULES
+from . import axis  # noqa: F401 — registers RM032 after every rule in `rules`
 from .sections import _legacy_schema_ids
 from .workspace import GateContext, Workspace
 

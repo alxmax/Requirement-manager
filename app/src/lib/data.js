@@ -29,7 +29,9 @@ const BAKED = [
     contract:[
       "`load_requirements` parses each `requirements/*.md` file into a record `{meta, body, path}`, keyed by the frontmatter `id:` or the filename stem. [[REQ-PARSE-890]]",
       "The hand-rolled frontmatter grammar accepts scalars, inline `[a, b]` lists, and block-style `key:` / indented `- item` lists — no external YAML library. [[REQ-PARSE-891]]",
-      "A file with no leading `---` block, an underscore-prefixed filename, or a leading UTF-8 BOM are all handled without raising. [[REQ-PARSE-892]]" ],
+      "A file with no leading `---` block, an underscore-prefixed filename, or a leading UTF-8 BOM are all handled without raising. [[REQ-PARSE-892]]",
+      "The atomic form — a story quote plus a `Scenario:` block, no normative headings — is recognised and hashed beside the sectioned form. [[REQ-ATOMICFORM-053]]",
+      "One file may hold many requirements: a block starts at a `---` line immediately followed by `id:`, and only block 0 may take its id from the filename. [[REQ-MODULEFILE-056]]" ],
     acc:[
       "A file with valid frontmatter yields its scalar and list fields in `meta`.",
       "A file without a leading `---` block returns empty `meta` and the whole text as body.",

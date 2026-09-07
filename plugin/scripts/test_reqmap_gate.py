@@ -1262,6 +1262,45 @@ class Traceability(unittest.TestCase):  # tested-by: ARCH-TRACE-020  # tested-by
         _, out = self._check({"NEED-X-001.md": need})
         self.assertIn("need has no requirement that satisfies it", out)
 
+    def _levelled(self, rid, level, extra=""):
+        return self._feature(rid, "level: {}\n{}".format(level, extra))
+
+    def _tagged(self, *rids):
+        return "".join("# {}: {}\n# {}: {}\ndef test_{}():\n    pass\n".format(
+            "implements", r, "tested" + "-by", r, i) for i, r in enumerate(rids))
+
+    def test_architecture_group_with_no_code_member_warns(self):  # verifies: REQ-TRACE-934#CASE-4
+        need = REQ.format(id="SYS-X-001", status="confirmed", layer="need", extra="level: system\n", title="N")
+        need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+        files = {"SYS-X-001.md": need,
+                 "ARCH-X-002.md": self._levelled("ARCH-X-002", "architecture", "satisfies: [SYS-X-001]\n"),
+                 "mod.py": self._tagged("ARCH-X-002")}
+        code, out = self._check(files)
+        self.assertIn("ARCH-X-002: level: architecture groups no `level: code` requirement", out)
+        self.assertNotIn("SYS-X-001: level: system groups", out)   # it has its architecture member
+        self.assertEqual(code, 0)                                   # warn, not error
+
+    def test_code_requirement_with_no_group_warns(self):  # verifies: REQ-TRACE-934#CASE-5
+        files = {"REQ-X-003.md": self._levelled("REQ-X-003", "code"),
+                 "mod.py": self._tagged("REQ-X-003")}
+        code, out = self._check(files)
+        self.assertIn("REQ-X-003: level: code satisfies nothing", out)
+        self.assertEqual(code, 0)
+
+    def test_complete_ladder_and_unlevelled_corpus_are_silent(self):  # verifies: REQ-TRACE-934#CASE-4  # verifies: REQ-TRACE-934#CASE-5
+        need = REQ.format(id="SYS-X-001", status="confirmed", layer="need", extra="level: system\n", title="N")
+        need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
+        ladder = {"SYS-X-001.md": need,
+                  "ARCH-X-002.md": self._levelled("ARCH-X-002", "architecture", "satisfies: [SYS-X-001]\n"),
+                  "REQ-X-003.md": self._levelled("REQ-X-003", "code", "satisfies: [ARCH-X-002]\n"),
+                  "mod.py": self._tagged("ARCH-X-002", "REQ-X-003")}
+        _, out = self._check(ladder)
+        self.assertNotIn("RM032", out)
+        flat = {"A-FOO-001.md": self._feature("A-FOO-001"), "B-BAR-002.md": self._feature("B-BAR-002"),
+                "mod.py": self._tagged("A-FOO-001", "B-BAR-002")}
+        _, out = self._check(flat)
+        self.assertNotIn("RM032", out)   # no `level:` declared: the axis is never touched
+
     def test_satisfied_need_not_orphan(self):  # verifies: ARCH-TRACE-020#CASE-2  # verifies: REQ-TRACE-934#CASE-3
         need = REQ.format(id="NEED-X-001", status="confirmed", layer="need", extra="", title="N")
         need += "\n## WHAT — Contract (normative)\n- want.\n\n## HOW — Acceptance (= tests)\n- a.\n"
@@ -2234,7 +2273,7 @@ class SpecLevel(unittest.TestCase):  # tested-by: ARCH-LEVEL-051  # tested-by: R
         self.assertNotIn("architecture", str(R.IMPL_EXEMPT_LAYERS))
 
 
-class VRungs(unittest.TestCase):  # tested-by: ARCH-VRUNGS-054
+class VRungs(unittest.TestCase):  # tested-by: REQ-VRUNGS-054
     """Each specification level answered by the verification level that discharges it."""
 
     def _check(self, files, levels):
@@ -2252,21 +2291,21 @@ class VRungs(unittest.TestCase):  # tested-by: ARCH-VRUNGS-054
         return REQ.format(id=rid, status="confirmed", layer="feature",
                           extra="level: %s\n" % level, title="T")
 
-    def test_a_level_verified_at_the_wrong_depth_warns(self):  # verifies: ARCH-VRUNGS-054#CASE-1
+    def test_a_level_verified_at_the_wrong_depth_warns(self):  # verifies: REQ-VRUNGS-054#CASE-1
         out = self._check({"A-SYS-001.md": self._req("A-SYS-001", "system")},
                           {"A-SYS-001": {"unit": [("t.py", 1)]}})
         self.assertIn("not @system", out)
 
-    def test_the_paired_level_is_silent(self):  # verifies: ARCH-VRUNGS-054#CASE-2
+    def test_the_paired_level_is_silent(self):  # verifies: REQ-VRUNGS-054#CASE-2
         out = self._check({"A-ARCH-001.md": self._req("A-ARCH-001", "architecture")},
                           {"A-ARCH-001": {"integration": [("t.py", 1)]}})
         self.assertNotIn("not @integration", out)
 
-    def test_no_levelled_link_is_never_judged(self):  # verifies: ARCH-VRUNGS-054#CASE-3
+    def test_no_levelled_link_is_never_judged(self):  # verifies: REQ-VRUNGS-054#CASE-3
         out = self._check({"A-SYS-001.md": self._req("A-SYS-001", "system")}, {})
         self.assertNotIn("not @system", out)
 
-    def test_no_declared_level_is_never_judged(self):  # verifies: ARCH-VRUNGS-054#CASE-3
+    def test_no_declared_level_is_never_judged(self):  # verifies: REQ-VRUNGS-054#CASE-3
         out = self._check({"A-FOO-001.md": REQ.format(
             id="A-FOO-001", status="confirmed", layer="feature", extra="", title="T")},
             {"A-FOO-001": {"unit": [("t.py", 1)]}})

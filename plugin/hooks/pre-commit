@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# implements: ARCH-CHECK-006
 # requirement-manager drift gate (git pre-commit hook).
 #
 # Blocks a commit that breaks requirement<->code sync: a dangling code tag, a

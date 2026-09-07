@@ -56,7 +56,7 @@ def _next_free_number(reqs_dir, reqs=None):
     but _warn_number_collision reads parts[-1] as the number and would compare "B".
 
     Read from the loaded ids when the caller has them: a module file
-    (ARCH-MODULEFILE-056) holds many ids under one name, so the file names alone
+    (REQ-MODULEFILE-056) holds many ids under one name, so the file names alone
     reported 110 on a corpus whose highest id was 982 — one `--decompose` away from a
     duplicate id. The directory listing is only the fallback for a caller with no corpus."""
     best = 0

@@ -302,7 +302,7 @@ def _write_frontmatter_status(r, new_status):  # implements: ARCH-PROMOTE-011
     eol = "\r\n" if "\r\n" in raw else "\n"
     text = raw.replace("\r\n", "\n") if eol == "\r\n" else raw
     # A module file holds several requirements; flip the status of THIS one, not of
-    # the first block in the file.  # implements: ARCH-MODULEFILE-056
+    # the first block in the file.  # implements: REQ-MODULEFILE-056
     blocks = split_requirement_blocks(text)
     if len(blocks) > 1:
         idx = r.get("block", 0)

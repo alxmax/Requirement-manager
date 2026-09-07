@@ -23,7 +23,7 @@ Every bullet below is binding.
 - A `tested-by:` tag may end with a verification level (`@unit`, `@integration`, `@system`), invisible to the ordinary tag parser so an older engine still resolves the id. [[REQ-VLEVEL-944]]
 - The engine collects, per requirement, each level it is verified at with the `file:line` locations that declare it, skipping backticked and quoted examples so prose about tagging is never mistaken for coverage. [[REQ-VLEVEL-945]]
 - The gate warns, warn-only, when a confirmed need carries no `validated-against:` member (once the repo has opted in) and when a confirmed `bus` requirement's only levelled coverage is `@system`. [[REQ-VLEVEL-946]]
-
+- A confirmed requirement's declared `level:` must be verified at the matching test level, or the gate warns (RM010). [[REQ-VRUNGS-054]]
 ## Cases
 CASE-1
   Given  tags declaring two levels for one id, a two-id list at `@integration`, one tag
@@ -262,3 +262,45 @@ CASE-7 — show prints an unlevelled member with no level marker
   When   `show REQ-X-001` runs with the old 3-argument call
   Then   its output contains "t.py:2" and no "@" marker after the members section
 
+--------------------
+
+
+---
+id: REQ-VRUNGS-054
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v2.32
+priority: could-have
+depends_on: [ARCH-LEVEL-051, ARCH-CHECK-006]
+satisfies: [ARCH-VLEVEL-037]
+---
+
+# Level-to-verification correspondence
+
+## Description
+> A level that no verification level answers to is a label; pairing them is what makes the V a V rather than two lists.
+
+Every bullet below is binding.
+- As someone who has declared both a requirement's specification level and the level its tests run at, I want the gate to tell me when the two do not correspond, so that a system requirement answered only by unit tests stops looking verified.
+
+## Cases
+CASE-1 — a level answered by the wrong depth of test warns
+  Given  a confirmed requirement carrying `level: system` whose only levelled `tested-by:`
+         link is `@unit`
+  When   the gate runs
+  Then   it warns, naming the level the requirement has and the `@system` link it lacks
+
+CASE-2 — the paired level is silent
+  Given  a confirmed requirement carrying `level: architecture` with an `@integration`
+         `tested-by:` link — the pairing is `system` to `@system`, `architecture` to
+         `@integration`, `code` to `@unit`
+  When   the gate runs
+  Then   it says nothing about that requirement, and the exit code is unchanged
+
+CASE-3 — an unlevelled or undeclared requirement is never judged
+  Given  either a requirement with no levelled `tested-by:` link at all, or one with no
+         `level:` declared in its frontmatter
+  When   the gate runs
+  Then   it never reports that requirement as answered at the wrong depth

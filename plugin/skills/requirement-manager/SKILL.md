@@ -441,6 +441,10 @@ too many acceptance criteria, the answer is to split it. `reqmap.py clarify <ID>
 group labels is split along those labels into `level: code` children (`--apply` writes
 them and rewrites the parent; without it you get the plan), and a Description with no
 groups gets one draft per over-long clause. The finding names that command.
+Decomposition builds downward only: the children `satisfies:` the requirement you split,
+and nothing above it is created, linked or checked. Only `init` drafts a system-level
+placeholder; a corpus that started at the architecture rung names its own needs by hand
+(ADR-0036 records why the engine does not, and the evidence that would reopen it).
 
 An exemption IS legitimate when the shape is deliberate: a capability whose five files are
 the capability, a stakeholder need with no cases of its own. Then write `lint_exempt:

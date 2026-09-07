@@ -14,7 +14,7 @@ _AC_VERIFIABLE_RE = re.compile(r"verifiable\s+by\s*:([^>]*)", re.I)
 _AC_MANUAL_WORDS = ("manual", "inspection", "review", "demo", "walkthrough", "sign-off")
 
 
-def _acc_blocks(body):  # implements: ARCH-ACVERIFY-019  # implements: ARCH-ATOMICFORM-053
+def _acc_blocks(body):  # implements: ARCH-ACVERIFY-019  # implements: REQ-ATOMICFORM-053
     """Parse the HOW — Acceptance section into one record per criterion:
     `{"label": "AC-1" or "", "text": <folded prose>, "manual": bool}`.
 
