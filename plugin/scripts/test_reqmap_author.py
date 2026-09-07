@@ -146,9 +146,9 @@ class New(unittest.TestCase):  # tested-by: ARCH-NEW-004  # tested-by: REQ-NEW-8
         self.assertIn("Every bullet below is binding.", t)
         # No CLAUSE may use a modal — but the guidance comment must stay free to name
         # 'shall' as the thing not to write, which is the clearest way to say it.
-        # Comments are stripped whole: _lint_prose yields each line of a multi-line
+        # Comments are stripped whole: _prose_lint yields each line of a multi-line
         # comment separately, so filtering on a leading '<!--' would only drop the first.
-        clauses = R._lint_prose(re.sub(r"<!--.*?-->", "", t, flags=re.DOTALL), "description")
+        clauses = R._prose_lint(re.sub(r"<!--.*?-->", "", t, flags=re.DOTALL), "description")
         self.assertTrue(clauses)                       # guard: the section actually parsed
         for ln in clauses:
             self.assertNotIn("shall", ln.lower())
@@ -355,7 +355,7 @@ class MdDiscovery(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009
     def test_extra_code_exts_env_scans_custom_extension(self):  # REQMAP_EXTRA_CODE_EXTS
         # A repo can declare extra scannable extensions via the env var; a file with a
         # custom extension (leading dot in the env value optional) then has its capability
-        # tag picked up. Reload the module so the module-level extension merge re-runs.
+        # tag picked up. Reload the config module so its extension merge re-runs.
         import importlib
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "src", "widget.foo"),
@@ -363,11 +363,11 @@ class MdDiscovery(unittest.TestCase):  # tested-by: ARCH-CANDIDATES-009
             _write(os.path.join(d, "src", "helper.bar"),
                    "// {}: AREA-FEATURE-001\n".format(_ROLE))
             with mock.patch.dict(os.environ, {"REQMAP_EXTRA_CODE_EXTS": ".foo, bar"}):
-                importlib.reload(R)
+                importlib.reload(R.config)
                 try:
                     members = R.scan_members(d, os.path.join(d, "requirements"))
                 finally:
-                    importlib.reload(R)  # restore default CODE_EXTS for other tests
+                    importlib.reload(R.config)  # restore default CODE_EXTS for other tests
             self.assertIn("AREA-FEATURE-001", members)
             files = {os.path.basename(m[1]) for m in members["AREA-FEATURE-001"]}
             self.assertIn("widget.foo", files)   # leading-dot form
@@ -818,7 +818,7 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
             "REQ-X-001", self._req("confirmed", self._body(contract="- Items are sorted.\n")))
         self.assertFalse(any(f["check"] == "anonymous-subject" for f in fs))
 
-    # These three probe `_lint_prose`'s fence and section handling, not any one check.
+    # These three probe `_prose_lint`'s fence and section handling, not any one check.
     # They used `long-sentence` as the probe until it was retired; `stacked-conditions`
     # reads the same source and fires deterministically on three and/or joins.
     PROBE = "a and b and c and d."
@@ -839,11 +839,11 @@ class Lint(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: ARCH-LI
         long_sent = " ".join(["word"] * 50) + "."
         body = ("# T\n\n## WHAT — Contract\n- short.\n\n"
                 "## Notes — contract addendum\n- " + long_sent + "\n")
-        self.assertEqual(R._lint_prose(body, "contract"), ["short."])
+        self.assertEqual(R._prose_lint(body, "contract"), ["short."])
 
     def test_lint_prose_keeps_option_flag_hyphen(self):  # bug-hunt #13
         body = "## WHAT — Contract\n--strict makes it fail.\n"
-        self.assertEqual(R._lint_prose(body, "contract"), ["--strict makes it fail."])
+        self.assertEqual(R._prose_lint(body, "contract"), ["--strict makes it fail."])
 
     def test_strict_zero_on_warnings_only(self):  # verifies: ARCH-LINT-014#CASE-5
         long_sent = " ".join(["word"] * 40) + "."
@@ -1050,7 +1050,7 @@ class Translate(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # tested-b
         # without it each stale entry would have to be invalidated file by file.
         body = self.RO_BODY
         before = R.translation_hash(body, R._title(body))
-        with mock.patch.object(R, "TRANSLATOR_VERSION", R.TRANSLATOR_VERSION + "-next"):
+        with mock.patch.object(R.i18n, "TRANSLATOR_VERSION", R.TRANSLATOR_VERSION + "-next"):
             after = R.translation_hash(body, R._title(body))
         self.assertNotEqual(before, after)
 
@@ -1529,14 +1529,14 @@ class StatementSize(unittest.TestCase):  # tested-by: ARCH-ATOMICITY-049  # test
         self.assertNotIn("statement-size", [f["check"] for f in self._findings(contract)])
 
     def test_a_glossary_comment_is_not_a_clause(self):  # verifies: REQ-ATOMICITY-825#CASE-6
-        # _lint_prose does not skip HTML comments; _contract_clauses must, or the template's
+        # _prose_lint does not skip HTML comments; _contract_clauses must, or the template's
         # own glossary block would be measured as a clause.
         contract = "<!-- {} -->\n- short.\n".format(self._words(160))
         self.assertEqual([n for n, _ in R._contract_clauses(self._body(contract))], [1])
         self.assertNotIn("statement-size", [f["check"] for f in self._findings(contract)])
 
     def test_wrapped_clause_is_joined_before_counting(self):  # verifies: REQ-ATOMICITY-825#CASE-7
-        # The reason this check cannot reuse _lint_prose: these files wrap near 95 columns,
+        # The reason this check cannot reuse _prose_lint: these files wrap near 95 columns,
         # so an 80-word clause reaches the per-line checks as six ~13-word lines.
         words = self._words(155).split()
         wrapped = "- " + "\n  ".join(" ".join(words[i:i + 13]) for i in range(0, 155, 13)) + ".\n"
@@ -2122,7 +2122,7 @@ class CasesPromoteTodo(unittest.TestCase):  # tested-by: ARCH-PROMOTE-TODO-001  
             rq = os.path.join(d, "requirements")
             os.makedirs(rq, exist_ok=True)
             buf = io.StringIO()
-            with mock.patch.object(R, "_mark_todo_done", return_value=0):
+            with mock.patch.object(R.author, "_mark_todo_done", return_value=0):
                 with redirect_stdout(buf):
                     code = R.cmd_promote_todo(rq, None, "Build the thing", "REQ-X-001", mark_done=True, root=d)
             out = buf.getvalue()
@@ -2178,7 +2178,7 @@ class CasesLint014(unittest.TestCase):  # tested-by: REQ-LINT-863  # tested-by: 
 
     def test_blockquote_stacked_line_not_linted_as_prose(self):  # verifies: REQ-LINT-864#CASE-3
         body = "# T\n\n{}\n> It shall do A and B and C and D.\n".format(self.CONTRACT)
-        self.assertEqual(R._lint_prose(body, "contract"), [])
+        self.assertEqual(R._prose_lint(body, "contract"), [])
 
     def test_missing_section_error_does_not_fail_non_strict_run(self):  # verifies: REQ-LINT-864#CASE-5
         body = "# T\n\n{}\n- the contract.\n".format(self.CONTRACT)  # no Cases heading
@@ -2628,7 +2628,7 @@ class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ
             rd = self._pair(d, dependent=False)
             names = ("AREA-R-001.md", "AREA-D-003.md")
             before = [open(os.path.join(rd, f), encoding="utf-8").read() for f in names]
-            with mock.patch.object(R, "_git_dirty", return_value=True):
+            with mock.patch.object(R.retire, "_git_dirty", return_value=True):
                 code, out = self._run(d, rid=["AREA-R-001", "AREA-D-003"], do_apply=True)
             after = [open(os.path.join(rd, f), encoding="utf-8").read() for f in names]
         self.assertEqual(1, code)
@@ -3236,7 +3236,7 @@ class LanguageSetting(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # te
                                "hash": "000000000000"},
         }, ensure_ascii=False))
         self._saved = R.LANGUAGE
-        self.addCleanup(setattr, R, "LANGUAGE", self._saved)
+        self.addCleanup(setattr, R.config, "LANGUAGE", self._saved)
 
     def _set(self, value):
         err = io.StringIO()

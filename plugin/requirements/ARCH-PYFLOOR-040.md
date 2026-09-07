@@ -11,7 +11,7 @@ satisfies: [SYS-SHIP-108]
 # Declared Python support floor
 
 ## Description
-> The engine's only promise to a new repo is "copy one file, run it with Python" — but
+> The engine's only promise to a new repo is "copy the engine, run it with Python" — but
 > which Python was never stated. It happened to work on 3.7 by accident, nothing tested
 > that, and a user on an older interpreter met a stdlib AttributeError from deep inside
 > a command instead of a sentence telling them what to do.

@@ -18,10 +18,10 @@ file: a Markdown spec that says *what it should do*. Code links back to it
 with a one-line comment, and a small Python script checks that the two never
 fall out of sync — and draws you a map of how everything connects.
 
-The engine is a single stdlib-only Python script (3.9+ — the oldest version CI
-actually tests, on Linux and Windows). It runs in any repo, with any AI assistant
-(Claude Code, Copilot, Gemini CLI, or none), and needs no installation — just copy
-one file. It's especially handy when several people or
+The engine is stdlib-only Python (3.9+ — the oldest version CI actually tests, on
+Linux and Windows): one script, `reqmap.py`, and the `reqmap_engine/` package beside
+it. It runs in any repo, with any AI assistant (Claude Code, Copilot, Gemini CLI, or
+none), and needs no installation — just copy the two in. It's especially handy when several people or
 several AI agents touch the same codebase and the specs slowly rot.
 
 ## Worked example
@@ -309,7 +309,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v6
+      - uses: alxmax/requirement-manager/check@v7
 ```
 
 The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`
@@ -385,7 +385,8 @@ plugin/                                     the plugin — self-contained
   skills/requirement-quality-review/
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
-  scripts/reqmap.py                         the engine (Python stdlib only, 10,711 lines)
+  scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 12,035 lines in all)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git
@@ -422,7 +423,7 @@ real requirement file.
 
 ## Why it works the way it does
 
-The decisions that shape the tool — the single-file engine, what may fail a build versus only
+The decisions that shape the tool — the engine's shape (one file, then a package), what may fail a build versus only
 warn, the deliberately parked half of the V-model, and four things considered and *not* built —
 are recorded as ADRs in [`docs/adr/`](docs/adr/README.md), with the evidence each was decided on
 and the condition that would justify revisiting it.

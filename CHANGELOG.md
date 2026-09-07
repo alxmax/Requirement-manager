@@ -1,5 +1,40 @@
 # Changelog
 
+## plugin `v7.0.0` — 2026-09-07
+
+**The engine is a package behind a thin CLI.** `reqmap.py` was one 10,711-line file; it is
+now the command line only — parser, dispatch, the Python floor, 499 lines — and the logic lives
+in `scripts/reqmap_engine/`, 47 stdlib-only modules, one per capability, layered as a bus
+(`config → model → parse → scan → git → locks → features → workspace → rules → gate`) with no
+import-time cycle.
+[ADR-0035](docs/adr/0035-the-engine-is-a-package-behind-a-thin-cli.md) records the decision,
+what it reverses (ADR-0014 and ADR-0033, at the maintainer's direction) and what it cost.
+
+- **BREAKING — seeding copies two things.** A consumer vendors `scripts/reqmap.py` AND
+  `scripts/reqmap_engine/` together; the skill's Setup, `sync_reqmap.sh`, the cross-tool test
+  and the `.reqmapignore` that `init` seeds all name both. The action alias moves to
+  `check@v7` with the major (ADR-0029). A copy that takes only the file fails on its first
+  import, loudly, rather than running an older engine in silence.
+- **`MAP_ENGINE_VERSION` lives in `reqmap_engine/__init__.py`.** Every probe that reads it —
+  the engine's own staleness warning, `check/engine_staleness.py`, `check_versions.py`,
+  `check_engine_bump.py`, `sync_reqmap.sh` — reads the package first and falls back to
+  `reqmap.py`, so a single-file engine seeded before this release is still measured.
+- **Tunables are read through `config.py`.** Every `_config.json` key is `cfg.NAME` at its
+  readers, so an override applied at startup is what every module sees.
+- **`import reqmap` still answers for every name** through a module-level `__getattr__`; a test
+  that patches an engine name now patches the module that looks it up (`R.git._git`).
+- **The package passes the engine's own design review.** `gate --design` on the split reported
+  78 findings; the second cut fixed the file standards (no module over 500 lines or 30
+  definitions) and a third pass the function-level ones: 30 gate rules, 7 lint checks and 9
+  design helpers renamed off their `_rule_`/`_lint_`/`_design_` prefixes, 13 long functions and
+  14 deep nestings split into named helpers (each carrying its parent's `# implements:` tag),
+  every line under 100 columns. `--help` and every printed line are byte-identical. Three
+  findings stay, by decision: `cmd_check`'s 7 parameters, the `reqs/reqs_dir/root` clump in
+  `mapcmd`, `apply_config`'s module write.
+- The committed `_map.*`, `_reqlock.json` and `_memberlock.json` were regenerated: every
+  member the engine carried moved under `reqmap_engine/`, and the extracted helpers add
+  163 tagged members.
+
 ## plugin `v6.5.0` — 2026-09-07
 
 **The Roadmap has one lane: Implementations.** It had four — bus, feature, need, ops, the

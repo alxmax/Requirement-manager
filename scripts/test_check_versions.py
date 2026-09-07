@@ -39,7 +39,8 @@ def _setup(d, plugin_ver="2.7.5", market_ver="2.7.5", plug_ver="2.7.5",
         plugins = [{"name": "requirement-manager", "version": plug_ver, "source": "./plugin"}]
     (d / ".claude-plugin" / "marketplace.json").write_text(
         json.dumps({"version": market_ver, "plugins": plugins}), encoding="utf-8")
-    (d / "plugin" / "scripts" / "reqmap.py").write_text(
+    (d / "plugin" / "scripts" / "reqmap_engine").mkdir()
+    (d / "plugin" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
         'MAP_ENGINE_VERSION = "{}"\n'.format(engine), encoding="utf-8")
     return d
 
@@ -50,7 +51,7 @@ class CheckVersions(unittest.TestCase):
         CV.REPO_ROOT = Path(d)
         CV.PLUGIN_JSON = Path(d) / "plugin" / ".claude-plugin" / "plugin.json"
         CV.MARKETPLACE_JSON = Path(d) / ".claude-plugin" / "marketplace.json"
-        CV.REQMAP_PY = Path(d) / "plugin" / "scripts" / "reqmap.py"
+        CV.REQMAP_PY = Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py"
         try:
             with redirect_stdout(io.StringIO()):
                 return CV.main([])
@@ -85,7 +86,7 @@ class CheckVersions(unittest.TestCase):
     def test_docstring_mention_before_assignment_is_ignored(self):  # regex anchor regression
         with tempfile.TemporaryDirectory() as d:
             _setup(d)
-            (Path(d) / "plugin" / "scripts" / "reqmap.py").write_text(
+            (Path(d) / "plugin" / "scripts" / "reqmap_engine" / "__init__.py").write_text(
                 '"""example: MAP_ENGINE_VERSION = "not-a-date" """\n'
                 'MAP_ENGINE_VERSION = "2026-06-21.4"\n', encoding="utf-8")
             self.assertEqual(self._run(d), 0)   # unanchored regex matched the docstring -> 1

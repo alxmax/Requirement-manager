@@ -41,6 +41,9 @@ find_engine() {
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC="$SCRIPT_DIR/plugin/scripts/reqmap.py"
+# The engine is the CLI module plus the reqmap_engine/ package beside it (v7.0.0);
+# the two travel together, and the version line lives in the package.
+PKG_SRC="$SCRIPT_DIR/plugin/scripts/reqmap_engine"
 # The pre-built single-file viewer ships beside the engine; propagate it too so
 # `map` can emit the self-contained _map.html wherever the engine lands.
 VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
@@ -63,12 +66,14 @@ if [[ ! -f "$SRC" ]]; then
   echo "ERROR: source not found: $SRC" >&2; exit 1
 fi
 
-VERSION=$(grep -m1 'MAP_ENGINE_VERSION' "$SRC" | sed 's/.*"\([^"]*\)".*/\1/')
+VERSION=$(grep -m1 '^MAP_ENGINE_VERSION' "$PKG_SRC/__init__.py" | sed 's/.*"\([^"]*\)".*/\1/')
 echo "syncing reqmap.py  version=$VERSION"
 
 # ── 2. push to plugin cache ─────────────────────────────────────────────────
 if [[ -d "$CACHE" ]]; then
   cp "$SRC" "$CACHE/scripts/reqmap.py"
+  rm -rf "$CACHE/scripts/reqmap_engine" && cp -r "$PKG_SRC" "$CACHE/scripts/reqmap_engine"
+  rm -rf "$CACHE/scripts/reqmap_engine/__pycache__"
   [[ -f "$VIEWER_SRC" ]] && cp "$VIEWER_SRC" "$CACHE/scripts/_map_viewer.html" && echo "  → viewer template updated"
   echo "  → plugin cache updated"
   # No map regeneration in the cache. The step used to call `map`, which folded into
@@ -94,6 +99,8 @@ for REPO in "$@"; do
   fi
   ENGINE_DIR=$(dirname "$REL")
   cp "$SRC" "$REPO/$REL"
+  rm -rf "$REPO/$ENGINE_DIR/reqmap_engine" && cp -r "$PKG_SRC" "$REPO/$ENGINE_DIR/reqmap_engine"
+  rm -rf "$REPO/$ENGINE_DIR/reqmap_engine/__pycache__"
   # Refresh the viewer template only where the repo already has one. Dropping a new
   # one in would make `map` start emitting _map.html in a repo that never tracked it.
   if [[ -f "$VIEWER_SRC" && -f "$REPO/$ENGINE_DIR/_map_viewer.html" ]]; then

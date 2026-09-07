@@ -86,15 +86,18 @@ intent triage before any other action.
 
 ## Setup (first use in a repo)
 
-The engine is a single stdlib-only script, Python 3.9+ (it refuses an older interpreter
-with one readable line rather than a stdlib error). Seed it into the target repo once:
+The engine is stdlib-only, Python 3.9+ (it refuses an older interpreter with one
+readable line rather than a stdlib error): the CLI module `reqmap.py` plus the
+`reqmap_engine/` package beside it. The two travel together — seed both into the
+target repo once:
 
 ```bash
 mkdir -p scripts requirements
-# Copy reqmap.py from the plugin's scripts/ directory:
-# - On Claude Code: ~/.claude/plugins/cache/requirement-manager/requirement-manager/<version>/scripts/reqmap.py
+# Copy reqmap.py AND reqmap_engine/ from the plugin's scripts/ directory:
+# - On Claude Code: ~/.claude/plugins/cache/requirement-manager/requirement-manager/<version>/scripts/
 # - On Copilot / other tools: wherever the plugin was installed; check the install path
 cp /path/to/plugin/scripts/reqmap.py scripts/reqmap.py
+cp -r /path/to/plugin/scripts/reqmap_engine scripts/reqmap_engine
 cp /path/to/plugin/scripts/_map_viewer.html scripts/_map_viewer.html   # optional: self-contained UI viewer
 ```
 
@@ -121,6 +124,7 @@ on the first run:
 
 ```
 scripts/reqmap.py
+scripts/reqmap_engine/**
 .worktrees/**
 .claude/worktrees/**
 ```
@@ -390,7 +394,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v6
+      - uses: alxmax/requirement-manager/check@v7
 ```
 
 Or, without the action: `- run: python -X utf8 scripts/reqmap.py gate`.

@@ -85,7 +85,8 @@ def main(argv=None):
     """Generate the synthetic tree, time a scan over it, print the timings, and
     return an exit code."""
     ap = argparse.ArgumentParser(description="Time the engine on a synthetic tree.")
-    ap.add_argument("--files", type=int, default=10000, help="source files to generate (default 10000)")
+    ap.add_argument("--files", type=int, default=10000,
+                    help="source files to generate (default 10000)")
     ap.add_argument("--reqs", type=int, default=100, help="requirements to generate (default 100)")
     ap.add_argument("--tagged-every", type=int, default=10, help="tag 1 file in N (default 10)")
     a = ap.parse_args(argv)

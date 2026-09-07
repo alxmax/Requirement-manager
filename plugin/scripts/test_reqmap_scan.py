@@ -1510,32 +1510,38 @@ class OneGitRunner(unittest.TestCase):  # tested-by: ARCH-GITRUN-067  # tested-b
     def test_the_root_falls_back_to_the_directory_given(self):  # verifies: REQ-GITRUN-993#CASE-3  # verifies: ARCH-GITRUN-067#CASE-2
         d = tempfile.mkdtemp(); self.addCleanup(shutil.rmtree, d, True)
         self.assertEqual(R._git_root(d), d)
-        with mock.patch.object(R, "_git", return_value="  /repo/root \n"):
+        with mock.patch.object(R.git, "_git", return_value="  /repo/root \n"):
             self.assertEqual(R._git_root(d), "/repo/root")
 
     def test_the_remote_url_is_empty_when_git_cannot_say(self):
-        with mock.patch.object(R, "_git", return_value=None):
+        with mock.patch.object(R.git, "_git", return_value=None):
             self.assertEqual(R._git_remote_url("."), "")
-        with mock.patch.object(R, "_git", return_value="git@example.com:a/b.git\n"):
+        with mock.patch.object(R.git, "_git", return_value="git@example.com:a/b.git\n"):
             self.assertEqual(R._git_remote_url("."), "git@example.com:a/b.git")
 
     def test_no_other_code_starts_a_git_process(self):  # verifies: REQ-GITRUN-993#CASE-4  # verifies: ARCH-GITRUN-067#CASE-3
-        with io.open(R.__file__, encoding="utf-8") as f:
-            src = f.read()
-        tree = ast.parse(src)
-        starts = []
-        for node in ast.walk(tree):
-            if not isinstance(node, ast.Call):
-                continue
-            f = node.func
-            if (isinstance(f, ast.Attribute) and f.attr in ("run", "check_output", "Popen",
-                                                            "call", "check_call")
-                    and isinstance(f.value, ast.Name) and f.value.id == "subprocess"):
-                starts.append(node.lineno)
-        self.assertEqual(len(starts), 1, "subprocess started at lines {}".format(starts))
-        runner = next(n for n in ast.walk(tree)
-                      if isinstance(n, ast.FunctionDef) and n.name == "_git")
-        self.assertTrue(runner.lineno < starts[0] <= (runner.end_lineno or starts[0]))
+        # The whole engine: the CLI module plus every module of the package.
+        pkg = os.path.dirname(os.path.abspath(R.git.__file__))
+        sources = [R.__file__] + [os.path.join(pkg, fn) for fn in sorted(os.listdir(pkg))
+                                  if fn.endswith(".py")]
+        starts, runner = [], None
+        for path in sources:
+            with io.open(path, encoding="utf-8") as f:
+                tree = ast.parse(f.read())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == "_git":
+                    runner = (path, node.lineno, node.end_lineno)
+                if not isinstance(node, ast.Call):
+                    continue
+                f = node.func
+                if (isinstance(f, ast.Attribute) and f.attr in ("run", "check_output", "Popen",
+                                                                "call", "check_call")
+                        and isinstance(f.value, ast.Name) and f.value.id == "subprocess"):
+                    starts.append((path, node.lineno))
+        self.assertEqual(len(starts), 1, "subprocess started at {}".format(starts))
+        self.assertIsNotNone(runner)
+        self.assertEqual(starts[0][0], runner[0])
+        self.assertTrue(runner[1] < starts[0][1] <= (runner[2] or starts[0][1]))
 
 
 class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # tested-by: REQ-SECTIONS-994
@@ -1562,7 +1568,7 @@ class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # te
         self.assertEqual(R._bullets(self.FENCED, "description"), [])
         self.assertEqual(R._section(self.FENCED, "description"), "")
         self.assertEqual(R._contract_clauses(self.FENCED), [])
-        self.assertEqual([f["check"] for f in R._lint_sections(self.FENCED)
+        self.assertEqual([f["check"] for f in R._sections_lint(self.FENCED)
                           if "Description" in f["detail"]], ["missing-section"])
 
     def test_a_fenced_example_is_not_part_of_the_contract(self):  # verifies: REQ-SECTIONS-994#CASE-5  # verifies: ARCH-SECTIONS-068#CASE-2

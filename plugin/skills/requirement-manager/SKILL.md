@@ -83,12 +83,15 @@ intent triage before any other action.
 
 ## Setup (first use in a repo)
 
-The engine is a single stdlib-only script, Python 3.9+ (it refuses an older interpreter
-with one readable line rather than a stdlib error). Seed it into the target repo once:
+The engine is stdlib-only, Python 3.9+ (it refuses an older interpreter with one
+readable line rather than a stdlib error): the CLI module `reqmap.py` plus the
+`reqmap_engine/` package beside it. The two travel together — seed both into the
+target repo once:
 
 ```bash
 mkdir -p scripts requirements
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+cp -r "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # optional: the self-contained UI viewer template
 ```
 
@@ -98,8 +101,8 @@ full UI, this repo's data inlined, no server). It is optional — omit it and th
 engine still emits `_map.md` + `_map.json`.
 
 **Then run the one-shot bootstrap** — `python scripts/reqmap.py init` creates the
-`requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`
-and the agent-worktree copies below),
+`requirements/` dir, writes a minimal `.reqmapignore` (ignoring `scripts/reqmap.py`,
+`scripts/reqmap_engine/**` and the agent-worktree copies below),
 drafts requirements from the existing code, builds the lock + map, and prints guided
 next steps. It is idempotent (safe to re-run) and never clobbers an existing
 `.reqmapignore`. The manual steps below are what `init` automates — do them by hand
@@ -115,6 +118,7 @@ on the first run:
 
 ```
 scripts/reqmap.py
+scripts/reqmap_engine/**
 .worktrees/**
 .claude/worktrees/**
 ```
@@ -129,11 +133,12 @@ Add any other vendored or generated paths that should not be scanned (one fnmatc
 glob per line, `#` comments ok). The engine itself is always the first entry.
 
 From then on every command below runs against the repo's own `scripts/reqmap.py`.
-Commit both the script and `.reqmapignore` so the gate works in CI without the
-plugin present. When the plugin ships a newer `reqmap.py`, re-seed with:
+Commit the script, the package and `.reqmapignore` so the gate works in CI without
+the plugin present. When the plugin ships a newer engine, re-seed with:
 
 ```bash
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap.py" scripts/reqmap.py
+rm -rf scripts/reqmap_engine && cp -r "${CLAUDE_PLUGIN_ROOT}/scripts/reqmap_engine" scripts/reqmap_engine
 cp "${CLAUDE_PLUGIN_ROOT}/scripts/_map_viewer.html" scripts/_map_viewer.html   # if you use the viewer
 ```
 
@@ -459,7 +464,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: alxmax/requirement-manager/check@v6
+      - uses: alxmax/requirement-manager/check@v7
         # with:
         #   reqmap-path: scripts/reqmap.py   # where you vendored the engine
         #   working-directory: .             # where requirements/ lives

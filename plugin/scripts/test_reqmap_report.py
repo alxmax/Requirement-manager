@@ -1675,8 +1675,8 @@ class Site(unittest.TestCase):  # tested-by: ARCH-SITE-026  # tested-by: REQ-SIT
         import unittest.mock as mock
         with tempfile.TemporaryDirectory() as d:
             target = os.path.join(d, "docs", "architecture.html")
-            with mock.patch.object(R, "_repo_name", return_value='x"><script>bad</script>'), \
-                 mock.patch.object(R, "_git_remote_web_url", return_value=None):
+            with mock.patch.object(R.site, "_repo_name", return_value='x"><script>bad</script>'), \
+                 mock.patch.object(R.site, "_git_remote_web_url", return_value=None):
                 with redirect_stdout(io.StringIO()):
                     R.cmd_site(R.Workspace(
                         R.load_requirements(os.path.join(d, "requirements")), {}),
@@ -2693,6 +2693,7 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertIn("skipped 1 pair(s) linked by tested-by or satisfies", out)
         self.assertNotIn("<->", out)
 
+
     def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
         body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
         reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},
@@ -2800,7 +2801,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         with tempfile.TemporaryDirectory() as d:
             ctx = R.GateContext(R.Workspace(reqs, members, d, d), full_members=members,
                                 update_lock=False)
-            found = list(R._rule_exemption_without_reason(ctx))
+            found = list(R._exemption_without_reason_rule(ctx))
         self.assertEqual(len(found), 1)
         rid, msg = found[0]
         self.assertEqual(rid, "REQ-A-001")
@@ -2978,9 +2979,9 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
 
     def test_standards_file_line_docstring_definitions(self):  # verifies: REQ-DESIGN-953#CASE-1
         saved = (R.DESIGN_FILE_MAX_LINES, R.DESIGN_FILE_MAX_FUNCS)
-        self.addCleanup(lambda: (setattr(R, "DESIGN_FILE_MAX_LINES", saved[0]),
-                                 setattr(R, "DESIGN_FILE_MAX_FUNCS", saved[1])))
-        R.DESIGN_FILE_MAX_LINES, R.DESIGN_FILE_MAX_FUNCS = 5, 2
+        self.addCleanup(lambda: (setattr(R.config, "DESIGN_FILE_MAX_LINES", saved[0]),
+                                 setattr(R.config, "DESIGN_FILE_MAX_FUNCS", saved[1])))
+        R.config.DESIGN_FILE_MAX_LINES, R.config.DESIGN_FILE_MAX_FUNCS = 5, 2
         src = ("def a():\n    return 1\n" "def b():\n    return 2\n" "def c():\n    return 3\n"
                "x = '" + "y" * 120 + "'\n")
         f = R._design_file("m.py", src)
@@ -2998,7 +2999,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
 
     def test_docstring_check_can_be_switched_off(self):  # verifies: REQ-DESIGN-953#CASE-3
         saved = R.DESIGN_DOCSTRING_PUBLIC
-        self.addCleanup(setattr, R, "DESIGN_DOCSTRING_PUBLIC", saved)
+        self.addCleanup(setattr, R.config, "DESIGN_DOCSTRING_PUBLIC", saved)
         src = "def a():\n    return 1\n"
         kinds = lambda: [f["kind"] for f in R._design_file("m.py", src)]
         self.assertEqual(kinds(), ["missing-docstring"])
@@ -3062,13 +3063,13 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
                "    def a(self):\n        return self['x']\n"
                "    def b(self):\n        return self['y']\n"
                "    def c(self):\n        return self['z']\n")
-        self.assertEqual(R._design_cohesion_skipped(ast.parse(src)), 1)
+        self.assertEqual(R._cohesion_skipped(ast.parse(src)), 1)
 
     def test_a_measurable_class_is_not_counted(self):  # verifies: REQ-DESIGN-979#CASE-2
         src = ("class Ok:\n"
                "    def __init__(self):\n        self.x = 1\n"
                "    def get(self):\n        return self.x\n")
-        self.assertEqual(R._design_cohesion_skipped(ast.parse(src)), 0)
+        self.assertEqual(R._cohesion_skipped(ast.parse(src)), 0)
 
     def test_json_carries_the_caveats(self):  # verifies: REQ-DESIGN-979#CASE-3
         """The machine surface must say what the text surface says, or a dashboard
@@ -3087,7 +3088,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
         self.assertEqual(doc["cohesion_skipped"], 1)
 
     def test_an_unparseable_file_is_tolerated(self):  # verifies: REQ-DESIGN-979#CASE-4
-        self.assertEqual(R._design_cohesion_skipped_in("class ??? broken("), 0)
+        self.assertEqual(R._cohesion_skipped_in("class ??? broken("), 0)
 
     def test_a_far_reaching_class_is_named(self):  # verifies: REQ-DESIGN-978#CASE-1
         body = "".join("    def m%d(self):\n        return helper%d(self.x)\n" % (i, i)
@@ -3123,7 +3124,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
                          for i in range(6)))
         cls = [n for n in ast.walk(ast.parse(src)) if isinstance(n, ast.ClassDef)][0]
         ms = [m for m in cls.body if isinstance(m, ast.FunctionDef)]
-        self.assertEqual(R._design_lcom(ms, R._design_py_fields(cls)), 0)
+        self.assertEqual(R._lcom(ms, R._class_fields(cls)), 0)
 
     def test_one_field_is_not_a_grouping(self):  # verifies: REQ-DESIGN-980#CASE-2
         src = ("class One:\n    def __init__(self):\n        self.x = 1\n"
@@ -3284,7 +3285,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
 
     def test_thresholds_are_configurable(self):  # verifies: REQ-DESIGN-952#CASE-4  # verifies: ARCH-DESIGN-061#CASE-2
         saved = R.DESIGN_PARAMS_MAX
-        self.addCleanup(setattr, R, "DESIGN_PARAMS_MAX", saved)
+        self.addCleanup(setattr, R.config, "DESIGN_PARAMS_MAX", saved)
         src = "def f(a, b, c): pass\n"
         self.assertEqual(self._kinds(src), [])
         R.apply_config({"DESIGN_PARAMS_MAX": 2}, out=io.StringIO())
@@ -3563,7 +3564,7 @@ class CasesCmdRegistry(unittest.TestCase):  # tested-by: ARCH-CMDREGISTRY-033  #
         import ast
         import importlib.util
         here = os.path.dirname(os.path.abspath(R.__file__))
-        src = open(os.path.join(here, "reqmap.py"), encoding="utf-8").read()
+        src = open(os.path.join(here, "reqmap_engine", "registry.py"), encoding="utf-8").read()
         tree = ast.parse(src)
         target_fns = {"_generate_schema", "_generate_command_table", "_check_integration_fresh"}
         fn_nodes = [n for n in ast.walk(tree)
@@ -3815,7 +3816,7 @@ class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWER-007  # tested
 
     def test_render_html_returns_none_without_template(self):  # verifies: REQ-VIEWER-940#CASE-3
         with tempfile.TemporaryDirectory() as d:
-            with mock.patch.object(R, "_viewer_template_path",
+            with mock.patch.object(R.viewer, "_viewer_template_path",
                                    return_value=os.path.join(d, "nope.html")):
                 out = R.render_html({"nodes": [], "edges": []}, d)
             self.assertIsNone(out)
@@ -3826,7 +3827,7 @@ class CasesViewer007(unittest.TestCase):  # tested-by: ARCH-VIEWER-007  # tested
                    "---\nid: A-FOO-001\nstatus: confirmed\nlayer: bus\n---\n\n" + _ac_body())
             _write(os.path.join(d, "a.py"), tag("A-FOO-001") + "\n")
             reqs, members = R.load_requirements(d), R.scan_members(d, d)
-            with mock.patch.object(R, "_viewer_template_path",
+            with mock.patch.object(R.viewer, "_viewer_template_path",
                                    return_value=os.path.join(d, "nope.html")):
                 with redirect_stdout(io.StringIO()):
                     code = R.cmd_map(R.Workspace(reqs, members, d), d)
@@ -4244,11 +4245,16 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
         m = re.search(r"stdlib only,\s*([\d,]+)\s+lines", readme)
         self.assertIsNotNone(m, "README no longer states the engine's line count")
         claimed = int(m.group(1).replace(",", ""))
-        with open(os.path.join(self.root, "plugin", "scripts", "reqmap.py"),
-                  encoding="utf-8") as f:
-            actual = sum(1 for _ in f)
+        scripts = os.path.join(self.root, "plugin", "scripts")
+        pkg = os.path.join(scripts, "reqmap_engine")
+        files = [os.path.join(scripts, "reqmap.py")] + [
+            os.path.join(pkg, fn) for fn in sorted(os.listdir(pkg)) if fn.endswith(".py")]
+        actual = 0
+        for path in files:
+            with open(path, encoding="utf-8") as f:
+                actual += sum(1 for _ in f)
         self.assertEqual(actual, claimed,
-                         "README claims {} lines, reqmap.py has {}".format(claimed, actual))
+                         "README claims {} lines, reqmap.py + reqmap_engine/ have {}".format(claimed, actual))
 
     def test_every_adr_on_disk_has_an_index_row(self):  # verifies: ARCH-SELFGATE-039#CASE-10  # verifies: REQ-SELFGATE-990#CASE-2
         # ADR-0027 existed on disk and in no index for nine days.
@@ -4650,7 +4656,7 @@ class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # t
                           title="A") + "\n## Description\n- x\n\n## Cases\nCASE-1 x\n")
         ws = R.Workspace.load(rdir, d)
         buf = io.StringIO()
-        with mock.patch.object(R, "cmd_check", side_effect=RuntimeError("gate exploded")):
+        with mock.patch.object(R.audit, "cmd_check", side_effect=RuntimeError("gate exploded")):
             with redirect_stdout(buf):
                 rc = R.cmd_audit(ws)
         self.assertEqual(rc, 1)

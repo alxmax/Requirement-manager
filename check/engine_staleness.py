@@ -23,7 +23,8 @@ import re
 import sys
 
 # The version's shape (ISO date + optional same-day `.N` suffix) is defined by
-# MAP_ENGINE_VERSION in plugin/scripts/reqmap.py and asserted by scripts/check_versions.py.
+# MAP_ENGINE_VERSION in plugin/scripts/reqmap_engine/__init__.py and asserted by
+# scripts/check_versions.py.
 _VERSION_RE = re.compile(r'(?m)^MAP_ENGINE_VERSION\s*=\s*"([^"]+)"')
 
 # The engine this action ships, relative to this file: check/ -> plugin/scripts/reqmap.py.
@@ -32,17 +33,23 @@ DEFAULT_REFERENCE = os.path.join(
 
 
 def version_at(path):
-    """MAP_ENGINE_VERSION read from a reqmap.py at `path`; None on any failure.
+    """MAP_ENGINE_VERSION of the engine whose CLI is the reqmap.py at `path`; None on
+    any failure. Since plugin v7.0.0 the constant lives in `reqmap_engine/__init__.py`
+    beside that file; a single-file engine seeded earlier still carries it in
+    reqmap.py itself, so both places are read, the file named first.
 
     Line-anchored so a docstring that merely MENTIONS the constant cannot match before
     the real assignment does.
     """
-    try:
-        with open(path, encoding="utf-8") as f:
-            m = _VERSION_RE.search(f.read())
-        return m.group(1) if m else None
-    except Exception:
-        return None
+    for candidate in (path, os.path.join(os.path.dirname(path), "reqmap_engine", "__init__.py")):
+        try:
+            with open(candidate, encoding="utf-8") as f:
+                m = _VERSION_RE.search(f.read())
+            if m:
+                return m.group(1)
+        except Exception:
+            continue
+    return None
 
 
 def reference_version():
@@ -61,10 +68,12 @@ def main(argv=None):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALE
     """Compare the vendored engine against this action's and annotate the run when
     it is behind. Returns the exit code, which is 0 unless `--stale-engine error`
     was asked for."""
-    ap = argparse.ArgumentParser(description="Warn when a vendored reqmap.py is behind this action's engine.")
+    ap = argparse.ArgumentParser(
+        description="Warn when a vendored reqmap.py is behind this action's engine.")
     ap.add_argument("--vendored", required=True, help="path to the consumer's vendored reqmap.py")
     ap.add_argument("--reference", default=DEFAULT_REFERENCE,
-                    help="path to the engine to compare against (default: the one this action ships)")
+                    help="path to the engine to compare against "
+                         "(default: the one this action ships)")
     ap.add_argument("--mode", choices=("warn", "error", "off"), default="warn",
                     help="warn (default): report and exit 0; error: exit 1; off: say nothing")
     a = ap.parse_args(argv)
@@ -78,7 +87,8 @@ def main(argv=None):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALE
         return 0
 
 
-def _probe(vendored_path, reference_path, mode):  # implements: REQ-STALEENGINE-925  # implements: REQ-STALEENGINE-926
+def _probe(vendored_path, reference_path, mode):
+    # implements: REQ-STALEENGINE-925  # implements: REQ-STALEENGINE-926
     vendored, reference = version_at(vendored_path), version_at(reference_path)
     if not vendored or not reference:
         # Fail open in every mode: an unreadable version is not evidence of staleness,

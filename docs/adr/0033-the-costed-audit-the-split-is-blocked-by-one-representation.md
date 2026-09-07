@@ -1,6 +1,6 @@
 # ADR-0033 — The costed audit: still one file, and the split is blocked by one representation
 
-- **Status:** Accepted — discharges the obligation [ADR-0032](0032-the-eight-thousand-line-trigger-fired.md) scheduled, and **retires ADR-0014's line-count trigger** without disturbing its decision
+- **Status:** Superseded by [ADR-0035](0035-the-engine-is-a-package-behind-a-thin-cli.md) (2026-09-07), at the maintainer's direction and on none of the conditions below. Was: Accepted — discharges the obligation [ADR-0032](0032-the-eight-thousand-line-trigger-fired.md) scheduled, and **retires ADR-0014's line-count trigger** without disturbing its decision
 - **Decided:** 2026-09-06, at the maintainer's direction, ahead of the 2026-12-06 date ADR-0032 set
 - **Owner:** Alex
 - **Evidence:** every number below was measured on `b0bcce8`, by the command named beside it
