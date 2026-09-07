@@ -42,6 +42,11 @@ the check.
   that did not name a child (`ARCH-CLARIFY-062`, `ARCH-DESIGN-061`) now do. The repo-root
   Python tooling passes `gate --design` too; the viewer under `app/` is the one place the
   review still reports, a separate, npm-bound pass.
+- **Design candidates are warnings in the viewer's inbox.** The Problems screen kept
+  `gate --design`'s candidates in a tab of their own and out of `All` while there were
+  123 of them; at 32 they join `All` and the Warnings count as `WARN` rows about a file
+  (kind, detail, advice, `file:line`), sorted after the corpus warnings and opening no
+  requirement. The Design tab keeps the reading by pillar (`REQ-VIEWER-977` CASE-3).
 - `TODO.md` carries the next cut: reduce the engine's 18 mode flags (27 `cmd_*` entry
   points) to 5 commands, retiring the rest with code, requirements and tests — the only lever
   in this repo that reduces lines.

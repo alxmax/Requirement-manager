@@ -12,8 +12,11 @@
  *
  * A third origin joined them: the advisory code review (`gate --design`), whose rows
  * are about a FILE rather than a requirement and which never gates anything. It gets its
- * own tab and is deliberately absent from "All" — the inbox counts what is open about the
- * corpus, and 123 advisory candidates dropped in there would bury the six that are.
+ * own tab, grouped by pillar the way the CLI prints it, AND — since 2026-09-07, at the
+ * maintainer's request — its candidates are rows of "All" and of the Warnings count too:
+ * a warning with a file for an id, so the inbox is the one place every open signal is
+ * read. They were kept out of "All" while there were 123 of them; at 32 they no longer
+ * bury anything, and a reader who never opens the Design tab still sees them.
  *
  * They were two screens until v4.0.0, because Problems was then ~618 rows of draft
  * review noise and a real question dropped in there was invisible. Two things ended
@@ -70,9 +73,21 @@ export function computeProblems() {
       fix:"Answer it, fold the answer into the Description, then delete the bullet.",
       loc:"" });
   });
+  // the advisory code review, as warnings about a file: never gating, never opening a
+  // spec, sorted after the corpus warnings so a WARN about a requirement reads first
+  const design = (DESIGN && Array.isArray(DESIGN.findings)) ? DESIGN.findings : [];
+  const advice = (DESIGN && DESIGN.advice) || {};
+  design.forEach(f => {
+    out.push({ id:f.file, title:(f.name && f.name !== f.file) ? `${f.kind} · ${f.name}` : f.kind,
+      signal:"design", sev:"WARN", noSpec:true,
+      msg:f.detail,
+      fix:advice[f.kind] || "Advisory: a shape worth a look, never a defect; `gate --design` names it.",
+      loc:`${f.file}:${f.line}` });
+  });
   // A question outranks an unreviewed draft: somebody wrote it down on purpose.
   const order = { ERROR:0, WARN:1, QUESTION:2, REVIEW:3 };
-  return out.sort((a,b)=> order[a.sev]-order[b.sev] || a.id.localeCompare(b.id));
+  const rank = p => order[p.sev] + (p.signal === "design" ? 0.5 : 0);
+  return out.sort((a,b)=> rank(a)-rank(b) || a.id.localeCompare(b.id));
 }
 
 /** Only the rows a human wrote — App's badge counts these separately. */
@@ -172,7 +187,7 @@ export function ProblemsView({ openSpec, problems }) {
         )}
         {filter !== "DESIGN" && shown.map((p,i)=>(
           <div className={"prob-row"+(p.sev==="QUESTION"?" question-row":"")} key={i}
-            onClick={()=>p.id!=="—" && openSpec(p.id)}>
+            onClick={()=>!p.noSpec && p.id!=="—" && openSpec(p.id)}>
             <span className={"prob-sev sev-"+p.sev}>{p.sev==="QUESTION" ? t("ASKED") : p.sev}</span>
             <div className="prob-body">
               <div className="prob-head">

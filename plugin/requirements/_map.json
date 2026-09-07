@@ -17827,7 +17827,7 @@
       "contract": [
         "`ProblemsView` offers a `Design` tab, labelled with the number of candidates the map carries, and offers it only when the map carries at least one.",
         "The tab groups candidates by pillar, shows each one's kind, name, detail and `file:line`, and prints each kind's advice once per group — the same shape the CLI prints.",
-        "Design candidates are absent from the `All` tab and from every severity count, so the inbox keeps reporting what is open about the corpus.",
+        "Design candidates are also rows of the `All` tab and of the warning count — a `WARN` about a file, naming the kind, the detail and the kind's advice, opening no requirement — so the inbox is the one place every open signal is read; they sort after the corpus warnings.",
         "The tab states that a candidate is advisory and never enters the gate, so a reader does not mistake the list for a build failure.",
         "A map written before the engine carried candidates leaves the tab unoffered rather than rendering an empty one."
       ],
@@ -17837,9 +17837,9 @@
       "acc": [
         "CASE-1 — — the tab appears with its count Given  a map whose `design` record carries two candidates When   `ProblemsView` renders Then   a `Design` tab is offered showing the count 2",
         "CASE-2 — — an older map offers nothing Given  a map whose `design` record carries a score but no candidates When   `ProblemsView` renders Then   no `Design` tab is offered",
-        "CASE-3 — — the inbox is unchanged Given  a map carrying both corpus signals and design candidates When   the open signals are computed Then   no computed row carries a design severity, and the `All` count is the corpus count alone --------------------"
+        "CASE-3 — — the candidates are warnings in the inbox Given  a map carrying both corpus signals and two design candidates When   the open signals are computed Then   exactly two rows carry the `design` signal, both at `WARN`, each with its `file:line`, and a map with no candidates adds none --------------------"
       ],
-      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the inbox is unchanged\n  Given  a map carrying both corpus signals and design candidates\n  When   the open signals are computed\n  Then   no computed row carries a design severity, and the `All` count is the corpus count alone\n\n\n--------------------",
+      "accept": "CASE-1 — the tab appears with its count\n  Given  a map whose `design` record carries two candidates\n  When   `ProblemsView` renders\n  Then   a `Design` tab is offered showing the count 2\n\nCASE-2 — an older map offers nothing\n  Given  a map whose `design` record carries a score but no candidates\n  When   `ProblemsView` renders\n  Then   no `Design` tab is offered\n\nCASE-3 — the candidates are warnings in the inbox\n  Given  a map carrying both corpus signals and two design candidates\n  When   the open signals are computed\n  Then   exactly two rows carry the `design` signal, both at `WARN`, each with its `file:line`, and a map with no candidates adds none\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -21117,7 +21117,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "551 lines (over 500)"
+        "detail": "555 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -21125,7 +21125,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "53 line(s) wider than 100 columns, first at line 1"
+        "detail": "54 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -21275,15 +21275,15 @@
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/views/ProblemsView.jsx",
-        "line": 36,
+        "line": 39,
         "name": "ProblemsView.jsx",
-        "detail": "13 line(s) wider than 100 columns, first at line 36"
+        "detail": "14 line(s) wider than 100 columns, first at line 39"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/ProblemsView.jsx",
-        "line": 90,
+        "line": 105,
         "name": "ProblemsView",
         "detail": "`ProblemsView` nests 6 levels deep (over 4)"
       },
@@ -21291,7 +21291,7 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/ProblemsView.jsx",
-        "line": 90,
+        "line": 105,
         "name": "ProblemsView",
         "detail": "`ProblemsView` is 120 lines (over 80)"
       },
