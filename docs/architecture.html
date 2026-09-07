@@ -391,12 +391,23 @@ footer a:hover{color:var(--accent)}
   transition:opacity .55s ease,transform .55s ease;
 }
 .reveal.in{opacity:1;transform:translateY(0)}
+.stats-bar{
+  display:flex;flex-wrap:wrap;gap:0 20px;
+  padding:6px 24px;background:var(--cream-dark);
+  border-bottom:1px solid var(--border);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+}
+.stat{display:inline-flex;align-items:baseline;gap:5px}
+.stat b{color:var(--ink-mid);font-weight:500}
+.stat span{color:var(--ink-faint);letter-spacing:.02em}
 </style>
 </head>
 <body>
+<div class="stats-bar">
 <!--##REQMAP:STATS##-->
 <div class="stat"><b>247</b><span>requirements</span></div><div class="stat"><b>247</b><span>confirmed</span></div><div class="stat"><b>3</b><span>layers</span></div><div class="stat"><b>110</b><span>edges</span></div><div class="stat"><b>2026-09-07.4</b><span>engine</span></div>
 <!--##/REQMAP:STATS##-->
+</div>
 
 <!-- NAV -->
 <nav>
@@ -425,7 +436,7 @@ footer a:hover{color:var(--accent)}
 <!-- HERO -->
 <div class="hero">
   <div class="wrap">
-    <div class="badge"><div class="badge-dot"></div>v2.3.1 · Claude Code Plugin · stdlib-only</div>
+    <div class="badge"><div class="badge-dot"></div>v7.2.0 · Claude Code Plugin · stdlib-only</div>
     <h1>Keep your specs and<br>your code <em>honest.</em></h1>
     <p class="hero-lead">
       A capability registry that sits between intent and code. One Markdown file per capability as
@@ -973,7 +984,7 @@ python scripts/reqmap.py map
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <span class="foot-copy">requirement-manager v2.3.1 · Business Source License 1.1</span>
+      <span class="foot-copy">requirement-manager v7.2.0 · Business Source License 1.1</span>
       <div class="foot-links">
         <a href="https://github.com/alxmax/requirement-manager">GitHub</a>
         <a href="https://github.com/alxmax/requirement-manager/blob/main/plugin/skills/requirement-manager/SKILL.md">SKILL.md</a>
