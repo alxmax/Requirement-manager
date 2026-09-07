@@ -494,9 +494,10 @@ for (const [label, ok] of gaugeChecks) test(label, ok);
 
 // ---- the advisory design tab (REQ-VIEWER-977) -----------------------------
 // The engine ships its code-review candidates in `_map.json`; the tab lists them by
-// pillar, and since 2026-09-07 they are also WARN rows of the inbox. A map written
-// before that carries no `findings`, so the tab must simply not appear rather than
-// render an empty shell, and the inbox gains nothing.
+// pillar, and since 2026-09-07 each is one computed signal (so the rail counts it) at
+// its own severity, never a Warning row and never a row of "All". A map written before
+// that carries no `findings`, so the tab must simply not appear rather than render an
+// empty shell, and nothing is counted.
 const DESIGN_WITH = {
   score: 23, clean_files: 7, files: 30,
   candidates: { encapsulation: 1, abstraction: 1, inheritance: 0, polymorphism: 0, standards: 0 },
@@ -520,9 +521,10 @@ const designChecks = [
     designHtml.includes("Design") && designHtml.includes(">2<")],
   ["design: no tab when the map carries no candidates",  // verifies: REQ-VIEWER-977#CASE-2
     !designBare.includes(">Design<")],
-  ["design: candidates are WARN rows of the inbox, with their file:line",  // verifies: REQ-VIEWER-977#CASE-3
-    designRows.length === 2 && designRows.every(p => p.sev === "WARN" && p.noSpec)
+  ["design: candidates are counted at their own severity, listed only in their tab",  // verifies: REQ-VIEWER-977#CASE-3
+    designRows.length === 2 && designRows.every(p => p.sev === "DESIGN" && p.noSpec)
     && designRows.some(p => p.loc === "src/thing.py:12")
+    && !designHtml.includes("src/thing.py:12")
     && computeProblems().every(p => p.signal !== "design")],
 ];
 for (const [label, ok] of designChecks) test(label, ok);

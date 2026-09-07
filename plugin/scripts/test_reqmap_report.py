@@ -2890,6 +2890,96 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             self.assertEqual(sorted(os.listdir(d)), before)
 
 
+class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
+    """`relevel_residue_lines`: the read-only half-done re-level residue signals `sync`
+    tails onto `_audit_summary`'s output. Report-only forever (ADR-0031/ADR-0036) - no
+    signal here is a gate rule, writes anything, or changes an exit code."""
+
+    def _req(self, level=None, satisfies=None, depends_on=None, path="req.md", body=None):
+        meta = {"status": "confirmed", "layer": "feature", "owner": "Alex"}
+        if level:
+            meta["level"] = level
+        if satisfies:
+            meta["satisfies"] = satisfies
+        if depends_on:
+            meta["depends_on"] = depends_on
+        return {"meta": meta, "path": path,
+                "body": body if body is not None else
+                        "# T\n\n## Description\n- It holds.\n\n## Cases\nCASE-1\n  Then it holds\n"}
+
+    def test_flags_a_child_split_off_its_group_shared_file(self):
+        reqs = {
+            "ARCH-P-001": self._req(
+                level="architecture", path="p.md",
+                body="# T\n\n## Description\n- A — see [[REQ-A-001]].\n"
+                     "- B — see [[REQ-B-002]].\n\n## Cases\nCASE-1\n  Then it holds\n"),
+            "REQ-A-001": self._req(level="code", satisfies=["ARCH-P-001"], path="p.md"),
+            "REQ-B-002": self._req(level="code", satisfies=["ARCH-P-001"], path="b.md"),
+        }
+        lines = R.relevel_residue_lines(reqs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("ARCH-P-001", lines[0])
+        self.assertIn("REQ-B-002", lines[0])
+
+    def test_flags_a_code_child_missing_from_the_parent_wikilinks(self):
+        reqs = {
+            "ARCH-Q-002": self._req(
+                level="architecture", path="p2.md",
+                body="# T\n\n## Description\n- A — see [[REQ-C-003]].\n\n"
+                     "## Cases\nCASE-1\n  Then it holds\n"),
+            "REQ-C-003": self._req(level="code", satisfies=["ARCH-Q-002"], path="p2.md"),
+            "REQ-D-004": self._req(level="code", satisfies=["ARCH-Q-002"], path="p2.md"),
+        }
+        lines = R.relevel_residue_lines(reqs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("ARCH-Q-002", lines[0])
+        self.assertIn("REQ-D-004", lines[0])
+
+    def test_flags_a_stale_system_level_mention(self):
+        reqs = {
+            "SYS-R-003": self._req(
+                level="system", path="s.md",
+                body="# T\n\n## Description\n- Needs [[ARCH-S-004]].\n\n"
+                     "## Cases\nCASE-1\n  Then it holds\n"),
+            "ARCH-S-004": self._req(level="architecture", path="s.md"),
+        }
+        lines = R.relevel_residue_lines(reqs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("SYS-R-003", lines[0])
+        self.assertIn("ARCH-S-004", lines[0])
+
+    def test_flags_a_redundant_satisfies_depends_on_edge(self):
+        reqs = {
+            "ARCH-T-005": self._req(
+                level="architecture", path="t.md",
+                body="# T\n\n## Description\n- A — see [[REQ-E-005]].\n\n"
+                     "## Cases\nCASE-1\n  Then it holds\n"),
+            "REQ-E-005": self._req(level="code", path="t.md",
+                                   satisfies=["ARCH-T-005"], depends_on=["ARCH-T-005"]),
+        }
+        lines = R.relevel_residue_lines(reqs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("REQ-E-005", lines[0])
+        self.assertIn("ARCH-T-005", lines[0])
+
+    def test_flags_a_requirement_satisfying_the_wrong_rung(self):
+        reqs = {
+            "SYS-U-006": self._req(level="system", path="u.md"),
+            "REQ-F-006": self._req(level="code", satisfies=["SYS-U-006"], path="f.md"),
+        }
+        lines = R.relevel_residue_lines(reqs)
+        self.assertEqual(len(lines), 1)
+        self.assertIn("REQ-F-006", lines[0])
+        self.assertIn("SYS-U-006", lines[0])
+
+    def test_silent_when_no_requirement_declares_a_level(self):
+        reqs = {
+            "REQ-G-007": self._req(satisfies=["REQ-H-008"], depends_on=["REQ-H-008"], path="g.md"),
+            "REQ-H-008": self._req(path="g.md"),
+        }
+        self.assertEqual(R.relevel_residue_lines(reqs), [])
+
+
 class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-DESIGN-979  # tested-by: REQ-DESIGN-978  # tested-by: REQ-DESIGN-976  # tested-by: ARCH-DESIGN-061  # tested-by: REQ-DESIGN-950  # tested-by: REQ-DESIGN-951  # tested-by: REQ-DESIGN-952  # tested-by: REQ-DESIGN-953  # tested-by: REQ-DESIGN-954  # tested-by: REQ-DESIGN-955
     """`design`: advisory design candidates against the four pillars, never the gate."""
 

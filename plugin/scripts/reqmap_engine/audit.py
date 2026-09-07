@@ -12,6 +12,7 @@ from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
 from .mapdata import _roadmap_behind, _roadmap_signals
 from .model import _as_list
 from .orphans import _scan_untagged
+from .relevel import relevel_residue_lines
 from .risk import cmd_next
 from .similar import _corpus_shape, _exemptions_in_force, _redundant_groups, cmd_similar
 from .workspace import GateContext
@@ -205,6 +206,7 @@ def _audit_summary(reqs, members, reqs_dir, code_root):
         _untagged_files_line(code_root, reqs_dir),
     ) if text]
     lines.extend(_roadmap_lag_lines(reqs, code_root))
+    lines.extend(relevel_residue_lines(reqs))
     if not lines:
         return
     print("")
