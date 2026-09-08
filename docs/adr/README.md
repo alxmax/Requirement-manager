@@ -47,6 +47,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0034](0034-one-rendered-map-built-where-it-is-published.md) | One rendered map, built where it is published | Accepted |
 | [0035](0035-the-engine-is-a-package-behind-a-thin-cli.md) | The engine is a package behind a thin CLI | Accepted |
 | [0036](0036-decomposition-builds-downward-the-system-rung-is-the-authors.md) | Decomposition builds downward; the system rung is the author's | Accepted |
+| [0037](0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md) | The command surface is already five; the cut is one mode per release | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is
