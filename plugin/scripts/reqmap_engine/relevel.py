@@ -16,6 +16,7 @@ from .tags import _ID_RE
 
 
 def _satisfied_by_map(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """parent id -> the ids of every requirement that declares `satisfies: [parent]`."""
     out = {}
     for rid, r in reqs.items():
@@ -25,6 +26,7 @@ def _satisfied_by_map(reqs):
 
 
 def _file_convention_residue(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """A `level:`-declaring parent whose children (via `satisfies:`) are split across
     more than one file path, where at least one child still shares a file with a
     sibling or with the parent itself — i.e. the group has NOT settled into one file
@@ -58,6 +60,7 @@ def _file_convention_residue(reqs):
 
 
 def _missing_obligation_residue(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """A `level: architecture` parent with `level: code` children (via `satisfies:`)
     whose Description/Contract body never wikilinks a child's id — the
     `- ... — see [[ID]].` sentence `clarify --decompose` writes for every child it
@@ -80,6 +83,7 @@ def _missing_obligation_residue(reqs):
 
 
 def _stale_sys_mention_residue(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """A `level: system` requirement whose body still mentions (`[[ID]]` or `` `ID` ``,
     the same id-token grammar `tags.py` uses everywhere else) an id whose own
     `satisfies:` list no longer names this system — prose that outlived the edge it
@@ -97,6 +101,7 @@ def _stale_sys_mention_residue(reqs):
 
 
 def _redundant_depends_on_residue(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """A `level:`-declaring requirement whose `satisfies:` and `depends_on:` lists
     share an id — the level axis (`satisfies:`) and the composition axis
     (`depends_on:`) drew the same edge twice, most likely because a promotion left
@@ -123,6 +128,7 @@ class _RungCtx(object):
 
 
 def _wrong_rung_residue(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """Reuses RM032's own adjacency check (`axis._parent_gap`) rather than
     reimplementing it: a `level: architecture`/`code` requirement whose `satisfies:`
     resolves to an id that itself declares a level, and that level is not one rung
@@ -144,6 +150,7 @@ def _wrong_rung_residue(reqs):
 
 
 def _file_convention_line(records):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     detail = "; ".join("{} (shared {}): {}".format(
         r["parent"], r["common_path"], ", ".join(r["odd_children"])) for r in records)
     n = sum(len(r["odd_children"]) for r in records)
@@ -152,6 +159,7 @@ def _file_convention_line(records):
 
 
 def _missing_obligation_line(records):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     detail = "; ".join("{} misses {}".format(r["parent"], ", ".join(r["missing_children"]))
                        for r in records)
     n = sum(len(r["missing_children"]) for r in records)
@@ -160,6 +168,7 @@ def _missing_obligation_line(records):
 
 
 def _stale_sys_mention_line(records):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     detail = "; ".join("{} still mentions {}".format(r["id"], ", ".join(r["stale_mentions"]))
                        for r in records)
     n = sum(len(r["stale_mentions"]) for r in records)
@@ -168,6 +177,7 @@ def _stale_sys_mention_line(records):
 
 
 def _redundant_depends_on_line(records):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     detail = "; ".join("{}: {}".format(r["id"], ", ".join(r["redundant_ids"]))
                        for r in records)
     n = sum(len(r["redundant_ids"]) for r in records)
@@ -176,6 +186,7 @@ def _redundant_depends_on_line(records):
 
 
 def _wrong_rung_line(records):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     detail = "; ".join("{} satisfies {} at another rung".format(
         r["id"], ", ".join(r["satisfies"])) for r in records)
     return ("{} requirement(s) satisfy a `level:` target at the wrong rung - {}"
@@ -192,6 +203,7 @@ _DETECTORS = (
 
 
 def relevel_residue_lines(reqs):
+    # implements: ARCH-AUDIT-065  # implements: REQ-RELEVEL-997
     """One phrased line per non-empty residue signal, in the order above; `[]` when
     every detector comes back empty — which includes a corpus that declares no
     `level:` at all, since each detector above is itself scoped to a

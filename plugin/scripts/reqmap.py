@@ -374,7 +374,7 @@ def main():
         return 2
     # The engine prints non-ASCII (em-dashes in WARN/info lines, the JSON plan with
     # ensure_ascii=False). On a legacy Windows codepage (cp437/cp850) a bare `python
-    # reqmap.py check` would crash with UnicodeEncodeError and fail the gate on an
+    # reqmap.py gate` would crash with UnicodeEncodeError and fail the gate on an
     # encoding error, not a real violation. Force UTF-8 so no caller has to remember
     # `-X utf8`. Guarded: reconfigure() is Python 3.7+ and may be absent on exotic streams.
     for _stream in (sys.stdout, sys.stderr):

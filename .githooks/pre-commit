@@ -4,7 +4,7 @@
 # Catches the two drifts that previously only failed in CI / went unnoticed:
 #   1. version drift  — plugin.json vs marketplace.json   (fix: check_versions.py --fix)
 #   2. engine bump    — reqmap.py / reqmap_engine/ staged without a MAP_ENGINE_VERSION change (fix: bump it)
-#   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py map --root plugin --code .)
+#   3. map staleness  — committed _map.* vs current code   (fix: reqmap.py sync --root plugin --code .)
 #   4. requirement lint — unreadable/structurally broken spec (fix: rewrite, or lint_exempt)
 # plus the standard requirement<->code drift gate. Mirrors the CI order:
 #   check_versions.py -> check_engine_bump.py -> gate -> lint --strict -> map --check

@@ -873,7 +873,11 @@
                `sync --retire` plan-then-apply so no `# implements:`/`# verifies:` tag is
                orphaned (Dimon, 2026-09-07: the retire path strips tags without
                repointing them — check per capability, not once at the end). -->
-- [ ] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
+- [x] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
+      <!-- shipped v7.2.0 (62f8009) as `relevel.py`, five detectors on the `sync` audit
+           tail. The requirement it shipped without — RM024 on a 204-line untagged file —
+           was authored afterwards as REQ-RELEVEL-997 under ARCH-AUDIT-065. Its ordering
+           clause below ("do this AFTER the 18-to-5 cut") was overtaken by the release. -->
       <!-- Senate 2026-09-07 `senate-reqmap-relevel-promote-demote` (Sonnet, MODIFY): a
            code requirement may be promoted to architecture and an architecture to
            system, and the reverse, but the engine gets the PLAN ONLY (R1) — no `--apply`,

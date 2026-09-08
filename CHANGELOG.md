@@ -1,5 +1,50 @@
 # Changelog
 
+## plugin `v7.2.1` — 2026-09-08
+
+**The stale-instruction guard learns flags, reads the consumer, and finds fifteen live
+defects at home.** A fifth verb/flag fold was proposed and audited by nine senators
+(Senate bundle `2026-09-08_163116-senate-reqmap-cli-surface-18-to-5`, verdict **MODIFY**,
+GO 1 / MODIFY 8 / STOP 0, superseding the still-open `senate-reqmap-cli-surface-18-to-4`
+of 2026-09-05). The cut itself did not ship — the audit measured its ceiling at ~854
+engine lines, not the bulk the TODO item assumed, because `sync` runs `_audit_summary`
+on every clean gate and eleven of the eighteen mode flags therefore free nothing. What
+shipped is the precondition the senators made blocking: the guard that has to be able to
+see such a cut before anyone makes one.
+
+- **`check_retired_verbs.py` checks retired FLAGS, not just verbs.** The verb-only form
+  read `gate --show` as the live verb `gate`, so a cull of mode flags — the change
+  actually on the table — passed it green. The flag half is **derived, not enumerated**:
+  the live set is read from `reqmap.py`'s own `add_argument` calls, because the parser is
+  what actually accepts or rejects a flag. (This deviates from the audit's literal
+  `RETIRED_FLAGS` anchor, and deliberately: a hand-kept list is one more thing to forget,
+  while a derived one starts firing the moment a flag is cut with nobody updating
+  anything.) Unreadable engine ⇒ no flag verdict, never a blanket accusation.
+- **An invocation no longer needs a delimiter.** `.githooks/pre-commit` wrote its own
+  repair hint as `(fix: reqmap.py map ...)` — a live instruction naming a verb folded at
+  `v7.0.0`, in a file the guard already scanned, that the delimited pattern could not see.
+- **The guard reads consumer checkouts.** `check_retired_verbs.py [EXTRA_ROOT ...]` scans
+  a consumer against **this** engine's live surface, which is what it gets when it
+  re-vendors. On `alxmax/Management_Dashboard` it currently reports 25 stale instructions.
+  Removal notes are recognised in Romanian as well as English, and a flag is attributed to
+  the call it belongs to rather than to whatever command follows on the same line.
+- **Fifteen live stale instructions repaired in this repo**, none of which any check had
+  been able to see: the hook's own repair hint, the README's description of the Action,
+  four printed strings in `site.py` (three of them naming `--regions` / `--diagram` /
+  `--detect`, flags argparse rejects), the shipped `requirement-manager` SKILL.md section
+  that instructed those same three flags, and three acceptance criteria in
+  `ARCH-SELFGATE-039` / `REQ-SELFGATE-916` that still described CI as three commands.
+- **`REQ-RELEVEL-997`**: `v7.2.0` shipped `relevel.py` — 204 lines, five detectors — with
+  no requirement at all, which the gate reported as `RM024` and this release closes. Six
+  cases, one per detector plus the silence of a corpus that declares no `level:`, each
+  linked to the test that already covered it.
+- New suite `scripts/test_check_retired_verbs.py` (12 tests), wired into CI ahead of the
+  guard it tests. Every case in it is a defect the audit found by measurement.
+
+**Not shipped, on purpose:** no mode was retired. `clarify --levels`, `gate --review`,
+`gate --show` and `init --plan` stay out of scope until their ADR, shipped-skill and
+blast-radius questions are settled; `sync --retire` is permanently KEEP under ADR-0027.
+
 ## plugin `v7.2.0` — 2026-09-07
 
 - **`sync` tails a read-only re-level residue report.** New module `relevel.py` adds

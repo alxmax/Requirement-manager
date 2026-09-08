@@ -377,7 +377,7 @@ like a need — downward instead of upward.</p><div class="ids">—</div></div>
     <h2>The hybrid: markers</h2>
     <p class="lead" style="margin-bottom:18px">The engine only rewrites what lives between its \
 markers. Your prose is never touched.
-      Re-run <code>reqmap.py site</code> after any change and the nav links, stats, commands, and \
+      Re-run <code>reqmap.py sync</code> after any change and the nav links, stats, commands, and \
 layers refresh — the hero and narrative survive.</p>
 <pre><span class="c-dim">&lt;!--##REQMAP:NAV##--&gt;</span>      <span class="c-eng">← engine: \
 Live Map / Diagram / GitHub, from `git remote` + artifact paths</span>
@@ -396,7 +396,7 @@ from requirement frontmatter</span></pre>
   </div>
 </section>
 <footer>
-  Prototype of <code>reqmap.py site</code> · hybrid (engine links + data / authored prose) ·
+  Prototype of <code>reqmap.py sync --attach</code> · hybrid (engine links + data / authored prose) ·
   self-contained, no network, no <code>file://</code> iframes · Senate 2026-06-14 verdict \
 <strong>MODIFY</strong> conditions applied.
 </footer>
@@ -460,12 +460,13 @@ def cmd_site(ws, root=".", attach=None,  # implements: REQ-SITE-924
         print("repo: {}".format(repo_url or "(no remote)"))
         print("presentation candidates: {}".format(", ".join(cands) or "(none)"))
         tgt = default or os.path.join(root, "docs", "architecture.html")
-        print("suggested: reqmap sync --attach {} --regions nav,stats".format(tgt))
+        print("suggested: reqmap sync --attach {}".format(tgt))
         return 0
 
     if not attach:
-        print("usage: reqmap sync --attach <page.html> [--regions nav,stats] [--diagram <rel>]")
-        print("   or: reqmap sync --detect")
+        print("usage: reqmap sync --attach <page.html>")
+        print("  the nav and stats regions are refreshed together; `init` scaffolds "
+              "the page when it does not exist yet")
         return 0
 
     map_ok = os.path.isfile(os.path.join(os.path.dirname(attach) or ".", "map.html"))

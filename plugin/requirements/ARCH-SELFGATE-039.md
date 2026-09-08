@@ -30,7 +30,8 @@ Every bullet below is binding.
 CASE-1  <!-- verifiable by: inspection -->
   Given  a push or pull request to this repo
   When   `ci.yml`'s `gate-and-tests` job runs
-  Then   `reqmap.py gate`, `lint --strict`, and `map --check` all exit 0 before any other job runs
+  Then   `reqmap.py gate --code ..` exits 0 before any other job runs — since `v4.0.0` that one
+         command IS the lint and the map-freshness check as well
 
 CASE-2  <!-- verifiable by: inspection -->
   Given  a local commit attempt with the dev hook enabled (`core.hooksPath .githooks`)
@@ -138,16 +139,18 @@ Every bullet below is binding.
   the local plugin cache and any consumer repos passed as arguments.
 
 ## Cases
-CASE-1 — the CI job runs all three checks on both triggers
+CASE-1 — the CI job runs the one verdict on both triggers
   Given  `.github/workflows/ci.yml`
   When   its `gate-and-tests` job is read
-  Then   the job invokes `gate`, `lint --strict`, `map --check`; the workflow triggers on
-         both push and pull_request
+  Then   the job invokes `gate` — which since `v4.0.0` carries the lint and the map
+         freshness check itself; the workflow triggers on both push and pull_request
 
-CASE-2 — the composite action runs the same three checks
+CASE-2 — the composite action runs the same verdict
   Given  `check/action.yml`
   When   its `runs.steps` are read
-  Then   the composite action invokes `reqmap.py gate`, `map --check` and `lint --strict`, the same commands `ci.yml` runs on itself
+  Then   the composite action invokes `reqmap.py gate`, the same command `ci.yml` runs on
+         itself, with the lint and freshness halves switched off by `--no-lint` /
+         `--no-map-check` when its `lint` / `freshness` inputs say so
 
 CASE-3 — the release job moves the action's major-alias tag on every push to main
   Given  a push to `main`, whether or not `plugin.json`'s version changed
