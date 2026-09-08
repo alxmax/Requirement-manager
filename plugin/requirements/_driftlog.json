@@ -126,8 +126,8 @@
       "reason": null
     },
     "REQ-VIEWER-995": {
-      "hash": "f6bcd1e2cb0f",
-      "reason": "v6.5.0: the Roadmap has one lane, Implementations"
+      "hash": "61b20c804d6b",
+      "reason": "v7.3.1: REQ-VIEWER-995 gains a clause and CASE-4 \u2014 a milestone whose TODO items are all complete still renders a column"
     }
   }
 }

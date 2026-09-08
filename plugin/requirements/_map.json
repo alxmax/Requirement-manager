@@ -17982,7 +17982,8 @@
         "The roadmap renders exactly one lane, labelled `Implementations`, and no other lane label appears.",
         "Every open `TODO.md` item renders in it, whatever its `lane` field says — `bug`, `feature` and the older `bus`/`ops` values all still parse and are never rejected. A completed item (`[x]`) still renders nowhere.",
         "Every requirement with a `milestone:` that is not deprecated renders in it.",
-        "`lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted in `_map.json`, so a repo that files its items by lane loses the split and nothing else, and no engine data changes for this."
+        "`lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted in `_map.json`, so a repo that files its items by lane loses the split and nothing else, and no engine data changes for this.",
+        "A milestone that `TODO.md` groups anything under renders as a column, complete items included. A version whose work has all shipped is a finished column, not a missing one; the chips inside it stay filtered to the open items."
       ],
       "verify": [],
       "notes": [],
@@ -17990,9 +17991,10 @@
       "acc": [
         "CASE-1 — — one lane, named Implementations Given  a registry with at least one milestone When   the roadmap renders Then   exactly one lane label is rendered and it reads `Implementations`",
         "CASE-2 — — every lane value lands in that one lane Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one milestone, and a completed item beside them When   the roadmap renders Then   all three open titles appear and the completed one does not",
-        "CASE-3 — — a milestoned requirement lands in it too Given  a confirmed requirement carrying that same milestone When   the roadmap renders Then   its title appears in the lane"
+        "CASE-3 — — a milestoned requirement lands in it too Given  a confirmed requirement carrying that same milestone When   the roadmap renders Then   its title appears in the lane",
+        "CASE-4 — — a milestone whose every item is complete still gets a column Given  a `TODO.md` milestone whose items are all completed (`[x]`), and no requirement carrying it When   the roadmap renders Then   that milestone's column is rendered, and it holds no chips"
       ],
-      "accept": "CASE-1 — one lane, named Implementations\n  Given  a registry with at least one milestone\n  When   the roadmap renders\n  Then   exactly one lane label is rendered and it reads `Implementations`\n\nCASE-2 — every lane value lands in that one lane\n  Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one\n         milestone, and a completed item beside them\n  When   the roadmap renders\n  Then   all three open titles appear and the completed one does not\n\nCASE-3 — a milestoned requirement lands in it too\n  Given  a confirmed requirement carrying that same milestone\n  When   the roadmap renders\n  Then   its title appears in the lane",
+      "accept": "CASE-1 — one lane, named Implementations\n  Given  a registry with at least one milestone\n  When   the roadmap renders\n  Then   exactly one lane label is rendered and it reads `Implementations`\n\nCASE-2 — every lane value lands in that one lane\n  Given  open `TODO.md` items marked `lane: bug`, `lane: ops` and `lane: feature` under one\n         milestone, and a completed item beside them\n  When   the roadmap renders\n  Then   all three open titles appear and the completed one does not\n\nCASE-3 — a milestoned requirement lands in it too\n  Given  a confirmed requirement carrying that same milestone\n  When   the roadmap renders\n  Then   its title appears in the lane\n\nCASE-4 — a milestone whose every item is complete still gets a column\n  Given  a `TODO.md` milestone whose items are all completed (`[x]`), and no requirement\n         carrying it\n  When   the roadmap renders\n  Then   that milestone's column is rendered, and it holds no chips",
       "input": "",
       "output": "",
       "desc": "",
@@ -18021,8 +18023,8 @@
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "ARCH-VLEVEL-037",
@@ -21173,7 +21175,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "557 lines (over 500)"
+        "detail": "566 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -21181,7 +21183,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "54 line(s) wider than 100 columns, first at line 1"
+        "detail": "55 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -21373,7 +21375,7 @@
         "file": "app/src/views/RoadmapView.jsx",
         "line": 163,
         "name": "RoadmapView",
-        "detail": "`RoadmapView` is 183 lines (over 80)"
+        "detail": "`RoadmapView` is 188 lines (over 80)"
       },
       {
         "pillar": "standards",

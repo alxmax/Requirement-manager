@@ -801,6 +801,9 @@ Every bullet below is binding.
 - `lane` stays in the engine's output. It is still parsed from `TODO.md` and still emitted
   in `_map.json`, so a repo that files its items by lane loses the split and nothing else,
   and no engine data changes for this.
+- A milestone that `TODO.md` groups anything under renders as a column, complete items
+  included. A version whose work has all shipped is a finished column, not a missing
+  one; the chips inside it stay filtered to the open items.
 
 ## Cases
 CASE-1 — one lane, named Implementations
@@ -818,3 +821,9 @@ CASE-3 — a milestoned requirement lands in it too
   Given  a confirmed requirement carrying that same milestone
   When   the roadmap renders
   Then   its title appears in the lane
+
+CASE-4 — a milestone whose every item is complete still gets a column
+  Given  a `TODO.md` milestone whose items are all completed (`[x]`), and no requirement
+         carrying it
+  When   the roadmap renders
+  Then   that milestone's column is rendered, and it holds no chips
