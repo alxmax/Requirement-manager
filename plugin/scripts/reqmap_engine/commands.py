@@ -267,8 +267,6 @@ COMMANDS = {
             "regenerate the map, the findings file and the generated integration artifacts "
             "in one step. Run after editing requirement files or tagging new code members. "
             "--accept-drift is required when a confirmed or implemented contract changed. "
-            "--suggest-verifies proposes per-criterion verifies: tags, and writes them with "
-            "--apply. "
        
         ),
         "arg": None,
@@ -298,8 +296,8 @@ COMMANDS = {
                 "flag": "--apply",
                 "type": "bool",
                 "help": (
-                    "With --retire or --suggest-verifies: actually write the change. Without it, "
-                    "the run is a dry report."
+                    "With --retire: actually write the change. Without it, the run is a "
+                    "dry report."
                 ),
             },
             {
@@ -310,15 +308,6 @@ COMMANDS = {
                     "With --retire: proceed even though dependents still point at this "
                     "requirement, or the working tree is dirty. Dependents that are already "
                     "deprecated, and those retired in the same call, never block."
-                ),
-            },
-            {
-                "name": "mode_suggest",
-                "flag": "--suggest-verifies",
-                "type": "bool",
-                "help": (
-                    "Propose per-criterion `verifies:` tags for tests already named after the "
-                    "criterion they check."
                 ),
             },
             {

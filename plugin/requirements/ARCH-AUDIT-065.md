@@ -24,6 +24,7 @@ Every bullet below is binding.
 - Every exemption in force is listed, and one that records no reason is itself a warning. [[REQ-AUDIT-971]]
 - The report says how the corpus sits on the V-model's left arm, and says so without failing. [[REQ-AUDIT-972]]
 - `sync` ends by naming what the audit would report, so the moment the corpus changes is the moment its problems surface. [[REQ-AUDIT-973]]
+- The same tail names the residue a half-done promotion or demotion along the level axis left behind. [[REQ-RELEVEL-997]]
 
 ## Cases
 CASE-1
@@ -278,3 +279,73 @@ CASE-3 — the tail is report-only
   Given  any corpus
   When   `sync` completes
   Then   the exit code and the files written are exactly what they were without the tail
+
+--------------------
+
+
+---
+id: REQ-RELEVEL-997
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-AUDIT-065]
+tested-by: plugin/scripts/test_reqmap_report.py
+---
+
+# The tail names a move that was only half made
+
+## Description
+> Moving a requirement between rungs is a hand edit in several files: the block moves, the
+> parent gains a wikilink, the old parent loses one, an edge that the new `satisfies:` now
+> covers stays behind in `depends_on:`. Nothing checked that the last of those steps ever
+> happened, so a promotion abandoned halfway looked exactly like one that was finished. The
+> engine cannot finish the move — ADR-0031 refused a write path inside the hook every commit
+> runs, and ADR-0036 kept the axis a decision the author makes by hand — but it can say
+> which step is still open.
+
+Every bullet below is binding.
+- After a successful `sync`, one line is printed for each observable residue of an
+  unfinished move along the `level:` axis, read from `level:` and `satisfies:` alone.
+- The residues named are: a child split off the file its siblings share with their parent;
+  a parent whose Description carries no `[[child]]` wikilink for one of its children; a
+  system requirement whose prose still names an id that no longer satisfies it; an edge
+  named by both `satisfies:` and `depends_on:`; and a requirement satisfying a target on
+  the wrong rung.
+- Every detector is scoped to a requirement that declares a `level:`, so a corpus that
+  declares none sees nothing — there is no separate adoption guard to switch off.
+- The report writes nothing, registers no gate rule, and leaves the exit code untouched.
+- The id prefix is not a residue: the engine does not parse it, so a block whose name still
+  carries its old rung is never reported on that ground alone.
+
+## Cases
+CASE-1 — a child split off its group's shared file
+  Given  a parent whose other children share its file and one child that does not
+  When   `sync` completes
+  Then   the tail names the parent and the child that moved out
+
+CASE-2 — a child the parent's Description does not name
+  Given  a parent whose Description wikilinks one of its two code children
+  When   `sync` completes
+  Then   the tail names the parent and the unlinked child
+
+CASE-3 — prose naming an id that no longer satisfies it
+  Given  a system requirement whose Description still wikilinks an architecture id that
+         does not declare `satisfies:` back to it
+  When   `sync` completes
+  Then   the tail names both ids
+
+CASE-4 — one edge named twice
+  Given  a requirement naming the same target in `satisfies:` and in `depends_on:`
+  When   `sync` completes
+  Then   the tail names the requirement and the duplicated target
+
+CASE-5 — a parent on the wrong rung
+  Given  a `code` requirement that satisfies a `system` requirement directly
+  When   `sync` completes
+  Then   the tail names the requirement and its mis-rung parent
+
+CASE-6 — a corpus with no level axis is silent
+  Given  a corpus in which no requirement declares a `level:`
+  When   `sync` completes
+  Then   the tail prints no residue line at all

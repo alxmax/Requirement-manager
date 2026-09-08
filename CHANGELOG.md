@@ -1,5 +1,88 @@
 # Changelog
 
+## plugin `v7.3.0` — 2026-09-08
+
+**Pass 1 of the command-surface cut: `sync --suggest-verifies` is retired.** The first and,
+for now, only mode the 2026-09-08 audit cleared — bundle
+`2026-09-08_163116-senate-reqmap-cli-surface-18-to-5` (MODIFY, GO 1 / MODIFY 8 / STOP 0),
+recorded as [ADR-0037](docs/adr/0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md).
+It was chosen over the smaller `gate --review` because blast radius measured in test
+functions missed that `--review` is the only engine command a shipped skill invokes:
+`--suggest-verifies` has zero references in the consumer repo and no surviving command
+prints its name.
+
+- **`verifies.py` deleted** (197 lines) and its registry entry removed (11 more), so
+  `reqmap_engine/` falls 11,842 → 11,634 lines. The yield is booked as a measured
+  post-condition, not a projection: had the requirements been deprecated while the line
+  count stood still, the retirement would have removed the specification and kept the
+  code, and it would have been reverted.
+- **`ARCH-SUGGESTVERIFIES-047` and its three children are `deprecated`, not deleted** —
+  `sync --retire --apply`, reversible, already exempt from the gates. `--delete` and the
+  block removal wait for the release after, per ADR-0027's own two-step. The retire plan
+  reported 0 dependents, 0 prose referrers and no `refusing:` line; `SYS-QUALITY-104` keeps
+  5 other satisfiers, so no rung is orphaned. Its `leaves_unused: ARCH-ACVERIFY-019` line
+  was **not** acted on — that requirement backs gate rule RM013 on the bare-gate path, and
+  the hint is a graph artefact of losing the last `depends_on` pointer.
+- **The flag survives one release as a no-op shim.** `sync --suggest-verifies` still parses,
+  prints one line naming what replaced it, and exits 0. `v5.0.0` shipped its fold with no
+  alias at all and a consumer met `invalid choice`; this is the window that audit asked for
+  and did not get. The shim goes in the next release, at which point the retired-name guard
+  starts reporting any instruction that still names the flag.
+- Per-pass discipline from ADR-0037, met here: 453 changed lines against a 500 cap
+  (excluding the four generated artifacts), 11 `verifies:`-tagged test functions against a
+  cap of 12, gate at 0 errors, 1067 tests green.
+
+**Not in this pass:** `clarify --levels` (needs an ADR superseding 0031, whose own revisit
+date is 2027-03-06), `gate --review` (the `requirement-quality-review` skill's only engine
+command), `gate --show` (`REQ-VLEVEL-946` is confirmed with `show.py:12` as its sole member —
+deleting it without re-pointing is RM006), and `init --plan` (one registry entry with
+`--md-glob`). `sync --retire` is permanently KEEP.
+
+## plugin `v7.2.1` — 2026-09-08
+
+**The stale-instruction guard learns flags, reads the consumer, and finds fifteen live
+defects at home.** A fifth verb/flag fold was proposed and audited by nine senators
+(Senate bundle `2026-09-08_163116-senate-reqmap-cli-surface-18-to-5`, verdict **MODIFY**,
+GO 1 / MODIFY 8 / STOP 0, superseding the still-open `senate-reqmap-cli-surface-18-to-4`
+of 2026-09-05). The cut itself did not ship — the audit measured its ceiling at ~854
+engine lines, not the bulk the TODO item assumed, because `sync` runs `_audit_summary`
+on every clean gate and eleven of the eighteen mode flags therefore free nothing. What
+shipped is the precondition the senators made blocking: the guard that has to be able to
+see such a cut before anyone makes one.
+
+- **`check_retired_verbs.py` checks retired FLAGS, not just verbs.** The verb-only form
+  read `gate --show` as the live verb `gate`, so a cull of mode flags — the change
+  actually on the table — passed it green. The flag half is **derived, not enumerated**:
+  the live set is read from `reqmap.py`'s own `add_argument` calls, because the parser is
+  what actually accepts or rejects a flag. (This deviates from the audit's literal
+  `RETIRED_FLAGS` anchor, and deliberately: a hand-kept list is one more thing to forget,
+  while a derived one starts firing the moment a flag is cut with nobody updating
+  anything.) Unreadable engine ⇒ no flag verdict, never a blanket accusation.
+- **An invocation no longer needs a delimiter.** `.githooks/pre-commit` wrote its own
+  repair hint as `(fix: reqmap.py map ...)` — a live instruction naming a verb folded at
+  `v7.0.0`, in a file the guard already scanned, that the delimited pattern could not see.
+- **The guard reads consumer checkouts.** `check_retired_verbs.py [EXTRA_ROOT ...]` scans
+  a consumer against **this** engine's live surface, which is what it gets when it
+  re-vendors. On `alxmax/Management_Dashboard` it currently reports 25 stale instructions.
+  Removal notes are recognised in Romanian as well as English, and a flag is attributed to
+  the call it belongs to rather than to whatever command follows on the same line.
+- **Fifteen live stale instructions repaired in this repo**, none of which any check had
+  been able to see: the hook's own repair hint, the README's description of the Action,
+  four printed strings in `site.py` (three of them naming `--regions` / `--diagram` /
+  `--detect`, flags argparse rejects), the shipped `requirement-manager` SKILL.md section
+  that instructed those same three flags, and three acceptance criteria in
+  `ARCH-SELFGATE-039` / `REQ-SELFGATE-916` that still described CI as three commands.
+- **`REQ-RELEVEL-997`**: `v7.2.0` shipped `relevel.py` — 204 lines, five detectors — with
+  no requirement at all, which the gate reported as `RM024` and this release closes. Six
+  cases, one per detector plus the silence of a corpus that declares no `level:`, each
+  linked to the test that already covered it.
+- New suite `scripts/test_check_retired_verbs.py` (12 tests), wired into CI ahead of the
+  guard it tests. Every case in it is a defect the audit found by measurement.
+
+**Not shipped, on purpose:** no mode was retired. `clarify --levels`, `gate --review`,
+`gate --show` and `init --plan` stay out of scope until their ADR, shipped-skill and
+blast-radius questions are settled; `sync --retire` is permanently KEEP under ADR-0027.
+
 ## plugin `v7.2.0` — 2026-09-07
 
 - **`sync` tails a read-only re-level residue report.** New module `relevel.py` adds

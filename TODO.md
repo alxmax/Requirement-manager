@@ -849,7 +849,50 @@
            them. -->
 
 ## v7.1
-- [ ] Reduce the engine's command surface from 18 modes to 5 commands | lane: feature
+- [x] Reduce the engine's command surface from 18 modes to 5 commands | lane: feature
+      <!-- CLOSED AS FILED 2026-09-08 by [ADR-0037](docs/adr/0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md),
+           after a nine-senator audit (bundle 2026-09-08_163116-senate-reqmap-cli-surface-18-to-5,
+           MODIFY, GO 1 / MODIFY 8 / STOP 0). The five commands already exist — `init new gate
+           sync clarify` — so the residue was a FLAG cull, and its measured ceiling is 854 LOC
+           = 7.2% of the engine, not the bulk the premise below assumed. Eleven of the eighteen
+           modes free ZERO lines, because `sync` runs `_audit_summary` on every clean gate
+           (reqmap.py:356) and audit.py imports their modules at module level. The premise's own
+           limbs fail on the full population: "hundreds of engine lines" holds for 2 of 7,
+           "5-10 requirements" for 1 of 7. What replaces it: one mode per release, ascending by
+           blast radius, each pass under 500 changed lines; `sync --retire` permanently KEEP;
+           `clarify --levels`, `gate --review`, `gate --show` and `init --plan` out of scope
+           until their ADR, shipped-skill and RM006 questions are settled. The two halves that
+           survive are the two items directly below. -->
+
+- [ ] Cut one mode per release, ascending by blast radius | lane: feature
+      <!-- ADR-0037 decision 4. Pass 1 shipped: `sync --suggest-verifies` (v7.3.0). Remaining
+           candidates, in order, with their measured cost:
+             - `gate --implement` — 135 LOC, 8 verifies-tagged test functions. Blocked on one
+               thing only: `clarify.py:269` and `:291` print `next: reqmap.py gate --implement
+               <ID>`, so a surviving command would issue dead-end advice. Repoint or drop.
+             - the rest are out of scope per ADR-0037 decision 6, each with its own release
+               condition; do not reopen them as a batch.
+           Each pass: `sync --retire --apply` for the requirements (deprecate, never --delete in
+           the same release), the module by hand, and the yield booked as a measured before/after
+           `wc -l` over reqmap_engine/. If requirements were deprecated and the delta is ~0, the
+           retirement removed the spec and kept the code — revert. -->
+
+- [ ] Give `gate` a flag ceiling, and make `sync` name what it runs | lane: feature
+      <!-- The half of the 18-to-5 item that was REAL and that a line count could never reach
+           (ADR-0037, and Aristotel's dissent inside the audit): "five commands each doing one
+           thing" is not satisfied by five verbs carrying 36 flags. Two numbers, both measurable
+           today, both currently failing:
+             - flags on one verb. `python -c "import sys;sys.path.insert(0,'.');from
+               reqmap_engine.commands import COMMANDS;print({n:len(s['params']) for n,s in
+               COMMANDS.items()})"` prints {'init':5,'new':3,'gate':17,'sync':8,'clarify':3} = 36.
+               Proposed ceiling: no verb over 12. `gate` is at 17.
+             - capabilities a bare `sync` runs that its own `--help` summary does not name.
+               reqmap.py:356 -> audit.py:198-210 is ten passes; COMMANDS['sync']['summary']
+               names none of them. Proposed ceiling: 0. It is at 10.
+           Neither is fixed by deleting code — the first wants flags folded or grouped, the
+           second wants the summary to tell the truth about what `sync` does. Pick ONE and
+           measure it before proposing a mechanism; a ceiling nobody has tried to meet is a
+           number, not a decision. -->
       <!-- Asked by the maintainer on 2026-09-07. Measured that day: the CLI has 5 verbs
            (init, new, gate, sync, clarify) but 18 mode flags behind gate/sync (--audit,
            --risk, --i18n, --show, --search, --review, --implement, --dupes, --design,
@@ -873,7 +916,11 @@
                `sync --retire` plan-then-apply so no `# implements:`/`# verifies:` tag is
                orphaned (Dimon, 2026-09-07: the retire path strips tags without
                repointing them — check per capability, not once at the end). -->
-- [ ] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
+- [x] `sync` reports a half-done re-level, with no new mode and no write | lane: feature
+      <!-- shipped v7.2.0 (62f8009) as `relevel.py`, five detectors on the `sync` audit
+           tail. The requirement it shipped without — RM024 on a 204-line untagged file —
+           was authored afterwards as REQ-RELEVEL-997 under ARCH-AUDIT-065. Its ordering
+           clause below ("do this AFTER the 18-to-5 cut") was overtaken by the release. -->
       <!-- Senate 2026-09-07 `senate-reqmap-relevel-promote-demote` (Sonnet, MODIFY): a
            code requirement may be promoted to architecture and an architecture to
            system, and the reverse, but the engine gets the PLAN ONLY (R1) — no `--apply`,

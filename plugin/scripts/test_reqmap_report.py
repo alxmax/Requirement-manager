@@ -2890,7 +2890,7 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
             self.assertEqual(sorted(os.listdir(d)), before)
 
 
-class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
+class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-RELEVEL-997
     """`relevel_residue_lines`: the read-only half-done re-level residue signals `sync`
     tails onto `_audit_summary`'s output. Report-only forever (ADR-0031/ADR-0036) - no
     signal here is a gate rule, writes anything, or changes an exit code."""
@@ -2908,6 +2908,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
                         "# T\n\n## Description\n- It holds.\n\n## Cases\nCASE-1\n  Then it holds\n"}
 
     def test_flags_a_child_split_off_its_group_shared_file(self):
+        # verifies: REQ-RELEVEL-997#CASE-1
         reqs = {
             "ARCH-P-001": self._req(
                 level="architecture", path="p.md",
@@ -2922,6 +2923,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
         self.assertIn("REQ-B-002", lines[0])
 
     def test_flags_a_code_child_missing_from_the_parent_wikilinks(self):
+        # verifies: REQ-RELEVEL-997#CASE-2
         reqs = {
             "ARCH-Q-002": self._req(
                 level="architecture", path="p2.md",
@@ -2936,6 +2938,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
         self.assertIn("REQ-D-004", lines[0])
 
     def test_flags_a_stale_system_level_mention(self):
+        # verifies: REQ-RELEVEL-997#CASE-3
         reqs = {
             "SYS-R-003": self._req(
                 level="system", path="s.md",
@@ -2949,6 +2952,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
         self.assertIn("ARCH-S-004", lines[0])
 
     def test_flags_a_redundant_satisfies_depends_on_edge(self):
+        # verifies: REQ-RELEVEL-997#CASE-4
         reqs = {
             "ARCH-T-005": self._req(
                 level="architecture", path="t.md",
@@ -2963,6 +2967,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
         self.assertIn("ARCH-T-005", lines[0])
 
     def test_flags_a_requirement_satisfying_the_wrong_rung(self):
+        # verifies: REQ-RELEVEL-997#CASE-5
         reqs = {
             "SYS-U-006": self._req(level="system", path="u.md"),
             "REQ-F-006": self._req(level="code", satisfies=["SYS-U-006"], path="f.md"),
@@ -2973,6 +2978,7 @@ class Relevel(unittest.TestCase):  # tested-by: ARCH-AUDIT-065
         self.assertIn("SYS-U-006", lines[0])
 
     def test_silent_when_no_requirement_declares_a_level(self):
+        # verifies: REQ-RELEVEL-997#CASE-6
         reqs = {
             "REQ-G-007": self._req(satisfies=["REQ-H-008"], depends_on=["REQ-H-008"], path="g.md"),
             "REQ-H-008": self._req(path="g.md"),
@@ -4631,7 +4637,7 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
-class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007  # tested-by: ARCH-SUGGESTVERIFIES-047
+class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007
     """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md)."""
 
     LONG = " ".join(["alpha"] * 155)
@@ -4727,12 +4733,6 @@ class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-
         self.assertEqual(R._bullets(body, "description"),
                          ["clause one", "clause two --flag continuation"])
 
-    def test_suggest_verifies_matches_the_case_label_spelling(self):
-        rx = R._ac_name_re("CASE-3")
-        self.assertTrue(rx.search("test_case3_reads"))
-        self.assertTrue(rx.search("test_case_3_reads"))
-        self.assertTrue(rx.search("test_ac3_reads"))
-        self.assertFalse(rx.search("test_case30_reads"))
 
 
 class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-AUDIT-970

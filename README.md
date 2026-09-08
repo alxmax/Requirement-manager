@@ -265,7 +265,6 @@ it to requirements whose members changed since a git ref, and `--no-lint` /
 | *(bare)* | Rebuild everything derived: lock, `_map.*`, `_findings.md`, the site regions, the integration artifacts. |
 | `--accept-drift` | Advance the baseline for a `confirmed`/`implemented` contract you edited on purpose. Without it, `sync` refuses. |
 | `--retire ID [ID ...]` | Take one requirement — or a whole class — out of service. Prints the blast radius first and writes nothing without `--apply`; `--delete` removes it outright instead of deprecating, `--force` proceeds past dependents or a dirty tree. A batch retires in a graph-computed order under one working-tree check; a dependent that is already `deprecated`, or that is in the same batch, never blocks. |
-| `--suggest-verifies` | Propose `# verifies: <ID>#CASE-N` tags for tests already named after the criterion they check. `--apply` writes them; ambiguous matches never are. |
 | `--attach <page>` | Refresh the engine-owned regions (nav links, counts) of a presentation page, scaffolding one if absent. `--regions nav,stats`, `--diagram <rel>`. |
 
 Confirming a requirement is **not** a command — it is a human's answer. Edit
@@ -312,8 +311,10 @@ jobs:
       - uses: alxmax/requirement-manager/check@v7
 ```
 
-The action runs `reqmap.py gate`, then `map --check` (freshness) and `lint --strict`
-— both default-on, both switchable off with `freshness: 'false'` / `lint: 'false'`.
+The action runs `reqmap.py gate`, which since `v4.0.0` *is* the lint and the map
+freshness check as well — both default-on, both switchable off with
+`freshness: 'false'` / `lint: 'false'` (the action passes `--no-map-check` /
+`--no-lint`).
 It also warns when the `reqmap.py` you vendored is older than the engine the pinned
 `check@vN` ships, so a copy that quietly stopped running half the checks says so on the
 run instead of staying green in silence (`stale-engine: 'error'` to fail the build on it,
@@ -386,7 +387,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 12,328 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 12,141 lines in all)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git

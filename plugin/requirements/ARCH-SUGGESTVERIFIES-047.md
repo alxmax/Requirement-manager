@@ -1,6 +1,6 @@
 ---
 id: ARCH-SUGGESTVERIFIES-047
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -78,7 +78,7 @@ CASE-5  <!-- verifiable by: automated test -->
 
 ---
 id: REQ-SUGGESTVERIFIES-927
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -138,7 +138,7 @@ CASE-5 — a criterion marked not machine-verifiable is skipped
 
 ---
 id: REQ-SUGGESTVERIFIES-928
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -192,7 +192,7 @@ CASE-4 — two matching tests report the criterion as ambiguous
 
 ---
 id: REQ-SUGGESTVERIFIES-929
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
