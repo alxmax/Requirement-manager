@@ -552,5 +552,14 @@ const roadmapChecks = [
 ];
 for (const [label, ok] of roadmapChecks) test(label, ok);
 
+// A milestone whose TODO items have all shipped. The chips are still filtered to the
+// open ones, so the column is empty — what is asserted is that it EXISTS, because the
+// version it names is finished, not skipped.
+setTodos([{ title: "a shipped item", done: true, milestone: "v99.9", lane: "feature" }]);
+const roadAllDone = renderToString(<RoadmapView openSpec={noop} />);
+setTodos([]);
+test("roadmap: a milestone whose every item is complete still gets a column",  // verifies: REQ-VIEWER-995#CASE-4
+  roadAllDone.includes(">v99.9<") && !roadAllDone.includes("a shipped item"));
+
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
 process.exit(failures ? 1 : 0);

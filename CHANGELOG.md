@@ -1,5 +1,22 @@
 # Changelog
 
+## plugin `v7.3.1` — 2026-09-09
+
+**A milestone whose work has all shipped is a finished column, not a missing one.**
+`RoadmapView` derived its milestone axis from open TODO items only, so a version whose
+every `TODO.md` item was ticked reached the axis through no signal at all: the column
+disappeared and the chart jumped to the next version, reading as a milestone that was
+skipped. A milestone is real once `TODO.md` groups anything under it, done or not.
+
+- The chips inside the column are unchanged — still filtered to the open items, so a
+  finished milestone renders as an empty column rather than as a gap. `REQ-VIEWER-995`'s
+  clause that a completed item renders nowhere still holds, and is still verified.
+- One new clause and `CASE-4` on `REQ-VIEWER-995`, with the SSR smoke check that fails
+  without the fix and passes with it. Drift on a confirmed contract accepted with this
+  entry as the reason.
+- The vendored viewer (`plugin/scripts/_map_viewer.html`) is rebuilt, which is what makes
+  the fix reach a consumer's `_map.html`.
+
 ## plugin `v7.3.0` — 2026-09-08
 
 **Pass 1 of the command-surface cut: `sync --suggest-verifies` is retired.** The first and,

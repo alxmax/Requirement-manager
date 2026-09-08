@@ -212,9 +212,14 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
 
   const d = DENSITY[density] || DENSITY.comfy;
 
+  // A milestone whose every TODO item shipped (and no requirement cites it)
+  // used to have no signal at all reaching this Set — the column vanished
+  // and the chart jumped straight to the next one, reading as a skipped
+  // version rather than a finished one. A milestone is real once TODO.md
+  // groups anything under it, done or not.
   const msSet = new Set();
   REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
-  TODOS.forEach(t => { if (!t.done && t.milestone) msSet.add(t.milestone); });
+  TODOS.forEach(t => { if (t.milestone) msSet.add(t.milestone); });
   const milestones = Array.from(msSet).sort(semverCmp);
 
   const current =
