@@ -4637,7 +4637,7 @@ class SearchByIdAndText(unittest.TestCase):  # tested-by: ARCH-SEARCH-036  # tes
         self.assertTrue(all("id " not in r[:8] and "text" not in r[:8] for r in rows), out)
 
 
-class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007  # tested-by: ARCH-SUGGESTVERIFIES-047
+class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-by: ARCH-INIT-012  # tested-by: ARCH-RETIRE-064  # tested-by: ARCH-DECOMPOSE-050  # tested-by: ARCH-HEALTH-017  # tested-by: ARCH-PARSE-001  # tested-by: ARCH-MAP-007
     """Regressions for the 2026-09-06 full audit (docs/audit/2026-09-06-full-audit.md)."""
 
     LONG = " ".join(["alpha"] * 155)
@@ -4733,12 +4733,6 @@ class Audit20260906(unittest.TestCase):  # tested-by: ARCH-DESIGN-061  # tested-
         self.assertEqual(R._bullets(body, "description"),
                          ["clause one", "clause two --flag continuation"])
 
-    def test_suggest_verifies_matches_the_case_label_spelling(self):
-        rx = R._ac_name_re("CASE-3")
-        self.assertTrue(rx.search("test_case3_reads"))
-        self.assertTrue(rx.search("test_case_3_reads"))
-        self.assertTrue(rx.search("test_ac3_reads"))
-        self.assertFalse(rx.search("test_case30_reads"))
 
 
 class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-AUDIT-970

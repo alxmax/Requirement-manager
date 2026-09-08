@@ -72,7 +72,6 @@ from reqmap_engine.similar import (
     SEARCH_TOP, _redundant_groups, _threshold_arg, cmd_search, cmd_similar
 )
 from reqmap_engine.site import _site_default_target, cmd_site
-from reqmap_engine.verifies import cmd_suggest_verifies
 from reqmap_engine.workspace import Workspace, _is_source_repo
 from reqmap_engine import (
     config, model, parse, sections, acceptance, text, tags, scan,
@@ -80,7 +79,7 @@ from reqmap_engine import (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     implement, risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
-    gate, audit, init, verifies, retire, levels, review,
+    gate, audit, init, retire, levels, review,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -217,8 +216,13 @@ def _add_todo_and_mode_flags(ap):
                     help="gate: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
                     help="gate: print the advisory design review of the code")
+    # DEPRECATED in v7.3.0, removed in the release after. The capability is gone
+    # (ARCH-SUGGESTVERIFIES-047 and its three children are `deprecated`, verifies.py
+    # deleted), but argparse still accepts the flag for one release so a consumer
+    # following an older doc meets a sentence instead of `unrecognized arguments`
+    # — the alias window v5.0.0 did not give them (ADR-0037 decision 3).
     ap.add_argument("--suggest-verifies", dest="mode_suggest", action="store_true",
-                    help="sync: propose per-criterion `verifies:` tags (--apply writes them)")
+                    help=argparse.SUPPRESS)
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
                     help="sync: take one or more requirements out of service; prints the blast "
                          "radius first")
@@ -308,7 +312,11 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
     if a.mode_suggest:
-        return cmd_suggest_verifies(ws, apply_tags=a.do_apply)
+        print("`sync --suggest-verifies` was retired in v7.3.0: the per-criterion tag it "
+              "proposed is written by hand, and the gate still reports an untagged CASE-N "
+              "(RM013). This flag is accepted for one release and does nothing.",
+              file=sys.stderr)
+        return 0
     # Before the gate, not after: the generated integration artifacts are derived
     # from the command registry, and RM028 reports them stale. Regenerating them
     # downstream of a check that fails ON them can never converge.
@@ -483,7 +491,7 @@ _ENGINE_MODULES = (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     implement, risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
-    gate, audit, init, verifies, retire, levels, review,
+    gate, audit, init, retire, levels, review,
 )
 
 

@@ -1,5 +1,43 @@
 # Changelog
 
+## plugin `v7.3.0` — 2026-09-08
+
+**Pass 1 of the command-surface cut: `sync --suggest-verifies` is retired.** The first and,
+for now, only mode the 2026-09-08 audit cleared — bundle
+`2026-09-08_163116-senate-reqmap-cli-surface-18-to-5` (MODIFY, GO 1 / MODIFY 8 / STOP 0),
+recorded as [ADR-0037](docs/adr/0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md).
+It was chosen over the smaller `gate --review` because blast radius measured in test
+functions missed that `--review` is the only engine command a shipped skill invokes:
+`--suggest-verifies` has zero references in the consumer repo and no surviving command
+prints its name.
+
+- **`verifies.py` deleted** (197 lines) and its registry entry removed (11 more), so
+  `reqmap_engine/` falls 11,842 → 11,634 lines. The yield is booked as a measured
+  post-condition, not a projection: had the requirements been deprecated while the line
+  count stood still, the retirement would have removed the specification and kept the
+  code, and it would have been reverted.
+- **`ARCH-SUGGESTVERIFIES-047` and its three children are `deprecated`, not deleted** —
+  `sync --retire --apply`, reversible, already exempt from the gates. `--delete` and the
+  block removal wait for the release after, per ADR-0027's own two-step. The retire plan
+  reported 0 dependents, 0 prose referrers and no `refusing:` line; `SYS-QUALITY-104` keeps
+  5 other satisfiers, so no rung is orphaned. Its `leaves_unused: ARCH-ACVERIFY-019` line
+  was **not** acted on — that requirement backs gate rule RM013 on the bare-gate path, and
+  the hint is a graph artefact of losing the last `depends_on` pointer.
+- **The flag survives one release as a no-op shim.** `sync --suggest-verifies` still parses,
+  prints one line naming what replaced it, and exits 0. `v5.0.0` shipped its fold with no
+  alias at all and a consumer met `invalid choice`; this is the window that audit asked for
+  and did not get. The shim goes in the next release, at which point the retired-name guard
+  starts reporting any instruction that still names the flag.
+- Per-pass discipline from ADR-0037, met here: 453 changed lines against a 500 cap
+  (excluding the four generated artifacts), 11 `verifies:`-tagged test functions against a
+  cap of 12, gate at 0 errors, 1067 tests green.
+
+**Not in this pass:** `clarify --levels` (needs an ADR superseding 0031, whose own revisit
+date is 2027-03-06), `gate --review` (the `requirement-quality-review` skill's only engine
+command), `gate --show` (`REQ-VLEVEL-946` is confirmed with `show.py:12` as its sole member —
+deleting it without re-pointing is RM006), and `init --plan` (one registry entry with
+`--md-glob`). `sync --retire` is permanently KEEP.
+
 ## plugin `v7.2.1` — 2026-09-08
 
 **The stale-instruction guard learns flags, reads the consumer, and finds fifteen live
