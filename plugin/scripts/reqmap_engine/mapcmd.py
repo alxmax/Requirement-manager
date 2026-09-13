@@ -15,6 +15,7 @@ from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
 from .scan import scan_ac_verifies
 from .site import _extract_region, _render_region, _site_context_from_data, _site_default_target
+from .targets import load_targets
 from .viewer import render_html
 
 
@@ -68,6 +69,10 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     # The same record `next` prints its headline from, so the viewer reads the score
     # rather than defining a second one.  # implements: REQ-HEALTH-968
     data["health"] = _health_record(reqs, members, reqs_dir)
+    planning = load_targets(reqs_dir)
+    if planning:
+        data["planning"] = planning
+        data["targets"] = planning  # legacy alias — one release
     _attach_translations(data, reqs, reqs_dir)
     return data
 

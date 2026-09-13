@@ -1,5 +1,44 @@
 # Changelog
 
+## plugin `v7.3.4` — 2026-09-13
+
+**Planning Gantt in Planificare, plus map zoom and a viewer split.** Optional
+`requirements/_planning.json` declares score targets, milestone due dates, lanes and
+dated bars. The viewer Planificare tab has two modes: **Plan** (months on X, swimlanes
+on Y, today line, milestone flags) and **Versions** (the existing chip grid). Map zoom/fit
+is shared with Roadmap. The viewer Design-OOP split extracts `Rail`, `TopBar`, `canvasZoom`,
+and per-view parts.
+
+- `_planning.json` is exported on `_map.json` as `planning` (legacy alias `targets`).
+- Rail gauges show target vs current (health / design OOP).
+- Engine: `reqmap_engine/targets.py`; vendored viewer rebuilt.
+
+## plugin `v7.3.3` — 2026-09-13
+
+**Planning sidecar in the viewer.** Optional `requirements/_planning.json` (legacy:
+`_targets.json`) declares milestone due dates, planned items not yet in `TODO.md`, and
+optional score targets; `sync` exports it in `_map.json` and the viewer shows it on the
+Planificare tab and the rail gauges — including future milestones with no work filed yet.
+
+- `_planning.json`: `{ milestones: { "vX.Y": { due, label, items[] } }, scores?: { health, design } }`.
+- Planificare tab: ghost chips for `items`, due date + label per column, “next due” in toolbar.
+- Rail: target marker on the gauge ring + “target N — on track / N below”.
+- Engine: `reqmap_engine/targets.py`; vendored viewer rebuilt.
+
+## plugin `v7.3.2` — 2026-09-13
+
+**Map zoom and viewer refactor.** The interactive map gains zoom/fit controls
+(shared with Roadmap), and the viewer's Design-OOP candidates are cleared by
+extracting shared components (`canvasZoom`, `Rail`, `MapParts`, `SpecParts`,
+`ProblemsPanels`).
+
+- Map toolbar: zoom −/+ , reset, **Fit**, ctrl+scroll — persisted per reader in
+  `localStorage`.
+- Hierarchy layout (`computeHierarchyLayout` in `layout.js`) uses `satisfies` /
+  `satisfied_by` edges top-down; each architecture node shows its code-child count.
+- `adoptMapExport()` replaces six `set*` functions in `data.js` (prefix-family fix).
+- Vendored viewer rebuilt (`plugin/scripts/_map_viewer.html`).
+
 ## plugin `v7.3.1` — 2026-09-09
 
 **A milestone whose work has all shipped is a finished column, not a missing one.**

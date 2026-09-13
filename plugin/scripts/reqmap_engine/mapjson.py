@@ -91,6 +91,11 @@ def _build_json_text(data):  # implements: ARCH-MAP-007  # implements: REQ-MAP-8
         payload["design"] = data["design"]
     if data.get("health"):                      # implements: REQ-HEALTH-968
         payload["health"] = data["health"]
+    if data.get("planning"):
+        payload["planning"] = data["planning"]
+        payload["targets"] = data["planning"]  # legacy alias
+    elif data.get("targets"):
+        payload["targets"] = data["targets"]
     return _utf8_safe(json.dumps(payload, indent=2, ensure_ascii=False))
 
 

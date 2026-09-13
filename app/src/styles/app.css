@@ -141,6 +141,9 @@ button { font-family: inherit; cursor: pointer; }
 .tab-legend { margin-left: auto; font: var(--text-small); color: var(--fg-muted); display: flex; align-items: center; gap: 7px; }
 
 /* ---- Map canvas ---------------------------------------------------------- */
+.map-toolbar { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 8px 20px; border-bottom: 1px solid var(--border-soft); background: var(--bg-raised); flex-shrink: 0; }
+.map-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.map-main .canvas { flex: 1; min-height: 0; max-height: none; }
 .map-wrap { display: grid; grid-template-columns: 1fr; min-height: 0; }
 .map-wrap.with-panel { grid-template-columns: minmax(0,1fr) 400px; }
 .canvas { position: relative; overflow: auto; min-height: 540px; max-height: calc(100vh - 156px); background-image: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px); background-size: 24px 24px; background-position: -1px -1px; }

@@ -1,4 +1,6 @@
 // implements: ARCH-VIEWER-007
+import { buildHierarchy } from "./tree.js";
+
 /* Graph layout computed from the live registry — no hand-tuned coordinates.
  *
  * Produces a layered "main-bus" layout: nodes are ranked by dependency depth so
@@ -218,4 +220,82 @@ export function colorFor(id) {
     border: `hsl(${hue} ${Math.min(sat + 4, 70)}% 60%)`,
     line: `hsl(${hue} 65% 45%)`,
   };
+}
+
+/** Top-down V-model tree: system → architecture via `satisfies` / `satisfied_by`.
+ * The code level is counted per node but not drawn — same scope as _map.md's
+ * Specification Hierarchy diagram. */
+export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
+  const COLW = opts.colW || 220;
+  const ROWH = opts.rowH || 130;
+  const X0 = 50, Y0 = 40;
+  const h = buildHierarchy(reqs);
+  const visible = reqs.filter((r) => r.level !== "code");
+  const visSet = new Set(visible.map((r) => r.id));
+
+  const edges = [];
+  const edgeKeys = new Set();
+  visible.forEach((r) => {
+    (r.satisfiedBy || []).forEach((c) => {
+      if (!visSet.has(c)) return;
+      const key = r.id + "\u0000" + c;
+      if (!edgeKeys.has(key)) { edgeKeys.add(key); edges.push([r.id, c]); }
+    });
+    (r.satisfies || []).forEach((p) => {
+      if (!visSet.has(p)) return;
+      const key = p + "\u0000" + r.id;
+      if (!edgeKeys.has(key)) { edgeKeys.add(key); edges.push([p, r.id]); }
+    });
+  });
+
+  const codeCounts = {};
+  visible.forEach((r) => {
+    codeCounts[r.id] = (h.childrenOf[r.id] || []).filter((c) => {
+      const child = h.byId[c];
+      return child && child.level === "code";
+    }).length;
+  });
+
+  const subtreeW = {};
+  const widthOf = (id) => {
+    if (subtreeW[id] != null) return subtreeW[id];
+    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
+    subtreeW[id] = kids.length ? kids.reduce((s, c) => s + widthOf(c), 0) : 1;
+    return subtreeW[id];
+  };
+
+  const pos = {};
+  const depthOf = {};
+  const place = (id, xUnit, depth) => {
+    depthOf[id] = depth;
+    const kids = (h.childrenOf[id] || []).filter((c) => visSet.has(c));
+    const w = widthOf(id);
+    pos[id] = [X0 + xUnit * COLW + Math.max(0, (w * COLW - NODE_W) / 2), Y0 + depth * ROWH];
+    let cx = xUnit;
+    kids.forEach((c) => { place(c, cx, depth + 1); cx += widthOf(c); });
+  };
+
+  let xUnit = 0;
+  h.roots.filter((id) => visSet.has(id)).forEach((id) => { widthOf(id); place(id, xUnit, 0); xUnit += widthOf(id); });
+  visible.forEach((r) => {
+    if (pos[r.id]) return;
+    widthOf(r.id);
+    place(r.id, xUnit, 0);
+    xUnit += widthOf(r.id);
+  });
+
+  let width = 800, height = 520;
+  for (const [x, y] of Object.values(pos)) {
+    width = Math.max(width, x + NODE_W + 60);
+    height = Math.max(height, y + 160);
+  }
+
+  const maxDepth = Math.max(0, ...Object.values(depthOf));
+  const colX = {}, colYs = {};
+  for (let d = 0; d <= maxDepth; d++) {
+    colX[d] = X0 + d * 0;
+    colYs[d] = visible.filter((r) => depthOf[r.id] === d && pos[r.id])
+      .map((r) => pos[r.id][1]).sort((a, b) => a - b);
+  }
+  return { pos, edges, width, height, codeCounts, depthOf, colX, colYs, rankOf: depthOf, lo: 0, hi: height, colW: COLW };
 }

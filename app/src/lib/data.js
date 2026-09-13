@@ -241,6 +241,9 @@ export let COMMANDS = [];
  * an invented zero.  implements: REQ-VIEWER-969 */
 export let HEALTH = null;
 export let DESIGN = null;
+/* Planning sidecar from requirements/_planning.json (legacy: `targets` key).
+ * Milestone due dates, planned items, optional score targets. Null until loaded. */
+export let TARGETS = null;
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -248,30 +251,19 @@ function derive() {
 }
 derive();
 
-/** Replace the registry with live data (from the engine export adapter). */
-export function setRegistry(list) {
-  REQUIREMENTS = list;
-  derive();
-}
-
-/** Adopt the engine's health + design records (both absent on older maps). */
-export function setScores(health, design) {          // implements: REQ-VIEWER-969
+/** Adopt one engine `_map.json` export — the single entry point loadData uses. */
+export function adoptMapExport(data) {               // implements: REQ-VIEWER-969
+  if (!data || typeof data !== "object") return;
+  if (Array.isArray(data.nodes)) { REQUIREMENTS = data.nodes; derive(); }
+  if ("repo" in data) REPO = data.repo || null;
+  if ("language" in data) LANGUAGE = (data.language === "ro" || data.language === "both") ? data.language : "en";
+  if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];
+  if ("commands" in data) COMMANDS = Array.isArray(data.commands) ? data.commands : [];
+  const health = data.health, design = data.design;
   HEALTH = (health && typeof health.score === "number") ? health : null;
   DESIGN = (design && typeof design.score === "number") ? design : null;
-}
-
-/** Replace the documented command list (engine-emitted; absent on older maps). */
-export function setCommands(list) { COMMANDS = Array.isArray(list) ? list : []; }
-
-/** Set the owner/repo name the loaded map describes (engine-emitted). */
-export function setLanguage(v) { LANGUAGE = (v === "ro" || v === "both") ? v : "en"; }  // implements: REQ-TRANSLATE-996
-export function setRepo(name) {
-  REPO = name || null;
-}
-
-/** Replace the TODO list with data parsed from TODO.md (engine-emitted). */
-export function setTodos(list) {
-  TODOS = Array.isArray(list) ? list : [];
+  const planning = data.planning || data.targets;
+  TARGETS = (planning && typeof planning === "object") ? planning : null;
 }
 
 /* ---- coverage --------------------------------------------------------------

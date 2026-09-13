@@ -11,7 +11,7 @@ import { resolve } from "node:path";
 
 import App from "../src/App.jsx";
 import { rankRequirements, searchRequirements } from "../src/lib/search.js";
-import { setRegistry, setTodos, REQUIREMENTS } from "../src/lib/data.js";
+import { adoptMapExport, REQUIREMENTS } from "../src/lib/data.js";
 import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
@@ -19,7 +19,7 @@ import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { SpecView } from "../src/views/SpecView.jsx";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
 import { CommandsView } from "../src/views/CommandsView.jsx";
-import { setCommands, setScores } from "../src/lib/data.js";
+
 import { I18nProvider, translate } from "../src/lib/i18n.jsx";
 import { computeLayout } from "../src/lib/layout.js";
 import {
@@ -30,7 +30,7 @@ import {
 // feed the real engine export through the adapter, exactly as the browser would
 // (run from the app/ directory: `node scripts/run-ssr-smoke.mjs`)
 const json = JSON.parse(readFileSync(resolve(process.cwd(), "public/data.json"), "utf8"));
-setRegistry(json.nodes.map(adaptNode));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 
 const noop = () => {};
 const cases = {
@@ -63,17 +63,17 @@ for (const [name, el] of Object.entries(cases)) {
 // the fixture on purpose: `lane:` must still PARSE and still be ignored by the chart.
 {
   const ms = "v9.9";
-  setRegistry([
+  adoptMapExport({ nodes: [
     adaptNode({ id: "LANE-REQ-001", title: "A shipped capability", status: "confirmed",
                 layer: "bus", milestone: ms, deps: [], used_by: [], depends_on: [] }),
-  ]);
+  ] });
   const todoNames = ["Crash on empty stdin", "Old style item", "Plain feature item"];
-  setTodos([
+  adoptMapExport({ todos: [
     { name: todoNames[0], lane: "bug",     milestone: ms, done: false },
     { name: todoNames[1], lane: "ops",     milestone: ms, done: false },
     { name: todoNames[2], lane: "feature", milestone: ms, done: false },
     { name: "Already shipped", lane: "feature", milestone: ms, done: true },
-  ]);
+  ] });
   const html = renderToString(<RoadmapView openSpec={noop} />);
   const laneLabels = (html.match(/>(Implementations|Bugs|Features|Bus|Need|Ops)</g) || []);
   const laneChecks = [
@@ -85,8 +85,8 @@ for (const [name, el] of Object.entries(cases)) {
       html.includes("A shipped capability")],
   ];
   for (const [label, ok] of laneChecks) test(label, ok);
-  setRegistry(json.nodes.map(adaptNode));           // back to the live registry
-  setTodos(json.todos || []);
+  adoptMapExport({ nodes: json.nodes.map(adaptNode) });           // back to the live registry
+  adoptMapExport({ todos: json.todos || [] });
 }
 
 // LANGUAGE sets the viewer's default locale.  // tested-by: REQ-TRANSLATE-996
@@ -146,11 +146,11 @@ for (const [label, ok] of searchChecks) test(label, ok);
 
 // XSS regression: untrusted requirement HTML must render ESCAPED in both
 // dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecView), never live.
-setRegistry([adaptNode({
+adoptMapExport({ nodes: [adaptNode({
   id: "XSS-TEST-001", title: "xss", area: "XSS", layer: "feature", status: "confirmed",
-  intent: "i", contract: ['danger <img src=x onerror="boom()">'],
+  intent: "i", contract: ['danger <img src=x onerror="boom( })">'],
   acc: ['<script>boom()</script>'], members: [], deps: [], used_by: [],
-})]);
+})] });
 const xssMap = renderToString(
   <MapView selId="XSS-TEST-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />);
 const xssSpec = renderToString(<SpecView selId="XSS-TEST-001" setSelId={noop} />);
@@ -164,13 +164,13 @@ for (const [label, ok] of xssChecks) test(label, ok);
 // `[[ID]]` is how an author points one requirement at another. Rendered
 // literally it was a pair of brackets leading nowhere, on every architecture
 // requirement in the corpus.
-setRegistry([
+adoptMapExport({ nodes: [
   adaptNode({ id: "LINK-SRC-001", title: "source", area: "LINK", layer: "feature", status: "confirmed",
     intent: "i", contract: ['see [[LINK-DST-002]] and [[LINK-GONE-999]] <b>x</b>'],
     acc: [], members: [], deps: [], used_by: [] }),
   adaptNode({ id: "LINK-DST-002", title: "target", area: "LINK", layer: "feature", status: "confirmed",
     intent: "i", contract: ["a clause"], acc: [], members: [], deps: [], used_by: [] }),
-]);
+] });
 const linkSpec = renderToString(<SpecView selId="LINK-SRC-001" setSelId={noop} />);
 const linkChecks = [
   ["links: a resolvable cross-reference renders as a control carrying the id",  // verifies: REQ-VIEWER-944#CASE-1
@@ -187,7 +187,7 @@ for (const [label, ok] of linkChecks) test(label, ok);
 // i18n: the toggle must translate UI CHROME and leave requirement content alone.
 // Rendered inside the provider with the locale forced, since the provider's own
 // initial value comes from localStorage, which does not exist here.
-setRegistry(json.nodes.map(adaptNode));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const spec = (locale) => renderToString(
   <I18nProvider initialLocale={locale}>
     <SpecView selId="ARCH-MAP-007" setSelId={noop} />
@@ -213,22 +213,22 @@ for (const [label, ok] of i18nChecks) test(label, ok);
 // "machine-translated, unreviewed" badge; a node with no cache entry (the default
 // for every requirement until `reqmap.py translate` runs) renders the author's
 // text and shows no badge at all — the untranslated path must stay unchanged.
-setRegistry([adaptNode({
+adoptMapExport({ nodes: [adaptNode({
   id: "I18N-CONTENT-TEST-001", title: "Titlu original", area: "I18N", layer: "feature",
   status: "confirmed", intent: "Motivul original.", contract: ["- Clauza originală."],
   acc: ["- Criteriul original."], members: [], deps: [], used_by: [],
   i18n: { en: { title: "Original title", intent: "The original reason.",
                 contract: "- The original clause.", acceptance: "- The original criterion." } },
-})]);
+})] });
 const translatedSpecEn = renderToString(
   <I18nProvider initialLocale="en"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
 const translatedSpecRo = renderToString(
   <I18nProvider initialLocale="ro"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
-setRegistry([adaptNode({
+adoptMapExport({ nodes: [adaptNode({
   id: "I18N-NOCACHE-TEST-001", title: "Titlu fără cache", area: "I18N", layer: "feature",
   status: "confirmed", intent: "Motiv.", contract: ["- Clauză."], acc: ["- Criteriu."],
   members: [], deps: [], used_by: [],
-})]);
+})] });
 const noCacheSpecEn = renderToString(
   <I18nProvider initialLocale="en"><SpecView selId="I18N-NOCACHE-TEST-001" setSelId={noop} /></I18nProvider>);
 const i18nContentChecks = [
@@ -245,12 +245,12 @@ for (const [label, ok] of i18nContentChecks) test(label, ok);
 // learned to parse the block form (v2.29.0), and false for every one after, which
 // silently turned every criterion into a single run-on line.
 const GWT_ACCEPT = "AC-1\n  Given  a repo with no requirements/\n  When   `init` runs\n  Then   it creates the directory";
-setRegistry([adaptNode({
+adoptMapExport({ nodes: [adaptNode({
   id: "GWT-TEST-001", title: "Acceptance block", area: "GWT", layer: "feature",
   status: "confirmed", intent: "Reason.", contract: ["- A clause."],
   acc: ["AC-1 — Given  a repo with no requirements/ When   `init` runs Then   it creates the directory"],
   accept: GWT_ACCEPT, members: [], deps: [], used_by: [],
-})]);
+})] });
 const gwtSpec = renderToString(<SpecView selId="GWT-TEST-001" setSelId={noop} />);
 const gwtChecks = [
   ["acceptance: a labelled block renders as the multi-line gwt block, not a folded bullet",  // verifies: REQ-VIEWER-942#CASE-5
@@ -293,7 +293,7 @@ for (const [label, ok] of layoutChecks) test(label, ok);
 // depth == level). These assert the SHAPE the outline depends on, plus the two
 // degradations that must not throw: a registry with no `satisfies` at all (the
 // baked fallback) and a `satisfies` cycle.
-setRegistry(json.nodes.map(adaptNode));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const H = buildHierarchy(REQUIREMENTS);
 const exp0 = defaultExpanded(H);
 const rows0 = flattenTree(H, { expanded: exp0, keep: null });
@@ -356,12 +356,12 @@ for (const [label, ok] of explorerChecks) test(label, ok);
 // registry. It used to run against this repo's own map and passed only because the
 // corpus happened to have nothing to fix — so the first draft requirement anyone
 // added broke a test whose name says nothing about the corpus.
-setRegistry([]);
+adoptMapExport({ nodes: [] });
 test("problems: an empty inbox renders the named empty state, not a badge",
   renderToString(<ProblemsView openSpec={noop} />).includes("Nothing to fix."));
 
 // ---- registry tally scopes the outline (REQ-VIEWER-945) ---------------------
-setRegistry(json.nodes.map(adaptNode));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const unscoped = renderToString(<ExplorerView selId="ARCH-MAP-007" setSelId={noop} />);
 const scopedDraft = renderToString(
   <ExplorerView selId="ARCH-MAP-007" setSelId={noop} focus="draft" clearFocus={noop} />);
@@ -389,12 +389,12 @@ const CLI_FIXTURE = [
   { name: "wibble", group: "read", summary: "A command no dictionary knows.",
     arg: "AREA-NAME-NNN", flags: [] },
 ];
-setCommands(CLI_FIXTURE);
+adoptMapExport({ commands: CLI_FIXTURE });
 const cmdsEn = renderToString(<I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
 const cmdsRo = renderToString(<I18nProvider initialLocale="ro"><CommandsView /></I18nProvider>);
-setCommands([]);
+adoptMapExport({ commands: [] });
 const cmdsEmpty = renderToString(<I18nProvider initialLocale="en"><CommandsView /></I18nProvider>);
-setCommands(CLI_FIXTURE);
+adoptMapExport({ commands: CLI_FIXTURE });
 const cmdChecks = [
   ["commands: each verb is listed with its invocation and flags",  // verifies: REQ-VIEWER-964#CASE-1
     cmdsEn.includes("reqmap.py gate") && cmdsEn.includes("--strict")
@@ -441,14 +441,14 @@ for (const [label, ok] of layerChecks) test(label, ok);
 // Two screens until v4.0.0: Problems was ~618 rows of draft review noise and a real
 // question dropped in there was invisible. What survives the merge is the
 // distinction — origin is a tab, never a severity.
-setRegistry([
+adoptMapExport({ nodes: [
   adaptNode({ id: "Q-ASKED-001", title: "asked", area: "Q", layer: "feature", status: "confirmed",
     intent: "i", contract: ["a clause"], acc: [], members: [{ role: "implements", loc: "a.py:1" }],
     verify: ["Is a stale tested-by range an error or a warning?"], deps: [], used_by: [] }),
   adaptNode({ id: "Q-QUIET-002", title: "quiet", area: "Q", layer: "feature", status: "confirmed",
     intent: "i", contract: ["a clause"], acc: [], members: [{ role: "implements", loc: "b.py:1" }],
     verify: ["None — authored from known intent."], deps: [], used_by: [] }),
-]);
+] });
 const merged = computeProblems();
 const asked = computeQuestions();
 const mergedHtml = renderToString(<ProblemsView openSpec={noop} />);
@@ -467,14 +467,14 @@ const mergeChecks = [
 for (const [label, ok] of mergeChecks) test(label, ok);
 
 // ---- the rail's two engine-emitted readings (REQ-VIEWER-969) ---------------
-setRegistry(json.nodes.map(adaptNode));
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const SCORES = [{ score: 78, healthy: 39, total: 50 },
                 { score: 23, clean_files: 7, files: 30 }];
-setScores(...SCORES);
+adoptMapExport({ health: SCORES[0], design: SCORES[1] });
 const railHtml = renderToString(<App />);
-setScores(null, null);                       // an older map carries neither key
+adoptMapExport({ health: null, design: null });                       // an older map carries neither key
 const railBare = renderToString(<App />);
-setScores(...SCORES);
+adoptMapExport({ health: SCORES[0], design: SCORES[1] });
 const gaugeChecks = [
   ["rail: both readings render the engine's own numbers",  // verifies: REQ-VIEWER-969#CASE-1
     railHtml.includes("39/50 green") && railHtml.includes("7/30 files clean")
@@ -510,12 +510,12 @@ const DESIGN_WITH = {
   advice: { "long-parameter-list": "a parameter list this long is an object waiting to be named",
             "long-function": "a function this long hides several steps" },
 };
-setScores(null, DESIGN_WITH);
+adoptMapExport({ health: null, design: DESIGN_WITH });
 const designHtml = renderToString(<ProblemsView openSpec={noop} />);
 const designRows = computeProblems().filter(p => p.signal === "design");
-setScores(null, { score: 23, clean_files: 7, files: 30, candidates: {} });
+adoptMapExport({ health: null, design: { score: 23, clean_files: 7, files: 30, candidates: {} } });
 const designBare = renderToString(<ProblemsView openSpec={noop} />);
-setScores(null, null);
+adoptMapExport({ health: null, design: null });
 const designChecks = [
   ["design: the tab is offered with the candidate count",  // verifies: REQ-VIEWER-977#CASE-1
     designHtml.includes("Design") && designHtml.includes(">2<")],
@@ -529,7 +529,7 @@ const designChecks = [
 ];
 for (const [label, ok] of designChecks) test(label, ok);
 
-setRegistry(json.nodes.map(adaptNode));   // restore the real dataset for anything after this point
+adoptMapExport({ nodes: json.nodes.map(adaptNode) });   // restore the real dataset for anything after this point
 
 // ---- roadmap zoom and density (REQ-VIEWER-984) ----------------------------
 // The wheel handler is NOT reachable from here: renderToString has no DOM and
@@ -555,9 +555,9 @@ for (const [label, ok] of roadmapChecks) test(label, ok);
 // A milestone whose TODO items have all shipped. The chips are still filtered to the
 // open ones, so the column is empty — what is asserted is that it EXISTS, because the
 // version it names is finished, not skipped.
-setTodos([{ title: "a shipped item", done: true, milestone: "v99.9", lane: "feature" }]);
+adoptMapExport({ todos: [{ title: "a shipped item", done: true, milestone: "v99.9", lane: "feature" }] });
 const roadAllDone = renderToString(<RoadmapView openSpec={noop} />);
-setTodos([]);
+adoptMapExport({ todos: [] });
 test("roadmap: a milestone whose every item is complete still gets a column",  // verifies: REQ-VIEWER-995#CASE-4
   roadAllDone.includes(">v99.9<") && !roadAllDone.includes("a shipped item"));
 

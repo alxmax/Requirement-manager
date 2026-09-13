@@ -7,7 +7,7 @@
  * the app's requirement shape; on any miss it leaves the baked fallback in
  * place, so the app always renders. */
 
-import { setRegistry, setRepo, setTodos, setCommands, setScores, setLanguage } from "./data.js";
+import { adoptMapExport } from "./data.js";
 
 /** engine node ({...used_by, acc, accept}) → app requirement ({...usedBy, gwt}). */
 export function adaptNode(n) {
@@ -79,12 +79,17 @@ export async function loadData() {
   // 1. inlined single-file viewer
   const inl = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
   if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
-    setRegistry(inl.nodes.map(adaptNode));
-    setRepo(inl.repo);
-    setLanguage(inl.language);
-    setTodos(inl.todos || []);
-    setCommands(inl.commands);
-    setScores(inl.health, inl.design);
+    adoptMapExport({
+      nodes: inl.nodes.map(adaptNode),
+      repo: inl.repo,
+      language: inl.language,
+      todos: inl.todos || [],
+      commands: inl.commands,
+      health: inl.health,
+      design: inl.design,
+      planning: inl.planning,
+      targets: inl.targets,
+    });
     return { source: "inline", engineVersion: inl.engine_version || null, count: inl.nodes.length };
   }
   // 2. fetched export (only meaningful over http; file:// will throw → fallback)
@@ -93,12 +98,17 @@ export async function loadData() {
     if (!res.ok) return { source: "baked" };
     const json = await res.json();
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) return { source: "baked" };
-    setRegistry(json.nodes.map(adaptNode));
-    setRepo(json.repo);
-    setLanguage(json.language);
-    setTodos(json.todos || []);
-    setCommands(json.commands);
-    setScores(json.health, json.design);
+    adoptMapExport({
+      nodes: json.nodes.map(adaptNode),
+      repo: json.repo,
+      language: json.language,
+      todos: json.todos || [],
+      commands: json.commands,
+      health: json.health,
+      design: json.design,
+      planning: json.planning,
+      targets: json.targets,
+    });
     return { source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length };
   } catch {
     return { source: "baked" };

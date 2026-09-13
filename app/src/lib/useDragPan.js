@@ -7,8 +7,9 @@
  * two copies of the same mouse-handler logic. */
 import { useRef } from "react";
 
-export function useDragPan() {
-  const ref = useRef(null);
+export function useDragPan(externalRef) {
+  const localRef = useRef(null);
+  const ref = externalRef || localRef;
   const drag = useRef(null);
 
   function onMouseDown(e) {
