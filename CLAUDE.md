@@ -21,7 +21,6 @@ python scripts/reqmap.py clarify --levels       # propose a V-model rung for eve
 # draft on its own.
 
 # --- build ----------------------------------------------------------------
-python scripts/reqmap.py gate --implement AREA-NAME-NNN  # the brief for writing its code: obligations, cases, tags, neighbouring code (--json)
 python scripts/reqmap.py gate --code ..     # THE verdict: link sync + drift + test links, then requirement readability, then committed-map freshness (--no-lint / --no-map-check opt out). Report-only.
 python scripts/reqmap.py sync --code ..     # rebuild EVERYTHING derived: lock, _map.*, _findings.md, the site regions, the integration artifacts. --accept-drift when a confirmed contract changed.
 python scripts/reqmap.py sync --retire AREA-NAME-NNN [ID ...]  # take one requirement — or a whole class — out of service: plan first, --apply to act, --delete to remove it outright, --force past dependents. A batch retires in a graph-computed order (consumers first) under ONE working-tree check; a dependent that is already deprecated, or that is in the same batch, never blocks

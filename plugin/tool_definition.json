@@ -73,7 +73,7 @@
     "type": "function",
     "function": {
       "name": "reqmap_gate",
-      "description": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review and --implement for the two machine-readable plans. ",
+      "description": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review for the machine-readable review plan. ",
       "parameters": {
         "type": "object",
         "properties": {
@@ -108,10 +108,6 @@
           "mode_review": {
             "type": "string",
             "description": "Emit the deterministic review plan for one requirement, as JSON."
-          },
-          "mode_implement": {
-            "type": "string",
-            "description": "Emit the implementation brief for one requirement: obligations, required tags, similar existing code."
           },
           "show_all": {
             "type": "boolean",

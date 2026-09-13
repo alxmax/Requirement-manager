@@ -1,6 +1,6 @@
 ---
 id: ARCH-IMPLEMENT-063
-status: confirmed
+status: deprecated
 level: architecture
 layer: feature
 owner: Alex
@@ -41,7 +41,7 @@ CASE-3 — the brief writes nothing
 
 ---
 id: REQ-IMPLEMENT-958
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex
@@ -86,7 +86,7 @@ CASE-3 — the JSON brief is one object with the same fields
 
 ---
 id: REQ-IMPLEMENT-959
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

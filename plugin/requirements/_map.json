@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-13.3",
+  "engine_version": "2026-09-13.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -969,7 +969,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:363"
+          "loc": "plugin/scripts/reqmap.py:369"
         },
         {
           "role": "tested-by",
@@ -2207,11 +2207,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2852"
+          "loc": "plugin/scripts/test_reqmap_author.py:2758"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2917"
+          "loc": "plugin/scripts/test_reqmap_author.py:2823"
         },
         {
           "role": "implements",
@@ -2291,7 +2291,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2917"
+          "loc": "plugin/scripts/test_reqmap_author.py:2823"
         },
         {
           "role": "implements",
@@ -2410,7 +2410,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2852"
+          "loc": "plugin/scripts/test_reqmap_author.py:2758"
         },
         {
           "role": "implements",
@@ -2495,15 +2495,15 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:111"
+          "loc": "plugin/scripts/reqmap.py:110"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:172"
+          "loc": "plugin/scripts/reqmap.py:171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:230"
+          "loc": "plugin/scripts/reqmap.py:234"
         },
         {
           "role": "tested-by",
@@ -2724,7 +2724,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:397"
+          "loc": "plugin/scripts/reqmap.py:403"
         },
         {
           "role": "tested-by",
@@ -3192,11 +3192,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2562"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3038"
+          "loc": "plugin/scripts/test_reqmap_author.py:2944"
         },
         {
           "role": "tested-by",
@@ -3422,7 +3422,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2656"
+          "loc": "plugin/scripts/test_reqmap_author.py:2562"
         },
         {
           "role": "implements",
@@ -3479,7 +3479,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3038"
+          "loc": "plugin/scripts/test_reqmap_author.py:2944"
         },
         {
           "role": "implements",
@@ -6470,7 +6470,7 @@
       "id": "ARCH-IMPLEMENT-063",
       "layer": "feature",
       "level": "architecture",
-      "status": "confirmed",
+      "status": "deprecated",
       "area": "ARCH",
       "title": "The brief for implementing a requirement",
       "intent": "Between a written requirement and working code there is a gap every agent fills by guessing: which tags to carry, where this kind of code lives in this repo, what proves it landed. `implement` states all of it in one place, from facts the engine already holds. It writes no code — a deterministic tool can own the contract and the verdict, never the authorship — and it says so, so nobody waits for it to.",
@@ -6510,34 +6510,11 @@
         "REQ-IMPLEMENT-958",
         "REQ-IMPLEMENT-959"
       ],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:15"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:37"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:75"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:120"
-        }
-      ],
+      "members": [],
       "test_exempt": null,
       "milestone": "v4.0",
       "priority": "should-have",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
       "i18n": {
         "ro": {
           "title": "Fișa de brief pentru implementarea unei cerințe",
@@ -6551,7 +6528,7 @@
       "id": "REQ-IMPLEMENT-958",
       "layer": "feature",
       "level": "code",
-      "status": "confirmed",
+      "status": "deprecated",
       "area": "REQ",
       "title": "What the implementation brief states",
       "intent": "The brief is the requirement plus the four facts a writer of code needs and would otherwise reconstruct by reading the repository: what already implements it, what is still unanswered, what tags bind the new code, and what command proves the result.",
@@ -6582,30 +6559,11 @@
         "ARCH-IMPLEMENT-063"
       ],
       "satisfied_by": [],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:37"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:75"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:120"
-        }
-      ],
+      "members": [],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
       "i18n": {
         "ro": {
           "title": "Ce afirmă briefing-ul de implementare",
@@ -6619,7 +6577,7 @@
       "id": "REQ-IMPLEMENT-959",
       "layer": "feature",
       "level": "code",
-      "status": "confirmed",
+      "status": "deprecated",
       "area": "REQ",
       "title": "Pointing at where this kind of code lives",
       "intent": "\"Where do I put it?\" is the question a brief cannot answer from the requirement alone, and the engine knows nothing about the host project's layout. It does know which requirements read alike, and requirements that read alike are implemented next to each other far more often than not — so the neighbours' files are the honest answer, offered as a hint.",
@@ -6647,22 +6605,11 @@
         "ARCH-IMPLEMENT-063"
       ],
       "satisfied_by": [],
-      "members": [
-        {
-          "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
-        },
-        {
-          "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/implement.py:15"
-        }
-      ],
+      "members": [],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3,
       "i18n": {
         "ro": {
           "title": "Indicând unde trăiește acest tip de cod",
@@ -9290,7 +9237,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2955"
+          "loc": "plugin/scripts/test_reqmap_author.py:2861"
         },
         {
           "role": "implements",
@@ -9361,7 +9308,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2955"
+          "loc": "plugin/scripts/test_reqmap_author.py:2861"
         },
         {
           "role": "implements",
@@ -10673,11 +10620,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:450"
+          "loc": "plugin/scripts/reqmap.py:456"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:468"
+          "loc": "plugin/scripts/reqmap.py:474"
         },
         {
           "role": "tested-by",
@@ -10725,7 +10672,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:468"
+          "loc": "plugin/scripts/reqmap.py:474"
         },
         {
           "role": "tested-by",
@@ -10796,7 +10743,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2771"
+          "loc": "plugin/scripts/test_reqmap_author.py:2677"
         },
         {
           "role": "tested-by",
@@ -10924,7 +10871,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2771"
+          "loc": "plugin/scripts/test_reqmap_author.py:2677"
         },
         {
           "role": "implements",
@@ -11499,7 +11446,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:91"
         },
         {
           "role": "tested-by",
@@ -11558,15 +11505,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:90"
+          "loc": "plugin/scripts/reqmap.py:89"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:92"
+          "loc": "plugin/scripts/reqmap.py:91"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:379"
+          "loc": "plugin/scripts/reqmap.py:385"
         },
         {
           "role": "tested-by",
@@ -11961,11 +11908,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2983"
+          "loc": "plugin/scripts/test_reqmap_author.py:2889"
         },
         {
           "role": "tested-by",
@@ -12050,7 +11997,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         },
         {
           "role": "implements",
@@ -12115,7 +12062,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         },
         {
           "role": "implements",
@@ -12203,11 +12150,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2983"
+          "loc": "plugin/scripts/test_reqmap_author.py:2889"
         },
         {
           "role": "implements",
@@ -12281,7 +12228,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2448"
+          "loc": "plugin/scripts/test_reqmap_author.py:2354"
         },
         {
           "role": "implements",
@@ -15113,7 +15060,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:353"
+          "loc": "plugin/scripts/reqmap.py:359"
         },
         {
           "role": "tested-by",
@@ -16601,11 +16548,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2716"
+          "loc": "plugin/scripts/test_reqmap_author.py:2622"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3216"
+          "loc": "plugin/scripts/test_reqmap_author.py:3122"
         },
         {
           "role": "implements",
@@ -16801,7 +16748,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2716"
+          "loc": "plugin/scripts/test_reqmap_author.py:2622"
         },
         {
           "role": "implements",
@@ -16874,7 +16821,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3216"
+          "loc": "plugin/scripts/test_reqmap_author.py:3122"
         },
         {
           "role": "implements",
@@ -21074,7 +21021,7 @@
     {
       "name": "gate",
       "group": "read",
-      "summary": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review and --implement for the two machine-readable plans.",
+      "summary": "The commit/CI verdict, and every read-only question you can ask the corpus. Bare, it verifies that every code tag resolves to a real requirement, that every confirmed requirement has at least one implements: member, and that drift has not been introduced since the last sync, then checks requirement readability and map freshness. Exits non-zero on link-sync errors only. Never writes anything. The mode flags answer one question each instead of running the verdict: --audit for the whole problem report, --risk for what to do next, --show for one requirement's dossier, --search to rank by relevance, --dupes for overlapping contracts, --design for the code review, --review for the machine-readable review plan.",
       "arg": null,
       "flags": [
         {
@@ -21104,10 +21051,6 @@
         {
           "flag": "--review",
           "help": "Emit the deterministic review plan for one requirement, as JSON."
-        },
-        {
-          "flag": "--implement",
-          "help": "Emit the implementation brief for one requirement: obligations, required tags, similar existing code."
         },
         {
           "flag": "--all",
@@ -21205,9 +21148,9 @@
     }
   ],
   "design": {
-    "files": 87,
-    "clean_files": 59,
-    "score": 68,
+    "files": 86,
+    "clean_files": 58,
+    "score": 67,
     "candidates": {
       "encapsulation": 7,
       "abstraction": 8,
@@ -21487,7 +21430,7 @@
         "file": "plugin/scripts/reqmap.py",
         "line": 1,
         "name": "reqmap.py",
-        "detail": "508 lines (over 500)"
+        "detail": "514 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -21549,12 +21492,12 @@
     }
   },
   "health": {
-    "score": 98,
+    "score": 97,
     "total": 248,
-    "healthy": 244,
-    "confirmed": 244,
-    "implemented": 235,
-    "tested": 232,
+    "healthy": 241,
+    "confirmed": 241,
+    "implemented": 232,
+    "tested": 229,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
