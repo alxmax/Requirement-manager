@@ -75,21 +75,18 @@ export function adaptNode(n) {
  *  2. ./data.json (or _map.json) — fetched when served over http (dev / preview).
  *  3. the baked fallback dataset already in data.js.
  */
+/* The export is forwarded WHOLE, with only `nodes` adapted. It used to be copied key by
+ * key, and that hand-kept whitelist is exactly how `roadmap` and `history` shipped in
+ * v7.6.0/v7.8.0 reaching the page and never reaching the app: the engine emitted them,
+ * `window.__REQMAP_DATA__` carried them, and this function dropped them on the floor, so
+ * the Horizons mode and the Shipped band silently never rendered. `adoptMapExport` reads
+ * only the keys it knows and validates each one, so a spread is the safe shape and an
+ * added key needs no edit here.  implements: REQ-VIEWER-969 */
 export async function loadData() {
   // 1. inlined single-file viewer
   const inl = typeof window !== "undefined" ? window.__REQMAP_DATA__ : null;
   if (inl && Array.isArray(inl.nodes) && inl.nodes.length) {
-    adoptMapExport({
-      nodes: inl.nodes.map(adaptNode),
-      repo: inl.repo,
-      language: inl.language,
-      todos: inl.todos || [],
-      commands: inl.commands,
-      health: inl.health,
-      design: inl.design,
-      planning: inl.planning,
-      targets: inl.targets,
-    });
+    adoptMapExport({ ...inl, nodes: inl.nodes.map(adaptNode) });
     return { source: "inline", engineVersion: inl.engine_version || null, count: inl.nodes.length };
   }
   // 2. fetched export (only meaningful over http; file:// will throw → fallback)
@@ -98,17 +95,7 @@ export async function loadData() {
     if (!res.ok) return { source: "baked" };
     const json = await res.json();
     if (!json || !Array.isArray(json.nodes) || json.nodes.length === 0) return { source: "baked" };
-    adoptMapExport({
-      nodes: json.nodes.map(adaptNode),
-      repo: json.repo,
-      language: json.language,
-      todos: json.todos || [],
-      commands: json.commands,
-      health: json.health,
-      design: json.design,
-      planning: json.planning,
-      targets: json.targets,
-    });
+    adoptMapExport({ ...json, nodes: json.nodes.map(adaptNode) });
     return { source: "engine", engineVersion: json.engine_version || null, count: json.nodes.length };
   } catch {
     return { source: "baked" };

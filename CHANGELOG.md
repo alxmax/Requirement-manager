@@ -1,5 +1,29 @@
 # Changelog
 
+## plugin `v7.8.1` — 2026-09-14
+
+**Fix: `loadData` dropped `roadmap` and `history` on the floor, so the Horizons mode and
+the Shipped band never rendered in a real viewer.**
+
+`loadData()` copied the engine export into the app key by key. That hand-kept whitelist
+was never extended when `roadmap` shipped in `v7.6.0` or `history` in `v7.8.0`: the engine
+emitted both, `window.__REQMAP_DATA__` carried both, and the app received neither. The
+Roadmap tab offered only `Plan | Versions`, the Gantt had no `Shipped` band, and the rail
+badge read `0`.
+
+**Every existing check passed through it.** The SSR smoke adopts the export *directly*, so
+seventeen green assertions about Horizons and the Shipped band were all testing a path the
+viewer does not use. The fix is the shape, not the list: the export is forwarded whole with
+only `nodes` adapted, since `adoptMapExport` already validates each key it knows — so the
+next key added needs no edit here, and cannot go missing the same way.
+
+- New smoke checks go through `loadData`, and fail without the fix (verified by reverting it).
+- The rail's Roadmap badge counts open `ROADMAP.md` horizons as well as open `TODO.md`
+  items. It read `0` the day this repo retired its own `TODO.md`, with ten open items one
+  click away — which reads as "nothing here", and is most of why the tab looked missing.
+- **Plan is the landing view** when a plan exists; Horizons is one click away. Plan answers
+  both questions at once — what shipped, on the band, and what is scheduled, right of today.
+
 ## plugin `v7.8.0` — 2026-09-14
 
 **A monthly release cadence, and the past on the same timeline as the plan.**
