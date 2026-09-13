@@ -98,3 +98,9 @@ app/scripts/install-viewer.mjs
 docs/index.html
 docs/audit/**
 scripts/benchmark_scan.py
+
+# The retired plan. It is history, not code and not an instruction: every command
+# name in it was current on the day its line was written. Scanning it would count
+# it as an untagged source file and, worse, pick up any `implements:` example in it
+# as a real member of a requirement.
+docs/history/**

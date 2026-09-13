@@ -406,13 +406,16 @@ scripts/
   test_cross_tool.py                        headless integration test — sync->gate->map, no AI needed
 app/                                        the React viewer (built into the single-file _map.html)
 docs/                                       guides, plans + specs
-TODO.md                                     optional planning file — feeds the Roadmap tab in the viewer
+  history/TODO-archive.md                   the retired TODO.md — history, not an instruction
+ROADMAP.md                                  the live plan — Now / Next / Later, read by the viewer
 ```
 
 `SKILL.md` (authoritative for authoring rules, statuses, and the gate):
 [`plugin/skills/requirement-manager/SKILL.md`](plugin/skills/requirement-manager/SKILL.md).
 
-**`TODO.md` format** — group items under `## vX.Y` milestone headings; each item is
+**`TODO.md` format** — still read wherever a consumer keeps one; this repo retired its own
+to [`docs/history/TODO-archive.md`](docs/history/TODO-archive.md) on 2026-09-14 and plans in
+`ROADMAP.md` instead. Group items under `## vX.Y` milestone headings; each item is
 a checkbox with an optional `| lane: <label>` suffix. The lane is parsed and carried into
 `_map.json`, but the Roadmap tab renders one lane, `Implementations`, so it no longer
 splits the chart. Completed items (`[x]`) are hidden in the chart.

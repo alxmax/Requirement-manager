@@ -1,4 +1,16 @@
-# TODO
+# TODO — archive
+
+> **Retired 2026-09-14.** This was the live plan until `ROADMAP.md` replaced it with
+> horizons (Now / Next / Later). It is kept whole because it records what was true on a
+> date — the same reason `docs/adr/**` and `CHANGELOG.md` were never rewritten when the
+> id prefixes changed.
+>
+> **Nothing here is an instruction.** Every command name, flag and path below was
+> current when its line was written and many no longer exist. Read it as history; for
+> what to run today see `README.md`, and for what is planned see `ROADMAP.md`.
+>
+> The engine still reads a `TODO.md` wherever a consumer keeps one. It does not read
+> this file: an archive the tool still parsed would be a live plan under another name.
 
 <!-- Items here appear in the Roadmap tab of the viewer, in its single Implementations lane.
      Format: - [ ] Name | lane: <label>   (optional — the lane is still parsed and still
