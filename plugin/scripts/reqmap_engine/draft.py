@@ -54,17 +54,42 @@ def _prose_facts(src):  # implements: ARCH-PROSE-024  # implements: REQ-PROSE-90
 SYS_PLACEHOLDER_ID = "SYS-NEEDS-A-NAME-001"
 
 
+def _arch_slug(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """Last two path segments — the spec's grouping key, not a unique id."""
+    parts = [p for p in rel_dir.replace(os.sep, "/").split("/") if p not in ("", ".")]
+    stem = "-".join(parts[-2:]) if parts else "ROOT"
+    return re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
+
+
 def _arch_id_for(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
-    """The architecture id proposed for a source directory.
+    """The architecture id proposed for a source directory (first occupant of the slug).
 
     The directory is the only structural signal a per-file draft has, and it is a weak
     one: on this repo it would name capabilities `scripts` and `app/src/lib`, which are
     not capabilities. That is why the node it produces is a `draft` carrying
     `level_source: auto` — a proposal to rename, not a claim."""
-    parts = [p for p in rel_dir.replace(os.sep, "/").split("/") if p not in ("", ".")]
-    stem = "-".join(parts[-2:]) if parts else "ROOT"
-    slug = re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
-    return "ARCH-{}-001".format(slug)
+    return "ARCH-{}-001".format(_arch_slug(rel_dir))
+
+
+def _assign_arch_ids(rel_dirs):  # implements: REQ-EXTRACT-981
+    """One unique ARCH id per source directory in this run.
+
+    The slug is still the last two path segments (REQ-EXTRACT-981). Two directories
+    that share that slug (`src/lib` and `app/src/lib`) must not collapse onto one
+    node — the second takes `-002`, `-003`, … so the pyramid keeps one ARCH row
+    per directory and every code draft has a parent that exists."""
+    claimed, out = set(), {}
+    for rel_dir in sorted(rel_dirs):
+        slug = _arch_slug(rel_dir)
+        n = 1
+        while True:
+            aid = "ARCH-{}-{:03d}".format(slug, n)
+            if aid not in claimed:
+                out[rel_dir] = aid
+                claimed.add(aid)
+                break
+            n += 1
+    return out
 
 
 def _write_sys_placeholder(reqs_dir, arch_ids):
@@ -100,7 +125,7 @@ def _write_sys_placeholder(reqs_dir, arch_ids):
     return 1
 
 
-def _write_arch_drafts(reqs_dir, by_dir):
+def _write_arch_drafts(reqs_dir, by_dir, id_of):
     # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
     """One architecture draft per source directory that produced code drafts.
 
@@ -109,7 +134,7 @@ def _write_arch_drafts(reqs_dir, by_dir):
     directory rather than pretending to name a capability."""
     written = []
     for rel_dir in sorted(by_dir):
-        aid = _arch_id_for(rel_dir)
+        aid = id_of[rel_dir]
         dest = os.path.join(reqs_dir, aid + ".md")
         if os.path.exists(dest):
             written.append(aid)
@@ -142,9 +167,10 @@ def _write_arch_drafts(reqs_dir, by_dir):
     return written
 
 
-def _write_prose_draft(dest, cap, rel, fn, src):
+def _write_prose_draft(dest, cap, rel, fn, src, arch_id):
     # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024
     # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
+    # implements: REQ-EXTRACT-981
     """Write one DRAFT .md for a prose capability file; returns the review label."""
     title, headings = _prose_facts(src)
     review = "REVIEW"   # intent is unrecoverable from prose — always author
@@ -153,8 +179,9 @@ def _write_prose_draft(dest, cap, rel, fn, src):
     # str.format (not f-string): the template embeds literal {cap}/{rel}
     # inside backticked instructions
     with open(dest, "w", encoding="utf-8") as f:
-        f.write("---\nid: {cap}\nstatus: draft\nlayer: feature\n"
-                "owner: auto\ndepends_on: []\n"
+        f.write("---\nid: {cap}\nstatus: draft\nlevel: code\n"
+                "layer: feature\nowner: auto\nlevel_source: auto\n"
+                "satisfies: [{arch}]\ndepends_on: []\n"
                 "risk: 2  # REVIEW — prose capability, author the contract "
                 "before promoting\n---\n\n"
                 "# {title}\n\n"
@@ -178,16 +205,16 @@ def _write_prose_draft(dest, cap, rel, fn, src):
                 "**Source sections detected (authoring hint, not the contract)**\n"
                 "{hint}\n".format(
                     cap=cap, title=(title or os.path.splitext(fn)[0]),
-                    rel=rel, hint=hint))
+                    rel=rel, hint=hint, arch=arch_id))
     return review
 
 
-def _write_code_draft(dest, cap, rel, fp, code_root, src):
+def _write_code_draft(dest, cap, rel, fp, src, arch_id):
     # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024
     # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
     """Write one DRAFT .md for a code file; returns the review label. `fp` is the
     file's full path (dirpath + fn folded into one, to keep the parameter count down)."""
-    dirpath, fn = os.path.dirname(fp), os.path.basename(fp)
+    fn = os.path.basename(fp)
     risk = _risk(src)
     review = "REVIEW" if risk >= 2 else "auto-baseline"
     surface = _observed_surface(_file_facts(fp, rel))
@@ -196,7 +223,7 @@ def _write_code_draft(dest, cap, rel, fp, code_root, src):
         # needs no reshaping
         f.write(f"---\nid: {cap}\nstatus: draft\nlevel: code\n"
                 f"layer: feature\nowner: auto\nlevel_source: auto\n"
-                f"satisfies: [{_arch_id_for(os.path.relpath(dirpath, code_root))}]\n"
+                f"satisfies: [{arch_id}]\n"
                 f"depends_on: []\n"
                 f"risk: {risk}  # {review} — author triage hint, not read by "
                 f"the engine\n---\n\n"
@@ -225,7 +252,7 @@ def cmd_extract(ws):
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
     tagged = {fp for hits in members.values() for (_, fp, _) in hits}
     proposed, used = 0, set()
-    by_dir = {}          # rel dir -> [code-level draft ids], for the ARCH rung
+    jobs = []            # pending writes: (fp, rel, is_prose, dest, cap, rel_dir)
     os.makedirs(reqs_dir, exist_ok=True)
     for fp, rel in _walk_files(code_root, reqs_dir,
                                lambda fn, _r: _is_code_file(fn) or fn.endswith(PROSE_EXTS)):
@@ -243,19 +270,24 @@ def cmd_extract(ws):
         dest = os.path.join(reqs_dir, cap + ".md")
         if os.path.exists(dest):
             continue
+        rel_dir = os.path.relpath(dirpath, code_root).replace(os.sep, "/")
+        jobs.append((fp, rel, is_prose, dest, cap, rel_dir))
+    id_of = _assign_arch_ids({rel_dir for *_rest, rel_dir in jobs})
+    by_dir = {}          # rel dir -> [code-level draft ids], for the ARCH rung
+    for fp, rel, is_prose, dest, cap, rel_dir in jobs:
+        dirpath, fn = os.path.dirname(fp), os.path.basename(fp)
         with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
             src = f.read()
+        arch_id = id_of[rel_dir]
         if is_prose:
-            review = _write_prose_draft(dest, cap, rel, fn, src)
+            review = _write_prose_draft(dest, cap, rel, fn, src, arch_id)
         else:
-            review = _write_code_draft(dest, cap, rel, fp, code_root, src)
+            review = _write_code_draft(dest, cap, rel, fp, src, arch_id)
         proposed += 1
-        if not is_prose:   # a file that passed the filter is one or the other
-            rel_dir = os.path.relpath(dirpath, code_root).replace(os.sep, "/")
-            by_dir.setdefault(rel_dir, []).append(cap)
+        by_dir.setdefault(rel_dir, []).append(cap)
         print(f"{review:14} {cap}  <- {rel}")
     # The two rungs above the code level. Written last, so they know their children.
-    arch_ids = _write_arch_drafts(reqs_dir, by_dir)
+    arch_ids = _write_arch_drafts(reqs_dir, by_dir, id_of)
     n_sys = _write_sys_placeholder(reqs_dir, arch_ids)
     if arch_ids:
         print(f"\n{len(arch_ids)} architecture draft(s) proposed from directory names, and "
