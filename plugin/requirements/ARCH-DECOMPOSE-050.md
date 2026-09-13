@@ -130,6 +130,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-DECOMPOSE-050]
 ---
 
@@ -174,6 +175,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-DECOMPOSE-050]
 ---
 
@@ -216,6 +218,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-DECOMPOSE-050]
 ---
 
@@ -281,6 +284,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-DECOMPOSE-050]
 ---
 

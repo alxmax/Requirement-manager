@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: feature
 owner: Alex
+milestone: v7.8
 priority: should-have
 depends_on: [ARCH-SCAN-002, ARCH-GITRUN-067, ARCH-ROADMAP-038]
 satisfies: [SYS-SSOT-001]
@@ -64,6 +65,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.8
 satisfies: [ARCH-PLANDRIFT-069]
 ---
 

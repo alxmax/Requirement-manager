@@ -66,6 +66,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-AUDIT-065]
 ---
 
@@ -131,6 +132,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-AUDIT-065]
 ---
 
@@ -191,6 +193,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-AUDIT-065]
 ---
 
@@ -237,6 +240,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-AUDIT-065]
 ---
 
@@ -289,6 +293,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.3
 satisfies: [ARCH-AUDIT-065]
 tested-by: plugin/scripts/test_reqmap_report.py
 ---

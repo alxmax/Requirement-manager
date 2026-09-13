@@ -97,6 +97,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MEMBERDRIFT-027]
 ---
 
@@ -159,6 +160,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MEMBERDRIFT-027]
 ---
 
@@ -217,6 +219,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-MEMBERDRIFT-027]
 ---
 

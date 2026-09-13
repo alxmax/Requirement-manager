@@ -45,6 +45,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-IMPLEMENT-063]
 ---
 
@@ -90,6 +91,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-IMPLEMENT-063]
 ---
 

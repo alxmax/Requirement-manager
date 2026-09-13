@@ -102,6 +102,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SCAN-002]
 ---
 
@@ -171,6 +172,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SCAN-002]
 ---
 
@@ -246,6 +248,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-SCAN-002]
 ---
 

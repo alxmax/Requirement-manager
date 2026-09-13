@@ -48,6 +48,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-CLARIFY-062]
 ---
 
@@ -123,6 +124,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-CLARIFY-062]
 ---
 
@@ -173,6 +175,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-CLARIFY-062]
 ---
 

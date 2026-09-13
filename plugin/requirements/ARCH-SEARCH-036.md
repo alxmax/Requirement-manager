@@ -89,6 +89,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SEARCH-036]
 ---
 
@@ -152,6 +153,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SEARCH-036]
 ---
 
@@ -207,6 +209,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SEARCH-036]
 ---
 
@@ -258,6 +261,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SEARCH-036]
 ---
 
@@ -296,6 +300,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-SEARCH-036]
 ---
 

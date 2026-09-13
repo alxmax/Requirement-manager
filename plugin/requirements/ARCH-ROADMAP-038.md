@@ -87,6 +87,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-ROADMAP-038]
 ---
 
@@ -163,6 +164,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-ROADMAP-038]
 ---
 
@@ -216,6 +218,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.7
 satisfies: [ARCH-ROADMAP-038]
 ---
 

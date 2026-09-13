@@ -82,6 +82,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 
@@ -125,6 +126,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 
@@ -170,6 +172,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 
@@ -214,6 +217,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 
@@ -272,6 +276,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 

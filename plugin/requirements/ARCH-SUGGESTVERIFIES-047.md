@@ -83,6 +83,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SUGGESTVERIFIES-047]
 ---
 
@@ -143,6 +144,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SUGGESTVERIFIES-047]
 ---
 
@@ -197,6 +199,7 @@ status: deprecated
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SUGGESTVERIFIES-047]
 ---
 

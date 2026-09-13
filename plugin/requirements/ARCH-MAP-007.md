@@ -93,6 +93,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAP-007]
 ---
 
@@ -163,6 +164,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAP-007]
 ---
 
@@ -236,6 +238,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAP-007]
 ---
 
@@ -282,6 +285,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-MAP-007]
 ---
 
@@ -328,6 +332,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.7
 satisfies: [ARCH-MAP-007]
 ---
 
@@ -396,6 +401,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.8
 satisfies: [ARCH-MAP-007]
 ---
 

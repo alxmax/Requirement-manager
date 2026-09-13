@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: bus
 owner: Alex
+milestone: v6.3
 satisfies: [SYS-GATE-102]
 ---
 
@@ -48,6 +49,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-GITRUN-067]
 ---
 

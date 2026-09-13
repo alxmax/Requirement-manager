@@ -76,6 +76,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -124,6 +125,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -173,6 +175,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -221,6 +224,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -269,6 +273,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -313,6 +318,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -360,6 +366,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -405,6 +412,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -467,6 +475,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -516,6 +525,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-DESIGN-061]
 ---
 
@@ -566,6 +576,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-DESIGN-061]
 ---
 

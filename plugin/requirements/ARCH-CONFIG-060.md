@@ -47,6 +47,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-CONFIG-060]
 ---
 

@@ -127,6 +127,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-ATOMICITY-049]
 ---
 
@@ -192,6 +193,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-ATOMICITY-049]
 ---
 
