@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "93c5e5e0041a2bc5683db0896ba9f1e8217dfa96901df213c65782daf743d3ff",
+      "plugin/scripts/reqmap_engine/__init__.py": "5c46e7c7d95052bf449256edb289d97e9f8c9b2fe5b087b4f7ea025101581948",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -240,8 +240,18 @@
     "REQ-PLANCADENCE-1000": {
       "plugin/scripts/reqmap_engine/targets.py#load_targets": "a433acf8ae69c58940486a589e49a5c01109ddb5f0dec0df4010c786a91ce5d0"
     },
+    "REQ-PLANDRIFT-1002": {
+      "plugin/scripts/reqmap_engine/plandrift.py": "73a5808cdc6f6bb6bc2139bc09e3a30762fdae7b34422060f0b3014b836c8945",
+      "plugin/scripts/reqmap_engine/plandrift.py#_index_repo": "6a581efb7fcc2ddd70b44a107b042f154ec221720c9a9db732ad242c5c2cc4cd",
+      "plugin/scripts/reqmap_engine/plandrift.py#_is_new_ground": "785e8f34ecf61934ae3bc44cea894b5b7ca08a407ed0139feef894be8dd11e05",
+      "plugin/scripts/reqmap_engine/plandrift.py#_last_touched": "4ead0f61146d7521cba38421c2090b82a9d25b02614fe87e56b5cdee059ca6ce",
+      "plugin/scripts/reqmap_engine/plandrift.py#_looks_like_symbol": "cb4a7af3aa736701712e8abb8b246dc32edd9c9aa5e143ac2f823ede006d1645",
+      "plugin/scripts/reqmap_engine/plandrift.py#_resolves": "b8741857bc6ac026476529dd5ddd95ab09441f9f17bbd0639f762f0a642c9354",
+      "plugin/scripts/reqmap_engine/plandrift.py#cited_refs": "9c58ab0969ebfdd15f45c2dca69c4adfe8ebd10171e08b30834fe87bdcff84b1",
+      "plugin/scripts/reqmap_engine/plandrift.py#item_dates": "b6d5cd350eca22c6aa2a8bcc0e21c8d6579d0501cfefba3fc9f87a20aa9630bf"
+    },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "b7b14507514bf0ba4ef988fc441388a42dc53596ac716fa0ea08e787fd2c0062"
+      "plugin/scripts/reqmap.py": "d1829f367f6955cd8785f9016690229c0e764b53f18889e5e5484b541492b0ac"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "583fe7d14ee2284248f10ccf0c36a1b9f450ba59ec5bd5edf2dbcc2725f42fbb"

@@ -168,6 +168,9 @@ ROADMAP_HORIZONS = ("now", "next", "later", "not now")
 # boundary: without it `unpark:` would also match inside a word.
 RE_REQ = re.compile(r"(?:^|\s)req:\s*([A-Za-z0-9][A-Za-z0-9_-]*)")
 RE_UNPARK = re.compile(r"(?:^|\s)unpark:\s*(.+)$")
+# A date an author wrote in the plan prose; plandrift uses it as the "as of" for an
+# item that carries none of its own.
+ROADMAP_ISO_RE = re.compile(r'\b(\d{4}-\d{2}-\d{2})\b')
 
 
 def _parse_roadmap_from_text(text):
@@ -181,24 +184,42 @@ def _parse_roadmap_from_text(text):
 
     Kept separate from `_parse_todos_from_text` rather than generalised into it: the two
     disagree about what a `## ` heading means and about which trailing key is required,
-    and folding them would make each one's rule conditional on the other's file name."""
-    items, horizon = [], None
+    and folding them would make each one's rule conditional on the other's file name.
+
+    `context` collects the lines under an item until the next item or heading - where the
+    evidence comments in this repo's own plan live - and `section_date` carries the first
+    date in the prose between a heading and its first item. Both feed `plandrift`, which
+    must read an item's citations and its date from wherever the author put them."""
+    items, horizon, section_date, seen_item = [], None, None, False
     for line in text.splitlines():
         stripped = line.strip()
         if stripped.startswith("## "):
             head = stripped[3:].strip().lower()
             horizon = head if head in ROADMAP_HORIZONS else None
+            section_date, seen_item = None, False
             continue
         m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", stripped)
-        if not m or not horizon:
+        if not m:
+            if not horizon:
+                continue
+            if seen_item and items:
+                items[-1]["context"] += ("\n" if items[-1]["context"] else "") + stripped
+            elif section_date is None:
+                found = ROADMAP_ISO_RE.search(stripped)
+                if found:
+                    section_date = found.group(1)
             continue
+        if not horizon:
+            continue
+        seen_item = True
         rest = m.group(2)
         req = re.search(RE_REQ, rest)
         unpark = re.search(RE_UNPARK, rest)
         items.append({"name": rest.split("|")[0].strip(), "horizon": horizon,
                       "req": req.group(1) if req else None,
                       "unpark": unpark.group(1).strip() if unpark else None,
-                      "done": m.group(1).lower() == "x"})
+                      "done": m.group(1).lower() == "x",
+                      "context": "", "section_date": section_date})
     return items
 
 

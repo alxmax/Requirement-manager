@@ -1,5 +1,71 @@
 # Changelog
 
+## plugin `v7.7.0` — 2026-09-13
+
+**Plan drift: which planned items cite code that has moved on without them.**
+(`ARCH-PLANDRIFT-069`, closing §15/§16 of the Management_Dashboard feedback.)
+
+The bridge between a plan and the code ran one way: `new --from-todo` turns a written item
+into a requirement, and nothing ever checked the item again. The failure a consumer lived
+four times is the other direction — the code gets fixed, the note stays written. On
+2026-09-05, fourteen of sixteen candidate items in their repo were already done; they found
+out by opening each file by hand.
+
+`gate --audit` now reads the code references an open plan item cites — file paths and
+backticked identifiers — and reports two things:
+
+- **`sure`** — a cited path that names no file, or a cited identifier absent from the code.
+  Mechanically checkable. A human still decides what it means.
+- **worth re-reading** — every citation resolves, but a cited file was committed after the
+  item's own date. Never a reason to close anything: in the case that motivated this, the
+  path, the symbol AND the line were all still correct and the code had been fixed
+  underneath them.
+
+**Nothing here closes an item, edits a plan file, or changes an exit code.** A list that
+verifies itself is the very error this exists to catch.
+
+**Six false-positive classes, each paid for rather than theorised.** Four came from the
+consumer's first run over their own 56-item list and are quoted in their report; two more
+were found on this repo's plan the first time the check ran here. They are written as
+behaviour with a test each, so removing a guard fails a test instead of quietly re-admitting
+nine false positives:
+
+1. **Extension ordering.** `ts` before `tsx` in the alternation makes
+   `EmployeeDocumentList.tsx` match `.ts`, leaving an orphan `x` and a file that "does not
+   exist". Nine false positives from one ordering. The list is now sorted longest-first, so
+   it can be extended without re-learning this.
+2. **A shortened path is not a wrong one.** `app/common/errors.py` for
+   `apps/api/app/common/errors.py` is benign — the cited segments are a suffix. But
+   `app/documents/x.py` for `apps/api/app/signing/x.py` is wrong: the module differs.
+   Matching whole SEGMENTS separates them; a plain `endswith` would call `errors.py` a
+   match for `my_errors.py` and quietly rehabilitate real typos.
+3. **Symbol scope is the whole tree, not the cited files.** Notes cite ambiguous paths with
+   dozens of namesakes; confronting a symbol only with the resolved files reported
+   `to_response`, `decrypt_cnp` and `EmployeeDosar` as missing when all three exist. Prose
+   files are indexed for paths and NOT for symbols — a changelog records what a name used
+   to be, and counting that as existing makes the check permanently silent.
+4. **The date is inherited from the section.** Items in an audit batch carry their date
+   once, in the opening paragraph, not per line. Without inheritance the freshness check
+   skipped exactly the items it was written for.
+5. **A version is not a date.** `\b\d{4}-\d{2}-\d{2}\b` matches the date half of
+   `2026-06-19.1`, because `.` is a word boundary — the item was then dated off a version
+   string it merely quoted, and every file it cited looked changed since.
+6. **A plan target is not a stale reference.** `TODO.md → docs/history/TODO-archive.md`
+   cites a file the item exists in order to CREATE. One signal cannot separate that from
+   trap 2's wrong-module case, where the directory is equally absent and the report IS
+   wanted; two can. Basename elsewhere → wrong path, report. Basename gone but the
+   directory occupied → deleted, report. Neither → new ground, silent.
+
+**The limit, stated in the module's own docstring:** a fix that leaves the path, the symbol
+and the line exactly where they were is invisible to any check of form. The only signal
+there is the date, and a date is not proof — it is a reason to read. A detector claiming
+more would be worse than none, because it would make the list look self-verifying.
+
+Also: `_parse_roadmap_from_text` now carries each item's trailing comment block as `context`
+and its section's first date as `section_date`, which is what lets the two rules above read
+citations and dates from wherever the author put them. Run on this repo's own `ROADMAP.md`:
+0 sure, 0 to re-derive.
+
 ## plugin `v7.6.0` — 2026-09-13
 
 **A Horizons tab, a weekly release cadence, and one tab fewer.**
