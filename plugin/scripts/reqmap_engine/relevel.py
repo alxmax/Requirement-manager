@@ -65,14 +65,20 @@ def _missing_obligation_residue(reqs):
     whose Description/Contract body never wikilinks a child's id — the
     `- ... — see [[ID]].` sentence `clarify --decompose` writes for every child it
     splits out. A child with no such sentence is one the parent's prose never
-    learned about, or was written out of when the prose was later edited."""
+    learned about, or was written out of when the prose was later edited.
+
+    A `deprecated` child is skipped: retiring one capability out of a live parent is
+    exactly the case where the obligation sentence SHOULD be gone, and reporting it
+    would ask the author to re-add the clause they just deleted on purpose."""
     children = _satisfied_by_map(reqs)
     out = []
     for parent_id, kids in children.items():
         parent = reqs.get(parent_id)
         if not parent or parent["meta"].get("level") != "architecture":
             continue
-        code_kids = sorted(k for k in kids if k in reqs and reqs[k]["meta"].get("level") == "code")
+        code_kids = sorted(k for k in kids
+                           if k in reqs and reqs[k]["meta"].get("level") == "code"
+                           and reqs[k]["meta"].get("status") != "deprecated")
         if not code_kids:
             continue
         section_text = "\n".join(_section_lines(parent["body"], CONTRACT_LABELS))

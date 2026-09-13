@@ -1,5 +1,43 @@
 # Changelog
 
+## plugin `v7.5.0` — 2026-09-13
+
+**The Specification Hierarchy diagram is gone, `--suggest-verifies` is gone, and the
+engine finally reads `ROADMAP.md`.**
+
+- `_map.md` is back to **4** Mermaid blocks: System Map, Req→Code, Dependencies, Risk.
+  `_mermaid_hierarchy` and its legend entry are deleted, `REQ-MAPDIAGRAMS-875` is
+  `deprecated`, and `ARCH-MAPDIAGRAMS-055`'s cases renumber 3/4/5 → 2/3/4 (the three
+  `verifies:` tags that pointed at them moved in the same commit). CLAUDE.md already
+  said four; the document now agrees with it again.
+- `sync --suggest-verifies` no longer parses. Its one-release alias window opened in
+  v7.3.0 and stayed open through v7.3.4; the flag, its dispatch branch and the mention
+  in `--apply`'s help are all removed. `gate --implement` keeps ITS window until v7.6.0.
+- **`ROADMAP.md` is read** (`REQ-ROADMAP-998`). `- [ ]` / `- [x]` items under the four
+  reserved horizons — `Now`, `Next`, `Later`, `Not now` — are parsed with their `req:`
+  id and `unpark:` condition. `gate --audit` reports the two claims in a plan file that
+  a machine can actually check: an item whose `req:` names an id the corpus does not
+  have, and an open `Later` item with no `unpark:`. Both advisory; a repo with no
+  `ROADMAP.md` sees nothing.
+
+**Consumer feedback (Management_Dashboard), two items closed:**
+
+- **§14** — `gate --audit` now prints the roadmap-lag lines, and `--json` carries them
+  under `roadmap`. They existed since `REQ-AUDIT-973` but were reachable only from
+  `sync`'s tail, so the report named "audit" was blind to the one signal that says the
+  roadmap feature is *inert for this repo*. A consumer reported reading the engine's
+  source to find that out. Deliberately not added to the bare `gate`: the commit hook
+  runs that on every commit and ADR-0020 draws the line there.
+- **§12** — the `depends_on` cycle warning now names its visible symptom. The map
+  layout ranks by longest path, which does not converge on a cyclic graph, so a cycle
+  stretches the canvas and its edges render as near-horizontal lines. "The map looks
+  like stripes" does not read as "the graph has a cycle" to anyone who has not been told.
+
+**`ROADMAP.md` corrected.** Four `Now` items were checked `[x]` while the code said
+otherwise — the roadmap parser, the viewer's Now/Next/Later columns, the `roadmap_unmapped`
+next-step, and a Hierarchy threshold that never existed. Two are now true (this release
+made them so), two are unchecked with the evidence recorded inline.
+
 ## plugin `v7.4.0` — 2026-09-13
 
 **ADR-0037 pass 2: `gate --implement` is retired.** The brief it printed is the

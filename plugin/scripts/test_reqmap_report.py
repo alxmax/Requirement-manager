@@ -28,7 +28,7 @@ from test_reqmap_common import (  # noqa: F401  (fixtures used across the parts)
 
 
 
-class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested-by: REQ-MAPDIAGRAMS-874, REQ-MAPDIAGRAMS-875, REQ-MAPDIAGRAMS-876, REQ-MAPDIAGRAMS-877, REQ-MAPDIAGRAMS-878
+class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested-by: REQ-MAPDIAGRAMS-874, REQ-MAPDIAGRAMS-876, REQ-MAPDIAGRAMS-877, REQ-MAPDIAGRAMS-878
     def _data(self, title):
         return {"nodes": [{"id": "A-1", "layer": "bus", "status": "draft", "title": title,
                            "intent": "", "input": "", "output": "", "desc": "", "acc": [],
@@ -61,7 +61,7 @@ class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested
         out = R._mermaid_req_to_code({"nodes": [self._node("AREA-FOO-001", status="confirmed")], "edges": []})
         self.assertIn("#fee", out)        # enforced + unlinked = a real gap -> red
 
-    def test_system_map_boxes_multinode_area_and_collapses_singletons(self):  # verifies: REQ-MAPDIAGRAMS-876#CASE-2  # verifies: ARCH-MAPDIAGRAMS-055#CASE-3
+    def test_system_map_boxes_multinode_area_and_collapses_singletons(self):  # verifies: REQ-MAPDIAGRAMS-876#CASE-2  # verifies: ARCH-MAPDIAGRAMS-055#CASE-2
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
                           self._node("BUS-RULES-002", layer="bus"),
                           self._node("AI-POSTMORTEM-001")], "edges": []}
@@ -70,7 +70,7 @@ class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested
         self.assertIn('subgraph sg_misc["misc"]', out)   # lone node collapses into misc
         self.assertIn("stroke-width:3px", out)           # bus stays marked
 
-    def test_system_map_hides_edges_into_bus(self):  # verifies: REQ-MAPDIAGRAMS-876#CASE-3  # verifies: ARCH-MAPDIAGRAMS-055#CASE-3
+    def test_system_map_hides_edges_into_bus(self):  # verifies: REQ-MAPDIAGRAMS-876#CASE-3  # verifies: ARCH-MAPDIAGRAMS-055#CASE-2
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
                           self._node("BUS-RULES-002", layer="bus"),
                           self._node("ETL-PIPELINE-001"), self._node("DASH-BUILD-001")],
@@ -101,7 +101,7 @@ class Rendering(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested
             md = open(os.path.join(d, "_map.md"), encoding="utf-8").read()
             self.assertIn("area-level coupling", md)   # dependency-map legend line present
 
-    def test_deps_is_area_level_overview(self):  # verifies: REQ-MAPDIAGRAMS-877#CASE-1  # verifies: REQ-MAPDIAGRAMS-877#CASE-2  # verifies: ARCH-MAPDIAGRAMS-055#CASE-4
+    def test_deps_is_area_level_overview(self):  # verifies: REQ-MAPDIAGRAMS-877#CASE-1  # verifies: REQ-MAPDIAGRAMS-877#CASE-2  # verifies: ARCH-MAPDIAGRAMS-055#CASE-3
         data = {"nodes": [self._node("BUS-PATHS-001", layer="bus"),
                           self._node("BUS-RULES-002", layer="bus"),
                           self._node("AI-X-001"), self._node("AI-Y-002")],
@@ -2472,8 +2472,8 @@ class DupesSkipPlaceholders(unittest.TestCase):  # tested-by: ARCH-SIMILAR-016  
         self.assertIn("REQ-X-001  <->  REQ-Y-002", out)
 
 
-class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested-by: REQ-MAPDIAGRAMS-874, REQ-MAPDIAGRAMS-875, REQ-MAPDIAGRAMS-876, REQ-MAPDIAGRAMS-877, REQ-MAPDIAGRAMS-878
-    """The Specification Hierarchy: the satisfies axis, with the code level counted."""
+class MapDocument(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tested-by: REQ-MAPDIAGRAMS-874, REQ-MAPDIAGRAMS-876, REQ-MAPDIAGRAMS-877, REQ-MAPDIAGRAMS-878
+    """The document `map` writes: its diagram blocks, their legends, and the graph behind them."""
 
     DATA = {
         "nodes": [
@@ -2491,58 +2491,21 @@ class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tes
                            ["REQ-B-200", "REQ-B-001"], ["REQ-B-201", "REQ-B-001"]],
     }
 
-    def test_it_draws_the_two_upper_levels_and_counts_the_third(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-2  # verifies: REQ-MAPDIAGRAMS-875#CASE-2  # verifies: REQ-MAPDIAGRAMS-875#CASE-3
-        out = R._mermaid_hierarchy(self.DATA)
-        self.assertIn("SYS_A_101", out)
-        self.assertIn("REQ_B_001", out)
-        self.assertNotIn("REQ_B_200", out)          # the code level is counted, never drawn
-        self.assertIn("2 code", out)                # ...and its count lands on the parent
-        self.assertIn("SYS_A_101 --> REQ_B_001", out)
-
-    def test_it_reads_satisfies_not_depends_on(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-2  # verifies: REQ-MAPDIAGRAMS-875#CASE-1
-        # depends_on and satisfies are different axes; only the latter forms a hierarchy.
-        d = dict(self.DATA, upstream_edges=[], edges=[["REQ-B-001", "SYS-A-101"]])
-        self.assertNotIn("-->", R._mermaid_hierarchy(d))
-
-    def test_an_empty_corpus_draws_nothing(self):
-        self.assertEqual(R._mermaid_hierarchy({"nodes": [], "edges": [], "upstream_edges": []}), "")
-
-    def test_a_promoted_system_node_still_shows_its_code_count(self):
-        # ADR-0024: a corpus that collapsed `architecture` into `system` carries two
-        # populations under `level: system` — a root need with no code children of its
-        # own, and a promoted grouping node whose code children are counted same as an
-        # `architecture` parent's always were. Both must render correctly from `level:`
-        # alone no longer being able to tell them apart.
-        d = {
-            "nodes": [
-                {"id": "SYS-A-101", "level": "system", "layer": "need", "status": "confirmed",
-                 "area": "SYS", "members": [], "deps": [], "risks": []},
-                {"id": "SYS-B-001", "level": "system", "layer": "feature", "status": "confirmed",
-                 "area": "SYS", "members": [], "deps": [], "risks": []},
-                {"id": "REQ-B-200", "level": "code", "layer": "feature", "status": "draft",
-                 "area": "REQ", "members": [], "deps": [], "risks": []},
-            ],
-            "edges": [],
-            "upstream_edges": [["SYS-B-001", "SYS-A-101"], ["REQ-B-200", "SYS-B-001"]],
-        }
-        out = R._mermaid_hierarchy(d)
-        self.assertIn("1 code", out)                 # SYS-B-001's promoted fan-out is counted
-        self.assertIn("SYS_A_101[[SYS-A-101]]", out)  # the true root stays bare + double-boxed
-        self.assertIn("SYS_A_101 --> SYS_B_001", out)
-
-    def test_the_document_carries_five_blocks(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-1  # verifies: REQ-MAPDIAGRAMS-874#CASE-2
+    def test_the_document_carries_four_blocks(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-1  # verifies: REQ-MAPDIAGRAMS-874#CASE-2
         md = R._build_md_text(dict(self.DATA, todos=[]))
-        self.assertEqual(md.count("```mermaid"), 5)
-        self.assertIn("Specification Hierarchy", md)
+        self.assertEqual(md.count("```mermaid"), 4)
+        self.assertNotIn("Specification Hierarchy", md)
 
     def test_the_legend_matches_the_diagram_order(self):  # bug: legend-md-missing-hierarchy-entry  # verifies: REQ-MAPDIAGRAMS-874#CASE-3
         # _LEGEND_MD must carry one entry per diagram _build_md_text emits, in the same
         # order -- a missing entry shifts every caption by one and leaves the LAST
-        # diagram (Risk & Unknowns) with an empty legend.
-        self.assertEqual(len(R._LEGEND_MD), 5)
+        # diagram (Risk & Unknowns) with an empty legend. It caught that when the
+        # Specification Hierarchy was ADDED without its entry; removing that diagram
+        # has the same failure mode in the other direction.
+        self.assertEqual(len(R._LEGEND_MD), 4)
         md = R._build_md_text(dict(self.DATA, todos=[]))
-        idx = md.index("## Specification Hierarchy")
-        self.assertIn("satisfies", md[idx:idx + 400])
+        idx = md.index("## System Map")
+        self.assertIn("thick border = bus", md[idx:idx + 400])
         idx = md.index("## Risk & Unknowns")
         self.assertIn("unimplemented", md[idx:idx + 400])
 
@@ -2550,6 +2513,69 @@ class MapHierarchy(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # tes
         # They were computed since ARCH-TRACE-020 and dropped by _build_json_text until now.
         payload = json.loads(R._build_json_text(dict(self.DATA, repo=None, todos=[])))
         self.assertEqual(len(payload["upstream_edges"]), 3)
+
+
+class RoadmapPlan(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-998
+    """ROADMAP.md: the horizon plan, and the two claims in it a machine can check."""
+
+    PLAN = "\n".join([
+        "# Roadmap",
+        "",
+        "## Now",
+        "- [ ] ship the thing | req: AREA-A-001",
+        "- [x] shipped already | req: AREA-A-001",
+        "",
+        "## Later",
+        "- [ ] parked with a reason | unpark: someone asks for it",
+        "- [ ] parked with no reason",
+        "",
+        "## Someday",
+        "- [ ] under an invented heading | req: AREA-A-001",
+        "",
+    ])
+
+    def _audit(self, d, plan):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-A-001.md"), _spec("AREA-A-001", ["`gate` writes the lock."]))
+        _write(os.path.join(d, "mod.py"), tag("AREA-A-001") + "\ndef f():\n    return 1\n")
+        if plan is not None:
+            _write(os.path.join(d, "ROADMAP.md"), plan)
+        reqs = R.load_requirements(rd)
+        members = R.scan_members(d, rd)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_audit(R.Workspace(reqs, members, rd, d))
+        return buf.getvalue()
+
+    def test_it_reads_items_under_the_reserved_horizons(self):  # verifies: REQ-ROADMAP-998#CASE-1
+        items = R.mapdata._parse_roadmap_from_text(self.PLAN)
+        self.assertEqual(["now", "now", "later", "later"], [i["horizon"] for i in items])
+        self.assertEqual("AREA-A-001", items[0]["req"])
+        self.assertTrue(items[1]["done"])
+        self.assertEqual("someone asks for it", items[2]["unpark"])
+        self.assertIsNone(items[3]["unpark"])
+
+    def test_an_item_under_an_invented_heading_is_skipped(self):  # verifies: REQ-ROADMAP-998#CASE-2
+        # `## Someday` carries one item; it must not leak in under the horizon above it.
+        names = [i["name"] for i in R.mapdata._parse_roadmap_from_text(self.PLAN)]
+        self.assertNotIn("under an invented heading", names)
+
+    def test_a_req_that_names_nothing_is_reported(self):  # verifies: REQ-ROADMAP-998#CASE-3
+        plan = "## Now\n- [ ] ship the thing | req: NOPE-X-999\n"
+        with tempfile.TemporaryDirectory() as d:
+            out = self._audit(d, plan)
+        self.assertIn("NOPE-X-999", out)
+        self.assertIn("points at nothing", out)
+
+    def test_a_parked_item_with_no_condition_is_reported(self):  # verifies: REQ-ROADMAP-998#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            out = self._audit(d, self.PLAN)
+        self.assertIn("Later` item(s) carry no `unpark:`", out)
+
+    def test_a_repo_with_no_roadmap_sees_nothing(self):  # verifies: REQ-ROADMAP-998#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            out = self._audit(d, None)
+        self.assertNotIn("ROADMAP.md", out)
 
 
 class Redundancy(unittest.TestCase):  # tested-by: REQ-REDUNDANCY-058
@@ -4180,9 +4206,9 @@ class CasesMapdiagrams055(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055
                 R.cmd_map(R.Workspace(reqs, members, rd), d)
             md = open(os.path.join(rd, "_map.md"), encoding="utf-8").read()
         self.assertNotIn("hand-edited content", md)
-        self.assertIn("Specification Hierarchy", md)
+        self.assertIn("System Map", md)
 
-    def test_risk_diagram_shows_only_flagged_with_recommendation(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-5
+    def test_risk_diagram_shows_only_flagged_with_recommendation(self):  # verifies: ARCH-MAPDIAGRAMS-055#CASE-4
         data = {"nodes": [self._node("AI-X-001", status="baseline"),
                           self._node("AI-Y-002", status="confirmed",
                                      members=[{"role": "implements", "loc": "a.py:1"},

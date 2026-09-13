@@ -1,6 +1,6 @@
 ---
 id: ARCH-ROADMAP-038
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -23,6 +23,7 @@ Every bullet below is binding.
 - `health --json` reads `TODO.md` from the code root, or its parent when absent there, and reports three read-only signals. [[REQ-ROADMAP-907]]
 - The first signal fires when the roadmap's newest milestone falls behind the newest requirement `milestone:`. The second lists a `## ` heading whose first token is not a version, which silently re-files items under the wrong milestone. [[REQ-ROADMAP-907]]
 - The third fires in the opposite direction: the requirements trail the newest milestone the roadmap marks shipped, so work that shipped carries no requirement. [[REQ-ROADMAP-983]]
+- A horizon plan in `ROADMAP.md` is read alongside the versioned `TODO.md`, and `gate --audit` reports the two claims in it that can be checked: an item pointing at an id the corpus does not have, and a parked item with no condition to bring it back. [[REQ-ROADMAP-998]]
 
 ## Cases
 CASE-1
@@ -204,3 +205,64 @@ CASE-3 — a corpus level with the shipped roadmap raises nothing
          newest requirement `milestone:` is `v2.13`
   When   `health --json` runs
   Then   the payload carries no `roadmap_unmapped` key
+
+
+--------------------
+
+
+---
+id: REQ-ROADMAP-998
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# ROADMAP.md: the horizon plan, and the two claims in it that can be checked
+
+## Description
+> Every roadmap signal before this one read `TODO.md`, a file organised by version. A plan
+> organised by HORIZON — Now, Next, Later — is a different shape, and this repo's own
+> `ROADMAP.md` was invisible to the engine while carrying the live plan. What can be checked
+> about a plan file is narrow and worth being honest about: whether an item points at a real
+> requirement, and whether a parked item says what would bring it back. Whether a `[x]` item
+> is TRUE is not decidable from the file — an item naming a change nobody made reads exactly
+> like one naming a change that landed — so nothing here claims to know.
+
+Every bullet below is binding.
+- `ROADMAP.md` is parsed for `- [ ]` / `- [x]` items under the reserved headings `Now`,
+  `Next`, `Later` and `Not now`, each item carrying its horizon, its `req:` id when present
+  and its `unpark:` condition when present.
+- An item under a heading that is not one of the four reserved horizons is skipped, as an
+  item before the first milestone is skipped in `TODO.md`.
+- `gate --audit` reports an item whose `req:` names an id absent from the corpus.
+- `gate --audit` reports an open `Later` item carrying no `unpark:`.
+- Both signals are read-only and advisory: they never change an exit code, and a repo with
+  no `ROADMAP.md` sees nothing.
+
+## Cases
+CASE-1 — items are read under the reserved horizons
+  Given  a `ROADMAP.md` with one item under `## Now` and one under `## Later`
+  When   the roadmap is parsed
+  Then   both items are returned, each carrying its own horizon
+
+CASE-2 — an item under an invented heading is skipped
+  Given  a `ROADMAP.md` whose only item sits under `## Someday`
+  When   the roadmap is parsed
+  Then   no item is returned
+
+CASE-3 — a req: that names nothing is reported
+  Given  a `ROADMAP.md` item carrying `req:` an id no requirement declares
+  When   `gate --audit` runs
+  Then   it names the id and says the plan points at nothing, and the exit code is unchanged
+
+CASE-4 — a parked item with no condition is reported
+  Given  an open item under `## Later` carrying no `unpark:`
+  When   `gate --audit` runs
+  Then   it counts the item and says parked with no condition is parked forever
+
+CASE-5 — a repo with no ROADMAP.md sees nothing
+  Given  a code root holding no `ROADMAP.md`
+  When   `gate --audit` runs
+  Then   it prints no roadmap-plan line

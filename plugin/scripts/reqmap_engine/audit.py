@@ -9,7 +9,7 @@ from .health import _health_record, cmd_coverage
 from .i18n import _translation_gaps
 from .lint import lint_requirement
 from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
-from .mapdata import _roadmap_behind, _roadmap_signals
+from .mapdata import _roadmap_behind, _roadmap_plan_problems, _roadmap_signals
 from .model import _as_list
 from .orphans import _scan_untagged
 from .relevel import relevel_residue_lines
@@ -171,10 +171,10 @@ def _roadmap_lag_lines(reqs, code_root):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-973
     """Zero or more lines describing how TODO.md's roadmap and the requirements
     disagree about how far along the work is."""
+    lines = _roadmap_plan_problems(code_root, reqs) if code_root else []
     roadmap = _roadmap_signals(code_root) if code_root else None
     if not roadmap:
-        return []
-    lines = []
+        return lines
     behind, newest_req, unmapped = _roadmap_behind(reqs, roadmap)
     if behind:
         lines.append("TODO.md stops at {} while the requirements reach {} - the roadmap "
@@ -187,6 +187,30 @@ def _roadmap_lag_lines(reqs, code_root):
         lines.append("{} TODO.md heading(s) are not milestones, so their items never "
                      "reach the roadmap".format(len(roadmap["unversioned_headings"])))
     return lines
+
+
+def _print_audit_roadmap(reqs, code_root):
+    # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
+    """Print the roadmap-lag block, the audit's third section with no verb of its own.
+
+    These lines existed since REQ-AUDIT-973 but were reachable only from `sync`'s tail,
+    so the report actually NAMED "audit" was structurally blind to them. That matters
+    most for the unversioned-headings line, which does not describe a defect in the
+    corpus: it says the roadmap feature is INERT for this repo, because its headings are
+    not milestones. A consumer reported reading the engine's source to find that out.
+
+    Deliberately here and not in the bare `gate`: the commit hook runs `gate` on every
+    commit and ADR-0020 draws that line for corpus-shape signals. `--audit` is a question
+    a reader asks on purpose."""
+    lines = _roadmap_lag_lines(reqs, code_root)
+    if not lines:
+        return
+    print("-" * 72)
+    print("Roadmap - how the plan and the requirements disagree")
+    print("-" * 72)
+    for text in lines:
+        print("  " + text)
+    print("")
 
 
 def _audit_summary(reqs, members, reqs_dir, code_root):
@@ -231,6 +255,11 @@ def _json_audit_report(ws, signals, strict):
         out["design"] = design
     if untagged is not None:
         out["untagged"] = len(untagged)
+    # Same lines the console report prints under "Roadmap" — a JSON consumer that could
+    # not see them would be back in the position REQ-AUDIT-973's reporter was in.
+    roadmap = _roadmap_lag_lines(reqs, ws.code_root)
+    if roadmap:
+        out["roadmap"] = roadmap
     errs, warns = run_gate_rules(
         GateContext(ws, full_members=members, update_lock=False),
         strict=strict)
@@ -388,4 +417,5 @@ def cmd_audit(ws, strict=False, as_json=False):
     _print_audit_sections(sections)
     _print_audit_exemptions(exemptions)
     _print_audit_corpus_shape(shape)
+    _print_audit_roadmap(reqs, code_root)
     return gate_rc
