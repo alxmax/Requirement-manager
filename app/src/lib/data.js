@@ -119,7 +119,7 @@ const BAKED = [
 
   { id:"ARCH-MAP-007", area:"REQ", title:"Requirement graph (_map.json)", layer:"feature", status:"confirmed",
     intent:"Render the whole registry as navigable diagrams a human can read at a glance.",
-    contract:["`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]", "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]", "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]", "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]"],
+    contract:["`sync` generates `_map.json` under `requirements/`, one node per requirement and one edge per `depends_on`. [[REQ-MAP-870]]", "`_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]", "Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]", "The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]", "The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]"],
     acc:[
       "The generated files contain one node per requirement and one edge per `depends_on`.",
       "`_map.md` contains 4 Mermaid code blocks, each with a legend.",
@@ -244,6 +244,12 @@ export let DESIGN = null;
 /* Planning sidecar from requirements/_planning.json (legacy: `targets` key).
  * Milestone due dates, planned items, optional score targets. Null until loaded. */
 export let TARGETS = null;
+/* ROADMAP.md's horizon plan, as the engine parsed it: one entry per `- [ ]` / `- [x]`
+ * item under Now / Next / Later / Not now, with its `req:` and `unpark:`. Empty for a
+ * repo with no ROADMAP.md and for any map written before v7.6.0, which is what gates
+ * the Horizons mode off — absent is NOT an empty plan, it is no plan file.
+ * implements: REQ-VIEWER-999 */
+export let ROADMAP = [];
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -258,6 +264,7 @@ export function adoptMapExport(data) {               // implements: REQ-VIEWER-9
   if ("repo" in data) REPO = data.repo || null;
   if ("language" in data) LANGUAGE = (data.language === "ro" || data.language === "both") ? data.language : "en";
   if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];
+  if ("roadmap" in data) ROADMAP = Array.isArray(data.roadmap) ? data.roadmap : [];
   if ("commands" in data) COMMANDS = Array.isArray(data.commands) ? data.commands : [];
   const health = data.health, design = data.design;
   HEALTH = (health && typeof health.score === "number") ? health : null;

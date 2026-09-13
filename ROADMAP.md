@@ -22,10 +22,9 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            `gate --audit` raportează cele două lucruri verificabile mecanic: un `req:` care
            nu există, și un `Later` fără `unpark:`. NU e precedență — ambele fișiere se
            citesc, pentru semnale diferite. -->
-- [ ] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
-      <!-- Debifat 2026-09-13: `RoadmapView.jsx` n-are niciun „Now"/„Next"/„Later". Are două
-           moduri, Plan (Gantt) și Versions (grila de chip-uri), ambele pe milestone-uri.
-           Motorul citește acum orizonturile, deci datele există; viewer-ul nu le arată. -->
+- [x] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
+      <!-- Făcut în v7.6.0 (REQ-VIEWER-999). Modul Horizons apare DOAR când exportul
+           duce itemi de orizont. `Not now` se parsează și nu se desenează. -->
 - [ ] `roadmap_unmapped` / heading-uri fără milestone numesc un next-step | req: ARCH-ROADMAP-038
       <!-- Debifat 2026-09-13: `audit.py:183-188` se opreşte la constatare în ambele cazuri.
            `roadmap_unmapped` are deja răspunsul — adaugă `milestone:` la cerinţele care au
@@ -40,6 +39,12 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
 - [ ] Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului | req: ARCH-HEALTH-017
 - [ ] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
+- [x] Scoate tab-ul Spec: Explorer randa deja acelaşi `SpecDoc` | req: ARCH-VIEWER-007
+      <!-- v7.6.0. `SpecView.jsx` -> `SpecDoc.jsx`; a plecat doar tab-ul şi navigaţia lui. -->
+- [x] Planificatorul pune un release la fiecare sfârşit de săptămână | req: ARCH-MAP-007
+      <!-- v7.6.0, REQ-PLANCADENCE-1000. `cadence: {every, on, from, until}` în
+           _planning.json; azi doar `every: week`. Un configurator peste asta e o
+           extindere a cheii, nu o rescriere. -->
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
 
 ## Later

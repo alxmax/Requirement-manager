@@ -25,6 +25,10 @@
       "hash": "f37afd7a0755",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
+    "ARCH-MAP-007": {
+      "hash": "df0025c4a73a",
+      "reason": null
+    },
     "ARCH-PARSE-001": {
       "hash": "3eca960dd4f3",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
@@ -58,8 +62,8 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "ARCH-VIEWER-007": {
-      "hash": "299f410ea090",
-      "reason": "v6.5.0: the Roadmap has one lane, Implementations"
+      "hash": "0f0781e1d5a2",
+      "reason": null
     },
     "ARCH-VLEVEL-037": {
       "hash": "cc82d97c7f2c",

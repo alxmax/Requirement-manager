@@ -9,11 +9,12 @@
    zoom shrinks everything including the type, density narrows the chip and
    keeps the type crisp. Both are remembered per reader. */
 import { useEffect, useState } from "react";
-import { REQUIREMENTS, TODOS, TARGETS } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, TARGETS, ROADMAP } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
 import { PlanGantt } from "./roadmap/PlanGantt.jsx";
+import { Horizons } from "./roadmap/Horizons.jsx";
 
 const ZOOM_KEY = "reqmap.roadmap.zoom";
 const DENSITY_KEY = "reqmap.roadmap.density";
@@ -149,17 +150,26 @@ function Segmented({ label, options, value, onChange, optionKey, optionLabel }) 
 /* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
  * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
  * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode }) {  // implements: REQ-VIEWER-984
+export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap }) {  // implements: REQ-VIEWER-984
   const { t, locale } = useI18n();
   const hasPlan = !!(TARGETS?.bars?.length)
     || Object.values(TARGETS?.milestones || {}).some((m) => m?.due);
+  // `Not now` is parsed but never drawn, so a ROADMAP.md holding only that section
+  // must not switch the mode on and then render three empty columns.
+  const horizonItems = (initialRoadmap || ROADMAP)
+    .filter(i => i.horizon === "now" || i.horizon === "next" || i.horizon === "later");
+  const hasHorizons = horizonItems.length > 0;
   const [mode, setMode] = useState(() => {
     const stored = readStored(MODE_KEY, (v) => {
       if (v === "versions" || v === "plan") return v;
+      if (v === "horizons") return v;
       if (v === "timeline") return "plan"; // renamed
       return null;
     }, null);
-    return initialMode || stored || (hasPlan ? "plan" : "versions");
+    // A reader whose last choice was Horizons in another repo must not land on a mode
+    // this one cannot offer — the segmented control would have no matching option.
+    const remembered = stored === "horizons" && !hasHorizons ? null : stored;
+    return initialMode || remembered || (hasHorizons ? "horizons" : hasPlan ? "plan" : "versions");
   });
   const [showUnscheduled, setShowUnscheduled] = useState(false);
   const { zoom, setZoom, canvasRef } = useCanvasZoom({
@@ -204,7 +214,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
   // 618 of them here produced a wall of chips that said nothing about the plan.
   const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated" && r.level !== "code");
 
-  if (!milestones.length && !unscheduled.length && !hasPlan) {
+  if (!milestones.length && !unscheduled.length && !hasPlan && !hasHorizons) {
     return (
       <div className="main" style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         No milestones yet. Add <code>milestone: v1.x</code> to requirement frontmatter
@@ -252,10 +262,14 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
         background: "var(--bg-raised)", flexShrink: 0,
       }}>
         <ZoomControl zoom={zoom} setZoom={setZoom} />
-        {hasPlan && (
+        {(hasPlan || hasHorizons) && (
           <Segmented
             label={t("View")}
-            options={[{ id: "plan", label: t("Plan") }, { id: "versions", label: t("Versions") }]}
+            options={[
+              ...(hasHorizons ? [{ id: "horizons", label: t("Horizons") }] : []),
+              ...(hasPlan ? [{ id: "plan", label: t("Plan") }] : []),
+              { id: "versions", label: t("Versions") },
+            ]}
             value={mode}
             onChange={setMode}
             optionKey="id"
@@ -285,7 +299,9 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
 
       <div ref={canvasRef} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
            className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
-        {mode === "plan" ? (
+        {mode === "horizons" ? (
+          <Horizons items={horizonItems} t={t} openSpec={openSpec} zoom={zoom} />
+        ) : mode === "plan" ? (
           <PlanGantt planning={TARGETS} locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
         ) : (
         /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with

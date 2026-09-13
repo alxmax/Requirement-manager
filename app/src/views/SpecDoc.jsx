@@ -1,11 +1,14 @@
 // implements: ARCH-VIEWER-007
+/* SpecDoc — one requirement, rendered in full. Was `SpecView.jsx`, whose own tab
+   was a 220px flat nav beside this component; the Explorer shows the SAME component
+   beside a hierarchy tree with filters, a breadcrumb and the link panel, so the tab
+   was the poorer half of a duplicate. The document stayed; the tab went. */
 // implements: ARCH-TRANSLATE-044
 // implements: REQ-VIEWER-944
-import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
 import { Pill, statusKind, mdInline, reqLinkProps } from "../lib/ui.jsx";
 import { openQuestions } from "../lib/tree.js";
 import { useI18n, translatedText } from "../lib/i18n.jsx";
-import { TranslatedProse, CovStrip, SpecNavItem, SpecMeta } from "./spec/SpecParts.jsx";
+import { TranslatedProse, CovStrip, SpecMeta } from "./spec/SpecParts.jsx";
 
 function TranslatedBadge() {
   return (
@@ -105,25 +108,6 @@ export function SpecDoc({ r, onNav, head = null, after = null }) {
         )}
         {after}
       </div>
-    </div>
-  );
-}
-
-export function SpecView({ selId, setSelId }) {
-  const cur = selId && REQ_BY_ID[selId] ? selId : "ARCH-PARSE-001";
-  const r = REQ_BY_ID[cur] || REQUIREMENTS[0];
-  const core = REQUIREMENTS.filter((x) => x.area === "CORE");
-  const req = REQUIREMENTS.filter((x) => x.area !== "CORE");
-  return (
-    <div className="main" style={{ display: "grid", gridTemplateColumns: "220px 1fr", minHeight: 0 }}>
-      <div style={{ borderRight: "1px solid var(--border)", background: "var(--bg-raised)", overflow: "auto", padding: "14px 10px" }}>
-        {core.length > 0 && <>
-          <div className="rail-section" style={{ paddingTop: 0 }}>CORE · bus</div>
-          {core.map((x) => <SpecNavItem key={x.id} x={x} cur={cur} setSelId={setSelId} />)}
-        </>}
-        {req.map((x) => <SpecNavItem key={x.id} x={x} cur={cur} setSelId={setSelId} />)}
-      </div>
-      <div style={{ overflow: "auto" }}><SpecDoc r={r} onNav={setSelId} /></div>
     </div>
   );
 }

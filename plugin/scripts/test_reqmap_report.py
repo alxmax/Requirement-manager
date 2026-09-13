@@ -2515,6 +2515,71 @@ class MapDocument(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # test
         self.assertEqual(len(payload["upstream_edges"]), 3)
 
 
+class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-PLANCADENCE-1000
+    """The release cadence: stated as a rhythm, computed once, emitted as dates."""
+
+    BARS = [{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-09-30"}]
+
+    def _load(self, **extra):
+        with tempfile.TemporaryDirectory() as d:
+            payload = dict({"bars": self.BARS}, **extra)
+            _write(os.path.join(d, "_planning.json"), json.dumps(payload))
+            return R.load_targets(d)
+
+    def test_a_weekly_cadence_lands_on_its_weekday(self):  # verifies: REQ-PLANCADENCE-1000#CASE-1
+        got = self._load(cadence={"every": "week"})
+        self.assertEqual("friday", got["cadence"]["on"])
+        self.assertEqual(["2026-09-18", "2026-09-25"], got["releases"])
+
+    def test_no_cadence_block_means_no_releases(self):  # verifies: REQ-PLANCADENCE-1000#CASE-2
+        got = self._load()
+        self.assertNotIn("cadence", got)
+        self.assertNotIn("releases", got)
+
+    def test_an_unimplemented_period_yields_nothing(self):  # verifies: REQ-PLANCADENCE-1000#CASE-3
+        # Not "fall back to weekly": a plan that asked for a fortnight and got a week
+        # would be wrong on every other marker, which is worse than no marker at all.
+        got = self._load(cadence={"every": "fortnight"})
+        self.assertNotIn("cadence", got)
+        self.assertNotIn("releases", got)
+
+    def test_the_weekday_is_chosen_and_from_narrows_the_span(self):  # verifies: REQ-PLANCADENCE-1000#CASE-4
+        got = self._load(
+            bars=[{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-10-05"}],
+            cadence={"every": "week", "on": "monday", "from": "2026-09-21"})
+        self.assertEqual(["2026-09-21", "2026-09-28", "2026-10-05"], got["releases"])
+
+    def test_a_plan_covering_no_dates_emits_no_cadence(self):  # verifies: REQ-PLANCADENCE-1000#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "_planning.json"),
+                   json.dumps({"cadence": {"every": "week"}, "scores": {"health": 90}}))
+            got = R.load_targets(d)
+        self.assertNotIn("cadence", got)
+        self.assertNotIn("releases", got)
+
+    def test_a_long_span_truncates_rather_than_thinning(self):
+        got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-01-01", "end": "2040-01-01"}],
+                         cadence={"every": "week"})
+        self.assertEqual(R.targets.CADENCE_MAX, len(got["releases"]))
+
+    def test_the_dates_reach_the_map_export(self):  # verifies: REQ-PLANCADENCE-1000#CASE-1
+        # The chart reads `planning.releases` off _map.json; a value computed and not
+        # emitted is the same as no cadence at all.
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-P-001.md"), _spec("AREA-P-001", ["`gate` writes the lock."]))
+            _write(os.path.join(d, "mod.py"), tag("AREA-P-001") + "\ndef f():\n    return 1\n")
+            _write(os.path.join(rd, "_planning.json"),
+                   json.dumps({"bars": self.BARS, "cadence": {"every": "week"}}))
+            reqs = R.load_requirements(rd)
+            members = R.scan_members(d, rd)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_map(R.Workspace(reqs, members, rd), d)
+            payload = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+        self.assertEqual(["2026-09-18", "2026-09-25"], payload["planning"]["releases"])
+
+
 class RoadmapPlan(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-998
     """ROADMAP.md: the horizon plan, and the two claims in it a machine can check."""
 

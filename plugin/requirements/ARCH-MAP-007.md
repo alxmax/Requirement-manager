@@ -22,6 +22,7 @@ Every bullet below is binding.
 - `_map.json` carries top-level `repo`, `engine_version` and `todos` fields; `repo`/`engine_version` are excluded from the freshness diff since each varies with the build environment, not the corpus. [[REQ-MAP-871]]
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
+- The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
 
 ## Cases
 CASE-1
@@ -317,3 +318,63 @@ CASE-3 — intent dedup ignores only whitespace differences
   When   `_distinct_intent` runs
   Then   it still returns "", because the comparison collapses whitespace before comparing
 
+--------------------
+
+
+---
+id: REQ-PLANCADENCE-1000
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+---
+
+# A release cadence, computed once and only drawn by the chart
+
+## Description
+> A plan whose only release markers are hand-written ones drifts the moment the team ships
+> weekly and the file still says December. A cadence states the rhythm instead of the dates:
+> one release at the end of every week, across whatever span the plan already covers. The
+> dates are computed in the engine and emitted, never recomputed in the viewer — weekday
+> arithmetic in two languages is how a chart comes to disagree with the tool that fed it.
+> `every: week` is the only period today, and the key is shaped so adding more is a
+> configurator, not a rewrite.
+
+Every bullet below is binding.
+- `_planning.json` may carry a `cadence` block; absent, nothing changes and no release
+  marker is emitted.
+- A cadence names its weekday with `on:` and defaults to Friday when it does not.
+- The release dates run across the span the plan's own bars and milestone dues already
+  cover, from the first to the last, unless `from:`/`until:` narrow it.
+- A cadence naming a period the engine does not implement yields no cadence at all, rather
+  than a series computed on a guess.
+- At most `CADENCE_MAX` dates are emitted, so a decade-long plan truncates its tail instead
+  of drawing an unreadable rule per week.
+- The viewer places the emitted dates and computes none of its own.
+
+## Cases
+CASE-1 — a weekly cadence lands on its weekday across the plan's span
+  Given  a plan whose bars run 2026-09-13 to 2026-09-30 and a `cadence` of `every: week`
+  When   the planning sidecar is loaded
+  Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`
+
+CASE-2 — no cadence block means no releases
+  Given  a plan carrying bars and milestones and no `cadence` key
+  When   the planning sidecar is loaded
+  Then   the result carries neither `cadence` nor `releases`
+
+CASE-3 — an unimplemented period yields nothing rather than a guess
+  Given  a `cadence` of `every: fortnight`
+  When   the planning sidecar is loaded
+  Then   the result carries neither `cadence` nor `releases`
+
+CASE-4 — the weekday is chosen, and `from:` narrows the span
+  Given  a `cadence` of `on: monday` with `from: 2026-09-21` on a plan ending 2026-10-05
+  When   the planning sidecar is loaded
+  Then   every emitted date is a Monday and none is earlier than 2026-09-21
+
+CASE-5 — a plan covering no dates emits no cadence
+  Given  a `cadence` block on a sidecar with no bars and no milestone due
+  When   the planning sidecar is loaded
+  Then   the result carries neither `cadence` nor `releases`

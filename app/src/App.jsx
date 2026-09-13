@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo, Component } from "react";
 import { REQUIREMENTS } from "./lib/data.js";
 import { MapView } from "./views/MapView.jsx";
 import { ProblemsView, computeProblems } from "./views/ProblemsView.jsx";
-import { SpecView } from "./views/SpecView.jsx";
 import { RoadmapView } from "./views/RoadmapView.jsx";
 import { ExplorerView } from "./views/ExplorerView.jsx";
 import { CommandsView } from "./views/CommandsView.jsx";
@@ -75,7 +74,6 @@ export default function App() {
           {view === "explorer" && <ExplorerView selId={selId} setSelId={setSelId} focus={focus} clearFocus={() => setFocus(null)} />}
           {view === "map" && <MapView selId={selId} setSelId={setSelId} openSpec={openSpec} highlightId={highlightId} setHighlightId={setHighlightId} />}
           {view === "problems" && <ProblemsView openSpec={openSpec} problems={problems} />}
-          {view === "spec" && <SpecView selId={selId} setSelId={setSelId} />}
           {view === "roadmap" && <RoadmapView openSpec={openSpec} />}
           {view === "commands" && <CommandsView />}
         </ErrorBoundary>
