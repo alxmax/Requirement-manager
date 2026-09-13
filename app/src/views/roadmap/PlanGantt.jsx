@@ -39,14 +39,20 @@ function indexBars(raw, origin) {
   }).filter(Boolean);
 }
 
-export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
+export function PlanGantt({ planning, history, locale, t, zoom, openSpec }) {
   const todayD = parseIso(isoLocal(new Date()));
   const raw = buildPlanBars(planning);
   const dueList = Object.entries(planning?.milestones || {})
     .filter(([, m]) => m?.due && parseIso(m.due))
     .map(([ms, m]) => ({ ms, due: m.due, label: m.label, at: parseIso(m.due) }));
 
-  if (!raw.length && !dueList.length) {
+  /* What already shipped, one row per calendar month, straight off CHANGELOG.md via the
+   * engine. It shares the timeline with the plan rather than living in a tab of its own:
+   * the question is "what happened, and what is next", and two charts cannot answer it
+   * next to a `today` line they do not share.  implements: REQ-HISTORY-1003 */
+  const past = (history || []).filter((h) => parseIso(h.first) && parseIso(h.last));
+
+  if (!raw.length && !dueList.length && !past.length) {
     return (
       <div style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         {t("Add milestones with due dates or bars in _planning.json.")}
@@ -57,6 +63,7 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
   const dates = [
     ...raw.flatMap((b) => [parseIso(b.start), parseIso(b.end)]),
     ...dueList.map((d) => d.at),
+    ...past.flatMap((h) => [parseIso(h.first), parseIso(h.last)]),
     todayD,
   ].filter(Boolean);
   let origin = monthStart(new Date(Math.min(...dates.map((d) => d.getTime()))));
@@ -71,6 +78,11 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
     : [...new Set(bars.map((b) => b.lane))];
   if (!lanes.length) lanes = ["Implementations"];
 
+  const pastRows = past.map((h) => {
+    const a = parseIso(h.first), z = parseIso(h.last);
+    const startIdx = dayIndex(origin, a);
+    return { ...h, startIdx, endIdx: Math.max(dayIndex(origin, z), startIdx) };
+  });
   const byLane = Object.fromEntries(lanes.map((ln) => [ln, bars.filter((b) => b.lane === ln)]));
   const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || []), 1) * ROW_H + PAD * 2);
   const bodyH = heights.reduce((a, h) => a + h, 0);
@@ -94,6 +106,16 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
       }}>
         <div style={{ width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)", background: "var(--bg-raised)" }}>
           <div style={{ height: HEAD_H, borderBottom: "1px solid var(--border)" }} />
+          {pastRows.length > 0 && (
+            <div style={{
+              height: ROW_H + PAD * 2, display: "flex", alignItems: "center",
+              justifyContent: "flex-end", padding: "0 12px", fontSize: 11, fontWeight: 700,
+              letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--fg-faint)",
+              borderBottom: "1px solid var(--border)",
+            }}>
+              {t("Shipped")}
+            </div>
+          )}
           {lanes.map((ln, i) => (
             <div key={ln} style={{
               height: heights[i], display: "flex", alignItems: "center", justifyContent: "flex-end",
@@ -153,6 +175,49 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
             </div>
           </div>
 
+          {pastRows.length > 0 && (
+            <div style={{
+              position: "relative", height: ROW_H + PAD * 2,
+              borderBottom: "1px solid var(--border)",
+              background: "color-mix(in oklch, var(--fg-faint) 5%, transparent)",
+            }}>
+              {months.map((m) => (
+                <div key={m.start} style={{
+                  position: "absolute", top: 0, bottom: 0, left: m.start * PX,
+                  width: 1, background: "var(--border-soft)", pointerEvents: "none",
+                }} />
+              ))}
+              {pastRows.map((h) => {
+                const left = h.startIdx * PX + 3;
+                const width = Math.max((h.endIdx - h.startIdx + 1) * PX - 6, 46);
+                return (
+                  <div
+                    key={h.month}
+                    title={`${h.month} · ${h.count} ${t("releases")} · ${h.versions[0]} → ${h.versions[h.versions.length - 1]}
+${h.headline}`}
+                    style={{
+                      position: "absolute", left, top: PAD, width, height: ROW_H - 4,
+                      boxSizing: "border-box", borderRadius: 4,
+                      background: "color-mix(in oklch, var(--fg-faint) 16%, transparent)",
+                      border: "1px solid color-mix(in oklch, var(--fg-faint) 40%, transparent)",
+                      borderLeft: "3px solid var(--fg-muted)",
+                      color: "var(--fg-muted)", fontSize: 11, fontWeight: 600,
+                      padding: "0 8px", display: "flex", alignItems: "center",
+                      gap: 6, overflow: "hidden", whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span style={{ fontWeight: 700 }}>{h.landmark}</span>
+                    <span style={{ opacity: 0.7 }}>
+                      {h.count} {t("releases")}
+                    </span>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", fontWeight: 500 }}>
+                      {h.headline}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
           {lanes.map((ln, i) => {
             const tone = LANE_TONE[i % LANE_TONE.length];
             const laneBars = byLane[ln] || [];

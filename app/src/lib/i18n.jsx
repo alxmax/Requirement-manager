@@ -66,6 +66,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Plan": "Plan",
   "Versions": "Versiuni",
   "Horizons": "Orizonturi",
+  "Shipped": "Livrat",
+  "releases": "release-uri",
   "release": "release",
   "Now": "Acum",
   "Next": "Urmează",

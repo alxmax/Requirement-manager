@@ -3,6 +3,7 @@
 // tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
 // tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995  // tested-by: REQ-TRANSLATE-996
 // tested-by: REQ-VIEWER-999  // tested-by: REQ-PLANCADENCE-1000
+// tested-by: REQ-HISTORY-1003
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -642,6 +643,33 @@ for (const [label, ok] of cadenceChecks) test(label, ok);
 const navHtml = renderToString(<App />);
 test("nav: no Spec tab — the Explorer renders the same document",  // verifies: REQ-VIEWER-945#CASE-1
   !/>Spec</.test(navHtml) && navHtml.includes(">Explorer<"));
+
+// ---- shipped history (REQ-HISTORY-1003) ------------------------------------
+// The band is engine-computed rows placed on the plan's own timeline, left of today.
+const HIST = [
+  { month: "2026-06", count: 10, first: "2026-06-04", last: "2026-06-26",
+    versions: ["v1.11.0", "v2.0.0", "v2.8.1"], landmark: "v2.0.0",
+    headline: "Breaking - intent-verb CLI" },
+  { month: "2026-07", count: 4, first: "2026-07-03", last: "2026-07-05",
+    versions: ["v2.11.0", "v2.13.0"], landmark: "v2.13.0",
+    headline: "Ranked requirement search" },
+];
+const withHist = renderToString(
+  <PlanGantt planning={cadencePlan} history={HIST} locale="en" t={(s) => s} zoom={100} openSpec={noop} />);
+const noHist = renderToString(
+  <PlanGantt planning={cadencePlan} history={[]} locale="en" t={(s) => s} zoom={100} openSpec={noop} />);
+const historyChecks = [
+  ["history: one band row per shipped month, labelled by its landmark",  // verifies: REQ-HISTORY-1003#CASE-4
+    withHist.includes(">Shipped<") && withHist.includes(">v2.0.0<") && withHist.includes(">v2.13.0<")],
+  ["history: the month's headline is shown, not its version list",  // verifies: REQ-HISTORY-1003#CASE-1
+    withHist.includes("Breaking - intent-verb CLI")],
+  ["history: no history means no band",  // verifies: REQ-HISTORY-1003#CASE-5
+    !noHist.includes(">Shipped<")],
+  ["history: the chart reaches back to the first shipped month",
+    // The plan's own bars start 2026-09-13; the band pulls the origin back to June.
+    withHist.includes("Jun") && !noHist.includes("Jun")],
+];
+for (const [label, ok] of historyChecks) test(label, ok);
 
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
 process.exit(failures ? 1 : 0);

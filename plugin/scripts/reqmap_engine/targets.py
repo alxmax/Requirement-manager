@@ -63,7 +63,12 @@ def _parse_bar(raw):
 
 # ---------- release cadence ----------
 WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
-CADENCE_DEFAULTS = {"every": "week", "on": "friday", "lane": "Release"}
+PERIODS = {"week": "week", "weekly": "week", "month": "month", "monthly": "month"}
+# One default per period, because "on" means a different thing in each: a weekday for a
+# week, a day-of-month (or "last") for a month. A single default would be wrong for one
+# of them, and silently so.
+PERIOD_DEFAULT_ON = {"week": "friday", "month": "last"}
+CADENCE_DEFAULTS = {"every": "month", "on": "last", "lane": "Release"}
 # A plan can span years; one marker per week over a decade is 520 vertical lines and an
 # unreadable chart. The cap is a rendering limit, not a planning opinion — it truncates
 # the tail and the count says so, rather than silently thinning the series.
@@ -73,20 +78,36 @@ CADENCE_MAX = 120
 def _parse_cadence(raw):
     """Normalise the optional `cadence` block, or None when absent/unusable.
 
-    Only `every: week` exists today. The field is still READ and validated so a plan
-    written against a later engine degrades to no cadence instead of a wrong one — the
-    configurator this is a placeholder for will add periods, not replace the key."""
+    `week` and `month` exist; anything else yields None rather than a series computed on
+    a guess. A plan that asked for a fortnight and silently got a week would be wrong on
+    every other marker, which is worse than no marker at all."""
     if raw is True:
         raw = {}
     if not isinstance(raw, dict):
         return None
-    out = dict(CADENCE_DEFAULTS)
     every = raw.get("every")
-    if isinstance(every, str) and every.strip().lower() not in ("week", "weekly"):
+    if every is None:
+        period = CADENCE_DEFAULTS["every"]
+    elif isinstance(every, str) and every.strip().lower() in PERIODS:
+        period = PERIODS[every.strip().lower()]
+    else:
         return None
+    out = dict(CADENCE_DEFAULTS)
+    out["every"] = period
+    out["on"] = PERIOD_DEFAULT_ON[period]
     on = raw.get("on")
-    if isinstance(on, str) and on.strip().lower() in WEEKDAYS:
+    if isinstance(on, str) and period == "week" and on.strip().lower() in WEEKDAYS:
         out["on"] = on.strip().lower()
+    elif period == "month":
+        # "last" is the default because a month's end is what a reader means by "end of
+        # month", and it is the only choice that lands in every month: a plan pinned to
+        # the 30th silently skips February.
+        if isinstance(on, str) and on.strip().lower() == "last":
+            out["on"] = "last"
+        elif isinstance(on, int) and 1 <= on <= 28:
+            out["on"] = on
+        elif isinstance(on, str) and on.strip().isdigit() and 1 <= int(on) <= 28:
+            out["on"] = int(on.strip())
     lane = raw.get("lane")
     if isinstance(lane, str) and lane.strip():
         out["lane"] = lane.strip()
@@ -113,11 +134,18 @@ def _plan_span(out):
     return min(dates), max(dates)
 
 
+def _month_end(year, month):
+    """The last day of that month, without a calendar import: day 1 of the next month,
+    minus one."""
+    nxt = datetime.date(year + (month == 12), 1 if month == 12 else month + 1, 1)
+    return nxt - datetime.timedelta(days=1)
+
+
 def _release_dates(cadence, first, last):
-    """Every `cadence["on"]` weekday from `first` through `last`, inclusive, as ISO
-    strings. Computed HERE and emitted, not recomputed in the viewer: a second
-    definition in JavaScript is how the CLI and the chart come to disagree about when
-    a release lands."""
+    """The cadence's dates from `first` through `last`, inclusive, as ISO strings.
+
+    Computed HERE and emitted, not recomputed in the viewer: a second definition in
+    JavaScript is how the CLI and the chart come to disagree about when a release lands."""
     start = cadence.get("from") or first
     end = cadence.get("until") or last
     if not start or not end or start > end:
@@ -127,9 +155,20 @@ def _release_dates(cadence, first, last):
         stop = datetime.date(*(int(p) for p in end.split("-")))
     except (TypeError, ValueError):
         return []
+    dates = []
+    if cadence["every"] == "month":
+        year, month = day.year, day.month
+        while len(dates) < CADENCE_MAX:
+            on = cadence["on"]
+            when = _month_end(year, month) if on == "last" else datetime.date(year, month, on)
+            if when > stop:
+                break
+            if when >= day:
+                dates.append(when.isoformat())
+            year, month = year + (month == 12), 1 if month == 12 else month + 1
+        return dates
     target = WEEKDAYS.index(cadence["on"])
     day += datetime.timedelta(days=(target - day.weekday()) % 7)
-    dates = []
     while day <= stop and len(dates) < CADENCE_MAX:
         dates.append(day.isoformat())
         day += datetime.timedelta(days=7)

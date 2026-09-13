@@ -9,7 +9,7 @@
    zoom shrinks everything including the type, density narrows the chip and
    keeps the type crisp. Both are remembered per reader. */
 import { useEffect, useState } from "react";
-import { REQUIREMENTS, TODOS, TARGETS, ROADMAP } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
@@ -150,10 +150,13 @@ function Segmented({ label, options, value, onChange, optionKey, optionLabel }) 
 /* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
  * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
  * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap }) {  // implements: REQ-VIEWER-984
+export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory }) {  // implements: REQ-VIEWER-984
   const { t, locale } = useI18n();
   const hasPlan = !!(TARGETS?.bars?.length)
-    || Object.values(TARGETS?.milestones || {}).some((m) => m?.due);
+    || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
+    // Shipped history alone is a timeline worth drawing: a repo that has released
+    // for months and planned nothing yet still has something to show on the Plan.
+    || !!(initialHistory || HISTORY).length;
   // `Not now` is parsed but never drawn, so a ROADMAP.md holding only that section
   // must not switch the mode on and then render three empty columns.
   const horizonItems = (initialRoadmap || ROADMAP)
@@ -302,7 +305,8 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
         {mode === "horizons" ? (
           <Horizons items={horizonItems} t={t} openSpec={openSpec} zoom={zoom} />
         ) : mode === "plan" ? (
-          <PlanGantt planning={TARGETS} locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
+          <PlanGantt planning={TARGETS} history={initialHistory || HISTORY}
+                     locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
         ) : (
         /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with
             the content — a transform leaves the container at full size and the

@@ -23,6 +23,7 @@ Every bullet below is binding.
 - Reading a requirement's clauses folds a wrapped line back into the clause above it, so a multi-line clause is never truncated to its first physical line. [[REQ-MAP-872]]
 - The `intent` field carries a requirement's first blockquote, joined into one line, and is empty when that quote just repeats the Contract. [[REQ-MAP-873]]
 - The planning sidecar may declare a release cadence; the engine computes its dates once and emits them, and nothing recomputes them downstream. [[REQ-PLANCADENCE-1000]]
+- What already shipped is read from `CHANGELOG.md` and emitted grouped by calendar month, so the chart can show the past beside the plan. [[REQ-HISTORY-1003]]
 
 ## Cases
 CASE-1
@@ -344,7 +345,8 @@ satisfies: [ARCH-MAP-007]
 Every bullet below is binding.
 - `_planning.json` may carry a `cadence` block; absent, nothing changes and no release
   marker is emitted.
-- A cadence names its weekday with `on:` and defaults to Friday when it does not.
+- A cadence runs every `week` or every `month`; `on:` names a weekday for a week and a
+  day-of-month (or `last`) for a month, defaulting to Friday and to the month's last day.
 - The release dates run across the span the plan's own bars and milestone dues already
   cover, from the first to the last, unless `from:`/`until:` narrow it.
 - A cadence naming a period the engine does not implement yields no cadence at all, rather
@@ -358,6 +360,12 @@ CASE-1 — a weekly cadence lands on its weekday across the plan's span
   Given  a plan whose bars run 2026-09-13 to 2026-09-30 and a `cadence` of `every: week`
   When   the planning sidecar is loaded
   Then   `releases` holds every Friday in that range, in order, and `cadence.on` is `friday`
+
+CASE-6 — a monthly cadence lands on each month's end
+  Given  a plan whose bars run 2026-09-13 to 2026-12-05 and a `cadence` of `every: month`
+  When   the planning sidecar is loaded
+  Then   `releases` is the last day of September, October and November, and `cadence.on`
+         is `last`
 
 CASE-2 — no cadence block means no releases
   Given  a plan carrying bars and milestones and no `cadence` key
@@ -378,3 +386,66 @@ CASE-5 — a plan covering no dates emits no cadence
   Given  a `cadence` block on a sidecar with no bars and no milestone due
   When   the planning sidecar is loaded
   Then   the result carries neither `cadence` nor `releases`
+
+--------------------
+
+
+---
+id: REQ-HISTORY-1003
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-MAP-007]
+---
+
+# What already shipped, read from the CHANGELOG and grouped by month
+
+## Description
+> The plan answers "what is next" and nothing answered "what happened". A repo that follows
+> the release discipline already writes the answer down: one dated heading per release, with
+> a headline under it. Reading the history from there rather than from a second sidecar means
+> it cannot drift from what was actually released — and one hundred releases across four
+> months is a wall of ticks, so the rows are calendar months, which is the grain the question
+> "what was done since we started" is asked at.
+
+Every bullet below is binding.
+- `CHANGELOG.md` is read for `## plugin \`vX.Y.Z\` — YYYY-MM-DD` headings, newest first, each
+  carrying its version, its date and a one-line headline; a repo with no such file yields
+  nothing and no chart band.
+- A heading carrying no date is skipped rather than dated by guesswork, because a version
+  that never shipped has no place on a timeline of what shipped.
+- The headline is the entry's opening bold sentence; a bold run that ends in a colon is a
+  lead-in to the list under it, so the next standalone line is used instead.
+- `_map.json` carries `history`: one row per calendar month with its release count, its first
+  and last date, every version in it, and the headline of its landmark release.
+- The landmark is the month's biggest step — a major over a minor over a patch, newest among
+  equals — never simply its first or last release.
+- The viewer places the rows the engine emitted, on the same timeline as the plan, and
+  derives none of its own.
+
+## Cases
+CASE-1 — dated headings are read, newest first
+  Given  a `CHANGELOG.md` with two dated `## plugin` headings
+  When   the history is parsed
+  Then   both are returned with their version, date and headline, newest first
+
+CASE-2 — an undated heading is skipped
+  Given  a heading reading `## plugin \`v3.5.0\` — superseded, never released`
+  When   the history is parsed
+  Then   it is not returned, and the dated entry above it keeps its own body
+
+CASE-3 — a colon-terminated bold run is a lead-in, not a headline
+  Given  an entry opening `**First release. Highlights:**` followed by a prose line
+  When   its headline is taken
+  Then   it is the prose line, not the lead-in
+
+CASE-4 — months group, and the landmark is the biggest step
+  Given  one month holding `v2.0.0`, `v2.1.0` and `v2.1.1`
+  When   the history is grouped
+  Then   that month has a count of 3, all three versions, and `v2.0.0` as its landmark
+
+CASE-5 — a repo with no CHANGELOG yields nothing
+  Given  a code root holding no `CHANGELOG.md`
+  When   the history is read
+  Then   it is empty and the chart draws no shipped band
