@@ -90,13 +90,14 @@ tool turns the spec into a real file that lives **next to the code** and is
 Copy the engine into any project, then:
 
 ```bash
-python scripts/reqmap.py init     # scaffold + draft requirements from your existing code
+python scripts/reqmap.py init     # scaffold + draft the SYS → ARCH → CODE pyramid
 python scripts/reqmap.py gate     # are code and specs in sync? (report-only)
 python scripts/reqmap.py sync      # build the visual map → open requirements/_map.html
 ```
 
-`init` is the friendly starting point — it sets everything up and tells you the
-next step. You never edit the generated files (`_map.*`, `_reqlock.json`) by hand.
+`init` is the friendly starting point — it sets everything up, drafts the SYS → ARCH → CODE
+pyramid (`status: draft`, `level_source: auto`), and tells you the next step. You never edit
+the generated files (`_map.*`, `_reqlock.json`) by hand.
 
 It also writes a starter `.reqmapignore`, and never overwrites one you already have.
 Two of its lines matter the first time you run an AI subagent in an isolated worktree
@@ -139,8 +140,11 @@ become your tests.
 
 A requirement may also declare where it sits on the V-model's left arm, with
 `level: system | architecture | code`, and name the level above it with
-`satisfies:`. Neither field is required — a corpus that sets neither behaves
-exactly as it did before these fields existed. Adopt them and two extra
+`satisfies:`. On a new repo, `init` writes all three rungs and those links;
+every invented field is `status: draft` and `level_source: auto` so you can
+rename, merge or delete the guesses. Neither field is required on a corpus you
+authored by hand — a tree that sets neither behaves exactly as it did before
+these fields existed. Adopt them and two extra
 checks switch on: `lint` reports a level whose fan-out leaves the 5–20 band, and
 the gate reports a level whose tests sit at the wrong depth (a `code`
 requirement is verified `@unit`, an `architecture` one `@integration`, a
@@ -230,7 +234,7 @@ it can change a file.
 
 | Verb | What it does |
 |---|---|
-| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft requirements from your existing code and prose, build the lock and map, print guided next steps. Idempotent; never clobbers an existing `.reqmapignore`. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
+| `init` | First-time setup: scaffold `requirements/` + `.reqmapignore`, draft the three-rung pyramid from untagged code and capability prose (one `level: system` placeholder, one `level: architecture` node per source directory, one `level: code` draft per file), then build the lock and map. Idempotent; never clobbers an existing `.reqmapignore`. `--wipe` hard-resets first; `--no-site` skips the `docs/architecture.html` step. |
 | `new AREA-NAME-NNN` | Scaffold one blank requirement from the built-in template. `--from-todo "name" --id ID` pre-fills it from a `TODO.md` item instead; add `--mark-done` to tick that item off. |
 | `gate` | **The verdict, and every read-only question.** Bare, it is the commit/CI check (below). The mode flags each answer one question instead. Never writes anything. |
 | `sync` | **The write path.** Rescan members, advance the drift baseline, and regenerate the map, `_findings.md`, the site regions and the generated integration artifacts — in one step. `--accept-drift` is required when a `confirmed` or `implemented` contract changed. |
@@ -387,7 +391,7 @@ plugin/                                     the plugin — self-contained
     SKILL.md                                advisory quality review (Claude Code)
     SKILL.universal.md                      AI-agnostic variant (any assistant)
   scripts/reqmap.py                         the command line: parser, dispatch, the Python floor
-  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 12,141 lines in all)
+  scripts/reqmap_engine/                    the engine, one module per capability (Python stdlib only, 12,173 lines in all)
   scripts/test_reqmap.py                    the regression suite's entry point — re-exports the four parts below
   scripts/test_reqmap_common.py             fixtures the parts share (runtime-built tag strings)
   scripts/test_reqmap_scan.py               reading the tree: parser, scanning, masking, walk, git
