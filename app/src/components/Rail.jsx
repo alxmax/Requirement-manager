@@ -1,6 +1,6 @@
 // implements: ARCH-VIEWER-007
 // implements: REQ-VIEWER-945
-import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI, HEALTH, DESIGN, TARGETS } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, ROADMAP, REPO, COMMANDS as CLI, HEALTH, DESIGN, TARGETS } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import { ENFORCED } from "../views/SpecDoc.jsx";
@@ -36,7 +36,13 @@ function RailNav({ view, setView, problems }) {
   const { t } = useI18n();
   const errCount = problems.filter((p) => p.sev === "ERROR").length;
   const questionCount = problems.filter((p) => p.sev === "QUESTION").length;
-  const todoCount = TODOS.filter((item) => !item.done).length;
+  /* Open work on the Roadmap tab, whichever plan the repo keeps: `TODO.md` items and
+   * `ROADMAP.md` horizons. Counting only TODOS made the badge read 0 the day this repo
+   * retired its own TODO.md — with ten open horizon items one click away, which reads
+   * as "nothing here" and is why the tab looked missing.  implements: REQ-VIEWER-999 */
+  const todoCount = TODOS.filter((item) => !item.done).length
+    + ROADMAP.filter((item) => !item.done
+        && (item.horizon === "now" || item.horizon === "next" || item.horizon === "later")).length;
   const counts = {
     explorer: REQUIREMENTS.length,
     map: REQUIREMENTS.filter((r) => r.level !== "code").length,

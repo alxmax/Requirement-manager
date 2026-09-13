@@ -172,7 +172,10 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
     // A reader whose last choice was Horizons in another repo must not land on a mode
     // this one cannot offer — the segmented control would have no matching option.
     const remembered = stored === "horizons" && !hasHorizons ? null : stored;
-    return initialMode || remembered || (hasHorizons ? "horizons" : hasPlan ? "plan" : "versions");
+    // Plan first: it is the view that answers both questions at once — what shipped, on
+    // the Shipped band, and what is scheduled, to the right of today. Horizons answers
+    // only the second, so it is a click away rather than the landing view.
+    return initialMode || remembered || (hasPlan ? "plan" : hasHorizons ? "horizons" : "versions");
   });
   const [showUnscheduled, setShowUnscheduled] = useState(false);
   const { zoom, setZoom, canvasRef } = useCanvasZoom({

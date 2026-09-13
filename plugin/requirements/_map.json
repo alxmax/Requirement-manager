@@ -18203,6 +18203,10 @@
         {
           "role": "implements",
           "loc": "app/src/lib/data.js:265"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/loadData.js:84"
         }
       ],
       "test_exempt": null,
@@ -18421,6 +18425,10 @@
         {
           "role": "tested-by",
           "loc": "app/scripts/ssr-smoke.jsx:5"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/components/Rail.jsx:42"
         },
         {
           "role": "implements",
@@ -21018,7 +21026,7 @@
     },
     {
       "month": "2026-09",
-      "count": 65,
+      "count": 66,
       "first": "2026-09-02",
       "last": "2026-09-14",
       "versions": [
@@ -21086,7 +21094,8 @@
         "v7.5.0",
         "v7.6.0",
         "v7.7.0",
-        "v7.8.0"
+        "v7.8.0",
+        "v7.8.1"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"
@@ -21289,7 +21298,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "676 lines (over 500)"
+        "detail": "732 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -21297,7 +21306,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "67 line(s) wider than 100 columns, first at line 1"
+        "detail": "70 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -21457,7 +21466,7 @@
         "file": "app/src/views/RoadmapView.jsx",
         "line": 153,
         "name": "RoadmapView",
-        "detail": "`RoadmapView` is 256 lines (over 80)"
+        "detail": "`RoadmapView` is 259 lines (over 80)"
       },
       {
         "pillar": "standards",
