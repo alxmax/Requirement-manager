@@ -9,7 +9,10 @@ from .health import _health_record, cmd_coverage
 from .i18n import _translation_gaps
 from .lint import lint_requirement
 from .lintrules import LINT_STATUSES, LINT_STRICT_PROMOTE
-from .mapdata import _roadmap_behind, _roadmap_plan_problems, _roadmap_signals
+from .mapdata import (
+    _read_roadmap, _roadmap_behind, _roadmap_plan_problems, _roadmap_signals
+)
+from .plandrift import plan_drift, plan_drift_lines
 from .model import _as_list
 from .orphans import _scan_untagged
 from .relevel import relevel_residue_lines
@@ -189,7 +192,7 @@ def _roadmap_lag_lines(reqs, code_root):
     return lines
 
 
-def _print_audit_roadmap(reqs, code_root):
+def _print_audit_roadmap(reqs, code_root, reqs_dir=None):
     # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-970
     """Print the roadmap-lag block, the audit's third section with no verb of its own.
 
@@ -203,6 +206,11 @@ def _print_audit_roadmap(reqs, code_root):
     commit and ADR-0020 draws that line for corpus-shape signals. `--audit` is a question
     a reader asks on purpose."""
     lines = _roadmap_lag_lines(reqs, code_root)
+    # Only here, never in `sync`'s tail: this one walks the tree a second time and shells
+    # to git once per cited file. `--audit` is asked for on purpose; `sync` runs on every
+    # edit and must not grow a second walk.
+    drift = plan_drift(_read_roadmap(code_root) or [], code_root, reqs_dir) if code_root else None
+    lines = lines + (plan_drift_lines(drift) if drift else [])
     if not lines:
         return
     print("-" * 72)
@@ -210,6 +218,13 @@ def _print_audit_roadmap(reqs, code_root):
     print("-" * 72)
     for text in lines:
         print("  " + text)
+    if drift:
+        for rec in drift["sure"][:5]:
+            what = ", ".join(rec["paths"] + rec["symbols"])
+            print("    gone: {}  <- {}".format(what, rec["name"][:60]))
+        for rec in drift["rederive"][:5]:
+            print("    since {}: {}  <- {}".format(
+                rec["since"], ", ".join(f["path"] for f in rec["files"][:2]), rec["name"][:60]))
     print("")
 
 
@@ -417,5 +432,5 @@ def cmd_audit(ws, strict=False, as_json=False):
     _print_audit_sections(sections)
     _print_audit_exemptions(exemptions)
     _print_audit_corpus_shape(shape)
-    _print_audit_roadmap(reqs, code_root)
+    _print_audit_roadmap(reqs, code_root, reqs_dir)
     return gate_rc

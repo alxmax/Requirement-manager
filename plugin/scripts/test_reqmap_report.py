@@ -2580,6 +2580,131 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
         self.assertEqual(["2026-09-18", "2026-09-25"], payload["planning"]["releases"])
 
 
+class PlanDrift(unittest.TestCase):  # tested-by: ARCH-PLANDRIFT-069  # tested-by: REQ-PLANDRIFT-1002
+    """Plan drift, and the six false-positive classes it was built around.
+
+    Each test below names the one it guards; deleting the guard is meant to fail here
+    rather than quietly re-admit the report the consumer measured."""
+
+    def _repo(self, d, files):
+        rd = os.path.join(d, "requirements")
+        _write(os.path.join(rd, "AREA-D-001.md"), _spec("AREA-D-001", ["`gate` writes the lock."]))
+        for rel, body in files.items():
+            _write(os.path.join(d, rel.replace("/", os.sep)), body)
+        return rd
+
+    def test_the_longest_extension_wins(self):  # verifies: REQ-PLANDRIFT-1002#CASE-1
+        # `ts` before `tsx` in the alternation cost the consumer nine false positives in
+        # one run: the `x` is left orphaned and the file "does not exist".
+        got = R.plandrift.cited_refs("see src/EmployeeDocumentList.tsx for the list")
+        self.assertEqual(["src/EmployeeDocumentList.tsx"], got["paths"])
+
+    def test_a_shortened_path_resolves_and_a_wrong_one_does_not(self):  # verifies: REQ-PLANDRIFT-1002#CASE-2
+        known = {"apps/api/app/common/errors.py", "apps/api/app/signing/x.py"}
+        self.assertEqual("apps/api/app/common/errors.py",
+                         R.plandrift._resolves("app/common/errors.py", known))
+        self.assertIsNone(R.plandrift._resolves("app/documents/errors.py", known))
+
+    def test_a_partial_filename_is_not_a_suffix_match(self):  # verifies: REQ-PLANDRIFT-1002#CASE-3
+        # A plain `endswith` would call `clarify.py` a match for `my_clarify.py` and
+        # quietly rehabilitate a real typo. Segments, not characters.
+        self.assertIsNone(R.plandrift._resolves("my_clarify.py", {"pkg/clarify.py"}))
+        self.assertEqual("pkg/clarify.py", R.plandrift._resolves("clarify.py", {"pkg/clarify.py"}))
+
+    def test_a_symbol_is_looked_for_across_the_whole_tree(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"mod.py": tag("AREA-D-001") + "\ndef to_response():\n    return 1\n",
+                                "other.py": "# nothing here\n"})
+            items = [{"name": "fix `to_response` in `other.py`", "context": "", "done": False}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        # The symbol lives in a file the item does not name. That is an imprecision, not
+        # a drift — reporting it is what made the consumer's first run unreadable.
+        self.assertEqual([], got["sure"])
+
+    def test_a_symbol_absent_from_the_code_is_reported(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"mod.py": tag("AREA-D-001") + "\ndef f():\n    return 1\n",
+                                "notes.md": "we used to have `decrypt_cnp` here\n"})
+            items = [{"name": "fix `decrypt_cnp`", "context": "", "done": False}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        # Prose is indexed for paths, not for symbols: a changelog records what a name
+        # USED to be, and counting that as existing makes the check permanently silent.
+        self.assertEqual(["decrypt_cnp"], got["sure"][0]["symbols"])
+
+    def test_a_path_nothing_resembles_is_a_target_not_a_stale_reference(self):  # verifies: REQ-PLANDRIFT-1002#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"mod.py": tag("AREA-D-001") + "\ndef f():\n    return 1\n"})
+            items = [{"name": "move it to docs/history/ARCHIVE.md", "context": "", "done": False}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        self.assertEqual([], got["sure"])
+
+    def test_a_deleted_file_under_a_live_directory_is_reported(self):  # verifies: ARCH-PLANDRIFT-069#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"pkg/mod.py": tag("AREA-D-001") + "\ndef f():\n    return 1\n"})
+            items = [{"name": "fix pkg/gone.py", "context": "", "done": False}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        self.assertEqual(["pkg/gone.py"], got["sure"][0]["paths"])
+
+    def test_a_version_is_not_a_date(self):  # verifies: REQ-PLANDRIFT-1002#CASE-5
+        # `\b\d{4}-\d{2}-\d{2}\b` matches the date half of `2026-06-19.1`, because `.` is
+        # a word boundary. The item was then dated off a version string it merely quoted.
+        items = [{"name": "re-vendor the engine (2026-06-19.1)", "context": "", "done": False,
+                  "section_date": "2026-09-05"}]
+        self.assertEqual(["2026-09-05"], R.plandrift.item_dates(items))
+
+    def test_an_item_with_no_date_inherits_its_sections(self):  # verifies: REQ-PLANDRIFT-1002#CASE-6
+        # The trap that mattered most: an audit batch carries its date ONCE, in the
+        # section's opening paragraph. Without inheritance the freshness check skipped
+        # exactly the items it was written for.
+        items = [{"name": "first", "context": "", "done": False, "section_date": "2026-09-05"},
+                 {"name": "second", "context": "", "done": False}]
+        self.assertEqual(["2026-09-05", "2026-09-05"], R.plandrift.item_dates(items))
+
+    def test_a_done_item_is_not_examined(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"pkg/mod.py": tag("AREA-D-001") + "\ndef f():\n    return 1\n"})
+            items = [{"name": "fix pkg/gone.py", "context": "", "done": True}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        self.assertEqual([], got["sure"])
+
+    def test_a_clean_plan_prints_nothing(self):  # verifies: ARCH-PLANDRIFT-069#CASE-3
+        self.assertEqual([], R.plandrift.plan_drift_lines({"sure": [], "rederive": []}))
+
+    def test_a_file_committed_after_the_item_is_worth_re_reading(self):  # verifies: ARCH-PLANDRIFT-069#CASE-2
+        # The case the module exists for: the path, the symbol and the line are all still
+        # correct and the code was fixed underneath them. The only signal is the date, so
+        # this bucket says "read it", never "close it" — and stays separate from `sure`.
+        with tempfile.TemporaryDirectory() as d:
+            rd = self._repo(d, {"pkg/mod.py": tag("AREA-D-001") + "\ndef f():\n    return 1\n"})
+            for args in (["init", "-q"], ["add", "-A"],
+                         ["-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "seed"]):
+                if R.git._git(args, cwd=d) is None:
+                    self.skipTest("git unavailable")
+            items = [{"name": "still true of pkg/mod.py", "context": "as of 2000-01-01",
+                      "done": False}]
+            got = R.plandrift.plan_drift(items, d, rd)
+        self.assertEqual([], got["sure"])
+        self.assertEqual(1, len(got["rederive"]))
+        self.assertEqual("pkg/mod.py", got["rederive"][0]["files"][0]["path"])
+        self.assertEqual("2000-01-01", got["rederive"][0]["since"])
+
+    def test_the_roadmap_parser_carries_context_and_the_section_date(self):  # verifies: REQ-PLANDRIFT-1002#CASE-6
+        plan = "\n".join([
+            "## Now",
+            "",
+            "Audited 2026-09-05 across eight areas.",
+            "",
+            "- [ ] fix the thing | req: AREA-D-001",
+            "      <!-- cites `pkg/mod.py` -->",
+            "- [ ] the second one",
+            "",
+        ])
+        items = R.mapdata._parse_roadmap_from_text(plan)
+        self.assertEqual("2026-09-05", items[0]["section_date"])
+        self.assertIn("pkg/mod.py", items[0]["context"])
+        self.assertEqual("", items[1]["context"])
+
+
 class RoadmapPlan(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # tested-by: REQ-ROADMAP-998
     """ROADMAP.md: the horizon plan, and the two claims in it a machine can check."""
 
