@@ -111,8 +111,8 @@ COMMANDS = {
             "writes anything. The mode flags answer one question each instead of running "
             "the verdict: --audit for the whole problem report, --risk for what to do next, "
             "--show for one requirement's dossier, --search to rank by relevance, --dupes "
-            "for overlapping contracts, --design for the code review, --review and "
-            "--implement for the two machine-readable plans. "
+            "for overlapping contracts, --design for the code review, --review for the "
+            "machine-readable review plan. "
        
         ),
         "arg": None,
@@ -174,15 +174,6 @@ COMMANDS = {
                 "type": "str",
                 "help": (
                     "Emit the deterministic review plan for one requirement, as JSON."
-                ),
-            },
-            {
-                "name": "mode_implement",
-                "flag": "--implement",
-                "type": "str",
-                "help": (
-                    "Emit the implementation brief for one requirement: obligations, required "
-                    "tags, similar existing code."
                 ),
             },
             {

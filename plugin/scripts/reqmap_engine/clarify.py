@@ -266,7 +266,7 @@ def cmd_clarify(reqs, cap_id, as_json=False):
         return 0
     if not items:
         print("{}: nothing unclear that this check can see.".format(cap_id or "corpus"))
-        print("  next: reqmap.py gate --implement {}".format(cap_id or "<ID>"))
+        print("  next: reqmap.py gate --show {}".format(cap_id or "<ID>"))
         return 0
     for it in items:
         blocking = [q for q in it["questions"] if q["severity"] == "blocking"]
@@ -288,5 +288,5 @@ def cmd_clarify(reqs, cap_id, as_json=False):
                 print("     -> {}".format(q["suggest"]))
         print("")
     if cap_id:
-        print("Answer them in {}.md, then: reqmap.py gate --implement {}".format(cap_id, cap_id))
+        print("Answer them in {}.md, then: reqmap.py gate --show {}".format(cap_id, cap_id))
     return 0

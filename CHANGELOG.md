@@ -1,5 +1,21 @@
 # Changelog
 
+## plugin `v7.4.0` — 2026-09-13
+
+**ADR-0037 pass 2: `gate --implement` is retired.** The brief it printed is the
+requirement itself — obligations, cases, required tags — and `gate --show <ID>` prints
+the same facts from the same corpus. `ARCH-IMPLEMENT-063` and its two children are
+`deprecated`; `reqmap_engine/implement.py` is deleted. Measured yield: 12,306 → 12,168
+lines over `reqmap.py` + `reqmap_engine/` (−138).
+
+- `--implement` is still ACCEPTED by argparse for one release and prints a sentence
+  naming its replacement, then exits 0 — the alias window `--suggest-verifies` got in
+  v7.3.0, so a consumer following an older doc does not meet `unrecognized arguments`.
+- `clarify` now ends at `next: reqmap.py gate --show <ID>`. It was the one caller that
+  issued the retired advice, and ADR-0037 named it as the only blocker on this pass.
+- Registry: the `--implement` entry is gone from `COMMANDS`, so `tool_definition.json`
+  and the `SKILL.universal.md` command table regenerate without it.
+
 ## plugin `v7.3.4` — 2026-09-13
 
 **Planning Gantt in Planificare, plus map zoom and a viewer split.** Optional

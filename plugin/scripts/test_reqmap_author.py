@@ -1,5 +1,5 @@
 """Writing requirements: `new`, `promote`, `init`, extraction and candidates, the
-readability linter, `clarify`/`--decompose`, `implement`, `retire` and the level retrofit.
+readability linter, `clarify`/`--decompose`, `retire` and the level retrofit.
 
 Part of the `test_reqmap` suite — run it through the aggregator (`python
 scripts/test_reqmap.py`), or on its own with `python -m unittest test_reqmap_author`."""
@@ -2349,100 +2349,6 @@ class Clarify(unittest.TestCase):  # tested-by: ARCH-CLARIFY-062  # tested-by: R
     def test_questions_are_deterministic(self):  # verifies: ARCH-CLARIFY-062#CASE-2
         clauses = ["It scans all files quickly, retrying 3 times."]
         self.assertEqual(self._qs(clauses), self._qs(clauses))
-
-
-class Implement(unittest.TestCase):  # tested-by: ARCH-IMPLEMENT-063  # tested-by: REQ-IMPLEMENT-958  # tested-by: REQ-IMPLEMENT-959
-    def _seed(self, d, rid="AREA-I-001", clauses=("`gate` writes the lock file.",), cases=None, code=True):
-        rd = os.path.join(d, "requirements")
-        cases = cases or ("CASE-1 — a\n  Given x\n  When y\n  Then z",
-                          "CASE-2 — b\n  Given an invalid lock\n  When y\n  Then it refuses")
-        _write(os.path.join(rd, rid + ".md"), _spec(rid, list(clauses), cases))
-        if code:
-            _write(os.path.join(d, "mod.py"), tag(rid) + "\ndef f():\n    return 1\n")
-        return rd
-
-    def _run(self, d, rid, as_json=False):
-        rd = os.path.join(d, "requirements")
-        reqs = R.load_requirements(rd)
-        members = R.scan_members(d, d)
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            code = R.cmd_implement(R.Workspace(reqs, members), rid, as_json)
-        return code, buf.getvalue()
-
-    def test_tags_are_emitted_verbatim_one_per_case(self):  # verifies: ARCH-IMPLEMENT-063#CASE-1  # verifies: REQ-IMPLEMENT-958#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            _code, out = self._run(d, "AREA-I-001")
-        self.assertIn(tag("AREA-I-001"), out)
-        self.assertIn("# verifies: AREA-I-001#CASE-1", out)
-        self.assertIn("# verifies: AREA-I-001#CASE-2", out)
-        self.assertEqual(2, out.count("# verifies: AREA-I-001#"))
-
-    def test_blocking_question_opens_the_brief(self):  # verifies: ARCH-IMPLEMENT-063#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-N-001.md"),
-                   "---\nid: AREA-N-001\nstatus: confirmed\nlayer: feature\n---\n\n"
-                   "# N\n\n## Description\nEvery bullet below is binding.\n- `gate` runs.\n")
-            _code, out = self._run(d, "AREA-N-001")
-        self.assertIn("BLOCKING", out)
-        self.assertIn("clarify AREA-N-001", out)
-
-    def test_brief_writes_nothing(self):  # verifies: ARCH-IMPLEMENT-063#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rd = self._seed(d)
-            before = {f: open(os.path.join(rd, f), encoding="utf-8").read() for f in os.listdir(rd)}
-            self._run(d, "AREA-I-001")
-            after = {f: open(os.path.join(rd, f), encoding="utf-8").read() for f in os.listdir(rd)}
-        self.assertEqual(before, after)
-
-    def test_a_requirement_with_no_code_says_so(self):  # verifies: REQ-IMPLEMENT-958#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d, code=False)
-            _code, out = self._run(d, "AREA-I-001")
-        self.assertIn("nothing yet", out)
-
-    def test_json_brief_carries_the_fields(self):  # verifies: REQ-IMPLEMENT-958#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            self._seed(d)
-            code, out = self._run(d, "AREA-I-001", as_json=True)
-        data = json.loads(out)
-        self.assertEqual(0, code)
-        for field in ("contract", "cases", "members", "tags", "open_questions"):
-            self.assertIn(field, data)
-
-    def test_nearest_implemented_neighbour_is_offered(self):  # verifies: REQ-IMPLEMENT-959#CASE-1
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-I-001.md"),
-                   _spec("AREA-I-001", ["the lock file records the contract hash baseline."]))
-            _write(os.path.join(rd, "AREA-J-002.md"),
-                   _spec("AREA-J-002", ["the lock file records the contract hash baseline exactly."]))
-            _write(os.path.join(d, "neighbour.py"), tag("AREA-J-002") + "\ndef g():\n    return 2\n")
-            _code, out = self._run(d, "AREA-I-001")
-        self.assertIn("AREA-J-002", out)
-        self.assertIn("neighbour.py", out)
-
-    def test_at_most_two_neighbours_are_offered(self):  # verifies: REQ-IMPLEMENT-959#CASE-3
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            clause = "the lock file records the contract hash baseline"
-            _write(os.path.join(rd, "AREA-I-001.md"), _spec("AREA-I-001", [clause + "."]))
-            for n in range(5):
-                rid = "AREA-N-01{}".format(n)
-                _write(os.path.join(rd, rid + ".md"), _spec(rid, ["{} exactly {}.".format(clause, n)]))
-                _write(os.path.join(d, "n{}.py".format(n)), tag(rid) + "\ndef f():\n    return 1\n")
-            _code, out = self._run(d, "AREA-I-001")
-        self.assertEqual(2, sum(1 for line in out.splitlines() if line.startswith("  AREA-N-01")))
-
-    def test_no_neighbour_when_nothing_is_implemented(self):  # verifies: REQ-IMPLEMENT-959#CASE-2
-        with tempfile.TemporaryDirectory() as d:
-            rd = os.path.join(d, "requirements")
-            _write(os.path.join(rd, "AREA-I-001.md"), _spec("AREA-I-001", ["the lock file records the hash."]))
-            _write(os.path.join(rd, "AREA-J-002.md"), _spec("AREA-J-002", ["the lock file records the hash."]))
-            _code, out = self._run(d, "AREA-I-001")
-        self.assertNotIn("Similar requirements", out)
 
 
 class Retire(unittest.TestCase):  # tested-by: ARCH-RETIRE-064  # tested-by: REQ-RETIRE-960  # tested-by: REQ-RETIRE-961  # tested-by: REQ-RETIRE-962  # tested-by: REQ-RETIRE-963

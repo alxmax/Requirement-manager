@@ -17,7 +17,7 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [x] `roadmap_unmapped` / heading-uri fără milă numesc un next-step | req: ARCH-ROADMAP-038
 - [x] `clarify` nu mai tipărește `next: gate --implement` | req: ARCH-CMDREGISTRY-033
 - [x] `sync --help` numește pașii (scan → drift → lock → map → findings → site) | req: ARCH-CMDREGISTRY-033
-- [ ] Scoate `gate --implement` (ADR-0037 pass 2) | req: ARCH-CMDREGISTRY-033
+- [x] Scoate `gate --implement` (ADR-0037 pass 2) | req: ARCH-CMDREGISTRY-033
 
 ## Next
 

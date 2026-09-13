@@ -58,7 +58,6 @@ from reqmap_engine.gate import cmd_check
 from reqmap_engine.groups import cmd_decompose_groups
 from reqmap_engine.health import cmd_coverage, cmd_health
 from reqmap_engine.i18n import cmd_i18n
-from reqmap_engine.implement import cmd_implement
 from reqmap_engine.init import cmd_init
 from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
@@ -77,7 +76,7 @@ from reqmap_engine import (
     config, model, parse, sections, acceptance, text, tags, scan,
     orphans, git, locks, commands, registry, author, draft, candidates,
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
-    implement, risk, show, design, design_python, design_brace, design_report, mapmd,
+    risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review,
 )
@@ -209,9 +208,14 @@ def _add_todo_and_mode_flags(ap):
                     help="gate: rank requirements by lexical relevance to a query")
     ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None, const="",
                     help="gate: emit the review plan for one requirement")
+    # DEPRECATED in v7.4.0, removed in the release after — same one-release alias
+    # window `--suggest-verifies` got below (ADR-0037 decision 3/4). The capability is
+    # gone (ARCH-IMPLEMENT-063 and its two children are `deprecated`, implement.py
+    # deleted); argparse still accepts the flag so an older doc meets a sentence
+    # instead of `unrecognized arguments`.
     ap.add_argument("--implement",
                     dest="mode_implement", metavar="ID", nargs="?", default=None, const="",
-                    help="gate: emit the implementation brief for one requirement")
+                    help=argparse.SUPPRESS)
     ap.add_argument("--dupes", dest="mode_dupes", action="store_true",
                     help="gate: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
@@ -282,9 +286,11 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
             print("usage: reqmap gate --review AREA-NAME-NNN"); return 2
         return cmd_review(reqs, a.mode_review)
     if a.mode_implement is not None:
-        if not a.mode_implement:
-            print("usage: reqmap gate --implement AREA-NAME-NNN"); return 2
-        return cmd_implement(ws, a.mode_implement, as_json=a.as_json)
+        print("`gate --implement` was retired in v7.4.0: the brief it printed is the "
+              "requirement itself, and `gate --show <ID>` prints the same contract, "
+              "cases and members from the same facts. This flag is accepted for one "
+              "release and does nothing.", file=sys.stderr)
+        return 0
     if a.mode_dupes:
         return cmd_similar(reqs, a.threshold if a.threshold is not None else cfg.SIMILAR_THRESHOLD,
                            members, top=a.top)
@@ -489,7 +495,7 @@ _ENGINE_MODULES = (
     config, model, parse, sections, acceptance, text, tags, scan,
     orphans, git, locks, commands, registry, author, draft, candidates,
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
-    implement, risk, show, design, design_python, design_brace, design_report, mapmd,
+    risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review,
 )
