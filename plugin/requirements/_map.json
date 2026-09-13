@@ -20738,7 +20738,7 @@
       "done": true
     },
     {
-      "name": "Get to n=2: one external repo running the gate",
+      "name": "Get to n=2: Consilium-py pineaza `uses: alxmax/requirement-manager/check@v7` pe `main`, verde 7 zile",
       "lane": "ops",
       "milestone": "v3",
       "done": false

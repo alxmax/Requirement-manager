@@ -447,7 +447,12 @@
            5,544 with a date, and its Status no longer carries the open question. Re-open
            triggers are numeric: 3+ merge conflicts on the file in a rolling 90 days, or
            crossing 8,000 lines, or a named external consumer wanting the split form. -->
-- [ ] Get to n=2: one external repo running the gate | lane: ops
+- [ ] Get to n=2: Consilium-py pineaza `uses: alxmax/requirement-manager/check@v7` pe `main`, verde 7 zile | lane: ops
+      <!-- 2026-09-13. Repo-ul deja vendoruieste reqmap (2026-06-19.1) si ruleaza
+           `python scripts/reqmap.py gate` + `map --check` in .github/workflows/ci.yml.
+           De facut, in job-ul `gate`: permissions contents:read;
+           uses: alxmax/requirement-manager/check@v7; pastreaza map --check
+           pana re-vendorizezi motorul la v7. Commit-ul e in Consilium-py, nu aici. -->
 - [x] Run the gate over a real C/C++ tree (headers, macros, generated code) — the evidence behind the automotive credibility line | lane: ops
       <!-- Closed 2026-08-25 by scan-evidence run 1 (v2.28.0, PR #192): madler/zlib (271 files) +
            curl/curl (4,449 files, 759 .c / 257 .h). Scanner 16/16 native-comment and edge probes
