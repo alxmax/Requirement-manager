@@ -1,0 +1,71 @@
+{
+  "lanes": ["Viewer", "Engine", "Release"],
+  "bars": [
+    {
+      "title": "Timeline Gantt în Planificare",
+      "lane": "Viewer",
+      "start": "2026-09-15",
+      "end": "2026-10-15",
+      "milestone": "v7.4",
+      "progress": 40
+    },
+    {
+      "title": "Panou istoric cerințe",
+      "lane": "Viewer",
+      "start": "2026-10-16",
+      "end": "2026-12-10",
+      "milestone": "v7.4"
+    },
+    {
+      "title": "Export _planning.json (bars + lanes)",
+      "lane": "Engine",
+      "start": "2026-09-13",
+      "end": "2026-09-20",
+      "milestone": "v7.4",
+      "progress": 85
+    },
+    {
+      "title": "Ranking căutare română",
+      "lane": "Engine",
+      "start": "2027-01-15",
+      "end": "2027-05-20",
+      "milestone": "v8.0"
+    },
+    {
+      "title": "Release v7.4",
+      "lane": "Release",
+      "start": "2026-12-20",
+      "end": "2026-12-31",
+      "milestone": "v7.4"
+    },
+    {
+      "title": "Release v8.0",
+      "lane": "Release",
+      "start": "2027-05-21",
+      "end": "2027-06-01",
+      "milestone": "v8.0"
+    }
+  ],
+  "milestones": {
+    "v7.4": {
+      "due": "2026-12-31",
+      "label": "Planificare în viewer + polish",
+      "items": [
+        "Itemi planificați ca chips fantomă (fără TODO.md încă)",
+        "Tab Planificare cu date țintă"
+      ]
+    },
+    "v8.0": {
+      "due": "2027-06-01",
+      "label": "Trasabilitate + căutare RO",
+      "items": [
+        "Istoric modificări cerințe",
+        "Ranking căutare română la paritate cu CLI"
+      ]
+    }
+  },
+  "scores": {
+    "health": 95,
+    "design": 85
+  }
+}

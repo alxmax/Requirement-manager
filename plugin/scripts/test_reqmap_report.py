@@ -281,6 +281,32 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
             doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
             self.assertEqual([t["name"] for t in doc["todos"]], ["Ship it"])
 
+    def test_export_includes_targets_sidecar(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            _write(os.path.join(rd, "_planning.json"), json.dumps({
+                "scores": {"health": 95, "design": 80},
+                "lanes": ["Tech"],
+                "bars": [{"title": "Ship planning", "lane": "Tech", "start": "2026-10-01", "end": "2026-10-15"}],
+                "milestones": {"v2.0": {
+                    "due": "2026-12-31",
+                    "label": "Ship planning",
+                    "items": ["Future panel"],
+                }},
+            }))
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_map(R.Workspace(R.load_requirements(rd), {}, rd), d)
+            doc = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+            self.assertEqual(doc["planning"]["scores"]["health"], 95)
+            self.assertEqual(doc["planning"]["milestones"]["v2.0"]["due"], "2026-12-31")
+            self.assertEqual(doc["planning"]["milestones"]["v2.0"]["items"], ["Future panel"])
+            self.assertEqual(doc["planning"]["bars"][0]["start"], "2026-10-01")
+            self.assertEqual(doc["planning"]["lanes"], ["Tech"])
+            self.assertEqual(doc["targets"]["scores"]["health"], 95)
+
     def test_hostile_title_roundtrips_as_data_not_injection(self):  # bug: id-js-string-breakout-xss  # verifies: REQ-MAP-870#CASE-6  # verifies: ARCH-MAP-007#CASE-3
         doc = _export_doc_for({"id": "a</script><img src=x>", "title": "x\");alert(1)//"})
         # the value survives intact as a JSON string — there is no markup context to break out of

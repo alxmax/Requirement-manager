@@ -8,15 +8,16 @@
    independent controls answer that, because they trade different things away —
    zoom shrinks everything including the type, density narrows the chip and
    keeps the type crisp. Both are remembered per reader. */
-import { useEffect, useRef, useState } from "react";
-import { REQUIREMENTS, TODOS } from "../lib/data.js";
+import { useEffect, useState } from "react";
+import { REQUIREMENTS, TODOS, TARGETS } from "../lib/data.js";
+import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
+import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
+import { PlanGantt } from "./roadmap/PlanGantt.jsx";
 
-const ZOOM_MIN = 40, ZOOM_MAX = 150, ZOOM_DEFAULT = 100;
 const ZOOM_KEY = "reqmap.roadmap.zoom";
 const DENSITY_KEY = "reqmap.roadmap.density";
-
-const clampZoom = z => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z)));
+const MODE_KEY = "reqmap.roadmap.mode";
 
 /* Guarded the way i18n.jsx guards its own: SSR (the smoke test) has no window,
  * and a file:// viewer in a hardened browser throws on the accessor itself. */
@@ -67,6 +68,20 @@ const DENSITY = {  // implements: REQ-VIEWER-984
              cellPad: "3px 5px",  headPad: "6px 8px",   lanePad: "0 8px",  titleMax: 108 },
 };
 
+function formatDue(iso, locale) {
+  try {
+    const d = new Date(`${iso}T12:00:00`);
+    return d.toLocaleDateString(locale === "ro" ? "ro-RO" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+  } catch { return iso; }
+}
+
+function dueTone(iso) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (iso < today) return "past";
+  if (iso === today) return "today";
+  return "future";
+}
+
 const VARIANT = {
   done:     { background: "var(--cov-tested-bg)",  color: "var(--cov-tested)",   dot: "var(--cov-tested)",   clipPath: ARROW, arrow: true },
   progress: { background: "var(--indigo-tint)",    color: "var(--indigo-500)",   dot: "var(--indigo-400)",   clipPath: ARROW, arrow: true },
@@ -103,35 +118,9 @@ function Bar({ variant, id, label, onClick, d }) {
   );
 }
 
-const ctrlBtn = {
-  border: "none", cursor: "pointer", fontFamily: "inherit", background: "transparent",
-  color: "var(--fg-muted)", padding: "3px 9px", fontSize: 12, lineHeight: 1.4,
-};
-
-function ZoomControl({ zoom, setZoom }) {  // implements: REQ-VIEWER-984
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
-                     textTransform: "uppercase", color: "var(--fg-faint)" }}>Zoom</span>
-      <span style={{ display: "inline-flex", alignItems: "center",
-                     border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden" }}>
-        <button style={ctrlBtn} title="Zoom out" aria-label="Zoom out"
-                onClick={() => setZoom(z => clampZoom(z / 1.1))}>−</button>
-        <button
-          onClick={() => setZoom(ZOOM_DEFAULT)}
-          title="Reset to 100%"
-          style={{ ...ctrlBtn, minWidth: 48, textAlign: "center", fontWeight: 700,
-                   color: "var(--fg)", background: "var(--surface-hov)" }}
-        >{`${zoom}%`}</button>
-        <button style={ctrlBtn} title="Zoom in" aria-label="Zoom in"
-                onClick={() => setZoom(z => clampZoom(z * 1.1))}>+</button>
-      </span>
-      <span style={{ fontSize: 10, color: "var(--fg-faint)" }}>ctrl + scroll</span>
-    </span>
-  );
-}
-
-function Segmented({ label, options, value, onChange }) {
+function Segmented({ label, options, value, onChange, optionKey, optionLabel }) {
+  const keyOf = (o) => (optionKey ? o[optionKey] : o);
+  const labelOf = (o) => (optionLabel ? o[optionLabel] : o);
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.8px",
@@ -139,17 +128,17 @@ function Segmented({ label, options, value, onChange }) {
       <span style={{ display: "inline-flex", border: "1px solid var(--border)", borderRadius: 6, overflow: "hidden" }}>
         {options.map(o => (
           <button
-            key={o}
-            onClick={() => onChange(o)}
-            aria-pressed={o === value}
+            key={keyOf(o)}
+            onClick={() => onChange(keyOf(o))}
+            aria-pressed={keyOf(o) === value}
             style={{
               ...ctrlBtn, fontSize: 11,
-              fontWeight: o === value ? 700 : 500,
-              background: o === value ? "var(--surface-hov)" : "transparent",
-              color: o === value ? "var(--fg)" : "var(--fg-muted)",
+              fontWeight: keyOf(o) === value ? 700 : 500,
+              background: keyOf(o) === value ? "var(--surface-hov)" : "transparent",
+              color: keyOf(o) === value ? "var(--fg)" : "var(--fg-muted)",
             }}
           >
-            {o}
+            {labelOf(o)}
           </button>
         ))}
       </span>
@@ -160,55 +149,36 @@ function Segmented({ label, options, value, onChange }) {
 /* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
  * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
  * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // implements: REQ-VIEWER-984
+export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode }) {  // implements: REQ-VIEWER-984
+  const { t, locale } = useI18n();
+  const hasPlan = !!(TARGETS?.bars?.length)
+    || Object.values(TARGETS?.milestones || {}).some((m) => m?.due);
+  const [mode, setMode] = useState(() => {
+    const stored = readStored(MODE_KEY, (v) => {
+      if (v === "versions" || v === "plan") return v;
+      if (v === "timeline") return "plan"; // renamed
+      return null;
+    }, null);
+    return initialMode || stored || (hasPlan ? "plan" : "versions");
+  });
   const [showUnscheduled, setShowUnscheduled] = useState(false);
-  const [zoom, setZoom] = useState(() => initialZoom != null ? clampZoom(initialZoom) : readStored(ZOOM_KEY, v => {
-    const n = Number(v);
-    return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : null;
-  }, ZOOM_DEFAULT));
+  const { zoom, setZoom, canvasRef } = useCanvasZoom({
+    storageKey: ZOOM_KEY,
+    initialZoom: initialZoom != null ? clampZoom(initialZoom) : readStored(ZOOM_KEY, (v) => {
+      const n = Number(v);
+      return Number.isFinite(n) && n >= ZOOM_MIN && n <= ZOOM_MAX ? Math.round(n) : null;
+    }, ZOOM_DEFAULT),
+  });
   const [density, setDensity] = useState(() => initialDensity || readStored(
-    DENSITY_KEY, v => (v === "comfy" || v === "compact" ? v : null), "comfy"));
-  const { ref, onMouseDown, onClickCapture } = useDragPan();
-  // The wheel handler both reads and WRITES this, synchronously: a trackpad
-  // flick delivers several wheel events inside one frame, and a ref synced only
-  // at render would hand all of them the same stale zoom, collapsing the flick
-  // into a single step. The effect keeps the button path in sync.
-  const zoomRef = useRef(zoom);
-  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+    DENSITY_KEY, (v) => (v === "comfy" || v === "compact" ? v : null), "comfy"));
+  const { onMouseDown, onClickCapture } = useDragPan(canvasRef);
 
-  useEffect(() => {
-    try { window.localStorage.setItem(ZOOM_KEY, String(zoom)); } catch { /* not fatal */ }
-  }, [zoom]);
   useEffect(() => {
     try { window.localStorage.setItem(DENSITY_KEY, density); } catch { /* not fatal */ }
   }, [density]);
-
-  /* Ctrl/⌘ + wheel zooms; a bare wheel still scrolls, because a table this wide
-   * needs the wheel more than it needs a shortcut. Registered natively and
-   * non-passive: React's onWheel cannot preventDefault, and without that the
-   * browser's own page zoom fires instead. The point under the cursor is held
-   * still, so zooming out to find a version does not lose the one you were on. */
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    const onWheel = (e) => {
-      if (!e.ctrlKey && !e.metaKey) return;
-      e.preventDefault();
-      const before = zoomRef.current;
-      const after = clampZoom(before * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
-      if (after === before) return;
-      const r = el.getBoundingClientRect();
-      const cx = e.clientX - r.left, cy = e.clientY - r.top;
-      const k = after / before;
-      zoomRef.current = after;
-      setZoom(after);
-      // CSS `zoom` scales the scroll extent, so the anchor is plain arithmetic.
-      el.scrollLeft = (el.scrollLeft + cx) * k - cx;
-      el.scrollTop  = (el.scrollTop  + cy) * k - cy;
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, [ref]);
+    try { window.localStorage.setItem(MODE_KEY, mode); } catch { /* not fatal */ }
+  }, [mode]);
 
   const d = DENSITY[density] || DENSITY.comfy;
 
@@ -219,7 +189,9 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
   // groups anything under it, done or not.
   const msSet = new Set();
   REQUIREMENTS.forEach(r => { if (r.milestone && r.status !== "deprecated") msSet.add(r.milestone); });
-  TODOS.forEach(t => { if (t.milestone) msSet.add(t.milestone); });
+  TODOS.forEach(item => { if (item.milestone) msSet.add(item.milestone); });
+  const msMeta = TARGETS?.milestones || {};
+  Object.keys(msMeta).forEach(ms => msSet.add(ms));
   const milestones = Array.from(msSet).sort(semverCmp);
 
   const current =
@@ -232,7 +204,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
   // 618 of them here produced a wall of chips that said nothing about the plan.
   const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated" && r.level !== "code");
 
-  if (!milestones.length && !unscheduled.length) {
+  if (!milestones.length && !unscheduled.length && !hasPlan) {
     return (
       <div className="main" style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         No milestones yet. Add <code>milestone: v1.x</code> to requirement frontmatter
@@ -246,6 +218,23 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
     .forEach(r => { if (byMs[r.milestone]) byMs[r.milestone].push({ type: "req", r }); });
   TODOS.filter(t => !t.done)
     .forEach(t => { if (byMs[t.milestone]) byMs[t.milestone].push({ type: "todo", t }); });
+  // Planned items from _planning.json — work not yet in TODO.md or requirements.
+  milestones.forEach(ms => {
+    const planned = msMeta[ms]?.items;
+    if (!Array.isArray(planned)) return;
+    const names = new Set(byMs[ms].map(item =>
+      item.type === "req" ? item.r.title.toLowerCase()
+        : item.type === "todo" ? item.t.name.toLowerCase() : ""));
+    planned.forEach(text => {
+      if (!names.has(text.toLowerCase())) byMs[ms].push({ type: "plan", text });
+    });
+  });
+  const plannedCount = Object.values(byMs).flat().filter(i => i.type === "plan").length;
+  const today = new Date().toISOString().slice(0, 10);
+  const nextDue = milestones
+    .map(ms => ({ ms, due: msMeta[ms]?.due }))
+    .filter(x => x.due && x.due >= today)
+    .sort((a, b) => a.due.localeCompare(b.due))[0];
   const maxRows = Math.max(1, ...Object.values(byMs).map(a => a.length));
   const rows = Array.from({ length: maxRows }, (_, i) => ({ rowIdx: i, maxRows, byMs }));
 
@@ -263,31 +252,76 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
         background: "var(--bg-raised)", flexShrink: 0,
       }}>
         <ZoomControl zoom={zoom} setZoom={setZoom} />
-        <Segmented label="Density" options={["compact", "comfy"]} value={density} onChange={setDensity} />
+        {hasPlan && (
+          <Segmented
+            label={t("View")}
+            options={[{ id: "plan", label: t("Plan") }, { id: "versions", label: t("Versions") }]}
+            value={mode}
+            onChange={setMode}
+            optionKey="id"
+            optionLabel="label"
+          />
+        )}
+        {mode === "versions" && (
+          <Segmented label="Density" options={["compact", "comfy"]} value={density} onChange={setDensity} />
+        )}
         <span style={{ fontSize: 11, color: "var(--fg-faint)", marginLeft: "auto" }}>
-          {milestones.length} milestones · {rows.length} rows
+          {nextDue && (
+            <span style={{ marginRight: 12 }}>
+              {t("next {ms} · due {date}", {
+                ms: nextDue.ms,
+                date: formatDue(nextDue.due, locale),
+              })}
+            </span>
+          )}
+          {mode === "versions" && (
+            <>
+              {milestones.length} {t("milestones")} · {rows.length} {t("rows")}
+              {plannedCount > 0 && ` · ${t("{n} planned", { n: plannedCount })}`}
+            </>
+          )}
         </span>
       </div>
 
-      <div ref={ref} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
+      <div ref={canvasRef} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
            className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
-        {/* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with
+        {mode === "plan" ? (
+          <PlanGantt planning={TARGETS} locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
+        ) : (
+        /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with
             the content — a transform leaves the container at full size and the
-            reader pans across empty space to reach the last column. */}
+            reader pans across empty space to reach the last column. */
         <div style={{ zoom: zoom / 100, width: "max-content" }}>
           <table style={{ borderCollapse: "separate", borderSpacing: 0, width: "max-content", minWidth: 560 }}>
             <thead>
               <tr>
                 <th style={{ ...thBase, background: "transparent", border: "none", width: 60 }} />
-                {milestones.map(ms => (
-                  <th key={ms} style={{ ...thBase, ...(ms === current ? { background: "var(--surface-hov)", color: "var(--fg)", fontWeight: 700 } : {}) }}>
-                    {ms}
-                    {ms === current && (
-                      <span style={{ display: "inline-block", width: 6, height: 6, background: "var(--accent-2)",
-                        borderRadius: "50%", marginLeft: 5, verticalAlign: "middle", position: "relative", top: -1 }} />
-                    )}
-                  </th>
-                ))}
+                {milestones.map(ms => {
+                  const meta = msMeta[ms] || {};
+                  const due = meta.due;
+                  const tone = due ? dueTone(due) : null;
+                  const dueColor = tone === "past" ? "var(--status-error)"
+                    : tone === "today" ? "var(--status-drift)" : "var(--fg-faint)";
+                  return (
+                    <th key={ms} style={{ ...thBase, ...(ms === current ? { background: "var(--surface-hov)", color: "var(--fg)", fontWeight: 700 } : {}) }}>
+                      <div>{ms}{ms === current && (
+                        <span style={{ display: "inline-block", width: 6, height: 6, background: "var(--accent-2)",
+                          borderRadius: "50%", marginLeft: 5, verticalAlign: "middle", position: "relative", top: -1 }} />
+                      )}</div>
+                      {due && (
+                        <div style={{ fontSize: 9, fontWeight: 500, color: dueColor, marginTop: 3 }}>
+                          {t("due {date}", { date: formatDue(due, locale) })}
+                        </div>
+                      )}
+                      {meta.label && (
+                        <div style={{ fontSize: 9, fontWeight: 400, color: "var(--fg-faint)", marginTop: 2, maxWidth: 140,
+                          overflow: "hidden", textOverflow: "ellipsis" }} title={meta.label}>
+                          {meta.label}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>
@@ -315,6 +349,9 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
                         )}
                         {item?.type === "todo" && (
                           <Bar variant="todo" label={item.t.name} onClick={() => {}} d={d} />
+                        )}
+                        {item?.type === "plan" && (
+                          <Bar variant="planned" label={item.text} onClick={() => {}} d={d} />
                         )}
                       </td>
                     );
@@ -344,6 +381,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity }) {  // imp
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
