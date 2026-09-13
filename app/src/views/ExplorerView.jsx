@@ -2,7 +2,7 @@
 // implements: REQ-VIEWER-945
 import { useEffect, useMemo, useRef, useState } from "react";
 import { REQUIREMENTS, REQ_BY_ID } from "../lib/data.js";
-import { SpecDoc, ENFORCED } from "./SpecView.jsx";
+import { SpecDoc, ENFORCED } from "./SpecDoc.jsx";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
 import {

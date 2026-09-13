@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "971f4df52b25769de5d78ae2b39a63a796ec951eacfa46d401a31b4aa90cda46",
+      "plugin/scripts/reqmap_engine/__init__.py": "93c5e5e0041a2bc5683db0896ba9f1e8217dfa96901df213c65782daf743d3ff",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -47,7 +47,7 @@
       "plugin/scripts/reqmap_engine/mapmd.py#_node_area": "61e3337411067d72c151b6a07b84a294fa6b5014e3ee07b3c51ea16a5e1fd872",
       "plugin/scripts/reqmap_engine/model.py#_area_of": "0d73e53ce9aa9834739401a38891477e4cfb88fb7862574c3215dd6919bcd27a",
       "plugin/scripts/reqmap_engine/rules.py#_map_stale_rule": "64f90ed5fdf723b5196d86606d2c742e0b19235c965249152cbcd55e1bfb641e",
-      "plugin/scripts/reqmap_engine/targets.py": "62236c37bb9a20c708c116a78d17a2421676d27dcd772529f0059e2167430b97",
+      "plugin/scripts/reqmap_engine/targets.py": "2a0108dbd06f3dfa44df583735ef38d3f6cf08b51755cd3cbb79ce2d76b869da",
       "plugin/scripts/reqmap_engine/text.py#_section": "b879c1ff2d58046d23380bdd7eac71ae570dfc379d2441e7e40fabacddb3eee9",
       "plugin/scripts/reqmap_engine/text.py#_section_raw": "a5c65a9e6e3dd0a0350f4c146d22c65451a0e7de64dfa9ca31ebab6ab273a69c",
       "plugin/scripts/reqmap_engine/text.py#_title": "51c31658b44ec1f4f9842114eea2b428852d59f73bcf9d5aa8d091a8af297d1a"
@@ -137,7 +137,6 @@
       "app/src/views/explorer/ExplorerFilters.jsx": "f6bc63f0c8f02e35872c6e3b8c95993c1a8288411076d637bfc7af80fd7357c8",
       "app/src/views/map/MapParts.jsx": "1237f403521b32da503d933f680b0bc4c59feb520ab9fbada1ce34f29237a52d",
       "app/src/views/problems/ProblemsPanels.jsx": "7d6b024deca8aa238e8536523fe132419022a2dddd3b792234dcd7c4c991b2b1",
-      "app/src/views/roadmap/PlanGantt.jsx": "3e21ab7588343aea05f7e2328ceb6924dd4718413c3f3914a75044aff69bda02",
       "app/src/views/spec/SpecParts.jsx": "49f4c8e491b1a22d52b8e501a9bad4caf392123e716f0edc2c075e6b6aaf9ec1",
       "app/vite.viewer.config.js": "0cdcb9953b91d24d45dc42ea5d3ab06dcacf40a12309ef1c2bdbc4dd9eb1b5f9",
       "plugin/scripts/reqmap_engine/rules.py#_viewer_fixture_rule": "2108cb055856b14520210bd7faf9fd3ccc10a3125ed61e4b1122e4ff59da8917",
@@ -238,8 +237,11 @@
       "plugin/scripts/reqmap_engine/parse.py#split_requirement_blocks": "233ff6bd93659a0c83636311aa87078b0a543ab043b95d47e2f16af670da338b",
       "plugin/scripts/reqmap_engine/text.py#_req_file": "3d1d8be1f66cffe499847b62e8dc9ae70019ea4286f6b2aa70dc9f9dcf7a5587"
     },
+    "REQ-PLANCADENCE-1000": {
+      "plugin/scripts/reqmap_engine/targets.py#load_targets": "a433acf8ae69c58940486a589e49a5c01109ddb5f0dec0df4010c786a91ce5d0"
+    },
     "REQ-PYFLOOR-902": {
-      "plugin/scripts/reqmap.py": "548163fbf24afe0fc01adf8404552060e86b00ca6868e5fb459c2230a4b7abfe"
+      "plugin/scripts/reqmap.py": "b7b14507514bf0ba4ef988fc441388a42dc53596ac716fa0ea08e787fd2c0062"
     },
     "REQ-REDUNDANCY-058": {
       "plugin/scripts/reqmap_engine/similar.py#_redundant_groups": "583fe7d14ee2284248f10ccf0c36a1b9f450ba59ec5bd5edf2dbcc2725f42fbb"
@@ -269,6 +271,9 @@
     "REQ-SIMILAR-921": {
       "plugin/scripts/reqmap_engine/similar.py#_add_test_suite_links": "e08f67cb1e79680c579f560d48467d011d53e899d5ebbb5f1e1db6c52e265ce7",
       "plugin/scripts/reqmap_engine/similar.py#_test_suite_pairs": "9e047abee26472f5e8721056b8f7eeb70623af4698827d6d4f3a5f80f1c9c674"
+    },
+    "REQ-VIEWER-999": {
+      "app/src/views/roadmap/Horizons.jsx": "0c2cd4d99392adc70db99cc09cd352525b490a09f8b944549659451baa34d598"
     },
     "REQ-VLEVEL-944": {
       "plugin/scripts/reqmap_engine/tags.py#_findall_tags": "8df404d02f471ab7d603bc58d03f44deffdf95e93559ded16241282361f1e547"

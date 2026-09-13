@@ -1,5 +1,39 @@
 # Changelog
 
+## plugin `v7.6.0` — 2026-09-13
+
+**A Horizons tab, a weekly release cadence, and one tab fewer.**
+
+- **Roadmap → Horizons** (`REQ-VIEWER-999`). `_map.json` now carries `roadmap`, the parsed
+  `ROADMAP.md` items, and the Roadmap tab renders them as three columns — Now, Next, Later.
+  An item whose `req:` resolves opens that requirement; one that does not renders as plain
+  text rather than a link to nowhere. A `Later` item shows its `unpark:` condition. The mode
+  is offered **only** when the export carries horizon items, so a repo with no `ROADMAP.md`
+  sees exactly the modes it saw before. `Not now` is parsed and deliberately not drawn: a
+  decision against doing something is not work, and does not belong in a column beside work.
+- **Release cadence** (`REQ-PLANCADENCE-1000`). `_planning.json` may carry
+  `cadence: {every: "week", on: "friday"}`; the engine computes one release date per week
+  across the span the plan's own bars and milestone dues already cover, and the Gantt draws
+  a rule at each. The dates are computed **once, in the engine**, and only placed by the
+  chart — weekday arithmetic in two languages is how a chart comes to disagree with the tool
+  that fed it. A period the engine does not implement yields no cadence rather than a series
+  computed on a guess, and a long span truncates at `CADENCE_MAX` (120) instead of drawing an
+  unreadable rule per week. `every: week` is the only period today; the key is shaped so
+  adding more is a configurator, not a rewrite.
+- **The Spec tab is gone.** `ExplorerView` already rendered `SpecDoc` — the same document
+  component — beside a hierarchy tree, filters, a breadcrumb and the link panel. The Spec tab
+  was that document beside a 220px flat list, so it was the poorer half of a duplicate.
+  `SpecView.jsx` is now `SpecDoc.jsx` and exports the document and `ENFORCED`; only the tab
+  and its nav went.
+
+**One test was passing for the wrong reason.** `i18n: requirement title stays in the
+author's language` asserted `specRo.includes(title)` against `ARCH-MAP-007`, whose title this
+repo's own `_i18n/ro.json` cache DOES translate — it passed only because the Spec tab's nav
+listed every title untranslated beside the document. Removing the tab exposed it. It now
+asserts what it means, on a requirement with no cache entry: the chrome toggle alone never
+translates content. A cached translation still renders, with its badge — that is
+`REQ-TRANSLATE-938`'s axis and a different question.
+
 ## plugin `v7.5.0` — 2026-09-13
 
 **The Specification Hierarchy diagram is gone, `--suggest-verifies` is gone, and the

@@ -10,7 +10,7 @@ from .findings import _render_findings, cmd_findings
 from .git import _repo_name
 from .health import _health_record
 from .i18n import _attach_translations
-from .mapdata import _build_map_data
+from .mapdata import _read_roadmap, _build_map_data
 from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
 from .scan import scan_ac_verifies
@@ -62,6 +62,11 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     data["repo"] = _repo_name(root)
     data["language"] = cfg.LANGUAGE          # implements: REQ-TRANSLATE-996
     data["todos"] = _parse_todos(root)
+    # The horizon plan, beside the versioned one. A repo keeps one, the other, or
+    # both; the viewer shows the Horizons column set only when this list is non-empty,
+    # so a repo with no ROADMAP.md sees exactly what it saw before.
+    # implements: REQ-VIEWER-999
+    data["roadmap"] = _read_roadmap(root) or []
     # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
     _design = _design_summary(root, reqs_dir, with_findings=True)
     if _design is not None:

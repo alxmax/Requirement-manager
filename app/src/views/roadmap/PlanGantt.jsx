@@ -77,6 +77,13 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
   const months = buildMonthBands(origin, totalDays, locale);
   const todayIdx = todayD ? dayIndex(origin, todayD) : -1;
   const flags = dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) }));
+  /* Release cadence: the ENGINE computed these dates (targets.py) and the chart only
+   * places them. Recomputing the weekday arithmetic here is how the CLI and the chart
+   * would come to disagree about when a release lands — the same reason `health` and
+   * `design` are read, not derived.  implements: REQ-PLANCADENCE-1000 */
+  const releaseIdx = (planning?.releases || [])
+    .map((iso) => ({ iso, idx: dayIndex(origin, parseIso(iso)) }))
+    .filter((r) => r.idx >= 0 && r.idx < totalDays);
   const loc = locale === "ro" ? "ro-RO" : "en-GB";
 
   return (
@@ -114,6 +121,12 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
                   {t("today")}
                 </div>
               )}
+              {releaseIdx.map((r) => (
+                <div key={r.iso} title={`${t("release")} · ${r.iso}`} style={{
+                  position: "absolute", top: FLAG_H - 6, left: r.idx * PX + PX / 2,
+                  width: 1, height: 6, background: "var(--fg-faint)", zIndex: 1,
+                }} />
+              ))}
               {flags.map((f) => (
                 <div key={f.ms} title={f.label || `${f.ms} · ${f.at.toLocaleDateString(loc)}`} style={{
                   position: "absolute", top: 4, left: f.idx * PX + PX / 2 - 28,
@@ -153,6 +166,13 @@ export function PlanGantt({ planning, locale, t, zoom, openSpec }) {
                   <div key={m.start} style={{
                     position: "absolute", top: 0, bottom: 0, left: m.start * PX,
                     width: 1, background: "var(--border-soft)", pointerEvents: "none",
+                  }} />
+                ))}
+                {releaseIdx.map((r) => (
+                  <div key={r.iso} style={{
+                    position: "absolute", top: 0, bottom: 0, left: r.idx * PX + PX / 2,
+                    width: 1, background: "color-mix(in oklch, var(--fg-faint) 45%, transparent)",
+                    pointerEvents: "none",
                   }} />
                 ))}
                 {laneBars.map((bar) => {

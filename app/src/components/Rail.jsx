@@ -3,13 +3,12 @@
 import { REQUIREMENTS, TODOS, REPO, COMMANDS as CLI, HEALTH, DESIGN, TARGETS } from "../lib/data.js";
 import { Icon } from "../lib/icons.jsx";
 import { useI18n } from "../lib/i18n.jsx";
-import { ENFORCED } from "../views/SpecView.jsx";
+import { ENFORCED } from "../views/SpecDoc.jsx";
 
 const NAV = [
   { key: "explorer", label: "Explorer", icon: "list-checks" },
   { key: "problems", label: "Problems", icon: "triangle-alert" },
   { key: "map", label: "Map", icon: "network" },
-  { key: "spec", label: "Spec", icon: "file-text" },
   { key: "roadmap", label: "Roadmap", icon: "list-checks" },
   { key: "commands", label: "Commands", icon: "terminal" },
 ];

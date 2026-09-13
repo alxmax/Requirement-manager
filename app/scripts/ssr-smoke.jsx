@@ -2,6 +2,7 @@
 // tested-by: ARCH-SEARCH-036  // tested-by: REQ-VIEWER-944  // tested-by: REQ-VIEWER-945  // tested-by: REQ-VIEWER-966
 // tested-by: REQ-VIEWER-964  // tested-by: REQ-SEARCH-965  // tested-by: REQ-VIEWER-969  // tested-by: REQ-VIEWER-977
 // tested-by: REQ-VIEWER-984  // tested-by: REQ-VIEWER-995  // tested-by: REQ-TRANSLATE-996
+// tested-by: REQ-VIEWER-999  // tested-by: REQ-PLANCADENCE-1000
 /* Render-time smoke test: server-render every view against the engine-adapted
  * dataset and assert real content appears. Catches render-throws and bad data
  * assumptions the build cannot. Bundled + run by run-ssr-smoke.mjs. */
@@ -16,7 +17,9 @@ import { adaptNode } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
-import { SpecView } from "../src/views/SpecView.jsx";
+import { PlanGantt } from "../src/views/roadmap/PlanGantt.jsx";
+import { SpecDoc } from "../src/views/SpecDoc.jsx";
+import { REQ_BY_ID } from "../src/lib/data.js";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
 import { CommandsView } from "../src/views/CommandsView.jsx";
 
@@ -33,12 +36,16 @@ const json = JSON.parse(readFileSync(resolve(process.cwd(), "public/data.json"),
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 
 const noop = () => {};
+// The Spec TAB was removed (Explorer renders the same document beside a richer
+// nav); every check below was about the DOCUMENT, so each one renders it directly.
+// REQ_BY_ID is a live binding, so this reads whatever fixture was last adopted.
+const specOf = (id) => <SpecDoc r={REQ_BY_ID[id]} onNav={noop} />;
 const cases = {
   App: <App />,
   MapView: <MapView selId="ARCH-PARSE-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />,
   ProblemsView: <ProblemsView openSpec={noop} />,
   RoadmapView: <RoadmapView openSpec={noop} />,
-  SpecView: <SpecView selId="ARCH-MAP-007" setSelId={noop} />,
+  SpecDoc: specOf("ARCH-MAP-007"),
   ExplorerView: <ExplorerView selId="ARCH-MAP-007" setSelId={noop} />,
 };
 
@@ -145,7 +152,7 @@ const searchChecks = [  // tested-by: REQ-SEARCH-912
 for (const [label, ok] of searchChecks) test(label, ok);
 
 // XSS regression: untrusted requirement HTML must render ESCAPED in both
-// dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecView), never live.
+// dangerouslySetInnerHTML sinks (MapView DetailPanel + SpecDoc), never live.
 adoptMapExport({ nodes: [adaptNode({
   id: "XSS-TEST-001", title: "xss", area: "XSS", layer: "feature", status: "confirmed",
   intent: "i", contract: ['danger <img src=x onerror="boom( })">'],
@@ -153,10 +160,10 @@ adoptMapExport({ nodes: [adaptNode({
 })] });
 const xssMap = renderToString(
   <MapView selId="XSS-TEST-001" setSelId={noop} openSpec={noop} highlightId={null} setHighlightId={noop} />);
-const xssSpec = renderToString(<SpecView selId="XSS-TEST-001" setSelId={noop} />);
+const xssSpec = renderToString(specOf("XSS-TEST-001"));
 const xssChecks = [
   ["MapView escapes injected contract HTML", xssMap.includes("&lt;img") && !xssMap.includes("<img src=x onerror")],
-  ["SpecView escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
+  ["SpecDoc escapes injected acceptance HTML", xssSpec.includes("&lt;script&gt;") && !xssSpec.includes("<script>boom")],
 ];
 for (const [label, ok] of xssChecks) test(label, ok);
 
@@ -171,7 +178,7 @@ adoptMapExport({ nodes: [
   adaptNode({ id: "LINK-DST-002", title: "target", area: "LINK", layer: "feature", status: "confirmed",
     intent: "i", contract: ["a clause"], acc: [], members: [], deps: [], used_by: [] }),
 ] });
-const linkSpec = renderToString(<SpecView selId="LINK-SRC-001" setSelId={noop} />);
+const linkSpec = renderToString(specOf("LINK-SRC-001"));
 const linkChecks = [
   ["links: a resolvable cross-reference renders as a control carrying the id",  // verifies: REQ-VIEWER-944#CASE-1
     linkSpec.includes('data-req="LINK-DST-002"') && !linkSpec.includes("[[LINK-DST-002]]")],
@@ -190,10 +197,10 @@ for (const [label, ok] of linkChecks) test(label, ok);
 adoptMapExport({ nodes: json.nodes.map(adaptNode) });
 const spec = (locale) => renderToString(
   <I18nProvider initialLocale={locale}>
-    <SpecView selId="ARCH-MAP-007" setSelId={noop} />
+    {specOf("ARCH-MAP-007")}
   </I18nProvider>);
 const specEn = spec("en"), specRo = spec("ro");
-const reqUnderTest = REQUIREMENTS.find(r => r.id === "ARCH-MAP-007");
+const reqUnderTest = REQ_BY_ID["ARCH-MAP-007"];
 const i18nChecks = [
   ["i18n: English is the default rendering", specEn.includes("Where — Members in code")],  // verifies: REQ-VIEWER-943#CASE-1
   ["i18n: Romanian translates a section header",  // verifies: REQ-VIEWER-943#CASE-2
@@ -201,8 +208,6 @@ const i18nChecks = [
   ["i18n: an unknown string falls back to English rather than blanking",  // verifies: REQ-VIEWER-943#CASE-3
     translate("ro", "Not In The Dictionary") === "Not In The Dictionary"],
   ["i18n: placeholders interpolate", translate("ro", "{n} members bound", { n: 7 }) === "7 membri legați"],  // verifies: REQ-VIEWER-943#CASE-4
-  // The boundary the feature exists to respect: the artifact under review is never translated.
-  ["i18n: requirement title stays in the author's language", specRo.includes(reqUnderTest.title)],  // verifies: REQ-VIEWER-943#CASE-5
   ["i18n: engine vocabulary stays literal (status value, not a translation)",  // verifies: REQ-VIEWER-943#CASE-6
     specRo.includes(reqUnderTest.status)],
 ];
@@ -221,21 +226,31 @@ adoptMapExport({ nodes: [adaptNode({
                 contract: "- The original clause.", acceptance: "- The original criterion." } },
 })] });
 const translatedSpecEn = renderToString(
-  <I18nProvider initialLocale="en"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
+  <I18nProvider initialLocale="en">{specOf("I18N-CONTENT-TEST-001")}</I18nProvider>);
 const translatedSpecRo = renderToString(
-  <I18nProvider initialLocale="ro"><SpecView selId="I18N-CONTENT-TEST-001" setSelId={noop} /></I18nProvider>);
+  <I18nProvider initialLocale="ro">{specOf("I18N-CONTENT-TEST-001")}</I18nProvider>);
 adoptMapExport({ nodes: [adaptNode({
   id: "I18N-NOCACHE-TEST-001", title: "Titlu fără cache", area: "I18N", layer: "feature",
   status: "confirmed", intent: "Motiv.", contract: ["- Clauză."], acc: ["- Criteriu."],
   members: [], deps: [], used_by: [],
 })] });
 const noCacheSpecEn = renderToString(
-  <I18nProvider initialLocale="en"><SpecView selId="I18N-NOCACHE-TEST-001" setSelId={noop} /></I18nProvider>);
+  <I18nProvider initialLocale="en">{specOf("I18N-NOCACHE-TEST-001")}</I18nProvider>);
+const noCacheSpecRo = renderToString(
+  <I18nProvider initialLocale="ro">{specOf("I18N-NOCACHE-TEST-001")}</I18nProvider>);
 const i18nContentChecks = [
   ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
   ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
   ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
   ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
+  // The boundary the feature exists to respect: the CHROME toggle never translates the
+  // artifact under review. Asserted on a requirement with NO `i18n` cache entry, because
+  // a cached translation IS rendered, with a badge — that is REQ-TRANSLATE-938's job and
+  // a different axis. Until the Spec tab was removed this read `specRo.includes(title)`
+  // against ARCH-MAP-007, which the repo's own cache DOES translate; it passed only
+  // because the tab's 220px nav listed every title untranslated beside the document.
+  ["i18n: the chrome toggle leaves an untranslated requirement alone",  // verifies: REQ-VIEWER-943#CASE-5
+    noCacheSpecRo.includes("Titlu f") && !noCacheSpecRo.includes("machine-translated, unreviewed")],
 ];
 for (const [label, ok] of i18nContentChecks) test(label, ok);
 // ---- acceptance criteria keep their Given/When/Then lines ------------------
@@ -251,7 +266,7 @@ adoptMapExport({ nodes: [adaptNode({
   acc: ["AC-1 — Given  a repo with no requirements/ When   `init` runs Then   it creates the directory"],
   accept: GWT_ACCEPT, members: [], deps: [], used_by: [],
 })] });
-const gwtSpec = renderToString(<SpecView selId="GWT-TEST-001" setSelId={noop} />);
+const gwtSpec = renderToString(specOf("GWT-TEST-001"));
 const gwtChecks = [
   ["acceptance: a labelled block renders as the multi-line gwt block, not a folded bullet",  // verifies: REQ-VIEWER-942#CASE-5
     gwtSpec.includes('class="gwt"')],
@@ -560,6 +575,73 @@ const roadAllDone = renderToString(<RoadmapView openSpec={noop} />);
 adoptMapExport({ todos: [] });
 test("roadmap: a milestone whose every item is complete still gets a column",  // verifies: REQ-VIEWER-995#CASE-4
   roadAllDone.includes(">v99.9<") && !roadAllDone.includes("a shipped item"));
+
+// ---- roadmap horizons (REQ-VIEWER-999) -----------------------------------
+// `initialRoadmap` is the seam the other two controls already open with
+// `initialZoom` / `initialDensity`: a fixture without mutating the loaded export.
+const HZ = [
+  { name: "the open one", horizon: "now", req: json.nodes[0].id, unpark: null, done: false },
+  { name: "the done one", horizon: "now", req: null, unpark: null, done: true },
+  { name: "the queued one", horizon: "next", req: "NOPE-X-999", unpark: null, done: false },
+  { name: "the parked one", horizon: "later", req: null, unpark: "a named consumer asks", done: false },
+];
+const hz = renderToString(<RoadmapView openSpec={noop} initialRoadmap={HZ} initialMode="horizons" />);
+const hzNone = renderToString(<RoadmapView openSpec={noop} initialRoadmap={[]} />);
+const horizonChecks = [
+  ["roadmap: the three horizons each get a column, in order",  // verifies: REQ-VIEWER-999#CASE-1
+    hz.indexOf(">Now<") < hz.indexOf(">Next<")
+    && hz.indexOf(">Next<") < hz.indexOf(">Later<")
+    && hz.includes("the open one") && hz.includes("the queued one")
+    && hz.includes("the parked one")],
+  ["roadmap: no roadmap items means no Horizons mode",  // verifies: REQ-VIEWER-999#CASE-2
+    !hzNone.includes(">Horizons<")],
+  ["roadmap: a req: that resolves is a button, one that does not is plain",  // verifies: REQ-VIEWER-999#CASE-3
+    hz.includes(`>${json.nodes[0].id}</button>`) && !hz.includes(">NOPE-X-999</button>")
+    && hz.includes("NOPE-X-999")],
+  ["roadmap: a parked item shows what would bring it back",  // verifies: REQ-VIEWER-999#CASE-4
+    hz.includes("a named consumer asks")],
+  ["roadmap: a done item is struck through and not counted open",  // verifies: REQ-VIEWER-999#CASE-5
+    // Two `now` items, one of them done: the header must say 1, not 2. React SSR
+    // splits adjacent text nodes with `<!-- -->`, so the comments come out first.
+    hz.includes("line-through")
+    && hz.replace(/<!--[^>]*-->/g, "").includes("1 open")
+    && !hz.replace(/<!--[^>]*-->/g, "").includes("2 open")],
+];
+for (const [label, ok] of horizonChecks) test(label, ok);
+
+// ---- release cadence (REQ-PLANCADENCE-1000) --------------------------------
+// The chart PLACES engine-computed dates and derives none. Asserted by handing it
+// a date the weekday arithmetic would never produce: if a rule appears for it, the
+// viewer is reading the list; if the viewer recomputed, it would not be there.
+const cadencePlan = {
+  lanes: ["Engine"],
+  bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],
+  cadence: { every: "week", on: "friday", lane: "Release" },
+  releases: ["2026-09-18", "2026-09-25"],
+};
+const withCadence = renderToString(
+  <PlanGantt planning={cadencePlan} locale="en" t={(s) => s} zoom={100} openSpec={noop} />);
+const noCadence = renderToString(
+  <PlanGantt planning={{ ...cadencePlan, cadence: undefined, releases: undefined }}
+             locale="en" t={(s) => s} zoom={100} openSpec={noop} />);
+const cadenceChecks = [
+  ["cadence: a rule is drawn for every emitted release date",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+    (withCadence.match(/release · 2026-09-/g) || []).length === 2],
+  ["cadence: no releases means no rules",  // verifies: REQ-PLANCADENCE-1000#CASE-2
+    !noCadence.includes("release · ")],
+  ["cadence: the chart places the emitted dates and computes none",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+    // 2026-09-20 is a Sunday, so a viewer doing its own Friday arithmetic could not
+    // produce it. It renders because it was in the list.
+    renderToString(<PlanGantt planning={{ ...cadencePlan, releases: ["2026-09-20"] }}
+                              locale="en" t={(s) => s} zoom={100} openSpec={noop} />)
+      .includes("release · 2026-09-20")],
+];
+for (const [label, ok] of cadenceChecks) test(label, ok);
+
+// ---- the Spec tab is gone; the Explorer is the one place a spec is read -----
+const navHtml = renderToString(<App />);
+test("nav: no Spec tab — the Explorer renders the same document",  // verifies: REQ-VIEWER-945#CASE-1
+  !/>Spec</.test(navHtml) && navHtml.includes(">Explorer<"));
 
 console.log(failures ? `\n${failures} failure(s)` : "\nall render checks passed");
 process.exit(failures ? 1 : 0);

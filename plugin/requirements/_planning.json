@@ -1,5 +1,9 @@
 {
-  "lanes": ["Viewer", "Engine", "Release"],
+  "lanes": [
+    "Viewer",
+    "Engine",
+    "Release"
+  ],
   "bars": [
     {
       "title": "Timeline Gantt în Planificare",
@@ -67,5 +71,10 @@
   "scores": {
     "health": 95,
     "design": 85
+  },
+  "cadence": {
+    "every": "week",
+    "on": "friday",
+    "lane": "Release"
   }
 }
