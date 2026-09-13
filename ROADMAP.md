@@ -10,11 +10,26 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 ## Now
 
 - [ ] n=2: Consilium-py, `uses: alxmax/requirement-manager/check@v7` pe `main`, verde 7 zile. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul (2026-06-19.1). | req: SYS-SSOT-001
-- [x] Mermaid Hierarchy desenează CODE când sunt ≤24 noduri code; peste prag le pliază în count | req: ARCH-MAPDIAGRAMS-055
+- [x] Scoate diagrama Specification Hierarchy din `_map.md` | req: ARCH-MAPDIAGRAMS-055
+      <!-- Bifa anterioară („desenează CODE când sunt ≤24 noduri code") era falsă:
+           `_mermaid_hierarchy` n-a desenat niciodată un nod code și n-a avut niciun prag
+           de 24. Diagrama a fost scoasă cu totul; `_map.md` are iar 4 blocuri, ca
+           CLAUDE.md. REQ-MAPDIAGRAMS-875 e `deprecated`. -->
 - [x] `init` pe un tree deja taguit tot scrie ARCH + SYS (nu rescrie CODE) | req: ARCH-EXTRACT-008
-- [x] Parserul citește `ROADMAP.md` (Now/Next/Later) înaintea lui `TODO.md` | req: ARCH-ROADMAP-038
-- [x] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
-- [x] `roadmap_unmapped` / heading-uri fără milă numesc un next-step | req: ARCH-ROADMAP-038
+- [x] Parserul citește `ROADMAP.md` (Now/Next/Later) pe lângă `TODO.md` | req: ARCH-ROADMAP-038
+      <!-- Bifat înainte de a fi adevărat: până azi motorul n-avea NICIO referință la
+           `ROADMAP.md`. Acum `_parse_roadmap_from_text` îl citește (REQ-ROADMAP-998) și
+           `gate --audit` raportează cele două lucruri verificabile mecanic: un `req:` care
+           nu există, și un `Later` fără `unpark:`. NU e precedență — ambele fișiere se
+           citesc, pentru semnale diferite. -->
+- [ ] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
+      <!-- Debifat 2026-09-13: `RoadmapView.jsx` n-are niciun „Now"/„Next"/„Later". Are două
+           moduri, Plan (Gantt) și Versions (grila de chip-uri), ambele pe milestone-uri.
+           Motorul citește acum orizonturile, deci datele există; viewer-ul nu le arată. -->
+- [ ] `roadmap_unmapped` / heading-uri fără milestone numesc un next-step | req: ARCH-ROADMAP-038
+      <!-- Debifat 2026-09-13: `audit.py:183-188` se opreşte la constatare în ambele cazuri.
+           `roadmap_unmapped` are deja răspunsul — adaugă `milestone:` la cerinţele care au
+           ieşit în versiunile alea. Vezi şi TODO.md v5.13, care cere acelaşi lucru. -->
 - [x] `clarify` nu mai tipărește `next: gate --implement` | req: ARCH-CMDREGISTRY-033
 - [x] `sync --help` numește pașii (scan → drift → lock → map → findings → site) | req: ARCH-CMDREGISTRY-033
 - [x] Scoate `gate --implement` (ADR-0037 pass 2) | req: ARCH-CMDREGISTRY-033

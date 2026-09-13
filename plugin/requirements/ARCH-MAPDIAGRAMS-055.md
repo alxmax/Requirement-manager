@@ -1,6 +1,6 @@
 ---
 id: ARCH-MAPDIAGRAMS-055
-status: confirmed
+status: draft
 level: architecture
 layer: feature
 owner: Alex
@@ -18,8 +18,7 @@ satisfies: [SYS-VISUAL-106]
 > cloning anything or running the engine.
 
 Every bullet below is binding.
-- `map` generates `_map.md` under `requirements/` — exactly 5 legended Mermaid blocks, rendered from the graph and never hand-edited. [[REQ-MAPDIAGRAMS-874]]
-- The Specification Hierarchy is drawn from the `satisfies:` edges, never from `depends_on:`, folding each code requirement into its parent's count instead of drawing it. [[REQ-MAPDIAGRAMS-875]]
+- `map` generates `_map.md` under `requirements/` — exactly 4 legended Mermaid blocks, rendered from the graph and never hand-edited. [[REQ-MAPDIAGRAMS-874]]
 - The System Map groups nodes into per-area subgraphs, an area falling back to the node's id prefix when `area:` is absent, and omits edges into a bus or high-fan-in node. [[REQ-MAPDIAGRAMS-876]]
 - The Dependency Map is area-level: one counted node per area, one edge per cross-area dependency. Req→Code draws the system/architecture tiers only, coloured by link status, with same-file members collapsed to a line range. [[REQ-MAPDIAGRAMS-877]]
 - The Risk diagram shows only requirements with at least one risk signal (confirmed with zero members; `draft`/`baseline`; ≥3 dependents), each paired with a scripted recommendation. [[REQ-MAPDIAGRAMS-878]]
@@ -28,27 +27,21 @@ Every bullet below is binding.
 CASE-1
   Given  the generated `_map.md`
   When   it is inspected
-  Then   it contains exactly 5 Mermaid code blocks, each with a legend
+  Then   it contains exactly 4 Mermaid code blocks, each with a legend
 
 CASE-2
-  Given  a corpus carrying system, architecture and code requirements
-  When   the Specification Hierarchy is rendered
-  Then   it draws the system and architecture nodes joined by their `satisfies:` edges,
-         draws no code node, and shows each architecture's code count on its box
-
-CASE-3
   Given  the System Map diagram
   When   it is rendered
   Then   nodes group into per-area subgraphs, single-node areas collapse into `misc`, and edges
          whose target is a bus node are omitted
 
-CASE-4
+CASE-3
   Given  the Dependency Map diagram
   When   it is rendered
   Then   it is area-level: one node per area (with a count), an edge A→B when some capability
          in A depends on one in B; per-capability hub edges are not drawn
 
-CASE-5
+CASE-4
   Given  the Risk diagram
   When   it is rendered
   Then   it shows only requirements with at least one risk signal, each with a scripted
@@ -85,26 +78,26 @@ CASE-5
 
 ---
 id: REQ-MAPDIAGRAMS-874
-status: confirmed
+status: draft
 level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-MAPDIAGRAMS-055]
 ---
 
-# _map.md: five legended, always-regenerated Mermaid blocks
+# _map.md: four legended, always-regenerated Mermaid blocks
 
 ## Description
-> `_map.md` is the picture that goes with the graph — Specification Hierarchy, System Map,
-> Req→Code, Dependencies, Risk — rendered fresh from the registry on every `map` run so it
+> `_map.md` is the picture that goes with the graph — System Map, Req→Code, Dependencies,
+> Risk — rendered fresh from the registry on every `map` run so it
 > can never drift into a hand-edited state. It renders on GitHub with no tooling, so a pull
 > request reviewer sees the shape of the system without cloning anything.
 
 Every bullet below is binding.
 - `map` generates `_map.md` under `requirements/`, rendered from the graph and never edited.
-- `_map.md` contains exactly 5 Mermaid code blocks: Specification Hierarchy, System Map,
-  Req→Code, Dependencies and Risk.
-- Each of those 5 blocks carries a legend.
+- `_map.md` contains exactly 4 Mermaid code blocks: System Map, Req→Code, Dependencies
+  and Risk.
+- Each of those 4 blocks carries a legend.
 
 ## Cases
 CASE-1 — map writes _map.md from the graph, overwriting any manual edit
@@ -112,14 +105,14 @@ CASE-1 — map writes _map.md from the graph, overwriting any manual edit
   When   `map` runs
   Then   the file is fully regenerated from the graph, discarding the manual edit
 
-CASE-2 — _map.md carries exactly the five named diagrams
+CASE-2 — _map.md carries exactly the four named diagrams
   Given  the generated `_map.md`
   When   its Mermaid code blocks are counted
-  Then   there are exactly 5: Specification Hierarchy, System Map, Req→Code, Dependencies, Risk
+  Then   there are exactly 4: System Map, Req→Code, Dependencies, Risk
 
 CASE-3 — every diagram block ships its own legend
   Given  the generated `_map.md`
-  When   each of the 5 Mermaid blocks is inspected
+  When   each of the 4 Mermaid blocks is inspected
   Then   each one carries a legend describing its symbols
 
 
@@ -128,7 +121,7 @@ CASE-3 — every diagram block ships its own legend
 
 ---
 id: REQ-MAPDIAGRAMS-875
-status: confirmed
+status: deprecated
 level: code
 layer: feature
 owner: Alex

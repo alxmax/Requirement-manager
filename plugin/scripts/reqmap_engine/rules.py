@@ -399,9 +399,17 @@ def _legacy_schema_rule(ctx):  # implements: REQ-CHECK-831
 def _depends_on_cycle_rule(ctx):  # implements: ARCH-CHECK-006  # implements: REQ-CHECK-831
     # warn, not error: a cycle is a modelling call across several requirements (ADR-0002).
     for _cyc in _dependency_cycles(ctx.reqs):
+        # The second sentence is the SYMPTOM, not the defect, and it is here because a
+        # consumer hit the symptom and could not get from it to this message: the map
+        # layout ranks by longest path, which does not converge on a cyclic graph, so a
+        # few nodes get pushed hundreds of columns out and every edge into them renders
+        # as a near-horizontal line. "The map looks like stripes" does not read as
+        # "the graph has a cycle" to anyone who has not been told.
         yield None, ("depends_on cycle: " + " -> ".join(_cyc)
                      + " — no requirement in a cycle can be built before the others; "
-                       "drop the edge that closes it")
+                       "drop the edge that closes it. This also flattens the map: the "
+                       "layout ranks by longest path, so a cycle stretches the canvas "
+                       "and its edges render as near-horizontal lines")
 
 
 @gate_rule("RM027", "warn")

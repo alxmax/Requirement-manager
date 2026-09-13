@@ -113,50 +113,6 @@ def _mermaid_system(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: RE
     return "\n".join(lines)
 
 
-def _mermaid_hierarchy(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-875
-    """The specification hierarchy: system -> architecture, over `satisfies:` edges.
-
-    Drawn from `upstream_edges`, not `depends_on` — those are different axes, and only this
-    one forms a hierarchy. The `code` level is counted, never drawn: a corpus that has split
-    its clauses carries hundreds of them, and past a few hundred nodes Mermaid stops being
-    something a reader can take in (or GitHub renders at all). Each grouping box shows how
-    many code requirements sit under it, which is the fan-out the band judges.
-
-    The bold-double-boxed root style keys on having no counted code children, not on the
-    literal `level:` string — a corpus that collapsed `architecture` into `system` (ADR-0024)
-    can carry two populations under `level: system`: root stakeholder-need nodes (no code
-    children of their own; their children are other `system`-level nodes) and promoted
-    grouping nodes (real code children). Levelled on `level:` alone, both would draw as
-    identical bare-labelled roots and the promoted nodes would silently lose their fan-out
-    annotation — this counts children instead, which reads correctly whether or not a
-    consumer repo still uses a real 3-tier split."""
-    levels = {n["id"]: n.get("level") for n in data["nodes"]}
-    drawn = [n for n in data["nodes"] if levels.get(n["id"]) in ("system", "architecture")]
-    if not drawn:
-        return ""
-    kids = {}
-    for child, parent in data.get("upstream_edges", []):
-        if levels.get(child) == "code":
-            kids[parent] = kids.get(parent, 0) + 1
-    lines = ["graph TD"]
-    for n in drawn:
-        rid = n["id"]
-        is_root = kids.get(rid, 0) == 0
-        label = rid if is_root else "{}<br/>{} code".format(rid, kids.get(rid, 0))
-        shape = "[[{}]]" if is_root else "[{}]"
-        lines.append("  {}{}".format(_safe_id(rid), shape.format(label)))
-    for child, parent in data.get("upstream_edges", []):
-        # both ends must be drawn: a parent with no `level:` (a corpus that adopted the
-        # axis partially) is not in `drawn`, and Mermaid would mint a bare node for it
-        if (levels.get(child) in ("system", "architecture")
-                and levels.get(parent) in ("system", "architecture")):
-            lines.append("  {} --> {}".format(_safe_id(parent), _safe_id(child)))
-    for n in drawn:
-        if kids.get(n["id"], 0) == 0:
-            lines.append("  style {} stroke-width:3px".format(_safe_id(n["id"])))
-    return "\n".join(lines)
-
-
 def _mermaid_deps(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-MAPDIAGRAMS-877
     # Area-level coupling overview (C4 'container' zoom-out): one box per area, an
     # edge A->B when ANY capability in A depends on one in B. Aggregating the
@@ -204,7 +160,7 @@ def _mermaid_req_to_code(data):
     loc_sid, sid_used = {}, {}        # distinct file:line locs must get distinct node ids
     for n in data["nodes"]:
         if n.get("level") == "code":
-            # Counted, never drawn, like the hierarchy: a corpus with its behaviour
+            # Counted, never drawn: a corpus with its behaviour
             # groups split out carries hundreds of code-level nodes and their members
             # at function granularity — the block passed 83,000 characters, past what
             # GitHub renders. The viewer has that detail; this diagram is the overview.
@@ -274,13 +230,10 @@ def _mermaid_risk(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ-
     return "\n".join(lines)
 
 
-# Per-tab legends (parallel to the 5 diagrams emitted by _build_md_text, same
+# Per-tab legends (parallel to the 4 diagrams emitted by _build_md_text, same
 # order) so each view is self-explanatory. HTML uses colored swatches; markdown
 # uses words.
 _LEGEND_MD = [
-    "The spec hierarchy: system needs -> architecture requirements (`satisfies:`), each box "
-        "showing how many code-level requirements sit under it. The code level itself is counted, "
-        "not drawn.",
     "Capabilities grouped by area; thick border = bus; arrows = `depends_on`. Edges into the "
         "bus/hubs are hidden (the Dependency Map shows area-level coupling).",
     "Each system/architecture requirement → its code; arrow label = role (`implements` / "
@@ -302,7 +255,6 @@ def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ
         dep_count[b] = dep_count.get(b, 0) + 1
 
     diagrams = [
-        ("Specification Hierarchy", _mermaid_hierarchy(data)),
         ("System Map",          _mermaid_system(data)),
         ("Requirement-to-Code", _mermaid_req_to_code(data)),
         ("Dependency Map",      _mermaid_deps(data)),

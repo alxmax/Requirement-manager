@@ -160,6 +160,91 @@ def _version_key(v):  # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-
     return tuple(int(p) for p in v.lstrip("v").split(".") if p.isdigit())
 
 
+# The horizon headings ROADMAP.md reserves. Anything else at `## ` is a heading the
+# plan invented, and its items are unreachable the same way an unversioned TODO.md
+# heading is — so it is reported, not guessed at.
+ROADMAP_HORIZONS = ("now", "next", "later", "not now")
+# Both keys are trailing metadata on an item line, so each must start at a word
+# boundary: without it `unpark:` would also match inside a word.
+RE_REQ = re.compile(r"(?:^|\s)req:\s*([A-Za-z0-9][A-Za-z0-9_-]*)")
+RE_UNPARK = re.compile(r"(?:^|\s)unpark:\s*(.+)$")
+
+
+def _parse_roadmap_from_text(text):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
+    """ROADMAP.md content -> list of {name, horizon, req, unpark, done}. Pure.
+
+    A second plan FORMAT, not a second plan file: `## Now|Next|Later|Not now` with
+    `- [ ] text | req: ID` items, where TODO.md uses `## vX.Y` with `| lane:`. Items
+    before the first recognised horizon are skipped, exactly as `_parse_todos_from_text`
+    skips items before the first milestone.
+
+    Kept separate from `_parse_todos_from_text` rather than generalised into it: the two
+    disagree about what a `## ` heading means and about which trailing key is required,
+    and folding them would make each one's rule conditional on the other's file name."""
+    items, horizon = [], None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            head = stripped[3:].strip().lower()
+            horizon = head if head in ROADMAP_HORIZONS else None
+            continue
+        m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", stripped)
+        if not m or not horizon:
+            continue
+        rest = m.group(2)
+        req = re.search(RE_REQ, rest)
+        unpark = re.search(RE_UNPARK, rest)
+        items.append({"name": rest.split("|")[0].strip(), "horizon": horizon,
+                      "req": req.group(1) if req else None,
+                      "unpark": unpark.group(1).strip() if unpark else None,
+                      "done": m.group(1).lower() == "x"})
+    return items
+
+
+def _read_roadmap(root):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
+    """Parsed ROADMAP.md items, or None when the file is absent in either the root or
+    its parent (the `plugin/` dogfood layout `_roadmap_signals` already handles)."""
+    for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
+        path = os.path.join(base, "ROADMAP.md")
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as f:
+                return _parse_roadmap_from_text(f.read())
+        except OSError:
+            return None
+    return None
+
+
+def _roadmap_plan_problems(root, reqs):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
+    """Zero or more lines about ROADMAP.md itself. Both checks are mechanically exact —
+    no heuristic, no threshold — because the one thing a plan file makes easy to get
+    wrong is a claim nobody can check.
+
+    Deliberately NOT a check on whether a `[x]` item is TRUE. That is the interesting
+    question and it is not decidable from the file: an item can name a change that was
+    never made and read identically to one that was. These two say only what the file
+    itself already promises."""
+    items = _read_roadmap(root)
+    if not items:
+        return []
+    lines = []
+    dangling = sorted({it["req"] for it in items if it["req"] and it["req"] not in reqs})
+    if dangling:
+        lines.append("{} ROADMAP.md item(s) name a `req:` that is not in the corpus "
+                     "({}) - the plan points at nothing".format(len(dangling),
+                                                                ", ".join(dangling[:4])))
+    parked = [it for it in items
+              if it["horizon"] == "later" and not it["done"] and not it["unpark"]]
+    if parked:
+        lines.append("{} ROADMAP.md `Later` item(s) carry no `unpark:` - parked with no "
+                     "condition to bring them back is parked forever".format(len(parked)))
+    return lines
+
+
 def _roadmap_behind(reqs, roadmap):
     # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-907  # implements: REQ-ROADMAP-983
     """(behind, newest_req, unmapped) — the highest `milestone:` any requirement

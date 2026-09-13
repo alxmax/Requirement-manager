@@ -188,8 +188,8 @@ def _add_todo_and_mode_flags(ap):
     ap.add_argument("--no-site", dest="no_site", action="store_true",
                     help="init: skip the final site step")
     ap.add_argument("--apply", dest="do_apply", action="store_true",
-                    help="sync --retire / --suggest-verifies: actually write the change (without "
-                         "it, the run is a dry report)")
+                    help="sync --retire: actually write the change (without it, the run is a "
+                         "dry report)")
     # Mode flags: the read-only queries that used to be their own verbs. The work
     # they do is unchanged — only the entry point moved, so `gate` is the one place
     # a reader asks the corpus anything and `sync` the one place a write happens.
@@ -208,11 +208,12 @@ def _add_todo_and_mode_flags(ap):
                     help="gate: rank requirements by lexical relevance to a query")
     ap.add_argument("--review", dest="mode_review", metavar="ID", nargs="?", default=None, const="",
                     help="gate: emit the review plan for one requirement")
-    # DEPRECATED in v7.4.0, removed in the release after — same one-release alias
-    # window `--suggest-verifies` got below (ADR-0037 decision 3/4). The capability is
+    # DEPRECATED in v7.4.0, removed in v7.5.0 — the same one-release alias window
+    # `--suggest-verifies` got in v7.3.0 (ADR-0037 decision 3/4). The capability is
     # gone (ARCH-IMPLEMENT-063 and its two children are `deprecated`, implement.py
     # deleted); argparse still accepts the flag so an older doc meets a sentence
-    # instead of `unrecognized arguments`.
+    # instead of `unrecognized arguments`. One release means ONE: when v7.5.0 is cut,
+    # this block and its branch in `_dispatch_gate` go with it.
     ap.add_argument("--implement",
                     dest="mode_implement", metavar="ID", nargs="?", default=None, const="",
                     help=argparse.SUPPRESS)
@@ -220,13 +221,6 @@ def _add_todo_and_mode_flags(ap):
                     help="gate: rank requirement pairs whose contracts overlap")
     ap.add_argument("--design", dest="mode_design", action="store_true",
                     help="gate: print the advisory design review of the code")
-    # DEPRECATED in v7.3.0, removed in the release after. The capability is gone
-    # (ARCH-SUGGESTVERIFIES-047 and its three children are `deprecated`, verifies.py
-    # deleted), but argparse still accepts the flag for one release so a consumer
-    # following an older doc meets a sentence instead of `unrecognized arguments`
-    # — the alias window v5.0.0 did not give them (ADR-0037 decision 3).
-    ap.add_argument("--suggest-verifies", dest="mode_suggest", action="store_true",
-                    help=argparse.SUPPRESS)
     ap.add_argument("--retire", dest="mode_retire", metavar="ID", nargs="*", default=None,
                     help="sync: take one or more requirements out of service; prints the blast "
                          "radius first")
@@ -317,12 +311,6 @@ def _dispatch_sync(a, ws, code_root, reqs_dir):
             print("usage: reqmap sync --retire AREA-NAME-NNN [ID ...]"); return 2
         return cmd_retire(ws, a.mode_retire, delete=a.delete,
                           do_apply=a.do_apply, force=a.force, as_json=a.as_json)
-    if a.mode_suggest:
-        print("`sync --suggest-verifies` was retired in v7.3.0: the per-criterion tag it "
-              "proposed is written by hand, and the gate still reports an untagged CASE-N "
-              "(RM013). This flag is accepted for one release and does nothing.",
-              file=sys.stderr)
-        return 0
     # Before the gate, not after: the generated integration artifacts are derived
     # from the command registry, and RM028 reports them stale. Regenerating them
     # downstream of a check that fails ON them can never converge.
