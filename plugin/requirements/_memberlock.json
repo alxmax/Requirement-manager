@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "c108b9ff9cf54bff298263f0a78df55d419582476cb477747d131f0aee969958",
+      "plugin/scripts/reqmap_engine/__init__.py": "31bbf21933c391ccf404b545aadb8b0b433d0f920c552591f6208cf537d55e01",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -206,6 +206,9 @@
       "plugin/scripts/reqmap_engine/locks.py#_driftlog_path": "2342c7d88fa2bd4f84b618770a92411413003e13f75e0dc3579087d42aee38df",
       "plugin/scripts/reqmap_engine/locks.py#load_driftlog": "228287ef550c436c60cd1da85ddc4cf5c0259b69e33e42106e0caa2c175b62a4",
       "plugin/scripts/reqmap_engine/locks.py#save_driftlog": "1b647afb1e992dbde77c25e7796f6fefd375912c5121d7377d214e4e8699bd47"
+    },
+    "REQ-EXTRACT-981": {
+      "plugin/scripts/reqmap_engine/draft.py#_assign_arch_ids": "df4c4e3e549d0907523a468a499e75002e918fdaeb4c3f1b66e8fbc853581780"
     },
     "REQ-FINDINGS-854": {
       "plugin/scripts/reqmap_engine/findings.py#_render_findings_raw": "393dbc203cdc4b419bdf0f215f2e04c6ed989df715880bae7a96b2feb4333187"

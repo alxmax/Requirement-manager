@@ -1,6 +1,6 @@
 ---
-generated: 2026-09-09
-engine: 2026-09-08.1
+generated: 2026-09-13
+engine: 2026-09-13
 nodes: 248
 edges: 110
 design OOP: 71/100 (54/76 source files without a design candidate)
@@ -635,8 +635,8 @@ graph LR
   ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_30_1986
   f_plugin_scripts_test_reqmap_scan_py_451["plugin/scripts/test_reqmap_scan.py:451"]
   ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_451
-  f_plugin_scripts_reqmap_engine_draft_py_10_288["plugin/scripts/reqmap_engine/draft.py:10-288"]
-  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_10_288
+  f_plugin_scripts_reqmap_engine_draft_py_10_320["plugin/scripts/reqmap_engine/draft.py:10-320"]
+  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_10_320
   ARCH_FANOUT_052["Hierarchy breadth<br><small>ARCH-FANOUT-052</small>"]
   f_plugin_scripts_test_reqmap_author_py_1748_1947["plugin/scripts/test_reqmap_author.py:1748-1947"]
   ARCH_FANOUT_052 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1748_1947
@@ -796,8 +796,8 @@ graph LR
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
   f_plugin_scripts_test_reqmap_scan_py_357_1263["plugin/scripts/test_reqmap_scan.py:357-1263"]
   ARCH_PROSE_024 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_357_1263
-  f_plugin_scripts_reqmap_engine_draft_py_18_222["plugin/scripts/reqmap_engine/draft.py:18-222"]
-  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_18_222
+  f_plugin_scripts_reqmap_engine_draft_py_18_249["plugin/scripts/reqmap_engine/draft.py:18-249"]
+  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_18_249
   f_plugin_scripts_reqmap_engine_tags_py_260["plugin/scripts/reqmap_engine/tags.py:260"]
   ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_tags_py_260
   ARCH_PYFLOOR_040["Declared Python support floor<br><small>ARCH-PYFLOOR-040</small>"]

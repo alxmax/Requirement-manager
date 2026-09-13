@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-08.1",
+  "engine_version": "2026-09-13",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -5027,31 +5027,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:71"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:104"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:96"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:146"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:129"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:186"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:222"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:213"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:269"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:249"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:288"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:301"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
         }
       ],
       "test_exempt": null,
@@ -5103,15 +5107,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:147"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:187"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:214"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:223"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:250"
         }
       ],
       "test_exempt": null,
@@ -5180,15 +5184,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:147"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:187"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:214"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:223"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:250"
         }
       ],
       "test_exempt": null,
@@ -5253,7 +5257,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:288"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
         }
       ],
       "test_exempt": null,
@@ -5325,11 +5329,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:71"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:64"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:104"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:74"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:96"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:173"
         }
       ],
       "test_exempt": null,
@@ -11273,15 +11289,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:146"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:171"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:186"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:213"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:222"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:249"
         },
         {
           "role": "implements",
