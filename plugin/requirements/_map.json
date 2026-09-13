@@ -8572,7 +8572,7 @@
       "id": "ARCH-MAPDIAGRAMS-055",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Mermaid diagrams (_map.md)",
       "intent": "The graph is data; this is the picture. Four Mermaid diagrams that render on GitHub with no tooling, so someone reviewing a pull request can see the shape of the system without cloning anything or running the engine.",
@@ -8663,12 +8663,7 @@
       "test_exempt": null,
       "milestone": "v2.32",
       "priority": "should-have",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 4,
       "covered": 4
     },
@@ -8676,7 +8671,7 @@
       "id": "REQ-MAPDIAGRAMS-874",
       "layer": "feature",
       "level": "code",
-      "status": "draft",
+      "status": "confirmed",
       "area": "REQ",
       "title": "_map.md: four legended, always-regenerated Mermaid blocks",
       "intent": "`_map.md` is the picture that goes with the graph — System Map, Req→Code, Dependencies, Risk — rendered fresh from the registry on every `map` run so it can never drift into a hand-edited state. It renders on GitHub with no tooling, so a pull request reviewer sees the shape of the system without cloning anything.",
@@ -8729,12 +8724,7 @@
       "test_exempt": null,
       "milestone": null,
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 3,
       "covered": 3
     },
@@ -12690,7 +12680,7 @@
       "id": "ARCH-ROADMAP-038",
       "layer": "feature",
       "level": "architecture",
-      "status": "draft",
+      "status": "confirmed",
       "area": "ARCH",
       "title": "Roadmap coherence signals",
       "intent": "`TODO.md` is this project's roadmap and decision log, and nothing checks that it still matches reality. Twice it has fallen behind — once by seven milestones — and once a cosmetic heading rename silently re-filed the only open item under the wrong version, because a heading that is not a version leaves the previous one in force. These two read-only signals surface both, so the roadmap stops drifting unnoticed between manual clean-ups.",
@@ -12784,12 +12774,7 @@
       "test_exempt": null,
       "milestone": "v2.17",
       "priority": "",
-      "risks": [
-        {
-          "signal": "unreviewed",
-          "advice": "Draft/baseline, not yet validated: review the contract, wire its `tested-by` tests, then promote to `confirmed`. Until then it is tracked, not enforced."
-        }
-      ],
+      "risks": [],
       "clauses": 6,
       "covered": 6
     },
@@ -21656,21 +21641,19 @@
     }
   },
   "health": {
-    "score": 96,
+    "score": 97,
     "total": 254,
-    "healthy": 243,
-    "confirmed": 243,
+    "healthy": 246,
+    "confirmed": 246,
     "implemented": 237,
     "tested": 234,
-    "drafts": 3,
+    "drafts": 0,
     "orphans": 0,
     "untested": 0,
     "open_intent": 0,
     "drift": 0,
     "gate_errors": 0,
-    "gate_link_sync_clean": true,
-    "reviewed_score": 100,
-    "reviewed_total": 243
+    "gate_link_sync_clean": true
   },
   "planning": {
     "scores": {

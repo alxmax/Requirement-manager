@@ -1,6 +1,6 @@
 ---
 id: ARCH-MAPDIAGRAMS-055
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
@@ -78,7 +78,7 @@ CASE-4
 
 ---
 id: REQ-MAPDIAGRAMS-874
-status: draft
+status: confirmed
 level: code
 layer: feature
 owner: Alex
