@@ -38,7 +38,20 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 - [ ] `gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului | req: ARCH-CMDREGISTRY-033
 - [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
 - [ ] Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului | req: ARCH-HEALTH-017
-- [ ] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
+- [x] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
+      <!-- 2026-09-14. Motorul citeşte în continuare `TODO.md` oriunde un consumator
+           ţine unul — capacitatea rămâne; repo-ul ăsta pur şi simplu nu mai are unul.
+           Arhiva NU e citită: dacă ar fi, ar fi tot un plan viu, iar mutarea n-ar
+           însemna nimic. Consecinţa intenţionată: cele trei semnale de roadmap din
+           `gate --audit` tac aici, iar graficul se alimentează doar din `milestone:`. -->
+- [ ] `init` spune o dată că roadmap-ul e inert, când planul n-are niciun titlu de versiune | req: ARCH-INIT-012
+      <!-- Ultimul rest din TODO-feedback-management-dashboard.md §14, propunerea 2,
+           înainte ca fişierul să fie şters pe 2026-09-14. Propunerea 1 a intrat în
+           v7.5.0 (`gate --audit` tipăreşte semnalele de roadmap); 3 e alternativa ei
+           şi a fost acoperită parţial de orizonturile din ROADMAP.md. Asta a rămas:
+           `init.py` nu numeşte azi nici TODO nici roadmap, deci un repo al cărui plan
+           n-are titluri `## vX.Y` nu află niciodată că jumătate dintr-o funcţie nu i
+           se aplică — tăcerea e indistinctă de „totul e în regulă". -->
 - [x] Scoate tab-ul Spec: Explorer randa deja acelaşi `SpecDoc` | req: ARCH-VIEWER-007
       <!-- v7.6.0. `SpecView.jsx` -> `SpecDoc.jsx`; a plecat doar tab-ul şi navigaţia lui. -->
 - [x] Planificatorul pune un release la fiecare sfârşit de săptămână | req: ARCH-MAP-007
