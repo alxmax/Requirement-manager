@@ -1,6 +1,6 @@
 ---
 id: ARCH-ROADMAP-038
-status: draft
+status: confirmed
 level: architecture
 layer: feature
 owner: Alex
