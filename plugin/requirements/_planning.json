@@ -73,8 +73,8 @@
     "design": 85
   },
   "cadence": {
-    "every": "week",
-    "on": "friday",
+    "every": "month",
+    "on": "last",
     "lane": "Release"
   }
 }

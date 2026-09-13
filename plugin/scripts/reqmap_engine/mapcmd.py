@@ -10,6 +10,7 @@ from .findings import _render_findings, cmd_findings
 from .git import _repo_name
 from .health import _health_record
 from .i18n import _attach_translations
+from .history import by_month, read_history
 from .mapdata import _read_roadmap, _build_map_data
 from .mapjson import _build_json_text, render_json
 from .mapmd import _build_md_text, render_md
@@ -67,6 +68,10 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
     # so a repo with no ROADMAP.md sees exactly what it saw before.
     # implements: REQ-VIEWER-999
     data["roadmap"] = _read_roadmap(root) or []
+    # What already shipped, from CHANGELOG.md. Grouped by month here rather than in
+    # the viewer, so the CLI and the chart cannot disagree about what a month held.
+    # implements: REQ-HISTORY-1003
+    data["history"] = by_month(read_history(root))
     # implements: REQ-DESIGN-954  # implements: REQ-DESIGN-976
     _design = _design_summary(root, reqs_dir, with_findings=True)
     if _design is not None:

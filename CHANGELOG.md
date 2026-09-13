@@ -1,5 +1,50 @@
 # Changelog
 
+## plugin `v7.8.0` — 2026-09-14
+
+**A monthly release cadence, and the past on the same timeline as the plan.**
+
+- **`every: month`** joins `every: week` in `_planning.json`'s `cadence` block. `on:` means
+  a different thing per period — a weekday for a week, a day-of-month for a month — so each
+  carries its own default: Friday, and the month's **last day**. A day number is capped at
+  28 on purpose: a plan pinned to the 30th silently skips February. This repo switched to
+  monthly, which turns 37 Friday rules into 9 month-ends.
+- **Shipped history** (`REQ-HISTORY-1003`). `_map.json` now carries `history`: one row per
+  calendar month of releases, read from `CHANGELOG.md` — the dated `## plugin` headings a
+  repo following the release discipline already writes. Each row has its release count,
+  first and last date, every version in it, and the headline of its **landmark** release.
+  The Plan Gantt draws it as a `Shipped` band left of the today line, so "what happened"
+  and "what is next" share one timeline instead of living in two charts that cannot be
+  compared across a `today` they do not share.
+
+On this repo: **100 releases, 2026-06-04 → 2026-09-14**, four month rows.
+
+| | | |
+|---|---|---|
+| 2026-06 | 10 releases, `v1.11.0` → `v2.8.1` | **v2.0.0** — Breaking — intent-verb CLI |
+| 2026-07 | 4 releases, `v2.11.0` → `v2.13.0` | **v2.13.0** — Ranked requirement search |
+| 2026-08 | 22 releases, `v2.14.0` → `v2.29.2` | **v2.29.0** — Ten findings from a consumer session |
+| 2026-09 | 64 releases, `v2.29.3` → `v7.8.0` | **v7.0.0** — The engine is a package behind a thin CLI |
+
+Three decisions worth naming, each of which was a wrong answer first:
+
+- **Derived, not stored.** The history comes from `CHANGELOG.md`, not a sidecar and not
+  `git log`. A sidecar drifts from what was actually released; tags record every commit,
+  including the ones that fixed the previous commit. A CHANGELOG heading is the author's own
+  statement that something shipped, which is what "in broad strokes" asks for.
+- **An undated heading is skipped, not guessed at.** This repo carries
+  `## plugin \`v3.5.0\` — superseded, never released`. A version that never shipped has no
+  place on a timeline of what shipped, and its body must not be absorbed into the dated
+  entry above it either.
+- **The month's landmark is its biggest step, not its first or last release.** The first is
+  whatever happened to land first, often a patch on the month before; the last is the same
+  problem at the other end. A major beats a minor beats a patch, newest among equals.
+
+One bug found while building it, in this repo's own data: the headline extractor skipped
+every line starting with `*`, which is a bullet — and also every `**bold**` headline, which
+is how all 100 entries open. The chart was labelled with the second line of each paragraph.
+`* ` with the space is the bullet.
+
 ## plugin `v7.7.0` — 2026-09-13
 
 **Plan drift: which planned items cite code that has moved on without them.**

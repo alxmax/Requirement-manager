@@ -2557,6 +2557,20 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
         self.assertNotIn("cadence", got)
         self.assertNotIn("releases", got)
 
+    def test_a_monthly_cadence_lands_on_each_month_end(self):  # verifies: REQ-PLANCADENCE-1000#CASE-6
+        got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-09-13",
+                                "end": "2026-12-05"}],
+                         cadence={"every": "month"})
+        self.assertEqual("last", got["cadence"]["on"])
+        self.assertEqual(["2026-09-30", "2026-10-31", "2026-11-30"], got["releases"])
+
+    def test_a_monthly_cadence_can_name_a_day(self):
+        # Capped at 28 on purpose: a plan pinned to the 30th silently skips February.
+        got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-09-01",
+                                "end": "2026-11-10"}],
+                         cadence={"every": "month", "on": 15})
+        self.assertEqual(["2026-09-15", "2026-10-15"], got["releases"])
+
     def test_a_long_span_truncates_rather_than_thinning(self):
         got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-01-01", "end": "2040-01-01"}],
                          cadence={"every": "week"})
@@ -2578,6 +2592,90 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
                 R.cmd_map(R.Workspace(reqs, members, rd), d)
             payload = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
         self.assertEqual(["2026-09-18", "2026-09-25"], payload["planning"]["releases"])
+
+
+class ShippedHistory(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-HISTORY-1003
+    """What already shipped, read from CHANGELOG.md and grouped by calendar month."""
+
+    LOG = "\n".join([
+        "# Changelog",
+        "",
+        "## plugin `v2.1.1` — 2026-06-20",
+        "",
+        "**A patch.** It fixed the thing.",
+        "",
+        "## plugin `v2.1.0` — 2026-06-12",
+        "",
+        "**A minor.** It added the thing.",
+        "",
+        "## plugin `v2.0.0` — 2026-06-02",
+        "",
+        "**First feature release. Highlights:**",
+        "",
+        "The breaking rename of every verb.",
+        "",
+        "- a bullet that is not the headline",
+        "",
+        "## plugin `v1.9.0` — superseded, never released",
+        "",
+        "**Never shipped.** Its body must not be read as v2.0.0's.",
+        "",
+    ])
+
+    def test_dated_headings_are_read_newest_first(self):  # verifies: REQ-HISTORY-1003#CASE-1
+        got = R.history.parse_changelog(self.LOG)
+        self.assertEqual(["v2.1.1", "v2.1.0", "v2.0.0"], [e["version"] for e in got])
+        self.assertEqual("2026-06-20", got[0]["date"])
+        self.assertEqual("A patch", got[0]["headline"])
+
+    def test_an_undated_heading_is_skipped(self):  # verifies: REQ-HISTORY-1003#CASE-2
+        # This repo carries `## plugin `v3.5.0` — superseded, never released`. A version
+        # that never shipped has no place on a timeline of what shipped — and its body
+        # must not be absorbed into the dated entry above it either.
+        got = R.history.parse_changelog(self.LOG)
+        self.assertNotIn("v1.9.0", [e["version"] for e in got])
+        self.assertNotIn("Never shipped", got[-1]["headline"])
+
+    def test_a_colon_terminated_bold_run_is_a_lead_in(self):  # verifies: REQ-HISTORY-1003#CASE-3
+        got = R.history.parse_changelog(self.LOG)
+        self.assertEqual("The breaking rename of every verb", got[2]["headline"])
+
+    def test_months_group_and_the_landmark_is_the_biggest_step(self):  # verifies: REQ-HISTORY-1003#CASE-4
+        rows = R.history.by_month(R.history.parse_changelog(self.LOG))
+        self.assertEqual(1, len(rows))
+        row = rows[0]
+        self.assertEqual("2026-06", row["month"])
+        self.assertEqual(3, row["count"])
+        self.assertEqual(["v2.0.0", "v2.1.0", "v2.1.1"], row["versions"])
+        # not the first by date and not the last — the biggest step
+        self.assertEqual("v2.0.0", row["landmark"])
+        self.assertEqual("2026-06-02", row["first"])
+        self.assertEqual("2026-06-20", row["last"])
+
+    def test_a_repo_with_no_changelog_yields_nothing(self):  # verifies: REQ-HISTORY-1003#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual([], R.history.read_history(d))
+
+    def test_a_bullet_is_not_mistaken_for_a_headline_and_bold_is_not_a_bullet(self):
+        # `* ` with the space is a bullet; `**` opens the headline every entry carries.
+        # Skipping on a bare `*` threw away the headline of every single entry.
+        self.assertEqual("Bold", R.history._headline("**Bold.** rest\n"))
+        self.assertEqual("plain", R.history._headline("* a bullet\nplain\n"))
+
+    def test_the_rows_reach_the_map_export(self):  # verifies: REQ-HISTORY-1003#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-H-001.md"), _spec("AREA-H-001", ["`gate` writes the lock."]))
+            _write(os.path.join(d, "mod.py"), tag("AREA-H-001") + "\ndef f():\n    return 1\n")
+            _write(os.path.join(d, "CHANGELOG.md"), self.LOG)
+            reqs = R.load_requirements(rd)
+            members = R.scan_members(d, rd)
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_map(R.Workspace(reqs, members, rd), d)
+            payload = json.loads(open(os.path.join(rd, "_map.json"), encoding="utf-8").read())
+        self.assertEqual(1, len(payload["history"]))
+        self.assertEqual("v2.0.0", payload["history"][0]["landmark"])
 
 
 class PlanDrift(unittest.TestCase):  # tested-by: ARCH-PLANDRIFT-069  # tested-by: REQ-PLANDRIFT-1002

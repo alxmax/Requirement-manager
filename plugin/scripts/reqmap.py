@@ -78,7 +78,7 @@ from reqmap_engine import (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
-    gate, audit, init, retire, levels, review, targets, plandrift,
+    gate, audit, init, retire, levels, review, targets, plandrift, history,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -485,7 +485,7 @@ _ENGINE_MODULES = (
     findings, i18n, lintrules, lint, decompose, groups, similar, clarify,
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
-    gate, audit, init, retire, levels, review, targets, plandrift,
+    gate, audit, init, retire, levels, review, targets, plandrift, history,
 )
 
 

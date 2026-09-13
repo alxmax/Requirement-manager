@@ -54,10 +54,13 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
            se aplică — tăcerea e indistinctă de „totul e în regulă". -->
 - [x] Scoate tab-ul Spec: Explorer randa deja acelaşi `SpecDoc` | req: ARCH-VIEWER-007
       <!-- v7.6.0. `SpecView.jsx` -> `SpecDoc.jsx`; a plecat doar tab-ul şi navigaţia lui. -->
-- [x] Planificatorul pune un release la fiecare sfârşit de săptămână | req: ARCH-MAP-007
+- [x] Planificatorul pune un release la fiecare sfârşit de lună | req: ARCH-MAP-007
       <!-- v7.6.0, REQ-PLANCADENCE-1000. `cadence: {every, on, from, until}` în
            _planning.json; azi doar `every: week`. Un configurator peste asta e o
            extindere a cheii, nu o rescriere. -->
+- [x] Istoricul livrat, pe aceeaşi axă cu planul | req: ARCH-MAP-007
+      <!-- v7.8.0, REQ-HISTORY-1003. Banda `Shipped` din Gantt, o linie per lună,
+           citită din CHANGELOG.md. 100 de release-uri, 2026-06-04 -> azi. -->
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
 
 ## Later

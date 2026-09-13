@@ -26,7 +26,7 @@
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
     "ARCH-MAP-007": {
-      "hash": "df0025c4a73a",
+      "hash": "4f93ce5f5feb",
       "reason": null
     },
     "ARCH-PARSE-001": {
@@ -100,6 +100,10 @@
     "REQ-NEW-881": {
       "hash": "e2419be12c70",
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
+    },
+    "REQ-PLANCADENCE-1000": {
+      "hash": "964ae4c79e7d",
+      "reason": null
     },
     "REQ-PROMOTE-894": {
       "hash": "b9701e079e3a",
