@@ -9,17 +9,22 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 ## Now
 
-- [ ] n=2: un repo care nu e ăsta rulează `uses: alxmax/requirement-manager/check@v7` pe `main`, verde, 7 zile | req: SYS-SSOT-001
-- [ ] Scoate `gate --implement` (ADR-0037 pass 2). Înainte, `clarify` nu mai tipărește `next: gate --implement` | req: ARCH-CMDREGISTRY-033
-- [ ] Parserul citește `ROADMAP.md` înaintea lui `TODO.md`; heading-uri Now/Next/Later | req: ARCH-ROADMAP-038
-- [ ] Viewer Roadmap: orizonturi Now / Next / Later, nu Gantt pe fiecare minor | req: ARCH-VIEWER-007
-- [ ] RM025 și `roadmap_unmapped` numesc un next-step | req: ARCH-ROADMAP-038
+- [ ] n=2: Consilium-py, `uses: alxmax/requirement-manager/check@v7` pe `main`, verde 7 zile. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul (2026-06-19.1). | req: SYS-SSOT-001
+- [x] Mermaid Hierarchy desenează CODE când sunt ≤24 noduri code; peste prag le pliază în count | req: ARCH-MAPDIAGRAMS-055
+- [x] `init` pe un tree deja taguit tot scrie ARCH + SYS (nu rescrie CODE) | req: ARCH-EXTRACT-008
+- [x] Parserul citește `ROADMAP.md` (Now/Next/Later) înaintea lui `TODO.md` | req: ARCH-ROADMAP-038
+- [x] Viewer Roadmap: trei coloane Now / Next / Later când orizonturile există | req: ARCH-VIEWER-007
+- [x] `roadmap_unmapped` / heading-uri fără milă numesc un next-step | req: ARCH-ROADMAP-038
+- [x] `clarify` nu mai tipărește `next: gate --implement` | req: ARCH-CMDREGISTRY-033
+- [x] `sync --help` numește pașii (scan → drift → lock → map → findings → site) | req: ARCH-CMDREGISTRY-033
+- [ ] Scoate `gate --implement` (ADR-0037 pass 2) | req: ARCH-CMDREGISTRY-033
 
 ## Next
 
-- [ ] `gate` ≤ 12 flag-uri; `sync --help` numește pasurile pe care le rulează | req: ARCH-CMDREGISTRY-033
-- [ ] README de 90 de linii: problemă, 3 comenzi, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
+- [ ] `gate` ≤ 12 flag-uri. Audit / risk / show rămân; restul coboară din calea verdictului | req: ARCH-CMDREGISTRY-033
+- [ ] README de 90 de linii: problemă, `init` / `sync` / `gate`, exemplul lucrat, action. Fără V-model în primul ecran | req: SYS-SSOT-001
 - [ ] Health: un snapshot, untagged, semnalele noi de orizont. Design review jos de pe calea verdictului | req: ARCH-HEALTH-017
+- [ ] `TODO.md` → `docs/history/TODO-archive.md`. Viewer-ul citește doar ROADMAP.md | req: ARCH-ROADMAP-038
 - [ ] Split ARCH-VIEWER-007: artefactul HTML vs. ce randează | req: ARCH-VIEWER-007
 
 ## Later
