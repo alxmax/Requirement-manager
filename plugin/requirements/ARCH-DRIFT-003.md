@@ -92,6 +92,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-DRIFT-003]
 ---
 
@@ -143,6 +144,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-DRIFT-003]
 ---
 
@@ -190,6 +192,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-DRIFT-003]
 ---
 

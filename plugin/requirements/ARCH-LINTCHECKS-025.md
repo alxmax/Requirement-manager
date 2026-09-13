@@ -161,6 +161,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-LINTCHECKS-025]
 ---
 
@@ -221,6 +222,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-LINTCHECKS-025]
 ---
 
@@ -288,6 +290,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-LINTCHECKS-025]
 ---
 
@@ -346,6 +349,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-LINTCHECKS-025]
 ---
 
@@ -389,6 +393,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-LINTCHECKS-025]
 ---
 

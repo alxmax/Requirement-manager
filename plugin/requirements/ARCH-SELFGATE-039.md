@@ -114,6 +114,7 @@ test_exempt: pipeline wiring (CI, hooks, the Action) observed by running it, not
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-SELFGATE-039]
 ---
 
@@ -187,6 +188,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-SELFGATE-039]
 ---
 

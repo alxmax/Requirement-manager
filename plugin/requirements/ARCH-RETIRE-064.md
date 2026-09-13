@@ -53,6 +53,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-RETIRE-064]
 ---
 
@@ -102,6 +103,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-RETIRE-064]
 ---
 
@@ -150,6 +152,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-RETIRE-064]
 ---
 
@@ -198,6 +201,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-RETIRE-064]
 ---
 

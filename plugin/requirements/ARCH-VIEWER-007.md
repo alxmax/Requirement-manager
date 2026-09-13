@@ -159,6 +159,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -225,6 +226,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -294,6 +296,7 @@ lint_exempt: [file-spread]
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -360,6 +363,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -417,6 +421,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -466,6 +471,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -509,6 +515,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -554,6 +561,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -606,6 +614,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v4.2
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -664,6 +673,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -709,6 +719,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -779,6 +790,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-VIEWER-007]
 ---
 
@@ -838,6 +850,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v7.7
 satisfies: [ARCH-VIEWER-007]
 ---
 

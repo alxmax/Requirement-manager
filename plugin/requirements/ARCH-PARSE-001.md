@@ -79,6 +79,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-PARSE-001]
 ---
 
@@ -123,6 +124,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-PARSE-001]
 ---
 
@@ -173,6 +175,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-PARSE-001]
 ---
 

@@ -81,6 +81,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-PROMOTE-011]
 ---
 
@@ -133,6 +134,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v5.6
 satisfies: [ARCH-PROMOTE-011]
 ---
 

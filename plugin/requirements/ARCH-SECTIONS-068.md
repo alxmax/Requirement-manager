@@ -4,6 +4,7 @@ status: confirmed
 level: architecture
 layer: bus
 owner: Alex
+milestone: v6.3
 satisfies: [SYS-SSOT-001]
 ---
 
@@ -50,6 +51,7 @@ status: confirmed
 level: code
 layer: bus
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-SECTIONS-068]
 ---
 

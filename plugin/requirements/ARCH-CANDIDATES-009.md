@@ -94,6 +94,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-CANDIDATES-009]
 ---
 
@@ -165,6 +166,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-CANDIDATES-009]
 ---
 

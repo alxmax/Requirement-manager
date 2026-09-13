@@ -65,6 +65,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-LEVELRETROFIT-066]
 ---
 
@@ -120,6 +121,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-LEVELRETROFIT-066]
 ---
 
@@ -167,6 +169,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v6.3
 satisfies: [ARCH-LEVELRETROFIT-066]
 ---
 

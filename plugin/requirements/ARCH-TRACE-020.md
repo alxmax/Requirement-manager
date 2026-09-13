@@ -78,6 +78,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-TRACE-020]
 ---
 
@@ -139,6 +140,7 @@ status: confirmed
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-TRACE-020]
 ---
 

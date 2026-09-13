@@ -73,6 +73,7 @@ test_exempt: pipeline wiring observed by the CI artifacts job, not by a unit tes
 level: code
 layer: feature
 owner: Alex
+milestone: v3.2
 satisfies: [ARCH-REPRO-041]
 ---
 
