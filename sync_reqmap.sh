@@ -50,7 +50,11 @@ VIEWER_SRC="$SCRIPT_DIR/plugin/scripts/_map_viewer.html"
 # Derive the cache path from the plugin's declared version (NOT a hard-coded one,
 # which silently no-ops once the published version moves on). Fall back to whatever
 # version dir is actually installed if that exact one is absent.
-CACHE_BASE="$HOME/.claude/plugins/cache/requirement-manager/requirement-manager"
+# One Claude account per folder root means the config dir is not always ~/.claude:
+# CLAUDE_CONFIG_DIR names the one the running session actually loads plugins from.
+# Backslashes are folded to forward slashes so a Windows-style value still tests.
+CLAUDE_DIR=$(printf %s "${CLAUDE_CONFIG_DIR:-$HOME/.claude}" | tr '\134' '/')
+CACHE_BASE="$CLAUDE_DIR/plugins/cache/requirement-manager/requirement-manager"
 PLUGIN_VERSION=$(grep -m1 '"version"' "$SCRIPT_DIR/plugin/.claude-plugin/plugin.json" \
   | sed 's/.*:[[:space:]]*"\([^"]*\)".*/\1/')
 CACHE="$CACHE_BASE/$PLUGIN_VERSION"
