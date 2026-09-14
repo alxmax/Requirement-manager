@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-14.4",
+  "engine_version": "2026-09-14.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -5302,35 +5302,35 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:51"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:84"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:126"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:168"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:204"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:242"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:301"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:299"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:318"
         },
         {
           "role": "implements",
@@ -5390,15 +5390,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:127"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:169"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:243"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:241"
         }
       ],
       "test_exempt": null,
@@ -5467,15 +5467,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:127"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:169"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:243"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:241"
         }
       ],
       "test_exempt": null,
@@ -5540,7 +5540,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:318"
         }
       ],
       "test_exempt": null,
@@ -5621,15 +5621,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:51"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:84"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:128"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:126"
         }
       ],
       "test_exempt": null,
@@ -5691,7 +5691,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:204"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:202"
         },
         {
           "role": "implements",
@@ -7399,23 +7399,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:12"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:11"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:31"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:30"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:79"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:91"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:90"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:102"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:101"
         },
         {
           "role": "implements",
@@ -7474,7 +7474,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:31"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:30"
         }
       ],
       "test_exempt": null,
@@ -7524,11 +7524,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:79"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:91"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:90"
         },
         {
           "role": "implements",
@@ -7586,7 +7586,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:102"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:101"
         },
         {
           "role": "implements",
@@ -11902,19 +11902,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:15"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:13"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:126"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:168"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:242"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:240"
         },
         {
           "role": "implements",
@@ -12047,7 +12047,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:15"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:13"
         }
       ],
       "test_exempt": null,
@@ -22196,9 +22196,9 @@
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "plugin/scripts/reqmap_engine/levels.py",
-        "line": 64,
+        "line": 63,
         "name": "levels.py",
-        "detail": "1 line(s) wider than 100 columns, first at line 64"
+        "detail": "1 line(s) wider than 100 columns, first at line 63"
       },
       {
         "pillar": "encapsulation",

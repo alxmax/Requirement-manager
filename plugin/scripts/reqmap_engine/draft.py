@@ -1,11 +1,9 @@
 """Drafting requirements from untagged code (`init`'s draft step, `plan`)."""
 import os, re
 
-from .candidates import (
-    SYS_PLACEHOLDER_ID, _arch_id_for, _arch_slug, _assign_arch_ids, _draft_id, _file_facts
-)
+from .candidates import SYS_PLACEHOLDER_ID, _assign_arch_ids, _draft_id, _file_facts
 from .parse import parse_frontmatter
-from .scan import _walk_files, read_source_lines, read_source_text
+from .scan import _walk_files, read_source_text
 from .tags import (
     PROSE_EXTS, TAG_RE, _is_code_file, _is_test_path, classify_prose, tag_comment_for,
     tag_insert_index, tagged_files

@@ -1,6 +1,5 @@
 """`clarify --levels`: propose and write a V-model rung."""
 
-from . import config as cfg
 from .acceptance import _labeled_acs
 from .groups import _contract_groups
 from .model import _as_list

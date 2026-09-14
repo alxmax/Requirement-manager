@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-14
-engine: 2026-09-14.4
+engine: 2026-09-14.5
 nodes: 262
 edges: 115
 design OOP: 62/100 (56/90 source files without a design candidate)
@@ -496,8 +496,8 @@ graph LR
   ARCH_EXTRACT_008 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_452
   f_plugin_scripts_reqmap_engine_candidates_py_362_405["plugin/scripts/reqmap_engine/candidates.py:362-405"]
   ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_candidates_py_362_405
-  f_plugin_scripts_reqmap_engine_draft_py_51_320["plugin/scripts/reqmap_engine/draft.py:51-320"]
-  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_51_320
+  f_plugin_scripts_reqmap_engine_draft_py_49_318["plugin/scripts/reqmap_engine/draft.py:49-318"]
+  ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_49_318
   f_plugin_scripts_reqmap_engine_tags_py_342_356["plugin/scripts/reqmap_engine/tags.py:342-356"]
   ARCH_EXTRACT_008 -->|implements| f_plugin_scripts_reqmap_engine_tags_py_342_356
   ARCH_FANOUT_052["Hierarchy breadth<br><small>ARCH-FANOUT-052</small>"]
@@ -545,8 +545,8 @@ graph LR
   ARCH_LEVELRETROFIT_066["Giving an existing corpus the three rungs<br><small>ARCH-LEVELRETROFIT-066</small>"]
   f_plugin_scripts_test_reqmap_author_py_1068["plugin/scripts/test_reqmap_author.py:1068"]
   ARCH_LEVELRETROFIT_066 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_1068
-  f_plugin_scripts_reqmap_engine_levels_py_12_102["plugin/scripts/reqmap_engine/levels.py:12-102"]
-  ARCH_LEVELRETROFIT_066 -->|implements| f_plugin_scripts_reqmap_engine_levels_py_12_102
+  f_plugin_scripts_reqmap_engine_levels_py_11_101["plugin/scripts/reqmap_engine/levels.py:11-101"]
+  ARCH_LEVELRETROFIT_066 -->|implements| f_plugin_scripts_reqmap_engine_levels_py_11_101
   f_plugin_scripts_reqmap_engine_pyramid_py_45_69["plugin/scripts/reqmap_engine/pyramid.py:45-69"]
   ARCH_LEVELRETROFIT_066 -->|implements| f_plugin_scripts_reqmap_engine_pyramid_py_45_69
   ARCH_LINT_014["Requirement readability linter<br><small>ARCH-LINT-014</small>"]
@@ -665,8 +665,8 @@ graph LR
   ARCH_PROSE_024["Prose capability classification & drafting<br><small>ARCH-PROSE-024</small>"]
   f_plugin_scripts_test_reqmap_scan_py_358_1264["plugin/scripts/test_reqmap_scan.py:358-1264"]
   ARCH_PROSE_024 -->|tested-by| f_plugin_scripts_test_reqmap_scan_py_358_1264
-  f_plugin_scripts_reqmap_engine_draft_py_15_242["plugin/scripts/reqmap_engine/draft.py:15-242"]
-  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_15_242
+  f_plugin_scripts_reqmap_engine_draft_py_13_240["plugin/scripts/reqmap_engine/draft.py:13-240"]
+  ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_draft_py_13_240
   f_plugin_scripts_reqmap_engine_tags_py_264["plugin/scripts/reqmap_engine/tags.py:264"]
   ARCH_PROSE_024 -->|implements| f_plugin_scripts_reqmap_engine_tags_py_264
   ARCH_PYFLOOR_040["Declared Python support floor<br><small>ARCH-PYFLOOR-040</small>"]

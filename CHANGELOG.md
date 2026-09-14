@@ -45,7 +45,10 @@ Bundle: `runs/senate/2026-09-14_205651-senate-reqmap-three-open-items.json` (MOD
   wanted, the instrument is un-deprecating that requirement under a superseding ADR, with a
   published hold-out precision against the measured 0.2414 chance baseline.
 
-Engine `2026-09-14.4`. 1126 tests (+9); gate 0 errors.
+The vendored viewer is rebuilt from `app/` (`npm run build:viewer`), since the BAKED
+fallback fixture and the SSR smoke both changed with the contracts above.
+
+Engine `2026-09-14.5`. 1126 tests (+9); gate 0 errors.
 
 ## plugin `v7.10.0` — 2026-09-14
 
