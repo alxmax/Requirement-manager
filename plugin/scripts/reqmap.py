@@ -71,7 +71,7 @@ from reqmap_engine.review import cmd_review
 from reqmap_engine.risk import cmd_next
 from reqmap_engine.show import cmd_show
 from reqmap_engine.similar import (
-    SEARCH_TOP, _redundant_groups, _threshold_arg, cmd_search, cmd_similar
+    SEARCH_TOP, _redundant_groups, cmd_search, cmd_similar
 )
 from reqmap_engine.site import _site_default_target, cmd_site
 from reqmap_engine.workspace import Workspace, _is_source_repo
@@ -371,6 +371,7 @@ _ENGINE_MODULES = (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
+    cliflags, site_template,
 )
 
 
