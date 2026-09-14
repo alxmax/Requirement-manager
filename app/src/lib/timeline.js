@@ -47,11 +47,30 @@ export function buildMonthBands(origin, totalDays, locale) {
   return bands;
 }
 
-/** Seven-day week ticks from the range start (W1, W2, …). */
-export function buildWeekBands(totalDays) {
+/** ISO-8601 week number: weeks start Monday, and week 1 is the one holding the year's
+ *  first Thursday. Reading the year off that Thursday is what makes the turn of the year
+ *  come out right — 1 January can belong to W52 or W53 of the year before. */
+export function isoWeek(d) {
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  t.setDate(t.getDate() + 3 - ((t.getDay() + 6) % 7));        // this week's Thursday
+  const jan4 = new Date(t.getFullYear(), 0, 4);               // always in week 1
+  jan4.setDate(jan4.getDate() + 3 - ((jan4.getDay() + 6) % 7));
+  return 1 + Math.round((t - jan4) / (7 * 86400000));
+}
+
+/** Week bands over [origin .. origin+totalDays), labelled with the ISO week of the year
+ *  (W23, W24, …) and aligned to real Monday boundaries — so the first band is short
+ *  whenever the range does not start on a Monday and every later one is exactly 7 days.
+ *  Numbering from the range start instead would give the same calendar week a different
+ *  number in two charts, which is the one thing a week label must never do. */
+export function buildWeekBands(origin, totalDays) {
   const bands = [];
-  for (let i = 0; i < totalDays; i += 7) {
-    bands.push({ label: `W${Math.floor(i / 7) + 1}`, start: i, span: Math.min(7, totalDays - i) });
+  let i = 0;
+  while (i < totalDays) {
+    const d = addDays(origin, i);
+    const span = Math.min(7 - ((d.getDay() + 6) % 7), totalDays - i);
+    bands.push({ label: `W${isoWeek(d)}`, start: i, span });
+    i += span;
   }
   return bands;
 }

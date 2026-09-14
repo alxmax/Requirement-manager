@@ -72,6 +72,12 @@ CASE-6
   5.10. The signal that would have said so did not exist.
 - Neither signal is a gate. The v1.35 roadmap-hygiene note chose manual upkeep over
   automation when demand was n=1; this is the read-only middle ground after n=2.
+- Un singur izvor pentru plan (ROADMAP.md și `_planning.json` topite într-unul,
+  docs/plan-source-audit.html) a fost respins pe 2026-09-14: 5 din 6 bare se potrivesc
+  deja cu un item, deci divergența măsurată e 1, nu 10. Se redeschide numai la ≥ 2
+  divergențe item/bară și ≥ 1 recurență de prospețime (o bară rămasă în urma item-ului
+  ei după ce a fost corectată o dată). Dacă pe 2027-03-14 cele două numere citesc
+  sub 2 și zero, propunerea se marchează respinsă — nu re-argumentată.
 
 **Current implementation**
 - `_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by

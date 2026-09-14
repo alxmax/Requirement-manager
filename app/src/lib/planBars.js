@@ -1,11 +1,12 @@
 // implements: ARCH-VIEWER-007
-/** Explicit planning bars, plus ghost items from milestone `items[]`. */
-import { parseIso, isoLocal, addDays } from "./timeline.js";
-
-function msDue(planning, milestone) {
-  const due = planning?.milestones?.[milestone]?.due;
-  return due && parseIso(due) ? due : null;
-}
+/** Explicit planning bars, from `_planning.json`'s `bars` list.
+ *
+ *  A second path used to mint "ghost" bars from `milestones[].items[]`, dating each two
+ *  weeks before its milestone's `due`. It was deleted 2026-09-14: every milestone in the
+ *  corpus carried `items: []`, so the branch — a third of this file — ran over nothing on
+ *  every render, and a roadmap item that wants a bar says so in `bars` already. Restoring
+ *  it means restoring a second way to author the same object, which is what the plan's own
+ *  audit refused (docs/plan-source-audit.html). */
 
 function fallbackLane(planning) {
   const lanes = planning?.lanes;
@@ -38,27 +39,6 @@ export function buildPlanBars(planning) {
       progress: b.progress,
       reqId: b.req || b.reqId || null,
       kind: "planned",
-    });
-  });
-
-  const titled = new Set(out.map((b) => b.title.toLowerCase()));
-  Object.entries(planning?.milestones || {}).forEach(([ms, meta]) => {
-    const due = msDue(planning, ms);
-    if (!due || !Array.isArray(meta.items)) return;
-    meta.items.forEach((text, i) => {
-      if (typeof text !== "string" || !text.trim()) return;
-      if (titled.has(text.toLowerCase())) return;
-      const endD = parseIso(due);
-      const startD = addDays(endD, -14);
-      push({
-        key: `item-${ms}-${i}`,
-        title: text.trim(),
-        lane,
-        milestone: ms,
-        start: isoLocal(startD),
-        end: due,
-        kind: "ghost",
-      });
     });
   });
 

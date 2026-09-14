@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- generated-from: ARCH-ROADMAP-038 -->
+<title>Sursa unică a planului</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400&family=JetBrains+Mono:wght@400;600;800&display=swap">
+<style>
+  :root{
+    --ground:#f7f4ec; --surface:#fffdf7; --sunk:#f1ece0;
+    --ink:#1c1913; --muted:#6a6152; --faint:#9a917f;
+    --rule:#e4dccd; --rule-soft:#efe8da;
+    --accent:#4338ca; --accent-soft:#e9eafc;
+    --mod:#a16207; --mod-soft:#fbf1dc;
+    --stop:#b3261e; --stop-soft:#fbeae8;
+    --ok:#15803d; --ok-soft:#e8f4ec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14120d; --surface:#1d1a13; --sunk:#241f16;
+      --ink:#f2ede2; --muted:#b0a591; --faint:#82786a;
+      --rule:#342e20; --rule-soft:#272217;
+      --accent:#a5b4fc; --accent-soft:#232449;
+      --mod:#e3b341; --mod-soft:#31280f;
+      --stop:#f3897e; --stop-soft:#391d1a;
+      --ok:#6ee7a0; --ok-soft:#14301e;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14120d; --surface:#1d1a13; --sunk:#241f16;
+    --ink:#f2ede2; --muted:#b0a591; --faint:#82786a;
+    --rule:#342e20; --rule-soft:#272217;
+    --accent:#a5b4fc; --accent-soft:#232449;
+    --mod:#e3b341; --mod-soft:#31280f;
+    --stop:#f3897e; --stop-soft:#391d1a;
+    --ok:#6ee7a0; --ok-soft:#14301e;
+  }
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground); color:var(--ink); margin:0;
+    font:400 17px/1.62 Newsreader,Georgia,"Times New Roman",serif;
+    padding-inline:20px; padding-block:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:720px;margin:0 auto;padding-block:52px 80px;
+    display:flex;flex-direction:column;gap:0}
+  .mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  .eyebrow{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
+    font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+    margin:0 0 14px}
+  h1{font-size:40px;line-height:1.08;font-weight:600;margin:0 0 10px;
+    letter-spacing:-.02em;text-wrap:balance}
+  .standfirst{font-size:19px;line-height:1.5;color:var(--muted);margin:0 0 34px;
+    text-wrap:pretty}
+
+  /* ---- verdict block ---- */
+  .verdict{background:var(--surface);border:1px solid var(--rule);
+    border-radius:3px;padding:20px 22px;margin:0 0 14px;
+    display:flex;flex-direction:column;gap:14px}
+  .vhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px}
+  .vword{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:800;
+    letter-spacing:.04em;color:var(--mod)}
+  .vnote{font-size:14px;color:var(--muted)}
+  .strip{display:flex;gap:3px}
+  .cell{flex:1;height:26px;border-radius:2px;display:flex;align-items:center;
+    justify-content:center;font-family:"JetBrains Mono",monospace;font-size:9px;
+    font-weight:800;letter-spacing:.03em}
+  .c-mod{background:var(--mod-soft);color:var(--mod);border:1px solid var(--mod)}
+  .c-stop{background:var(--stop-soft);color:var(--stop);border:1px solid var(--stop)}
+  .legend{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--faint);
+    display:flex;flex-wrap:wrap;gap:16px}
+
+  h2{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--accent);
+    margin:44px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--rule)}
+  p{margin:0 0 15px;text-wrap:pretty}
+  strong{font-weight:600}
+  code{font-family:"JetBrains Mono",monospace;font-size:.82em;
+    background:var(--sunk);padding:1px 5px;border-radius:2px;
+    word-break:break-word}
+
+  /* ---- the correction table ---- */
+  .tw{overflow-x:auto;margin:0 0 18px}
+  table{border-collapse:collapse;width:100%;min-width:420px;
+    font-family:"JetBrains Mono",monospace;font-size:12.5px}
+  th{text-align:left;padding:0 12px 8px 0;color:var(--faint);font-weight:600;
+    font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    border-bottom:1px solid var(--rule)}
+  td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule-soft);
+    vertical-align:baseline;font-variant-numeric:tabular-nums}
+  td:first-child{font-family:Newsreader,Georgia,serif;font-size:15px;color:var(--muted)}
+  .was{color:var(--stop);text-decoration:line-through;text-decoration-thickness:1px}
+  .now{color:var(--ok);font-weight:800}
+
+  /* ---- six predicates ---- */
+  .preds{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 10px}
+  .pred{flex:1 1 60px;min-width:56px;background:var(--sunk);border-radius:2px;
+    padding:9px 6px;text-align:center;font-family:"JetBrains Mono",monospace}
+  .pred b{display:block;font-size:17px;font-weight:800;line-height:1.1}
+  .pred span{display:block;font-size:8.5px;letter-spacing:.06em;color:var(--faint);
+    margin-top:4px;text-transform:uppercase}
+  .pred.hi{background:var(--stop-soft)} .pred.hi b{color:var(--stop)}
+  .caption{font-size:13.5px;color:var(--muted);font-style:italic;margin:0 0 16px}
+
+  /* ---- the ladder: the spine of the verdict ---- */
+  .ladder{display:flex;flex-direction:column;gap:0;margin:0 0 8px;
+    border:1px solid var(--rule);border-radius:3px;overflow:hidden}
+  .rung{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;
+    background:var(--surface);border-bottom:1px solid var(--rule-soft)}
+  .rung:last-child{border-bottom:0}
+  .rung.here{background:var(--stop-soft)}
+  .rn{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:800;
+    color:var(--faint);min-width:34px;padding-top:2px}
+  .rung.here .rn{color:var(--stop)}
+  .rb{flex:1;min-width:0}
+  .rb b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+  .rb span{display:block;font-size:13.5px;color:var(--muted);line-height:1.45}
+  .mark{font-family:"JetBrains Mono",monospace;font-size:9.5px;font-weight:800;
+    letter-spacing:.08em;color:var(--stop);border:1px solid var(--stop);
+    border-radius:999px;padding:2px 8px;white-space:nowrap;align-self:center}
+
+  /* ---- findings ---- */
+  .find{border-left:2px solid var(--accent);padding:2px 0 2px 16px;margin:0 0 20px}
+  .find h3{font-size:17px;font-weight:600;margin:0 0 6px;line-height:1.3}
+  .find p{font-size:15.5px;margin:0 0 9px}
+  .find p:last-child{margin:0}
+
+  blockquote{margin:0 0 18px;padding:0 0 0 16px;border-left:2px solid var(--rule);
+    font-style:italic;color:var(--muted);font-size:16px}
+
+  /* ---- actions ---- */
+  ol.acts{list-style:none;counter-reset:a;padding:0;margin:0 0 6px;
+    display:flex;flex-direction:column;gap:11px}
+  ol.acts>li{counter-increment:a;display:flex;gap:13px;align-items:flex-start}
+  ol.acts>li::before{content:counter(a,decimal-leading-zero);
+    font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:800;
+    color:var(--accent);padding-top:4px;min-width:20px}
+  .act{flex:1;min-width:0}
+  .act b{font-weight:600}
+  .act .anch{display:block;font-family:"JetBrains Mono",monospace;font-size:11px;
+    color:var(--muted);background:var(--sunk);border-radius:2px;
+    padding:7px 9px;margin-top:7px;overflow-x:auto;white-space:pre-wrap;
+    word-break:break-word}
+  .blk{font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:800;
+    letter-spacing:.07em;color:var(--stop);margin-left:6px}
+
+  footer{margin-top:52px;padding-top:16px;border-top:1px solid var(--rule);
+    font-family:"JetBrains Mono",monospace;font-size:11px;line-height:1.7;
+    color:var(--faint)}
+  @media (max-width:430px){
+    h1{font-size:31px} body{font-size:16px}
+    .standfirst{font-size:17px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <p class="eyebrow">Audit · nouă senatori · 2026-09-14</p>
+  <h1>Sursa unică a planului</h1>
+  <p class="standfirst">Propunerea: <code>ROADMAP.md</code> devine singura sursă a planului, iar <code>_planning.json</code> se generează. Verdictul: nu construi nimic — și dovada cu care s-a deschis era greșită.</p>
+
+  <div class="verdict">
+    <div class="vhead">
+      <span class="vword">MODIFY</span>
+      <span class="vnote">poziții reale: 0 GO · 7 MODIFY (6 blocking) · 2 STOP</span>
+    </div>
+    <div class="strip">
+      <div class="cell c-mod">WIT</div>
+      <div class="cell c-mod">AUR</div>
+      <div class="cell c-mod">CON</div>
+      <div class="cell c-mod">ARI</div>
+      <div class="cell c-stop">MUS</div>
+      <div class="cell c-mod">DIM</div>
+      <div class="cell c-mod">NAP</div>
+      <div class="cell c-stop">DEM</div>
+      <div class="cell c-mod">TAC</div>
+    </div>
+    <div class="legend">
+      <span>■ MODIFY — 7</span>
+      <span>■ STOP — 2</span>
+      <span>runda 2: Musk MODIFY → STOP</span>
+    </div>
+  </div>
+
+  <h2>Dovada s-a corectat în timpul auditului</h2>
+  <p>Wittgenstein a prins-o, remăsurarea a confirmat-o. Ambele cifre cu care s-a deschis propunerea erau greșite:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Mărimea</th><th>Susținut</th><th>Măsurat</th></tr></thead>
+      <tbody>
+        <tr><td>Populație databilă</td><td class="was">10 itemi</td><td class="now">7</td></tr>
+        <tr><td>Bare care se potrivesc</td><td class="was">0 din 6</td><td class="now">5 din 6</td></tr>
+        <tr><td>Divergență reală</td><td class="was">4 itemi</td><td class="now">1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Trei din cei zece itemi sunt <code>Later</code>, care prin construcție n-au date — chiar propunerea spunea asta, apoi îi număra. Iar „0 din 6" nu măsura divergența, ci criteriul: <code>mapdata.py:216</code> păstrează numele itemului așa cum l-a scris autorul, cu backtick-uri și două propoziții, în timp ce eticheta unei bare e scurtă. Egalitatea de șiruri nu putea da altceva decât zero.</p>
+
+  <div class="preds">
+    <div class="pred hi"><b>0</b><span>exact</span></div>
+    <div class="pred hi"><b>0</b><span>casefold</span></div>
+    <div class="pred hi"><b>0</b><span>fără ` `</span></div>
+    <div class="pred"><b>5</b><span>1ª frază</span></div>
+    <div class="pred"><b>3</b><span>prefix</span></div>
+    <div class="pred"><b>1</b><span>6 cuvinte</span></div>
+  </div>
+  <p class="caption">Aceeași pereche de fișiere, șase predicate de potrivire. Rezultatul e ales de instrument, nu de date.</p>
+
+  <blockquote>O măsurătoare a cărei valoare e fixată de instrument nu poartă niciun bit despre lume.</blockquote>
+
+  <h2>Scara pe care repo-ul și-o afișase deja</h2>
+  <p><code>ARCH-ROADMAP-038:73-74</code> conține, scrisă de mână și demult, exact scara de cerere după care se judecă propunerea asta:</p>
+
+  <div class="ladder">
+    <div class="rung">
+      <div class="rn">n ≥ ?</div>
+      <div class="rb"><b>Generare</b><span>Engine-ul scrie planul. Nicio valoare a lui n n-a cumpărat vreodată treapta asta aici.</span></div>
+    </div>
+    <div class="rung">
+      <div class="rn">n = 2</div>
+      <div class="rb"><b>Semnale read-only</b><span>Engine-ul raportează divergența, omul o repară. Livrat în v2.17.0.</span></div>
+    </div>
+    <div class="rung here">
+      <div class="rn">n = 1</div>
+      <div class="rb"><b>Întreținere manuală</b><span>Nota de igienă din v1.35 a ales-o explicit în locul automatizării.</span></div>
+      <span class="mark">AICI</span>
+    </div>
+  </div>
+  <p class="caption">Propunerea cerea treapta de sus, cu dovada de pe treapta de jos.</p>
+
+  <h2>Cele trei constatări care au decis</h2>
+
+  <div class="find">
+    <h3>Tehnica are deja o rată de eroare măsurată — în acest repo</h3>
+    <p>Antetul lui <code>plandrift.py</code> enumeră cinci capcane de fals pozitiv plătite la primul contact cu exact această proză de plan. Două sunt chiar pe <code>ROADMAP.md</code>: o ordonare de alternative a produs <strong>nouă</strong> false pozitive, iar <code>_ISO_RE</code> a avut nevoie de <code>(?!\.\d)</code> fiindcă versiunea de engine <code>2026-06-19.1</code>, citată textual în linia 12, se parsa ca dată.</p>
+    <p>Noutatea principală a propunerii era un parser de date peste aceeași proză. Iar cei <strong>78,6% fals pozitivi</strong> din ADR-0012, citați în propunere <em>doar</em> împotriva variantei Excalidraw, se aplică la fel de bine variantei favorite.</p>
+  </div>
+
+  <div class="find">
+    <h3>Răul măsurat a fost prospețimea, nu duplicarea</h3>
+    <p>Singurul eșec real consemnat: <code>_planning.json</code> plănuia v7.4 pentru 31 decembrie <em>după</em> ce v7.4.0 se livrase. Generarea barelor dintr-un markdown la fel de vechi reproduce exact acel eșec, cu un parser în plus de întreținut.</p>
+  </div>
+
+  <div class="find">
+    <h3>Fișierul a fost anunțat consumatorilor ca intrare</h3>
+    <p><code>_planning.json</code> apare ca intrare scrisă de om în patru locuri din CHANGELOG. Transformarea lui în ieșire generată e aceeași manevră pe care ADR-0034 a făcut-o pentru <code>docs/map.html</code> — la preț de <strong>major plus o linie de migrare</strong>, pe o dovadă de 2,1 MB rescriși în 249 de commit-uri. Un item divergent e cu unul-două ordine de mărime sub acel prag.</p>
+  </div>
+
+  <h2>Ce se livrează în loc</h2>
+
+  <ol class="acts">
+    <li><div class="act"><b>Niciun mecanism.</b><span class="blk">BLOCKING</span> Fără parser, fără cheie nouă pe linia de roadmap, fără <code>_planning.json</code> generat, fără regulă de gate. Toate cele patru variante sunt refuzate pe dovada actuală.
+      <span class="anch">diff-ul nu adaugă nicio intrare în GATE_RULES și niciun fișier sub plugin/scripts/reqmap_engine/</span></div></li>
+
+    <li><div class="act"><b>Ramura moartă de ghost-bars.</b> Toate cele trei milestone-uri commise poartă <code>items: []</code>; ramura care le consumă e ~20 din cele 66 de linii ale lui <code>planBars.js</code>, rulând pe zero intrări la fiecare randare.
+      <span class="anch">grep -c '"items"' _planning.json → 0 · npm run smoke rămâne verde</span></div></li>
+
+    <li><div class="act"><b>Perechea <code>scores</code> scrisă de mână.</b> Două întregi bătuți la tastatură care umbresc două pe care engine-ul deja le calculează — chiar defectul pe care propunerea pretindea că-l repară, în același fișier, neexaminat.
+      <span class="anch">Rail.jsx nu mai citește TARGETS.scores; numărul egalează `gate --risk --json`</span></div></li>
+
+    <li><div class="act"><b>Cele două căi inexistente.</b> Antetul lui <code>ROADMAP.md</code> îți spune să editezi <code>docs/roadmap-preview.html</code> și <code>docs/planning/roadmap.excalidraw</code>. Niciunul nu există.
+      <span class="anch">reparație de documentație: fără semver, fără DRIFT</span></div></li>
+
+    <li><div class="act"><b>Declanșatorul de redeschidere, ca proză.</b><span class="blk">BLOCKING</span> În Notele lui <code>ARCH-ROADMAP-038</code>: se redeschide doar când <em>ambele</em> contoare se aprind — ≥2 divergențe independente din sincronizare manuală ȘI ≥1 recurență de prospețime datată după 2026-09-14. Dacă până la <strong>2027-03-14</strong> citesc sub 2 și zero, propunerea se marchează respinsă, nu re-argumentată.
+      <span class="anch">038 conține cele două contoare și data; fără intrare în GATE_RULES</span></div></li>
+  </ol>
+
+  <h2>Cum s-a mișcat deliberarea</h2>
+  <p>Musk a intrat susținând o formă redusă — generează doar cheia <code>bars</code>, cea singura duplicată. Deming l-a întrebat direct ce număr de divergențe ar justifica măcar acea formă. A răspuns numeric — ≥2 evenimente independente <em>și</em> ≥1 recurență de prospețime, contoare care azi arată zero și zero — apoi și-a schimbat votul în <strong>STOP</strong>, notând că raționamentul lui din prima rundă se sprijinea pe o cifră fără conținut informațional.</p>
+  <p>Un avertisment de reținut pentru orice verificare viitoare: Notele lui <code>ARCH-ROADMAP-038</code> consemnează că <em>„a fost verificată o singură direcție din v2.17 până în v5.10, iar cea neverificată e cea care s-a întâmplat"</em>.</p>
+
+  <footer>
+    bundle: 2026-09-14_225939-senate-reqmap-plan-single-source<br>
+    tally-ul brut al sintetizatorului arată 2 GO: Law 8 a promovat automat două cereri ale căror ancore nu le-a recunoscut în transcriere.<br>
+    copie autonomă în repo: docs/plan-source-audit.html
+  </footer>
+
+</div>
+</body>
+</html>

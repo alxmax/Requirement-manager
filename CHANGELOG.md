@@ -1,5 +1,36 @@
 # Changelog
 
+## plugin `v7.12.0` — 2026-09-14
+
+**The Gantt header now says which week of the year it is, and two dead things stopped
+pretending to be alive.** Bundle:
+`runs/senate/2026-09-14_233104-senate-plan-single-source.json` (MODIFY, 9-0-0).
+
+- **ISO week-of-year labels on the plan Gantt.** `buildWeekBands` was dead code that took
+  a day count and numbered from 1, so the same calendar week read `W1` in one chart and
+  `W5` in another. It now takes the chart's origin and emits the real ISO-8601 week
+  (Monday start, week 1 holds the year's first Thursday) — the number two people can say
+  out loud and mean the same thing by. A band under four days wide renders no label
+  instead of a clipped one.
+- **The ghost-bar branch is gone** (`app/src/lib/planBars.js`, 66 → 44 lines). It minted
+  bars from `milestones[].items[]`, dating each two weeks before its milestone's `due`.
+  Every milestone in the corpus carries `items: []`, so it produced zero bars for its
+  whole life while standing as a second, undocumented way to author the same object. The
+  dashed border in `PlanGantt` that only `kind: "ghost"` could select went with it.
+- **One source for the plan was proposed and rejected on measurement**
+  (`docs/plan-source-audit.html`). Five of six bars already match a roadmap item, so the
+  measured divergence is 1, not the 10 the proposal's headline claimed — that zero came
+  from the instrument, not the corpus. `ARCH-ROADMAP-038`'s Notes carry the reopen trigger
+  as two numbers: ≥ 2 item/bar divergences AND ≥ 1 freshness recurrence, refuted if on
+  2027-03-14 they read under 2 and zero.
+- **The `ROADMAP.md` header named two files that do not exist** —
+  `docs/roadmap-preview.html` and `docs/planning/roadmap.excalidraw`, both gone with the
+  excalidraw split at `v6.1.0`. It now names the surface you actually edit.
+- The hand-kept `scores` pair in `_planning.json` was audited for deletion and **kept**:
+  `Rail.jsx` reads it as *targets* compared against the computed health and design scores
+  (95 vs 97, 85 vs 62), not as a duplicate of them. Deleting it would have removed the
+  only signal that says design is 23 under its goal.
+
 ## plugin `v7.11.0` — 2026-09-14
 
 **What a nine-senator audit of three open items actually returned: one of them was a
