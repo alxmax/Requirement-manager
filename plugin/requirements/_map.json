@@ -14919,7 +14919,8 @@
       "intent": "`reqmap.py` ships a gate other repos vendor and run — but until now, none of the files that actually WIRE the gate into this repo (CI, the GitHub Action, the git hooks, the cache-sync script) carried a single tag pointing back at the capability they invoke. \"Tag your own pipeline\" (v2.9 TODO.md) closes that gap.",
       "contract": [
         "Five repo-root files — `ci.yml`, `check/action.yml`, both dev git hooks, and `sync_reqmap.sh` — each wire the gate into a real entry point (CI, a consumer's Action, a local commit/push, the cache-sync script), and each carries a member tag pointing back at this requirement. [[REQ-SELFGATE-916]]",
-        "The repo's own documentation is checked against the code it describes, because a drift detector whose own front page has drifted is an argument against itself. [[REQ-SELFGATE-990]]"
+        "The repo's own documentation is checked against the code it describes, because a drift detector whose own front page has drifted is an argument against itself. [[REQ-SELFGATE-990]]",
+        "A live instruction that tells a reader to type a CLI name the engine no longer has is found at merge time, read from the engine's own surface rather than from a list kept beside it. [[REQ-SELFGATE-1011]]"
       ],
       "verify": [],
       "notes": [
@@ -14964,7 +14965,8 @@
       ],
       "satisfied_by": [
         "REQ-SELFGATE-916",
-        "REQ-SELFGATE-990"
+        "REQ-SELFGATE-990",
+        "REQ-SELFGATE-1011"
       ],
       "members": [
         {
@@ -15018,6 +15020,10 @@
         {
           "role": "tested-by",
           "loc": "scripts/test_check_engine_bump.py:56"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_check_retired_verbs.py:12"
         },
         {
           "role": "tested-by",
@@ -15124,9 +15130,9 @@
         "CASE-1 — — a stale line count fails Given  a README whose stated engine line count differs from the file When   the suite runs in the source repo Then   it fails and names both numbers",
         "CASE-2 — — an unindexed ADR fails Given  an ADR file with no row in the index When   the suite runs in the source repo Then   it fails and names the file",
         "CASE-3 — — the index carries no count to maintain Given  the ADR index When   its prose above the table is read Then   it states no number of decisions",
-        "CASE-4 — — an undocumented design finding fails Given  `CLAUDE.md` stating a number of design findings the engine reports on itself, and a package that reports a different number When   the suite runs in the source repo Then   it fails, names both numbers and lists the findings actually reported"
+        "CASE-4 — — an undocumented design finding fails Given  `CLAUDE.md` stating a number of design findings the engine reports on itself, and a package that reports a different number When   the suite runs in the source repo Then   it fails, names both numbers and lists the findings actually reported --------------------"
       ],
-      "accept": "CASE-1 — a stale line count fails\n  Given  a README whose stated engine line count differs from the file\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-2 — an unindexed ADR fails\n  Given  an ADR file with no row in the index\n  When   the suite runs in the source repo\n  Then   it fails and names the file\n\nCASE-3 — the index carries no count to maintain\n  Given  the ADR index\n  When   its prose above the table is read\n  Then   it states no number of decisions\n\nCASE-4 — an undocumented design finding fails\n  Given  `CLAUDE.md` stating a number of design findings the engine reports on itself, and a\n         package that reports a different number\n  When   the suite runs in the source repo\n  Then   it fails, names both numbers and lists the findings actually reported",
+      "accept": "CASE-1 — a stale line count fails\n  Given  a README whose stated engine line count differs from the file\n  When   the suite runs in the source repo\n  Then   it fails and names both numbers\n\nCASE-2 — an unindexed ADR fails\n  Given  an ADR file with no row in the index\n  When   the suite runs in the source repo\n  Then   it fails and names the file\n\nCASE-3 — the index carries no count to maintain\n  Given  the ADR index\n  When   its prose above the table is read\n  Then   it states no number of decisions\n\nCASE-4 — an undocumented design finding fails\n  Given  `CLAUDE.md` stating a number of design findings the engine reports on itself, and a\n         package that reports a different number\n  When   the suite runs in the source repo\n  Then   it fails, names both numbers and lists the findings actually reported\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -15153,6 +15159,66 @@
       "risks": [],
       "clauses": 4,
       "covered": 4
+    },
+    {
+      "id": "REQ-SELFGATE-1011",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A live instruction never names a CLI name the engine dropped",
+      "intent": "Folding one verb into another has happened four times here, and three of those left an instruction telling a reader to type a command that no longer resolves: `map --check` in three places of a consumer's CLAUDE.md, a script telling the reader to run the `findings` verb after it was folded into `sync`, and a SKILL contract that documented `scan` (gone) while omitting five verbs that existed. None failed at merge. None failed in CI. Each failed later, at the moment a human followed a written line. The guard moves that failure to merge time, and it reads the engine rather than a second list, because a list of what is live is one more claim to keep true.",
+      "contract": [
+        "The live surface is read from the engine itself: the verbs from the `COMMANDS` registry, the flags from the `add_argument` calls the parser is built from, across every file that holds them.",
+        "A retired name is reported only where a line instructs a reader to type it — an invocation inside backticks, inside a quoted string, or after `python`/`$PY` — so prose that merely mentions the name is not a finding.",
+        "A line that states the name is gone is skipped whole, in English and in Romanian, because a migration note is the reason a reader stops calling the old name and reporting it would retract the retraction.",
+        "A flag belongs to the call it follows and to nothing after a backtick, a quote, `&&`, `||` or `;`, so a second command on the same line never hands its flags to `reqmap`.",
+        "When the engine's flags cannot be read the flag half is skipped rather than reported, so a guard that cannot read the engine fails open instead of accusing every flag at once.",
+        "Positional arguments are extra consumer roots, scanned against THIS repo's live surface; a root that does not exist ends the run with exit 2 rather than a pass.",
+        "A finding ends the run with exit 1 and names the file, the line number, whether it was a verb or a flag, and the line itself."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the live surface comes from the engine, both halves Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser When   the guard reads its live surface Then   it holds every registered verb and every long flag the parser accepts, including flags the registry itself omits",
+        "CASE-2 — — an instruction to type a retired name is reported Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does not accept, in any of the delimited or bare invocation forms When   the guard scans it Then   it reports the name with its file, line and kind, and the run exits 1",
+        "CASE-3 — — a live name and an unrelated word are not findings Given  a line naming a verb the engine still has, and another naming a word that was never a verb When   the guard scans them Then   neither is reported",
+        "CASE-4 — — a removal note retracts the instruction it describes Given  a line saying the name was folded, renamed or removed, written in English or in Romanian When   the guard scans it Then   the whole line is skipped and nothing is reported",
+        "CASE-5 — — a neighbour command keeps its own flags Given  a line carrying a `reqmap` call followed by a second command with its own flags, separated by a backtick, a quote or a shell operator When   the guard attributes flags Then   only the flags before that separator are read against the engine",
+        "CASE-6 — — a guard that cannot read fails open, a missing root does not Given  an engine whose flags cannot be read, and separately an extra root that is not a directory When   the guard runs Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass"
+      ],
+      "accept": "CASE-1 — the live surface comes from the engine, both halves\n  Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser\n  When   the guard reads its live surface\n  Then   it holds every registered verb and every long flag the parser accepts, including\n         flags the registry itself omits\n\nCASE-2 — an instruction to type a retired name is reported\n  Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does\n         not accept, in any of the delimited or bare invocation forms\n  When   the guard scans it\n  Then   it reports the name with its file, line and kind, and the run exits 1\n\nCASE-3 — a live name and an unrelated word are not findings\n  Given  a line naming a verb the engine still has, and another naming a word that was never\n         a verb\n  When   the guard scans them\n  Then   neither is reported\n\nCASE-4 — a removal note retracts the instruction it describes\n  Given  a line saying the name was folded, renamed or removed, written in English or in\n         Romanian\n  When   the guard scans it\n  Then   the whole line is skipped and nothing is reported\n\nCASE-5 — a neighbour command keeps its own flags\n  Given  a line carrying a `reqmap` call followed by a second command with its own flags,\n         separated by a backtick, a quote or a shell operator\n  When   the guard attributes flags\n  Then   only the flags before that separator are read against the engine\n\nCASE-6 — a guard that cannot read fails open, a missing root does not\n  Given  an engine whose flags cannot be read, and separately an extra root that is not a\n         directory\n  When   the guard runs\n  Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-SELFGATE-039"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "implements",
+          "loc": "scripts/check_retired_verbs.py:2"
+        },
+        {
+          "role": "implements",
+          "loc": "scripts/check_retired_verbs.py:200"
+        },
+        {
+          "role": "tested-by",
+          "loc": "scripts/test_check_retired_verbs.py:12"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.14",
+      "priority": "",
+      "risks": [],
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-SHOW-015",
@@ -21134,6 +21200,10 @@
       "ARCH-SELFGATE-039"
     ],
     [
+      "REQ-SELFGATE-1011",
+      "ARCH-SELFGATE-039"
+    ],
+    [
       "ARCH-SHOW-015",
       "SYS-REPORT-105"
     ],
@@ -21655,7 +21725,7 @@
     },
     {
       "month": "2026-09",
-      "count": 71,
+      "count": 72,
       "first": "2026-09-02",
       "last": "2026-09-15",
       "versions": [
@@ -21729,7 +21799,8 @@
         "v7.8.0",
         "v7.8.1",
         "v7.9.0",
-        "v7.13.0"
+        "v7.13.0",
+        "v7.14.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"
@@ -22252,11 +22323,11 @@
   },
   "health": {
     "score": 97,
-    "total": 262,
-    "healthy": 254,
-    "confirmed": 254,
-    "implemented": 245,
-    "tested": 242,
+    "total": 263,
+    "healthy": 255,
+    "confirmed": 255,
+    "implemented": 246,
+    "tested": 243,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,

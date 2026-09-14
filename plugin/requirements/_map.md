@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-15
 engine: 2026-09-15.1
-nodes: 262
+nodes: 263
 edges: 115
 design OOP: 72/100 (66/92 source files without a design candidate)
 ---
@@ -226,6 +226,7 @@ graph LR
     REQ_DESCRIPTION_057["One Description section, and Cases instead of Acceptance<br><small>REQ-DESCRIPTION-057</small>"]
     REQ_SELFGATE_916["Five files wire the gate into CI, hooks, and a consumer's Action<br><small>REQ-SELFGATE-916</small>"]
     REQ_SELFGATE_990["The repo's own documentation is checked, not trusted<br><small>REQ-SELFGATE-990</small>"]
+    REQ_SELFGATE_1011["A live instruction never names a CLI name the engine dropped<br><small>REQ-SELFGATE-1011</small>"]
     REQ_SHOW_917["A one-screen header, intent and contract<br><small>REQ-SHOW-917</small>"]
     REQ_SHOW_918["Dependencies both ways, and the code members<br><small>REQ-SHOW-918</small>"]
     REQ_SHOW_919["Open questions, risk signals, and a caller-visible exit code<br><small>REQ-SHOW-919</small>"]
@@ -771,6 +772,8 @@ graph LR
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_changelog_notes_py_2
   f_scripts_test_check_engine_bump_py_56["scripts/test_check_engine_bump.py:56"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_engine_bump_py_56
+  f_scripts_test_check_retired_verbs_py_12["scripts/test_check_retired_verbs.py:12"]
+  ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_retired_verbs_py_12
   f_scripts_test_check_versions_py_94_101["scripts/test_check_versions.py:94-101"]
   ARCH_SELFGATE_039 -->|tested-by| f_scripts_test_check_versions_py_94_101
   ARCH_SHOW_015["Single-requirement dossier<br><small>ARCH-SHOW-015</small>"]
@@ -974,7 +977,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>63 caps</small>"]
-  a_REQ["REQ<br><small>190 caps</small>"]
+  a_REQ["REQ<br><small>191 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

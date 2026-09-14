@@ -1,5 +1,31 @@
 # Changelog
 
+## plugin `v7.14.0` — 2026-09-15
+
+**The stale-instruction guard was a member of a requirement that said nothing about it.**
+`check_retired_verbs.py` carried `implements: ARCH-SELFGATE-039` while that requirement had
+exactly two obligation sentences — the five files that wire the gate, and the documentation
+checks — and neither described a guard that reads the engine's live CLI surface and fails a
+merge when an instruction names something gone. Its own suite carried no `tested-by:` either,
+so 12 passing tests linked to nothing.
+
+- **New `REQ-SELFGATE-1011`**, the third child of `ARCH-SELFGATE-039`: seven clauses for what
+  the guard actually promises — the live surface read from `COMMANDS` and from the parser's
+  own `add_argument` calls; an invocation reported but a mention not; a removal note (English
+  or Romanian) retracting the line it appears on; a flag belonging to the call it follows and
+  not to a neighbour command after a backtick, quote or shell operator; the flag half skipped
+  rather than accusing everything when the engine cannot be read; a missing extra root exiting
+  2 rather than passing; a finding exiting 1 with file, line and kind.
+- **Six cases, all six tagged.** The suite's 12 tests now carry `verifies:` per case and the
+  file a `tested-by: ... @unit`. Verified by mutation: dropping the removal-note skip fails
+  CASE-4 (three tests), reading a call's flags to end of line fails CASE-5 (two), and removing
+  the fail-open fails CASE-6.
+- The guard caught the requirement's own prose while it was being written — an intent
+  blockquote quoting `findings` as an example of a stale instruction reads as a live one. The
+  sentence now names the verb without the invocation form, which is the repo's convention.
+- `gate --risk` reports **"Nothing pending"** for the first time: no untagged file, and every
+  confirmed requirement implemented, tested and intent-checked.
+
 ## plugin `v7.13.0` — 2026-09-15
 
 **A sentence in `CLAUDE.md` said the engine reported three design findings on itself. It

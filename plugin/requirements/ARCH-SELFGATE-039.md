@@ -25,6 +25,7 @@ test_exempt: pipeline wiring (YAML/shell config invoking the gate) — no unit-t
 Every bullet below is binding.
 - Five repo-root files — `ci.yml`, `check/action.yml`, both dev git hooks, and `sync_reqmap.sh` — each wire the gate into a real entry point (CI, a consumer's Action, a local commit/push, the cache-sync script), and each carries a member tag pointing back at this requirement. [[REQ-SELFGATE-916]]
 - The repo's own documentation is checked against the code it describes, because a drift detector whose own front page has drifted is an argument against itself. [[REQ-SELFGATE-990]]
+- A live instruction that tells a reader to type a CLI name the engine no longer has is found at merge time, read from the engine's own surface rather than from a list kept beside it. [[REQ-SELFGATE-1011]]
 
 ## Cases
 CASE-1  <!-- verifiable by: inspection -->
@@ -234,3 +235,84 @@ CASE-4 — an undocumented design finding fails
          package that reports a different number
   When   the suite runs in the source repo
   Then   it fails, names both numbers and lists the findings actually reported
+
+--------------------
+
+
+---
+id: REQ-SELFGATE-1011
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.14
+satisfies: [ARCH-SELFGATE-039]
+---
+
+# A live instruction never names a CLI name the engine dropped
+
+## Description
+> Folding one verb into another has happened four times here, and three of those left an
+> instruction telling a reader to type a command that no longer resolves: `map --check` in
+> three places of a consumer's CLAUDE.md, a script telling the reader to run the `findings`
+> verb after it was folded into `sync`, and a SKILL contract that documented `scan` (gone)
+> while omitting five verbs that existed.
+> None failed at merge. None failed in CI. Each failed later, at the moment a human followed
+> a written line. The guard moves that failure to merge time, and it reads the engine rather
+> than a second list, because a list of what is live is one more claim to keep true.
+
+Every bullet below is binding.
+- The live surface is read from the engine itself: the verbs from the `COMMANDS` registry,
+  the flags from the `add_argument` calls the parser is built from, across every file that
+  holds them.
+- A retired name is reported only where a line instructs a reader to type it — an invocation
+  inside backticks, inside a quoted string, or after `python`/`$PY` — so prose that merely
+  mentions the name is not a finding.
+- A line that states the name is gone is skipped whole, in English and in Romanian, because a
+  migration note is the reason a reader stops calling the old name and reporting it would
+  retract the retraction.
+- A flag belongs to the call it follows and to nothing after a backtick, a quote, `&&`, `||`
+  or `;`, so a second command on the same line never hands its flags to `reqmap`.
+- When the engine's flags cannot be read the flag half is skipped rather than reported, so a
+  guard that cannot read the engine fails open instead of accusing every flag at once.
+- Positional arguments are extra consumer roots, scanned against THIS repo's live surface; a
+  root that does not exist ends the run with exit 2 rather than a pass.
+- A finding ends the run with exit 1 and names the file, the line number, whether it was a
+  verb or a flag, and the line itself.
+
+## Cases
+CASE-1 — the live surface comes from the engine, both halves
+  Given  the engine's `COMMANDS` registry and the `add_argument` calls of its parser
+  When   the guard reads its live surface
+  Then   it holds every registered verb and every long flag the parser accepts, including
+         flags the registry itself omits
+
+CASE-2 — an instruction to type a retired name is reported
+  Given  a line instructing a reader to run a retired verb, or to pass a flag the parser does
+         not accept, in any of the delimited or bare invocation forms
+  When   the guard scans it
+  Then   it reports the name with its file, line and kind, and the run exits 1
+
+CASE-3 — a live name and an unrelated word are not findings
+  Given  a line naming a verb the engine still has, and another naming a word that was never
+         a verb
+  When   the guard scans them
+  Then   neither is reported
+
+CASE-4 — a removal note retracts the instruction it describes
+  Given  a line saying the name was folded, renamed or removed, written in English or in
+         Romanian
+  When   the guard scans it
+  Then   the whole line is skipped and nothing is reported
+
+CASE-5 — a neighbour command keeps its own flags
+  Given  a line carrying a `reqmap` call followed by a second command with its own flags,
+         separated by a backtick, a quote or a shell operator
+  When   the guard attributes flags
+  Then   only the flags before that separator are read against the engine
+
+CASE-6 — a guard that cannot read fails open, a missing root does not
+  Given  an engine whose flags cannot be read, and separately an extra root that is not a
+         directory
+  When   the guard runs
+  Then   the first reports no flag at all, and the second exits 2 rather than reporting a pass
