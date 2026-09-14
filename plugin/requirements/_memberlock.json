@@ -90,8 +90,6 @@
     "ARCH-SELFGATE-039": {
       "scripts/changelog_notes.py": "c8fd931f479de639273d59dc6daddfad29e446c4b2d4a619dc94d6444b17db74",
       "scripts/check_engine_bump.py": "906a883226188a078c8812b69df9da5a5c96edb82ba4d40785c14cae5f8acdbd",
-      "scripts/check_retired_verbs.py": "75e602d84cf5449a444150050e131224e6d3bb56e66d68642b1a6a4501b05993",
-      "scripts/check_retired_verbs.py#_consumer_tree_files": "209fcd366aab2bb93041f4be72a07bd9a81aa3e909c3a81e3fc994a760d022e0",
       "scripts/check_versions.py": "a48be4c68daf2a1062c0493b5f3cb9f9faf0fc9f8ed41b7fee77ca6a3229ea4e"
     },
     "ARCH-SIMILAR-016": {

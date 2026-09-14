@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# implements: ARCH-SELFGATE-039
+# implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-1011
 # -*- coding: utf-8 -*-
 """Fail if a live instruction still names a CLI verb the engine no longer has.
 
@@ -197,7 +197,7 @@ CONSUMER_SKIP = ("scripts/reqmap.py", "requirements/_")
 
 
 def _consumer_tree_files(root, sub, prefix, ext):
-    # implements: ARCH-SELFGATE-039
+    # implements: ARCH-SELFGATE-039  # implements: REQ-SELFGATE-1011
     """Every instruction file under one CONSUMER_TREES entry, as (rel, full).
 
     Split out of `candidate_files` so that generator stays four levels deep: a walk

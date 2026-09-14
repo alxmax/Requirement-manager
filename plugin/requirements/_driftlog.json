@@ -66,8 +66,8 @@
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
     },
     "ARCH-SELFGATE-039": {
-      "hash": "f2b2050825b0",
-      "reason": "ARCH-AUDIT-065 gains the obligation sentence for its new member REQ-RELEVEL-997 (relevel.py had shipped in v7.2.0 with no requirement, RM024); ARCH-SELFGATE-039's CASE-1/CASE-2 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
+      "hash": "6179c5ac1d86",
+      "reason": "ARCH-SELFGATE-039 gains its third obligation sentence: check_retired_verbs.py was a member of it with no clause describing the guard, and its suite carried no tested-by."
     },
     "ARCH-SIMILAR-016": {
       "hash": "e36d53b747be",
