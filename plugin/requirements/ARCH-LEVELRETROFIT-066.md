@@ -72,22 +72,23 @@ satisfies: [ARCH-LEVELRETROFIT-066]
 # Which rung, and on what evidence
 
 ## Description
-> Two of the three rungs can be read off a requirement that already exists. The third
-> cannot: `code` is the rung an author arrives at by DECOMPOSING a capability into one
-> behaviour group, so proposing it for a requirement that was never decomposed would
-> rename the problem rather than solve it. It is proposed only where the requirement is
-> already shaped like one, and the evidence is printed next to the proposal.
+> Two of the three rungs can be read off the layer. The third is read off the shape: a
+> requirement bound to code is one behaviour group — the `code` rung — unless the engine
+> has evidence it is a GROUP of them (bold contract groups, or an over-scope exemption),
+> in which case it is an `architecture` awaiting decomposition. The evidence is printed
+> next to every proposal (ADR-0038).
 
 Every bullet below is binding.
 - A requirement that already declares a `level:` is absent from the proposal: the run
   proposes onto silence and never overrules an author.
 - `layer: need` proposes `system`, and `layer: aggregate` proposes `architecture`,
   because each layer already states the thing the rung would say.
-- `code` is proposed only for a requirement that has at least one `implements:` member,
-  at least `LINT_AC_MIN` labelled cases, and at least one of those cases linked to a
-  test by a `verifies:` tag.
-- Every other requirement proposes `architecture`, which is the honest reading of a
-  capability nobody has decomposed yet.
+- A requirement with two or more contract groups, or a `lint_exempt: [over-scoped]` /
+  `[ac-count-high]` entry, proposes `architecture`, and the reason names
+  `clarify <id> --decompose --apply` as the way to its code rung.
+- Every other requirement proposes `code`: one behaviour group, and the reason states
+  its case count, linked cases and implementing members so an under-specified one is
+  visible without being moved up a rung.
 - Each proposal carries the sentence it was based on, so a reader can disagree with one
   requirement instead of the whole run.
 
@@ -99,12 +100,12 @@ CASE-1 — the layer answers it where the layer already said so
   Then   the first is proposed `system` and the second `architecture`, each naming its
          layer as the reason
 
-CASE-2 — `code` needs cases, code and a test link, not just cases
-  Given  two requirements with no `level:`, one with three labelled cases, an
-         `implements:` member and a `verifies:` tag, the other with an `implements:`
-         member and no cases
+CASE-2 — a group is proposed `architecture`, everything bound to code is `code`
+  Given  three requirements with no `level:`: one with two bold contract groups, one
+         with three labelled cases and an `implements:` member, one with a member and
+         no cases
   When   the proposal runs
-  Then   the first is proposed `code` and the second `architecture`
+  Then   the first is proposed `architecture` naming `--decompose`, the other two `code`
 
 CASE-3 — a declared rung is left alone
   Given  a requirement that already declares `level: architecture`
@@ -180,18 +181,20 @@ satisfies: [ARCH-LEVELRETROFIT-066]
 > run without consequence first. It is also one that must not be reachable from
 > anything automatic: the pre-commit hook runs `sync` on every commit, which is the most
 > automatic placement in the tool, so the retrofit lives on `clarify` instead. And it
-> stops where inference stops — the pyramid's edges are a modelling decision, not
+> stops where inference stops — the pyramid's edges come from the ids the author typed, never
 > something to be derived from a different axis.
 
 Every bullet below is binding.
 - Without `--apply` the run writes nothing and says so, having already printed every
   proposal it would have made.
 - The run exits 0 whatever it finds, and no gate rule reads its output.
-- `satisfies:` edges are never proposed or written. `satisfies:` is the level axis and
-  `depends_on` is the composition axis, and deriving one from the other is the
-  conflation the engine refuses to make everywhere else.
-- When no requirement is proposed at `code`, the run says what that rung is and which
-  command reaches it, so a two-rung corpus reads as an end state rather than a failure.
+- `--apply` writes the two upper rungs with the edges (ADR-0038), in `init`'s shape: one
+  draft `ARCH-<FAMILY>-001` per id-prefix family of at least `LEVEL_FAMILY_MIN` code
+  members (smaller prefixes share `ARCH-NEEDS-A-NAME-001`), `SYS-NEEDS-A-NAME-001` at the
+  apex, `satisfies:` from every non-draft code requirement to its family and from every
+  placeholder or unlinked architecture requirement to the apex. `depends_on` is never read.
+- When a requirement carries contract groups, the run names it and the command that
+  builds its code rung (`clarify --decompose --apply`), so the last gap is one command away.
 
 ## Cases
 CASE-1 — the default run changes nothing on disk
@@ -199,12 +202,12 @@ CASE-1 — the default run changes nothing on disk
   When   `clarify --levels` runs without `--apply`
   Then   every proposal is printed, no requirement file changes, and the exit code is 0
 
-CASE-2 — the pyramid's edges are left to the author
-  Given  any corpus
+CASE-2 — the upper rungs and the edges are written with the rungs, in `init`'s shape
+  Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub
   When   `clarify --levels --apply` runs
-  Then   no `satisfies:` line is written or proposed, and the output says why
+  Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing
 
-CASE-3 — a corpus that reaches only two rungs is told what the third is
-  Given  a corpus in which no requirement carries the evidence for `code`
+CASE-3 — a requirement with contract groups is told which command builds its code rung
+  Given  a requirement whose Description carries two bold contract groups
   When   `clarify --levels` runs
-  Then   it names the `code` rung's shape and the command that reaches it
+  Then   it is proposed `architecture` and the output names `clarify --decompose --apply`

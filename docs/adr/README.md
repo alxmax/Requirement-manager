@@ -48,6 +48,7 @@ revisiting it — a decision with no revisit condition is a belief, not a decisi
 | [0035](0035-the-engine-is-a-package-behind-a-thin-cli.md) | The engine is a package behind a thin CLI | Accepted |
 | [0036](0036-decomposition-builds-downward-the-system-rung-is-the-authors.md) | Decomposition builds downward; the system rung is the author's | Accepted |
 | [0037](0037-the-command-surface-is-already-five-the-cut-is-one-mode-per-release.md) | The command surface is already five; the cut is one mode per release | Accepted |
+| [0038](0038-the-retrofit-writes-the-whole-pyramid-in-inits-shape.md) | The retrofit writes the whole pyramid, in `init`'s shape | Accepted |
 
 **Format.** Context → Decision → Consequences → Revisit when. Statuses are `Accepted`,
 `Rejected` (considered and deliberately not done), or `Superseded by NNNN`. A record is

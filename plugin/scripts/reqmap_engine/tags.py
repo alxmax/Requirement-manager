@@ -40,7 +40,11 @@ _FENCE_RE = re.compile(r'^(`{3,}|~{3,})')   # CommonMark fence opener/closer
 # NOTE: only handles single-backtick spans; double/triple-backtick spans (CommonMark-valid)
 # are not filtered. No instances exist in this corpus, but this is a known gap.
 _BACKTICK_RE = re.compile(r'`[^`]*`')         # inline backtick span (strip before tag search)
-# Per-acceptance-criterion coverage tag, placed in a test: `# verifies: REQ-X#AC-1`.
+# Per-acceptance-criterion coverage tag, placed in a test: `# verifies: <ID>#AC-1`.
+# The id is spelled `<ID>` for the same reason the `tested-by:` example below is: a
+# real-looking id in a PLAIN COMMENT is scanned as an actual tag (backtick spans are
+# stripped only for .md/.html), and `REQ-X` here was silently recorded as per-case
+# coverage for a requirement that does not exist until RM034 named it.
 # Finer-grained sibling of `tested-by` — links ONE test to ONE labelled criterion so
 # "Verifiable" becomes machine-checked per criterion, not just per requirement. The
 # `#AC-N` suffix is what distinguishes it from a plain requirement reference.
@@ -291,3 +295,73 @@ def _is_test_path(rel):  # implements: ARCH-CANDIDATES-009  # implements: REQ-CA
     base = parts[-1]
     return (any(p in _TEST_DIR_NAMES for p in parts[:-1])
             or base.startswith("test_") or base.endswith(_TEST_FILE_SUFFIXES))
+
+
+def tagged_files(members):
+    # implements: ARCH-CANDIDATES-009  # implements: REQ-PLANTAGGED-1005
+    """`{rel_path: requirement_id}` for every file that already carries a membership tag —
+    the one definition of "this file is already accounted for".
+
+    `plan` and the write path used to disagree about it: `plan` counted only `implements:`,
+    so a test file linked by `tested-by:` was reported as a NEW draft, while `init` skipped
+    that same file because it counted every role. On a 96%-tagged consumer corpus `--plan`
+    listed 123 NEW candidates of which ~120 were tests that would never have been written.
+    `--plan` exists to say what the write path will do, so the two read one function.
+
+    First tag wins per file, in `members` order, so the hint is stable across runs."""
+    out = {}
+    for cap, hits in members.items():
+        for _role, fp, _ln in hits:
+            out.setdefault(fp, cap)
+    return out
+
+
+# How a membership tag is spelled in each file type. `_strip_line_tag` already knows how to
+# REMOVE a tag behind any of these markers (`init --wipe`); this is the other direction, and
+# the two must agree or a wipe would not undo a write.
+_HASH, _SLASH, _HTML, _BLOCK, _DASH = "#", "//", "<!--", "/*", "--"
+_TAG_COMMENT = {_HTML: "<!-- {} -->", _BLOCK: "/* {} */"}
+_MARKER_BY_EXT = {
+    ".js": _SLASH, ".ts": _SLASH, ".tsx": _SLASH, ".jsx": _SLASH, ".mjs": _SLASH,
+    ".cjs": _SLASH, ".mts": _SLASH, ".cts": _SLASH, ".c": _SLASH, ".cpp": _SLASH,
+    ".h": _SLASH, ".hpp": _SLASH, ".cc": _SLASH, ".java": _SLASH, ".go": _SLASH,
+    ".rs": _SLASH, ".cs": _SLASH, ".php": _SLASH, ".kt": _SLASH, ".kts": _SLASH,
+    ".swift": _SLASH, ".scala": _SLASH, ".dart": _SLASH, ".proto": _SLASH,
+    ".prisma": _SLASH, ".graphql": _HASH, ".scss": _SLASH, ".less": _SLASH,
+    ".py": _HASH, ".rb": _HASH, ".sh": _HASH, ".yaml": _HASH, ".yml": _HASH,
+    ".toml": _HASH, ".tf": _HASH, ".ex": _HASH, ".exs": _HASH, ".sass": _HASH,
+    ".html": _HTML, ".vue": _HTML, ".svelte": _HTML, ".md": _HTML,
+    ".css": _BLOCK, ".sql": _DASH,
+}
+# A line that must stay first: the interpreter line, the XML/HTML preamble, and the
+# `@charset` a CSS file is only allowed to open with.
+_MUST_STAY_FIRST = ("#!", "<?xml", "<?php", "<!doctype", "@charset")
+
+
+def tag_comment_for(rel, role, cap):
+    # implements: ARCH-EXTRACT-008  # implements: REQ-INITTAG-1008
+    """The membership tag line to write into `rel`, or None when its type has no known
+    line-comment form. `role` is `implements` or `tested-by`."""
+    fn = os.path.basename(rel)
+    marker = _MARKER_BY_EXT.get(os.path.splitext(fn)[1].lower())
+    if marker is None and (fn in BASENAME_CODE_FILES or fn.startswith("Dockerfile.")):
+        marker = _HASH          # Dockerfile, Makefile, git hooks: all `#`
+    if marker is None:
+        return None
+    body = "{}: {}".format(role, cap)
+    return _TAG_COMMENT.get(marker, marker + " {}").format(body)
+
+
+def tag_insert_index(lines):
+    # implements: ARCH-EXTRACT-008  # implements: REQ-INITTAG-1008
+    """Where a tag may be inserted: after any line that must stay first (shebang, XML/HTML
+    preamble, `@charset`), else at the top. A UTF-8 BOM rides on line 0, so inserting after
+    it — never before — keeps the BOM the first bytes of the file."""
+    i = 0
+    while i < len(lines):
+        s = lines[i].lstrip("﻿").strip().lower()
+        if s and s.startswith(_MUST_STAY_FIRST):
+            i += 1
+            continue
+        break
+    return i

@@ -2,7 +2,7 @@
 import json, os
 
 from . import config as cfg
-from .acceptance import _automatable_acs
+from .acceptance import _automatable_acs, _labeled_acs
 from .i18n import _load_translations
 from .locks import load_memberlock, lock_path, member_drift, untracked_locks
 from .mapcmd import _stale_artifacts
@@ -11,7 +11,8 @@ from .model import (
     _dependency_cycles, _impl_exempt, gate_rule
 )
 from .orphans import (
-    orphan_code_files, tagged_unscanned_files, untagged_doc_bundles, untracked_members
+    orphan_code_files, tagged_unscanned_files, undecodable_source_files, untagged_doc_bundles,
+    untracked_members
 )
 from .sections import (
     ACCEPTANCE_LABELS, CONTRACT_LABELS, VALID_FORM, _atomic_spans, _from_any, _has_any,
@@ -194,6 +195,39 @@ def _case_coverage_rule(ctx):  # implements: ARCH-ACVERIFY-019
                            + ", ".join(missing))
 
 
+@gate_rule("RM034", "warn")
+def _dangling_verifies_rule(ctx):
+    # implements: ARCH-ACVERIFY-019  # implements: REQ-DANGLINGVERIFY-1009
+    """RM013 read one direction only — a labelled case with no tag. The other direction
+    was unguarded: a `# verifies: <id>#CASE-N` naming a case that does not exist was
+    accepted in silence, AND it is what flips RM013 on (`covered` becomes non-empty), so
+    a typo produced `0/2 criteria carry a tag` for a file that plainly carries one. The
+    label is an identifier; an identifier with no referent is a broken link."""
+    for rid in sorted(ctx.ac_cover):
+        r = ctx.reqs.get(rid)
+        if r is None:
+            # RM001 does NOT cover this: it reads `members` (implements/tested-by tags) and
+            # never `ac_cover`, so a `verifies:` naming a requirement that does not exist
+            # was silent in both rules. Same broken link, so it is reported here.
+            locs = [l for ac in sorted(ctx.ac_cover[rid]) for l in ctx.ac_cover[rid][ac]]
+            where = ", ".join(f"{fp}:{ln}" for fp, ln in locs[:3])
+            yield None, (f"`# verifies: {rid}#…` names no such requirement ({where}"
+                         + (", …" if len(locs) > 3 else "") + ")")
+            continue
+        labels = set(_labeled_acs(r["body"]))
+        if not labels:
+            continue          # unlabelled acceptance: nothing to dangle against
+        for ac in sorted(ctx.ac_cover[rid]):
+            if ac in labels:
+                continue
+            locs = ctx.ac_cover[rid][ac]
+            where = ", ".join(f"{fp}:{ln}" for fp, ln in locs[:3])
+            yield rid, (f"{rid}: `# verifies: {rid}#{ac}` names no such case ({where}"
+                        + (", …" if len(locs) > 3 else "")
+                        + f") — the requirement labels {', '.join(sorted(labels))}. "
+                        "Fix the label, or the case it meant to name is missing.")
+
+
 @gate_rule("RM014", "warn")
 def _confirmed_sections_rule(ctx):  # implements: REQ-CHECK-829
     for rid, r in ctx.reqs.items():
@@ -373,6 +407,15 @@ def _unscanned_tags_rule(ctx):  # implements: ARCH-UNSCANNEDTAG-045
             .format(
                 len(_unscanned), ", ".join(_unscanned[:5])
                 + ("" if len(_unscanned) <= 5 else ", …")))
+
+
+@gate_rule("RM033", "warn")
+def _undecodable_source_rule(ctx):  # implements: ARCH-UNREADABLE-070  # implements: REQ-UNREADABLE-1004
+    _bad = undecodable_source_files(ctx.code_root, ctx.reqs_dir)
+    for rel, reason in _bad:
+        yield None, (f"{rel}: {reason} — the scan cannot read it, so any tag in it is "
+                     "invisible and it counts as untagged. Re-save it as UTF-8, or add it "
+                     "to .reqmapignore.")
 
 
 @gate_rule("RM024", "warn")

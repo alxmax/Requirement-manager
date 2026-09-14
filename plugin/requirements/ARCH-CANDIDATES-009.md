@@ -22,6 +22,9 @@ satisfies: [SYS-READ-103]
 Every bullet below is binding.
 - `draft --plan` emits a single JSON object, to stdout or to `--out PATH`, shaped `{engine_version, bus[], candidates[]}`, and writes no `.md` files. [[REQ-CANDIDATES-826]]
 - Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]
+- The plan and the write path read ONE definition of an already-covered file, so a file the write path would skip is never reported as new. [[REQ-PLANTAGGED-1005]]
+- The plan states the rung of every candidate it would draft and the upper rungs the same run would mint, so the pyramid is visible before anything is written. [[REQ-PLANLEVEL-1006]]
+- Each candidate the write path would draft also states the id that write path will mint for it, without either id being renamed. [[REQ-PLANDRAFTID-1010]]
 
 ## Cases
 CASE-1
@@ -227,3 +230,184 @@ CASE-7 — no capmap means one candidate per file
   When   `draft --plan` runs
   Then   every file becomes its own separate candidate
 
+
+--------------------
+
+
+---
+id: REQ-PLANTAGGED-1005
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.10
+satisfies: [ARCH-CANDIDATES-009]
+---
+
+# One definition of "this file is already accounted for"
+
+## Description
+> The plan and the write path each decided for themselves which files already carry a
+> requirement, and they disagreed: the plan counted only `implements:`, the write path
+> counted every role. A test file linked by `tested-by:` therefore appeared in the plan as
+> a NEW draft that `init` would never write. On a 96%-tagged consumer corpus that was 123
+> reported candidates of which about 120 were tests — a plan nobody could act on, for a
+> command whose whole purpose is to say what the write will do.
+
+Every bullet below is binding.
+- `tagged_files` returns `{file: requirement_id}` for every file carrying a membership tag
+  of any role, first tag winning per file in scan order.
+- `plan` and the write path both derive their notion of an already-covered file from that
+  one function, so a file the write path would skip is never reported as a new candidate.
+- A file linked only by `tested-by:` counts as covered, and its candidate carries that
+  requirement as `existing_req`.
+
+## Cases
+CASE-1 — a tested-by link is coverage
+  Given  a test file whose only tag is `# tested-by: ARCH-FOO-001`
+  When   `init --plan` runs
+  Then   its candidate carries `existing_req: "ARCH-FOO-001"` and is not reported as new
+
+CASE-2 — the plan predicts the write
+  Given  a repository where every source file already carries some membership tag
+  When   `init --plan` runs and then `init` writes
+  Then   the plan reports no new candidate and the write path creates no `DRAFT-*` file
+
+CASE-3 — an untagged file is still reported
+  Given  a repository holding one tagged file and one file with no tag at all
+  When   `init --plan` runs
+  Then   only the untagged file is reported as a new candidate, and `init` writes a draft
+         for exactly that file
+
+## Context
+**Notes**
+- The helper returns a mapping rather than a set because the two callers want different
+  halves of the same fact: the write path asks "is this file covered", the plan also wants
+  the id to report as the idempotency hint. One function answers both.
+
+
+--------------------
+
+
+---
+id: REQ-PLANLEVEL-1006
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.10
+satisfies: [ARCH-CANDIDATES-009]
+---
+
+# The plan carries the pyramid it would write
+
+## Description
+> `init` writes three rungs (ADR-0030/0036) and the plan named none of them: `plan.json`
+> held zero `level` keys. The only way to see what pyramid a run would produce was to let
+> it write every file first and read the result — which defeats a dry run. The plan now
+> states the rung of each candidate and the upper rungs the same run would mint.
+
+Every bullet below is binding.
+- Each candidate the write path would draft carries `level: "code"` and `arch_id`, the
+  architecture requirement it would be written under.
+- A candidate that is already linked in code carries `level: null` and `arch_id: null` —
+  it is not drafted, so no rung is claimed for it.
+- The plan carries `pyramid: {architecture: [...], system: <id or null>}`, naming the
+  architecture ids one per source directory that would produce drafts, and the system
+  placeholder, which is null when no architecture rung would be written.
+- The architecture ids in the plan are the ids the write path mints for the same
+  directories, minted by the same function.
+
+## Cases
+CASE-1 — the plan names the rungs
+  Given  two untagged source files in `core/` and `web/`
+  When   `init --plan` runs
+  Then   `pyramid.architecture` is `["ARCH-CORE-001", "ARCH-WEB-001"]`, `pyramid.system` is
+         the placeholder id, and each candidate carries `level: "code"` with its `arch_id`
+
+CASE-2 — the planned pyramid is the written one
+  Given  the same repository
+  When   `init --plan` runs and then `init` writes
+  Then   every id in `pyramid` exists as a requirement at the stated level, and each code
+         draft's `satisfies:` is the `arch_id` its candidate named
+
+CASE-3 — nothing to draft means no pyramid
+  Given  a repository where every file is already linked in code
+  When   `init --plan` runs
+  Then   every candidate carries `level: null` and `arch_id: null`, and `pyramid` is
+         `{architecture: [], system: null}`
+
+## Context
+**Notes**
+- The naming helpers (`SYS_PLACEHOLDER_ID`, `_arch_slug`, `_assign_arch_ids`) live in the
+  plan module, one layer below the writer, because `draft.py` imports `candidates.py` and
+  never the reverse. Naming only: nothing in that block writes a file.
+- A candidate group may span directories; its `arch_id` is that of its first file, while
+  `pyramid.architecture` covers every directory the run would touch. The set is what the
+  write path produces; the per-candidate field is a pointer into it.
+
+
+--------------------
+
+
+---
+id: REQ-PLANDRAFTID-1010
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.11
+satisfies: [ARCH-CANDIDATES-009]
+---
+
+# The plan states the id the writer will mint
+
+## Description
+> The plan proposed `CORE-ENGINE-001` and the write path minted `DRAFT-CORE-ENGINE`, so a
+> reader who ran `init --plan`, then `init`, and diffed the corpus found different ids
+> everywhere. The repair is disclosure, not unification: the two ids are different things.
+> `suggested_id` is a group-level name an author may adopt — it can span several files
+> under a `_capmap.json` grouping — while the writer mints one id per file, and its
+> `DRAFT-` prefix is the marker that a requirement is an unreviewed auto-draft, asserted in
+> the confirmed contract of [[ARCH-EXTRACT-008]] and keyed on by `init --wipe` and the risk
+> report. Renaming either side would break a live marker to fix a reporting gap; stating
+> both closes the gap and breaks nothing.
+
+Every bullet below is binding.
+- Each candidate the write path would draft carries `draft_id`, the id `init` will mint for
+  that candidate's first file.
+- A candidate that is already linked in code carries `draft_id: null`, since no draft is
+  written for it and no id would be minted.
+- Neither `suggested_id` nor the writer's id changes: the `DRAFT-` prefix stays exactly
+  what it was.
+
+## Cases
+CASE-1 — the plan predicts the written id
+  Given  one untagged source file at `core/engine.py`
+  When   `init --plan` runs and then `init` writes
+  Then   the candidate's `draft_id` is `DRAFT-CORE-ENGINE`, that id exists in the corpus
+         afterwards, and its `suggested_id` `CORE-ENGINE-001` does not
+
+CASE-2 — nothing drafted, nothing claimed
+  Given  a repository where every source file already carries a membership tag
+  When   `init --plan` runs
+  Then   every candidate carries `draft_id: null`
+
+CASE-3 — the marker is untouched
+  Given  the id-minting function the write path uses
+  When   it mints an id for any path
+  Then   the result still begins with `DRAFT-`
+
+## Context
+**Notes**
+- `_draft_id` moved from `draft.py` into `candidates.py` so the plan can call it: the
+  dependency runs `draft.py -> candidates.py` and never the reverse, the same reason
+  `SYS_PLACEHOLDER_ID` and `_assign_arch_ids` already live there. The function's behaviour
+  is unchanged and the flat `reqmap._draft_id` name still resolves.
+- `draft_id` is the id before the residual collision suffix the write path appends when two
+  different paths slug identically (`DRAFT-X`, `DRAFT-X-2`). That case needs a case or
+  extension-only clash and does not arise in a normal tree; the plan states the base id.
+- Rejected: making `cmd_candidates` emit `DRAFT-*` as its `suggested_id`. It would make an
+  authoring suggestion look like the unreviewed-draft marker, and `_minted_groups` can
+  group several files under one id while `_draft_id` is per file — they are different
+  granularities, not two spellings of one thing.

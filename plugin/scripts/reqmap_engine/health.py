@@ -6,7 +6,7 @@ from .git import _git
 from .locks import load_lock
 from .mapdata import _roadmap_behind, _roadmap_signals
 from .model import _as_list, _impl_exempt, gate_rule_by_id
-from .orphans import _scan_untagged
+from .orphans import _scan_untagged, untaggable_by_design
 from .risk import _member_roles
 from .scan import _walk_code
 from .sections import binding_hash
@@ -47,9 +47,16 @@ def cmd_coverage(ws, as_json=False):
             tagged_files.add(os.path.normcase(os.path.abspath(os.path.join(code_root, fp))))
 
     buckets = {}  # dir_label -> [total, tagged]
+    by_design = 0
     for fp, rel in _walk_code(code_root, reqs_dir):
         norm_fp = os.path.normcase(os.path.abspath(fp))
         if reqs_abs and norm_fp.startswith(reqs_abs + os.sep):
+            continue
+        # implements: REQ-UNTAGGEDSET-1007 — the same exclusion the "Untagged files"
+        # bucket applies. Counting a file that will never carry a tag put the ratio's
+        # ceiling below 100% and named no file the author could act on.
+        if untaggable_by_design(rel):
+            by_design += 1
             continue
         # Group by first path component (top-level directory or "." for root files)
         parts = rel.split("/")
@@ -67,7 +74,7 @@ def cmd_coverage(ws, as_json=False):
         rows.append({"dir": label, "total": total, "tagged": tagged, "pct": pct})
 
     if as_json:
-        print(json.dumps(rows, indent=2))
+        print(json.dumps({"rows": rows, "excluded_by_design": by_design}, indent=2))
         return 0
 
     if not rows:
@@ -83,6 +90,10 @@ def cmd_coverage(ws, as_json=False):
     tagged_all = sum(r["tagged"] for r in rows)
     pct_all = round(100 * tagged_all / total_all) if total_all else 0
     print("\nTotal: {}/{} files tagged ({:>3}%)".format(tagged_all, total_all, pct_all))
+    if by_design:
+        print("({} file(s) excluded: they carry no tag by contract — decision records, "
+              "CHANGELOG, LICENSE, issue templates. `gate --risk` skips the same set, so "
+              "both reports name one list.)".format(by_design))
     return 0
 
 

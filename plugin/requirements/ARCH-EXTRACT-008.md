@@ -24,6 +24,7 @@ Every bullet below is binding.
 - `draft` proposes one `requirements/DRAFT-*.md` per remaining file, marked `status: draft` with a TODO contract. [[REQ-EXTRACT-850]] details the behaviour.
 - `draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size, and never overwrites an existing draft. [[REQ-EXTRACT-851]] details the behaviour.
 - Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.
+- Extraction links each source file to the draft it produced by writing that file’s membership tag into it, reversibly, so a stub never ships with zero members. [[REQ-INITTAG-1008]]
 
 ## Cases
 CASE-1
@@ -302,3 +303,98 @@ CASE-4 — nothing is overwritten
 **Notes**
 - The directory names will often be wrong: measured on this repo before the decision, directory inference proposes capabilities called `scripts` and `app/src/lib`. That is why the architecture node is a `draft` whose own body tells the reader to rename, merge or delete it. A wrong name that says it is a guess is recoverable; a wrong name that looks decided is not.
 - `level_source: auto` is the only part of ADR-0030 that reaches a consumer — the ADR set is not shipped inside `plugin/`. It is therefore the load-bearing half of the record, not an annotation on it.
+
+
+--------------------
+
+
+---
+id: REQ-INITTAG-1008
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.10
+lint_exempt: [file-spread]
+satisfies: [ARCH-EXTRACT-008]
+---
+
+# The draft and its source are linked in the same run
+
+## Description
+> `init` wrote the requirement stub and left the source file untagged, so the two never met:
+> the stub had zero members, the file stayed in the untagged bucket forever, and
+> `gate --risk` kept proposing the `init` that had already run. A consumer deleted eleven
+> such orphan stubs by hand, then four more the same day, before anyone noticed the loop.
+> The engine already writes into source in the other direction — `init --wipe` strips these
+> very tags — so the boundary was never the objection.
+
+Every bullet below is binding.
+- For every draft it writes from a source file, `init` inserts that file's membership tag
+  into the file: `implements:` normally, `tested-by:` when the path is a test path.
+- The tag is spelled with the line-comment form of the file's own type, and a file type
+  with no known comment form is skipped and reported rather than guessed at.
+- A line the language requires first — shebang, XML or HTML preamble, `@charset` — stays
+  first, and a UTF-8 BOM stays the file's first bytes.
+- The file's own line endings survive the insertion; a CRLF file does not become LF.
+- A file that already carries any membership tag is never given a second one, and a file
+  the scan cannot decode is never rewritten.
+- `init --wipe` removes a tag that was the whole line without leaving a blank line behind,
+  so repeating wipe-then-init is a fixed point rather than growing the file a line at a
+  time.
+- `init` reports how many of the sources it drafted it managed to link.
+
+## Cases
+CASE-1 — the drafted source becomes a member
+  Given  one untagged source file and no requirements
+  When   `init` runs
+  Then   the file carries the draft's `implements:` tag, is a member of it, and the untagged
+         bucket is empty
+
+CASE-2 — the comment marker matches the language
+  Given  untagged `.py`, `.jsx`, `.css` and `.sql` files
+  When   `init` runs
+  Then   their tags open with `#`, `//`, `/* … */` and `--` respectively
+
+CASE-3 — a required first line stays first
+  Given  a source file opening with a shebang, and one opening with `@charset`
+  When   `init` runs
+  Then   both still open with that line, and the tag sits immediately after it
+
+CASE-4 — a test file is linked as a test
+  Given  an untagged file at a test path
+  When   `init` runs
+  Then   its tag is `tested-by:`, not `implements:`
+
+CASE-5 — line endings survive
+  Given  an untagged CRLF source file
+  When   `init` runs
+  Then   every line in the file, the inserted one included, still ends with CRLF
+
+CASE-6 — wipe then init is a fixed point
+  Given  a source file that `init` has tagged
+  When   `init --wipe` runs three times
+  Then   the file is byte-identical after each run and never gains a line
+
+CASE-7 — an existing tag is left alone
+  Given  a source file already carrying `# implements: ARCH-FOO-001`
+  When   `init` runs
+  Then   the file still carries exactly one membership tag
+
+## Context
+**Notes**
+- `tested-by:` for a test path is the author's stated design. It has a consequence worth
+  knowing: a requirement whose only member is a test has no `implements:` member, so RM006
+  errors if it is ever promoted to `confirmed`. That is correct feedback — a confirmed
+  requirement with only a test behind it is exactly what RM006 exists to catch — but it
+  means such a draft needs either an implementation member or retirement, not a promotion.
+- `lint_exempt: file-spread` - the tag spelling, the insertion point, the write and the
+  wipe half live in the modules that own each, by design; one file holding all four
+  would put source-rewriting logic inside the tag grammar.
+- `_strip_line_tag` still blanks the line it strips; that is its own tested contract and the
+  right answer for `def f():  # implements: X`. The whole-line case is decided by the wipe
+  loop instead, which is the only caller that knows the line was nothing but a tag.
+- The insertion rewrites the file with `newline=""` and `errors="surrogateescape"`, the same
+  pair `--wipe` already used, so non-UTF-8 bytes elsewhere in the file round-trip verbatim.
+  It splits with `splitlines(keepends=True)` rather than the scan's normalising reader,
+  because a rewrite must preserve the bytes a line number is measured against.

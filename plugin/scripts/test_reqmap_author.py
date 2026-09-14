@@ -549,8 +549,14 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             _write(os.path.join(d, "app.py"),
                    "def f():  " + tag("CORE-FOO-001") + "\n    pass\n")
             self._init(d, wipe=True)
-            content = open(os.path.join(d, "app.py"), encoding="utf-8").read()
-            self.assertNotIn(_ROLE + ":", content)
+            with open(os.path.join(d, "app.py"), encoding="utf-8") as f:
+                content = f.read()
+            # `init --wipe` wipes and then re-initialises, and extraction now links each
+            # source to the draft it writes (REQ-INITTAG-1008). So the OLD tag is gone and
+            # the only tag left is the fresh DRAFT id — never the requirement just deleted.
+            self.assertNotIn("CORE-FOO-001", content)
+            self.assertEqual(content.count(_ROLE + ":"), 1)
+            self.assertIn("DRAFT-APP", content)
             self.assertIn("def f():", content)               # code line preserved
 
     def test_wipe_strips_tested_by_tag(self):
@@ -559,8 +565,12 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             _write(os.path.join(d, "test_app.py"),
                    "class T:  " + tb_tag("CORE-FOO-001") + "\n    pass\n")
             self._init(d, wipe=True)
-            content = open(os.path.join(d, "test_app.py"), encoding="utf-8").read()
-            self.assertNotIn(_TB_ROLE + ":", content)
+            with open(os.path.join(d, "test_app.py"), encoding="utf-8") as f:
+                content = f.read()
+            # same as above: the old link is gone, and a test path is re-linked as tested-by
+            self.assertNotIn("CORE-FOO-001", content)
+            self.assertEqual(content.count(_TB_ROLE + ":"), 1)
+            self.assertIn("DRAFT-TEST-APP", content)
             self.assertIn("class T:", content)
 
     def test_wipe_left_boundary_guard(self):
@@ -1101,18 +1111,32 @@ class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # 
         self.assertEqual(got["AGG-B-002"][0], "architecture")
         self.assertIn("aggregate", got["AGG-B-002"][1])
 
-    def test_code_needs_cases_a_member_and_a_test_link(self):  # verifies: REQ-LEVELRETROFIT-985#CASE-2
-        # Same layer, same status: only the evidence differs, and only the one
-        # carrying all three signals is proposed at the decomposed rung.
+    def _grouped_req(self, rid):
+        """A requirement whose Description carries two bold contract groups — the one
+        shape the engine reads as a GROUP, hence `architecture` (ADR-0038)."""
+        body = self.HEAD.format(id=rid, layer="feature", extra="")
+        body += ("## Description\nEvery bullet below is binding.\n"
+                 "**Polling**\n- It polls.\n**Sending**\n- It sends.\n\n") + self.CASES
+        return body
+
+    def test_a_group_is_architecture_everything_bound_to_code_is_code(self):  # verifies: REQ-LEVELRETROFIT-985#CASE-2
+        # Same layer, same status: the shape decides. Under-specification (no cases) is
+        # lint's finding and never moves a behaviour group up a rung.
         _d, ws = self._repo(
-            {"REQ-A-001.md": self._req("REQ-A-001", cases=True),
+            {"REQ-G-000.md": self._grouped_req("REQ-G-000"),
+             "REQ-A-001.md": self._req("REQ-A-001", cases=True),
              "REQ-B-002.md": self._req("REQ-B-002", cases=False)},
-            members={"REQ-A-001": [("implements", "src/a.py", 1)],
+            members={"REQ-G-000": [("implements", "src/g.py", 1)],
+                     "REQ-A-001": [("implements", "src/a.py", 1)],
                      "REQ-B-002": [("implements", "src/b.py", 1)]},
             ac_cover={"REQ-A-001": {"CASE-1": ["t"]}})
         got = R._propose_levels(ws.reqs, ws.members, ws.ac_cover)
+        self.assertEqual(got["REQ-G-000"][0], "architecture")
+        self.assertIn("--decompose", got["REQ-G-000"][1])
         self.assertEqual(got["REQ-A-001"][0], "code")
-        self.assertEqual(got["REQ-B-002"][0], "architecture")
+        self.assertIn("3 case(s), 1 linked to a test, 1 implementing member(s)", got["REQ-A-001"][1])
+        self.assertEqual(got["REQ-B-002"][0], "code")
+        self.assertIn("0 case(s)", got["REQ-B-002"][1])
 
     def test_a_declared_rung_is_never_overruled(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-3  # verifies: REQ-LEVELRETROFIT-985#CASE-3
         # Shape says `code`; the author said `architecture`. The author wins, and
@@ -1124,7 +1148,7 @@ class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # 
         self.assertEqual(R._propose_levels(ws.reqs, ws.members, ws.ac_cover), {})
         rc, out = self._run(ws)
         self.assertEqual(rc, 0)
-        self.assertIn("nothing to propose", out)
+        self.assertIn("already declare a `level:`", out)   # the rung itself is untouched
 
     # ---- REQ-LEVELRETROFIT-986: writing into somebody else's file ---------
     def test_a_crlf_file_comes_back_crlf(self):  # verifies: REQ-LEVELRETROFIT-986#CASE-1
@@ -1173,18 +1197,64 @@ class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # 
         self.assertIn("Nothing written", out)
         self.assertIn("REQ-A-001", out)
 
-    def test_satisfies_edges_are_never_proposed_or_written(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-2
-        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001", layer="need")})
+    def test_apply_writes_family_placeholders_and_satisfies_edges(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-2
+        _d, ws = self._repo({
+            "JS-A-001.md": self._req("JS-A-001"),
+            "JS-B-002.md": self._req("JS-B-002"),
+            "JS-C-003.md": self._req("JS-C-003"),
+            "AI-C-003.md": self._req("AI-C-003", extra="satisfies: [SYS-OWN-001]\n"),
+            "SYS-OWN-001.md": self._req("SYS-OWN-001", layer="need"),
+            "MT4-D-004.md": self._req("MT4-D-004"),                      # a prefix of one: no family
+            "DRAFT-E-005.md": self._req("DRAFT-E-005").replace("status: confirmed", "status: draft"),
+        })
+        rc, out = self._run(ws)            # read-only: the plan is printed, nothing written
+        self.assertEqual(rc, 0)
+        self.assertIn("ARCH-JS-001", out)
+        self.assertIn("Nothing written", out)
+        self.assertFalse(os.path.exists(os.path.join(ws.reqs_dir, "ARCH-JS-001.md")))
         rc, out = self._run(ws, apply_it=True)
         self.assertEqual(rc, 0)
-        self.assertIn("`satisfies:` edges are NOT proposed", out)
-        self.assertNotIn("satisfies:", open(ws.reqs["REQ-A-001"]["path"], encoding="utf-8").read())
+        reread = R.load_requirements(ws.reqs_dir)
+        cap = reread["ARCH-JS-001"]["meta"]
+        self.assertEqual((cap["status"], cap["level"], cap["layer"], cap["level_source"]),
+                         ("draft", "architecture", "feature", "auto"))
+        self.assertEqual(cap["satisfies"], [R.SYS_PLACEHOLDER_ID])      # the apex, init's own hole
+        self.assertEqual(reread[R.SYS_PLACEHOLDER_ID]["meta"]["layer"], "need")
+        for rid in ("JS-A-001", "JS-B-002", "JS-C-003"):
+            self.assertEqual(reread[rid]["meta"]["level"], "code")
+            self.assertEqual(reread[rid]["meta"]["satisfies"], ["ARCH-JS-001"])
+        self.assertEqual(reread["AI-C-003"]["meta"]["satisfies"], ["SYS-OWN-001"])   # kept as is
+        self.assertNotIn("ARCH-AI-001", reread)                      # no edge needed: no hole minted
+        self.assertNotIn("satisfies", reread["SYS-OWN-001"]["meta"])  # a need satisfies nothing
+        # a prefix below LEVEL_FAMILY_MIN shares one placeholder instead of minting ARCH-MT4-001
+        self.assertNotIn("ARCH-MT4-001", reread)
+        self.assertEqual(reread["MT4-D-004"]["meta"]["satisfies"], [R.ARCH_SHARED_ID])
+        # an auto-extracted draft stub is never given an edge, and DRAFT is not a family
+        self.assertNotIn("satisfies", reread["DRAFT-E-005"]["meta"])
+        self.assertNotIn("ARCH-DRAFT-001", reread)
+        self.assertIn("`depends_on` is never read", out)
 
-    def test_a_two_rung_corpus_is_told_what_the_third_rung_is(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-3
-        _d, ws = self._repo({"REQ-A-001.md": self._req("REQ-A-001")})
+    def test_a_second_apply_writes_nothing_new(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-2
+        _d, ws = self._repo({"JS-A-001.md": self._req("JS-A-001")})
+        self._run(ws, apply_it=True)
+        def snap():
+            return {n: open(os.path.join(ws.reqs_dir, n), "rb").read()
+                    for n in sorted(os.listdir(ws.reqs_dir))}
+        before = snap()
+        self.assertIn(R.ARCH_SHARED_ID + ".md", before)      # one JS member: below the floor
+        self.assertIn(R.SYS_PLACEHOLDER_ID + ".md", before)
+        ws2 = R.Workspace(R.load_requirements(ws.reqs_dir), {}, ws.reqs_dir, _d, ac_cover={})
+        _rc, out = self._run(ws2, apply_it=True)
+        self.assertIn("nothing to propose", out)
+        self.assertEqual(snap(), before)
+
+    def test_a_grouped_requirement_is_told_which_command_builds_its_code_rung(self):  # verifies: REQ-LEVELRETROFIT-987#CASE-3
+        _d, ws = self._repo({"REQ-G-000.md": self._grouped_req("REQ-G-000"),
+                             "REQ-A-001.md": self._req("REQ-A-001")})
         _rc, out = self._run(ws)
-        self.assertIn("No requirement is proposed at `code`", out)
-        self.assertIn("--decompose", out)
+        self.assertIn("architecture   REQ-G-000", out)
+        self.assertIn("1 requirement(s) carry contract groups", out)
+        self.assertIn("--decompose --apply", out)
 
     def test_apply_writes_the_rung_and_the_marker(self):  # verifies: ARCH-LEVELRETROFIT-066#CASE-2
         _d, ws = self._repo({
@@ -1195,7 +1265,7 @@ class LevelRetrofit(unittest.TestCase):  # tested-by: ARCH-LEVELRETROFIT-066  # 
         self.assertEqual(rc, 0)
         reread = R.load_requirements(ws.reqs_dir)
         self.assertEqual(reread["SYS-A-001"]["meta"]["level"], "system")
-        self.assertEqual(reread["REQ-B-002"]["meta"]["level"], "architecture")
+        self.assertEqual(reread["REQ-B-002"]["meta"]["level"], "code")
         for r in reread.values():
             self.assertEqual(r["meta"].get("level_source"), "auto")
 
@@ -2590,7 +2660,7 @@ class RemedyCanAct(unittest.TestCase):  # tested-by: ARCH-DECOMPOSE-050  # teste
         self.assertIn("either", f["detail"])
         self.assertIn("does not cover this check", f["detail"])
 
-    def test_a_decompose_run_that_scaffolds_nothing_says_so(self):  # verifies: ARCH-DECOMPOSE-050#CASE-8  # verifies: REQ-DECOMPOSE-839#CASE-6
+    def test_a_decompose_run_that_scaffolds_nothing_says_so(self):  # verifies: REQ-DECOMPOSE-839#CASE-6
         with tempfile.TemporaryDirectory() as d:
             rd = os.path.join(d, "requirements")
             _write(os.path.join(rd, "A-OK-001.md"),
@@ -3225,3 +3295,214 @@ class LanguageSetting(unittest.TestCase):  # tested-by: ARCH-TRANSLATE-044  # te
         self.assertIn("AREA-STALE-002", out); self.assertIn("stale", out)
         self.assertIn("AREA-NONE-003", out);  self.assertIn("missing", out)
         self.assertNotIn("AREA-FRESH-001", out)
+
+
+class PlanMatchesWritePath(unittest.TestCase):  # tested-by: REQ-PLANTAGGED-1005 @unit  # tested-by: REQ-PLANLEVEL-1006 @unit  # tested-by: REQ-PLANDRAFTID-1010 @unit
+    """`--plan` exists to say what `init` will write. Two things it got wrong: it counted
+    only `implements:` as coverage (so tested-by-linked tests read as NEW drafts the write
+    path would skip), and it carried no rung at all."""
+
+    def _repo(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        os.makedirs(os.path.join(d, "core"))
+        os.makedirs(os.path.join(d, "tests"))
+        _write(os.path.join(reqs, "ARCH-FOO-001.md"), _spec("ARCH-FOO-001", ["does a thing"]))
+        _write(os.path.join(d, "core", "app.py"), tag("ARCH-FOO-001") + "\ndef f(): pass\n")
+        _write(os.path.join(d, "tests", "test_app.py"),
+               tb_tag("ARCH-FOO-001") + "\ndef test_f(): pass\n")
+        return d, reqs
+
+    def _plan(self, d, reqs):
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_candidates(ws, None)
+        return json.loads(buf.getvalue()), ws
+
+    def test_a_tested_by_file_is_not_reported_as_new(self):  # verifies: REQ-PLANTAGGED-1005#CASE-1
+        d, reqs = self._repo()
+        plan, _ws = self._plan(d, reqs)
+        new = [c["suggested_id"] for c in plan["candidates"] if not c["existing_req"]]
+        self.assertEqual(new, [], "a file linked by tested-by: is already accounted for")
+
+    def test_plan_and_write_path_agree_on_what_is_new(self):  # verifies: REQ-PLANTAGGED-1005#CASE-2
+        d, reqs = self._repo()
+        plan, ws = self._plan(d, reqs)
+        predicted = {c["suggested_id"] for c in plan["candidates"] if not c["existing_req"]}
+        before = set(os.listdir(reqs))
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        wrote = {f for f in set(os.listdir(reqs)) - before if f.startswith("DRAFT-")}
+        self.assertEqual(bool(predicted), bool(wrote))
+
+    def test_an_untagged_file_is_still_reported(self):  # verifies: REQ-PLANTAGGED-1005#CASE-3
+        d, reqs = self._repo()
+        _write(os.path.join(d, "core", "loose.py"), "def g(): pass\n")
+        plan, ws = self._plan(d, reqs)
+        new = [c for c in plan["candidates"] if not c["existing_req"]]
+        self.assertEqual([c["files"] for c in new], [["core/loose.py"]])
+        before = set(os.listdir(reqs))
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        self.assertEqual(sorted(set(os.listdir(reqs)) - before),
+                         ["ARCH-CORE-001.md", "DRAFT-CORE-LOOSE.md", R.SYS_PLACEHOLDER_ID + ".md"])
+
+    def test_plan_carries_the_rung_and_the_pyramid(self):  # verifies: REQ-PLANLEVEL-1006#CASE-1
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        os.makedirs(os.path.join(d, "core"))
+        os.makedirs(os.path.join(d, "web"))
+        _write(os.path.join(d, "core", "engine.py"), "def run(): pass\n")
+        _write(os.path.join(d, "web", "views.py"), "def index(): pass\n")
+        plan, _ws = self._plan(d, reqs)
+        self.assertEqual(plan["pyramid"]["architecture"], ["ARCH-CORE-001", "ARCH-WEB-001"])
+        self.assertEqual(plan["pyramid"]["system"], R.SYS_PLACEHOLDER_ID)
+        got = {c["suggested_id"]: (c["level"], c["arch_id"]) for c in plan["candidates"]}
+        self.assertEqual(got["CORE-ENGINE-001"], ("code", "ARCH-CORE-001"))
+        self.assertEqual(got["WEB-VIEWS-001"], ("code", "ARCH-WEB-001"))
+
+    def test_the_planned_pyramid_is_the_one_written(self):  # verifies: REQ-PLANLEVEL-1006#CASE-2
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        os.makedirs(os.path.join(d, "core"))
+        _write(os.path.join(d, "core", "engine.py"), "def run(): pass\n")
+        plan, ws = self._plan(d, reqs)
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        written = R.load_requirements(reqs)
+        for aid in plan["pyramid"]["architecture"]:
+            self.assertIn(aid, written)
+            self.assertEqual(written[aid]["meta"]["level"], "architecture")
+        self.assertEqual(written[plan["pyramid"]["system"]]["meta"]["level"], "system")
+        for c in plan["candidates"]:
+            if c["level"] != "code":
+                continue
+            kid = next(r for r in written.values()
+                       if r["meta"].get("level") == "code" and c["files"][0] in r["body"])
+            self.assertEqual(R._as_list(kid["meta"]["satisfies"]), [c["arch_id"]])
+
+    def test_draft_id_is_the_id_the_write_path_mints(self):  # verifies: REQ-PLANDRAFTID-1010#CASE-1
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        os.makedirs(os.path.join(d, "core"))
+        _write(os.path.join(d, "core", "engine.py"), "def run(): pass\n")
+        plan, ws = self._plan(d, reqs)
+        c = plan["candidates"][0]
+        # the two ids differ ON PURPOSE and the plan states both, rather than renaming either
+        self.assertEqual(c["suggested_id"], "CORE-ENGINE-001")
+        self.assertEqual(c["draft_id"], "DRAFT-CORE-ENGINE")
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        written = R.load_requirements(reqs)
+        self.assertIn(c["draft_id"], written)          # the plan predicted the written id
+        self.assertNotIn(c["suggested_id"], written)   # and did not claim to be it
+
+    def test_an_already_linked_candidate_carries_no_draft_id(self):  # verifies: REQ-PLANDRAFTID-1010#CASE-2
+        d, reqs = self._repo()
+        plan, _ws = self._plan(d, reqs)
+        for c in plan["candidates"]:
+            self.assertIsNone(c["draft_id"])   # not drafted: no id is claimed for it
+
+    def test_the_draft_marker_is_untouched(self):  # verifies: REQ-PLANDRAFTID-1010#CASE-3
+        # the whole point of disclosure over unification: `DRAFT-` stays the marker that a
+        # requirement is an unreviewed auto-draft, which several call sites key on.
+        self.assertTrue(R.draft._draft_id("core/engine.py").startswith("DRAFT-"))
+        self.assertEqual(R.draft._draft_id("a/b.py"), R._draft_id("a/b.py"))
+
+    def test_an_already_linked_candidate_gets_no_rung(self):  # verifies: REQ-PLANLEVEL-1006#CASE-3
+        d, reqs = self._repo()
+        plan, _ws = self._plan(d, reqs)
+        for c in plan["candidates"]:
+            self.assertIsNone(c["level"])        # not drafted -> no rung is claimed
+            self.assertIsNone(c["arch_id"])
+        self.assertEqual(plan["pyramid"], {"architecture": [], "system": None})
+
+
+class InitTagsTheSource(unittest.TestCase):  # tested-by: REQ-INITTAG-1008 @unit
+    """`init` wrote a stub and left the source untagged, so the file stayed in the untagged
+    bucket forever while `gate --risk` kept proposing the `init` that had already run."""
+
+    def _repo(self, files):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        for rel, body in files.items():
+            p = os.path.join(d, rel.replace("/", os.sep))
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w", encoding="utf-8", newline="") as f:
+                f.write(body)
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        return d, reqs
+
+    def _read(self, d, rel):
+        with open(os.path.join(d, rel.replace("/", os.sep)), encoding="utf-8", newline="") as f:
+            return f.read()
+
+    def test_the_drafted_source_becomes_a_member(self):  # verifies: REQ-INITTAG-1008#CASE-1
+        d, reqs = self._repo({"core/engine.py": "def run(): pass\n"})
+        members = R.scan_members(d, reqs)
+        self.assertEqual({fp for hits in members.values() for _r, fp, _l in hits},
+                         {"core/engine.py"})
+        self.assertEqual(R.orphans._scan_untagged(d, reqs), [])      # the advice loop closes
+
+    def test_the_comment_marker_matches_the_language(self):  # verifies: REQ-INITTAG-1008#CASE-2
+        d, _reqs = self._repo({"core/a.py": "x = 1\n", "core/b.jsx": "export const B = 1;\n",
+                               "core/c.css": "a { color: red }\n", "core/d.sql": "select 1;\n"})
+        self.assertTrue(self._read(d, "core/a.py").startswith("# implements: "))
+        self.assertTrue(self._read(d, "core/b.jsx").startswith("// implements: "))
+        self.assertTrue(self._read(d, "core/c.css").startswith("/* implements: "))
+        self.assertTrue(self._read(d, "core/d.sql").startswith("-- implements: "))
+
+    def test_a_line_that_must_stay_first_stays_first(self):  # verifies: REQ-INITTAG-1008#CASE-3
+        charset = "@charset " + chr(34) + "utf-8" + chr(34) + ";\n"
+        d, _reqs = self._repo({"core/hook.py": "#!/usr/bin/env python\nx = 1\n",
+                               "core/s.css": charset + "a { color: red }\n"})
+        self.assertTrue(self._read(d, "core/hook.py").startswith("#!/usr/bin/env python\n"))
+        self.assertTrue(self._read(d, "core/s.css").startswith(charset))
+
+    def test_a_test_file_is_linked_as_tested_by(self):  # verifies: REQ-INITTAG-1008#CASE-4
+        d, _reqs = self._repo({"tests/test_a.py": "def test_a(): pass\n"})
+        self.assertTrue(self._read(d, "tests/test_a.py").startswith("# tested-by: "))
+
+    def test_crlf_survives_the_insertion(self):  # verifies: REQ-INITTAG-1008#CASE-5
+        d, _reqs = self._repo({"core/w.jsx": "export const A = 1;\r\nexport const B = 2;\r\n"})
+        body = self._read(d, "core/w.jsx")
+        self.assertIn("implements: ", body)
+        self.assertEqual(body.count("\r\n"), 3)          # tag + both originals
+        self.assertNotIn("\n", body.replace("\r\n", ""))  # not one line flattened to LF
+
+    def test_an_already_tagged_source_is_left_alone(self):  # verifies: REQ-INITTAG-1008#CASE-7
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        _write(os.path.join(reqs, "ARCH-FOO-001.md"), _spec("ARCH-FOO-001", ["does a thing"]))
+        body = tag("ARCH-FOO-001") + "\ndef f(): pass\n"
+        _write(os.path.join(d, "app.py"), body)
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        with redirect_stdout(io.StringIO()):
+            R.cmd_extract(ws)
+        self.assertEqual(self._read(d, "app.py").count("implements:"), 1)
+
+    def test_wipe_then_init_is_a_fixed_point(self):  # verifies: REQ-INITTAG-1008#CASE-6
+        d, reqs = self._repo({"core/engine.py": "#!/usr/bin/env python\ndef run(): pass\n"})
+        seen = []
+        for _ in range(3):
+            with redirect_stdout(io.StringIO()):
+                R.cmd_init(reqs, d, wipe=True, no_site=True)
+            seen.append(self._read(d, "core/engine.py"))
+        self.assertEqual(seen[0], seen[1])
+        self.assertEqual(seen[1], seen[2])
+        self.assertEqual(len(seen[0].splitlines()), 3)   # shebang + tag + code, never growing

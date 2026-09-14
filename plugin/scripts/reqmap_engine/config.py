@@ -108,6 +108,9 @@ LINT_STATEMENT_WORDS = 150     # a Contract CLAUSE — continuation lines joined
                                # ARCH-ATOMICITY-049 makes atomicity the normative rule and this
                                # threshold an explicit heuristic, so a longer clause stays valid.
 LINT_AC_MIN = 3                # fewer ACs than this suggests under-specified (warn)
+LEVEL_FAMILY_MIN = 3           # `clarify --levels --apply` mints one ARCH-<FAMILY>-001 capability
+                               # per id-prefix family with at least this many code members;
+                               # smaller families share ARCH-NEEDS-A-NAME-001 (ADR-0038)
 LINT_AC_MAX = 7                # more ACs than this suggests over-scoped — split candidate (warn)
                                # `- ` facts before it is no longer one obligation (warn,
                                # 'atomic-story-overlong'); each fact under the ceiling needs

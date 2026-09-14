@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-14.1",
+  "engine_version": "2026-09-14.5",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -13,7 +13,8 @@
       "contract": [
         "The gate scans code for `# verifies: <id>#AC-N` tags and maps each to the labelled criterion it covers — the per-criterion half of behaviour-sync. [[REQ-ACVERIFY-821]]",
         "A confirmed requirement with no `verifies` tag, with unlabelled criteria, or with an inspection-only criterion is exempt from the per-criterion warning; the coarser `tested-by` check still applies to it. [[REQ-ACVERIFY-822]]",
-        "The map emits `clauses`/`covered`/`gap` only on a requirement that has adopted per-criterion tagging, and the check never changes the gate's exit code. [[REQ-ACVERIFY-823]]"
+        "The map emits `clauses`/`covered`/`gap` only on a requirement that has adopted per-criterion tagging, and the check never changes the gate's exit code. [[REQ-ACVERIFY-823]]",
+        "A `verifies:` tag whose case label, or whose requirement id, has no referent is reported as the broken link it is — the reverse direction, unchecked until now. [[REQ-DANGLINGVERIFY-1009]]"
       ],
       "verify": [],
       "notes": [
@@ -53,7 +54,8 @@
       "satisfied_by": [
         "REQ-ACVERIFY-821",
         "REQ-ACVERIFY-822",
-        "REQ-ACVERIFY-823"
+        "REQ-ACVERIFY-823",
+        "REQ-DANGLINGVERIFY-1009"
       ],
       "members": [
         {
@@ -66,11 +68,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:544"
+          "loc": "plugin/scripts/test_reqmap_scan.py:545"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:890"
+          "loc": "plugin/scripts/test_reqmap_scan.py:891"
         },
         {
           "role": "implements",
@@ -90,15 +92,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:182"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:183"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:134"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:200"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:241"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:188"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/scan.py:291"
         }
       ],
       "test_exempt": null,
@@ -106,15 +112,7 @@
       "priority": "should-have",
       "risks": [],
       "clauses": 5,
-      "covered": 5,
-      "i18n": {
-        "ro": {
-          "title": "Acoperire de test per criteriu",
-          "intent": "În prezent, gate-ul poate spune că o cerință are *un* test, dar nu că *fiecare* dintre criteriile sale de acceptare este verificat efectiv — astfel încât o cerință cu cinci criterii și un singur test pare la fel de \"acoperită\" ca una cu cinci teste. Aceasta leagă fiecare criteriu etichetat de testul care îl verifică, astfel încât gate-ul poate numi exact criteriul pe care nimeni nu îl testează. Fără aceasta, \"Verificabil\" este adevărat doar la nivelul întregii cerințe, iar o cerință testată doar pe jumătate trece în tăcere.",
-          "contract": "> În prezent, gate-ul poate spune că o cerință are *un* test, dar nu că *fiecare*\n> dintre criteriile sale de acceptare este verificat efectiv — astfel încât o cerință\n> cu cinci criterii și un singur test pare la fel de \"acoperită\" ca una cu cinci teste.\n> Aceasta leagă fiecare criteriu etichetat de testul care îl verifică, astfel încât\n> gate-ul poate numi exact criteriul pe care nimeni nu îl testează. Fără aceasta,\n> \"Verificabil\" este adevărat doar la nivelul întregii cerințe, iar o cerință testată\n> doar pe jumătate trece în tăcere.\n\nFiecare punct de mai jos este obligatoriu.\n- Gate-ul scanează codul pentru etichete `# verifies: <id>#AC-N` și mapează fiecare la criteriul etichetat pe care îl acoperă — jumătatea per-criteriu a sincronizării comportamentale. [[REQ-ACVERIFY-821]]\n- O cerință confirmată fără nicio etichetă `verifies`, cu criterii neetichetate, sau cu un criteriu verificabil doar prin inspecție este exceptată de la avertismentul per-criteriu; verificarea mai grosieră `tested-by` i se aplică în continuare. [[REQ-ACVERIFY-822]]\n- Harta emite `clauses`/`covered`/`gap` doar pentru o cerință care a adoptat etichetarea per-criteriu, iar verificarea nu modifică niciodată codul de ieșire al gate-ului. [[REQ-ACVERIFY-823]]",
-          "acceptance": "CASE-1\n  Given  o cerință cu CASE-1 și CASE-2 etichetate și un test care etichetează `# verifies: REQ-X#CASE-1`\n  When   gate-ul rulează\n  Then   avertizează că CASE-2 nu este verificat și nu spune nimic despre CASE-1\nCASE-2\n  Given  o cerință ale cărei criterii etichetate au toate câte o etichetă `verifies` corespunzătoare\n  When   gate-ul rulează\n  Then   nu adaugă niciun avertisment per-criteriu\nCASE-3\n  Given  o cerință confirmată cu criterii etichetate dar zero etichete `verifies`\n  When   gate-ul rulează\n  Then   nu adaugă niciun avertisment per-criteriu (etichetarea per-criteriu este opțională)\nCASE-4\n  Given  o cerință confirmată ale cărei criterii sunt puncte neetichetate\n  When   gate-ul rulează\n  Then   nu adaugă niciun avertisment per-criteriu\nCASE-5\n  Given  o cerință confirmată cu un criteriu marcat `verifiable by: inspection`\n  When   gate-ul rulează\n  Then   acel criteriu nu apare în niciun avertisment și în nicio numărătoare emisă\nCASE-6\n  Given  o cerință cu două criterii etichetate, dintre care unul poartă o etichetă `verifies`\n  When   harta este generată\n  Then   nodul său poartă `clauses: 2`, `covered: 1`, și un `gap` care numește criteriul neetichetat"
-        }
-      }
+      "covered": 5
     },
     {
       "id": "REQ-ACVERIFY-821",
@@ -157,7 +155,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:241"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:291"
         }
       ],
       "test_exempt": null,
@@ -256,9 +254,9 @@
       "acc": [
         "CASE-1 — — clauses/covered appear only once tagging is adopted Given  a requirement with two labelled criteria and no `verifies` coverage passed to `_build_map_data`, and separately the same requirement with `AC-1` covered When   `_build_map_data` builds each node Then   the untagged node has no `clauses`/`covered` keys — absent means not measured, never a substituted zero — and the tagged node has `clauses: 2, covered: 1`",
         "CASE-2 — — gap names the untagged criteria only when coverage is partial Given  a two-criterion requirement with only `AC-1` covered, and separately one with both `AC-1` and its only criterion covered When   `_build_map_data` builds each node Then   the partial node's `gap` contains \"AC-2\" and the fully-covered node carries no `gap` key",
-        "CASE-3 — — an unverified criterion warns but the gate exits 0 Given  a confirmed requirement with `AC-1` tagged and `AC-2` untagged, nothing else causing an error When   `gate` runs Then   the run warns about AC-2 and still exits 0"
+        "CASE-3 — — an unverified criterion warns but the gate exits 0 Given  a confirmed requirement with `AC-1` tagged and `AC-2` untagged, nothing else causing an error When   `gate` runs Then   the run warns about AC-2 and still exits 0 --------------------"
       ],
-      "accept": "CASE-1 — clauses/covered appear only once tagging is adopted\n  Given  a requirement with two labelled criteria and no `verifies` coverage passed to\n         `_build_map_data`, and separately the same requirement with `AC-1` covered\n  When   `_build_map_data` builds each node\n  Then   the untagged node has no `clauses`/`covered` keys — absent means not measured,\n         never a substituted zero — and the tagged node has `clauses: 2, covered: 1`\n\nCASE-2 — gap names the untagged criteria only when coverage is partial\n  Given  a two-criterion requirement with only `AC-1` covered, and separately one with\n         both `AC-1` and its only criterion covered\n  When   `_build_map_data` builds each node\n  Then   the partial node's `gap` contains \"AC-2\" and the fully-covered node carries no\n         `gap` key\n\nCASE-3 — an unverified criterion warns but the gate exits 0\n  Given  a confirmed requirement with `AC-1` tagged and `AC-2` untagged, nothing else\n         causing an error\n  When   `gate` runs\n  Then   the run warns about AC-2 and still exits 0",
+      "accept": "CASE-1 — clauses/covered appear only once tagging is adopted\n  Given  a requirement with two labelled criteria and no `verifies` coverage passed to\n         `_build_map_data`, and separately the same requirement with `AC-1` covered\n  When   `_build_map_data` builds each node\n  Then   the untagged node has no `clauses`/`covered` keys — absent means not measured,\n         never a substituted zero — and the tagged node has `clauses: 2, covered: 1`\n\nCASE-2 — gap names the untagged criteria only when coverage is partial\n  Given  a two-criterion requirement with only `AC-1` covered, and separately one with\n         both `AC-1` and its only criterion covered\n  When   `_build_map_data` builds each node\n  Then   the partial node's `gap` contains \"AC-2\" and the fully-covered node carries no\n         `gap` key\n\nCASE-3 — an unverified criterion warns but the gate exits 0\n  Given  a confirmed requirement with `AC-1` tagged and `AC-2` untagged, nothing else\n         causing an error\n  When   `gate` runs\n  Then   the run warns about AC-2 and still exits 0\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -284,15 +282,65 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3,
-      "i18n": {
-        "ro": {
-          "title": "Emiterea clauzelor, acoperite și lacunelor pe hartă",
-          "intent": "Odată ce o cerință adoptă etichetarea per-criteriu, harta înregistrează câte criterii există, câte sunt acoperite și care nu sunt — astfel încât un revizor vede acoperirea parțială fără să citească ieșirea gate-ului. Un câmp `clauses` absent înseamnă că cerința nu a fost niciodată măsurată, niciodată un zero substituit.",
-          "contract": "> Odată ce o cerință adoptă etichetarea per-criteriu, harta înregistrează câte criterii există,\n> câte sunt acoperite și care nu sunt — astfel încât un revizor vede acoperirea parțială fără să\n> citească ieșirea gate-ului. Un câmp `clauses` absent înseamnă că cerința nu a fost niciodată\n> măsurată, niciodată un zero substituit.\n\nFiecare punct de mai jos este obligatoriu.\n- Harta emite `clauses` și `covered` pentru o cerință care a adoptat etichetarea per-criteriu,\n  și omite ambele câmpuri altfel.\n- Harta emite un `gap` care numește criteriile neetichetate atunci când acoperirea este parțială.\n- Un `clauses` absent înseamnă \"nemăsurat\". Niciun cititor nu poate substitui un număr al său.\n- Verificarea este doar de avertizare. Nu schimbă niciodată codul de ieșire al gate-ului.",
-          "acceptance": "CASE-1 — clauses/covered apar doar odată ce etichetarea este adoptată\n  Given  o cerință cu două criterii etichetate și fără acoperire `verifies` transmisă către\n         `_build_map_data`, și separat aceeași cerință cu `AC-1` acoperit\n  When   `_build_map_data` construiește fiecare nod\n  Then   nodul neetichetat nu are cheile `clauses`/`covered` — absența înseamnă nemăsurat,\n         niciodată un zero substituit — iar nodul etichetat are `clauses: 2, covered: 1`\n\nCASE-2 — gap numește criteriile neetichetate doar când acoperirea este parțială\n  Given  o cerință cu două criterii, cu doar `AC-1` acoperit, și separat una cu\n         `AC-1` și singurul ei criteriu acoperite\n  When   `_build_map_data` construiește fiecare nod\n  Then   `gap`-ul nodului parțial conține \"AC-2\" iar nodul complet acoperit nu poartă\n         cheia `gap`\n\nCASE-3 — un criteriu neverificat avertizează dar gate-ul iese cu 0\n  Given  o cerință confirmată cu `AC-1` etichetat și `AC-2` neetichetat, nimic altceva\n         care să cauzeze o eroare\n  When   `gate` rulează\n  Then   rularea avertizează despre AC-2 și tot iese cu 0"
+      "covered": 3
+    },
+    {
+      "id": "REQ-DANGLINGVERIFY-1009",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "A verifies tag that points at nothing",
+      "intent": "Per-case coverage was checked in one direction only: RM013 named a labelled case with no tag. The reverse — a `# verifies: <id>#CASE-N` naming a case, or a requirement, that does not exist — was accepted in silence by every rule. That is not a cosmetic gap. The bogus tag is precisely what switches RM013 ON, because it makes the requirement's coverage non-empty, so a single typo produced `0/2 automatable criteria carry a verifies: tag` for a file that plainly carries one, and the reader had no way to see why. Run on this repo's own 1061 hand-written tags the first time, the check found three: cases removed or renumbered while the tags that named them stayed behind.",
+      "contract": [
+        "`gate` reports each `# verifies:` tag whose case label is not one the requirement declares, naming the requirement, the label, the file and line, and the labels that do exist.",
+        "It reports a `# verifies:` tag whose requirement id matches no requirement at all, because RM001 reads only `implements:`/`tested-by:` members and never the per-case coverage, so that link was unreported by both rules.",
+        "A requirement whose acceptance criteria carry no labels is exempt — per-case coverage only applies where cases are labelled, the same exemption RM013 makes.",
+        "The check is a warning and never changes the exit code."
+      ],
+      "verify": [],
+      "notes": [
+        "The label set compared against is `_labeled_acs`, every declared label — NOT `_automatable_acs`, which RM013 uses. The latter drops criteria marked `verifiable by: inspection|manual`, and a tag on one of those names a case that really exists; reporting it would be a false finding.",
+        "Warn, never error: a stale label is a documentation slip, and the gate's errors stay reserved for link integrity between requirements and code members.",
+        "This closes a condition first raised as blocking in the Senate run `2026-09-02_201621`, recorded there as an override and never built. It is a precondition for any future tool that writes `verifies:` tags in bulk: without it, a generated wrong label is indistinguishable from a correct one."
+      ],
+      "current_impl": [
+        "`_dangling_verifies_rule` in `reqmap_engine/rules.py`, registered as RM034."
+      ],
+      "acc": [
+        "CASE-1 — — a case label with no referent is named Given  a requirement labelling CASE-1 and CASE-2, and a test tagged `# verifies: <id>#CASE-99` When   `gate` runs Then   it prints an RM034 warning naming CASE-99, saying it names no such case, and listing CASE-1 and CASE-2 as the labels that do exist",
+        "CASE-2 — — a real label is silent Given  tests tagged `# verifies: <id>#CASE-1` and `#CASE-2` on that same requirement When   `gate` runs Then   no RM034 warning is printed",
+        "CASE-3 — — the warning locates the tag Given  the dangling tag of CASE-1 When   `gate` runs Then   the warning names the file and the line the tag sits on",
+        "CASE-4 — — an unlabelled requirement cannot dangle Given  a requirement whose acceptance section uses bullets with no `CASE-N` labels, and a test tagged `# verifies: <id>#CASE-3` When   `gate` runs Then   no RM034 warning is printed",
+        "CASE-5 — — a tag naming no requirement at all is reported here Given  a test tagged `# verifies: ARCH-NOSUCH-404#CASE-1` where no such requirement exists When   `gate` runs Then   RM034 names that id and says it names no such requirement"
+      ],
+      "accept": "CASE-1 — a case label with no referent is named\n  Given  a requirement labelling CASE-1 and CASE-2, and a test tagged\n         `# verifies: <id>#CASE-99`\n  When   `gate` runs\n  Then   it prints an RM034 warning naming CASE-99, saying it names no such case, and\n         listing CASE-1 and CASE-2 as the labels that do exist\n\nCASE-2 — a real label is silent\n  Given  tests tagged `# verifies: <id>#CASE-1` and `#CASE-2` on that same requirement\n  When   `gate` runs\n  Then   no RM034 warning is printed\n\nCASE-3 — the warning locates the tag\n  Given  the dangling tag of CASE-1\n  When   `gate` runs\n  Then   the warning names the file and the line the tag sits on\n\nCASE-4 — an unlabelled requirement cannot dangle\n  Given  a requirement whose acceptance section uses bullets with no `CASE-N` labels, and a\n         test tagged `# verifies: <id>#CASE-3`\n  When   `gate` runs\n  Then   no RM034 warning is printed\n\nCASE-5 — a tag naming no requirement at all is reported here\n  Given  a test tagged `# verifies: ARCH-NOSUCH-404#CASE-1` where no such requirement exists\n  When   `gate` runs\n  Then   RM034 names that id and says it names no such requirement",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-ACVERIFY-019"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2677"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rules.py:200"
         }
-      }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.11",
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "ARCH-ATOMICITY-049",
@@ -352,11 +400,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1470"
+          "loc": "plugin/scripts/test_reqmap_author.py:1540"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1934"
+          "loc": "plugin/scripts/test_reqmap_author.py:2004"
         },
         {
           "role": "implements",
@@ -424,11 +472,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1470"
+          "loc": "plugin/scripts/test_reqmap_author.py:1540"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1934"
+          "loc": "plugin/scripts/test_reqmap_author.py:2004"
         },
         {
           "role": "implements",
@@ -496,11 +544,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1470"
+          "loc": "plugin/scripts/test_reqmap_author.py:1540"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1934"
+          "loc": "plugin/scripts/test_reqmap_author.py:2004"
         },
         {
           "role": "implements",
@@ -593,7 +641,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5078"
+          "loc": "plugin/scripts/test_reqmap_report.py:5095"
         },
         {
           "role": "implements",
@@ -717,7 +765,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:286"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:320"
         },
         {
           "role": "implements",
@@ -782,7 +830,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5078"
+          "loc": "plugin/scripts/test_reqmap_report.py:5095"
         },
         {
           "role": "implements",
@@ -865,7 +913,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:286"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:320"
         },
         {
           "role": "implements",
@@ -1139,7 +1187,10 @@
       "intent": "When you point this tool at an old codebase that has no requirements written down yet, this is the first, look-but-don't-touch step. It reads the code and produces a tidy machine-readable plan that guesses what each capability is — which files belong together, what they depend on, how central each one is — without writing or changing a single requirement file. An author (or an AI assistant) then uses that plan to decide what to actually write up. Without it, you would face a wall of untagged code with no starting map.",
       "contract": [
         "`draft --plan` emits a single JSON object, to stdout or to `--out PATH`, shaped `{engine_version, bus[], candidates[]}`, and writes no `.md` files. [[REQ-CANDIDATES-826]]",
-        "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]"
+        "Each candidate carries `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]",
+        "The plan and the write path read ONE definition of an already-covered file, so a file the write path would skip is never reported as new. [[REQ-PLANTAGGED-1005]]",
+        "The plan states the rung of every candidate it would draft and the upper rungs the same run would mint, so the pyramid is visible before anything is written. [[REQ-PLANLEVEL-1006]]",
+        "Each candidate the write path would draft also states the id that write path will mint for it, without either id being renamed. [[REQ-PLANDRAFTID-1010]]"
       ],
       "verify": [],
       "notes": [
@@ -1175,7 +1226,10 @@
       ],
       "satisfied_by": [
         "REQ-CANDIDATES-826",
-        "REQ-CANDIDATES-827"
+        "REQ-CANDIDATES-827",
+        "REQ-PLANTAGGED-1005",
+        "REQ-PLANLEVEL-1006",
+        "REQ-PLANDRAFTID-1010"
       ],
       "members": [
         {
@@ -1196,19 +1250,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1408"
+          "loc": "plugin/scripts/test_reqmap_author.py:1478"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2134"
+          "loc": "plugin/scripts/test_reqmap_author.py:2204"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:466"
+          "loc": "plugin/scripts/test_reqmap_scan.py:467"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:507"
+          "loc": "plugin/scripts/test_reqmap_scan.py:508"
         },
         {
           "role": "implements",
@@ -1264,21 +1318,21 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:288"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:306"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:292"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:301"
         }
       ],
       "test_exempt": null,
       "milestone": "v1.06",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Candidați de capabilitate (plan de extracție)",
-          "intent": "Când îndrepți acest instrument spre o bază de cod veche care nu are încă nicio cerință scrisă, acesta este primul pas, de tip privește-dar-nu-atinge. Citește codul și produce un plan ordonat, citibil de mașină, care ghicește ce este fiecare capabilitate — ce fișiere aparțin împreună, de ce depind, cât de centrală este fiecare — fără a scrie sau modifica vreun fișier de cerință. Un autor (sau un asistent AI) folosește apoi acel plan pentru a decide ce să scrie de fapt. Fără el, te-ai confrunta cu un zid de cod neetichetat, fără nicio hartă de pornire.",
-          "contract": "> Când îndrepți acest instrument spre o bază de cod veche care nu are încă nicio cerință\n> scrisă, acesta este primul pas, de tip privește-dar-nu-atinge. Citește codul și produce\n> un plan ordonat, citibil de mașină, care ghicește ce este fiecare capabilitate — ce\n> fișiere aparțin împreună, de ce depind, cât de centrală este fiecare — fără a scrie sau\n> modifica vreun fișier de cerință. Un autor (sau un asistent AI) folosește apoi acel plan\n> pentru a decide ce să scrie de fapt. Fără el, te-ai confrunta cu un zid de cod neetichetat,\n> fără nicio hartă de pornire.\n\nFiecare punct de mai jos este obligatoriu.\n- `draft --plan` emite un singur obiect JSON, către stdout sau către `--out PATH`, cu forma `{engine_version, bus[], candidates[]}`, și nu scrie niciun fișier `.md`. [[REQ-CANDIDATES-826]]\n- Fiecare candidat poartă `{suggested_id, suggested_layer, files[], docstrings{}, signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc, split_candidate, is_test}`. [[REQ-CANDIDATES-827]]",
-          "acceptance": "CASE-1\n  Given  orice corpus\n  When   `draft --plan` rulează\n  Then   scrie zero fișiere `.md` și emite JSON valid\n\nCASE-2\n  Given  un fișier listat în `.reqmapignore` (inclusiv unul plasat în `requirements/`)\n  When   `draft --plan` rulează\n  Then   acel fișier lipsește din `files` al fiecărui candidat\n\nCASE-3\n  Given  un import al unui modul local\n  When   `draft --plan` rulează\n  Then   o muchie `depends_on` indică spre candidatul acelui modul\n\nCASE-4\n  Given  un `requirements/_capmap.json` care grupează două fișiere sub un singur id\n  When   `draft --plan` rulează\n  Then   ele apar ca un singur candidat care poartă ambele fișiere cu layer-ul declarat\n\nCASE-5\n  Given  un fișier care poartă deja o etichetă `implements:`\n  When   `draft --plan` rulează\n  Then   este raportat prin `existing_req`\n\nCASE-6\n  Given  un modul importat de `BUS_FANIN_THRESHOLD` sau mai mulți candidați\n  When   `draft --plan` rulează\n  Then   este sugerat ca `bus`\n\nCASE-7\n  Given  un fișier `.go` și un fișier `tests/test_x.py`, și niciun `_capmap.json`\n  When   `draft --plan` rulează\n  Then   ambele sunt candidați; cel `.go` poartă semnături goale, iar cel de test poartă `is_test: true`"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-CANDIDATES-826",
@@ -1327,11 +1381,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1408"
+          "loc": "plugin/scripts/test_reqmap_author.py:1478"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:507"
+          "loc": "plugin/scripts/test_reqmap_scan.py:508"
         },
         {
           "role": "implements",
@@ -1367,7 +1421,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/candidates.py:275"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:306"
         }
       ],
       "test_exempt": null,
@@ -1412,9 +1466,9 @@
         "CASE-4 — — high fan-in earns a bus suggestion Given  a module imported by at least `BUS_FANIN_THRESHOLD` other candidates When   `draft --plan` runs Then   that module's candidate carries `suggested_layer: \"bus\"`",
         "CASE-5 — — an already-tagged file reports its existing requirement Given  a file carrying `# implements: ARCH-EXAMPLE-001` When   `draft --plan` runs Then   that file's candidate carries `existing_req: \"ARCH-EXAMPLE-001\"`",
         "CASE-6 — — _capmap.json groups files into one candidate Given  a `requirements/_capmap.json` grouping two files under one id When   `draft --plan` runs Then   both files appear together as one candidate carrying the declared layer",
-        "CASE-7 — — no capmap means one candidate per file Given  a codebase with no `requirements/_capmap.json` When   `draft --plan` runs Then   every file becomes its own separate candidate"
+        "CASE-7 — — no capmap means one candidate per file Given  a codebase with no `requirements/_capmap.json` When   `draft --plan` runs Then   every file becomes its own separate candidate --------------------"
       ],
-      "accept": "CASE-1 — every candidate carries the full documented field set\n  Given  any file scanned by `draft --plan`\n  When   its candidate is built\n  Then   the candidate dict carries all of `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` and `is_test`\n\nCASE-2 — is_test follows test-file convention, not content\n  Given  a file at `tests/test_foo.py` alongside an ordinary module\n  When   `draft --plan` runs\n  Then   the test file's candidate carries `is_test: true` and the ordinary module's does not\n\nCASE-3 — an import edge becomes a depends_on edge\n  Given  file `a.py` importing local module `b.py`\n  When   `draft --plan` runs\n  Then   `a.py`'s candidate lists `b.py`'s candidate in `depends_on`\n\nCASE-4 — high fan-in earns a bus suggestion\n  Given  a module imported by at least `BUS_FANIN_THRESHOLD` other candidates\n  When   `draft --plan` runs\n  Then   that module's candidate carries `suggested_layer: \"bus\"`\n\nCASE-5 — an already-tagged file reports its existing requirement\n  Given  a file carrying `# implements: ARCH-EXAMPLE-001`\n  When   `draft --plan` runs\n  Then   that file's candidate carries `existing_req: \"ARCH-EXAMPLE-001\"`\n\nCASE-6 — _capmap.json groups files into one candidate\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `draft --plan` runs\n  Then   both files appear together as one candidate carrying the declared layer\n\nCASE-7 — no capmap means one candidate per file\n  Given  a codebase with no `requirements/_capmap.json`\n  When   `draft --plan` runs\n  Then   every file becomes its own separate candidate",
+      "accept": "CASE-1 — every candidate carries the full documented field set\n  Given  any file scanned by `draft --plan`\n  When   its candidate is built\n  Then   the candidate dict carries all of `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` and `is_test`\n\nCASE-2 — is_test follows test-file convention, not content\n  Given  a file at `tests/test_foo.py` alongside an ordinary module\n  When   `draft --plan` runs\n  Then   the test file's candidate carries `is_test: true` and the ordinary module's does not\n\nCASE-3 — an import edge becomes a depends_on edge\n  Given  file `a.py` importing local module `b.py`\n  When   `draft --plan` runs\n  Then   `a.py`'s candidate lists `b.py`'s candidate in `depends_on`\n\nCASE-4 — high fan-in earns a bus suggestion\n  Given  a module imported by at least `BUS_FANIN_THRESHOLD` other candidates\n  When   `draft --plan` runs\n  Then   that module's candidate carries `suggested_layer: \"bus\"`\n\nCASE-5 — an already-tagged file reports its existing requirement\n  Given  a file carrying `# implements: ARCH-EXAMPLE-001`\n  When   `draft --plan` runs\n  Then   that file's candidate carries `existing_req: \"ARCH-EXAMPLE-001\"`\n\nCASE-6 — _capmap.json groups files into one candidate\n  Given  a `requirements/_capmap.json` grouping two files under one id\n  When   `draft --plan` runs\n  Then   both files appear together as one candidate carrying the declared layer\n\nCASE-7 — no capmap means one candidate per file\n  Given  a codebase with no `requirements/_capmap.json`\n  When   `draft --plan` runs\n  Then   every file becomes its own separate candidate\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -1436,11 +1490,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1408"
+          "loc": "plugin/scripts/test_reqmap_author.py:1478"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2134"
+          "loc": "plugin/scripts/test_reqmap_author.py:2204"
         },
         {
           "role": "implements",
@@ -1464,7 +1518,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:288"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:292"
         }
       ],
       "test_exempt": null,
@@ -1472,15 +1526,170 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Câmpurile pe care le poartă un candidat",
-          "intent": "Câmpurile unui candidat sunt materia primă pe care un autor uman sau AI o transformă într-o cerință reală: ce fișiere grupează, ce importă, cât de central este și dacă cineva l-a etichetat deja. `is_test`, `existing_req` și `importer_count` există astfel încât autorul să nu trebuiască să le re-deducă manual din fișierele înseși.",
-          "contract": "> Câmpurile unui candidat sunt materia primă pe care un autor uman sau AI o transformă într-o\n> cerință reală: ce fișiere grupează, ce importă, cât de central este și dacă cineva l-a\n> etichetat deja. `is_test`, `existing_req` și `importer_count` există astfel încât autorul\n> să nu trebuiască să le re-deducă manual din fișierele înseși.\n\nFiecare punct de mai jos este obligatoriu.\n- Fiecare candidat poartă `{suggested_id, suggested_layer, files[], docstrings{},\n  signatures[], imports[], depends_on[], tested_by[], importer_count, existing_req, loc,\n  split_candidate, is_test}`.\n- `is_test` este true când fiecare fișier al candidatului este cod de test prin convenție: un\n  segment de director în stil `tests/`, un nume de bază `test_*`, sau un sufix `*_test`/`*.spec`.\n- `depends_on` este derivat din importuri rezolvate către alți candidați.\n- `suggested_layer` este `bus` când `importer_count ≥ BUS_FANIN_THRESHOLD`, altfel `feature`.\n- Un fișier care poartă deja o etichetă `implements:` este raportat via `existing_req`.\n- `draft --plan` grupează fișierele după `requirements/_capmap.json` când acel fișier este prezent, și\n  îl tratează ca autoritativ.\n- În absența `_capmap.json`, `draft --plan` revine la câte un candidat per fișier.",
-          "acceptance": "CASE-1 — fiecare candidat poartă setul complet de câmpuri documentat\n  Given  orice fișier scanat de `draft --plan`\n  When   candidatul lui este construit\n  Then   dicționarul candidatului poartă toate câmpurile `suggested_id`, `suggested_layer`, `files`, `docstrings`, `signatures`, `imports`, `depends_on`, `tested_by`, `importer_count`, `existing_req`, `loc`, `split_candidate` și `is_test`\n\nCASE-2 — is_test urmează convenția fișierelor de test, nu conținutul\n  Given  un fișier la `tests/test_foo.py` alături de un modul obișnuit\n  When   `draft --plan` rulează\n  Then   candidatul fișierului de test poartă `is_test: true` iar cel al modulului obișnuit nu\n\nCASE-3 — o muchie de import devine o muchie depends_on\n  Given  fișierul `a.py` care importă modulul local `b.py`\n  When   `draft --plan` rulează\n  Then   candidatul lui `a.py` listează candidatul lui `b.py` în `depends_on`\n\nCASE-4 — fan-in ridicat câștigă o sugestie bus\n  Given  un modul importat de cel puțin `BUS_FANIN_THRESHOLD` alți candidați\n  When   `draft --plan` rulează\n  Then   candidatul acelui modul poartă `suggested_layer: \"bus\"`\n\nCASE-5 — un fișier deja etichetat raportează cerința sa existentă\n  Given  un fișier care poartă `# implements: ARCH-EXAMPLE-001`\n  When   `draft --plan` rulează\n  Then   candidatul acelui fișier poartă `existing_req: \"ARCH-EXAMPLE-001\"`\n\nCASE-6 — _capmap.json grupează fișiere într-un candidat\n  Given  un `requirements/_capmap.json` care grupează două fișiere sub un id\n  When   `draft --plan` rulează\n  Then   ambele fișiere apar împreună ca un candidat care poartă layer-ul declarat\n\nCASE-7 — fără capmap înseamnă câte un candidat per fișier\n  Given  o bază de cod fără `requirements/_capmap.json`\n  When   `draft --plan` rulează\n  Then   fiecare fișier devine propriul său candidat separat"
+      "covered": 7
+    },
+    {
+      "id": "REQ-PLANTAGGED-1005",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "One definition of \"this file is already accounted for\"",
+      "intent": "The plan and the write path each decided for themselves which files already carry a requirement, and they disagreed: the plan counted only `implements:`, the write path counted every role. A test file linked by `tested-by:` therefore appeared in the plan as a NEW draft that `init` would never write. On a 96%-tagged consumer corpus that was 123 reported candidates of which about 120 were tests — a plan nobody could act on, for a command whose whole purpose is to say what the write will do.",
+      "contract": [
+        "`tagged_files` returns `{file: requirement_id}` for every file carrying a membership tag of any role, first tag winning per file in scan order.",
+        "`plan` and the write path both derive their notion of an already-covered file from that one function, so a file the write path would skip is never reported as a new candidate.",
+        "A file linked only by `tested-by:` counts as covered, and its candidate carries that requirement as `existing_req`."
+      ],
+      "verify": [],
+      "notes": [
+        "The helper returns a mapping rather than a set because the two callers want different halves of the same fact: the write path asks \"is this file covered\", the plan also wants the id to report as the idempotency hint. One function answers both.",
+        "-------------------"
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a tested-by link is coverage Given  a test file whose only tag is `# tested-by: ARCH-FOO-001` When   `init --plan` runs Then   its candidate carries `existing_req: \"ARCH-FOO-001\"` and is not reported as new",
+        "CASE-2 — — the plan predicts the write Given  a repository where every source file already carries some membership tag When   `init --plan` runs and then `init` writes Then   the plan reports no new candidate and the write path creates no `DRAFT-*` file",
+        "CASE-3 — — an untagged file is still reported Given  a repository holding one tagged file and one file with no tag at all When   `init --plan` runs Then   only the untagged file is reported as a new candidate, and `init` writes a draft for exactly that file"
+      ],
+      "accept": "CASE-1 — a tested-by link is coverage\n  Given  a test file whose only tag is `# tested-by: ARCH-FOO-001`\n  When   `init --plan` runs\n  Then   its candidate carries `existing_req: \"ARCH-FOO-001\"` and is not reported as new\n\nCASE-2 — the plan predicts the write\n  Given  a repository where every source file already carries some membership tag\n  When   `init --plan` runs and then `init` writes\n  Then   the plan reports no new candidate and the write path creates no `DRAFT-*` file\n\nCASE-3 — an untagged file is still reported\n  Given  a repository holding one tagged file and one file with no tag at all\n  When   `init --plan` runs\n  Then   only the untagged file is reported as a new candidate, and `init` writes a draft\n         for exactly that file",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CANDIDATES-009"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3300"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:301"
         }
-      }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-PLANLEVEL-1006",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The plan carries the pyramid it would write",
+      "intent": "`init` writes three rungs (ADR-0030/0036) and the plan named none of them: `plan.json` held zero `level` keys. The only way to see what pyramid a run would produce was to let it write every file first and read the result — which defeats a dry run. The plan now states the rung of each candidate and the upper rungs the same run would mint.",
+      "contract": [
+        "Each candidate the write path would draft carries `level: \"code\"` and `arch_id`, the architecture requirement it would be written under.",
+        "A candidate that is already linked in code carries `level: null` and `arch_id: null` — it is not drafted, so no rung is claimed for it.",
+        "The plan carries `pyramid: {architecture: [...], system: <id or null>}`, naming the architecture ids one per source directory that would produce drafts, and the system placeholder, which is null when no architecture rung would be written.",
+        "The architecture ids in the plan are the ids the write path mints for the same directories, minted by the same function."
+      ],
+      "verify": [],
+      "notes": [
+        "The naming helpers (`SYS_PLACEHOLDER_ID`, `_arch_slug`, `_assign_arch_ids`) live in the plan module, one layer below the writer, because `draft.py` imports `candidates.py` and never the reverse. Naming only: nothing in that block writes a file.",
+        "A candidate group may span directories; its `arch_id` is that of its first file, while `pyramid.architecture` covers every directory the run would touch. The set is what the write path produces; the per-candidate field is a pointer into it.",
+        "-------------------"
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the plan names the rungs Given  two untagged source files in `core/` and `web/` When   `init --plan` runs Then   `pyramid.architecture` is `[\"ARCH-CORE-001\", \"ARCH-WEB-001\"]`, `pyramid.system` is the placeholder id, and each candidate carries `level: \"code\"` with its `arch_id`",
+        "CASE-2 — — the planned pyramid is the written one Given  the same repository When   `init --plan` runs and then `init` writes Then   every id in `pyramid` exists as a requirement at the stated level, and each code draft's `satisfies:` is the `arch_id` its candidate named",
+        "CASE-3 — — nothing to draft means no pyramid Given  a repository where every file is already linked in code When   `init --plan` runs Then   every candidate carries `level: null` and `arch_id: null`, and `pyramid` is `{architecture: [], system: null}`"
+      ],
+      "accept": "CASE-1 — the plan names the rungs\n  Given  two untagged source files in `core/` and `web/`\n  When   `init --plan` runs\n  Then   `pyramid.architecture` is `[\"ARCH-CORE-001\", \"ARCH-WEB-001\"]`, `pyramid.system` is\n         the placeholder id, and each candidate carries `level: \"code\"` with its `arch_id`\n\nCASE-2 — the planned pyramid is the written one\n  Given  the same repository\n  When   `init --plan` runs and then `init` writes\n  Then   every id in `pyramid` exists as a requirement at the stated level, and each code\n         draft's `satisfies:` is the `arch_id` its candidate named\n\nCASE-3 — nothing to draft means no pyramid\n  Given  a repository where every file is already linked in code\n  When   `init --plan` runs\n  Then   every candidate carries `level: null` and `arch_id: null`, and `pyramid` is\n         `{architecture: [], system: null}`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CANDIDATES-009"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3300"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:275"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
+    },
+    {
+      "id": "REQ-PLANDRAFTID-1010",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The plan states the id the writer will mint",
+      "intent": "The plan proposed `CORE-ENGINE-001` and the write path minted `DRAFT-CORE-ENGINE`, so a reader who ran `init --plan`, then `init`, and diffed the corpus found different ids everywhere. The repair is disclosure, not unification: the two ids are different things. `suggested_id` is a group-level name an author may adopt — it can span several files under a `_capmap.json` grouping — while the writer mints one id per file, and its `DRAFT-` prefix is the marker that a requirement is an unreviewed auto-draft, asserted in the confirmed contract of [[ARCH-EXTRACT-008]] and keyed on by `init --wipe` and the risk report. Renaming either side would break a live marker to fix a reporting gap; stating both closes the gap and breaks nothing.",
+      "contract": [
+        "Each candidate the write path would draft carries `draft_id`, the id `init` will mint for that candidate's first file.",
+        "A candidate that is already linked in code carries `draft_id: null`, since no draft is written for it and no id would be minted.",
+        "Neither `suggested_id` nor the writer's id changes: the `DRAFT-` prefix stays exactly what it was."
+      ],
+      "verify": [],
+      "notes": [
+        "`_draft_id` moved from `draft.py` into `candidates.py` so the plan can call it: the dependency runs `draft.py -> candidates.py` and never the reverse, the same reason `SYS_PLACEHOLDER_ID` and `_assign_arch_ids` already live there. The function's behaviour is unchanged and the flat `reqmap._draft_id` name still resolves.",
+        "`draft_id` is the id before the residual collision suffix the write path appends when two different paths slug identically (`DRAFT-X`, `DRAFT-X-2`). That case needs a case or extension-only clash and does not arise in a normal tree; the plan states the base id.",
+        "Rejected: making `cmd_candidates` emit `DRAFT-*` as its `suggested_id`. It would make an authoring suggestion look like the unreviewed-draft marker, and `_minted_groups` can group several files under one id while `_draft_id` is per file — they are different granularities, not two spellings of one thing."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the plan predicts the written id Given  one untagged source file at `core/engine.py` When   `init --plan` runs and then `init` writes Then   the candidate's `draft_id` is `DRAFT-CORE-ENGINE`, that id exists in the corpus afterwards, and its `suggested_id` `CORE-ENGINE-001` does not",
+        "CASE-2 — — nothing drafted, nothing claimed Given  a repository where every source file already carries a membership tag When   `init --plan` runs Then   every candidate carries `draft_id: null`",
+        "CASE-3 — — the marker is untouched Given  the id-minting function the write path uses When   it mints an id for any path Then   the result still begins with `DRAFT-`"
+      ],
+      "accept": "CASE-1 — the plan predicts the written id\n  Given  one untagged source file at `core/engine.py`\n  When   `init --plan` runs and then `init` writes\n  Then   the candidate's `draft_id` is `DRAFT-CORE-ENGINE`, that id exists in the corpus\n         afterwards, and its `suggested_id` `CORE-ENGINE-001` does not\n\nCASE-2 — nothing drafted, nothing claimed\n  Given  a repository where every source file already carries a membership tag\n  When   `init --plan` runs\n  Then   every candidate carries `draft_id: null`\n\nCASE-3 — the marker is untouched\n  Given  the id-minting function the write path uses\n  When   it mints an id for any path\n  Then   the result still begins with `DRAFT-`",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-CANDIDATES-009"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3300"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:276"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:406"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.11",
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-CHECK-006",
@@ -1555,6 +1764,7 @@
         "ARCH-TESTLINK-018",
         "ARCH-TRACE-020",
         "ARCH-TRACKED-042",
+        "ARCH-UNREADABLE-070",
         "ARCH-UNSCANNEDTAG-045",
         "ARCH-VLEVEL-037",
         "REQ-VRUNGS-054"
@@ -1697,7 +1907,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:399"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:442"
         },
         {
           "role": "implements",
@@ -1769,19 +1979,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:27"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:28"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:36"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:37"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:72"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:73"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:104"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:105"
         }
       ],
       "test_exempt": null,
@@ -1851,15 +2061,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:113"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:114"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:198"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:232"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:317"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:351"
         }
       ],
       "test_exempt": null,
@@ -1994,19 +2204,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:122"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:135"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:136"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:390"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:433"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:399"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:442"
         }
       ],
       "test_exempt": null,
@@ -2211,15 +2421,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2224"
+          "loc": "plugin/scripts/test_reqmap_author.py:2294"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2758"
+          "loc": "plugin/scripts/test_reqmap_author.py:2828"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2823"
+          "loc": "plugin/scripts/test_reqmap_author.py:2893"
         },
         {
           "role": "implements",
@@ -2295,11 +2505,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2224"
+          "loc": "plugin/scripts/test_reqmap_author.py:2294"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2823"
+          "loc": "plugin/scripts/test_reqmap_author.py:2893"
         },
         {
           "role": "implements",
@@ -2366,7 +2576,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2224"
+          "loc": "plugin/scripts/test_reqmap_author.py:2294"
         },
         {
           "role": "implements",
@@ -2418,7 +2628,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2758"
+          "loc": "plugin/scripts/test_reqmap_author.py:2828"
         },
         {
           "role": "implements",
@@ -2523,7 +2733,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4866"
+          "loc": "plugin/scripts/test_reqmap_report.py:4883"
         },
         {
           "role": "implements",
@@ -2669,7 +2879,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4866"
+          "loc": "plugin/scripts/test_reqmap_report.py:4883"
         },
         {
           "role": "implements",
@@ -2740,11 +2950,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:188"
+          "loc": "plugin/scripts/reqmap_engine/config.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:198"
+          "loc": "plugin/scripts/reqmap_engine/config.py:201"
         }
       ],
       "test_exempt": null,
@@ -2803,11 +3013,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:188"
+          "loc": "plugin/scripts/reqmap_engine/config.py:191"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:198"
+          "loc": "plugin/scripts/reqmap_engine/config.py:201"
         }
       ],
       "test_exempt": null,
@@ -2971,7 +3181,8 @@
       "title": "Untagged-code coverage signal",
       "intent": "reqmap links code to requirements by tags, but nothing reported how much code is linked to nothing — code traceable to no requirement was only visible by running `draft`/`plan`. This surfaces that gap as a read-only count, so a reviewer sees at a glance whether code is drifting ahead of the spec. A Senate audit (2026-06-21) rejected enforcing coverage as a hard gate — it is gameable with hollow tags and conflicts with the model where a requirement is a behavior, not a file — and approved only this non-blocking visibility signal.",
       "contract": [
-        "`health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour."
+        "`health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour.",
+        "The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files and name one list, and the ratio states what it excluded. [[REQ-UNTAGGEDSET-1007]]"
       ],
       "verify": [],
       "notes": [
@@ -3007,7 +3218,8 @@
         "SYS-REPORT-105"
       ],
       "satisfied_by": [
-        "REQ-COVERAGE-836"
+        "REQ-COVERAGE-836",
+        "REQ-UNTAGGEDSET-1007"
       ],
       "members": [
         {
@@ -3016,25 +3228,21 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:231"
+          "loc": "plugin/scripts/reqmap_engine/health.py:242"
         },
         {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/orphans.py:134"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:150"
         }
       ],
       "test_exempt": null,
       "milestone": "v2.6",
       "priority": "",
-      "risks": [],
-      "i18n": {
-        "ro": {
-          "title": "Semnal de acoperire pentru codul neetichetat",
-          "intent": "reqmap leagă codul de cerințe prin etichete, dar nimic nu raporta cât cod este legat de nimic — codul netrasabil la nicio cerință era vizibil doar rulând `draft`/`plan`. Aceasta scoate la suprafață acel gol ca o numărătoare doar-citire, astfel încât un revizor vede dintr-o privire dacă codul o ia înaintea specificației. Un audit Senate (2026-06-21) a respins impunerea acoperirii ca gate ferm — este ușor de păcălit cu etichete goale și intră în conflict cu modelul în care o cerință este un comportament, nu un fișier — și a aprobat doar acest semnal de vizibilitate neblocant.",
-          "contract": "> reqmap leagă codul de cerințe prin etichete, dar nimic nu raporta cât cod este legat\n> de nimic — codul netrasabil la nicio cerință era vizibil doar rulând `draft`/`plan`.\n> Aceasta scoate la suprafață acel gol ca o numărătoare doar-citire, astfel încât un\n> revizor vede dintr-o privire dacă codul o ia înaintea specificației. Un audit Senate\n> (2026-06-21) a respins impunerea acoperirii ca gate ferm — este ușor de păcălit cu\n> etichete goale și intră în conflict cu modelul în care o cerință este un comportament,\n> nu un fișier — și a aprobat doar acest semnal de vizibilitate neblocant.\n\nFiecare punct de mai jos este obligatoriu.\n- `health` raportează numărul de fișiere de cod scanabile care nu poartă nicio etichetă de apartenență ca un semnal `untagged` doar-citire — prezent doar când o rădăcină de cod este scanată, și nu afectează niciodată scorul sau codul de ieșire. [[REQ-COVERAGE-836]] detaliază comportamentul.",
-          "acceptance": "CASE-1\n  Given  o rădăcină de cod cu un fișier scanabil etichetat și unul neetichetat\n  When   `health --json` rulează cu acea rădăcină de cod\n  Then   cheia `untagged` este egală cu 1 iar scorul rămâne neschimbat de aceasta\n\nCASE-2\n  Given  nicio rădăcină de cod (un apelant din unit-test)\n  When   `health --json` rulează\n  Then   ieșirea nu poartă nicio cheie `untagged`\n\nCASE-3\n  Given  un fișier scanabil neetichetat care este apoi etichetat sau adăugat în `.reqmapignore`\n  When   `health --json` rulează din nou cu rădăcina de cod\n  Then   numărătoarea `untagged` scade cu unu (fișierul este redus la tăcere din semnal)"
-        }
-      }
+      "risks": []
     },
     {
       "id": "REQ-COVERAGE-836",
@@ -3066,9 +3274,9 @@
         "CASE-4 — — health --json exposes the untagged integer key Given  a code root with one untagged scannable file When   `health --json` runs Then   its output is valid JSON carrying an integer `untagged` key",
         "CASE-5 — — health's text output labels the untagged count Given  a code root with one untagged scannable file When   `health` runs without `--json` Then   its text output includes a labelled line naming the untagged count",
         "CASE-6 — — the untagged key is absent without a code root Given  a `health --json` invocation with no code root supplied When   it runs Then   the output carries no `untagged` key at all",
-        "CASE-7 — — tagging or ignoring a file drops it from the count Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another When   `health --json` runs after each change Then   the `untagged` count drops by one either way, with no separate exemption mechanism"
+        "CASE-7 — — tagging or ignoring a file drops it from the count Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another When   `health --json` runs after each change Then   the `untagged` count drops by one either way, with no separate exemption mechanism --------------------"
       ],
-      "accept": "CASE-1 — the untagged count reflects untagged files\n  Given  a code root with one tagged file and one untagged scannable file\n  When   `health --json` runs with that code root\n  Then   the `untagged` key equals 1, the health score is unchanged, and the exit code stays 0\n\nCASE-2 — the untagged count shares its denominator with _scan_untagged\n  Given  a code root scanned by both `health` and `_scan_untagged` directly\n  When   both are run over the same tree\n  Then   the `untagged` count equals the length of `_scan_untagged`'s file list\n\nCASE-3 — a tested-by tag alone covers a file\n  Given  an untagged file that is then given only a `# tested-by:` comment\n  When   `health --json` runs\n  Then   that file no longer counts toward `untagged`\n\nCASE-4 — health --json exposes the untagged integer key\n  Given  a code root with one untagged scannable file\n  When   `health --json` runs\n  Then   its output is valid JSON carrying an integer `untagged` key\n\nCASE-5 — health's text output labels the untagged count\n  Given  a code root with one untagged scannable file\n  When   `health` runs without `--json`\n  Then   its text output includes a labelled line naming the untagged count\n\nCASE-6 — the untagged key is absent without a code root\n  Given  a `health --json` invocation with no code root supplied\n  When   it runs\n  Then   the output carries no `untagged` key at all\n\nCASE-7 — tagging or ignoring a file drops it from the count\n  Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another\n  When   `health --json` runs after each change\n  Then   the `untagged` count drops by one either way, with no separate exemption mechanism",
+      "accept": "CASE-1 — the untagged count reflects untagged files\n  Given  a code root with one tagged file and one untagged scannable file\n  When   `health --json` runs with that code root\n  Then   the `untagged` key equals 1, the health score is unchanged, and the exit code stays 0\n\nCASE-2 — the untagged count shares its denominator with _scan_untagged\n  Given  a code root scanned by both `health` and `_scan_untagged` directly\n  When   both are run over the same tree\n  Then   the `untagged` count equals the length of `_scan_untagged`'s file list\n\nCASE-3 — a tested-by tag alone covers a file\n  Given  an untagged file that is then given only a `# tested-by:` comment\n  When   `health --json` runs\n  Then   that file no longer counts toward `untagged`\n\nCASE-4 — health --json exposes the untagged integer key\n  Given  a code root with one untagged scannable file\n  When   `health --json` runs\n  Then   its output is valid JSON carrying an integer `untagged` key\n\nCASE-5 — health's text output labels the untagged count\n  Given  a code root with one untagged scannable file\n  When   `health` runs without `--json`\n  Then   its text output includes a labelled line naming the untagged count\n\nCASE-6 — the untagged key is absent without a code root\n  Given  a `health --json` invocation with no code root supplied\n  When   it runs\n  Then   the output carries no `untagged` key at all\n\nCASE-7 — tagging or ignoring a file drops it from the count\n  Given  an untagged file, then tagged in one run and `.reqmapignore`-listed in another\n  When   `health --json` runs after each change\n  Then   the `untagged` count drops by one either way, with no separate exemption mechanism\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -3094,11 +3302,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:232"
+          "loc": "plugin/scripts/reqmap_engine/health.py:243"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:135"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:151"
         }
       ],
       "test_exempt": null,
@@ -3106,15 +3314,68 @@
       "priority": "",
       "risks": [],
       "clauses": 7,
-      "covered": 7,
-      "i18n": {
-        "ro": {
-          "title": "Numărarea codului netaguit ca semnal doar-pentru-citire",
-          "intent": "Codul poate devansa specificația prin drift fără ca nimeni să observe, pentru că absența unui tag era vizibilă doar rulând `draft`/`plan`. `health` numără acum fișierele scanabile fără niciun tag de apartenență și raportează asta ca `untagged` — vizibil, dar niciodată ca gate: un audit Senate a respins impunerea lui, pentru că un tag gol ar deveni astfel calea rațională de a trece CI.",
-          "contract": "> Codul poate devansa specificația prin drift fără ca nimeni să observe, pentru că absența unui tag era\n> vizibilă doar rulând `draft`/`plan`. `health` numără acum fișierele scanabile fără niciun\n> tag de apartenență și raportează asta ca `untagged` — vizibil, dar niciodată ca gate: un audit Senate\n> a respins impunerea lui, pentru că un tag gol ar deveni astfel calea rațională de a\n> trece CI.\n\nFiecare punct de mai jos este obligatoriu.\n- Capabilitatea raportează numărul fișierelor de cod scanabile care nu poartă niciun tag de apartenență —\n  „cod netaguit\", cod netrasabil la nicio cerință.\n- Numitorul este exact cel al lui `_scan_untagged` (vezi [[ARCH-NEXT-013]]): fișierele găsite de\n  parcurgerea pe extensii a scanerului, minus `.reqmapignore`.\n- Orice tag de apartenență numără fișierul ca fiind acoperit. Tag-urile sunt `implements`, `tested-by`,\n  `generated-from` și `validated-against`.\n- Comanda `health` include acest număr ca o cheie întreagă `untagged` în ieșirea sa `--json`.\n- Comanda `health` îl include de asemenea ca o linie etichetată în ieșirea sa text.\n- Cheia `untagged` lipsește, nu este zero, atunci când nu este scanată nicio rădăcină de cod —\n  de exemplu un apelant dintr-un test unitar. Astfel un consumator `--json` existent își păstrează schema.\n- Semnalul este doar-pentru-citire și nu este niciodată gate. Nu modifică niciun cod de ieșire.\n- Semnalul nu scade niciodată scorul de health, pentru că numără fișiere, nu cerințe.\n- Un fișier este exclus din numărătoare fie prin taguire, fie prin adăugare în `.reqmapignore`.\n- Nu există niciun mecanism separat de exceptare.",
-          "acceptance": "CASE-1 — numărul untagged reflectă fișierele netaguite\n  Given  o rădăcină de cod cu un fișier taguit și un fișier scanabil netaguit\n  When   `health --json` rulează cu acea rădăcină de cod\n  Then   cheia `untagged` este egală cu 1, scorul de health rămâne neschimbat, iar codul de ieșire rămâne 0\n\nCASE-2 — numărul untagged împarte numitorul cu _scan_untagged\n  Given  o rădăcină de cod scanată atât de `health`, cât și direct de `_scan_untagged`\n  When   ambele rulează peste același arbore\n  Then   numărul `untagged` este egal cu lungimea listei de fișiere a lui `_scan_untagged`\n\nCASE-3 — un singur tag tested-by acoperă un fișier\n  Given  un fișier netaguit căruia i se adaugă apoi doar un comentariu `# tested-by:`\n  When   `health --json` rulează\n  Then   acel fișier nu mai contează la `untagged`\n\nCASE-4 — health --json expune cheia întreagă untagged\n  Given  o rădăcină de cod cu un fișier scanabil netaguit\n  When   `health --json` rulează\n  Then   ieșirea sa este JSON valid și conține o cheie întreagă `untagged`\n\nCASE-5 — ieșirea text a lui health etichetează numărul untagged\n  Given  o rădăcină de cod cu un fișier scanabil netaguit\n  When   `health` rulează fără `--json`\n  Then   ieșirea sa text include o linie etichetată care numește numărul untagged\n\nCASE-6 — cheia untagged lipsește fără o rădăcină de cod\n  Given  o invocare `health --json` fără nicio rădăcină de cod furnizată\n  When   rulează\n  Then   ieșirea nu conține deloc cheia `untagged`\n\nCASE-7 — taguirea sau ignorarea unui fișier îl scoate din numărătoare\n  Given  un fișier netaguit, apoi taguit într-o rulare și listat în `.reqmapignore` în alta\n  When   `health --json` rulează după fiecare schimbare\n  Then   numărul `untagged` scade cu unu în ambele cazuri, fără niciun mecanism separat de exceptare"
+      "covered": 7
+    },
+    {
+      "id": "REQ-UNTAGGEDSET-1007",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Two untagged reports, one list",
+      "intent": "Two reports counted untagged files against different denominators. The risk bucket skipped files that carry no tag by contract — decision records, CHANGELOG, LICENSE, issue templates — while the per-directory ratio counted them. A consumer tagged every file the bucket named and the ratio still read 270/272: two root files that appeared in no bucket, were named nowhere, and put the ratio's ceiling permanently below 100%. A number nobody can move is a number nobody reads.",
+      "contract": [
+        "`untaggable_by_design` is the single predicate for a scannable file that will never carry a membership tag: prose in the auto-draft \"ignore\" bucket, and repo boilerplate.",
+        "The untagged bucket and the per-directory coverage ratio both exclude exactly what that predicate excludes, so both name one list.",
+        "The coverage report states how many files it excluded and why, and points at the other report, so the exclusion is visible rather than silent.",
+        "The JSON form carries `excluded_by_design` alongside the per-directory rows."
+      ],
+      "verify": [],
+      "notes": [
+        "The fix is exclusion, not inclusion: counting a file that cannot be tagged puts the ceiling below 100% forever, and the author has no action that moves it. Excluding it and saying so leaves a number that reaching is possible and means something."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the two reports agree Given  a repository holding one untagged source file plus a CHANGELOG, a SECURITY.md and a decision record When   the untagged bucket and the coverage ratio are both computed Then   they name the same single file",
+        "CASE-2 — — only the real gap is listed Given  that same repository When   the untagged bucket is computed Then   it contains the untagged source file and nothing else",
+        "CASE-3 — — the exclusion is stated Given  that same repository When   the coverage report runs Then   it names the count of excluded files, says they carry no tag by contract, and points at the other report; the JSON form carries the same count",
+        "CASE-4 — — the ratio is reachable Given  every file the bucket names has been tagged When   the coverage report runs Then   it reads 100% and the bucket is empty"
+      ],
+      "accept": "CASE-1 — the two reports agree\n  Given  a repository holding one untagged source file plus a CHANGELOG, a SECURITY.md and\n         a decision record\n  When   the untagged bucket and the coverage ratio are both computed\n  Then   they name the same single file\n\nCASE-2 — only the real gap is listed\n  Given  that same repository\n  When   the untagged bucket is computed\n  Then   it contains the untagged source file and nothing else\n\nCASE-3 — the exclusion is stated\n  Given  that same repository\n  When   the coverage report runs\n  Then   it names the count of excluded files, says they carry no tag by contract, and\n         points at the other report; the JSON form carries the same count\n\nCASE-4 — the ratio is reachable\n  Given  every file the bucket names has been tagged\n  When   the coverage report runs\n  Then   it reads 100% and the bucket is empty",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-COVERAGE-029"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5129"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/health.py:55"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:134"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:152"
         }
-      }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": [],
+      "clauses": 4,
+      "covered": 4
     },
     {
       "id": "ARCH-DECOMPOSE-050",
@@ -3180,35 +3441,35 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1548"
+          "loc": "plugin/scripts/test_reqmap_author.py:1618"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1634"
+          "loc": "plugin/scripts/test_reqmap_author.py:1704"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1728"
+          "loc": "plugin/scripts/test_reqmap_author.py:1798"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1822"
+          "loc": "plugin/scripts/test_reqmap_author.py:1892"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1974"
+          "loc": "plugin/scripts/test_reqmap_author.py:2044"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2562"
+          "loc": "plugin/scripts/test_reqmap_author.py:2632"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2944"
+          "loc": "plugin/scripts/test_reqmap_author.py:3014"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -3293,11 +3554,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1548"
+          "loc": "plugin/scripts/test_reqmap_author.py:1618"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1974"
+          "loc": "plugin/scripts/test_reqmap_author.py:2044"
         },
         {
           "role": "implements",
@@ -3354,7 +3615,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1548"
+          "loc": "plugin/scripts/test_reqmap_author.py:1618"
         },
         {
           "role": "implements",
@@ -3422,15 +3683,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1548"
+          "loc": "plugin/scripts/test_reqmap_author.py:1618"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1634"
+          "loc": "plugin/scripts/test_reqmap_author.py:1704"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2562"
+          "loc": "plugin/scripts/test_reqmap_author.py:2632"
         },
         {
           "role": "implements",
@@ -3487,7 +3748,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2944"
+          "loc": "plugin/scripts/test_reqmap_author.py:3014"
         },
         {
           "role": "implements",
@@ -3633,11 +3894,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4724"
+          "loc": "plugin/scripts/test_reqmap_report.py:4741"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -3971,7 +4232,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:245"
+          "loc": "plugin/scripts/reqmap_engine/health.py:256"
         },
         {
           "role": "implements",
@@ -4337,7 +4598,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4724"
+          "loc": "plugin/scripts/test_reqmap_report.py:4741"
         },
         {
           "role": "implements",
@@ -4409,7 +4670,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:347"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:381"
         }
       ],
       "test_exempt": null,
@@ -4570,7 +4831,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1401"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1402"
         },
         {
           "role": "implements",
@@ -4590,7 +4851,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:316"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:350"
         },
         {
           "role": "implements",
@@ -4653,7 +4914,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1401"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1402"
         },
         {
           "role": "implements",
@@ -4867,7 +5128,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:316"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:350"
         }
       ],
       "test_exempt": null,
@@ -4931,7 +5192,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:317"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:351"
         }
       ],
       "test_exempt": null,
@@ -4961,7 +5222,8 @@
         "`draft` walks every untagged scannable code file, skipping tagged and `.reqmapignore`-matched ones. [[REQ-EXTRACT-849]] details the behaviour.",
         "`draft` proposes one `requirements/DRAFT-*.md` per remaining file, marked `status: draft` with a TODO contract. [[REQ-EXTRACT-850]] details the behaviour.",
         "`draft` assigns a cheap risk score from `TODO`/`FIXME`/`HACK`/`XXX` markers, suppressions and file size, and never overwrites an existing draft. [[REQ-EXTRACT-851]] details the behaviour.",
-        "Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour."
+        "Extraction drafts all three specification rungs and marks every one it invented, so a corpus starts as a pyramid the author corrects rather than a flat list. [[REQ-EXTRACT-981]] details the behaviour.",
+        "Extraction links each source file to the draft it produced by writing that file’s membership tag into it, reversibly, so a stub never ships with zero members. [[REQ-INITTAG-1008]]"
       ],
       "verify": [],
       "notes": [
@@ -5002,7 +5264,8 @@
         "REQ-EXTRACT-849",
         "REQ-EXTRACT-850",
         "REQ-EXTRACT-851",
-        "REQ-EXTRACT-981"
+        "REQ-EXTRACT-981",
+        "REQ-INITTAG-1008"
       ],
       "members": [
         {
@@ -5011,59 +5274,71 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1448"
+          "loc": "plugin/scripts/test_reqmap_author.py:1518"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1986"
+          "loc": "plugin/scripts/test_reqmap_author.py:2056"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:451"
+          "loc": "plugin/scripts/test_reqmap_scan.py:452"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:10"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:362"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:53"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:366"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:57"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:373"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:64"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:405"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:96"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:129"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:171"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:213"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:249"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:202"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:301"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:299"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:318"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:342"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:356"
         }
       ],
       "test_exempt": null,
@@ -5111,19 +5386,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1986"
+          "loc": "plugin/scripts/test_reqmap_author.py:2056"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:172"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:214"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:250"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:241"
         }
       ],
       "test_exempt": null,
@@ -5184,23 +5459,23 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1986"
+          "loc": "plugin/scripts/test_reqmap_author.py:2056"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:10"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:405"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:172"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:125"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:214"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:167"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:250"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:241"
         }
       ],
       "test_exempt": null,
@@ -5257,15 +5532,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1448"
+          "loc": "plugin/scripts/test_reqmap_author.py:1518"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1986"
+          "loc": "plugin/scripts/test_reqmap_author.py:2056"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:320"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:318"
         }
       ],
       "test_exempt": null,
@@ -5302,7 +5577,8 @@
       "verify": [],
       "notes": [
         "The directory names will often be wrong: measured on this repo before the decision, directory inference proposes capabilities called `scripts` and `app/src/lib`. That is why the architecture node is a `draft` whose own body tells the reader to rename, merge or delete it. A wrong name that says it is a guess is recoverable; a wrong name that looks decided is not.",
-        "`level_source: auto` is the only part of ADR-0030 that reaches a consumer — the ADR set is not shipped inside `plugin/`. It is therefore the load-bearing half of the record, not an annotation on it."
+        "`level_source: auto` is the only part of ADR-0030 that reaches a consumer — the ADR set is not shipped inside `plugin/`. It is therefore the load-bearing half of the record, not an annotation on it.",
+        "-------------------"
       ],
       "current_impl": [],
       "acc": [
@@ -5325,35 +5601,35 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1860"
+          "loc": "plugin/scripts/test_reqmap_author.py:1930"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:53"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:362"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:57"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:366"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:64"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:373"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:74"
+          "loc": "plugin/scripts/reqmap_engine/candidates.py:383"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:96"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:49"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:129"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:82"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:173"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:126"
         }
       ],
       "test_exempt": null,
@@ -5362,6 +5638,80 @@
       "risks": [],
       "clauses": 4,
       "covered": 4
+    },
+    {
+      "id": "REQ-INITTAG-1008",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "The draft and its source are linked in the same run",
+      "intent": "`init` wrote the requirement stub and left the source file untagged, so the two never met: the stub had zero members, the file stayed in the untagged bucket forever, and `gate --risk` kept proposing the `init` that had already run. A consumer deleted eleven such orphan stubs by hand, then four more the same day, before anyone noticed the loop. The engine already writes into source in the other direction — `init --wipe` strips these very tags — so the boundary was never the objection.",
+      "contract": [
+        "For every draft it writes from a source file, `init` inserts that file's membership tag into the file: `implements:` normally, `tested-by:` when the path is a test path.",
+        "The tag is spelled with the line-comment form of the file's own type, and a file type with no known comment form is skipped and reported rather than guessed at.",
+        "A line the language requires first — shebang, XML or HTML preamble, `@charset` — stays first, and a UTF-8 BOM stays the file's first bytes.",
+        "The file's own line endings survive the insertion; a CRLF file does not become LF.",
+        "A file that already carries any membership tag is never given a second one, and a file the scan cannot decode is never rewritten.",
+        "`init --wipe` removes a tag that was the whole line without leaving a blank line behind, so repeating wipe-then-init is a fixed point rather than growing the file a line at a time.",
+        "`init` reports how many of the sources it drafted it managed to link."
+      ],
+      "verify": [],
+      "notes": [
+        "`tested-by:` for a test path is the author's stated design. It has a consequence worth knowing: a requirement whose only member is a test has no `implements:` member, so RM006 errors if it is ever promoted to `confirmed`. That is correct feedback — a confirmed requirement with only a test behind it is exactly what RM006 exists to catch — but it means such a draft needs either an implementation member or retirement, not a promotion.",
+        "`lint_exempt: file-spread` - the tag spelling, the insertion point, the write and the wipe half live in the modules that own each, by design; one file holding all four would put source-rewriting logic inside the tag grammar.",
+        "`_strip_line_tag` still blanks the line it strips; that is its own tested contract and the right answer for `def f():  # implements: X`. The whole-line case is decided by the wipe loop instead, which is the only caller that knows the line was nothing but a tag.",
+        "The insertion rewrites the file with `newline=\"\"` and `errors=\"surrogateescape\"`, the same pair `--wipe` already used, so non-UTF-8 bytes elsewhere in the file round-trip verbatim. It splits with `splitlines(keepends=True)` rather than the scan's normalising reader, because a rewrite must preserve the bytes a line number is measured against."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — the drafted source becomes a member Given  one untagged source file and no requirements When   `init` runs Then   the file carries the draft's `implements:` tag, is a member of it, and the untagged bucket is empty",
+        "CASE-2 — — the comment marker matches the language Given  untagged `.py`, `.jsx`, `.css` and `.sql` files When   `init` runs Then   their tags open with `#`, `//`, `/* … */` and `--` respectively",
+        "CASE-3 — — a required first line stays first Given  a source file opening with a shebang, and one opening with `@charset` When   `init` runs Then   both still open with that line, and the tag sits immediately after it",
+        "CASE-4 — — a test file is linked as a test Given  an untagged file at a test path When   `init` runs Then   its tag is `tested-by:`, not `implements:`",
+        "CASE-5 — — line endings survive Given  an untagged CRLF source file When   `init` runs Then   every line in the file, the inserted one included, still ends with CRLF",
+        "CASE-6 — — wipe then init is a fixed point Given  a source file that `init` has tagged When   `init --wipe` runs three times Then   the file is byte-identical after each run and never gains a line",
+        "CASE-7 — — an existing tag is left alone Given  a source file already carrying `# implements: ARCH-FOO-001` When   `init` runs Then   the file still carries exactly one membership tag"
+      ],
+      "accept": "CASE-1 — the drafted source becomes a member\n  Given  one untagged source file and no requirements\n  When   `init` runs\n  Then   the file carries the draft's `implements:` tag, is a member of it, and the untagged\n         bucket is empty\n\nCASE-2 — the comment marker matches the language\n  Given  untagged `.py`, `.jsx`, `.css` and `.sql` files\n  When   `init` runs\n  Then   their tags open with `#`, `//`, `/* … */` and `--` respectively\n\nCASE-3 — a required first line stays first\n  Given  a source file opening with a shebang, and one opening with `@charset`\n  When   `init` runs\n  Then   both still open with that line, and the tag sits immediately after it\n\nCASE-4 — a test file is linked as a test\n  Given  an untagged file at a test path\n  When   `init` runs\n  Then   its tag is `tested-by:`, not `implements:`\n\nCASE-5 — line endings survive\n  Given  an untagged CRLF source file\n  When   `init` runs\n  Then   every line in the file, the inserted one included, still ends with CRLF\n\nCASE-6 — wipe then init is a fixed point\n  Given  a source file that `init` has tagged\n  When   `init --wipe` runs three times\n  Then   the file is byte-identical after each run and never gains a line\n\nCASE-7 — an existing tag is left alone\n  Given  a source file already carrying `# implements: ARCH-FOO-001`\n  When   `init` runs\n  Then   the file still carries exactly one membership tag",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-EXTRACT-008"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_author.py:3430"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/draft.py:202"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/init.py:84"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:342"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/tags.py:356"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": [],
+      "clauses": 7,
+      "covered": 7
     },
     {
       "id": "ARCH-FANOUT-052",
@@ -5417,11 +5767,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1748"
+          "loc": "plugin/scripts/test_reqmap_author.py:1818"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1947"
+          "loc": "plugin/scripts/test_reqmap_author.py:2017"
         },
         {
           "role": "implements",
@@ -5492,11 +5842,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1748"
+          "loc": "plugin/scripts/test_reqmap_author.py:1818"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1947"
+          "loc": "plugin/scripts/test_reqmap_author.py:2017"
         },
         {
           "role": "implements",
@@ -5918,7 +6268,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1482"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1483"
         },
         {
           "role": "implements",
@@ -5978,7 +6328,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1482"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1483"
         },
         {
           "role": "implements",
@@ -6078,7 +6428,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -6086,31 +6436,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:116"
+          "loc": "plugin/scripts/reqmap_engine/health.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:146"
+          "loc": "plugin/scripts/reqmap_engine/health.py:157"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:176"
+          "loc": "plugin/scripts/reqmap_engine/health.py:187"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:222"
+          "loc": "plugin/scripts/reqmap_engine/health.py:233"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:265"
+          "loc": "plugin/scripts/reqmap_engine/health.py:276"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:284"
+          "loc": "plugin/scripts/reqmap_engine/health.py:295"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:331"
+          "loc": "plugin/scripts/reqmap_engine/health.py:342"
         }
       ],
       "test_exempt": null,
@@ -6161,19 +6511,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:222"
+          "loc": "plugin/scripts/reqmap_engine/health.py:233"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:265"
+          "loc": "plugin/scripts/reqmap_engine/health.py:276"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:284"
+          "loc": "plugin/scripts/reqmap_engine/health.py:295"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:331"
+          "loc": "plugin/scripts/reqmap_engine/health.py:342"
         }
       ],
       "test_exempt": null,
@@ -6238,19 +6588,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:223"
+          "loc": "plugin/scripts/reqmap_engine/health.py:234"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:266"
+          "loc": "plugin/scripts/reqmap_engine/health.py:277"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:285"
+          "loc": "plugin/scripts/reqmap_engine/health.py:296"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:332"
+          "loc": "plugin/scripts/reqmap_engine/health.py:343"
         }
       ],
       "test_exempt": null,
@@ -6314,19 +6664,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:223"
+          "loc": "plugin/scripts/reqmap_engine/health.py:234"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:266"
+          "loc": "plugin/scripts/reqmap_engine/health.py:277"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:285"
+          "loc": "plugin/scripts/reqmap_engine/health.py:296"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:332"
+          "loc": "plugin/scripts/reqmap_engine/health.py:343"
         }
       ],
       "test_exempt": null,
@@ -6375,15 +6725,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:116"
+          "loc": "plugin/scripts/reqmap_engine/health.py:127"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:146"
+          "loc": "plugin/scripts/reqmap_engine/health.py:157"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:176"
+          "loc": "plugin/scripts/reqmap_engine/health.py:187"
         },
         {
           "role": "implements",
@@ -6454,11 +6804,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:159"
+          "loc": "plugin/scripts/reqmap_engine/health.py:170"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:170"
+          "loc": "plugin/scripts/reqmap_engine/health.py:181"
         }
       ],
       "test_exempt": null,
@@ -6690,7 +7040,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:589"
+          "loc": "plugin/scripts/test_reqmap_author.py:599"
         },
         {
           "role": "tested-by",
@@ -6698,15 +7048,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:93"
+          "loc": "plugin/scripts/reqmap_engine/init.py:104"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:132"
+          "loc": "plugin/scripts/reqmap_engine/init.py:143"
         }
       ],
       "test_exempt": null,
@@ -6759,11 +7109,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2190"
+          "loc": "plugin/scripts/test_reqmap_author.py:2260"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:93"
+          "loc": "plugin/scripts/reqmap_engine/init.py:104"
         }
       ],
       "test_exempt": null,
@@ -6824,11 +7174,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2190"
+          "loc": "plugin/scripts/test_reqmap_author.py:2260"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:132"
+          "loc": "plugin/scripts/reqmap_engine/init.py:143"
         }
       ],
       "test_exempt": null,
@@ -6907,7 +7257,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:35"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:36"
         }
       ],
       "test_exempt": null,
@@ -6976,7 +7326,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:36"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:37"
         }
       ],
       "test_exempt": null,
@@ -7045,27 +7395,35 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1058"
+          "loc": "plugin/scripts/test_reqmap_author.py:1068"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:9"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:11"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:28"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:30"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:73"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:97"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:90"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:126"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:101"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:45"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:69"
         }
       ],
       "test_exempt": null,
@@ -7082,12 +7440,12 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Which rung, and on what evidence",
-      "intent": "Two of the three rungs can be read off a requirement that already exists. The third cannot: `code` is the rung an author arrives at by DECOMPOSING a capability into one behaviour group, so proposing it for a requirement that was never decomposed would rename the problem rather than solve it. It is proposed only where the requirement is already shaped like one, and the evidence is printed next to the proposal.",
+      "intent": "Two of the three rungs can be read off the layer. The third is read off the shape: a requirement bound to code is one behaviour group — the `code` rung — unless the engine has evidence it is a GROUP of them (bold contract groups, or an over-scope exemption), in which case it is an `architecture` awaiting decomposition. The evidence is printed next to every proposal (ADR-0038).",
       "contract": [
         "A requirement that already declares a `level:` is absent from the proposal: the run proposes onto silence and never overrules an author.",
         "`layer: need` proposes `system`, and `layer: aggregate` proposes `architecture`, because each layer already states the thing the rung would say.",
-        "`code` is proposed only for a requirement that has at least one `implements:` member, at least `LINT_AC_MIN` labelled cases, and at least one of those cases linked to a test by a `verifies:` tag.",
-        "Every other requirement proposes `architecture`, which is the honest reading of a capability nobody has decomposed yet.",
+        "A requirement with two or more contract groups, or a `lint_exempt: [over-scoped]` / `[ac-count-high]` entry, proposes `architecture`, and the reason names `clarify <id> --decompose --apply` as the way to its code rung.",
+        "Every other requirement proposes `code`: one behaviour group, and the reason states its case count, linked cases and implementing members so an under-specified one is visible without being moved up a rung.",
         "Each proposal carries the sentence it was based on, so a reader can disagree with one requirement instead of the whole run."
       ],
       "verify": [],
@@ -7095,10 +7453,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — the layer answers it where the layer already said so Given  a requirement with `layer: need` and one with `layer: aggregate`, neither declaring a `level:` When   the proposal runs Then   the first is proposed `system` and the second `architecture`, each naming its layer as the reason",
-        "CASE-2 — — `code` needs cases, code and a test link, not just cases Given  two requirements with no `level:`, one with three labelled cases, an `implements:` member and a `verifies:` tag, the other with an `implements:` member and no cases When   the proposal runs Then   the first is proposed `code` and the second `architecture`",
+        "CASE-2 — — a group is proposed `architecture`, everything bound to code is `code` Given  three requirements with no `level:`: one with two bold contract groups, one with three labelled cases and an `implements:` member, one with a member and no cases When   the proposal runs Then   the first is proposed `architecture` naming `--decompose`, the other two `code`",
         "CASE-3 — — a declared rung is left alone Given  a requirement that already declares `level: architecture` When   the proposal runs Then   it is absent from the result, whatever its shape would otherwise suggest --------------------"
       ],
-      "accept": "CASE-1 — the layer answers it where the layer already said so\n  Given  a requirement with `layer: need` and one with `layer: aggregate`, neither\n         declaring a `level:`\n  When   the proposal runs\n  Then   the first is proposed `system` and the second `architecture`, each naming its\n         layer as the reason\n\nCASE-2 — `code` needs cases, code and a test link, not just cases\n  Given  two requirements with no `level:`, one with three labelled cases, an\n         `implements:` member and a `verifies:` tag, the other with an `implements:`\n         member and no cases\n  When   the proposal runs\n  Then   the first is proposed `code` and the second `architecture`\n\nCASE-3 — a declared rung is left alone\n  Given  a requirement that already declares `level: architecture`\n  When   the proposal runs\n  Then   it is absent from the result, whatever its shape would otherwise suggest\n\n\n--------------------",
+      "accept": "CASE-1 — the layer answers it where the layer already said so\n  Given  a requirement with `layer: need` and one with `layer: aggregate`, neither\n         declaring a `level:`\n  When   the proposal runs\n  Then   the first is proposed `system` and the second `architecture`, each naming its\n         layer as the reason\n\nCASE-2 — a group is proposed `architecture`, everything bound to code is `code`\n  Given  three requirements with no `level:`: one with two bold contract groups, one\n         with three labelled cases and an `implements:` member, one with a member and\n         no cases\n  When   the proposal runs\n  Then   the first is proposed `architecture` naming `--decompose`, the other two `code`\n\nCASE-3 — a declared rung is left alone\n  Given  a requirement that already declares `level: architecture`\n  When   the proposal runs\n  Then   it is absent from the result, whatever its shape would otherwise suggest\n\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -7112,11 +7470,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1058"
+          "loc": "plugin/scripts/test_reqmap_author.py:1068"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:28"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:30"
         }
       ],
       "test_exempt": null,
@@ -7162,15 +7520,23 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1058"
+          "loc": "plugin/scripts/test_reqmap_author.py:1068"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:73"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:97"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:90"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:45"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:69"
         }
       ],
       "test_exempt": null,
@@ -7187,22 +7553,22 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Read-only by default, and honest about what it will not do",
-      "intent": "A command that edits every requirement in a corpus is one a reader has to be able to run without consequence first. It is also one that must not be reachable from anything automatic: the pre-commit hook runs `sync` on every commit, which is the most automatic placement in the tool, so the retrofit lives on `clarify` instead. And it stops where inference stops — the pyramid's edges are a modelling decision, not something to be derived from a different axis.",
+      "intent": "A command that edits every requirement in a corpus is one a reader has to be able to run without consequence first. It is also one that must not be reachable from anything automatic: the pre-commit hook runs `sync` on every commit, which is the most automatic placement in the tool, so the retrofit lives on `clarify` instead. And it stops where inference stops — the pyramid's edges come from the ids the author typed, never something to be derived from a different axis.",
       "contract": [
         "Without `--apply` the run writes nothing and says so, having already printed every proposal it would have made.",
         "The run exits 0 whatever it finds, and no gate rule reads its output.",
-        "`satisfies:` edges are never proposed or written. `satisfies:` is the level axis and `depends_on` is the composition axis, and deriving one from the other is the conflation the engine refuses to make everywhere else.",
-        "When no requirement is proposed at `code`, the run says what that rung is and which command reaches it, so a two-rung corpus reads as an end state rather than a failure."
+        "`--apply` writes the two upper rungs with the edges (ADR-0038), in `init`'s shape: one draft `ARCH-<FAMILY>-001` per id-prefix family of at least `LEVEL_FAMILY_MIN` code members (smaller prefixes share `ARCH-NEEDS-A-NAME-001`), `SYS-NEEDS-A-NAME-001` at the apex, `satisfies:` from every non-draft code requirement to its family and from every placeholder or unlinked architecture requirement to the apex. `depends_on` is never read.",
+        "When a requirement carries contract groups, the run names it and the command that builds its code rung (`clarify --decompose --apply`), so the last gap is one command away."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
       "acc": [
         "CASE-1 — — the default run changes nothing on disk Given  a corpus with requirements that declare no `level:` When   `clarify --levels` runs without `--apply` Then   every proposal is printed, no requirement file changes, and the exit code is 0",
-        "CASE-2 — — the pyramid's edges are left to the author Given  any corpus When   `clarify --levels --apply` runs Then   no `satisfies:` line is written or proposed, and the output says why",
-        "CASE-3 — — a corpus that reaches only two rungs is told what the third is Given  a corpus in which no requirement carries the evidence for `code` When   `clarify --levels` runs Then   it names the `code` rung's shape and the command that reaches it"
+        "CASE-2 — — the upper rungs and the edges are written with the rungs, in `init`'s shape Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub When   `clarify --levels --apply` runs Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing",
+        "CASE-3 — — a requirement with contract groups is told which command builds its code rung Given  a requirement whose Description carries two bold contract groups When   `clarify --levels` runs Then   it is proposed `architecture` and the output names `clarify --decompose --apply`"
       ],
-      "accept": "CASE-1 — the default run changes nothing on disk\n  Given  a corpus with requirements that declare no `level:`\n  When   `clarify --levels` runs without `--apply`\n  Then   every proposal is printed, no requirement file changes, and the exit code is 0\n\nCASE-2 — the pyramid's edges are left to the author\n  Given  any corpus\n  When   `clarify --levels --apply` runs\n  Then   no `satisfies:` line is written or proposed, and the output says why\n\nCASE-3 — a corpus that reaches only two rungs is told what the third is\n  Given  a corpus in which no requirement carries the evidence for `code`\n  When   `clarify --levels` runs\n  Then   it names the `code` rung's shape and the command that reaches it",
+      "accept": "CASE-1 — the default run changes nothing on disk\n  Given  a corpus with requirements that declare no `level:`\n  When   `clarify --levels` runs without `--apply`\n  Then   every proposal is printed, no requirement file changes, and the exit code is 0\n\nCASE-2 — the upper rungs and the edges are written with the rungs, in `init`'s shape\n  Given  three `JS-*` code-shaped requirements and one `MT4-*` that declare no `satisfies:`, plus a `draft` stub\n  When   `clarify --levels --apply` runs\n  Then   a draft `ARCH-JS-001` exists and the three point at it, the `MT4-*` one points at `ARCH-NEEDS-A-NAME-001`, both placeholders satisfy a draft `SYS-NEEDS-A-NAME-001`, the stub and a requirement that already satisfied something are unchanged, and a second run writes nothing\n\nCASE-3 — a requirement with contract groups is told which command builds its code rung\n  Given  a requirement whose Description carries two bold contract groups\n  When   `clarify --levels` runs\n  Then   it is proposed `architecture` and the output names `clarify --decompose --apply`",
       "input": "",
       "output": "",
       "desc": "",
@@ -7216,11 +7582,51 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1058"
+          "loc": "plugin/scripts/test_reqmap_author.py:1068"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/levels.py:126"
+          "loc": "plugin/scripts/reqmap_engine/levels.py:101"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:96"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:101"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:105"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:110"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:148"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:157"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:189"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:199"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:205"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/pyramid.py:231"
         }
       ],
       "test_exempt": null,
@@ -7285,7 +7691,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "implements",
@@ -7368,11 +7774,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2152"
+          "loc": "plugin/scripts/test_reqmap_author.py:2222"
         },
         {
           "role": "implements",
@@ -7468,11 +7874,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2152"
+          "loc": "plugin/scripts/test_reqmap_author.py:2222"
         },
         {
           "role": "implements",
@@ -7568,15 +7974,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1203"
+          "loc": "plugin/scripts/test_reqmap_author.py:1273"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:528"
+          "loc": "plugin/scripts/test_reqmap_scan.py:529"
         },
         {
           "role": "implements",
@@ -7669,7 +8075,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "implements",
@@ -7736,7 +8142,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "implements",
@@ -7796,7 +8202,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1203"
+          "loc": "plugin/scripts/test_reqmap_author.py:1273"
         },
         {
           "role": "implements",
@@ -7853,7 +8259,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "implements",
@@ -7910,7 +8316,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:690"
+          "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
           "role": "implements",
@@ -8052,11 +8458,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:544"
+          "loc": "plugin/scripts/test_reqmap_scan.py:545"
         },
         {
           "role": "implements",
@@ -8108,7 +8514,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:416"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:459"
         },
         {
           "role": "implements",
@@ -8542,7 +8948,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:255"
+          "loc": "app/src/lib/data.js:256"
         },
         {
           "role": "implements",
@@ -9073,7 +9479,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:330"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:364"
         }
       ],
       "test_exempt": null,
@@ -9335,11 +9741,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1382"
+          "loc": "plugin/scripts/test_reqmap_author.py:1452"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2861"
+          "loc": "plugin/scripts/test_reqmap_author.py:2931"
         },
         {
           "role": "implements",
@@ -9410,7 +9816,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2861"
+          "loc": "plugin/scripts/test_reqmap_author.py:2931"
         },
         {
           "role": "implements",
@@ -9469,7 +9875,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1382"
+          "loc": "plugin/scripts/test_reqmap_author.py:1452"
         },
         {
           "role": "implements",
@@ -9563,7 +9969,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1634"
+          "loc": "plugin/scripts/test_reqmap_author.py:1704"
         },
         {
           "role": "tested-by",
@@ -9603,7 +10009,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:134"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:150"
         },
         {
           "role": "implements",
@@ -9951,7 +10357,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:135"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:151"
         },
         {
           "role": "implements",
@@ -10119,11 +10525,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:159"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:172"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:379"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:422"
         }
       ],
       "test_exempt": null,
@@ -10192,7 +10598,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/orphans.py:159"
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:172"
         }
       ],
       "test_exempt": null,
@@ -10286,19 +10692,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:31"
+          "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:480"
+          "loc": "plugin/scripts/test_reqmap_scan.py:481"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:859"
+          "loc": "plugin/scripts/test_reqmap_scan.py:860"
         },
         {
           "role": "implements",
@@ -10367,11 +10773,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:31"
+          "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1392"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1393"
         },
         {
           "role": "implements",
@@ -10430,7 +10836,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:31"
+          "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
           "role": "implements",
@@ -10491,7 +10897,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:31"
+          "loc": "plugin/scripts/test_reqmap_scan.py:32"
         },
         {
           "role": "implements",
@@ -10553,7 +10959,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1020"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1021"
         },
         {
           "role": "implements",
@@ -10561,7 +10967,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:35"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:36"
         },
         {
           "role": "implements",
@@ -10640,7 +11046,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1110"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1111"
         },
         {
           "role": "implements",
@@ -10999,11 +11405,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2056"
+          "loc": "plugin/scripts/test_reqmap_author.py:2126"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2677"
+          "loc": "plugin/scripts/test_reqmap_author.py:2747"
         },
         {
           "role": "tested-by",
@@ -11075,7 +11481,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2056"
+          "loc": "plugin/scripts/test_reqmap_author.py:2126"
         },
         {
           "role": "implements",
@@ -11131,7 +11537,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2677"
+          "loc": "plugin/scripts/test_reqmap_author.py:2747"
         },
         {
           "role": "implements",
@@ -11195,11 +11601,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1235"
+          "loc": "plugin/scripts/test_reqmap_author.py:1305"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2083"
+          "loc": "plugin/scripts/test_reqmap_author.py:2153"
         },
         {
           "role": "tested-by",
@@ -11267,11 +11673,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1235"
+          "loc": "plugin/scripts/test_reqmap_author.py:1305"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2083"
+          "loc": "plugin/scripts/test_reqmap_author.py:2153"
         },
         {
           "role": "implements",
@@ -11332,11 +11738,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1235"
+          "loc": "plugin/scripts/test_reqmap_author.py:1305"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2083"
+          "loc": "plugin/scripts/test_reqmap_author.py:2153"
         },
         {
           "role": "implements",
@@ -11393,11 +11799,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1235"
+          "loc": "plugin/scripts/test_reqmap_author.py:1305"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2083"
+          "loc": "plugin/scripts/test_reqmap_author.py:2153"
         },
         {
           "role": "implements",
@@ -11472,47 +11878,47 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:357"
+          "loc": "plugin/scripts/test_reqmap_scan.py:358"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:375"
+          "loc": "plugin/scripts/test_reqmap_scan.py:376"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:400"
+          "loc": "plugin/scripts/test_reqmap_scan.py:401"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:451"
+          "loc": "plugin/scripts/test_reqmap_scan.py:452"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1005"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1006"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1263"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1264"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:18"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:13"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:171"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:124"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:213"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:166"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:249"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:240"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:260"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:264"
         }
       ],
       "test_exempt": null,
@@ -11566,15 +11972,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:357"
+          "loc": "plugin/scripts/test_reqmap_scan.py:358"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:400"
+          "loc": "plugin/scripts/test_reqmap_scan.py:401"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:260"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:264"
         }
       ],
       "test_exempt": null,
@@ -11629,19 +12035,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:375"
+          "loc": "plugin/scripts/test_reqmap_scan.py:376"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:400"
+          "loc": "plugin/scripts/test_reqmap_scan.py:401"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1263"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1264"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/draft.py:18"
+          "loc": "plugin/scripts/reqmap_engine/draft.py:13"
         }
       ],
       "test_exempt": null,
@@ -11851,11 +12257,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:90"
+          "loc": "plugin/scripts/reqmap_engine/health.py:101"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:238"
+          "loc": "plugin/scripts/reqmap_engine/health.py:249"
         }
       ],
       "test_exempt": null,
@@ -11914,7 +12320,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:90"
+          "loc": "plugin/scripts/reqmap_engine/health.py:101"
         }
       ],
       "test_exempt": null,
@@ -11981,7 +12387,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:241"
+          "loc": "plugin/scripts/reqmap_engine/health.py:252"
         }
       ],
       "test_exempt": null,
@@ -12164,19 +12570,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1822"
+          "loc": "plugin/scripts/test_reqmap_author.py:1892"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
+          "loc": "plugin/scripts/test_reqmap_author.py:2424"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2889"
+          "loc": "plugin/scripts/test_reqmap_author.py:2959"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4980"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -12257,7 +12663,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
+          "loc": "plugin/scripts/test_reqmap_author.py:2424"
         },
         {
           "role": "implements",
@@ -12322,7 +12728,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
+          "loc": "plugin/scripts/test_reqmap_author.py:2424"
         },
         {
           "role": "implements",
@@ -12410,11 +12816,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
+          "loc": "plugin/scripts/test_reqmap_author.py:2424"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2889"
+          "loc": "plugin/scripts/test_reqmap_author.py:2959"
         },
         {
           "role": "implements",
@@ -12488,7 +12894,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2354"
+          "loc": "plugin/scripts/test_reqmap_author.py:2424"
         },
         {
           "role": "implements",
@@ -12578,7 +12984,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1321"
+          "loc": "plugin/scripts/test_reqmap_author.py:1391"
         },
         {
           "role": "implements",
@@ -12650,7 +13056,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:1321"
+          "loc": "plugin/scripts/test_reqmap_author.py:1391"
         },
         {
           "role": "implements",
@@ -12744,7 +13150,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/health.py:244"
+          "loc": "plugin/scripts/reqmap_engine/health.py:255"
         },
         {
           "role": "implements",
@@ -13129,11 +13535,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:27"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:28"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:104"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:105"
         },
         {
           "role": "implements",
@@ -13350,6 +13756,7 @@
         "ARCH-SHOW-015",
         "ARCH-SUGGESTVERIFIES-047",
         "ARCH-TRACKED-042",
+        "ARCH-UNREADABLE-070",
         "ARCH-UNSCANNEDTAG-045",
         "ARCH-VLEVEL-037"
       ],
@@ -13364,27 +13771,27 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:112"
+          "loc": "plugin/scripts/test_reqmap_scan.py:113"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:318"
+          "loc": "plugin/scripts/test_reqmap_scan.py:319"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:745"
+          "loc": "plugin/scripts/test_reqmap_scan.py:746"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:906"
+          "loc": "plugin/scripts/test_reqmap_scan.py:907"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:998"
+          "loc": "plugin/scripts/test_reqmap_scan.py:999"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1420"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1421"
         },
         {
           "role": "implements",
@@ -13404,39 +13811,39 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:128"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:182"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:153"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:207"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:214"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:266"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:222"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:274"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:74"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:78"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:143"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:160"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:170"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:174"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:228"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:232"
         }
       ],
       "test_exempt": null,
@@ -13489,35 +13896,35 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:112"
+          "loc": "plugin/scripts/test_reqmap_scan.py:113"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:154"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:208"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:214"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:266"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:222"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:274"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:143"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:160"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:170"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:174"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:228"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:232"
         }
       ],
       "test_exempt": null,
@@ -13579,11 +13986,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:112"
+          "loc": "plugin/scripts/test_reqmap_scan.py:113"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:745"
+          "loc": "plugin/scripts/test_reqmap_scan.py:746"
         },
         {
           "role": "implements",
@@ -13648,23 +14055,23 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1420"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1421"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:134"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:188"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:143"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:147"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:160"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/tags.py:170"
+          "loc": "plugin/scripts/reqmap_engine/tags.py:174"
         }
       ],
       "test_exempt": null,
@@ -13720,7 +14127,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:585"
+          "loc": "plugin/scripts/test_reqmap_scan.py:586"
         },
         {
           "role": "implements",
@@ -13736,7 +14143,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:153"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:207"
         }
       ],
       "test_exempt": null,
@@ -13796,7 +14203,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:585"
+          "loc": "plugin/scripts/test_reqmap_scan.py:586"
         },
         {
           "role": "implements",
@@ -13812,7 +14219,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:154"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:208"
         }
       ],
       "test_exempt": null,
@@ -13905,7 +14312,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4901"
+          "loc": "plugin/scripts/test_reqmap_report.py:4918"
         },
         {
           "role": "implements",
@@ -14245,7 +14652,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4901"
+          "loc": "plugin/scripts/test_reqmap_report.py:4918"
         },
         {
           "role": "implements",
@@ -14308,7 +14715,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1547"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1548"
         },
         {
           "role": "implements",
@@ -14369,7 +14776,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1547"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1548"
         },
         {
           "role": "implements",
@@ -14435,7 +14842,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1199"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1200"
         },
         {
           "role": "implements",
@@ -15489,7 +15896,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:160"
+          "loc": "plugin/scripts/reqmap_engine/init.py:171"
         },
         {
           "role": "implements",
@@ -16139,7 +16546,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:166"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:167"
         },
         {
           "role": "implements",
@@ -16402,7 +16809,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:166"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:167"
         }
       ],
       "test_exempt": null,
@@ -16507,19 +16914,19 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:55"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:56"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:92"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:93"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:104"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:105"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:211"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:245"
         },
         {
           "role": "implements",
@@ -16599,11 +17006,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:92"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:93"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:211"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:245"
         }
       ],
       "test_exempt": null,
@@ -16671,7 +17078,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:55"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:56"
         },
         {
           "role": "implements",
@@ -16733,7 +17140,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:803"
+          "loc": "plugin/scripts/test_reqmap_scan.py:804"
         },
         {
           "role": "implements",
@@ -16741,7 +17148,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:355"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:389"
         }
       ],
       "test_exempt": null,
@@ -16795,11 +17202,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:803"
+          "loc": "plugin/scripts/test_reqmap_scan.py:804"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1348"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1349"
         },
         {
           "role": "implements",
@@ -16886,15 +17293,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:969"
+          "loc": "plugin/scripts/test_reqmap_author.py:979"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2622"
+          "loc": "plugin/scripts/test_reqmap_author.py:2692"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3122"
+          "loc": "plugin/scripts/test_reqmap_author.py:3192"
         },
         {
           "role": "implements",
@@ -16926,7 +17333,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:253"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:287"
         }
       ],
       "test_exempt": null,
@@ -16971,7 +17378,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:969"
+          "loc": "plugin/scripts/test_reqmap_author.py:979"
         },
         {
           "role": "implements",
@@ -17036,7 +17443,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:969"
+          "loc": "plugin/scripts/test_reqmap_author.py:979"
         },
         {
           "role": "implements",
@@ -17090,11 +17497,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:2622"
+          "loc": "plugin/scripts/test_reqmap_author.py:2692"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:253"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:287"
         }
       ],
       "test_exempt": null,
@@ -17155,7 +17562,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:232"
+          "loc": "app/src/lib/data.js:233"
         },
         {
           "role": "implements",
@@ -17163,7 +17570,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3122"
+          "loc": "plugin/scripts/test_reqmap_author.py:3192"
         },
         {
           "role": "implements",
@@ -17188,6 +17595,158 @@
       "risks": [],
       "clauses": 7,
       "covered": 7
+    },
+    {
+      "id": "ARCH-UNREADABLE-070",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "confirmed",
+      "area": "ARCH",
+      "title": "Source files the scan cannot decode",
+      "intent": "A file the scan opens but cannot decode is worse than one it never opens: it looks read. With `errors=\"ignore\"` a UTF-16 source decodes to its text interleaved with dropped NULs, so every tag in it silently stops being a member and its line count doubles — the file reports \"untagged\" forever and no message ever says why. MetaEditor saves `.mq4` as UTF-16 LE by default, so this is a consumer's first file, not a corner case. It bit the same repo twice: once through a tag that \"disappeared\", once through a 4089-line count for a 2041-line file.",
+      "contract": [
+        "One decoder reads every source file the engine opens, decoding a UTF-16 BOM instead of mangling it, and refusing a file whose bytes carry NULs with nothing to key the encoding on rather than half-reading it. [[REQ-UNREADABLE-1004]]",
+        "`undecodable_source_files` lists the scannable files that stay unreadable, and the gate warns (never errors) when any exist. [[REQ-UNREADABLE-1004]]"
+      ],
+      "verify": [],
+      "notes": [
+        "The pair with [[ARCH-UNSCANNEDTAG-045]] is deliberate: that rule reports a tag in a file type the walk never opens, this one a file the walk DOES open and cannot decode. Both fail identically from the outside — the tag is silently not a member — and neither is visible without being named.",
+        "Line splitting is `io.StringIO(text, newline=None).readlines()`, not `str.splitlines()`. The latter also breaks on form feed and U+0085, which would shift every line number after one such byte; a tag's recorded line number means universal-newline `readlines()` and must keep meaning it.",
+        "A BOM-less UTF-16 file yields empty text rather than a guess. Decoding it by sniffing would be a second, weaker heuristic that can mis-read a genuinely binary file as source; naming it and moving on is the honest outcome, and the remedy (re-save as UTF-8) is one the author can act on.",
+        "The BOM-less test is NUL **density**, not the presence of a NUL. \"Any NUL\" was tried first and this repo falsified it on the first run: `app/src/lib/search.js` is valid UTF-8 carrying two deliberate NUL sentinels in a string literal, and refusing it dropped four real member tags — this requirement's own failure mode, inverted. Mostly-ASCII UTF-16 is about half NULs; a sentinel is a few bytes in thousands. The threshold errs toward reading: a missed BOM-less UTF-16 file is the status quo, a wrongly refused UTF-8 file is a new regression.",
+        "Warn, never error: an undecodable file is a fact about someone's editor, not a broken contract, and the gate's errors are reserved for link integrity."
+      ],
+      "current_impl": [
+        "`read_source_text()` / `read_source_lines()` in `reqmap_engine/scan.py`, used by `scan_all`, `_walk_code_lines`, `candidates._file_facts` and `orphans.orphan_code_files`.",
+        "`undecodable_source_files()` in `reqmap_engine/orphans.py`, wired into the gate as RM033.",
+        "`lint_exempt: file-spread` - the spread IS the capability. One decoder exists so that the four places which open a source file stop each deciding for themselves; a version touching one file would be the bug this requirement removes."
+      ],
+      "acc": [
+        "CASE-1 — Given  a scannable file saved as UTF-16 with a byte-order mark, carrying `# implements: <ID>` When   `scan_members` runs Then   that file is a member of `<ID>`, and its reported line count is its real one",
+        "CASE-2 — Given  a scannable file whose bytes are UTF-16 with no byte-order mark When   `gate` runs Then   it warns naming that file and the reason, exits 0, and no tag is read out of it",
+        "CASE-3 — Given  a UTF-8 source file, with or without a BOM When   the scan reads it Then   its lines, tag line numbers and line count are exactly what they were before this requirement existed"
+      ],
+      "accept": "CASE-1\n  Given  a scannable file saved as UTF-16 with a byte-order mark, carrying `# implements: <ID>`\n  When   `scan_members` runs\n  Then   that file is a member of `<ID>`, and its reported line count is its real one\n\nCASE-2\n  Given  a scannable file whose bytes are UTF-16 with no byte-order mark\n  When   `gate` runs\n  Then   it warns naming that file and the reason, exits 0, and no tag is read out of it\n\nCASE-3\n  Given  a UTF-8 source file, with or without a BOM\n  When   the scan reads it\n  Then   its lines, tag line numbers and line count are exactly what they were before this\n         requirement existed",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "ARCH-SCAN-002",
+        "ARCH-CHECK-006"
+      ],
+      "depends_on": [
+        "ARCH-SCAN-002",
+        "ARCH-CHECK-006"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-GATE-102"
+      ],
+      "satisfied_by": [
+        "REQ-UNREADABLE-1004"
+      ],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_scan.py:1631"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_scan.py:1710"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:193"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rules.py:413"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/scan.py:144"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/scan.py:170"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-UNREADABLE-1004",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Decoding a source file, or refusing it out loud",
+      "intent": "Four call sites each opened source files with `errors=\"ignore\"` and drifted into the same blind spot: a UTF-16 file decoded to interleaved rubbish that still looked like text, so its tags vanished and its line count doubled. One decoder, used by all four, either reads the file properly or says it could not.",
+      "contract": [
+        "`read_source_text` returns the file's text and no problem when the bytes decode as UTF-8, with or without a BOM.",
+        "When the first two bytes are a UTF-16 byte-order mark, it decodes the file as UTF-16 and returns the resulting text with no problem, so tags inside it are read normally.",
+        "When the bytes carry no UTF-16 BOM and NULs are at least a tenth of the decoded text, it returns empty text and a short reason, so no caller reads a partial tag or counts a doubled line. Below that density the text is returned unchanged: a UTF-8 source holding a NUL sentinel keeps every tag it has.",
+        "A file that cannot be opened at all yields `(None, None)` — skipped, never fatal.",
+        "`read_source_lines` splits that text exactly as universal-newline `readlines()` splits it, so no recorded tag line number moves.",
+        "`undecodable_source_files` returns the sorted `(path, reason)` pairs for every scannable file under the scan root that yields a problem.",
+        "`gate` reports each such file in one warning naming the path and the reason, states that any tag in it is invisible and it counts as untagged, names the remedy (re-save as UTF-8, or ignore it), and never changes the exit code."
+      ],
+      "verify": [],
+      "notes": [
+        "`str.splitlines()` was rejected for the split: it breaks on form feed, U+0085 and the Unicode separators, which moves every line number after one such byte. The test compares against `readlines()` directly rather than asserting a count.",
+        "`lint_exempt: file-spread` - one decoder read from four modules IS the requirement. A version confined to one file would be the per-call-site drift it removes.",
+        "The NUL test is a density ratio, not `\"\\x00\" in text`. A UTF-8 source may legitimately hold a real NUL byte — a sentinel key in a string literal — and this repo has one; the presence test dropped its four member tags. Density separates the two cases by three orders of magnitude."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a UTF-16 file with a BOM becomes a real member Given  a scannable file written as UTF-16 LE with a BOM, whose first line is `# implements: ARCH-EXAMPLE-001` When   `scan_members` runs over its directory Then   the file is listed as a member of `ARCH-EXAMPLE-001`",
+        "CASE-2 — — its line count is its real one, not double Given  that same 41-line UTF-16 file When   `_file_facts` reads it Then   the reported `loc` is 41",
+        "CASE-3 — — a BOM-less UTF-16 file is named, not half-read Given  a scannable file written as UTF-16 LE with no BOM, containing a membership tag When   `undecodable_source_files` runs Then   the file is returned with a reason mentioning UTF-8, and `scan_members` finds no tag in it",
+        "CASE-4 — — the gate warns and stays green Given  a repository containing one BOM-less UTF-16 source file When   `gate` runs Then   it prints one RM033 warning naming that file, and the exit code is 0",
+        "CASE-5 — — UTF-8 files are untouched Given  a UTF-8 source file containing a form feed and a tag after it When   `read_source_lines` reads it Then   the lines are identical to `readlines()` on the same file, so the tag's line number is unchanged",
+        "CASE-6 — — a UTF-8 file with a NUL sentinel keeps its tags Given  a valid UTF-8 source file of several thousand bytes containing two real NUL bytes inside a string literal, and four membership tags When   `scan_members` runs Then   the file is a member for all four tags, and `undecodable_source_files` does not list it"
+      ],
+      "accept": "CASE-1 — a UTF-16 file with a BOM becomes a real member\n  Given  a scannable file written as UTF-16 LE with a BOM, whose first line is `# implements: ARCH-EXAMPLE-001`\n  When   `scan_members` runs over its directory\n  Then   the file is listed as a member of `ARCH-EXAMPLE-001`\n\nCASE-2 — its line count is its real one, not double\n  Given  that same 41-line UTF-16 file\n  When   `_file_facts` reads it\n  Then   the reported `loc` is 41\n\nCASE-3 — a BOM-less UTF-16 file is named, not half-read\n  Given  a scannable file written as UTF-16 LE with no BOM, containing a membership tag\n  When   `undecodable_source_files` runs\n  Then   the file is returned with a reason mentioning UTF-8, and `scan_members` finds no\n         tag in it\n\nCASE-4 — the gate warns and stays green\n  Given  a repository containing one BOM-less UTF-16 source file\n  When   `gate` runs\n  Then   it prints one RM033 warning naming that file, and the exit code is 0\n\nCASE-5 — UTF-8 files are untouched\n  Given  a UTF-8 source file containing a form feed and a tag after it\n  When   `read_source_lines` reads it\n  Then   the lines are identical to `readlines()` on the same file, so the tag's line number\n         is unchanged\n\nCASE-6 — a UTF-8 file with a NUL sentinel keeps its tags\n  Given  a valid UTF-8 source file of several thousand bytes containing two real NUL bytes\n         inside a string literal, and four membership tags\n  When   `scan_members` runs\n  Then   the file is a member for all four tags, and `undecodable_source_files` does not\n         list it",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-UNREADABLE-070"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_scan.py:1631"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/orphans.py:193"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/rules.py:413"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/scan.py:144"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/scan.py:170"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.10",
+      "priority": "",
+      "risks": [],
+      "clauses": 6,
+      "covered": 6
     },
     {
       "id": "ARCH-UNSCANNEDTAG-045",
@@ -17236,7 +17795,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:945"
+          "loc": "plugin/scripts/test_reqmap_scan.py:946"
         },
         {
           "role": "implements",
@@ -17244,7 +17803,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:367"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:401"
         }
       ],
       "test_exempt": null,
@@ -17304,11 +17863,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:945"
+          "loc": "plugin/scripts/test_reqmap_scan.py:946"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:1286"
+          "loc": "plugin/scripts/test_reqmap_scan.py:1287"
         },
         {
           "role": "implements",
@@ -17567,7 +18126,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:236"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:270"
         },
         {
           "role": "implements",
@@ -18183,11 +18742,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:241"
+          "loc": "app/src/lib/data.js:242"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:265"
+          "loc": "app/src/lib/data.js:266"
         },
         {
           "role": "implements",
@@ -18417,7 +18976,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/data.js:251"
+          "loc": "app/src/lib/data.js:252"
         },
         {
           "role": "implements",
@@ -18529,35 +19088,35 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:250"
+          "loc": "plugin/scripts/test_reqmap_scan.py:251"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:261"
+          "loc": "plugin/scripts/test_reqmap_scan.py:262"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:273"
+          "loc": "plugin/scripts/test_reqmap_scan.py:274"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:291"
+          "loc": "plugin/scripts/test_reqmap_scan.py:292"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:312"
+          "loc": "plugin/scripts/test_reqmap_scan.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:122"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:123"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:135"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:136"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:254"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:304"
         },
         {
           "role": "implements",
@@ -18608,11 +19167,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:250"
+          "loc": "plugin/scripts/test_reqmap_scan.py:251"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:254"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:304"
         },
         {
           "role": "implements",
@@ -18671,11 +19230,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_scan.py:291"
+          "loc": "plugin/scripts/test_reqmap_scan.py:292"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/scan.py:254"
+          "loc": "plugin/scripts/reqmap_engine/scan.py:304"
         }
       ],
       "test_exempt": null,
@@ -18798,7 +19357,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/rules.py:145"
+          "loc": "plugin/scripts/reqmap_engine/rules.py:146"
         }
       ],
       "test_exempt": null,
@@ -18910,6 +19469,7 @@
         "ARCH-RULES-059",
         "ARCH-TESTLINK-018",
         "ARCH-TRACKED-042",
+        "ARCH-UNREADABLE-070",
         "ARCH-UNSCANNEDTAG-045"
       ],
       "members": [],
@@ -19708,6 +20268,14 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "ARCH-UNREADABLE-070",
+      "ARCH-SCAN-002"
+    ],
+    [
+      "ARCH-UNREADABLE-070",
+      "ARCH-CHECK-006"
+    ],
+    [
       "ARCH-UNSCANNEDTAG-045",
       "ARCH-SCAN-002"
     ],
@@ -19751,6 +20319,10 @@
     ],
     [
       "REQ-ACVERIFY-823",
+      "ARCH-ACVERIFY-019"
+    ],
+    [
+      "REQ-DANGLINGVERIFY-1009",
       "ARCH-ACVERIFY-019"
     ],
     [
@@ -19799,6 +20371,18 @@
     ],
     [
       "REQ-CANDIDATES-827",
+      "ARCH-CANDIDATES-009"
+    ],
+    [
+      "REQ-PLANTAGGED-1005",
+      "ARCH-CANDIDATES-009"
+    ],
+    [
+      "REQ-PLANLEVEL-1006",
+      "ARCH-CANDIDATES-009"
+    ],
+    [
+      "REQ-PLANDRAFTID-1010",
       "ARCH-CANDIDATES-009"
     ],
     [
@@ -19879,6 +20463,10 @@
     ],
     [
       "REQ-COVERAGE-836",
+      "ARCH-COVERAGE-029"
+    ],
+    [
+      "REQ-UNTAGGEDSET-1007",
       "ARCH-COVERAGE-029"
     ],
     [
@@ -19999,6 +20587,10 @@
     ],
     [
       "REQ-EXTRACT-981",
+      "ARCH-EXTRACT-008"
+    ],
+    [
+      "REQ-INITTAG-1008",
       "ARCH-EXTRACT-008"
     ],
     [
@@ -20634,6 +21226,14 @@
       "ARCH-TRANSLATE-044"
     ],
     [
+      "ARCH-UNREADABLE-070",
+      "SYS-GATE-102"
+    ],
+    [
+      "REQ-UNREADABLE-1004",
+      "ARCH-UNREADABLE-070"
+    ],
+    [
       "ARCH-UNSCANNEDTAG-045",
       "SYS-GATE-102"
     ],
@@ -21011,7 +21611,7 @@
     },
     {
       "month": "2026-09",
-      "count": 66,
+      "count": 69,
       "first": "2026-09-02",
       "last": "2026-09-14",
       "versions": [
@@ -21079,8 +21679,11 @@
         "v7.5.0",
         "v7.6.0",
         "v7.7.0",
+        "v7.10.0",
+        "v7.11.0",
         "v7.8.0",
-        "v7.8.1"
+        "v7.8.1",
+        "v7.9.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"
@@ -21255,7 +21858,7 @@
         },
         {
           "flag": "--levels",
-          "help": "Propose a V-model rung for every requirement that declares no `level:`; --apply writes them, each marked `level_source: auto`."
+          "help": "Propose a V-model rung for every requirement that declares no `level:`, plus the rungs above: one draft `ARCH-<FAMILY>-001` per id-prefix family, `SYS-NEEDS-A-NAME-001` at the apex, and the `satisfies:` edges between them. --apply writes all of it, each line marked `level_source: auto`."
         },
         {
           "flag": "--json",
@@ -21265,16 +21868,16 @@
     }
   ],
   "design": {
-    "files": 89,
-    "clean_files": 58,
-    "score": 65,
+    "files": 90,
+    "clean_files": 56,
+    "score": 62,
     "candidates": {
       "encapsulation": 7,
       "abstraction": 11,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 26
+      "standards": 30
     },
     "findings": [
       {
@@ -21323,7 +21926,7 @@
         "file": "app/src/lib/data.js",
         "line": 7,
         "name": "data.js",
-        "detail": "84 line(s) wider than 100 columns, first at line 7"
+        "detail": "85 line(s) wider than 100 columns, first at line 7"
       },
       {
         "pillar": "standards",
@@ -21577,7 +22180,7 @@
         "pillar": "encapsulation",
         "kind": "global-state",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 198,
+        "line": 201,
         "name": "apply_config",
         "detail": "`apply_config` writes module state: CODE_EXTS"
       },
@@ -21588,6 +22191,14 @@
         "line": 176,
         "name": "cmd_check",
         "detail": "`cmd_check` takes 7 parameters (over 6)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap_engine/levels.py",
+        "line": 63,
+        "name": "levels.py",
+        "detail": "1 line(s) wider than 100 columns, first at line 63"
       },
       {
         "pillar": "encapsulation",
@@ -21604,6 +22215,30 @@
         "line": 176,
         "name": "_parse_roadmap_from_text",
         "detail": "`_parse_roadmap_from_text` nests 5 levels deep (over 4)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap_engine/pyramid.py",
+        "line": 162,
+        "name": "pyramid.py",
+        "detail": "5 line(s) wider than 100 columns, first at line 162"
+      },
+      {
+        "pillar": "standards",
+        "kind": "too-many-definitions",
+        "file": "plugin/scripts/reqmap_engine/rules.py",
+        "line": 1,
+        "name": "rules.py",
+        "detail": "32 top-level definitions (over 30)"
+      },
+      {
+        "pillar": "standards",
+        "kind": "line-too-long",
+        "file": "plugin/scripts/reqmap_engine/rules.py",
+        "line": 413,
+        "name": "rules.py",
+        "detail": "1 line(s) wider than 100 columns, first at line 413"
       },
       {
         "pillar": "standards",
@@ -21637,16 +22272,17 @@
       "global-state": "module state mutated from inside a function has no owner: hold it in an object, or pass it in and return it",
       "line-too-long": "lines wider than the limit hide their tail in every diff and side-by-side view: wrap them",
       "long-function": "a function this long hides several steps: extract each step under a name that says what it does",
-      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together"
+      "long-parameter-list": "a parameter list this long is an object waiting to be named: group the parameters that travel together",
+      "too-many-definitions": "this many top-level definitions in one file is a package, not a module: group them"
     }
   },
   "health": {
     "score": 97,
-    "total": 254,
-    "healthy": 246,
-    "confirmed": 246,
-    "implemented": 237,
-    "tested": 234,
+    "total": 262,
+    "healthy": 254,
+    "confirmed": 254,
+    "implemented": 245,
+    "tested": 242,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,

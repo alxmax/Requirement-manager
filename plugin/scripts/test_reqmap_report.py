@@ -316,7 +316,7 @@ class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: RE
     def test_node_with_no_members_has_empty_list(self):  # verifies: REQ-MAP-870#CASE-3  # verifies: ARCH-MAP-007#CASE-3
         self.assertEqual(_export_doc_for({"id": "A-1"})["nodes"][0]["members"], [])
 
-    def test_dependency_list_answers_to_both_names(self):  # verifies: REQ-MAP-870#CASE-7  # verifies: ARCH-MAP-007#CASE-7
+    def test_dependency_list_answers_to_both_names(self):  # verifies: REQ-MAP-870#CASE-7
         # `deps` is what the vendored viewer reads; `depends_on` is what the frontmatter
         # and every document call it. A consumer asking for the documented name used to
         # get a silent None and build the wrong graph from it.
@@ -4687,6 +4687,23 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
 
     def setUp(self):
         self.root = _repo_root()
+
+    def test_every_engine_module_is_tracked_by_git(self):  # verifies: REQ-SELFGATE-990#CASE-2
+        """A module the package imports but git does not track ships a DEAD engine, and the
+        author's machine structurally cannot see it: the working tree imports fine, and even
+        `sync_reqmap.sh` propagates it, while a fresh checkout raises ModuleNotFoundError at
+        CLI startup. `pyramid.py` sat untracked through a whole 36-file changeset exactly so,
+        with `levels.py` — tracked and modified — importing it at module scope."""
+        pkg = os.path.join(self.root, "plugin", "scripts", "reqmap_engine")
+        out = subprocess.run(["git", "ls-files", "--", "plugin/scripts/reqmap_engine"],
+                             cwd=self.root, capture_output=True, text=True)
+        if out.returncode != 0:
+            self.skipTest("not a git work tree")
+        tracked = {os.path.basename(p) for p in out.stdout.split("\n") if p.strip()}
+        on_disk = {fn for fn in os.listdir(pkg) if fn.endswith(".py")}
+        self.assertEqual(sorted(on_disk - tracked), [],
+                         "engine module(s) not tracked by git — a fresh checkout cannot "
+                         "import the package")
         if not self.root:
             self.skipTest("not the source repo")
 
@@ -5107,3 +5124,81 @@ class AuditCrashIsNotClean(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # t
         out = buf.getvalue()
         self.assertIn("FAIL", out)
         self.assertIn("gate exploded", out)
+
+
+class OneUntaggedList(unittest.TestCase):  # tested-by: REQ-UNTAGGEDSET-1007 @unit
+    """Two reports counted untagged files against different denominators: the risk bucket
+    skipped files that carry no tag by contract, the coverage ratio counted them. The gap
+    was files that appeared in no bucket, were named nowhere, and held the ratio's ceiling
+    below 100% no matter what the author tagged."""
+
+    def _repo(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        reqs = os.path.join(d, "requirements")
+        os.makedirs(reqs)
+        os.makedirs(os.path.join(d, "docs", "adr"))
+        _write(os.path.join(reqs, "ARCH-FOO-001.md"), _spec("ARCH-FOO-001", ["does a thing"]))
+        _write(os.path.join(d, "app.py"), tag("ARCH-FOO-001") + "\ndef f(): pass\n")
+        _write(os.path.join(d, "loose.py"), "def g(): pass\n")          # a real gap
+        # by contract these never carry a tag
+        _write(os.path.join(d, "CHANGELOG.md"), "# Changelog\n")
+        _write(os.path.join(d, "SECURITY.md"), "# Security\n")
+        _write(os.path.join(d, "docs", "adr", "0001-x.md"), "# ADR\n")
+        return d, reqs
+
+    def _ratio_untagged(self, d, reqs):
+        """What the per-directory coverage ratio counts as untagged."""
+        members = R.scan_members(d, reqs)
+        tagged = {os.path.normcase(os.path.abspath(os.path.join(d, fp)))
+                  for hits in members.values() for _r, fp, _l in hits}
+        reqs_abs = os.path.normcase(os.path.abspath(reqs))
+        out = []
+        for fp, rel in R.scan._walk_code(d, reqs):
+            n = os.path.normcase(os.path.abspath(fp))
+            if n.startswith(reqs_abs + os.sep) or R.orphans.untaggable_by_design(rel):
+                continue
+            if n not in tagged:
+                out.append(rel)
+        return sorted(out)
+
+    def test_both_reports_name_the_same_list(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-1
+        d, reqs = self._repo()
+        self.assertEqual(self._ratio_untagged(d, reqs), R.orphans._scan_untagged(d, reqs))
+
+    def test_the_list_is_the_real_gap_only(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-2
+        d, reqs = self._repo()
+        self.assertEqual(R.orphans._scan_untagged(d, reqs), ["loose.py"])
+
+    def test_by_design_untaggable_files_are_named_as_excluded(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-3
+        d, reqs = self._repo()
+        for rel in ("CHANGELOG.md", "SECURITY.md", "docs/adr/0001-x.md"):
+            self.assertTrue(R.orphans.untaggable_by_design(rel), rel)
+        self.assertFalse(R.orphans.untaggable_by_design("loose.py"))
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_coverage(ws)
+        out = buf.getvalue()
+        self.assertIn("excluded", out)          # the difference is stated, not hidden
+        self.assertIn("gate --risk", out)
+
+    def test_the_ratio_can_reach_a_hundred_percent(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-4
+        d, reqs = self._repo()
+        _write(os.path.join(d, "loose.py"), tag("ARCH-FOO-001") + "\ndef g(): pass\n")
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_coverage(ws)
+        self.assertIn("(100%)", buf.getvalue())
+        self.assertEqual(R.orphans._scan_untagged(d, reqs), [])
+
+    def test_json_carries_the_excluded_count(self):  # verifies: REQ-UNTAGGEDSET-1007#CASE-3
+        d, reqs = self._repo()
+        ws = R.Workspace(R.load_requirements(reqs), R.scan_members(d, reqs), reqs, d)
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_coverage(ws, as_json=True)
+        data = json.loads(buf.getvalue())
+        self.assertEqual(data["excluded_by_design"], 3)
+        self.assertTrue(all("dir" in row for row in data["rows"]))

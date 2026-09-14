@@ -1,18 +1,13 @@
 """Drafting requirements from untagged code (`init`'s draft step, `plan`)."""
 import os, re
 
-from .candidates import _file_facts
+from .candidates import SYS_PLACEHOLDER_ID, _assign_arch_ids, _draft_id, _file_facts
 from .parse import parse_frontmatter
-from .scan import _walk_files
-from .tags import PROSE_EXTS, _is_code_file, classify_prose
-
-
-def _draft_id(rel):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-850
-    """Mint a draft capability id from a file's relative path. Path-aware so
-    same-basename files in different dirs don't collide; falls back to FILE when
-    the name has no usable A-Z0-9 token (e.g. `_.py`, non-ASCII stems)."""
-    slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
-    return "DRAFT-" + (slug or "FILE")
+from .scan import _walk_files, read_source_text
+from .tags import (
+    PROSE_EXTS, TAG_RE, _is_code_file, _is_test_path, classify_prose, tag_comment_for,
+    tag_insert_index, tagged_files
+)
 
 
 def _prose_facts(src):  # implements: ARCH-PROSE-024  # implements: REQ-PROSE-901
@@ -48,48 +43,6 @@ def _prose_facts(src):  # implements: ARCH-PROSE-024  # implements: REQ-PROSE-90
     # A prompt corpus (fabric: 255 files) writes every section as `# `: with no H2 at
     # all, the later H1s ARE the sections, and the hint would otherwise be empty.
     return title, (headings or h1_sections)
-
-
-# implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
-SYS_PLACEHOLDER_ID = "SYS-NEEDS-A-NAME-001"
-
-
-def _arch_slug(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
-    """Last two path segments — the spec's grouping key, not a unique id."""
-    parts = [p for p in rel_dir.replace(os.sep, "/").split("/") if p not in ("", ".")]
-    stem = "-".join(parts[-2:]) if parts else "ROOT"
-    return re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
-
-
-def _arch_id_for(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
-    """The architecture id proposed for a source directory (first occupant of the slug).
-
-    The directory is the only structural signal a per-file draft has, and it is a weak
-    one: on this repo it would name capabilities `scripts` and `app/src/lib`, which are
-    not capabilities. That is why the node it produces is a `draft` carrying
-    `level_source: auto` — a proposal to rename, not a claim."""
-    return "ARCH-{}-001".format(_arch_slug(rel_dir))
-
-
-def _assign_arch_ids(rel_dirs):  # implements: REQ-EXTRACT-981
-    """One unique ARCH id per source directory in this run.
-
-    The slug is still the last two path segments (REQ-EXTRACT-981). Two directories
-    that share that slug (`src/lib` and `app/src/lib`) must not collapse onto one
-    node — the second takes `-002`, `-003`, … so the pyramid keeps one ARCH row
-    per directory and every code draft has a parent that exists."""
-    claimed, out = set(), {}
-    for rel_dir in sorted(rel_dirs):
-        slug = _arch_slug(rel_dir)
-        n = 1
-        while True:
-            aid = "ARCH-{}-{:03d}".format(slug, n)
-            if aid not in claimed:
-                out[rel_dir] = aid
-                claimed.add(aid)
-                break
-            n += 1
-    return out
 
 
 def _write_sys_placeholder(reqs_dir, arch_ids):
@@ -245,13 +198,51 @@ def _write_code_draft(dest, cap, rel, fp, src, arch_id):
     return review
 
 
+def _tag_the_source(fp, rel, cap, is_test):
+    # implements: ARCH-EXTRACT-008  # implements: REQ-INITTAG-1008
+    """Write the membership tag for `cap` into its own source file. True when written.
+
+    Without this, `init` wrote a stub and left the source untagged, so the file stayed in
+    the untagged bucket forever and `gate --risk` kept proposing the `init` that had
+    already run — while the stub it produced had zero members. A consumer deleted eleven
+    such orphans by hand before anyone noticed the loop.
+
+    Reversible by `init --wipe`, which strips exactly the markers `tag_comment_for` writes.
+    Skipped, never forced, when the file type has no comment form, when it is already
+    tagged, or when it cannot be read as text — a file the scan cannot decode must not be
+    rewritten from a half-decoding."""
+    line = tag_comment_for(rel, "tested-by" if is_test else "implements", cap)
+    if line is None:
+        return False
+    text, problem = read_source_text(fp)
+    if text is None or problem:
+        return False
+    if TAG_RE.search(text):
+        return False                     # already linked: never a second tag
+    # `read_source_lines` normalises line endings (that is what a tag's line NUMBER means);
+    # a rewrite must not, or every CRLF file silently converts to LF. `splitlines(keepends)`
+    # round-trips exactly, so the bytes outside the inserted line are untouched.
+    lines = text.splitlines(keepends=True)
+    at = tag_insert_index(lines)
+    eol = "\r\n" if "\r\n" in text else "\n"
+    lines.insert(at, line + eol)
+    if at and not lines[at - 1].endswith(("\n", "\r")):
+        lines[at - 1] += eol             # the preamble had no trailing newline
+    try:
+        with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
+            f.writelines(lines)
+    except OSError:
+        return False
+    return True
+
+
 def cmd_extract(ws):
     # implements: ARCH-EXTRACT-008  # implements: ARCH-PROSE-024
     # implements: REQ-EXTRACT-849  # implements: REQ-EXTRACT-850
     """Propose DRAFT requirements for code files that have no member tag yet."""
     members, reqs_dir, code_root = ws.members, ws.reqs_dir, ws.code_root
-    tagged = {fp for hits in members.values() for (_, fp, _) in hits}
-    proposed, used = 0, set()
+    tagged = tagged_files(members)   # the same definition `plan` reports (REQ-PLANTAGGED-1005)
+    proposed, tagged_n, used = 0, 0, set()
     jobs = []            # pending writes: (fp, rel, is_prose, dest, cap, rel_dir)
     os.makedirs(reqs_dir, exist_ok=True)
     for fp, rel in _walk_files(code_root, reqs_dir,
@@ -276,8 +267,8 @@ def cmd_extract(ws):
     by_dir = {}          # rel dir -> [code-level draft ids], for the ARCH rung
     for fp, rel, is_prose, dest, cap, rel_dir in jobs:
         dirpath, fn = os.path.dirname(fp), os.path.basename(fp)
-        with open(os.path.join(dirpath, fn), encoding="utf-8", errors="ignore") as f:
-            src = f.read()
+        src, _problem = read_source_text(os.path.join(dirpath, fn))
+        src = src or ""          # undecodable: draft the stub from its path, not from rubbish
         arch_id = id_of[rel_dir]
         if is_prose:
             review = _write_prose_draft(dest, cap, rel, fn, src, arch_id)
@@ -285,7 +276,9 @@ def cmd_extract(ws):
             review = _write_code_draft(dest, cap, rel, fp, src, arch_id)
         proposed += 1
         by_dir.setdefault(rel_dir, []).append(cap)
-        print(f"{review:14} {cap}  <- {rel}")
+        linked = _tag_the_source(fp, rel, cap, _is_test_path(rel))
+        tagged_n += linked
+        print(f"{review:14} {cap}  <- {rel}{'' if linked else '   (source not tagged)'}")
     # The two rungs above the code level. Written last, so they know their children.
     arch_ids = _write_arch_drafts(reqs_dir, by_dir, id_of)
     n_sys = _write_sys_placeholder(reqs_dir, arch_ids)
@@ -295,6 +288,11 @@ def cmd_extract(ws):
               f"invented them and a directory is not a capability. Rename, merge or delete "
               f"them; the code level below is the only rung it can assert.")
     print(f"\n{proposed} draft requirements proposed. Review the REVIEW ones before promoting.")
+    if proposed:
+        print(f"{tagged_n} of {proposed} source file(s) were linked to their draft in place "
+              f"(`init --wipe` removes those tags). The rest have no comment form the "
+              f"engine writes, or were already linked — tag them by hand or they stay in "
+              f"the untagged bucket.")
     return 0
 
 

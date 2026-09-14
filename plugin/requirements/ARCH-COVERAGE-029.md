@@ -22,6 +22,7 @@ satisfies: [SYS-REPORT-105]
 
 Every bullet below is binding.
 - `health` reports the count of scannable code files carrying no membership tag as a read-only `untagged` signal — present only when a code root is scanned, and never affecting the score or exit code. [[REQ-COVERAGE-836]] details the behaviour.
+- The untagged bucket and the per-directory coverage ratio exclude the same by-design-untaggable files and name one list, and the ratio states what it excluded. [[REQ-UNTAGGEDSET-1007]]
 
 ## Cases
 CASE-1
@@ -131,3 +132,64 @@ CASE-7 — tagging or ignoring a file drops it from the count
   When   `health --json` runs after each change
   Then   the `untagged` count drops by one either way, with no separate exemption mechanism
 
+
+--------------------
+
+
+---
+id: REQ-UNTAGGEDSET-1007
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.10
+satisfies: [ARCH-COVERAGE-029]
+---
+
+# Two untagged reports, one list
+
+## Description
+> Two reports counted untagged files against different denominators. The risk bucket
+> skipped files that carry no tag by contract — decision records, CHANGELOG, LICENSE,
+> issue templates — while the per-directory ratio counted them. A consumer tagged every
+> file the bucket named and the ratio still read 270/272: two root files that appeared in
+> no bucket, were named nowhere, and put the ratio's ceiling permanently below 100%. A
+> number nobody can move is a number nobody reads.
+
+Every bullet below is binding.
+- `untaggable_by_design` is the single predicate for a scannable file that will never carry
+  a membership tag: prose in the auto-draft "ignore" bucket, and repo boilerplate.
+- The untagged bucket and the per-directory coverage ratio both exclude exactly what that
+  predicate excludes, so both name one list.
+- The coverage report states how many files it excluded and why, and points at the other
+  report, so the exclusion is visible rather than silent.
+- The JSON form carries `excluded_by_design` alongside the per-directory rows.
+
+## Cases
+CASE-1 — the two reports agree
+  Given  a repository holding one untagged source file plus a CHANGELOG, a SECURITY.md and
+         a decision record
+  When   the untagged bucket and the coverage ratio are both computed
+  Then   they name the same single file
+
+CASE-2 — only the real gap is listed
+  Given  that same repository
+  When   the untagged bucket is computed
+  Then   it contains the untagged source file and nothing else
+
+CASE-3 — the exclusion is stated
+  Given  that same repository
+  When   the coverage report runs
+  Then   it names the count of excluded files, says they carry no tag by contract, and
+         points at the other report; the JSON form carries the same count
+
+CASE-4 — the ratio is reachable
+  Given  every file the bucket names has been tagged
+  When   the coverage report runs
+  Then   it reads 100% and the bucket is empty
+
+## Context
+**Notes**
+- The fix is exclusion, not inclusion: counting a file that cannot be tagged puts the
+  ceiling below 100% forever, and the author has no action that moves it. Excluding it and
+  saying so leaves a number that reaching is possible and means something.
