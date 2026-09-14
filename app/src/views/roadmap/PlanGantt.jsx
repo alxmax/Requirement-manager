@@ -264,7 +264,6 @@ ${h.headline}`}
                   const left = bar.startIdx * PX + 3;
                   const width = Math.max((bar.endIdx - bar.startIdx + 1) * PX - 6, 72);
                   const top = PAD + bar.subRow * ROW_H;
-                  const dashed = bar.kind === "ghost";
                   return (
                     <div
                       key={bar.key}
@@ -274,9 +273,7 @@ ${h.headline}`}
                         position: "absolute", left, top, width, height: ROW_H - 4,
                         background: tone.bg, color: tone.fg, borderRadius: 4,
                         boxSizing: "border-box",
-                        border: dashed
-                          ? `1.5px dashed ${tone.edge}`
-                          : `1px solid color-mix(in oklch, ${tone.edge} 40%, transparent)`,
+                        border: `1px solid color-mix(in oklch, ${tone.edge} 40%, transparent)`,
                         borderLeft: `3px solid ${tone.edge}`,
                         fontSize: 11, fontWeight: 600, padding: "0 8px",
                         display: "flex", alignItems: "center", overflow: "hidden",
