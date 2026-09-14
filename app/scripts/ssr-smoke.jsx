@@ -240,10 +240,10 @@ const noCacheSpecEn = renderToString(
 const noCacheSpecRo = renderToString(
   <I18nProvider initialLocale="ro">{specOf("I18N-NOCACHE-TEST-001")}</I18nProvider>);
 const i18nContentChecks = [
-  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
-  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
-  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-5
-  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-5
+  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],
+  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],
+  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],
+  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],
   // The boundary the feature exists to respect: the CHROME toggle never translates the
   // artifact under review. Asserted on a requirement with NO `i18n` cache entry, because
   // a cached translation IS rendered, with a badge — that is REQ-TRANSLATE-938's job and

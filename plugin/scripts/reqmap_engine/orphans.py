@@ -5,7 +5,7 @@ import fnmatch, os
 
 from . import config as cfg
 from .git import _git
-from .scan import _walk_code, _walk_files, load_ignore
+from .scan import _walk_code, _walk_files, load_ignore, read_source_lines, read_source_text
 from .tags import PROSE_EXTS, TAG_RE, _is_code_file, _scan_file_tags, classify_prose
 
 
@@ -130,19 +130,32 @@ _UNTAGGED_NOISE = ("adr/*", "*/adr/*", "decisions/*", "*/decisions/*",
                    "*dependabot.yml", "*/FUNDING.yml")
 
 
+def untaggable_by_design(rel):
+    # implements: ARCH-COVERAGE-029  # implements: REQ-UNTAGGEDSET-1007
+    """True for a scannable file that will never carry a membership tag by contract —
+    prose in the auto-draft "ignore" bucket (CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE,
+    `_`-prefixed: ARCH-PROSE-024) and repo boilerplate (`_UNTAGGED_NOISE`).
+
+    The one definition, because two reports disagreed about it: the "Untagged files"
+    bucket skipped these, the per-directory coverage ratio counted them, and the gap
+    was two root files that appeared in no bucket, were named nowhere, and made the
+    ratio unable to reach 100% no matter what the author tagged."""
+    fn = os.path.basename(rel)
+    if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
+        return True
+    return any(fnmatch.fnmatch(rel, pat) for pat in _UNTAGGED_NOISE)
+
+
 def _scan_untagged(code_root, reqs_dir=None):
     # implements: ARCH-NEXT-013  # implements: ARCH-COVERAGE-029
     # implements: REQ-NEXT-886  # implements: REQ-COVERAGE-836
+    # implements: REQ-UNTAGGEDSET-1007
     """Scannable files that carry no membership tag at all, as sorted rel paths.
-    Skips the auto-draft "ignore" bucket and `_UNTAGGED_NOISE`."""
+    Skips whatever `untaggable_by_design` excludes — the same set the coverage
+    ratio excludes."""
     untagged = []
     for fp, rel in _walk_code(code_root, reqs_dir):
-        fn = os.path.basename(rel)
-        if fn.endswith(PROSE_EXTS) and classify_prose(rel) == "ignore":
-            # CLAUDE.md, TODO.md, CHANGELOG.md, LICENSE, _-prefixed: invisible by
-            # contract (ARCH-PROSE-024)
-            continue
-        if any(fnmatch.fnmatch(rel, pat) for pat in _UNTAGGED_NOISE):
+        if untaggable_by_design(rel):
             continue
         tags = _scan_file_tags(fp)
         if tags is not None and not tags:
@@ -167,11 +180,27 @@ def orphan_code_files(code_root, covered, reqs_dir=None):
     out = []
     for fp, rel in _walk_files(code_root, reqs_dir,
                                lambda fn, r: fn.endswith(ORPHAN_CODE_EXTS) and r not in covered):
-        try:
-            with open(fp, encoding="utf-8", errors="ignore") as f:
-                loc = sum(1 for _ in f)
-        except OSError:
+        lines, _problem = read_source_lines(fp)
+        if lines is None:
             continue
+        loc = len(lines)
         if loc >= cfg.ORPHAN_CODE_MIN_LOC:
             out.append(rel)
+    return sorted(out)
+
+
+def undecodable_source_files(code_root, reqs_dir=None):
+    # implements: ARCH-UNREADABLE-070  # implements: REQ-UNREADABLE-1004
+    """Sorted `(rel, reason)` for every scannable file the scan cannot read as text.
+
+    The counterpart of `tagged_unscanned_files`: that one reports a tag in a file type the
+    walk never opens, this one a file the walk DOES open and cannot decode. Both fail the
+    same way from the outside — the tag is silently not a member — and neither is visible
+    without being named. A UTF-16 file with a BOM is decoded and never appears here; what
+    remains is a file whose bytes carry NULs with nothing to key the encoding on."""
+    out = []
+    for fp, rel in _walk_code(code_root, reqs_dir):
+        _text, problem = read_source_text(fp)
+        if problem:
+            out.append((rel, problem))
     return sorted(out)

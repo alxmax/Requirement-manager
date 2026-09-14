@@ -77,8 +77,19 @@ def _wipe(reqs_dir, code_root):
             # (`"# implements: X\n..."` -> `"`, a SyntaxError) and blanked the fenced
             # examples in every README that documents the tagging convention.
             hits = {ln for _role, _cid, ln in (_scan_file_tags(fp, lines) or [])}
-            new_lines = [_strip_line_tag(l) if i in hits else l
-                         for i, l in enumerate(lines, 1)]
+            # A line that was NOTHING but a tag comment leaves no blank line behind.
+            # `_strip_line_tag` blanks it (its own tested contract, and the right answer
+            # for `def f():  # implements: X`), but `init` now writes whole-line tags
+            # itself, so a wipe that left one blank per file would make init --wipe --> init
+            # grow the source a line at a time. implements: REQ-INITTAG-1008
+            new_lines = []
+            for i, l in enumerate(lines, 1):
+                if i not in hits:
+                    new_lines.append(l)
+                    continue
+                stripped = _strip_line_tag(l)
+                if stripped.strip():
+                    new_lines.append(stripped)
             if new_lines != lines:
                 with open(fp, "w", encoding="utf-8", errors="surrogateescape", newline="") as f:
                     f.writelines(new_lines)

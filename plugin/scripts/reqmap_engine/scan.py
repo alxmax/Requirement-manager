@@ -1,7 +1,7 @@
 """The code walk: .reqmapignore, pruning, the cached scan of every tag, `verifies:` coverage and
 test levels.
 """
-import fnmatch, json, os
+import fnmatch, io, json, os
 
 from .tags import (
     AC_VERIFY_RE, TEST_LEVEL_RE, _BACKTICK_RE, _ID_RE, _is_code_file, _scan_file_tags,
@@ -125,6 +125,60 @@ def _walk_files(code_root, reqs_dir=None, accept=None):
                 yield fp, rel
 
 
+# A source file the scan cannot read as UTF-8 is not empty to it — it is INVISIBLE. With
+# `errors="ignore"` a UTF-16 file decodes to its text interleaved with dropped NULs: every
+# tag in it silently stops being a member, and its line count doubles. MetaEditor saves
+# `.mq4` as UTF-16 LE by default, so this is a consumer's first file, not a corner case.
+_UTF16_BOMS = (b"\xff\xfe", b"\xfe\xff")
+# Without a BOM the only evidence is how MANY NULs there are, and "any NUL" is the wrong
+# test: this repo's own `app/src/lib/search.js` is valid UTF-8 carrying two deliberate NUL
+# sentinels in a string literal, and refusing it would have silently dropped four real
+# member tags — the exact failure this decoder exists to prevent, inverted. UTF-16 LE/BE
+# holding mostly-ASCII source is ~50% NULs; a sentinel is a few in thousands of bytes. The
+# threshold sits far from both, and errs toward reading the file: a missed BOM-less UTF-16
+# file is the status quo, while a wrongly refused UTF-8 file is a new regression.
+_NUL_DENSITY_REFUSE = 0.10
+
+
+def read_source_text(path):
+    # implements: ARCH-UNREADABLE-070  # implements: REQ-UNREADABLE-1004
+    """`(text, problem)`: the text the scan should read for one source file, and a short
+    reason when it is not readable as text at all.
+
+    A UTF-16 BOM is decoded instead of mangled, so tags inside such a file are members like
+    any other. Without a BOM, a file whose decoded text is at least `_NUL_DENSITY_REFUSE`
+    NULs is refused whole — half a decoding is worse than none — so it yields `("", reason)`
+    and RM033 names it, rather than a caller reading a broken tag or a doubled line count
+    out of it. `(None, None)` is the unreadable file every call site already skipped."""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return None, None
+    if data[:2] in _UTF16_BOMS:
+        try:
+            return data.decode("utf-16"), None
+        except (UnicodeDecodeError, ValueError):
+            return "", "undecodable UTF-16"
+    text = data.decode("utf-8", "ignore")
+    if text and text.count("\x00") >= _NUL_DENSITY_REFUSE * len(text):
+        return "", "not UTF-8 (UTF-16 without BOM?)"
+    return text, None
+
+
+def read_source_lines(path):
+    # implements: ARCH-UNREADABLE-070  # implements: REQ-UNREADABLE-1004
+    """`(lines, problem)` — `read_source_text` split exactly as `readlines()` splits it.
+
+    `str.splitlines` would ALSO break on form feed and U+0085, shifting every line number
+    after one; `io.StringIO(..., newline=None)` reproduces universal-newline `readlines()`
+    byte for byte, which is what every tag's recorded line number already means."""
+    text, problem = read_source_text(path)
+    if text is None:
+        return None, None
+    return io.StringIO(text, newline=None).readlines(), problem
+
+
 def _walk_code(code_root, reqs_dir=None):  # implements: ARCH-SCAN-002
     """(abs, rel) for every scannable SOURCE file — the walk with the code-file filter."""
     return _walk_files(code_root, reqs_dir, lambda fn, _rel: _is_code_file(fn))
@@ -183,10 +237,8 @@ def scan_all(code_root, reqs_dir=None, cache=False):
                     and "ac" in e and "lv" in e):
                 ent = e
         if ent is None:
-            try:
-                with open(fp, encoding="utf-8", errors="ignore") as f:
-                    lines = f.readlines()
-            except OSError:
+            lines, _problem = read_source_lines(fp)
+            if lines is None:
                 continue          # unreadable file is skipped, never fatal
             ac, lv = {}, {}
             _extract_coverage(fp, rel, lines, ac, lv)
@@ -228,10 +280,8 @@ def _walk_code_lines(code_root, reqs_dir=None):
     fence is not read as a real tag. A caller receives lines already masked and only
     has to say what a tag means."""
     for fp, rel in _walk_code(code_root, reqs_dir):
-        try:
-            with open(fp, encoding="utf-8", errors="ignore") as f:
-                lines = f.readlines()
-        except OSError:
+        lines, _problem = read_source_lines(fp)
+        if lines is None:
             continue
         for i, masked in _visible_lines(fp, lines):
             yield rel, i, masked

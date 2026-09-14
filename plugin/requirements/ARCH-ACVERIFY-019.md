@@ -24,6 +24,7 @@ Every bullet below is binding.
 - The gate scans code for `# verifies: <id>#AC-N` tags and maps each to the labelled criterion it covers — the per-criterion half of behaviour-sync. [[REQ-ACVERIFY-821]]
 - A confirmed requirement with no `verifies` tag, with unlabelled criteria, or with an inspection-only criterion is exempt from the per-criterion warning; the coarser `tested-by` check still applies to it. [[REQ-ACVERIFY-822]]
 - The map emits `clauses`/`covered`/`gap` only on a requirement that has adopted per-criterion tagging, and the check never changes the gate's exit code. [[REQ-ACVERIFY-823]]
+- A `verifies:` tag whose case label, or whose requirement id, has no referent is reported as the broken link it is — the reverse direction, unchecked until now. [[REQ-DANGLINGVERIFY-1009]]
 
 ## Cases
 CASE-1
@@ -224,3 +225,90 @@ CASE-3 — an unverified criterion warns but the gate exits 0
   When   `gate` runs
   Then   the run warns about AC-2 and still exits 0
 
+
+--------------------
+
+
+---
+id: REQ-DANGLINGVERIFY-1009
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+milestone: v7.11
+satisfies: [ARCH-ACVERIFY-019]
+---
+
+# A verifies tag that points at nothing
+
+## Description
+> Per-case coverage was checked in one direction only: RM013 named a labelled case with no
+> tag. The reverse — a `# verifies: <id>#CASE-N` naming a case, or a requirement, that does
+> not exist — was accepted in silence by every rule. That is not a cosmetic gap. The bogus
+> tag is precisely what switches RM013 ON, because it makes the requirement's coverage
+> non-empty, so a single typo produced `0/2 automatable criteria carry a verifies: tag` for
+> a file that plainly carries one, and the reader had no way to see why. Run on this repo's
+> own 1061 hand-written tags the first time, the check found three: cases removed or
+> renumbered while the tags that named them stayed behind.
+
+Every bullet below is binding.
+- `gate` reports each `# verifies:` tag whose case label is not one the requirement
+  declares, naming the requirement, the label, the file and line, and the labels that do
+  exist.
+- It reports a `# verifies:` tag whose requirement id matches no requirement at all,
+  because RM001 reads only `implements:`/`tested-by:` members and never the per-case
+  coverage, so that link was unreported by both rules.
+- A requirement whose acceptance criteria carry no labels is exempt — per-case coverage
+  only applies where cases are labelled, the same exemption RM013 makes.
+- The check is a warning and never changes the exit code.
+
+## Cases
+CASE-1 — a case label with no referent is named
+  Given  a requirement labelling CASE-1 and CASE-2, and a test tagged
+         `# verifies: <id>#CASE-99`
+  When   `gate` runs
+  Then   it prints an RM034 warning naming CASE-99, saying it names no such case, and
+         listing CASE-1 and CASE-2 as the labels that do exist
+
+CASE-2 — a real label is silent
+  Given  tests tagged `# verifies: <id>#CASE-1` and `#CASE-2` on that same requirement
+  When   `gate` runs
+  Then   no RM034 warning is printed
+
+CASE-3 — the warning locates the tag
+  Given  the dangling tag of CASE-1
+  When   `gate` runs
+  Then   the warning names the file and the line the tag sits on
+
+CASE-4 — an unlabelled requirement cannot dangle
+  Given  a requirement whose acceptance section uses bullets with no `CASE-N` labels, and a
+         test tagged `# verifies: <id>#CASE-3`
+  When   `gate` runs
+  Then   no RM034 warning is printed
+
+CASE-5 — a tag naming no requirement at all is reported here
+  Given  a test tagged `# verifies: ARCH-NOSUCH-404#CASE-1` where no such requirement exists
+  When   `gate` runs
+  Then   RM034 names that id and says it names no such requirement
+
+## Context
+**Notes**
+- The label set compared against is `_labeled_acs`, every declared label — NOT
+  `_automatable_acs`, which RM013 uses. The latter drops criteria marked
+  `verifiable by: inspection|manual`, and a tag on one of those names a case that really
+  exists; reporting it would be a false finding.
+- Warn, never error: a stale label is a documentation slip, and the gate's errors stay
+  reserved for link integrity between requirements and code members.
+- This closes a condition first raised as blocking in the Senate run
+  `2026-09-02_201621`, recorded there as an override and never built. It is a precondition
+  for any future tool that writes `verifies:` tags in bulk: without it, a generated wrong
+  label is indistinguishable from a correct one.
+
+**Example**
+On this corpus the first run named `ARCH-DECOMPOSE-050#CASE-8` (the requirement has seven),
+`ARCH-MAP-007#CASE-7` (it has five) and four copies of `REQ-TRANSLATE-938#CASE-5` (it has
+three). In each the child-level tag on the same line was correct; the parent-level one was
+a leftover.
+
+**Current implementation**
+- `_dangling_verifies_rule` in `reqmap_engine/rules.py`, registered as RM034.

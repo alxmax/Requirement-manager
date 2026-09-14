@@ -359,8 +359,10 @@ COMMANDS = {
                 "flag": "--levels",
                 "type": "bool",
                 "help": (
-                    "Propose a V-model rung for every requirement that declares no `level:`; "
-                    "--apply writes them, each marked `level_source: auto`."
+                    "Propose a V-model rung for every requirement that declares no `level:`, "
+                    "plus the rungs above: one draft `ARCH-<FAMILY>-001` per id-prefix family, "
+                    "`SYS-NEEDS-A-NAME-001` at the apex, and the `satisfies:` edges between "
+                    "them. --apply writes all of it, each line marked `level_source: auto`."
                 ),
             },
             {"name": "as_json", "flag": "--json", "type": "bool",

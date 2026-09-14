@@ -5,6 +5,7 @@ and the section reader.
 Part of the `test_reqmap` suite — run it through the aggregator (`python
 scripts/test_reqmap.py`), or on its own with `python -m unittest test_reqmap_scan`."""
 import ast
+import codecs
 import errno
 import io
 import json
@@ -1625,3 +1626,98 @@ class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # te
     def test_only_the_first_matching_section_is_read(self):  # verifies: REQ-SECTIONS-994#CASE-2
         body = "## Description\n- first\n\n## Notes\nx\n\n## Description\n- second\n"
         self.assertEqual(R._bullets(body, "description"), ["first"])
+
+
+class UndecodableSources(unittest.TestCase):  # tested-by: ARCH-UNREADABLE-070 @unit  # tested-by: REQ-UNREADABLE-1004 @unit
+    """A file the scan opens but cannot decode used to look read: `errors="ignore"` turned
+    UTF-16 into interleaved rubbish, so its tags vanished and its line count doubled."""
+
+    SRC = "# implements: ARCH-EXAMPLE-001\n" + "x = 1\n" * 40      # 41 lines
+
+    def _tree(self, d):
+        with open(os.path.join(d, "bom.py"), "wb") as f:
+            f.write(codecs.BOM_UTF16_LE + self.SRC.encode("utf-16-le"))
+        with open(os.path.join(d, "nobom.py"), "wb") as f:
+            f.write(self.SRC.encode("utf-16-le"))
+        _write(os.path.join(d, "plain.py"), self.SRC)
+
+    def test_utf16_with_bom_is_a_real_member(self):  # verifies: REQ-UNREADABLE-1004#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            self._tree(d)
+            files = {fp for _r, fp, _l in R.scan_members(d, None)["ARCH-EXAMPLE-001"]}
+            self.assertIn("bom.py", files)       # was invisible: every tag in it was lost
+            self.assertIn("plain.py", files)
+            self.assertNotIn("nobom.py", files)  # nothing to key the encoding on: not guessed
+
+    def test_utf16_line_count_is_not_doubled(self):  # verifies: REQ-UNREADABLE-1004#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self._tree(d)
+            for name, want in (("bom.py", 41), ("plain.py", 41), ("nobom.py", 0)):
+                facts = R.candidates._file_facts(os.path.join(d, name), name)
+                self.assertEqual(facts["loc"], want, name)   # bom.py reported 82 before
+
+    def test_bom_less_utf16_is_named_with_a_reason(self):  # verifies: REQ-UNREADABLE-1004#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self._tree(d)
+            bad = R.orphans.undecodable_source_files(d)
+            self.assertEqual([rel for rel, _why in bad], ["nobom.py"])
+            self.assertIn("UTF-8", bad[0][1])
+
+    def test_unreadable_file_is_skipped_not_fatal(self):
+        text, problem = R.scan.read_source_text(os.path.join(tempfile.gettempdir(), "no-such-f"))
+        self.assertIsNone(text)
+        self.assertIsNone(problem)
+
+    def test_lines_split_exactly_like_readlines(self):  # verifies: REQ-UNREADABLE-1004#CASE-5
+        # str.splitlines() also breaks on form feed and U+0085, which would shift every
+        # line number after one — including the line a tag was recorded on.
+        raw = b"a\r\nb\x0cc\rd\n# implements: ARCH-EXAMPLE-001\ne\xc2\x85f\ng"
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "ff.py")
+            with open(p, "wb") as f:
+                f.write(raw)
+            with open(p, encoding="utf-8", errors="ignore") as f:
+                want = f.readlines()
+            got, problem = R.scan.read_source_lines(p)
+            self.assertEqual(got, want)
+            self.assertIsNone(problem)
+            self.assertNotEqual(got, raw.decode("utf-8", "ignore").splitlines(keepends=True))
+
+    def test_utf8_file_with_a_nul_sentinel_keeps_its_tags(self):  # verifies: REQ-UNREADABLE-1004#CASE-6
+        # this repo's own app/src/lib/search.js: valid UTF-8 with two deliberate NUL
+        # sentinels in a string literal. "any NUL means UTF-16" dropped its four tags.
+        body = ('// implements: ARCH-EXAMPLE-001\n'
+                'const corpus = { ...docs, "\x00query": qtok };\n'
+                'const other = "\x00key";\n' + "// filler\n" * 400)
+        self.assertLess(body.count("\x00") / len(body), 0.001)   # nothing like UTF-16
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "search.js"), "w", encoding="utf-8", newline="") as f:
+                f.write(body)
+            files = {fp for _r, fp, _l in R.scan_members(d, None).get("ARCH-EXAMPLE-001", [])}
+            self.assertEqual(files, {"search.js"})
+            self.assertEqual(R.orphans.undecodable_source_files(d), [])
+
+    def test_utf8_bom_file_is_read_normally(self):  # verifies: REQ-UNREADABLE-1004#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            p = os.path.join(d, "u8bom.py")
+            with open(p, "wb") as f:
+                f.write(codecs.BOM_UTF8 + self.SRC.encode("utf-8"))
+            text, problem = R.scan.read_source_text(p)
+            self.assertIsNone(problem)
+            self.assertIn("implements: ARCH-EXAMPLE-001", text)
+            self.assertEqual(R.orphans.undecodable_source_files(d), [])
+
+    def test_gate_warns_rm033_and_stays_green(self):  # tested-by: ARCH-UNREADABLE-070 @integration  # verifies: REQ-UNREADABLE-1004#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "ARCH-EXAMPLE-001.md"),
+                   _spec("ARCH-EXAMPLE-001", ["does a thing"], status="draft"))
+            with open(os.path.join(d, "nobom.py"), "wb") as f:
+                f.write(self.SRC.encode("utf-16-le"))
+            reqs = R.load_requirements(d)
+            members = R.scan_members(d, d)
+            out = io.StringIO()
+            with redirect_stdout(out), redirect_stderr(out):
+                rc = R.cmd_check(R.Workspace(reqs, members, d, d), False)
+            self.assertEqual(rc, 0)
+            self.assertIn("RM033", out.getvalue())
+            self.assertIn("nobom.py", out.getvalue())

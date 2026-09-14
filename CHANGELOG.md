@@ -1,5 +1,137 @@
 # Changelog
 
+## plugin `v7.11.0` — 2026-09-14
+
+**What a nine-senator audit of three open items actually returned: one of them was a
+release-blocking bug filed as a courtesy, one was a capability this repo deleted six days
+earlier, and the cheap one surfaced three broken links in our own corpus.**
+Bundle: `runs/senate/2026-09-14_205651-senate-reqmap-three-open-items.json` (MODIFY, 9-0-0).
+
+- **`pyramid.py` was untracked while `levels.py` imported it.** `levels.py:7` does
+  `from .pyramid import (...)` at module scope and sits in the CLI's startup chain, so a
+  fresh checkout of the previous changeset raised `ModuleNotFoundError` on `import reqmap`
+  — `gate --help` included. Not a stale map: a **dead engine**, invisible on the author's
+  machine because the working tree has the file and `sync_reqmap.sh` copies from it.
+  Now tracked, and `DocsAreTrue.test_every_engine_module_is_tracked_by_git` fails the suite
+  for any engine module git does not have.
+- **New RM034: a `verifies:` tag that points at nothing** (`ARCH-ACVERIFY-019` /
+  `REQ-DANGLINGVERIFY-1009`). RM013 read one direction only — a labelled case with no tag.
+  The reverse was unguarded, and it is worse than cosmetic: a bogus label is exactly what
+  switches RM013 ON (coverage becomes non-empty), so one typo printed
+  `0/2 automatable criteria carry a verifies: tag` for a file that plainly carries one.
+  RM034 also reports a `verifies:` naming a requirement that does not exist — `RM001` reads
+  `members` and never the per-case coverage, so that link was unreported by both rules.
+  - First run on this repo's own 1061 hand-written tags found **three** real dangling
+    labels (`ARCH-DECOMPOSE-050#CASE-8` of seven, `ARCH-MAP-007#CASE-7` of five, and four
+    copies of `REQ-TRANSLATE-938#CASE-5` of three) plus a phantom `REQ-X#AC-1` that the
+    grammar's own doc comment had been feeding the scanner. All four are fixed here; in
+    every case the child-level tag on the same line was already correct.
+  - It compares against `_labeled_acs`, every declared label — not RM013's
+    `_automatable_acs`, which drops inspection-only criteria a tag may legitimately name.
+- **`init --plan` now states the id `init` will mint**, as `draft_id` beside `suggested_id`
+  (`REQ-PLANDRAFTID-1010`). Disclosure, not unification: `suggested_id` is a group-level
+  authoring name that may span several files, while the writer mints one id per file whose
+  `DRAFT-` prefix is a marker asserted in `ARCH-EXTRACT-008`'s confirmed cases and keyed on
+  by `init --wipe` and the risk report. Renaming either side would break a live marker to
+  fix a reporting gap. `_draft_id` moved into `candidates.py` so the plan can call it —
+  `draft.py` imports `candidates.py` and never the reverse — with its behaviour unchanged.
+- **Declined: `clarify --link-cases`.** It is `sync --suggest-verifies` / `verifies.py`
+  (197 lines), retired six days ago in `be78724` as ADR-0037 decision 4's own first pass,
+  with `ARCH-SUGGESTVERIFIES-047` still at `status: deprecated`; the proposed TF-IDF matcher
+  is looser than the whole-token + distinctive-id + refuse-on-ambiguity guards that were
+  deleted. Its premise ("per-case linking never happens by hand") is falsified by this
+  repo's 1061 hand-written tags, and RM013's `if labels and covered:` guard means it would
+  have *started* warnings on a zero-tag corpus rather than stopped them. If it is ever
+  wanted, the instrument is un-deprecating that requirement under a superseding ADR, with a
+  published hold-out precision against the measured 0.2414 chance baseline.
+
+Engine `2026-09-14.4`. 1126 tests (+9); gate 0 errors.
+
+## plugin `v7.10.0` — 2026-09-14
+
+**Five gaps the Dashboard_Sync feedback found, each one a place where two parts of the
+engine answered the same question differently**
+([the report](docs/audit/2026-09-14-feedback-flat-corpus-dashboard-sync.md), items A–E).
+
+- **A file the scan cannot decode is now named, not half-read.** Four call sites opened
+  source files with `errors="ignore"`, which turns a UTF-16 file into its text interleaved
+  with dropped NULs: every tag in it silently stopped being a member and its line count
+  doubled (a 2041-line `.mq4` reported 4089). One decoder — `read_source_text` /
+  `read_source_lines` in `scan.py` — now serves `scan_all`, `_walk_code_lines`,
+  `candidates._file_facts`, `orphans.orphan_code_files` and the draft writer. A UTF-16 BOM
+  is decoded, so tags inside a MetaEditor-saved file are ordinary members; a file that stays
+  undecodable is reported by the new **RM033** (warn, exit 0) instead of counting as
+  untagged forever. Splitting is `io.StringIO(..., newline=None).readlines()`, not
+  `str.splitlines()`, which would break on form feed and shift every later tag's line
+  number. New `ARCH-UNREADABLE-070` / `REQ-UNREADABLE-1004`.
+  - The BOM-less test is NUL **density**, not "contains a NUL": this repo's own
+    `app/src/lib/search.js` is valid UTF-8 with two deliberate NUL sentinels in a string
+    literal, and the presence test dropped four real member tags — the exact failure the
+    decoder exists to prevent, inverted. It errs toward reading the file.
+- **`--plan` and the write path now share one definition of "already accounted for".** The
+  plan counted only `implements:`, the write path counted every role, so a test file linked
+  by `tested-by:` was reported as a NEW draft `init` would never write — 123 reported
+  candidates on a 96%-tagged corpus, about 120 of them tests. Both now read
+  `tags.tagged_files`. New `REQ-PLANTAGGED-1005`.
+- **`--plan` carries the pyramid it would write.** `plan.json` held zero `level` keys, so
+  the only way to see what rungs a run would produce was to let it write every file first.
+  Each candidate the write path would draft now carries `level` and `arch_id`, and the plan
+  carries `pyramid: {architecture, system}` — minted by the same function the writer uses,
+  which moved one layer down into `candidates.py` for the purpose. A candidate that is
+  already linked carries `null` for both: it is not drafted, so no rung is claimed. New
+  `REQ-PLANLEVEL-1006`.
+- **`init` links each source to the draft it wrote.** It wrote the stub and left the file
+  untagged, so the stub had zero members, the file stayed in the untagged bucket, and
+  `gate --risk` kept proposing the `init` that had already run; a consumer deleted fifteen
+  such orphans by hand. The tag is spelled in the file's own comment form (`#`, `//`,
+  `/* */`, `--`, `<!-- -->`), goes after any line that must stay first (shebang, XML/HTML
+  preamble, `@charset`), preserves the file's line endings, and is `tested-by:` for a test
+  path. Already-tagged and undecodable files are skipped. `init --wipe` now drops a
+  whole-line tag rather than leaving a blank line, so wipe-then-init is a fixed point. New
+  `REQ-INITTAG-1008`.
+- **The two untagged reports name one list.** The risk bucket skipped files that carry no
+  tag by contract (decision records, CHANGELOG, LICENSE, issue templates) and the
+  per-directory ratio counted them, so a consumer who tagged everything the bucket named
+  still read 270/272 — two files named nowhere, holding the ceiling below 100% forever.
+  `orphans.untaggable_by_design` is now the one predicate both use, and the ratio states how
+  many files it excluded and points at the other report. The JSON form gains
+  `excluded_by_design`. New `REQ-UNTAGGEDSET-1007`.
+
+Engine `2026-09-14.3`. 25 new regression tests (1116 total); gate 0 errors.
+
+## plugin `v7.9.0` — 2026-09-14
+
+**The level retrofit writes the whole pyramid, in `init`'s shape**
+([ADR-0038](docs/adr/0038-the-retrofit-writes-the-whole-pyramid-in-inits-shape.md)).
+
+Measured on the first real consumer corpus the retrofit met (194 requirements, 152
+confirmed, none levelled): `clarify --levels --apply` produced **193 architecture / 0 code**
+and took the gate from **0 to 304 warnings**, all RM032. The corpus has 0 `verifies:` tags
+and 122 `tested-by:` files, so the old rule — `code` only with a `verifies:` tag — put every
+per-file behaviour group one rung too high, and then RM032 correctly said so twice per
+requirement. The model was right; the classification was wrong.
+
+- **`code` is the default for a requirement bound to code.** `architecture` is proposed only
+  where the engine has evidence of a GROUP: two or more contract groups (the bold labels
+  `clarify --decompose` splits on) or a `lint_exempt: [over-scoped]`/`[ac-count-high]` entry,
+  and the reason names `clarify <ID> --decompose --apply`. Under-specification (few cases,
+  no test) stays lint's finding and never moves a requirement up a rung.
+- **`--apply` writes the two upper rungs and the edges**, exactly as `init` does for a fresh
+  repo: one draft `ARCH-<FAMILY>-001` per id-prefix family with `LEVEL_FAMILY_MIN` (3,
+  tunable) or more code members (`JS-TIMELINE-001` → `ARCH-JS-001`; smaller prefixes share
+  `ARCH-NEEDS-A-NAME-001`), `SYS-NEEDS-A-NAME-001` at the apex — written by `init`'s own
+  function — and `satisfies:` from every code requirement to its family and from every
+  placeholder or unlinked architecture requirement to the apex. `draft` stubs get no edge;
+  a requirement that already points somewhere is untouched; an existing placeholder is
+  reused; a second run writes nothing. The family is the prefix the author typed —
+  `depends_on` is still never read as the level axis (ADR-0036 stands). The read-only run
+  prints the whole plan beside the rung proposals.
+- **RM032 is unchanged**: every `code` has an `architecture`, every `architecture` has a
+  `code` and a `system`. What the retrofit writes passes it by construction.
+- New engine module `reqmap_engine/pyramid.py` (the upper rungs, the edges, and the
+  frontmatter-edit helper the rung writer now shares). `REQ-LEVELRETROFIT-985` bullets 3–4 +
+  CASE-2 and `REQ-LEVELRETROFIT-987` CASE-2/3 change accordingly. Engine `2026-09-14.2`.
+
 ## plugin `v7.8.1` — 2026-09-14
 
 **Fix: `loadData` dropped `roadmap` and `history` on the floor, so the Horizons mode and

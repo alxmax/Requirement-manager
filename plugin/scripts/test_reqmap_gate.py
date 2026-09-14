@@ -2672,3 +2672,75 @@ class SinceScopesNotFacts(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # te
         full = {"SYS-A-001": [("validated-against", "a.md", 1)]}
         self.assertTrue(self._ctx({}, full).any_validation)
         self.assertFalse(self._ctx({}, {"SYS-A-001": [("implements", "a.py", 1)]}).any_validation)
+
+
+class DanglingVerifies(unittest.TestCase):  # tested-by: REQ-DANGLINGVERIFY-1009 @unit
+    """RM013 read one direction only. A `# verifies: <id>#CASE-N` naming a case that does
+    not exist was accepted in silence — and it is the very thing that flips RM013 on, so a
+    typo produced `0/2 criteria carry a tag` for a file that plainly carries one."""
+
+    CASES = ("CASE-1 - real\n  Given x\n  When y\n  Then z",
+             "CASE-2 - also real\n  Given x\n  When y\n  Then z")
+
+    def _gate(self, tags):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        _write(os.path.join(d, "ARCH-FOO-001.md"),
+               _spec("ARCH-FOO-001", ["does a thing"], cases=self.CASES))
+        _write(os.path.join(d, "test_foo.py"),
+               tb_tag("ARCH-FOO-001") + "\n" + tags + "\ndef test_a(): pass\n")
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(buf):
+            code = R.cmd_check(R.Workspace(R.load_requirements(d), R.scan_members(d, d), d, d),
+                               False)
+        return code, buf.getvalue()
+
+    def test_a_case_that_does_not_exist_is_named(self):  # verifies: REQ-DANGLINGVERIFY-1009#CASE-1
+        code, out = self._gate("# verifies: ARCH-FOO-001#CASE-99")
+        self.assertIn("RM034", out)
+        self.assertIn("CASE-99", out)
+        self.assertIn("names no such case", out)
+        self.assertIn("CASE-1, CASE-2", out)      # the labels that DO exist are listed
+        self.assertEqual(code, 1)                  # warn-only: the 1 is RM006/RM013, not us
+
+    def test_a_real_case_label_is_silent(self):  # verifies: REQ-DANGLINGVERIFY-1009#CASE-2
+        _code, out = self._gate("# verifies: ARCH-FOO-001#CASE-1\n# verifies: ARCH-FOO-001#CASE-2")
+        self.assertNotIn("RM034", out)
+
+    def test_the_warning_names_the_file_and_line(self):  # verifies: REQ-DANGLINGVERIFY-1009#CASE-3
+        _code, out = self._gate("# verifies: ARCH-FOO-001#CASE-99")
+        line = next(l for l in out.splitlines() if "RM034" in l)
+        self.assertIn("test_foo.py:2", line)
+
+    def test_an_unlabelled_requirement_is_exempt(self):  # verifies: REQ-DANGLINGVERIFY-1009#CASE-4
+        # per-case coverage only applies to requirements that label their criteria, so an
+        # unlabelled one cannot dangle — the same exemption RM013 makes.
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        _write(os.path.join(d, "AREA-FOO-001.md"),
+               REQ.format(id="AREA-FOO-001", status="confirmed", layer="bus", extra="", title="Foo")
+               + "\n## Description\nEvery bullet below is binding.\n- does a thing\n"
+                 "\n## Cases\n- an unlabelled bullet criterion\n")
+        _write(os.path.join(d, "test_foo.py"),
+               tb_tag("AREA-FOO-001") + "\n# verifies: AREA-FOO-001#CASE-3\ndef test_a(): pass\n")
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(buf):
+            R.cmd_check(R.Workspace(R.load_requirements(d), R.scan_members(d, d), d, d), False)
+        self.assertNotIn("RM034", buf.getvalue())
+
+    def test_a_tag_naming_no_requirement_is_reported_too(self):  # verifies: REQ-DANGLINGVERIFY-1009#CASE-5
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, True)
+        _write(os.path.join(d, "ARCH-FOO-001.md"),
+               _spec("ARCH-FOO-001", ["does a thing"], cases=self.CASES))
+        _write(os.path.join(d, "test_foo.py"),
+               tb_tag("ARCH-FOO-001") + "\n# verifies: ARCH-NOSUCH-404#CASE-1\ndef test_a(): pass\n")
+        buf = io.StringIO()
+        with redirect_stdout(buf), redirect_stderr(buf):
+            R.cmd_check(R.Workspace(R.load_requirements(d), R.scan_members(d, d), d, d), False)
+        out = buf.getvalue()
+        # RM001 reads `members` only and never `ac_cover`, so before RM034 this was silent
+        # in BOTH rules — the assumption that RM001 covered it was wrong.
+        self.assertIn("RM034", out)
+        self.assertIn("ARCH-NOSUCH-404", out)
+        self.assertIn("names no such requirement", out)

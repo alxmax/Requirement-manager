@@ -3,8 +3,8 @@ import ast, fnmatch, json, os, re
 
 from . import MAP_ENGINE_VERSION, config as cfg
 from .model import _as_list
-from .scan import _walk_files
-from .tags import PROSE_EXTS, _is_code_file, _is_test_path
+from .scan import _walk_files, read_source_text
+from .tags import PROSE_EXTS, _is_code_file, _is_test_path, tagged_files
 
 
 # ---------- candidates (capability extraction plan) ----------
@@ -118,10 +118,10 @@ def _md_facts(src):  # implements: ARCH-CANDIDATES-009
 
 
 def _file_facts(path, rel):  # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
-    try:
-        with open(path, encoding="utf-8", errors="ignore") as f:
-            src = f.read()
-    except OSError:
+    src, _problem = read_source_text(path)
+    if not src:   # unreadable, empty, or not decodable as text: no facts, and LOC 0 — a
+        # UTF-16 file used to report twice its real line count here (`errors="ignore"`
+        # turned its NULs into dropped bytes, not dropped lines).
         return {"signatures": [], "docstrings": {}, "imports": [], "loc": 0}
     if rel.endswith(".py"):
         facts = _py_facts(src)
@@ -271,6 +271,37 @@ def _annotate_fanin(cands):
         )
 
 
+def _annotate_pyramid(cands):
+    # implements: ARCH-CANDIDATES-009  # implements: REQ-PLANLEVEL-1006
+    # implements: REQ-PLANDRAFTID-1010
+    """Mutate cands in place with the rung and architecture parent `init` would mint, and
+    return the upper rungs as `{"architecture": [...], "system": <id or None>}`.
+
+    `init` writes three rungs (ADR-0036) and the plan reported none of them, so the only
+    way to see the pyramid a run would produce was to let it write every file first. A
+    candidate that is already linked in code is not drafted, so it gets no rung — stating
+    one would describe a write that will not happen."""
+    dirs = set()
+    for c in cands:
+        drafted = not c["existing_req"]
+        c["level"] = "code" if drafted else None
+        if drafted:
+            dirs.update(os.path.dirname(f).replace(os.sep, "/") for f in c["files"])
+    id_of = _assign_arch_ids(dirs)
+    for c in cands:
+        first = c["files"][0] if (c["level"] and c["files"]) else None
+        c["arch_id"] = id_of[os.path.dirname(first).replace(os.sep, "/")] if first else None
+        # DISCLOSURE, not unification (REQ-PLANDRAFTID-1010): `suggested_id` is the
+        # group-level name an author may adopt, `draft_id` is the id the write path will
+        # actually mint for this file. They differ on purpose — `DRAFT-` is the marker
+        # that a requirement is an unreviewed auto-draft — so the plan states both rather
+        # than renaming either.
+        c["draft_id"] = _draft_id(first) if first else None
+    arch = sorted(set(id_of.values()))
+    # the apex is written only when there is an architecture rung to hang it under
+    return {"architecture": arch, "system": SYS_PLACEHOLDER_ID if arch else None}
+
+
 def cmd_candidates(ws, out, md_globs=None):
     # implements: ARCH-CANDIDATES-009  # implements: REQ-CANDIDATES-826
     """Emit a deterministic JSON capability-extraction plan and write NO .md.
@@ -282,11 +313,7 @@ def cmd_candidates(ws, out, md_globs=None):
     files = _collect_files(code_root, reqs_dir, md_globs)
     facts_by_file = {rel: _file_facts(os.path.join(code_root, rel), rel) for rel in files}
 
-    tagged = {}   # file -> already-implemented requirement id (idempotency hint)
-    for cap, hits in members.items():
-        for role, fp, _ln in hits:
-            if role == "implements":
-                tagged.setdefault(fp, cap)
+    tagged = tagged_files(members)   # file -> the requirement it is already linked to
 
     # depends_on is resolved by matching an import name to a file STEM. Known
     # limitation (Stage-1 heuristic): an import that shadows a stdlib/3rd-party name
@@ -300,10 +327,13 @@ def cmd_candidates(ws, out, md_globs=None):
     cands = _build_candidates(
         groups, facts_by_file, stem_of, group_id_of_file, test_by_stem, tagged)
     _annotate_fanin(cands)
+    pyramid = _annotate_pyramid(cands)
 
     authored = sum(1 for c in cands if c["existing_req"])
     plan = {
         "engine_version": MAP_ENGINE_VERSION,
+        # the three rungs `init` would write, before it writes them (REQ-PLANLEVEL-1006)
+        "pyramid": pyramid,
         # surfaces the unfilled-plan gap so an advisory plan nobody authored cannot
         # masquerade as coverage (with_existing_req = candidates already tagged in code)
         "coverage_summary": {"total_candidates": len(cands), "with_existing_req": authored},
@@ -322,3 +352,60 @@ def cmd_candidates(ws, out, md_globs=None):
     else:
         print(text)
     return 0
+
+
+# ---------- the pyramid names `init` would mint ----------
+# These live HERE, one layer below the writer, because `--plan` must be able to say
+# what `init` will write without importing it (draft.py imports candidates.py, never
+# the other way round). Naming only: nothing below writes a file.
+
+# implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+SYS_PLACEHOLDER_ID = "SYS-NEEDS-A-NAME-001"
+
+
+def _arch_slug(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """Last two path segments — the spec's grouping key, not a unique id."""
+    parts = [p for p in rel_dir.replace(os.sep, "/").split("/") if p not in ("", ".")]
+    stem = "-".join(parts[-2:]) if parts else "ROOT"
+    return re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").upper() or "ROOT"
+
+
+def _arch_id_for(rel_dir):  # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-981
+    """The architecture id proposed for a source directory (first occupant of the slug).
+
+    The directory is the only structural signal a per-file draft has, and it is a weak
+    one: on this repo it would name capabilities `scripts` and `app/src/lib`, which are
+    not capabilities. That is why the node it produces is a `draft` carrying
+    `level_source: auto` — a proposal to rename, not a claim."""
+    return "ARCH-{}-001".format(_arch_slug(rel_dir))
+
+
+def _assign_arch_ids(rel_dirs):  # implements: REQ-EXTRACT-981
+    """One unique ARCH id per source directory in this run.
+
+    The slug is still the last two path segments (REQ-EXTRACT-981). Two directories
+    that share that slug (`src/lib` and `app/src/lib`) must not collapse onto one
+    node — the second takes `-002`, `-003`, … so the pyramid keeps one ARCH row
+    per directory and every code draft has a parent that exists."""
+    claimed, out = set(), {}
+    for rel_dir in sorted(rel_dirs):
+        slug = _arch_slug(rel_dir)
+        n = 1
+        while True:
+            aid = "ARCH-{}-{:03d}".format(slug, n)
+            if aid not in claimed:
+                out[rel_dir] = aid
+                claimed.add(aid)
+                break
+            n += 1
+    return out
+
+
+def _draft_id(rel):
+    # implements: ARCH-EXTRACT-008  # implements: REQ-EXTRACT-850
+    # implements: REQ-PLANDRAFTID-1010
+    """Mint a draft capability id from a file's relative path. Path-aware so
+    same-basename files in different dirs don't collide; falls back to FILE when
+    the name has no usable A-Z0-9 token (e.g. `_.py`, non-ASCII stems)."""
+    slug = re.sub(r"[^A-Z0-9]+", "-", os.path.splitext(rel)[0].upper()).strip("-")
+    return "DRAFT-" + (slug or "FILE")
