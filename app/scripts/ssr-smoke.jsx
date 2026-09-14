@@ -240,10 +240,18 @@ const noCacheSpecEn = renderToString(
 const noCacheSpecRo = renderToString(
   <I18nProvider initialLocale="ro">{specOf("I18N-NOCACHE-TEST-001")}</I18nProvider>);
 const i18nContentChecks = [
-  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],
-  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],
-  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],
-  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],
+  ["i18n content: cached en translation renders the translated title", translatedSpecEn.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-4
+  ["i18n content: cached translation shows the machine-translated badge", translatedSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-4
+  ["i18n content: no cache entry for ro falls back to the author's title", translatedSpecRo.includes("Titlu original") && !translatedSpecRo.includes("Original title")],  // verifies: REQ-TRANSLATE-938#CASE-4
+  ["i18n content: no cache entry at all shows no badge", noCacheSpecEn.includes("Titlu f") && !noCacheSpecEn.includes("machine-translated, unreviewed")],  // verifies: REQ-TRANSLATE-938#CASE-4
+  // COUNT, not presence. The four checks above assert the badge string appears SOMEWHERE
+  // in the rendered document, which no single render site owns: a mutation matrix over all
+  // four `<TranslatedBadge />` sites in SpecDoc.jsx (title, contract, intent, acceptance)
+  // killed 0 of 4 — deleting any one left every check green, so a refactor could drop a
+  // badge and ship machine-translated prose as the author's own with nothing failing.
+  // The fixture caches all four fields, so a fully-translated node owes exactly four badges.
+  ["i18n content: every translated field carries its own badge, not just one somewhere",  // verifies: REQ-TRANSLATE-938#CASE-4
+    (translatedSpecEn.match(/machine-translated, unreviewed/g) || []).length === 4],
   // The boundary the feature exists to respect: the CHROME toggle never translates the
   // artifact under review. Asserted on a requirement with NO `i18n` cache entry, because
   // a cached translation IS rendered, with a badge — that is REQ-TRANSLATE-938's job and

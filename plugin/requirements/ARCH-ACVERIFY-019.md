@@ -306,8 +306,8 @@ CASE-5 — a tag naming no requirement at all is reported here
 
 **Example**
 On this corpus the first run named `ARCH-DECOMPOSE-050#CASE-8` (the requirement has seven),
-`ARCH-MAP-007#CASE-7` (it has five) and four copies of `REQ-TRANSLATE-938#CASE-5` (it has
-three). In each the child-level tag on the same line was correct; the parent-level one was
+`ARCH-MAP-007#CASE-7` (it has five) and four copies of `REQ-TRANSLATE-938#CASE-5` (it had
+three at the time; a CASE-4 was authored afterwards, for a clause whose test was orphaned). In each the child-level tag on the same line was correct; the parent-level one was
 a leftover.
 
 **Current implementation**

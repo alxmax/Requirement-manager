@@ -157,6 +157,10 @@
       "hash": "2ccdcdb3fec3",
       "reason": "ADR-0038 v3: code by default, ARCH-<FAMILY> + SYS apex, RM032 unchanged"
     },
+    "REQ-TRANSLATE-938": {
+      "hash": "25c9549e479a",
+      "reason": "senate i18n sequence: clause 4 corrected against search.js, CASE-4 authored at the mutation evidence, counting check added"
+    },
     "REQ-TRANSLATE-996": {
       "hash": "4f6e6771dd73",
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
