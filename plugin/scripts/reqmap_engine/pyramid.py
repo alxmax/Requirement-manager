@@ -159,14 +159,15 @@ def _arch_text(aid, family, members):  # implements: REQ-LEVELRETROFIT-987
     (`draft._write_arch_drafts`): a proposed grouping that says it is one."""
     n = len(members)
     if family is None:
-        title = "NAME THIS CAPABILITY — {} behaviour group(s) whose id prefix has fewer than {} members".format(
-            n, cfg.LEVEL_FAMILY_MIN)
+        title = ("NAME THIS CAPABILITY — {} behaviour group(s) whose id prefix "
+                 "has fewer than {} members".format(n, cfg.LEVEL_FAMILY_MIN))
         signal = ("no id prefix shared by {} or more of them, so the engine parked them under "
                   "one placeholder rather than mint a \"capability\" per stray prefix"
                   .format(cfg.LEVEL_FAMILY_MIN))
     else:
         title = "NAME THIS CAPABILITY — {} ({} behaviour groups)".format(family, n)
-        signal = "the id prefix `{}-` the author typed into each of these {} requirements".format(family, n)
+        signal = ("the id prefix `{}-` the author typed into each of these "
+                  "{} requirements".format(family, n))
     lines = [
         "---", "id: " + aid, "status: draft", "level: architecture", "layer: feature",
         "owner: auto", "level_source: auto", "satisfies: [{}]".format(SYS_PLACEHOLDER_ID),
@@ -177,7 +178,8 @@ def _arch_text(aid, family, members):  # implements: REQ-LEVELRETROFIT-987
         "together let a user do, merge it with a sibling, or delete it and re-point its "
         "children's `satisfies:` lines.".format(signal), "",
         "## Description", "Every bullet below is binding.",
-        "- TODO: what these {} behaviour groups together let a user do, as one capability.".format(n), "",
+        "- TODO: what these {} behaviour groups together let a user do, "
+        "as one capability.".format(n), "",
         "## Cases", "CASE-1", "  Given  TODO", "  When   TODO", "  Then   TODO", "",
         "## Context (non-binding)", "**Current implementation**",
         "Grouped here by `clarify --levels --apply`:",
@@ -220,11 +222,13 @@ def report_edges(plan):  # implements: REQ-LEVELRETROFIT-987
         print("    {:<26} {:>4} requirement(s)  {}".format(
             aid, len(e["members"]), "exists — reused" if e["exists"] else "new, draft"))
     print("  System rung: {} ({}), satisfied by every placeholder above{}."
-          .format(sys_["id"], "exists — reused" if sys_["exists"] else "new, draft — init's own hole",
-                  " and by {} architecture requirement(s) that declare none".format(len(sys_["members"]))
-                  if sys_["members"] else ""))
+          .format(sys_["id"],
+                  "exists — reused" if sys_["exists"] else "new, draft — init's own hole",
+                  " and by {} architecture requirement(s) that declare none"
+                  .format(len(sys_["members"])) if sys_["members"] else ""))
     print("  The family is the id prefix the author typed; `depends_on` is never read for this.")
-    print("  `draft` stubs are skipped — the gate never judges them. Every placeholder is a named")
+    print("  `draft` stubs are skipped — the gate never judges them. Every placeholder "
+          "is a named")
     print("  hole (`NAME THIS …`) for the author to fill, merge or delete.")
 
 

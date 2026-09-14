@@ -90,6 +90,11 @@ plugin/scripts/test_reqmap_common.py
 
 # Prose, page shells, build config and dev tooling: not capability implementations.
 README.md
+# ROADMAP.md is INPUT the engine reads (`_roadmap_signals`, ARCH-ROADMAP-038), not a
+# capability and not an artifact derived from one. A `generated-from:` tag would be
+# backwards: the drift gate would call the plan stale whenever the requirement that
+# reads it changes, asking a human to regenerate a hand-written document.
+ROADMAP.md
 app/README.md
 app/index.html
 app/viewer.html

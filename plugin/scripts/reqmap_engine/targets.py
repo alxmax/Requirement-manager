@@ -75,6 +75,23 @@ CADENCE_DEFAULTS = {"every": "month", "on": "last", "lane": "Release"}
 CADENCE_MAX = 120
 
 
+def _cadence_month_on(on):
+    """The day of the month a `cadence` block asks for, or None to keep the default.
+
+    "last" is the default because a month's end is what a reader means by "end of
+    month", and it is the only choice that lands in every month: a plan pinned to the
+    30th silently skips February. Three accepted spellings were an `elif` chain inside
+    `_parse_cadence`, which is one nesting level per branch; as early returns they are
+    a list of what the key accepts."""
+    if isinstance(on, str) and on.strip().lower() == "last":
+        return "last"
+    if isinstance(on, int) and 1 <= on <= 28:
+        return on
+    if isinstance(on, str) and on.strip().isdigit() and 1 <= int(on) <= 28:
+        return int(on.strip())
+    return None
+
+
 def _parse_cadence(raw):
     """Normalise the optional `cadence` block, or None when absent/unusable.
 
@@ -99,15 +116,9 @@ def _parse_cadence(raw):
     if isinstance(on, str) and period == "week" and on.strip().lower() in WEEKDAYS:
         out["on"] = on.strip().lower()
     elif period == "month":
-        # "last" is the default because a month's end is what a reader means by "end of
-        # month", and it is the only choice that lands in every month: a plan pinned to
-        # the 30th silently skips February.
-        if isinstance(on, str) and on.strip().lower() == "last":
-            out["on"] = "last"
-        elif isinstance(on, int) and 1 <= on <= 28:
-            out["on"] = on
-        elif isinstance(on, str) and on.strip().isdigit() and 1 <= int(on) <= 28:
-            out["on"] = int(on.strip())
+        day = _cadence_month_on(on)
+        if day is not None:
+            out["on"] = day
     lane = raw.get("lane")
     if isinstance(lane, str) and lane.strip():
         out["lane"] = lane.strip()

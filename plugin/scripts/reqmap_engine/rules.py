@@ -410,7 +410,8 @@ def _unscanned_tags_rule(ctx):  # implements: ARCH-UNSCANNEDTAG-045
 
 
 @gate_rule("RM033", "warn")
-def _undecodable_source_rule(ctx):  # implements: ARCH-UNREADABLE-070  # implements: REQ-UNREADABLE-1004
+def _undecodable_source_rule(ctx):  # implements: ARCH-UNREADABLE-070
+    # implements: REQ-UNREADABLE-1004
     _bad = undecodable_source_files(ctx.code_root, ctx.reqs_dir)
     for rel, reason in _bad:
         yield None, (f"{rel}: {reason} — the scan cannot read it, so any tag in it is "

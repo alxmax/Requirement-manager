@@ -83,16 +83,23 @@ def live_flags(root=None):
     The parser, not `COMMANDS`, is the authority here: the registry deliberately
     omits the shared workspace flags (`--root`, `--reqs`, `--code`, `--cache`),
     so checking against it alone would report four flags that work. Returns an
-    empty set when the file cannot be read, and the caller then skips the flag
+    empty set when NO source can be read, and the caller then skips the flag
     half rather than reporting every flag as retired — a guard that cannot read
     the engine must fail open, not accuse.
+
+    Both sources are scanned because the calls moved: `reqmap_engine/cliflags.py`
+    holds them since v7.13, and reading only `reqmap.py` returned an empty set the
+    moment they did — the guard went silent on every flag instead of one.
     """
-    path = os.path.join(root or ROOT, "plugin", "scripts", "reqmap.py")
-    try:
-        with io.open(path, encoding="utf-8") as fh:
-            src = fh.read()
-    except OSError:
-        return set()
+    base = root or ROOT
+    src = ""
+    for parts in (("plugin", "scripts", "reqmap.py"),
+                  ("plugin", "scripts", "reqmap_engine", "cliflags.py")):
+        try:
+            with io.open(os.path.join(base, *parts), encoding="utf-8") as fh:
+                src += fh.read()
+        except OSError:
+            continue
     return set(re.findall(r'add_argument\(\s*"(--[a-z][a-z0-9-]*)"', src))
 
 
@@ -189,6 +196,27 @@ CONSUMER_TREES = [("scripts", "", ".py"), ("scripts", "", ".sh"), (".githooks", 
 CONSUMER_SKIP = ("scripts/reqmap.py", "requirements/_")
 
 
+def _consumer_tree_files(root, sub, prefix, ext):
+    # implements: ARCH-SELFGATE-039
+    """Every instruction file under one CONSUMER_TREES entry, as (rel, full).
+
+    Split out of `candidate_files` so that generator stays four levels deep: a walk
+    inside a loop inside a branch was three of them before the filter.
+    """
+    base = os.path.join(root, sub.replace("/", os.sep))
+    if not os.path.isdir(base):
+        return
+    for dirpath, dirs, names in os.walk(base):
+        dirs[:] = [d for d in dirs if d != ".git"]
+        for name in sorted(names):
+            if not name.startswith(prefix) or not name.endswith(ext):
+                continue
+            full = os.path.join(dirpath, name)
+            rel = os.path.relpath(full, root).replace(os.sep, "/")
+            if not any(rel.startswith(skip) for skip in CONSUMER_SKIP):
+                yield rel, full
+
+
 def candidate_files(root=ROOT, consumer=False):
     """The instruction files to scan — the ones a human or an assistant follows."""
     if consumer:
@@ -197,19 +225,8 @@ def candidate_files(root=ROOT, consumer=False):
             if os.path.exists(p):
                 yield rel, p
         for sub, prefix, ext in CONSUMER_TREES:
-            base = os.path.join(root, sub.replace("/", os.sep))
-            if not os.path.isdir(base):
-                continue
-            for dirpath, dirs, names in os.walk(base):
-                dirs[:] = [d for d in dirs if d != ".git"]
-                for name in sorted(names):
-                    if not name.startswith(prefix) or not name.endswith(ext):
-                        continue
-                    full = os.path.join(dirpath, name)
-                    rel = os.path.relpath(full, root).replace(os.sep, "/")
-                    if any(rel.startswith(skip) for skip in CONSUMER_SKIP):
-                        continue
-                    yield rel, full
+            for pair in _consumer_tree_files(root, sub, prefix, ext):
+                yield pair
         return
     for rel in INSTRUCTION_FILES:
         p = os.path.join(root, rel)

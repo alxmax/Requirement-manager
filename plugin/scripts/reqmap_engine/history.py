@@ -27,7 +27,7 @@ HISTORY_FILES = ("CHANGELOG.md",)
 HEADLINE_MAX = 120
 
 
-def _headline(body):
+def _headline(body):  # implements: REQ-HISTORY-1003
     """The entry's first bold run, flattened to one line, or its first prose line.
 
     Every entry in this repo opens with a bold sentence naming what shipped; a consumer
@@ -52,7 +52,7 @@ def _headline(body):
     return ""
 
 
-def _weight(version):
+def _weight(version):  # implements: REQ-HISTORY-1003
     """Sort key picking a month's landmark release: a major beats a minor beats a patch,
     and among equals the newer version wins.
 
@@ -65,7 +65,7 @@ def _weight(version):
     return (rank, parts)
 
 
-def parse_changelog(text):
+def parse_changelog(text):  # implements: REQ-HISTORY-1003
     """[{version, date, headline}] newest first. Pure.
 
     An entry with no date is SKIPPED, not dated by guesswork: this repo carries
@@ -82,7 +82,7 @@ def parse_changelog(text):
     return out
 
 
-def read_history(root):
+def read_history(root):  # implements: REQ-HISTORY-1003
     """Parsed CHANGELOG entries for `root` or its parent, or [] when there is none."""
     for base in dict.fromkeys([root, os.path.dirname(os.path.abspath(root))]):
         for name in HISTORY_FILES:
@@ -97,7 +97,7 @@ def read_history(root):
     return []
 
 
-def by_month(entries):
+def by_month(entries):  # implements: REQ-HISTORY-1003
     """[{month, count, first, last, versions, headline}] oldest first — the broad-strokes
     view.
 
