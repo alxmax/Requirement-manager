@@ -2,7 +2,7 @@
 
 Planul produsului. Nu e jurnal. Versiunile trăiesc în CHANGELOG și în tag-ul git.
 
-Editezi în [docs/roadmap-preview.html](docs/roadmap-preview.html) (browser, fără motor) și, dacă vrei copia în git, înlocuiești acest fișier. Scena tragibilă: [docs/planning/roadmap.excalidraw](docs/planning/roadmap.excalidraw).
+Editezi aici, direct. Barele din Gantt-ul viewer-ului se scriu în `plugin/requirements/_planning.json`.
 
 Format: `- [ ] text | req: ID` pe Now/Next. Later cere `unpark:`.
 Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
