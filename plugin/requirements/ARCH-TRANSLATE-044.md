@@ -175,11 +175,13 @@ Every bullet below is binding.
   never serves a translation known to be out of date.
 - A malformed cache file — unreadable, not JSON, or not an object — yields no
   translations at all rather than an exception. The map still builds.
-- The viewer consumes `node.i18n` ONLY through `translatedText()` (`i18n.jsx`),
-  which reports `isTranslated` alongside the text. Every caller that renders
-  `isTranslated` text renders the "machine-translated, unreviewed" badge next to
-  it. Absent a cache entry, content renders in the author's own language exactly as
-  before this capability existed.
+- Every viewer path that RENDERS `node.i18n` as displayed prose goes through
+  `translatedText()` (`i18n.jsx`), which reports `isTranslated` alongside the text,
+  and each such caller renders the "machine-translated, unreviewed" badge beside its
+  own field — one badge per translated field, not one somewhere on the page. A
+  non-rendering reader may read `node.i18n` directly: the search index does, to match
+  a query against cached translations. Absent a cache entry, content renders in the
+  author's own language exactly as before this capability existed.
 
 ## Cases
 CASE-1 — the map attaches a fresh cache entry without calling anything external
@@ -201,6 +203,15 @@ CASE-3 — a malformed cache file yields no translations, never an exception
   When   `_load_translations` runs
   Then   it returns no translations at all and raises nothing, so the map still
          builds
+
+CASE-4 — a translated field carries its own badge; an untranslated one carries none
+  Given  a node whose `i18n.en` entry covers title, intent, contract and acceptance,
+         and a node with no cache entry at all
+  When   the spec document is server-rendered at locale `en` and at locale `ro`
+  Then   the cached node renders the translated title and the badge string appears
+         exactly once per translated field, the uncached node renders the author's own
+         title with no badge anywhere, and removing any single badge render site fails
+         the suite
 
 ## Context
 **Notes**
