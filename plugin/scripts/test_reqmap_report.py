@@ -4731,6 +4731,42 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
                    if f.endswith(".md") and f != "README.md" and "(" + f + ")" not in index]
         self.assertEqual([], missing, "ADR files with no index row")
 
+    def test_the_engine_reports_the_documented_design_findings(self):  # verifies: REQ-SELFGATE-990#CASE-4
+        """CLAUDE.md says the engine package reports N design findings on itself.
+        That sentence read 'three' while the package reported ten: a 502-line CLI, a
+        32-definition module, fourteen over-wide lines and two functions nested five
+        deep had accumulated under a claim nobody re-measured. Each was arguably fine;
+        the defect was that the document had stopped describing the code, which is the
+        one failure this repo exists to catch. Accepting a finding is a decision to
+        record in CLAUDE.md, and this test is what makes recording it necessary.
+        """
+        claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
+        words = {"THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7}
+        m = re.search(r"reports exactly ([A-Z]+) findings on itself", claude_md)
+        self.assertIsNotNone(m, "CLAUDE.md no longer states the engine's design-finding count")
+        claimed = words.get(m.group(1))
+        self.assertIsNotNone(claimed, "unrecognised count word: " + m.group(1))
+        scripts = os.path.join(self.root, "plugin", "scripts")
+        summary = R.design_report._design_summary(scripts, with_findings=True)
+        found = summary["findings"] if summary else []
+        self.assertEqual(len(found), claimed,
+                         "CLAUDE.md claims {} design finding(s) for the engine package; "
+                         "gate --design reports {}: {}".format(
+                             claimed, len(found),
+                             [(f["file"], f["kind"]) for f in found]))
+
+    def test_the_engine_module_count_is_current(self):  # verifies: REQ-SELFGATE-990#CASE-4
+        """The same sentence states a module count; it read 49 against 51 files."""
+        claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
+        m = re.search(r"holds the logic, (\d+) modules beside", claude_md)
+        self.assertIsNotNone(m, "CLAUDE.md no longer states the engine's module count")
+        pkg = os.path.join(self.root, "plugin", "scripts", "reqmap_engine")
+        actual = len([f for f in os.listdir(pkg)
+                      if f.endswith(".py") and f != "__init__.py"])
+        self.assertEqual(actual, int(m.group(1)),
+                         "CLAUDE.md claims {} engine modules, the package has {}".format(
+                             m.group(1), actual))
+
     def test_the_index_states_no_count_it_would_have_to_maintain(self):  # verifies: REQ-SELFGATE-990#CASE-3
         # "Twenty-three decisions" was written when there were 23 and never moved again.
         index = open(os.path.join(self.root, "docs", "adr", "README.md"), encoding="utf-8").read()

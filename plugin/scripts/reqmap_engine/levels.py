@@ -60,7 +60,9 @@ def _propose_levels(reqs, members=None, ac_cover=None):
         exempt = _as_list(meta.get("lint_exempt"))
         over = "over-scoped" in exempt or "ac-count-high" in exempt
         if groups >= 2 or over:
-            why = "{} contract group(s)".format(groups) + (" + over-scope exemption" if over else "")
+            why = "{} contract group(s)".format(groups)
+            if over:
+                why += " + over-scope exemption"
             out[rid] = ("architecture",
                         "{} — a group; `clarify {} --decompose --apply` builds its code rung"
                         .format(why, rid))

@@ -173,6 +173,23 @@ RE_UNPARK = re.compile(r"(?:^|\s)unpark:\s*(.+)$")
 ROADMAP_ISO_RE = re.compile(r'\b(\d{4}-\d{2}-\d{2})\b')
 
 
+def _absorb_roadmap_line(stripped, items, seen_item, section_date):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
+    """Fold one non-item line into the item above it, or read the section's first
+    date from it, and return the section date that holds afterwards.
+
+    Split out of `_parse_roadmap_from_text` so its loop stays four levels deep: this
+    is the whole of what a line that is not an item can mean."""
+    if seen_item and items:
+        items[-1]["context"] += ("\n" if items[-1]["context"] else "") + stripped
+        return section_date
+    if section_date is None:
+        found = ROADMAP_ISO_RE.search(stripped)
+        if found:
+            return found.group(1)
+    return section_date
+
+
 def _parse_roadmap_from_text(text):
     # implements: ARCH-ROADMAP-038  # implements: REQ-ROADMAP-998
     """ROADMAP.md content -> list of {name, horizon, req, unpark, done}. Pure.
@@ -200,14 +217,9 @@ def _parse_roadmap_from_text(text):
             continue
         m = re.match(r"^-\s+\[([ xX])\]\s+(.+)$", stripped)
         if not m:
-            if not horizon:
-                continue
-            if seen_item and items:
-                items[-1]["context"] += ("\n" if items[-1]["context"] else "") + stripped
-            elif section_date is None:
-                found = ROADMAP_ISO_RE.search(stripped)
-                if found:
-                    section_date = found.group(1)
+            if horizon:
+                section_date = _absorb_roadmap_line(
+                    stripped, items, seen_item, section_date)
             continue
         if not horizon:
             continue

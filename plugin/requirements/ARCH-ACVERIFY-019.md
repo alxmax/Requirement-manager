@@ -255,7 +255,7 @@ Every bullet below is binding.
 - `gate` reports each `# verifies:` tag whose case label is not one the requirement
   declares, naming the requirement, the label, the file and line, and the labels that do
   exist.
-- It reports a `# verifies:` tag whose requirement id matches no requirement at all,
+- RM034 reports a `# verifies:` tag whose requirement id matches no requirement at all,
   because RM001 reads only `implements:`/`tested-by:` members and never the per-case
   coverage, so that link was unreported by both rules.
 - A requirement whose acceptance criteria carry no labels is exempt — per-case coverage

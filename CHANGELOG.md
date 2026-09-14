@@ -1,5 +1,38 @@
 # Changelog
 
+## plugin `v7.13.0` — 2026-09-15
+
+**A sentence in `CLAUDE.md` said the engine reported three design findings on itself. It
+reported ten.** Each of the seven was arguably fine on its own; the defect was that the
+document had stopped describing the code — the one failure this repo exists to catch, found
+by reading `gate --design`'s own output instead of the paragraph about it.
+
+- **Seven undocumented findings closed.** `reqmap.py` was 502 lines against a 500 bar: the
+  117 lines of `add_argument` wiring moved to `reqmap_engine/cliflags.py`, leaving the CLI
+  at 385 (parser assembly, dispatch, the Python floor). `site.py` was 496 and my own line
+  wrapping pushed it to 501, so the 300-line HTML literal moved to
+  `reqmap_engine/site_template.py` — the template is data, and the module is now 196 lines.
+  Fourteen over-wide lines wrapped across five modules; `_parse_roadmap_from_text` and
+  `_parse_cadence` each lost a level of nesting to an extracted helper (an `elif` chain is
+  one nesting level per branch in the AST, which is what put both at five).
+- **`rules.py`'s 32 top-level definitions stay, and are now argued rather than silent.** The
+  file IS the gate registry (ADR-0026, one `@gate_rule` function per check), so splitting it
+  to satisfy a count would fragment the single place the rules live.
+- **The claim is now a test** (`DocsAreTrue.test_the_engine_reports_the_documented_design_findings`,
+  `REQ-SELFGATE-990` CASE-4). It reads the number out of `CLAUDE.md`, runs the design review
+  over the package, and fails naming both numbers and every finding reported. A second test
+  pins the module count, which had read 49 against 51 files before this change. Accepting a
+  finding is now a decision that must be written down, not a number that can quietly grow.
+- **`history.py` was traced to nothing.** `REQ-HISTORY-1003` had six members across four
+  files — every place that calls or renders the shipped history, and not the 121-line module
+  that parses it. Four of its six contract clauses live there, unwatched by `_memberlock`.
+- `ROADMAP.md` is in `.reqmapignore`: it is INPUT the engine reads, not an artifact derived
+  from a requirement, so a `generated-from:` tag would have the drift gate call a
+  hand-written plan stale whenever the requirement that reads it changed.
+- Two prose warnings fixed (a clause opening with a bare "It", a `must` the Contract header
+  already binds). `check_retired_verbs.py` learned that the CLI's flags now live in two
+  files — its own suite caught that the guard had gone silent on all 41.
+
 ## plugin `v7.12.0` — 2026-09-14
 
 **The Gantt header now says which week of the year it is, and two dead things stopped

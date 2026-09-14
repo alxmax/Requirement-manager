@@ -207,6 +207,9 @@ Every bullet below is binding.
 - Every ADR file on disk has a row in the ADR index, and one that does not fails the suite.
 - The ADR index states no decision count, because a hand-maintained total is one more claim to
   keep true; the index itself is the count.
+- The number of design findings the engine package reports on itself is asserted against the
+  count `CLAUDE.md` states, and a mismatch fails the suite naming both numbers, so a finding
+  can be accepted but not accumulated unread.
 - These checks are skipped, not failed, when the suite runs from a seeded copy that has no
   repo root to read.
 
@@ -225,3 +228,9 @@ CASE-3 — the index carries no count to maintain
   Given  the ADR index
   When   its prose above the table is read
   Then   it states no number of decisions
+
+CASE-4 — an undocumented design finding fails
+  Given  `CLAUDE.md` stating a number of design findings the engine reports on itself, and a
+         package that reports a different number
+  When   the suite runs in the source repo
+  Then   it fails, names both numbers and lists the findings actually reported

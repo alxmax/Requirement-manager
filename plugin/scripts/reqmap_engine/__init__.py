@@ -8,7 +8,8 @@ import os
 # vendored copy is older than the installed plugin's. ISO date with an optional
 # `.N` same-day revision suffix (YYYY-MM-DD[.N]): lexicographic order ==
 # chronological order, so a plain string compare is enough.
-MAP_ENGINE_VERSION = "2026-09-14.5"  # implements: ARCH-CHECK-006 -- RM034 dangling verifies, plan draft_id
+# .5 carried RM034 (dangling verifies) and the plan's draft_id.
+MAP_ENGINE_VERSION = "2026-09-15.1"  # implements: ARCH-CHECK-006
 
 # The directory that holds reqmap.py and this package — the anchor every
 # on-disk neighbour (the viewer template, the plugin manifest) is found from.

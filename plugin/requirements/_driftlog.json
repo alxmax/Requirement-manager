@@ -82,8 +82,8 @@
       "reason": null
     },
     "ARCH-VLEVEL-037": {
-      "hash": "cc82d97c7f2c",
-      "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
+      "hash": "808bb64c07a9",
+      "reason": "Editorial only: named the subject of one clause (It -> RM034) and dropped a redundant 'must' the Contract header already binds. Neither obligation changed."
     },
     "REQ-AUDIT-970": {
       "hash": "918984c1362a",
@@ -96,6 +96,10 @@
     "REQ-CHECK-831": {
       "hash": "b94ffb48a121",
       "reason": "reword REQ-CHECK-831's new clause to drop a redundant modal"
+    },
+    "REQ-DANGLINGVERIFY-1009": {
+      "hash": "330e7b7c015c",
+      "reason": "Editorial only: named the subject of one clause (It -> RM034) and dropped a redundant 'must' the Contract header already binds. Neither obligation changed."
     },
     "REQ-DECOMPOSE-839": {
       "hash": "754c8d23f4ff",
@@ -148,6 +152,10 @@
     "REQ-SELFGATE-916": {
       "hash": "11f65cd22341",
       "reason": "REQ-SELFGATE-916 CASE-1 corrected from the three pre-v4.0.0 commands to the single gate CI actually runs"
+    },
+    "REQ-SELFGATE-990": {
+      "hash": "1a1b6c2ac3d7",
+      "reason": "REQ-SELFGATE-990 gains the design-finding count clause: the CLAUDE.md sentence claiming three findings had drifted to ten unread, and a clause with no test is the same claim again."
     },
     "REQ-SIMILAR-921": {
       "hash": "18c77b368797",

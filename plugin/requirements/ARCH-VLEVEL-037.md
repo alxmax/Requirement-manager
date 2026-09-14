@@ -23,7 +23,7 @@ Every bullet below is binding.
 - A `tested-by:` tag may end with a verification level (`@unit`, `@integration`, `@system`), invisible to the ordinary tag parser so an older engine still resolves the id. [[REQ-VLEVEL-944]]
 - The engine collects, per requirement, each level it is verified at with the `file:line` locations that declare it, skipping backticked and quoted examples so prose about tagging is never mistaken for coverage. [[REQ-VLEVEL-945]]
 - The gate warns, warn-only, when a confirmed need carries no `validated-against:` member (once the repo has opted in) and when a confirmed `bus` requirement's only levelled coverage is `@system`. [[REQ-VLEVEL-946]]
-- A confirmed requirement's declared `level:` must be verified at the matching test level, or the gate warns (RM010). [[REQ-VRUNGS-054]]
+- A confirmed requirement's declared `level:` is verified at the matching test level, or the gate warns (RM010). [[REQ-VRUNGS-054]]
 ## Cases
 CASE-1
   Given  tags declaring two levels for one id, a two-id list at `@integration`, one tag
