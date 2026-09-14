@@ -1,7 +1,8 @@
 // implements: ARCH-VIEWER-007
-/* Calendar Gantt: months on X, swimlanes on Y, today + milestone flags in the header. */
+/* Calendar Gantt: months and ISO weeks on X, swimlanes on Y, today + milestone flags in
+ * the header. */
 import {
-  parseIso, isoLocal, dayIndex, addDays, buildMonthBands, stackBars,
+  parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, stackBars,
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
 
@@ -11,7 +12,8 @@ const ROW_H = 26;
 const PAD = 10;
 const FLAG_H = 22;
 const MONTH_H = 26;
-const HEAD_H = FLAG_H + MONTH_H;
+const WEEK_H = 16;
+const HEAD_H = FLAG_H + MONTH_H + WEEK_H;
 
 const LANE_TONE = [
   { bg: "color-mix(in oklch, var(--cov-tested) 22%, transparent)", fg: "var(--cov-tested)", edge: "var(--cov-tested)" },
@@ -87,6 +89,7 @@ export function PlanGantt({ planning, history, locale, t, zoom, openSpec }) {
   const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || []), 1) * ROW_H + PAD * 2);
   const bodyH = heights.reduce((a, h) => a + h, 0);
   const months = buildMonthBands(origin, totalDays, locale);
+  const weeks = buildWeekBands(origin, totalDays);
   const todayIdx = todayD ? dayIndex(origin, todayD) : -1;
   const flags = dueList.map((d) => ({ ...d, idx: dayIndex(origin, d.at) }));
   /* Release cadence: the ENGINE computed these dates (targets.py) and the chart only
@@ -170,6 +173,23 @@ export function PlanGantt({ planning, history, locale, t, zoom, openSpec }) {
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
                   {m.label}
+                </div>
+              ))}
+            </div>
+            {/* ISO week of the year, not a count from the chart's left edge: the same
+              * calendar week must read the same in every chart and in any conversation
+              * about it. A short first band is the honest consequence of a range that
+              * does not begin on a Monday. */}
+            <div style={{ height: WEEK_H, display: "flex", borderTop: "1px solid var(--border-soft)" }}>
+              {weeks.map((w) => (
+                <div key={w.start} style={{
+                  width: w.span * PX, boxSizing: "border-box",
+                  borderRight: "1px solid var(--border-soft)",
+                  fontSize: 9, fontWeight: 600, color: "var(--fg-faint)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  overflow: "hidden", whiteSpace: "nowrap",
+                }}>
+                  {w.span >= 4 ? w.label : ""}
                 </div>
               ))}
             </div>

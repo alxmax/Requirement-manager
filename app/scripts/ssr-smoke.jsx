@@ -657,6 +657,17 @@ const cadenceChecks = [
       .includes("release · 2026-09-20")],
 ];
 for (const [label, ok] of cadenceChecks) test(label, ok);
+// ---- ISO week header ------------------------------------------------------
+// The week row is labelled with the week OF THE YEAR, not a count from the chart's left
+// edge: the same calendar week has to read the same in two charts and in a conversation
+// about it. 2026-09-13 is a Sunday, so it closes W37 alone and the next band is a full W38.
+const weekChecks = [
+  ["gantt: the header carries ISO week-of-year labels, not a count from the left edge",
+    withCadence.includes(">W37<") && withCadence.includes(">W38<")],
+  ["gantt: a range starting mid-week keeps the real week number, not W1",
+    !withCadence.includes(">W1<")],
+];
+for (const [label, ok] of weekChecks) test(label, ok);
 
 // ---- the Spec tab is gone; the Explorer is the one place a spec is read -----
 const navHtml = renderToString(<App />);
