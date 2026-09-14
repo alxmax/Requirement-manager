@@ -701,6 +701,8 @@ graph LR
   f_plugin_skills_requirement_quality_review_SKILL_universal_md_9["plugin/skills/requirement-quality-review/SKILL.universal.md:9"]
   ARCH_REVIEW_022 -->|implements| f_plugin_skills_requirement_quality_review_SKILL_universal_md_9
   ARCH_ROADMAP_038["Roadmap coherence signals<br><small>ARCH-ROADMAP-038</small>"]
+  f_docs_plan_source_audit_html_6["docs/plan-source-audit.html:6"]
+  ARCH_ROADMAP_038 -->|generated-from| f_docs_plan_source_audit_html_6
   f_plugin_scripts_test_reqmap_report_py_2174_4434["plugin/scripts/test_reqmap_report.py:2174-4434"]
   ARCH_ROADMAP_038 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2174_4434
   f_plugin_scripts_reqmap_engine_health_py_255["plugin/scripts/reqmap_engine/health.py:255"]

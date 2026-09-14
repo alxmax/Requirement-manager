@@ -76,6 +76,9 @@
     "ARCH-REVIEW-022": {
       "plugin/skills/requirement-quality-review/SKILL.universal.md": "0934c5c02dc54a20be9ec7d5bf5b9c937ff0db5be33fa94a88296d1a9afd89b9"
     },
+    "ARCH-ROADMAP-038": {
+      "docs/plan-source-audit.html": "f0b810b38b7c6caa9e4c4bcdf2b983da7557ffb62e7a46634e5665306c8c9e49"
+    },
     "ARCH-RULES-059": {
       "plugin/scripts/reqmap_engine/model.py#Rule": "5e666e5270657a2d999c871835d04dd2a5d2dcc7691fc72dfe7d7295297df60d",
       "plugin/scripts/reqmap_engine/workspace.py#Workspace": "3f5f73353e049f55bfe5300098a6bc0003645f63a044f3b3400665117186da3b"
@@ -125,8 +128,8 @@
       "app/src/components/TopBar.jsx": "8e113dfb287f1b00523fe22504b535779a5e32610f42028e28415656638bc58b",
       "app/src/lib/canvasZoom.jsx": "5d14b0cc184efa1bf5c0d4ab4ebe9046654bede7be941ef90ac6ffade5403acf",
       "app/src/lib/icons.jsx": "6b4eb4b3b97949401faf5859d20593fac59f5951111307469c1844e127671b4d",
-      "app/src/lib/planBars.js": "82e0992083f3c80feec4c13873f1647de366bb638dd9a48d34bb9c39eebf69dc",
-      "app/src/lib/timeline.js": "b88af696c482beee8f9e73322ac025e1dbd2625f2998669a3ab6f66209112a14",
+      "app/src/lib/planBars.js": "1c9d9d8aa472b6c921ec98c3a4db7e82f82b21ee084f24d79c0441fbaabc9090",
+      "app/src/lib/timeline.js": "ae6a5a394fc9636dcaae8d0c0356cbc682435a5b4cbc93e693783266f00c9bff",
       "app/src/lib/tree.js": "2e2cf87a4c2bc1f2ea63e45c8458d9d81b06203158ed7c9fbd0fb5c5ff01e676",
       "app/src/lib/useDragPan.js": "953fff072831acf0e213b4bcefab3499cbd980884cf5b24ac2bf1e93e8461742",
       "app/src/main.jsx": "8885b344ea6e788cbe6b42620ce7162acd016f5cd412ca01f5d7ef48ee7e4062",
