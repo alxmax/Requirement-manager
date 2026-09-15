@@ -21924,6 +21924,15 @@
       "section_date": null
     },
     {
+      "name": "Planul si Versiunile citesc acelasi lucru",
+      "horizon": "next",
+      "req": "ARCH-VIEWER-007",
+      "unpark": null,
+      "done": false,
+      "context": "Ce apare in Plan nu apare in Versiuni. Puntea EXISTA deja - RoadmapView.jsx:236-246\namesteca itemi planificati in coloana fiecarei versiuni - dar ii citeste din\n`milestones[].items[]`, nu din `bars`. Iar `items[]` e chiar cheia goala pe care\nauditul din 2026-09-14 a scos-o din planBars.js: fiecare milestone o avea `[]`, deci\nramura rula peste nimic.\n\nAsa ca azi: coloana v7.19 se creeaza (msSet ia si cheile din `_planning.json`,\nlinia 209), dar bara \"Server MCP\" nu intra in ea, fiindca continutul unei coloane\nvine din cerinte cu `milestone:`, din TODO-uri, si din `items[]` - niciodata din\n`bars`.\n\nReparatia mica: citeste `bars` acolo unde se citeste `items[]`, filtrate pe\n`bar.milestone`. Atentie la dedublare - se face deja pe titlu, iar o bara cu `req:`\nnumeste o cerinta care e probabil deja in coloana.\n\nIntrebarea inainte de a scrie codul: e o singura lista cu doua randari, sau doua\nliste care se intampla sa semene? Daca e prima, `items[]` ar trebui sters, nu\nalimentat.\n",
+      "section_date": null
+    },
+    {
       "name": "CD: deploy automat pe git",
       "horizon": "next",
       "req": "ARCH-SELFGATE-039",

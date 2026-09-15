@@ -35,6 +35,26 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 ## Next
 
+- [ ] Planul si Versiunile citesc acelasi lucru | req: ARCH-VIEWER-007
+      Ce apare in Plan nu apare in Versiuni. Puntea EXISTA deja - RoadmapView.jsx:236-246
+      amesteca itemi planificati in coloana fiecarei versiuni - dar ii citeste din
+      `milestones[].items[]`, nu din `bars`. Iar `items[]` e chiar cheia goala pe care
+      auditul din 2026-09-14 a scos-o din planBars.js: fiecare milestone o avea `[]`, deci
+      ramura rula peste nimic.
+
+      Asa ca azi: coloana v7.19 se creeaza (msSet ia si cheile din `_planning.json`,
+      linia 209), dar bara "Server MCP" nu intra in ea, fiindca continutul unei coloane
+      vine din cerinte cu `milestone:`, din TODO-uri, si din `items[]` - niciodata din
+      `bars`.
+
+      Reparatia mica: citeste `bars` acolo unde se citeste `items[]`, filtrate pe
+      `bar.milestone`. Atentie la dedublare - se face deja pe titlu, iar o bara cu `req:`
+      numeste o cerinta care e probabil deja in coloana.
+
+      Intrebarea inainte de a scrie codul: e o singura lista cu doua randari, sau doua
+      liste care se intampla sa semene? Daca e prima, `items[]` ar trebui sters, nu
+      alimentat.
+
 - [ ] CD: deploy automat pe git | req: ARCH-SELFGATE-039
       Jumatate exista deja: la push pe `main`, jobul `release` taie tag-ul din
       `plugin.json`, creeaza release-ul cu notele extrase din CHANGELOG si muta
