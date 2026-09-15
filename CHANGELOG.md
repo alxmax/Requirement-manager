@@ -1,5 +1,38 @@
 # Changelog
 
+## plugin `v7.19.0` — 2026-09-16
+
+**A plan file a repo does not have is a plan nobody writes.** `init` scaffolded neither
+`ROADMAP.md` nor `_planning.json`, so a fresh repo's Plan tab said "add milestones with
+due dates or bars in _planning.json" — the empty case being the one with nothing to look
+at, which is backwards: the repo that has planned nothing is exactly the one that needs a
+calendar to plan ON. `init` now writes both, once, and never overwrites an edited one.
+
+The seeded `_planning.json` deliberately carries **no `until`**. A horizon written into a
+file goes stale by definition — this very file planned a version that had already
+shipped, once. `default_horizon` computes it instead: the end of the current year, or
+three months out, whichever is later. Mid-year that is the year end; from October it
+rolls forward, so asked in December 2026 it answers March 2027 rather than showing one
+month at the point a reader most needs the next quarter. Lanes start as Feature / Bug /
+Release, which are a vocabulary, not a schema.
+
+**Two deliberate "no"s are reversed, and named as such.** `_plan_span` returned
+`(None, None)` for a plan covering no dates, reasoning that "a cadence needs something to
+run alongside, and inventing a span from today would put markers on an empty chart"; it
+now runs from today to the horizon. The chart's empty-plan message no longer fires when a
+cadence alone is present. `REQ-PLANCADENCE-1000` CASE-5 asserted the old behaviour and is
+replaced by `REQ-PLANHORIZON-1010` CASE-2.
+
+**And a bug the seeding exposed twice.** `ROADMAP.md` is now in `init`'s `.reqmapignore`
+seed: seeded before the extraction pass, the extractor read it as untagged prose and
+drafted a requirement whose subject was the plan file, then stamped a membership tag into
+it. `_read_roadmap` opens the file by name, so the scanner never needed it. Separately,
+release dates did not extend the chart's range — a cadence running past the last bar
+emitted dates the in-range filter then dropped, so the engine said a release lands and
+the chart, never having grown to reach it, showed nothing and reported nothing.
+
+This repo's own `_planning.json` is rebuilt to match: lanes Feature / Bug / Release, one
+bar (the MCP server at W39), v7.9 / v8.0 / v8.1 kept, calendar through 31 December.
 ## plugin `v7.18.0` — 2026-09-15
 
 **Four numbers in this repo's own front page were wrong, and every check passed.**

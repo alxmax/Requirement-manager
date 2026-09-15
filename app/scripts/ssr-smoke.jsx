@@ -636,6 +636,36 @@ for (const [label, ok] of barNoteChecks) test(label, ok);
 // The chart PLACES engine-computed dates and derives none. Asserted by handing it
 // a date the weekday arithmetic would never produce: if a rule appears for it, the
 // viewer is reading the list; if the viewer recomputed, it would not be there.
+test("cadence: a release past the last bar still gets a column",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+  (() => {
+    // `until` running past everything scheduled is the whole point of a cadence: the
+    // months after the last bar are exactly where the next releases land. Before the
+    // range counted release dates, those were emitted and then dropped by the
+    // in-range filter — the engine said a release lands and the chart showed nothing.
+    const far = renderToString(<PlanGantt planning={{
+      lanes: ["Feature"],
+      bars: [{ title: "b", lane: "Feature", start: "2026-09-21", end: "2026-09-27" }],
+      cadence: { every: "month", on: "last", lane: "Release", until: "2026-12-31" },
+      releases: ["2026-09-30", "2026-12-31"],
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    return far.includes("2026-12-31") || far.toLowerCase().includes("dec");
+  })());
+
+test("cadence: a plan with only a cadence still draws its calendar",  // verifies: REQ-PLANHORIZON-1010#CASE-3
+  (() => {
+    // The seeded shape: no bars, no milestone dues, no history. It used to render the
+    // "add milestones or bars" dead end — the empty case being the one with nothing to
+    // look at, which is backwards for a repo that has planned nothing yet.
+    const bare = renderToString(<PlanGantt planning={{
+      lanes: ["Feature", "Bug", "Release"],
+      cadence: { every: "month", on: "last", lane: "Release" },
+      milestones: {}, bars: [],
+      releases: ["2026-09-30", "2026-10-31", "2026-11-30", "2026-12-31"],
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    return !bare.includes("Add milestones with due dates")
+      && bare.includes("Feature") && bare.includes("Release");
+  })());
+
 const cadencePlan = {
   lanes: ["Engine"],
   bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],

@@ -275,3 +275,62 @@ CASE-5 — a repo with no ROADMAP.md sees nothing
   Given  a code root holding no `ROADMAP.md`
   When   `gate --audit` runs
   Then   it prints no roadmap-plan line
+
+---
+id: REQ-PLANHORIZON-1010
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# A repo with no plan still gets a calendar to plan on
+
+## Description
+> A plan file a repo does not have is a plan nobody writes. `init` scaffolded neither
+> `ROADMAP.md` nor `_planning.json`, so a fresh repo's Plan tab said "add milestones with
+> due dates or bars" — the empty case being the one with nothing to look at, which is
+> backwards: the repo that has planned nothing is exactly the one that needs a calendar
+> to plan ON. And a horizon written once into a file goes stale by definition, so the
+> engine computes it instead of freezing it.
+
+Every bullet below is binding.
+- `init` writes a `ROADMAP.md` holding the four reserved headings and the format it
+  expects, and a `requirements/_planning.json` holding lanes and a cadence; it never
+  overwrites either when one is already there.
+- The seeded `_planning.json` carries no `until`, so its calendar is recomputed on every
+  run rather than ending on the date it was written.
+- `default_horizon` answers the end of the current year, or three months out, whichever
+  is later — so the calendar covers the year for most of it and rolls into the next one
+  near the close.
+- A plan covering no dates at all runs its cadence from today to that horizon, and the
+  chart draws it instead of reporting an empty plan.
+- The seeded `ROADMAP.md` is not scanned as a capability: `init` adds it to a freshly
+  seeded `.reqmapignore`, because `_read_roadmap` opens it by name.
+
+## Cases
+CASE-1 — the horizon is the later of the year end and three months out
+  Given  the dates 2026-09-15, 2026-12-31 and 2027-01-15
+  When   `default_horizon` is asked for each
+  Then   it answers 2026-12-31, 2027-03-31 and 2027-12-31
+
+CASE-2 — a plan with no dates still carries a calendar
+  Given  a `_planning.json` holding a cadence, no bars and no milestone dues
+  When   the export is built
+  Then   `releases` is non-empty and reaches the horizon
+
+CASE-3 — the chart draws a calendar with no bars on it
+  Given  a plan carrying only lanes, a cadence and its release dates
+  When   the Plan renders
+  Then   the lanes and the calendar are drawn, not the empty-plan message
+
+CASE-4 — init seeds both files, once
+  Given  a repo with neither `ROADMAP.md` nor `requirements/_planning.json`
+  When   `init` runs, and runs a second time after both are edited
+  Then   the first run creates both and the second leaves the edits untouched
+
+CASE-5 — the seeded plan file is not drafted as a capability
+  Given  a fresh repo where `init` seeds `.reqmapignore` and `ROADMAP.md`
+  When   the extraction pass runs
+  Then   no requirement is drafted for `ROADMAP.md` and it carries no membership tag

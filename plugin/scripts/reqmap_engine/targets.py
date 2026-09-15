@@ -131,8 +131,14 @@ def _parse_cadence(raw):
 
 def _plan_span(out):
     """(first, last) ISO dates the plan already covers, from its bars and milestone
-    dues. Returns (None, None) when it covers nothing — a cadence needs something to
-    run alongside, and inventing a span from today would put markers on an empty chart."""
+    dues. When it covers nothing the span runs from today to `default_horizon()`.
+
+    That reverses an earlier "a cadence needs something to run alongside, and inventing
+    a span from today would put markers on an empty chart". The case it was written for
+    is the case that turned out to matter: a repo that has planned nothing yet is
+    exactly the one that needs a calendar to plan ON. An empty chart with months on it
+    is a canvas; an empty chart with no months is a dead end, and `init` now seeds a
+    `_planning.json` precisely so a new repo starts with one (REQ-PLANHORIZON-1010)."""
     dates = []
     for bar in out.get("bars", []):
         dates.append(bar["start"])
@@ -141,7 +147,7 @@ def _plan_span(out):
         if entry.get("due"):
             dates.append(entry["due"])
     if not dates:
-        return None, None
+        return datetime.date.today().isoformat(), default_horizon()
     return min(dates), max(dates)
 
 
@@ -152,13 +158,34 @@ def _month_end(year, month):
     return nxt - datetime.timedelta(days=1)
 
 
+def default_horizon(today=None):
+    # implements: ARCH-ROADMAP-038  # implements: REQ-PLANHORIZON-1010
+    """How far a cadence runs when its author named no `until`: the end of this year,
+    or three months out, whichever is later.
+
+    The year end alone is a plan that shrinks as the year does — in December it would
+    show one month, which is the point at which a reader needs the next quarter most.
+    Three months alone never shows the year. Taking the later of the two means the chart
+    reaches the end of the year for most of it and rolls into the next one near the
+    close: asked in December 2026 it answers February 2027."""
+    d = today or datetime.date.today()
+    year_end = datetime.date(d.year, 12, 31)
+    month = d.month + 3
+    year = d.year + (month - 1) // 12
+    quarter_out = _month_end(year, (month - 1) % 12 + 1)
+    return max(year_end, quarter_out).isoformat()
+
+
 def _release_dates(cadence, first, last):
     """The cadence's dates from `first` through `last`, inclusive, as ISO strings.
 
     Computed HERE and emitted, not recomputed in the viewer: a second definition in
     JavaScript is how the CLI and the chart come to disagree about when a release lands."""
     start = cadence.get("from") or first
-    end = cadence.get("until") or last
+    # `last` is the final dated thing in the plan, which in a fresh repo is nothing at
+    # all. Falling back to the shared horizon means a cadence draws a calendar before
+    # anything is scheduled on it — which is what a new repo has.
+    end = cadence.get("until") or last or default_horizon()
     if not start or not end or start > end:
         return []
     try:

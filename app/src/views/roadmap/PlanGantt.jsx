@@ -124,7 +124,9 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
    * next to a `today` line they do not share.  implements: REQ-HISTORY-1003 */
   const past = (history || []).filter((h) => parseIso(h.first) && parseIso(h.last));
 
-  if (!raw.length && !dueList.length && !past.length) {
+  // A cadence with no bars is still a calendar, and a repo that has planned nothing is
+  // the one that needs one — `init` seeds it for exactly that (REQ-PLANHORIZON-1010).
+  if (!raw.length && !dueList.length && !past.length && !(planning?.releases || []).length) {
     return (
       <div style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         {t("Add milestones with due dates or bars in _planning.json.")}
@@ -136,6 +138,12 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
     ...raw.flatMap((b) => [parseIso(b.start), parseIso(b.end)]),
     ...dueList.map((d) => d.at),
     ...past.flatMap((h) => [parseIso(h.first), parseIso(h.last)]),
+    // Release dates extend the range like any other dated thing. Without this a
+    // cadence running past the last bar or due — `until: 2026-12-31` with nothing
+    // scheduled in December — emits dates the chart then drops on the `idx <
+    // totalDays` filter below: the engine says a release lands and the chart, having
+    // never grown to reach it, shows nothing and reports nothing.
+    ...(planning?.releases || []).map(parseIso),
     todayD,
   ].filter(Boolean);
   let origin = monthStart(new Date(Math.min(...dates.map((d) => d.getTime()))));

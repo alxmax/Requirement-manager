@@ -1,4 +1,5 @@
 """`init`: scaffold, seed .reqmapignore, wipe."""
+import json
 import os
 
 from .draft import cmd_extract
@@ -7,6 +8,7 @@ from .mapcmd import cmd_map
 from .parse import load_requirements
 from .scan import _walk_code, scan_members
 from .site import _site_default_target, _site_pages_bootstrap, cmd_site
+from .targets import default_horizon
 from .tags import TAG_RE, _findall_tags, _scan_file_tags
 from .workspace import Workspace
 
@@ -100,6 +102,56 @@ def _wipe(reqs_dir, code_root):
         deleted, stripped_files))
 
 
+
+ROADMAP_SEED = """# Roadmap
+
+The product plan. Not a log: versions live in CHANGELOG.md and in the git tag.
+
+Format: `- [ ] text | req: ID` under Now or Next. A `Later` item needs `unpark:` —
+a condition that would bring it back, because parked with no way back is parked
+forever, and `gate --audit` says so.
+
+Lines indented under an item are its note. They are carried into the map and shown
+when its bar is selected in the Plan, so this is where the reasoning goes.
+
+Reserved headings: Now, Next, Later, Not now. Items under any other `## ` heading
+are skipped.
+
+## Now
+
+## Next
+
+## Later
+
+## Not now
+"""
+
+
+def _planning_seed():
+    # implements: ARCH-INIT-012  # implements: REQ-PLANHORIZON-1010
+    """Content for a freshly-seeded `_planning.json`.
+
+    Deliberately carries NO `until`: the horizon is a live rule (`default_horizon`),
+    so a calendar written today still reaches three months out a year from now. A date
+    frozen here would be a plan that quietly stops — the failure this file already had
+    once, when it planned a version that had shipped.
+
+    The lanes are a starting vocabulary, not a schema: rename them freely, the chart
+    reads whatever is here."""
+    return json.dumps({
+        "_comment": [
+            "Bars drawn on the Plan chart. `lanes` are yours to rename.",
+            "The calendar runs to the end of this year, or three months out,",
+            "whichever is later - the engine computes it, so it never goes stale.",
+            "Pin it by adding `until` to `cadence` if you want a fixed end.",
+        ],
+        "lanes": ["Feature", "Bug", "Release"],
+        "cadence": {"every": "month", "on": "last", "lane": "Release"},
+        "milestones": {},
+        "bars": [],
+    }, ensure_ascii=False, indent=2) + "\n"
+
+
 def _reqmapignore_seed(code_root, reqs_dir):
     # implements: ARCH-INIT-012  # implements: REQ-INIT-860
     """Content for a freshly-seeded `.reqmapignore`. Normally ignores the vendored
@@ -117,7 +169,11 @@ def _reqmapignore_seed(code_root, reqs_dir):
               "# Both spellings: Claude Code creates `.claude/worktrees/`, older\n"
               "# parallel-session tooling `.worktrees/`.\n"
               ".worktrees/**\n"
-              ".claude/worktrees/**\n")
+              ".claude/worktrees/**\n"
+              "# The plan, not a capability. `_read_roadmap` opens it by name, so the\n"
+              "# scanner never needs to: left scanned, the extractor reads it as untagged\n"
+              "# prose and drafts a requirement whose subject is the plan file itself.\n"
+              "ROADMAP.md\n")
     engine = os.path.join(code_root, "scripts", "reqmap.py")
     req_ids = set(load_requirements(reqs_dir))
     if req_ids and os.path.isfile(engine):
@@ -157,6 +213,18 @@ def cmd_init(reqs_dir, code_root, wipe=False, no_site=False):
         with open(ignore, "w", encoding="utf-8") as f:
             f.write(_reqmapignore_seed(code_root, reqs_dir))
         created.append(".reqmapignore")
+    # A plan file a repo does not have is a plan nobody writes. Both are seeded empty
+    # and never clobbered, so `init` is still idempotent (REQ-PLANHORIZON-1010).
+    roadmap = os.path.join(code_root, "ROADMAP.md")
+    if not os.path.exists(roadmap):
+        with open(roadmap, "w", encoding="utf-8") as f:
+            f.write(ROADMAP_SEED)
+        created.append("ROADMAP.md")
+    planning = os.path.join(reqs_dir, "_planning.json")
+    if not os.path.exists(planning):
+        with open(planning, "w", encoding="utf-8") as f:
+            f.write(_planning_seed())
+        created.append(os.path.relpath(planning, code_root).replace(os.sep, "/"))
     if wipe:
         _wipe(reqs_dir, code_root)
     print("Bootstrapping draft requirements from existing code...\n")

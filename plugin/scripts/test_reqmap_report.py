@@ -2606,13 +2606,27 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
             cadence={"every": "week", "on": "monday", "from": "2026-09-21"})
         self.assertEqual(["2026-09-21", "2026-09-28", "2026-10-05"], got["releases"])
 
-    def test_a_plan_covering_no_dates_emits_no_cadence(self):  # verifies: REQ-PLANCADENCE-1000#CASE-5
+    def test_a_plan_covering_no_dates_still_gets_a_calendar(self):  # verifies: REQ-PLANHORIZON-1010#CASE-2
+        # Reverses REQ-PLANCADENCE-1000 CASE-5, which read "a cadence needs something to
+        # run alongside". The case it was written for is the one that turned out to
+        # matter: a repo that has planned nothing is exactly the one that needs a
+        # calendar to plan on, and `init` now seeds a `_planning.json` to give it one.
         with tempfile.TemporaryDirectory() as d:
             _write(os.path.join(d, "_planning.json"),
-                   json.dumps({"cadence": {"every": "week"}, "scores": {"health": 90}}))
+                   json.dumps({"cadence": {"every": "month"}}))
             got = R.load_targets(d)
-        self.assertNotIn("cadence", got)
-        self.assertNotIn("releases", got)
+        self.assertIn("cadence", got)
+        self.assertTrue(got["releases"], "an empty plan must still carry its calendar")
+        # ...and it reaches the shared horizon rather than stopping at today.
+        self.assertGreaterEqual(got["releases"][-1], R.default_horizon()[:7])
+
+    def test_the_horizon_is_the_year_end_or_three_months_whichever_is_later(self):  # verifies: REQ-PLANHORIZON-1010#CASE-1
+        import datetime
+        # Mid-year the year end wins; from October the quarter does, which is the point:
+        # a plan that only ever ran to 31 Dec would show one month in December.
+        self.assertEqual("2026-12-31", R.default_horizon(datetime.date(2026, 9, 15)))
+        self.assertEqual("2027-03-31", R.default_horizon(datetime.date(2026, 12, 31)))
+        self.assertEqual("2027-12-31", R.default_horizon(datetime.date(2027, 1, 15)))
 
     def test_a_monthly_cadence_lands_on_each_month_end(self):  # verifies: REQ-PLANCADENCE-1000#CASE-6
         got = self._load(bars=[{"title": "a", "lane": "E", "start": "2026-09-13",

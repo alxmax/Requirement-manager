@@ -13,72 +13,24 @@
     "and dating them would turn a condition into a deadline."
   ],
   "lanes": [
-    "Engine",
-    "Viewer",
-    "Ops"
+    "Feature",
+    "Bug",
+    "Release"
   ],
   "cadence": {
     "every": "month",
     "on": "last",
-    "lane": "Release"
+    "lane": "Release",
+    "until": "2026-12-31"
   },
   "bars": [
     {
-      "title": "n=2: Consilium-py pe check@v7, verde 7 zile",
-      "lane": "Ops",
-      "start": "2026-09-14",
-      "end": "2026-09-21",
-      "milestone": "v7.9",
-      "req": "SYS-SSOT-001",
-      "progress": 60
-    },
-    {
-      "title": "gate ≤ 12 flag-uri",
-      "lane": "Engine",
-      "start": "2026-09-21",
-      "end": "2026-09-30",
-      "milestone": "v7.9",
-      "req": "ARCH-CMDREGISTRY-033"
-    },
-    {
       "title": "Server MCP: expune reqmap ca tool",
-      "lane": "Engine",
+      "lane": "Feature",
       "start": "2026-09-21",
       "end": "2026-09-27",
       "milestone": "v7.9",
       "progress": 0
-    },
-    {
-      "title": "README de 90 de linii",
-      "lane": "Ops",
-      "start": "2026-10-01",
-      "end": "2026-10-15",
-      "milestone": "v8.0",
-      "req": "SYS-SSOT-001"
-    },
-    {
-      "title": "Health: un snapshot, design review jos de pe calea verdictului",
-      "lane": "Engine",
-      "start": "2026-10-16",
-      "end": "2026-10-31",
-      "milestone": "v8.0",
-      "req": "ARCH-HEALTH-017"
-    },
-    {
-      "title": "init spune o dată că roadmap-ul e inert",
-      "lane": "Engine",
-      "start": "2026-11-02",
-      "end": "2026-11-13",
-      "milestone": "v8.1",
-      "req": "ARCH-INIT-012"
-    },
-    {
-      "title": "Split ARCH-VIEWER-007: artefactul vs. ce randează",
-      "lane": "Viewer",
-      "start": "2026-11-16",
-      "end": "2026-11-30",
-      "milestone": "v8.1",
-      "req": "ARCH-VIEWER-007"
     }
   ],
   "milestones": {

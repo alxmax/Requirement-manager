@@ -155,7 +155,11 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
     || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
     // Shipped history alone is a timeline worth drawing: a repo that has released
     // for months and planned nothing yet still has something to show on the Plan.
-    || !!(initialHistory || HISTORY).length;
+    || !!(initialHistory || HISTORY).length
+    // And a cadence alone is too. A repo that has planned NOTHING is the one that most
+    // needs a calendar to plan on, which is why `init` seeds one (REQ-PLANHORIZON-1010);
+    // requiring a bar first made the empty case the one with nothing to look at.
+    || !!(TARGETS?.releases?.length);
   // The roadmap items are still carried and still read — by the Plan's detail panel,
   // which looks up a selected bar's note by `req`. What is gone is the Horizons MODE:
   // a plan with dates and a plan with horizons were two pictures of one file, and the
