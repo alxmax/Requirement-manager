@@ -78,7 +78,7 @@
       "reason": "v6.4.0: REQ-TRANSLATE-996 wording, file-spread exemption with reason"
     },
     "ARCH-VIEWER-007": {
-      "hash": "0f0781e1d5a2",
+      "hash": "e890b0af4c9c",
       "reason": null
     },
     "ARCH-VLEVEL-037": {
@@ -180,6 +180,10 @@
     "REQ-VIEWER-995": {
       "hash": "61b20c804d6b",
       "reason": "v7.3.1: REQ-VIEWER-995 gains a clause and CASE-4 \u2014 a milestone whose TODO items are all complete still renders a column"
+    },
+    "REQ-VIEWER-999": {
+      "hash": "b357adfd41ea",
+      "reason": null
     }
   }
 }

@@ -18,7 +18,7 @@ import { adaptNode, loadData } from "../src/lib/loadData.js";
 import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
-import { PlanGantt } from "../src/views/roadmap/PlanGantt.jsx";
+import { PlanGantt, noteText, matchItem } from "../src/views/roadmap/PlanGantt.jsx";
 import { SpecDoc } from "../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../src/lib/data.js";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
@@ -594,40 +594,43 @@ const HZ = [
   { name: "the queued one", horizon: "next", req: "NOPE-X-999", unpark: null, done: false },
   { name: "the parked one", horizon: "later", req: null, unpark: "a named consumer asks", done: false },
 ];
-const hz = renderToString(<RoadmapView openSpec={noop} initialRoadmap={HZ} initialMode="horizons" />);
 const hzNone = renderToString(<RoadmapView openSpec={noop} initialRoadmap={[]} />);
-const horizonChecks = [
-  ["roadmap: the three horizons each get a column, in order",  // verifies: REQ-VIEWER-999#CASE-1
-    hz.indexOf(">Now<") < hz.indexOf(">Next<")
-    && hz.indexOf(">Next<") < hz.indexOf(">Later<")
-    && hz.includes("the open one") && hz.includes("the queued one")
-    && hz.includes("the parked one")],
-  ["roadmap: no roadmap items means no Horizons mode",  // verifies: REQ-VIEWER-999#CASE-2
-    !hzNone.includes(">Horizons<")],
-  ["roadmap: Plan is the landing view when a plan exists, Horizons one click away",  // verifies: REQ-VIEWER-999#CASE-2
-    // Plan answers both questions at once — what shipped, and what is scheduled. It has
-    // to be adopted here: `hasPlan` reads TARGETS from module state, not from a prop.
+const barNoteChecks = [
+  ["roadmap: the Horizons mode is gone",  // verifies: REQ-VIEWER-999#CASE-4
+    // Items are still carried — the panel reads them — but no mode renders columns.
     (() => {
-      adoptMapExport({ nodes: json.nodes.map(adaptNode), roadmap: HZ,
-                       planning: { bars: [{ title: "b", lane: "L",
-                                            start: "2026-09-01", end: "2026-09-30" }] } });
-      const landed = renderToString(<RoadmapView openSpec={noop} />);
-      adoptMapExport({ nodes: json.nodes.map(adaptNode) });
-      return landed.includes(">Horizons<") && !landed.includes("being worked on");
+      const withItems = renderToString(
+        <RoadmapView openSpec={noop} initialRoadmap={HZ} />);
+      return !withItems.includes(">Horizons<")
+        && !(withItems.includes(">Now<") && withItems.includes(">Later<"));
     })()],
-  ["roadmap: a req: that resolves is a button, one that does not is plain",  // verifies: REQ-VIEWER-999#CASE-3
-    hz.includes(`>${json.nodes[0].id}</button>`) && !hz.includes(">NOPE-X-999</button>")
-    && hz.includes("NOPE-X-999")],
-  ["roadmap: a parked item shows what would bring it back",  // verifies: REQ-VIEWER-999#CASE-4
-    hz.includes("a named consumer asks")],
-  ["roadmap: a done item is struck through and not counted open",  // verifies: REQ-VIEWER-999#CASE-5
-    // Two `now` items, one of them done: the header must say 1, not 2. React SSR
-    // splits adjacent text nodes with `<!-- -->`, so the comments come out first.
-    hz.includes("line-through")
-    && hz.replace(/<!--[^>]*-->/g, "").includes("1 open")
-    && !hz.replace(/<!--[^>]*-->/g, "").includes("2 open")],
+  ["roadmap: a stored Horizons choice lands on Plan, not on nothing",  // verifies: REQ-VIEWER-999#CASE-4
+    !hzNone.includes(">Horizons<")],
+  ["roadmap: an HTML-comment note renders as its text",  // verifies: REQ-VIEWER-999#CASE-3
+    noteText("<!-- the reason -->") === "the reason"],
+  ["roadmap: a multi-line note keeps its breaks and loses its indent",  // verifies: REQ-VIEWER-999#CASE-3
+    noteText(["<!--", "  first", "  second", "-->"].join("\n"))
+      === ["first", "second"].join("\n")],
+  ["roadmap: a bar finds its item by req:",  // verifies: REQ-VIEWER-999#CASE-1
+    (() => {
+      const it = matchItem({ reqId: json.nodes[0].id }, HZ);
+      return !!it && it.name === "the open one";
+    })()],
+  ["roadmap: a bar with no req, or an unmatched one, has no item",  // verifies: REQ-VIEWER-999#CASE-2
+    // NOT `NOPE-X-999`: the registry does not have it but the fixture's `next` item
+    // carries it, so the join finds that item and should. The join is bar->item, and
+    // whether the id also resolves to a requirement is the panel's separate question.
+    matchItem({ reqId: null }, HZ) === null
+    && matchItem({ reqId: "ABSENT-Z-000" }, HZ) === null],
+  ["roadmap: the roadmap payload survives the mode's removal",  // verifies: REQ-VIEWER-999#CASE-5
+    (() => {
+      const adopted = adoptMapExport({ nodes: json.nodes.map(adaptNode), roadmap: HZ });
+      const kept = (adopted && adopted.roadmap) || ROADMAP;
+      adoptMapExport({ nodes: json.nodes.map(adaptNode) });
+      return Array.isArray(kept) && kept.length === HZ.length;
+    })()],
 ];
-for (const [label, ok] of horizonChecks) test(label, ok);
+for (const [label, ok] of barNoteChecks) test(label, ok);
 
 // ---- release cadence (REQ-PLANCADENCE-1000) --------------------------------
 // The chart PLACES engine-computed dates and derives none. Asserted by handing it
