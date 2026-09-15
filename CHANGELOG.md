@@ -1,5 +1,51 @@
 # Changelog
 
+## plugin `v7.18.0` — 2026-09-15
+
+**Four numbers in this repo's own front page were wrong, and every check passed.**
+`CLAUDE.md` claimed 68 architecture requirements against 63, 159 code against 191, 236
+total against 263, and 197-in-71-files against 263-in-72. An outside reader found it, not
+a check — the exact failure this tool exists to prevent, sitting in the file every
+contributor and every agent reads first. Three smaller things surfaced with it, each one
+a number or a label that had stopped describing the code.
+
+- **New `ARCH-DOCCLAIMS-071` / `REQ-DOCCLAIMS-1012` and gate rule `RM035`**
+  (`reqmap_engine/docclaims.py`): a number a prose document marks as a corpus count is
+  re-measured against the live corpus, and the gate warns when the two disagree. Opt-in in
+  two independent ways — a document carrying no `<!--reqmap:KIND-->` marker yields nothing,
+  and the new `DOC_CLAIM_FILES` config key names which documents are read at all — so a
+  repository that wants none of it is untouched and pays one failed `open`. Warn, never
+  error: `.githooks/pre-commit` runs the gate on every commit, and an error here would
+  block every commit that adds a requirement until its author re-edited a paragraph.
+  A marker naming a kind the engine cannot count is reported rather than skipped, because
+  a mistyped kind that quietly checked nothing would be this rule's own failure mode.
+- **`DocsAreTrue.test_the_corpus_counts_in_claude_md_are_current`** is the binding half for
+  this repository: RM035 is portable but warn-only, and a warn inside a run that already
+  prints thirty-odd warnings is detection in principle. The test asserts the marker SET
+  before the numbers, so deleting a marker fails loudly instead of silently reducing what
+  is checked.
+- **The last line of a `gate` run is now the gate's own verdict.** `cmd_check` prints its
+  counts where it runs, which is FIRST — a hundred lines above the end on this corpus — so
+  the number a run finished on was the readability sub-report's. An auditor read that as
+  the gate under-reporting itself by 32 warnings; the gate's count was right and its
+  position was wrong. The sub-reports now name the check they belong to
+  (`readability: N non-draft requirement(s) linted …`) and a final `gate: PASS — …` line
+  closes the run. Nothing may print below it.
+- **`design OOP: N/100` is now `design pass-rate: N%`.** The number at
+  `design_report.py` is `round(100 * clean / files)` — the percentage of source files
+  carrying zero advisory findings of any kind. It is not an object-orientation measure and
+  not a graded score: a file with one flag and a file with fifty score identically. Renamed
+  at all four engine sites, including the `_strip_generated` prefix in `mapcmd.py` that
+  keeps the advisory number out of the map-freshness diff — changing the label without that
+  prefix would have made `RM027` fail every time the design score moved.
+- **Eight temporal terms added to `LINT_VAGUE_TERMS`**: `promptly`, `timely`,
+  `periodically`, `regularly`, `frequently`, `soon`, `eventually`, `shortly`. A deadline
+  with no unit is not testable, and the list had no temporal word at all. The obvious
+  candidates `immediately`, `later` and `recent` are deliberately excluded: measured over
+  this corpus they scored 12 hits and 12 false positives, every one positional rather than
+  temporal ("a block starts at a `---` line immediately followed by `id:`"). The eight
+  scored zero hits — silent here, firing on the shape that produced them.
+
 ## plugin `v7.17.0` — 2026-09-15
 
 **A Gantt bar was a title and two dates.** It said when something was scheduled and

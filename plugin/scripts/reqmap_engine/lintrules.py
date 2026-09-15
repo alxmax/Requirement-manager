@@ -66,6 +66,16 @@ LINT_VAGUE_TERMS = frozenset({
     "efficient", "efficiently", "optimal", "scalable", "performant", "fast", "slow",
     "quick", "quickly", "easy", "easily", "simple", "user-friendly", "seamless",
     "seamlessly", "intuitive", "various", "etc",
+    # Temporal terms, added 2026-09-15. Same rule as the quality words above: a
+    # deadline with no unit is not testable ("sent promptly", "retried periodically").
+    # The obvious candidates `immediately`, `later` and `recent` are deliberately NOT
+    # here — measured over this corpus they scored 12 hits and 12 false positives,
+    # every one of them positional rather than temporal ("a block starts at a `---`
+    # line immediately followed by `id:`", "a later block", "the most recent commit").
+    # The eight below scored zero hits: silent here, firing on the shape that produced
+    # them, which is the same bargain LINT_FANOUT_BANDS records above.
+    "promptly", "timely", "periodically", "regularly", "frequently",
+    "soon", "eventually", "shortly",
 })
 # Redundant normative modals: the Contract section opens with "Every line in this
 # section is binding.", so "shall"/"must" on each clause is dead weight — and in a

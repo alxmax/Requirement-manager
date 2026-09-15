@@ -2744,3 +2744,146 @@ class DanglingVerifies(unittest.TestCase):  # tested-by: REQ-DANGLINGVERIFY-1009
         self.assertIn("RM034", out)
         self.assertIn("ARCH-NOSUCH-404", out)
         self.assertIn("names no such requirement", out)
+
+
+class DocClaims(unittest.TestCase):  # tested-by: ARCH-DOCCLAIMS-071  # tested-by: REQ-DOCCLAIMS-1012
+    """RM035: a number a prose document states about the corpus, re-measured.
+
+    This repo's own CLAUDE.md claimed 68 architecture requirements against 63 and 236
+    total against 263 while the gate reported zero errors — the tool's thesis failing on
+    the tool's own front page, found by an outside reader rather than by a check."""
+
+    def setUp(self):
+        self._saved = R.config.DOC_CLAIM_FILES
+        R.config.DOC_CLAIM_FILES = ["DOC.md"]
+
+    def tearDown(self):
+        R.config.DOC_CLAIM_FILES = self._saved
+
+    def _rm035(self, d, doc_body, n=3):
+        rdir = os.path.join(d, "requirements")
+        for i in range(n):
+            rid = "REQ-{}-00{}".format("ABCDE"[i], i + 1)
+            _write(os.path.join(rdir, rid + ".md"),
+                   _spec(rid, ["`gate` writes the lock file."]))
+        _write(os.path.join(d, "DOC.md"), doc_body)
+        reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
+        _errors, warns = R.run_gate_rules(R.GateContext(R.Workspace(reqs, members, rdir, d)))
+        return [str(w) for w in warns if w["rule"] == "RM035"]
+
+    def test_a_stale_marked_count_warns_with_both_numbers(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            found = self._rm035(d, "This repo has <!--reqmap:total-->5 requirements.\n")
+        self.assertEqual(1, len(found), found)
+        self.assertIn("5", found[0])
+        self.assertIn("3", found[0])
+
+    def test_a_current_marked_count_is_silent(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-2
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual(
+                [], self._rm035(d, "This repo has <!--reqmap:total-->3 requirements.\n"))
+
+    def test_an_unknown_claim_kind_is_named_not_skipped(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-3
+        # A mistyped kind that quietly checked nothing would be this rule's own failure mode.
+        with tempfile.TemporaryDirectory() as d:
+            found = self._rm035(d, "This repo has <!--reqmap:totl-->3 requirements.\n")
+        self.assertEqual(1, len(found), found)
+        self.assertIn("unknown claim kind", found[0])
+        self.assertIn("total", found[0])
+
+    def test_a_document_with_no_marker_produces_nothing(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual([], self._rm035(d, "This repo has 5 requirements, unmarked.\n"))
+
+    def test_a_missing_document_is_skipped_without_a_finding(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-4
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"),
+                   _spec("REQ-A-001", ["`gate` writes the lock file."]))
+            reqs, members = R.load_requirements(rdir), R.scan_members(d, rdir)
+            _e, warns = R.run_gate_rules(R.GateContext(R.Workspace(reqs, members, rdir, d)))
+        self.assertEqual([], [w for w in warns if w["rule"] == "RM035"])
+
+    def test_the_file_count_is_the_parsers_not_the_globs(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-5
+        # `requirements/` also holds _map.md, _findings.md and _ai_review.md. A glob counts
+        # them; the first draft of this very rule was written from the glob number and was
+        # wrong by three.
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            for rid in ("REQ-A-001", "REQ-B-002"):
+                _write(os.path.join(rdir, rid + ".md"),
+                       _spec(rid, ["`gate` writes the lock file."]))
+            _write(os.path.join(rdir, "_map.md"), "# generated, holds no requirement\n")
+            counts = R.corpus_counts(R.load_requirements(rdir))
+        self.assertEqual(2, counts["files"])
+
+    def test_a_requirement_with_no_path_does_not_crash_the_count(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-5
+        # A requirement assembled in memory carries no `path`, and `corpus_counts` runs on
+        # every gate pass. Reading the key directly raised KeyError and took the whole gate
+        # down with it — three suite errors on the first full run.
+        counts = R.corpus_counts({"REQ-A-001": {"meta": {"level": "code"}}})
+        self.assertEqual(1, counts["total"])
+        self.assertEqual(0, counts["files"])
+        self.assertEqual(1, counts["level:code"])
+
+    def test_an_axis_value_with_no_members_measures_zero(self):  # verifies: REQ-DOCCLAIMS-1012#CASE-3
+        with tempfile.TemporaryDirectory() as d:
+            self.assertEqual([], self._rm035(d, "<!--reqmap:level:system-->0 needs.\n"))
+
+
+class GateVerdictIsLast(unittest.TestCase):  # tested-by: ARCH-CHECK-006
+    """The last line of a gate run is the gate's own verdict.
+
+    `cmd_check` prints its counts where it runs, which is FIRST; on this repo the
+    readability sub-report's count was a hundred lines below it and therefore the number
+    a reader finished on. An auditor read that as the gate under-reporting itself by 32."""
+
+    def _run(self, *args, cwd):
+        reqmap = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reqmap.py")
+        return subprocess.run([sys.executable, "-X", "utf8", reqmap, *args],
+                              cwd=cwd, capture_output=True, text=True)
+
+    def _seeded(self, d):
+        rdir = os.path.join(d, "requirements")
+        _write(os.path.join(rdir, "REQ-A-001.md"),
+               _spec("REQ-A-001", ["`gate` writes the lock file."]))
+        _write(os.path.join(d, "impl.py"), "x = 1  " + tag("REQ-A-001"))
+        return self._run("gate", cwd=d)
+
+    def test_nothing_prints_below_the_verdict(self):  # verifies: ARCH-CHECK-006#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            out = self._seeded(d)
+        lines = [l for l in out.stdout.strip().splitlines() if l.strip()]
+        self.assertTrue(lines[-1].startswith("gate: "), out.stdout)
+        self.assertIn("readability", lines[-1])
+        self.assertIn("map freshness", lines[-1])
+
+    def test_each_sub_report_says_which_check_it_belongs_to(self):  # verifies: ARCH-LINT-014#CASE-1
+        with tempfile.TemporaryDirectory() as d:
+            out = self._seeded(d)
+        self.assertIn("readability: 1 non-draft requirement(s) linted", out.stdout)
+
+
+class TemporalVagueTerms(unittest.TestCase):  # tested-by: ARCH-LINT-014  # tested-by: REQ-LINT-863
+    """The eight temporal terms added 2026-09-15, and the three deliberately left out."""
+
+    def _vague(self, clause):
+        with tempfile.TemporaryDirectory() as d:
+            rdir = os.path.join(d, "requirements")
+            _write(os.path.join(rdir, "REQ-A-001.md"), _spec("REQ-A-001", [clause]))
+            reqs = R.load_requirements(rdir)
+            fs = R.lint_requirement("REQ-A-001", reqs["REQ-A-001"], reqs)
+        return [f["detail"] for f in fs if f["check"] == "vague-term"]
+
+    def test_a_deadline_with_no_unit_is_flagged(self):  # verifies: REQ-LINT-863#CASE-1
+        self.assertTrue(any("promptly" in x for x in
+                            self._vague("The broker is notified promptly.")))
+
+    def test_positional_immediately_is_not_flagged(self):  # verifies: REQ-LINT-863#CASE-1
+        # Measured over this corpus, `immediately`, `later` and `recent` scored 12 hits
+        # and 12 false positives, every one positional rather than temporal. They are
+        # excluded on that evidence, and this test is what records it.
+        self.assertEqual([], self._vague(
+            "A block starts at a line immediately followed by an id."))
+        self.assertEqual([], self._vague("A later block keeps its own id."))
+        self.assertEqual([], self._vague("The most recent commit wins."))

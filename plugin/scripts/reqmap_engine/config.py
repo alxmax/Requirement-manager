@@ -163,6 +163,12 @@ DESIGN_DOCSTRING_PUBLIC = 1
 DESIGN_RFC_MAX = 50             # metrics: own methods + distinct methods it calls (C&K RFC)
 
 
+# Prose documents `RM035` re-measures the marked corpus counts in, relative to the scan
+# root. A LIST, not a tuple, because `_config.json` hands JSON lists to `apply_config`
+# and a tuple default would reject every override on a type mismatch. Set it to `[]` to
+# turn the rule off outright; a file that carries no marker already costs one failed open.
+DOC_CLAIM_FILES = ["CLAUDE.md"]
+
 # ---------- per-repo configuration ----------
 # Every threshold above is a module constant, and a consumer could change none of them
 # without forking the engine. `requirements/_config.json` overrides the named ones —
@@ -179,7 +185,7 @@ CONFIG_KEYS = ("LINT_AC_MIN", "LINT_AC_MAX", "LINT_STATEMENT_WORDS", "LINT_CONTR
                "DESIGN_SHARED_METHODS",
                "DESIGN_ISINSTANCE_CHAIN", "DESIGN_BRANCH_CHAIN", "DESIGN_FILE_MAX_LINES",
                "DESIGN_LINE_MAX", "DESIGN_FILE_MAX_FUNCS", "DESIGN_DOCSTRING_PUBLIC",
-               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE")
+               "DESIGN_RFC_MAX", "DRIFT_SEVERITY", "LANGUAGE", "DOC_CLAIM_FILES")
 
 # A string-valued config key names a behaviour, so its accepted spellings are declared
 # here and a value outside them is reported rather than applied. Without this, a repo

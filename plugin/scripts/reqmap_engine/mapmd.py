@@ -271,7 +271,7 @@ def _build_md_text(data):  # implements: ARCH-MAPDIAGRAMS-055  # implements: REQ
         "engine: {}".format(MAP_ENGINE_VERSION),
         "nodes: {}".format(len(data["nodes"])),
         "edges: {}".format(len(data["edges"])),
-    ] + (["design OOP: {}/100 ({}/{} source files without a design candidate)".format(
+    ] + (["design pass-rate: {}% ({}/{} source files without a design candidate)".format(
         data["design"]["score"], data["design"]["clean_files"], data["design"]["files"])]
          if data.get("design") else []) + [
         "---",
