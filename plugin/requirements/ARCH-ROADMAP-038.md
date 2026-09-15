@@ -334,3 +334,50 @@ CASE-5 — the seeded plan file is not drafted as a capability
   Given  a fresh repo where `init` seeds `.reqmapignore` and `ROADMAP.md`
   When   the extraction pass runs
   Then   no requirement is drafted for `ROADMAP.md` and it carries no membership tag
+
+---
+id: REQ-PLANBRANCH-1011
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-ROADMAP-038]
+---
+
+# The shipped band is named by the branch it shipped on
+
+## Description
+> "Shipped" is a label that says nothing a reader did not already know from the band's
+> position. What they cannot see is which branch they are looking at — and a map opened
+> from a feature branch looks identical to one opened from `main`, right up to the moment
+> someone acts on the wrong plan. The name git already knows is the one worth showing.
+
+Every bullet below is binding.
+- `_map.json` carries `branch`, the checked-out branch name, when git can answer.
+- `branch` is excluded from the freshness comparison, exactly as `repo` is: both are
+  git-derived and differ between two checkouts of the same corpus, so comparing them
+  would fail `map --check` on every branch and every fork.
+- A detached HEAD and a tree git cannot read both answer unknown, and the field is then
+  absent rather than guessed.
+- The shipped band is labelled with that name; with no name it keeps its former label.
+
+## Cases
+CASE-1 — the branch reaches the export
+  Given  a work tree checked out on a named branch
+  When   `sync` writes the export
+  Then   `_map.json` carries that name under `branch`
+
+CASE-2 — a branch change does not make the committed map stale
+  Given  a committed `_map.json` written on one branch
+  When   `gate` runs on a second branch with the same corpus
+  Then   the map is reported fresh
+
+CASE-3 — no branch is not a wrong branch
+  Given  a tree with a detached HEAD, or no git at all
+  When   the export is written
+  Then   it carries no `branch` field and nothing fails
+
+CASE-4 — the band shows the name, or keeps its old label
+  Given  one export carrying `branch: feat/x` and one carrying none
+  When   the Plan renders each
+  Then   the first labels the shipped band `feat/x` and the second labels it `Shipped`

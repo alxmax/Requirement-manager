@@ -387,10 +387,10 @@ CASE-4 — the weekday is chosen, and `from:` narrows the span
   When   the planning sidecar is loaded
   Then   every emitted date is a Monday and none is earlier than 2026-09-21
 
-CASE-5 — a plan covering no dates emits no cadence
+CASE-5 — a plan covering no dates still emits its calendar
   Given  a `cadence` block on a sidecar with no bars and no milestone due
   When   the planning sidecar is loaded
-  Then   the result carries neither `cadence` nor `releases`
+  Then   it carries `cadence` and a non-empty `releases` running to the shared horizon
 
 --------------------
 

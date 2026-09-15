@@ -407,7 +407,8 @@ scripts/
 app/                                        the React viewer (built into the single-file _map.html)
 docs/                                       guides, plans + specs
   history/TODO-archive.md                   the retired TODO.md — history, not an instruction
-ROADMAP.md                                  the live plan — Now / Next / Later, read by the viewer
+ROADMAP.md                                  the live plan — Now / Next / Later; a bar opens its note
+  requirements/_planning.json               Gantt bars, lanes and the release cadence (both seeded by `init`)
 ```
 
 `SKILL.md` (authoritative for authoring rules, statuses, and the gate):
@@ -419,6 +420,16 @@ to [`docs/history/TODO-archive.md`](docs/history/TODO-archive.md) on 2026-09-14 
 a checkbox with an optional `| lane: <label>` suffix. The lane is parsed and carried into
 `_map.json`, but the Roadmap tab renders one lane, `Implementations`, so it no longer
 splits the chart. Completed items (`[x]`) are hidden in the chart.
+
+**The plan, and the note under it.** `init` seeds a `ROADMAP.md` and a
+`requirements/_planning.json` on a fresh repo, because a plan file a repo does not have
+is a plan nobody writes. The first holds horizons — `Now` / `Next` / `Later`, an item
+per line with `| req: ID`; **the lines you indent under an item are its note**, and the
+Plan shows them when that item's bar is selected. The second holds the bars, the lanes
+and the release cadence. Its calendar runs to the end of the year, or three months out,
+whichever is later — computed on every run, so it cannot go stale; pin it with `until`
+if you want a fixed end. A repo that has scheduled nothing still gets the calendar,
+which is the point: that is the repo with planning to do.
 
 ```markdown
 ## v1.14

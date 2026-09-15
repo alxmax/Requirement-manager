@@ -138,7 +138,7 @@
       "reason": "v5.17.0: four gate-honesty bugs \u2014 one masking pass (REQ-SCAN-992), --since reads full facts, new validates its id, a crashed gate section is not a clean gate"
     },
     "REQ-PLANCADENCE-1000": {
-      "hash": "964ae4c79e7d",
+      "hash": "4ddea76b8894",
       "reason": null
     },
     "REQ-PLANTAGGED-1005": {

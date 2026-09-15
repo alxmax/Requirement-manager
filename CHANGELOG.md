@@ -2,6 +2,23 @@
 
 ## plugin `v7.19.0` — 2026-09-16
 
+**The lane column and the note panel stay put now.** Both scrolled away with the chart:
+scroll two months right and the lanes had no labels and the note clipped its own first
+words. Both are `position: sticky, left: 0`, because a lane the reader cannot name is a
+row of bars with no subject, and the note belongs to the reader rather than to the month
+the bar happens to sit in.
+
+**The shipped band is named by the branch git is on.** "Shipped" said nothing a reader
+did not already know from the band's position; what they could not see is which branch
+they were looking at, and a map opened from a feature branch looked identical to one
+opened from `main` right up to the moment someone acted on the wrong plan. `_map.json`
+carries `branch` when git can answer, and it is excluded from the freshness diff exactly
+as `repo` is — both are git-derived, so comparing them would fail `map --check` on every
+branch and every fork. A detached HEAD answers the literal `HEAD`, which is not a branch:
+absent beats a name that names nothing, and the band keeps its old label.
+
+
+
 **A plan file a repo does not have is a plan nobody writes.** `init` scaffolded neither
 `ROADMAP.md` nor `_planning.json`, so a fresh repo's Plan tab said "add milestones with
 due dates or bars in _planning.json" — the empty case being the one with nothing to look

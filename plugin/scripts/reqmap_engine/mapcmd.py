@@ -7,7 +7,7 @@ from . import config as cfg
 from .author import _parse_todos
 from .design_report import _design_summary
 from .findings import _render_findings, cmd_findings
-from .git import _git, _repo_name
+from .git import _git, _git_branch, _repo_name
 from .health import _health_record
 from .i18n import _attach_translations
 from .history import by_month, read_history
@@ -61,6 +61,12 @@ def _assemble_map_data(reqs, members, reqs_dir, root=".", ac_cover=None):
         ac_cover = scan_ac_verifies(root, reqs_dir)
     data = _build_map_data(reqs, members, ac_cover)
     data["repo"] = _repo_name(root)
+    # The branch the shipped band is shipped ON. Git-derived like `repo`, so it varies
+    # between a branch and a fork of the same corpus and is excluded from the freshness
+    # diff for the same reason.  implements: REQ-PLANBRANCH-1011
+    branch = _git_branch(root)
+    if branch:
+        data["branch"] = branch
     data["language"] = cfg.LANGUAGE          # implements: REQ-TRANSLATE-996
     data["todos"] = _parse_todos(root)
     # The horizon plan, beside the versioned one. A repo keeps one, the other, or
@@ -129,6 +135,7 @@ def _strip_generated(text):  # implements: REQ-DESIGN-991
                 # the same reason it must not be able to fail a build.
                 or l.startswith("design pass-rate: ")
                 or l.lstrip().startswith('"repo":')
+                or l.lstrip().startswith('"branch":')
                 or l.lstrip().startswith('"engine_version":')):
             continue
         out.append(l)

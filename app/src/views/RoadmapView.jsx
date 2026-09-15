@@ -9,7 +9,7 @@
    zoom shrinks everything including the type, density narrows the chip and
    keeps the type crisp. Both are remembered per reader. */
 import { useEffect, useState } from "react";
-import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY, BRANCH } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
@@ -149,7 +149,7 @@ function Segmented({ label, options, value, onChange, optionKey, optionLabel }) 
 /* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
  * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
  * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory }) {  // implements: REQ-VIEWER-984
+export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory, initialBranch }) {  // implements: REQ-VIEWER-984
   const { t, locale } = useI18n();
   const hasPlan = !!(TARGETS?.bars?.length)
     || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
@@ -305,7 +305,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
            className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
         {mode === "plan" ? (
           <PlanGantt planning={TARGETS} history={initialHistory || HISTORY}
-                     roadmap={roadmapItems}
+                     roadmap={roadmapItems} branch={initialBranch || BRANCH}
                      locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
         ) : (
         /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with

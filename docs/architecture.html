@@ -646,7 +646,7 @@ has not been re-touched.</pre></div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>map</code></div>
-        <div class="cmd-d">Generate <code>_map.md</code> (4 Mermaid diagrams) + <code>_map.json</code> (graph) + <code>_map.html</code> (self-contained viewer). Reads <code>TODO.md</code> for the Roadmap tab. <span class="fl">--check</span> freshness gate — exits non-zero if committed map is stale.</div>
+        <div class="cmd-d">Generate <code>_map.md</code> (4 Mermaid diagrams) + <code>_map.json</code> (graph) + <code>_map.html</code> (self-contained viewer). Reads <code>ROADMAP.md</code> and <code>requirements/_planning.json</code> for the Roadmap tab. <span class="fl">--check</span> freshness gate — exits non-zero if committed map is stale.</div>
       </div>
       <div class="cmd">
         <div class="cmd-n"><code>site</code></div>
@@ -932,7 +932,7 @@ python -X utf8 scripts/reqmap.py gate</pre></div>
       </div>
       <div class="vtab">
         <div class="vtab-name">Roadmap</div>
-        <div class="vtab-desc">Gantt chart from <code>milestone:</code> frontmatter and <code>TODO.md</code> items. Amber dashed bars for todos, solid bars for confirmed requirements.</div>
+        <div class="vtab-desc">Calendar Gantt: swimlanes from <code>requirements/_planning.json</code>, the shipped band read from <code>CHANGELOG.md</code> and labelled by the checked-out branch. Selecting a bar opens the note its author wrote under the matching <code>ROADMAP.md</code> item.</div>
       </div>
     </div>
 

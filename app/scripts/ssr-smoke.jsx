@@ -666,6 +666,19 @@ test("cadence: a plan with only a cadence still draws its calendar",  // verifie
       && bare.includes("Feature") && bare.includes("Release");
   })());
 
+test("roadmap: the shipped band is named by the branch",  // verifies: REQ-PLANBRANCH-1011#CASE-4
+  (() => {
+    const hist = [{ month: "2026-06", count: 2, first: "2026-06-01", last: "2026-06-30",
+                    versions: ["v1.0.0"], landmark: "v1.0.0", headline: "first" }];
+    const named = renderToString(<PlanGantt planning={{ lanes: ["Feature"], bars: [] }}
+      history={hist} branch="feat/plan-bar-note" locale="en" t={(x) => x} zoom={100} />);
+    const bare = renderToString(<PlanGantt planning={{ lanes: ["Feature"], bars: [] }}
+      history={hist} locale="en" t={(x) => x} zoom={100} />);
+    // a branch shows its own name; no branch keeps the former label rather than a blank
+    return named.includes("feat/plan-bar-note") && !named.includes(">Shipped<")
+      && bare.includes("Shipped");
+  })());
+
 const cadencePlan = {
   lanes: ["Engine"],
   bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],

@@ -2572,7 +2572,7 @@ class MapDocument(unittest.TestCase):  # tested-by: ARCH-MAPDIAGRAMS-055  # test
         self.assertEqual(len(payload["upstream_edges"]), 3)
 
 
-class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-PLANCADENCE-1000
+class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-PLANCADENCE-1000  # tested-by: REQ-PLANBRANCH-1011 @unit
     """The release cadence: stated as a rhythm, computed once, emitted as dates."""
 
     BARS = [{"title": "a", "lane": "Engine", "start": "2026-09-13", "end": "2026-09-30"}]
@@ -2606,7 +2606,21 @@ class PlanCadence(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: R
             cadence={"every": "week", "on": "monday", "from": "2026-09-21"})
         self.assertEqual(["2026-09-21", "2026-09-28", "2026-10-05"], got["releases"])
 
-    def test_a_plan_covering_no_dates_still_gets_a_calendar(self):  # verifies: REQ-PLANHORIZON-1010#CASE-2
+    def test_the_branch_reaches_the_export_and_is_not_gated(self):  # verifies: REQ-PLANBRANCH-1011#CASE-1  # verifies: REQ-PLANBRANCH-1011#CASE-2
+        # Git-derived like `repo`: two checkouts of one corpus disagree about it, so
+        # comparing it would fail `map --check` on every branch and every fork.
+        self.assertIn('"branch":', R._strip_generated('{"branch": "main"}') or "")
+        stripped = R._strip_generated('  "branch": "main",' + '\n' + '  "nodes": []' + '\n')
+        self.assertNotIn("branch", stripped)
+        self.assertIn("nodes", stripped)
+
+    def test_a_detached_head_reports_no_branch(self):  # verifies: REQ-PLANBRANCH-1011#CASE-3
+        # `rev-parse --abbrev-ref HEAD` answers the literal "HEAD" when detached, which
+        # is not a branch: absent beats a name that names nothing.
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(R.git._git_branch(d))
+
+    def test_a_plan_covering_no_dates_still_gets_a_calendar(self):  # verifies: REQ-PLANHORIZON-1010#CASE-2  # verifies: REQ-PLANCADENCE-1000#CASE-5
         # Reverses REQ-PLANCADENCE-1000 CASE-5, which read "a cadence needs something to
         # run alongside". The case it was written for is the one that turned out to
         # matter: a repo that has planned nothing is exactly the one that needs a

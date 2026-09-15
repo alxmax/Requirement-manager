@@ -110,7 +110,7 @@ function BarNote({ bar, roadmap, t, openSpec, onClose }) {  // implements: REQ-V
   );
 }
 
-export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpec }) {
+export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom, openSpec }) {
   const [picked, setPicked] = useState(null);
   const todayD = parseIso(isoLocal(new Date()));
   const raw = buildPlanBars(planning);
@@ -185,7 +185,13 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
         display: "flex", border: "1px solid var(--border)", borderRadius: 8,
         overflow: "hidden", background: "var(--surface)",
       }}>
-        <div style={{ width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)", background: "var(--bg-raised)" }}>
+        {/* Sticky: the chart scrolls sideways for months, and a lane the reader cannot
+            name is a row of bars with no subject. zIndex clears the bars, which are
+            absolutely positioned inside each lane. */}
+        <div style={{
+          width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)",
+          background: "var(--bg-raised)", position: "sticky", left: 0, zIndex: 5,
+        }}>
           <div style={{ height: HEAD_H, borderBottom: "1px solid var(--border)" }} />
           {pastRows.length > 0 && (
             <div style={{
@@ -194,7 +200,10 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
               letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--fg-faint)",
               borderBottom: "1px solid var(--border)",
             }}>
-              {t("Shipped")}
+              {/* The branch git is on, not the word "Shipped": a map opened from a
+                  feature branch looked identical to one opened from main, right up to
+                  the moment someone acted on the wrong plan (REQ-PLANBRANCH-1011). */}
+              {branch || t("Shipped")}
             </div>
           )}
           {lanes.map((ln, i) => (
@@ -399,9 +408,14 @@ ${h.headline}`}
           ))}
         </div>
       </div>
+      {/* Sticky too, and for the same reason: the note belongs to the reader, not to
+          the month the bar happens to sit in. Left unpinned it slid out of view with
+          the chart, clipping its own first words. */}
       {picked && (
-        <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
-                 onClose={() => setPicked(null)} />
+        <div style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
+          <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
+                   onClose={() => setPicked(null)} />
+        </div>
       )}
     </div>
   );

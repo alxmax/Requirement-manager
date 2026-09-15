@@ -107,3 +107,14 @@ def _git_dirty(root):  # implements: REQ-RETIRE-961
     git is absent or this is not a repository: a missing safety net must not block a
     legitimate operation, and the plan was printed before this point either way."""
     return bool((_git(["status", "--porcelain"], cwd=root or ".", timeout=20) or "").strip())
+
+
+def _git_branch(root):  # implements: ARCH-GITRUN-067  # implements: REQ-PLANBRANCH-1011
+    """The checked-out branch name, or None when git cannot say.
+
+    Fail-open like every git call here: a detached HEAD answers "HEAD", which is not a
+    branch, and a tarball with no work tree answers nothing. Both read as unknown, and
+    the caller shows what it showed before."""
+    out = _git(["rev-parse", "--abbrev-ref", "HEAD"], cwd=root)
+    name = (out or "").strip()
+    return name or None if name and name != "HEAD" else None
