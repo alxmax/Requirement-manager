@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Senate audit, 2026-09-15. Bundle: runs/senate/2026-09-15_183041-senate-reqmap-map-json-duplication.json -->
+<style>
+  :root{color-scheme:light dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  html,body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Costul real al _map.json</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+
+<style>
+:root{
+  --paper:#EDEFF2;
+  --surface:#F8F9FB;
+  --sunk:#E3E7EC;
+  --ink:#13171C;
+  --ink-2:#4A5462;
+  --ink-3:#77818F;
+  --rule:#D2D8E0;
+  --rule-strong:#B4BDC8;
+  --accent:#2F4B7C;
+  --accent-soft:#DDE4F0;
+  --refuted:#A8432A;
+  --refuted-soft:#F2DED8;
+  --holds:#35704F;
+  --holds-soft:#DCEBE2;
+  --advisory:#7E6023;
+  --advisory-soft:#F0E6D0;
+
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Newsreader",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1116;
+    --surface:#161B22;
+    --sunk:#1C222B;
+    --ink:#E5E9EF;
+    --ink-2:#9BA5B2;
+    --ink-3:#727D8B;
+    --rule:#262E38;
+    --rule-strong:#39434F;
+    --accent:#8AA6DC;
+    --accent-soft:#1B2436;
+    --refuted:#E0865D;
+    --refuted-soft:#33201A;
+    --holds:#72B292;
+    --holds-soft:#182A21;
+    --advisory:#C9A860;
+    --advisory-soft:#2B2417;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1116;
+  --surface:#161B22;
+  --sunk:#1C222B;
+  --ink:#E5E9EF;
+  --ink-2:#9BA5B2;
+  --ink-3:#727D8B;
+  --rule:#262E38;
+  --rule-strong:#39434F;
+  --accent:#8AA6DC;
+  --accent-soft:#1B2436;
+  --refuted:#E0865D;
+  --refuted-soft:#33201A;
+  --holds:#72B292;
+  --holds-soft:#182A21;
+  --advisory:#C9A860;
+  --advisory-soft:#2B2417;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding-inline:24px;padding-block:0 96px}
+.prose{max-width:66ch}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:2px solid var(--ink);padding-block:40px 20px;margin-bottom:0}
+.kicker{
+  font-family:var(--f-mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:22px;
+}
+.kicker span{white-space:nowrap}
+h1{
+  font-family:var(--f-display);font-weight:700;
+  font-size:clamp(34px,6.2vw,58px);line-height:1.02;letter-spacing:-.024em;
+  margin:0 0 14px;text-wrap:balance;
+}
+.standfirst{font-size:19px;line-height:1.55;color:var(--ink-2);margin:0;max-width:60ch}
+.standfirst em{font-style:italic;color:var(--ink)}
+
+/* ---------- verdict ---------- */
+.verdict{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px 40px;
+  align-items:end;padding-block:26px 24px;border-bottom:1px solid var(--rule);
+}
+.vlabel{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.vword{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,8vw,68px);line-height:.92;letter-spacing:-.03em;color:var(--refuted)}
+.vsub{font-family:var(--f-mono);font-size:13px;color:var(--ink-2);margin-top:10px;font-variant-numeric:tabular-nums}
+
+.bench{display:flex;gap:5px;align-items:flex-end}
+.seat{width:34px}
+.seat i{display:block;height:34px;border-radius:2px;border:1px solid var(--rule-strong)}
+.seat b{
+  display:block;font-family:var(--f-mono);font-size:9px;font-weight:500;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);
+  margin-top:6px;text-align:center;
+}
+.s-go i{background:var(--holds);border-color:var(--holds)}
+.s-blk i{background:var(--refuted);border-color:var(--refuted)}
+.s-adv i{background:var(--advisory-soft);border-color:var(--advisory)}
+.s-stop i{background:var(--ink);border-color:var(--ink)}
+.benchkey{
+  font-family:var(--f-mono);font-size:11px;color:var(--ink-3);
+  display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:14px;
+}
+.benchkey em{font-style:normal;display:inline-flex;align-items:center;gap:6px}
+.chip{width:9px;height:9px;border-radius:2px;display:inline-block}
+
+/* ---------- sections ---------- */
+section{padding-block:52px 0}
+h2{
+  font-family:var(--f-display);font-weight:600;font-size:15px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+  margin:0 0 6px;
+}
+.dek{font-family:var(--f-display);font-weight:600;font-size:clamp(23px,3.6vw,30px);line-height:1.18;letter-spacing:-.017em;margin:0 0 20px;text-wrap:balance;max-width:24ch}
+p{margin:0 0 18px}
+code,.m{font-family:var(--f-mono);font-size:.875em;font-variant-numeric:tabular-nums}
+code{background:var(--sunk);padding:1px 5px;border-radius:3px;word-break:break-word}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:500}
+
+/* ---------- scale figure ---------- */
+.scale{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding-block:26px;margin-block:8px 28px}
+.srow{display:grid;grid-template-columns:132px minmax(0,1fr);gap:16px;align-items:center;margin-bottom:16px}
+.srow:last-child{margin-bottom:0}
+.sname{font-family:var(--f-mono);font-size:12px;line-height:1.4;color:var(--ink-2)}
+.sname b{display:block;color:var(--ink);font-weight:600;font-size:13px}
+.strack{position:relative;height:26px;background:var(--sunk);border-radius:2px;overflow:hidden}
+.sbar{height:100%;border-radius:2px}
+.sbar.big{background:var(--accent)}
+.sbar.mid{background:var(--rule-strong)}
+.sbar.tiny{background:var(--refuted)}
+.sval{
+  position:absolute;top:0;height:26px;display:flex;align-items:center;
+  font-family:var(--f-mono);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+  padding-inline:9px;white-space:nowrap;
+}
+.scap{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-top:18px;line-height:1.55}
+
+/* ---------- ledger ---------- */
+.ledger{border-top:2px solid var(--ink);margin-top:8px}
+.entry{border-bottom:1px solid var(--rule);padding-block:22px;display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:8px 36px}
+.claim{font-size:16.5px;line-height:1.5}
+.claim .tag{
+  display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:7px;
+}
+.result{font-size:16px;line-height:1.55;color:var(--ink-2);border-left:2px solid var(--rule-strong);padding-left:18px}
+.result strong{color:var(--ink);font-weight:500}
+.verd{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:600;
+  letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border-radius:2px;
+  margin-bottom:8px;
+}
+.v-ref{background:var(--refuted-soft);color:var(--refuted)}
+.v-hold{background:var(--holds-soft);color:var(--holds)}
+.v-part{background:var(--advisory-soft);color:var(--advisory)}
+.entry.mine{background:var(--surface);margin-inline:-18px;padding-inline:18px}
+
+/* ---------- options table ---------- */
+.tblwrap{overflow-x:auto;border-top:2px solid var(--ink);margin-top:8px}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:13px 14px 13px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+th{
+  font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);padding-top:14px;
+}
+td{font-size:15.5px;line-height:1.45}
+td.o{font-family:var(--f-display);font-weight:600;font-size:15px;white-space:nowrap}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap}
+.minibar{display:block;height:5px;background:var(--accent);border-radius:1px;margin-top:5px;min-width:2px}
+td.fate{font-family:var(--f-mono);font-size:12.5px;line-height:1.4}
+.fate.no{color:var(--refuted)}
+.fate.yes{color:var(--holds)}
+.fate.hold{color:var(--advisory)}
+
+/* ---------- actions ---------- */
+.acts{counter-reset:a;border-top:2px solid var(--ink);margin-top:8px}
+.act{
+  counter-increment:a;border-bottom:1px solid var(--rule);padding-block:22px;
+  display:grid;grid-template-columns:44px minmax(0,1fr);gap:20px;
+}
+.act::before{
+  content:counter(a);font-family:var(--f-mono);font-size:26px;font-weight:600;
+  color:var(--rule-strong);line-height:1;padding-top:3px;
+}
+.act h3{font-family:var(--f-display);font-weight:600;font-size:18px;line-height:1.35;margin:0 0 9px;letter-spacing:-.008em}
+.act p{font-size:15.5px;line-height:1.5;margin:0 0 11px;color:var(--ink-2)}
+.anchor{
+  font-family:var(--f-mono);font-size:12px;line-height:1.55;color:var(--ink-3);
+  background:var(--sunk);border-radius:3px;padding:10px 12px;
+}
+.anchor b{color:var(--ink-2);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px;display:block;margin-bottom:4px}
+.sev{font-family:var(--f-mono);font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--refuted);margin-left:8px;vertical-align:2px}
+.sev.adv{color:var(--advisory)}
+
+/* ---------- conflicts ---------- */
+.conf{border-left:2px solid var(--advisory);padding:4px 0 4px 20px;margin-bottom:26px}
+.conf h3{font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.conf p{font-size:15.5px;margin:0 0 10px}
+.conf .rec{color:var(--ink);font-size:15.5px;margin:0}
+.conf .rec b{font-family:var(--f-display);font-weight:600}
+
+/* ---------- close ---------- */
+.close{border-top:2px solid var(--ink);margin-top:52px;padding-top:26px}
+.close p{font-size:16.5px}
+.foot{
+  font-family:var(--f-mono);font-size:11.5px;line-height:1.7;color:var(--ink-3);
+  border-top:1px solid var(--rule);margin-top:40px;padding-top:18px;
+}
+
+@media (max-width:720px){
+  body{font-size:16px}
+  .verdict{grid-template-columns:1fr;align-items:start}
+  .entry{grid-template-columns:1fr;gap:12px}
+  .result{border-left:none;border-top:1px solid var(--rule-strong);padding-left:0;padding-top:12px}
+  .srow{grid-template-columns:1fr;gap:7px}
+  .seat{width:27px}
+  .seat i{height:27px}
+  .act{grid-template-columns:30px minmax(0,1fr);gap:14px}
+  .act::before{font-size:20px}
+  .entry.mine{margin-inline:-12px;padding-inline:12px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="kicker">
+    <span>Senat · 9 senatori · 2 runde</span>
+    <span>requirement-manager</span>
+    <span>15 sep 2026</span>
+    <span>263 noduri · 303 versiuni</span>
+  </div>
+  <h1>Costul real al _map.json</h1>
+  <p class="standfirst">Întrebarea era dacă harta ar trebui scrisă modular, fără să repete cerințele deja scrise. Răspunsul scurt: duplicarea e reală, dar <em>nu costă ce credeam că costă</em> — și argumentul pe care stătea întreaga propunere a fost refutat, nu supraestimat.</p>
+</header>
+
+<div class="verdict">
+  <div>
+    <div class="vlabel">Verdict</div>
+    <div class="vword">MODIFY</div>
+    <div class="vsub">GO 2 · MODIFY 6 (4 blocante, 2 consultative) · STOP 1</div>
+  </div>
+  <div>
+    <div class="bench">
+      <div class="seat s-blk"><i></i><b>Witt</b></div>
+      <div class="seat s-adv"><i></i><b>Aure</b></div>
+      <div class="seat s-blk"><i></i><b>Conf</b></div>
+      <div class="seat s-blk"><i></i><b>Aris</b></div>
+      <div class="seat s-go"><i></i><b>Musk</b></div>
+      <div class="seat s-blk"><i></i><b>Dimo</b></div>
+      <div class="seat s-go"><i></i><b>Napo</b></div>
+      <div class="seat s-stop"><i></i><b>Demi</b></div>
+      <div class="seat s-adv"><i></i><b>Taci</b></div>
+    </div>
+    <div class="benchkey">
+      <em><span class="chip" style="background:var(--holds)"></span>GO</em>
+      <em><span class="chip" style="background:var(--refuted)"></span>MODIFY blocant</em>
+      <em><span class="chip" style="background:var(--advisory-soft);border:1px solid var(--advisory)"></span>consultativ</em>
+      <em><span class="chip" style="background:var(--ink)"></span>STOP</em>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>Decizia</h2>
+  <p class="dek">Schema nu se schimbă. Ce rămâne de făcut e igienă și instrumentare.</p>
+  <div class="prose">
+    <p>Nu în sensul „ajustați propunerea”. Temeiul ei numeric s-a prăbușit la măsurătoare, așa că partea de arhitectură se închide pe status quo, iar lista de acțiuni nu mai conține nicio tăiere de schemă.</p>
+    <p>Motivul unic și decisiv: economia reală împachetată a tuturor tăierilor propuse, pe toate cele 303 versiuni istorice, este <span class="num">324 KB</span> — în timp ce un <code>git gc</code> care nu s-a declanșat niciodată recuperează <span class="num">153 MB</span>. De <strong>472 de ori mai mult</strong>, fără nicio decizie de arhitectură.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Scara</h2>
+  <p class="dek">Ce cumpără fiecare intervenție, în octeți care ating discul.</p>
+
+  <div class="scale">
+    <div class="srow">
+      <div class="sname"><b>git gc</b>obiecte loose necolectate</div>
+      <div class="strack">
+        <div class="sbar big" style="width:100%"></div>
+        <div class="sval" style="left:0;color:var(--paper)">153 MB recuperați</div>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="sname"><b>repo împachetat</b>tot istoricul, după repack</div>
+      <div class="strack">
+        <div class="sbar mid" style="width:4.84%"></div>
+        <div class="sval" style="left:4.84%;color:var(--ink-2)">7,4 MB</div>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="sname"><b>B + C + D</b>toată propunerea, împreună</div>
+      <div class="strack">
+        <div class="sbar tiny" style="width:0.21%;min-width:3px"></div>
+        <div class="sval" style="left:0.21%;padding-left:12px;color:var(--refuted)">324 KB</div>
+      </div>
+    </div>
+    <p class="scap">Bare la aceeași scară liniară. Ultima e vizibilă doar ca o linie — acesta <em>este</em> rezultatul. Măsurat prin reconstruirea tuturor celor 303 versiuni istorice cu câmpurile scoase și repachetarea identică a fiecărei variante.</p>
+  </div>
+
+  <div class="prose">
+    <p>Și un al doilea rezultat, mai instructiv: <code>acc</code> așezat lângă <code>accept</code> în același fișier e exact lucrul cel mai compresibil din tot artefactul. <strong>Delta-compresia git execută deja opțiunea C</strong> — gratis, de 303 ori, la un raport de 206:1. Propunerea cerea să obții printr-un breaking de schemă și o reimplementare în JS netestat exact ce fac deja zlib și xdelta.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Numitorul</h2>
+  <p class="dek">Aceeași întrebare, trei răspunsuri, un interval de 47×.</p>
+  <div class="prose">
+    <p>„Cât costă <code>_map.json</code> în git” nu are un răspuns unic, iar asta a produs un conflict real între senatori în care niciunul nu greșise un calcul:</p>
+  </div>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Stare</th><th>.git</th><th>Costul fișierului</th><th>Ce e de fapt</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="o">pe disc, acum</td>
+          <td class="n">180 MB</td>
+          <td class="n">47,83 MB</td>
+          <td>Stare tranzitorie: 153 MB sunt obiecte loose pe care git le șterge singur la 6700. Un cronometru, nu un cost.</td>
+        </tr>
+        <tr>
+          <td class="o">clonă default</td>
+          <td class="n">11 MB</td>
+          <td class="n">2,23 MB</td>
+          <td><strong>Numitorul onest.</strong> Ce plătește efectiv orice consumator, orice checkout CI și stocarea GitHub, fără ca cineva să ruleze ceva special.</td>
+        </tr>
+        <tr>
+          <td class="o">repack agresiv</td>
+          <td class="n">8 MB</td>
+          <td class="n">1,01 MB</td>
+          <td>O podea atinsă printr-o intervenție manuală. Nu e prețul.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="prose" style="margin-top:20px">
+    <p>Costul marginal real per commit este <span class="num">3,43 KB</span> — nu 1,8 MB, cum sugera propunerea, și nici 154 KB. Supraestimare de aproximativ <strong>238×</strong>.</p>
+    <p>Lecția de metodă, formulată de senatorul pe disciplină statistică: costul unui fișier în git nu e o proprietate a fișierului, ci a perechii <em>(fișier, stare de împachetare)</em>. Un argument de cost care nu declară starea nu este falsificabil.</p>
+  </div>
+</section>
+
+<section>
+  <h2>Registrul de falsificare</h2>
+  <p class="dek">Ce a susținut propunerea și ce i-a făcut măsurătoarea.</p>
+
+  <div class="ledger">
+
+    <div class="entry mine">
+      <div class="claim">
+        <span class="tag">Premisa mea de pornire</span>
+        „295 din 632 de commituri rescriu un fișier de 1,8 MB; <code>.git</code> = 180 MB.”
+      </div>
+      <div class="result">
+        <span class="verd v-ref">Refutat</span><br>
+        Corect ca descriere, fals ca argument. <strong>153 din cei 180 MB sunt obiecte loose</strong> — 4659, sub pragul <code>gc.auto</code> de 6700, deci un <code>git gc</code> care nu s-a declanșat niciodată. Delta-compresia absoarbe restul.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Secțiunea 4 a propunerii</span>
+        <code>members</code>, <code>risks</code>, <code>clauses</code> nu sunt duplicare — sunt derivate.
+      </div>
+      <div class="result">
+        <span class="verd v-hold">Se menține, dar inversează teza</span><br>
+        Diff pe 39 de perechi consecutive: driverul churn-ului e chiar <code>members</code> — <strong>68% din deltă</strong>, fiindcă <code>members[].loc</code> e <code>fișier:linie</code>, deci orice editare care mută o linie rescrie 73 de noduri. Toată proza duplicată mișcă 9,25 KB/pereche.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Opțiunea B</span>
+        „Se elimină doar ce niciun consumator nu citește: <code>notes</code>, <code>current_impl</code>, <code>desc</code>/<code>input</code>/<code>output</code>.”
+      </div>
+      <div class="result">
+        <span class="verd v-ref">Refutat</span><br>
+        Corpusul de cerințe <strong>este</strong> un consumator. <code>notes</code> și <code>current_impl</code> sunt cerute de <code>ARCH-CONTEXT-048</code> CASE-4/5 și de <code>REQ-MAP-870:110-112</code>, ambele <em>confirmed</em>, asertate verde la <code>test_reqmap_report.py:516</code> și <code>:532</code>. <code>desc</code>/<code>input</code>/<code>output</code> sunt back-compat viu, guvernat de <code>ADR-0017:39</code> — „stays fully valid, unchanged, forever”.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Descoperire în rundă, apoi retrasă</span>
+        <code>deps</code> și <code>depends_on</code> sunt identice pe toate 263 nodurile — deci duplicare.
+      </div>
+      <div class="result">
+        <span class="verd v-ref">Refutat de corpusul propriu</span><br>
+        Identice, da. Duplicare, nu: <code>REQ-MAP-870:113-115</code> contractează <strong>explicit</strong> dubla emitere, cu motivul ei — „a consumer that asks for the documented name gets the same list, never a silent empty answer”. Senatorul care o propusese și-a retras propriul punct și i-a corectat pe cei doi care îl susținuseră.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Opțiunea C</span>
+        Emite doar <code>accept</code>; <code>acc</code> se derivă în <code>loadData.js</code>. Câștig invariant la corpus: 286 KB.
+      </div>
+      <div class="result">
+        <span class="verd v-ref">Falsificat determinist</span><br>
+        8 din 263 de noduri au <code>accept</code> gol și <code>acc</code> ne-gol — și sunt <strong>exact cele 8 cerințe <code>form: atomic</code></strong>. Forma atomică nu produce <code>accept</code> prin construcție (<code>acceptance.py:27</code>), deci acolo <code>acc</code> e singurul purtător al criteriului. A-l deriva în JS nu e riscant: e <strong>imposibil</strong> — nu poți plia un șir gol. Iar forma atomică e normativă prin <code>ARCH-ATOMICITY-049</code>.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Constrângerea „dură” a propunerii</span>
+        C reintroduce clasa de bug din v2.29.0, deci e interzisă din principiu.
+      </div>
+      <div class="result">
+        <span class="verd v-part">Parțial — mecanism greșit</span><br>
+        <code>CHANGELOG.md:2549</code>: bug-ul a fost un <em>condițional</em> care cupla două câmpuri co-emise. C șterge unul dintre ele, deci elimină exact cuplajul. Statistic, 1 incident din 235 de commituri „fix” = 0,43%, sub fondul de zgomot. C pică din alt motiv — cel de mai sus — nu din acesta.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Opțiunea D · cadrul meu</span>
+        <code>i18n</code> inline e „transportul” cache-ului <code>_i18n/ro.json</code> către viewer-ul single-file.
+      </div>
+      <div class="result">
+        <span class="verd v-ref">Refutat</span><br>
+        <code>_attach_translations</code> rulează <strong>necondiționat</strong>, fără să consulte <code>cfg.LANGUAGE</code>. Repo-ul n-are <code>_config.json</code>, deci <code>LANGUAGE == "en"</code> și <code>gate --i18n</code> răspunde „no translation is expected” — în timp ce 415 KB de proză RO călătoresc în harta committed la fiecare <code>sync</code>. Din 233 de intrări, doar 152 trec hash-ul; 81 sunt aruncate tăcut. Producătorul a fost scos pe 2026-09-05.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Contractul public</span>
+        <code>_map.json</code> e „consumed by the viewer and any external front-end”.
+      </div>
+      <div class="result">
+        <span class="verd v-ref">n = 0, măsurat</span><br>
+        <code>ADR-0033:52</code> consemnează, în scris, în casă: <em>„a named external consumer · threshold 1 · actual 0”</em>. Zero e o măsurătoare, nu absența uneia. Riscul a fost invocat identic la patru opțiuni, deci nu putea departaja nimic.
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="claim">
+        <span class="tag">Teza utilizatorului</span>
+        „Să folosească requirementurile deja scrise, fără să le mai scrie încă o dată.”
+      </div>
+      <div class="result">
+        <span class="verd v-hold">Deja adevărată, în sensul care contează</span><br>
+        Nu există duplicare de <em>autorat</em>: <code>_map.json</code> are un singur scriitor mașinal (<code>render_json</code>), nicio editare umană nu supraviețuiește lui <code>sync</code>, iar <code>RM027</code> o semnalează. Rămâne duplicare de octeți — adică sensul în care orice bundle își repetă sursa.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Opțiunile</h2>
+  <p class="dek">Economia împachetată pe tot istoricul, și ce se întâmplă cu fiecare.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Opțiune</th><th>Economie</th><th>Soartă</th><th>Motivul</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="o">A · status quo</td>
+          <td class="n">—</td>
+          <td class="fate yes">se adoptă</td>
+          <td>Duplicarea de octeți într-un artefact compilat, cu un singur scriitor, nu e un defect.</td>
+        </tr>
+        <tr>
+          <td class="o">B · câmpuri moarte</td>
+          <td class="n">44 KB<span class="minibar" style="width:18%"></span></td>
+          <td class="fate no">cade</td>
+          <td>Nu sunt moarte. Două cerințe <em>confirmed</em> le cer; <code>ADR-0017</code> apără forma legacy. Rămâne doar aliasul <code>targets</code>.</td>
+        </tr>
+        <tr>
+          <td class="o">C · derivă <code>acc</code></td>
+          <td class="n">86 KB<span class="minibar" style="width:36%"></span></td>
+          <td class="fate no">interzisă</td>
+          <td>Golește determinist randarea criteriilor pentru cele 8 cerințe atomice. Și git o face deja, gratis, la 206:1.</td>
+        </tr>
+        <tr>
+          <td class="o">D · scoate <code>i18n</code></td>
+          <td class="n">241 KB<span class="minibar" style="width:100%"></span></td>
+          <td class="fate hold">reîncadrată</td>
+          <td>Nu e mutare de transport. Întâi se decide dacă un cache fără producător, din care 35% e aruncat tăcut, mai are consumator.</td>
+        </tr>
+        <tr>
+          <td class="o">E · două fișiere</td>
+          <td class="n">~310 KB<span class="minibar" style="width:100%;background:var(--rule-strong)"></span></td>
+          <td class="fate no">cade</td>
+          <td>16–30 h ca să faci manual ce face delta-compresia gratis. Adaugă un al doilea artefact derivat de ținut sincron.</td>
+        </tr>
+        <tr>
+          <td class="o">F · nu comite</td>
+          <td class="n">n/a</td>
+          <td class="fate hold">rundă proprie</td>
+          <td>Singura neatinsă de prăbușirea costului — temeiul ei a fost mereu freshness-ul, nu octeții. Se judecă explicit contra <code>ADR-0005</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Ce se face</h2>
+  <p class="dek">În ordine — unele sunt precondiții pentru altele.</p>
+
+  <div class="acts">
+
+    <div class="act">
+      <div>
+        <h3>Rulează <code>git gc --prune=now</code><span class="sev">blocant</span></h3>
+        <p>Și setează <code>git config gc.auto 1000</code>. Singura acțiune de cost reală disponibilă, și nu cere nicio decizie de arhitectură. Dacă durerea observată dispare aici, restul discuției se închide prin construcție.</p>
+        <div class="anchor"><b>Criteriu de verificare</b><code>git count-objects -v</code> raportează count &lt; 500 și <code>du -sh .git</code> &lt; 40 MB. Azi: count = 4659, 156.924 KB loose, size-pack = 3.291 KB.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Scoate opțiunea C de pe masă, definitiv<span class="sev">blocant</span></h3>
+        <p>Pe temei de corectitudine, nu de cost. Și corectează rândul de tabel care spune că <code>acc</code> ar fi „aceleași criterii, pliate” — e fals pentru 100% din cerințele atomice.</p>
+        <div class="anchor"><b>Criteriu de verificare</b>Interogarea nodurilor cu <code>accept</code> gol și <code>acc</code> ne-gol întoarce exact cele 8 id-uri <code>SYS-*</code>. Forma atomică e normativă prin <code>ARCH-ATOMICITY-049</code>.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Rescrie B: șterge doar aliasul <code>targets</code><span class="sev">blocant</span></h3>
+        <p>Singurul câmp cu proprietar zero. Alias identic al lui <code>planning</code>, comentat <code>// legacy alias — one release</code>, livrat la v7.3.4, azi v7.14.0 — unsprezece minore mai târziu. Ramura e inaccesibilă. Zece linii, fără ADR, fără major.</p>
+        <div class="anchor"><b>Criteriu de verificare</b>Emisia dispare din motor; <code>data.planning || data.targets</code> la <code>app/src/lib/data.js:278</code> devine o singură ramură; <code>gate --code ..</code> dă 0 errors. −2.939 B împachetat.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Îngheață setul de chei emise, cu un test golden<span class="sev">blocant</span></h3>
+        <p>Seam-ul motor → <code>_map.json</code> → viewer cedează <strong>tăcut prin construcție</strong>: <code>adaptNode</code> transformă orice cheie lipsă în <code>[]</code>/<code>""</code>/<code>null</code>. Precedent: <code>roadmap</code> și <code>history</code> au fost emise, purtate și aruncate pe jos două versiuni (v7.6.0–v7.8.0), fără nimic roșu.</p>
+        <div class="anchor"><b>Criteriu de verificare</b>Șterge o cheie la întâmplare din <code>mapdata.py</code> și testul devine roșu. Comentariul de la <code>app/src/lib/loadData.js:78-84</code> documentează precedentul pe care azi nu-l prinde nimic.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Adaugă asertiunea care lipsește din <code>ssr-smoke.jsx</code><span class="sev">blocant</span></h3>
+        <p>Un nod cu <code>accept</code> gol și <code>acc</code> ne-gol trebuie să randeze criteriile. Cele trei <code>gwtChecks</code> existente furnizează toate <code>accept</code> ne-gol, deci acoperirea pe exact intrarea care s-ar rupe este <span class="num">n = 0</span> — inclusiv azi, pe status quo.</p>
+        <div class="anchor"><b>Criteriu de verificare</b><code>npm run smoke</code> cade dacă se scoate calea de rezervă pe <code>acc</code> din <code>SpecDoc.jsx:80</code> sau <code>MapParts.jsx:93</code>. Azi trece și cu ea scoasă.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Consemnează decizia A în <code>## Context</code> la <code>ARCH-MAP-007</code><span class="sev">blocant</span></h3>
+        <p>Ca proză, nu ca mecanism: temeiul de cost retras, numitorul onest, și pragurile de redeschidere — <code>_map.json</code> peste 3 MB <em>sau</em> peste 4× corpusul sursă, <em>și</em> un consumator extern inventariat prin id. Expiră 2027-03-15.</p>
+        <div class="anchor"><b>Criteriu de verificare</b>Data apare o dată în fișier; <code>gate --code ..</code> dă 0 errors și niciun RM018 pe <code>ARCH-MAP-007</code> — <code>## Context</code> nu intră în <code>binding_hash</code>.</div>
+      </div>
+    </div>
+
+    <div class="act">
+      <div>
+        <h3>Corectează cele trei afirmații false înainte de arhivare<span class="sev adv">consultativ</span></h3>
+        <p>Nota de precedent (runda i18n a decis „a narrowed CASE-4 is authorized”, nu „nu construi”); <code>ADR-0034</code> e precedentul <em>pentru</em> F, nu o restricție asupra lui, cu contra-precedentul <code>REQ-DESIGN-991</code> — „the data stays in the artifacts”; și „any external front-end” are n = 0.</p>
+        <div class="anchor"><b>Criteriu de verificare</b>Toate trei referințele apar în textul revizuit. <code>ADR-0033:52</code> consemnează „a named external consumer · threshold 1 · actual 0”.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>Rămâne de decis</h2>
+  <p class="dek">Patru dezacorduri pe care senatul nu le-a închis.</p>
+
+  <div class="conf">
+    <h3>Musk × Deming — blocaj Legea 3</h3>
+    <p>Amândoi au măsurat independent aceeași prăbușire a argumentului de cost, dar Musk conchide GO pe A (decide acum), iar Deming conchide STOP (propunerea se <em>retrage</em>, nu se ajustează).</p>
+    <p class="rec"><b>Recomandare:</b> Deming pe procedură, Musk pe fond, în ordinea asta — întâi scrie retragerea temeiului de cost, abia apoi consemnează A ca decisă. Ambii ajung la același rezultat material; ordinea asta lasă în urmă o cifră falsificabilă în loc de o preferință.</p>
+  </div>
+
+  <div class="conf">
+    <h3>Napoleon × Deming — al doilea blocaj</h3>
+    <p>Napoleon a ajuns la GO doar prin Legea 8: votul lui MODIFY a fost auto-promovat fiindcă cererea nu purta ancoră de falsificabilitate.</p>
+    <p class="rec"><b>Recomandare:</b> Deming. Partea din Napoleon care supraviețuiește e exact <code>git gc</code>. Tratează GO-ul lui ca pe un vot consultativ nedovedit, nu ca pe unul de fond.</p>
+  </div>
+
+  <div class="conf">
+    <h3>Aristotel × Dimon — opțiunea F</h3>
+    <p>Aristotel o cere blocant, cu <code>ADR-0034</code> ca precedent direct. Dimon o respinge până când <code>_map_check</code> distinge „absent fiindcă netrackuit” de „absent fiindcă niciodată generat” — altfel gate-ul tipărește <code>OK  map is fresh.</code> după ce n-a comparat nimic.</p>
+    <p class="rec"><b>Recomandare:</b> amânare, nu arbitraj. F merită rundă proprie, după acțiunea 4. Dezanalogia se declară acolo: la <code>docs/map.html</code> nu exista consumator al copiei committed, pe când <code>_map.json</code> committed <em>este</em> dovada că harta corespunde corpusului.</p>
+  </div>
+
+  <div class="conf">
+    <h3>Confucius × Napoleon — opțiunea D</h3>
+    <p>Confucius o pune prima, ca singura care nu atinge nicio clauză confirmată. Napoleon și Deming o cotează sub pragul de materialitate.</p>
+    <p class="rec"><b>Recomandare:</b> niciunul pe temeiul invocat. Întrebarea corectă e a lui Wittgenstein — decide întâi dacă acel cache mai are consumator. Dacă nu, D nu e mutare de transport, ci ștergere de cache mort, și se judecă separat.</p>
+  </div>
+</section>
+
+<div class="close prose">
+  <p><strong>Drumul spre GO.</strong> Verdictul nu se reia pe propunerea actuală: temeiul ei de cost e refutat, nu supraestimat. O re-propunere ajunge la GO doar dacă argumentul de cost e retras în scris și înlocuit cu numitorul clonă-default; C și E sunt scoase de pe masă; testul golden de chei și asertiunea <code>ssr-smoke</code> sunt deja verzi înainte de orice atingere de schemă; și rămâne o singură întrebare, F, argumentată pe freshness. Ștergerea lui <code>targets</code> nu așteaptă nimic din toate astea.</p>
+
+  <div class="foot">
+    Senat · 9 senatori pe Opus, bench uniform · runda 1 completă, runda 2 focală pe Musk și Deming (Legea 2/4)<br>
+    2 schimbări de poziție: Musk MODIFY→GO, Deming MODIFY→STOP · Legea 8 a auto-promovat votul lui Napoleon<br>
+    Bundle: <code>runs/senate/2026-09-15_183041-senate-reqmap-map-json-duplication.json</code> · validat, concluzie atașată
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>

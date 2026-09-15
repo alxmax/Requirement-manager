@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-15.1",
+  "engine_version": "2026-09-15.2",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -633,15 +633,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3074"
+          "loc": "plugin/scripts/test_reqmap_report.py:3131"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3233"
+          "loc": "plugin/scripts/test_reqmap_report.py:3290"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5131"
+          "loc": "plugin/scripts/test_reqmap_report.py:5188"
         },
         {
           "role": "implements",
@@ -826,11 +826,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3074"
+          "loc": "plugin/scripts/test_reqmap_report.py:3131"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5131"
+          "loc": "plugin/scripts/test_reqmap_report.py:5188"
         },
         {
           "role": "implements",
@@ -909,7 +909,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3074"
+          "loc": "plugin/scripts/test_reqmap_report.py:3131"
         },
         {
           "role": "implements",
@@ -966,7 +966,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3074"
+          "loc": "plugin/scripts/test_reqmap_report.py:3131"
         },
         {
           "role": "implements",
@@ -1029,7 +1029,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3074"
+          "loc": "plugin/scripts/test_reqmap_report.py:3131"
         },
         {
           "role": "implements",
@@ -1119,7 +1119,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3233"
+          "loc": "plugin/scripts/test_reqmap_report.py:3290"
         },
         {
           "role": "implements",
@@ -1859,7 +1859,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:594"
+          "loc": "plugin/scripts/test_reqmap_report.py:647"
         },
         {
           "role": "implements",
@@ -2717,15 +2717,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1915"
+          "loc": "plugin/scripts/test_reqmap_report.py:1972"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4012"
+          "loc": "plugin/scripts/test_reqmap_report.py:4069"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4919"
+          "loc": "plugin/scripts/test_reqmap_report.py:4976"
         },
         {
           "role": "implements",
@@ -2805,11 +2805,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1915"
+          "loc": "plugin/scripts/test_reqmap_report.py:1972"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4012"
+          "loc": "plugin/scripts/test_reqmap_report.py:4069"
         },
         {
           "role": "implements",
@@ -2879,7 +2879,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4919"
+          "loc": "plugin/scripts/test_reqmap_report.py:4976"
         },
         {
           "role": "implements",
@@ -2946,7 +2946,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "implements",
@@ -3009,7 +3009,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "implements",
@@ -3082,11 +3082,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:404"
+          "loc": "plugin/scripts/test_reqmap_report.py:457"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3993"
+          "loc": "plugin/scripts/test_reqmap_report.py:4050"
         },
         {
           "role": "implements",
@@ -3146,11 +3146,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:404"
+          "loc": "plugin/scripts/test_reqmap_report.py:457"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3993"
+          "loc": "plugin/scripts/test_reqmap_report.py:4050"
         },
         {
           "role": "implements",
@@ -3224,7 +3224,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1389"
+          "loc": "plugin/scripts/test_reqmap_report.py:1446"
         },
         {
           "role": "implements",
@@ -3290,15 +3290,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1390"
+          "loc": "plugin/scripts/test_reqmap_report.py:1447"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1406"
+          "loc": "plugin/scripts/test_reqmap_report.py:1463"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4525"
+          "loc": "plugin/scripts/test_reqmap_report.py:4582"
         },
         {
           "role": "implements",
@@ -3355,7 +3355,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5165"
+          "loc": "plugin/scripts/test_reqmap_report.py:5222"
         },
         {
           "role": "implements",
@@ -3469,7 +3469,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "implements",
@@ -3890,15 +3890,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4777"
+          "loc": "plugin/scripts/test_reqmap_report.py:4834"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "implements",
@@ -3967,7 +3967,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4036,7 +4036,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4109,7 +4109,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4161,7 +4161,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4224,7 +4224,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4296,7 +4296,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4363,7 +4363,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4429,7 +4429,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4486,7 +4486,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4545,7 +4545,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3329"
+          "loc": "plugin/scripts/test_reqmap_report.py:3386"
         },
         {
           "role": "implements",
@@ -4598,7 +4598,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4777"
+          "loc": "plugin/scripts/test_reqmap_report.py:4834"
         },
         {
           "role": "implements",
@@ -5124,7 +5124,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4451"
+          "loc": "plugin/scripts/test_reqmap_report.py:4508"
         },
         {
           "role": "implements",
@@ -5188,7 +5188,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4451"
+          "loc": "plugin/scripts/test_reqmap_report.py:4508"
         },
         {
           "role": "implements",
@@ -5928,15 +5928,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:563"
+          "loc": "plugin/scripts/test_reqmap_report.py:616"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2334"
+          "loc": "plugin/scripts/test_reqmap_report.py:2391"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4044"
+          "loc": "plugin/scripts/test_reqmap_report.py:4101"
         },
         {
           "role": "implements",
@@ -5956,7 +5956,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:169"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:195"
         },
         {
           "role": "implements",
@@ -6017,7 +6017,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4044"
+          "loc": "plugin/scripts/test_reqmap_report.py:4101"
         },
         {
           "role": "implements",
@@ -6205,7 +6205,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2334"
+          "loc": "plugin/scripts/test_reqmap_report.py:2391"
         },
         {
           "role": "implements",
@@ -6213,7 +6213,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:151"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:177"
         }
       ],
       "test_exempt": null,
@@ -6416,19 +6416,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1540"
+          "loc": "plugin/scripts/test_reqmap_report.py:1597"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4189"
+          "loc": "plugin/scripts/test_reqmap_report.py:4246"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "implements",
@@ -6503,11 +6503,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4189"
+          "loc": "plugin/scripts/test_reqmap_report.py:4246"
         },
         {
           "role": "implements",
@@ -6580,11 +6580,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4189"
+          "loc": "plugin/scripts/test_reqmap_report.py:4246"
         },
         {
           "role": "implements",
@@ -6656,11 +6656,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4189"
+          "loc": "plugin/scripts/test_reqmap_report.py:4246"
         },
         {
           "role": "implements",
@@ -6721,7 +6721,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "implements",
@@ -6800,7 +6800,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1261"
+          "loc": "plugin/scripts/test_reqmap_report.py:1318"
         },
         {
           "role": "implements",
@@ -7044,11 +7044,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2110"
+          "loc": "plugin/scripts/test_reqmap_report.py:2167"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "implements",
@@ -8414,51 +8414,55 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:258"
+          "loc": "plugin/scripts/test_reqmap_report.py:281"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:346"
+          "loc": "plugin/scripts/test_reqmap_report.py:311"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:404"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:629"
+          "loc": "plugin/scripts/test_reqmap_report.py:457"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:817"
+          "loc": "plugin/scripts/test_reqmap_report.py:682"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1612"
+          "loc": "plugin/scripts/test_reqmap_report.py:870"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1856"
+          "loc": "plugin/scripts/test_reqmap_report.py:1669"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2110"
+          "loc": "plugin/scripts/test_reqmap_report.py:1913"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2518"
+          "loc": "plugin/scripts/test_reqmap_report.py:2167"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2597"
+          "loc": "plugin/scripts/test_reqmap_report.py:2575"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3973"
+          "loc": "plugin/scripts/test_reqmap_report.py:2654"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:4030"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "tested-by",
@@ -8482,11 +8486,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:151"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:197"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:177"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:223"
         },
         {
           "role": "implements",
@@ -8598,11 +8606,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:258"
+          "loc": "plugin/scripts/test_reqmap_report.py:281"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1856"
+          "loc": "plugin/scripts/test_reqmap_report.py:311"
+        },
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_report.py:1913"
         },
         {
           "role": "implements",
@@ -8687,11 +8699,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:346"
+          "loc": "plugin/scripts/test_reqmap_report.py:399"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:817"
+          "loc": "plugin/scripts/test_reqmap_report.py:870"
         },
         {
           "role": "implements",
@@ -8703,11 +8715,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:151"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:154"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:197"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:177"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:223"
         }
       ],
       "test_exempt": null,
@@ -8760,7 +8776,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:629"
+          "loc": "plugin/scripts/test_reqmap_report.py:682"
         },
         {
           "role": "implements",
@@ -8823,7 +8839,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:404"
+          "loc": "plugin/scripts/test_reqmap_report.py:457"
         },
         {
           "role": "implements",
@@ -8890,7 +8906,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2518"
+          "loc": "plugin/scripts/test_reqmap_report.py:2575"
         },
         {
           "role": "implements",
@@ -8956,7 +8972,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2597"
+          "loc": "plugin/scripts/test_reqmap_report.py:2654"
         },
         {
           "role": "implements",
@@ -9051,11 +9067,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2475"
+          "loc": "plugin/scripts/test_reqmap_report.py:2532"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4475"
+          "loc": "plugin/scripts/test_reqmap_report.py:4532"
         },
         {
           "role": "implements",
@@ -9132,11 +9148,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2475"
+          "loc": "plugin/scripts/test_reqmap_report.py:2532"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4475"
+          "loc": "plugin/scripts/test_reqmap_report.py:4532"
         },
         {
           "role": "implements",
@@ -9240,7 +9256,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2475"
+          "loc": "plugin/scripts/test_reqmap_report.py:2532"
         },
         {
           "role": "implements",
@@ -9309,11 +9325,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2475"
+          "loc": "plugin/scripts/test_reqmap_report.py:2532"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "implements",
@@ -9378,11 +9394,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2475"
+          "loc": "plugin/scripts/test_reqmap_report.py:2532"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4475"
+          "loc": "plugin/scripts/test_reqmap_report.py:4532"
         },
         {
           "role": "implements",
@@ -9993,35 +10009,35 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:969"
+          "loc": "plugin/scripts/test_reqmap_report.py:1026"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:978"
+          "loc": "plugin/scripts/test_reqmap_report.py:1035"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:984"
+          "loc": "plugin/scripts/test_reqmap_report.py:1041"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2056"
+          "loc": "plugin/scripts/test_reqmap_report.py:2113"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2396"
+          "loc": "plugin/scripts/test_reqmap_report.py:2453"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2436"
+          "loc": "plugin/scripts/test_reqmap_report.py:2493"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10108,11 +10124,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10202,11 +10218,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10281,11 +10297,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10365,15 +10381,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10444,11 +10460,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:861"
+          "loc": "plugin/scripts/test_reqmap_report.py:918"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3766"
+          "loc": "plugin/scripts/test_reqmap_report.py:3823"
         },
         {
           "role": "implements",
@@ -10712,7 +10728,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "tested-by",
@@ -11263,7 +11279,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2681"
+          "loc": "plugin/scripts/test_reqmap_report.py:2738"
         },
         {
           "role": "implements",
@@ -11322,7 +11338,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2681"
+          "loc": "plugin/scripts/test_reqmap_report.py:2738"
         },
         {
           "role": "implements",
@@ -11437,11 +11453,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1612"
+          "loc": "plugin/scripts/test_reqmap_report.py:1669"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2056"
+          "loc": "plugin/scripts/test_reqmap_report.py:2113"
         },
         {
           "role": "implements",
@@ -11629,7 +11645,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2056"
+          "loc": "plugin/scripts/test_reqmap_report.py:2113"
         },
         {
           "role": "implements",
@@ -12273,7 +12289,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1413"
+          "loc": "plugin/scripts/test_reqmap_report.py:1470"
         },
         {
           "role": "implements",
@@ -12332,11 +12348,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1425"
+          "loc": "plugin/scripts/test_reqmap_report.py:1482"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4599"
+          "loc": "plugin/scripts/test_reqmap_report.py:4656"
         },
         {
           "role": "implements",
@@ -12399,11 +12415,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1425"
+          "loc": "plugin/scripts/test_reqmap_report.py:1482"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4599"
+          "loc": "plugin/scripts/test_reqmap_report.py:4656"
         },
         {
           "role": "implements",
@@ -12518,19 +12534,19 @@
       "members": [
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:177"
-        },
-        {
-          "role": "implements",
           "loc": ".github/workflows/ci.yml:180"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:184"
+          "loc": ".github/workflows/ci.yml:183"
         },
         {
           "role": "implements",
-          "loc": ".github/workflows/ci.yml:319"
+          "loc": ".github/workflows/ci.yml:187"
+        },
+        {
+          "role": "implements",
+          "loc": ".github/workflows/ci.yml:322"
         }
       ],
       "test_exempt": "pipeline wiring observed by the CI artifacts job, not by a unit test",
@@ -12602,7 +12618,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5033"
+          "loc": "plugin/scripts/test_reqmap_report.py:5090"
         },
         {
           "role": "implements",
@@ -13163,15 +13179,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2174"
+          "loc": "plugin/scripts/test_reqmap_report.py:2231"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2806"
+          "loc": "plugin/scripts/test_reqmap_report.py:2863"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4434"
+          "loc": "plugin/scripts/test_reqmap_report.py:4491"
         },
         {
           "role": "implements",
@@ -13257,11 +13273,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2174"
+          "loc": "plugin/scripts/test_reqmap_report.py:2231"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4434"
+          "loc": "plugin/scripts/test_reqmap_report.py:4491"
         },
         {
           "role": "implements",
@@ -13319,7 +13335,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2174"
+          "loc": "plugin/scripts/test_reqmap_report.py:2231"
         },
         {
           "role": "implements",
@@ -13376,7 +13392,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2806"
+          "loc": "plugin/scripts/test_reqmap_report.py:2863"
         },
         {
           "role": "implements",
@@ -14232,7 +14248,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "tested-by",
@@ -14337,15 +14353,15 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1181"
+          "loc": "plugin/scripts/test_reqmap_report.py:1238"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4059"
+          "loc": "plugin/scripts/test_reqmap_report.py:4116"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4954"
+          "loc": "plugin/scripts/test_reqmap_report.py:5011"
         },
         {
           "role": "implements",
@@ -14418,11 +14434,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1181"
+          "loc": "plugin/scripts/test_reqmap_report.py:1238"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4059"
+          "loc": "plugin/scripts/test_reqmap_report.py:4116"
         },
         {
           "role": "implements",
@@ -14483,11 +14499,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1181"
+          "loc": "plugin/scripts/test_reqmap_report.py:1238"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4059"
+          "loc": "plugin/scripts/test_reqmap_report.py:4116"
         },
         {
           "role": "implements",
@@ -14546,11 +14562,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1181"
+          "loc": "plugin/scripts/test_reqmap_report.py:1238"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4059"
+          "loc": "plugin/scripts/test_reqmap_report.py:4116"
         },
         {
           "role": "implements",
@@ -14607,11 +14623,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1181"
+          "loc": "plugin/scripts/test_reqmap_report.py:1238"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4059"
+          "loc": "plugin/scripts/test_reqmap_report.py:4116"
         },
         {
           "role": "implements",
@@ -14685,7 +14701,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4954"
+          "loc": "plugin/scripts/test_reqmap_report.py:5011"
         },
         {
           "role": "implements",
@@ -14991,7 +15007,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4683"
+          "loc": "plugin/scripts/test_reqmap_report.py:4740"
         },
         {
           "role": "implements",
@@ -15146,11 +15162,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/test_reqmap_report.py:4683"
+          "loc": "plugin/scripts/test_reqmap_report.py:4740"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4683"
+          "loc": "plugin/scripts/test_reqmap_report.py:4740"
         }
       ],
       "test_exempt": null,
@@ -15275,11 +15291,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1018"
+          "loc": "plugin/scripts/test_reqmap_report.py:1075"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3969"
         },
         {
           "role": "implements",
@@ -15342,11 +15358,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1018"
+          "loc": "plugin/scripts/test_reqmap_report.py:1075"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3969"
         },
         {
           "role": "implements",
@@ -15407,7 +15423,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1018"
+          "loc": "plugin/scripts/test_reqmap_report.py:1075"
         },
         {
           "role": "implements",
@@ -15464,11 +15480,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1018"
+          "loc": "plugin/scripts/test_reqmap_report.py:1075"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:3912"
+          "loc": "plugin/scripts/test_reqmap_report.py:3969"
         },
         {
           "role": "implements",
@@ -15553,15 +15569,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1100"
+          "loc": "plugin/scripts/test_reqmap_report.py:1157"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2450"
+          "loc": "plugin/scripts/test_reqmap_report.py:2507"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4316"
+          "loc": "plugin/scripts/test_reqmap_report.py:4373"
         },
         {
           "role": "implements",
@@ -15635,11 +15651,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1100"
+          "loc": "plugin/scripts/test_reqmap_report.py:1157"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4316"
+          "loc": "plugin/scripts/test_reqmap_report.py:4373"
         },
         {
           "role": "implements",
@@ -15705,19 +15721,19 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1100"
+          "loc": "plugin/scripts/test_reqmap_report.py:1157"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2450"
+          "loc": "plugin/scripts/test_reqmap_report.py:2507"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2946"
+          "loc": "plugin/scripts/test_reqmap_report.py:3003"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4316"
+          "loc": "plugin/scripts/test_reqmap_report.py:4373"
         },
         {
           "role": "implements",
@@ -15782,11 +15798,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1100"
+          "loc": "plugin/scripts/test_reqmap_report.py:1157"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4316"
+          "loc": "plugin/scripts/test_reqmap_report.py:4373"
         },
         {
           "role": "implements",
@@ -15853,11 +15869,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1100"
+          "loc": "plugin/scripts/test_reqmap_report.py:1157"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4316"
+          "loc": "plugin/scripts/test_reqmap_report.py:4373"
         },
         {
           "role": "implements",
@@ -15918,7 +15934,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2869"
+          "loc": "plugin/scripts/test_reqmap_report.py:2926"
         },
         {
           "role": "implements",
@@ -15989,7 +16005,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1651"
+          "loc": "plugin/scripts/test_reqmap_report.py:1708"
         },
         {
           "role": "implements",
@@ -16009,7 +16025,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:182"
+          "loc": "plugin/scripts/reqmap_engine/mapcmd.py:208"
         },
         {
           "role": "implements",
@@ -16118,7 +16134,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1651"
+          "loc": "plugin/scripts/test_reqmap_report.py:1708"
         },
         {
           "role": "implements",
@@ -18220,19 +18236,19 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:377"
+          "loc": "plugin/scripts/test_reqmap_report.py:430"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1874"
+          "loc": "plugin/scripts/test_reqmap_report.py:1931"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:2233"
+          "loc": "plugin/scripts/test_reqmap_report.py:2290"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4314"
         },
         {
           "role": "implements",
@@ -18302,11 +18318,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:377"
+          "loc": "plugin/scripts/test_reqmap_report.py:430"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4314"
         },
         {
           "role": "implements",
@@ -18372,15 +18388,15 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:377"
+          "loc": "plugin/scripts/test_reqmap_report.py:430"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1856"
+          "loc": "plugin/scripts/test_reqmap_report.py:1913"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4257"
+          "loc": "plugin/scripts/test_reqmap_report.py:4314"
         },
         {
           "role": "implements",
@@ -19190,11 +19206,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1081"
+          "loc": "plugin/scripts/test_reqmap_report.py:1138"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:1090"
+          "loc": "plugin/scripts/test_reqmap_report.py:1147"
         },
         {
           "role": "tested-by",
@@ -21725,7 +21741,7 @@
     },
     {
       "month": "2026-09",
-      "count": 72,
+      "count": 73,
       "first": "2026-09-02",
       "last": "2026-09-15",
       "versions": [
@@ -21800,7 +21816,8 @@
         "v7.8.1",
         "v7.9.0",
         "v7.13.0",
-        "v7.14.0"
+        "v7.14.0",
+        "v7.15.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"
