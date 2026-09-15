@@ -1,16 +1,11 @@
 {
   "_comment": [
-    "Rebuilt 2026-09-14. The previous contents planned v7.4 for 31 Dec 2026 and bars for",
-    "work that had already shipped — v7.4.0 went out on 2026-09-13, so the file was",
-    "planning a version that existed. A plan that describes the past is worse than no plan.",
+    "Rebuilt 2026-09-16. The previous contents planned v7.9 for 30 Sept while the plugin",
+    "was already at 7.18.0 and v7.11.0 was a tag - the SECOND time this file scheduled a",
+    "version that had shipped. A plan that describes the past is worse than no plan.",
     "",
-    "What is here now comes from ROADMAP.md's own open items, nothing invented: the one",
-    "open Now item and the five open Next ones. The DATES are the assumption — they place",
-    "those items on the monthly cadence below, one milestone per month end. Move them when",
-    "you disagree; the items themselves are yours.",
-    "",
-    "`Later` items carry no dates on purpose. They are parked behind an `unpark:` condition",
-    "and dating them would turn a condition into a deadline."
+    "The calendar runs to the end of this year, or three months out, whichever is later -",
+    "the engine computes it, so it never goes stale. Pin it by adding `until` to `cadence`."
   ],
   "lanes": [
     "Feature",
@@ -29,25 +24,31 @@
       "lane": "Feature",
       "start": "2026-09-21",
       "end": "2026-09-27",
-      "milestone": "v7.9",
+      "milestone": "v7.19",
+      "progress": 0
+    },
+    {
+      "title": "CD: deploy automat pe git",
+      "lane": "Feature",
+      "start": "2026-09-28",
+      "end": "2026-10-04",
+      "milestone": "v7.19",
+      "req": "ARCH-SELFGATE-039",
       "progress": 0
     }
   ],
   "milestones": {
-    "v7.9": {
+    "v7.19": {
       "due": "2026-09-30",
-      "label": "Suprafața CLI + prima dovadă n=2",
-      "items": []
+      "label": "Server MCP + suprafata CLI"
+    },
+    "v7.20": {
+      "due": "2026-10-31",
+      "label": "README onest + health pe o singura pagina"
     },
     "v8.0": {
-      "due": "2026-10-31",
-      "label": "README onest + health pe o singură pagină",
-      "items": []
-    },
-    "v8.1": {
       "due": "2026-11-30",
-      "label": "Datoria de viewer: split + init vorbăreț",
-      "items": []
+      "label": "Datoria de viewer: split + init vorbaret"
     }
   },
   "scores": {

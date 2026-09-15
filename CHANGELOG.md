@@ -2,6 +2,20 @@
 
 ## plugin `v7.19.0` — 2026-09-16
 
+**The plan was scheduling versions that had already shipped, for the second time.** It
+placed `v7.9` on 30 September while the plugin stood at 7.18.0 and `v7.11.0` was already
+a tag — the exact failure this file's own comment records from the last time, when it
+planned v7.4 for a December that came after v7.4.0 went out. Milestones are renumbered
+ahead of the release line (v7.19 / v7.20 / v8.0).
+
+Ordering was checked and is not at fault: `_version_key` in the engine and `semverCmp`
+in the viewer both compare numerically per segment, so v7.9 sorts before v7.10 by design
+rather than by luck. Zero-padding the labels to `v7.09` was declined for the same
+reason — it would diverge from the real tags (`v7.8.0`, `v7.11.0`) and from semver,
+which does not pad.
+
+
+
 **The lane column and the note panel stay put now.** Both scrolled away with the chart:
 scroll two months right and the lanes had no labels and the note clipped its own first
 words. Both are `position: sticky, left: 0`, because a lane the reader cannot name is a
