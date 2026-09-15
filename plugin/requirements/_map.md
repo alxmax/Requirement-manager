@@ -1,7 +1,7 @@
 ---
 generated: 2026-09-16
-engine: 2026-09-16.2
-nodes: 267
+engine: 2026-09-16.3
+nodes: 268
 edges: 117
 design pass-rate: 73% (67/92 source files without a design candidate)
 ---
@@ -271,6 +271,7 @@ graph LR
     REQ_VIEWER_984["Reading a roadmap wider than the screen<br><small>REQ-VIEWER-984</small>"]
     REQ_VIEWER_995["The roadmap has one lane, and it is named for what the chips are<br><small>REQ-VIEWER-995</small>"]
     REQ_VIEWER_999["A plan bar opens the note its author wrote in ROADMAP.md<br><small>REQ-VIEWER-999</small>"]
+    REQ_PLANSTACK_1012["Bars are stacked by what is drawn, not by what is scheduled<br><small>REQ-PLANSTACK-1012</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
     REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
     REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]
@@ -543,8 +544,8 @@ graph LR
   ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_432_633
   f_plugin_scripts_test_reqmap_report_py_2167_5139["plugin/scripts/test_reqmap_report.py:2167-5139"]
   ARCH_INIT_012 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_2167_5139
-  f_plugin_scripts_reqmap_engine_init_py_131_199["plugin/scripts/reqmap_engine/init.py:131-199"]
-  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_engine_init_py_131_199
+  f_plugin_scripts_reqmap_engine_init_py_130_198["plugin/scripts/reqmap_engine/init.py:130-198"]
+  ARCH_INIT_012 -->|implements| f_plugin_scripts_reqmap_engine_init_py_130_198
   ARCH_LEVEL_051["Specification level<br><small>ARCH-LEVEL-051</small>"]
   f_plugin_scripts_test_reqmap_gate_py_2090_2410["plugin/scripts/test_reqmap_gate.py:2090-2410"]
   ARCH_LEVEL_051 -->|tested-by| f_plugin_scripts_test_reqmap_gate_py_2090_2410
@@ -804,8 +805,8 @@ graph LR
   ARCH_SITE_026 -->|tested-by| f_plugin_scripts_test_reqmap_report_py_1708
   f_plugin_scripts_reqmap_engine_git_py_72_92["plugin/scripts/reqmap_engine/git.py:72-92"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_git_py_72_92
-  f_plugin_scripts_reqmap_engine_init_py_239["plugin/scripts/reqmap_engine/init.py:239"]
-  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_init_py_239
+  f_plugin_scripts_reqmap_engine_init_py_238["plugin/scripts/reqmap_engine/init.py:238"]
+  ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_init_py_238
   f_plugin_scripts_reqmap_engine_mapcmd_py_148_215["plugin/scripts/reqmap_engine/mapcmd.py:148-215"]
   ARCH_SITE_026 -->|implements| f_plugin_scripts_reqmap_engine_mapcmd_py_148_215
   f_plugin_scripts_reqmap_engine_site_py_10_147["plugin/scripts/reqmap_engine/site.py:10-147"]
@@ -990,7 +991,7 @@ _Area-level coupling: one box per area (N caps), arrow A->B = some capability in
 ```mermaid
 graph LR
   a_ARCH["ARCH<br><small>64 caps</small>"]
-  a_REQ["REQ<br><small>194 caps</small>"]
+  a_REQ["REQ<br><small>195 caps</small>"]
   a_SYS["SYS<br><small>9 caps</small>"]
   a_ARCH --> a_REQ
   a_REQ --> a_ARCH

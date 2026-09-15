@@ -19,6 +19,7 @@ import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { PlanGantt, noteText, matchItem } from "../src/views/roadmap/PlanGantt.jsx";
+import { stackBars } from "../src/lib/timeline.js";
 import { SpecDoc } from "../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../src/lib/data.js";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
@@ -677,6 +678,63 @@ test("roadmap: the shipped band is named by the branch",  // verifies: REQ-PLANB
     // a branch shows its own name; no branch keeps the former label rather than a blank
     return named.includes("feat/plan-bar-note") && !named.includes(">Shipped<")
       && bare.includes("Shipped");
+  })());
+
+// ---- overlapping short bars ------------------------------------------------
+// tested-by: REQ-PLANSTACK-1012 @unit
+// Two bars a WEEK apart do not overlap as dates, so the old date-based stacker put them
+// on one row — and the renderer then drew each 72px wide from starts 49px apart, so the
+// second covered 23px of the first, label included.
+const stackPlan = {
+  lanes: ["Feature"],
+  bars: [
+    { title: "primul lucru cu titlu lung", lane: "Feature", start: "2026-09-21", end: "2026-09-27" },
+    { title: "al doilea lucru",            lane: "Feature", start: "2026-09-28", end: "2026-10-04" },
+  ],
+};
+test("gantt: two bars a week apart are drawn on separate rows",  // verifies: REQ-PLANSTACK-1012#CASE-1
+  (() => {
+    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 7, endIdx: 13 };
+    const extent = (x) => ({ left: x.startIdx * 7 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 7 - 6, 72) });
+    // dates say "no overlap"; pixels say otherwise, and pixels are what is painted
+    const rows = stackBars([a, b], extent);
+    const rowsByDate = stackBars([{ ...a }, { ...b }]);
+    return rows === 2 && rowsByDate === 1;
+  })());
+
+test("gantt: bars that really are apart still share one row",  // verifies: REQ-PLANSTACK-1012#CASE-2
+  (() => {
+    // far enough that even the 72px floor cannot make them touch
+    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 40, endIdx: 46 };
+    const extent = (x) => ({ left: x.startIdx * 7 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 7 - 6, 72) });
+    return stackBars([a, b], extent) === 1;
+  })());
+
+test("gantt: the chart itself stacks them, not just the helper",  // verifies: REQ-PLANSTACK-1012#CASE-1
+  (() => {
+    // The two checks above exercise stackBars directly, so they stay green even if
+    // PlanGantt forgets to hand it `extent` — which is the whole fix. This asserts the
+    // WIRING: render the clashing pair and read the two bars' `top` out of the markup.
+    const html = renderToString(<PlanGantt planning={stackPlan} history={[]}
+      locale="en" t={(x) => x} zoom={100} />);
+    // React SSR writes inline styles as `top:10px`, no space, so the probe is a plain
+    // substring: with both bars on row 0 the markup carries `top:10px` twice and
+    // `top:36px` (PAD + ROW_H) not at all.
+    const secondRow = (html.match(/top:36px/g) || []).length;
+    if (!secondRow) { console.log("   (bars share a row — stacking not wired)"); }
+    return secondRow >= 1;
+  })());
+
+test("gantt: the guides mark the work, not today or the milestones",  // verifies: REQ-PLANSTACK-1012#CASE-3
+  (() => {
+    const html = renderToString(<PlanGantt planning={{
+      ...stackPlan,
+      milestones: { "v9.9": { due: "2026-09-30" } },
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    // the milestone keeps its header pill; what goes is the full-height dashed rule
+    return html.includes("v9.9") && !html.includes("dashed var(--indigo-400)");
   })());
 
 const cadencePlan = {

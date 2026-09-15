@@ -2,7 +2,7 @@
 /* Calendar Gantt: months and ISO weeks on X, swimlanes on Y, today + milestone flags in
  * the header. Selecting a bar opens the note its author wrote under the matching
  * ROADMAP.md item (REQ-VIEWER-999). */
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, stackBars,
 } from "../../lib/timeline.js";
@@ -151,6 +151,13 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
 
   const totalDays = dayIndex(origin, end) + 1;
   const chartW = totalDays * PX;
+  /* The drawn box of a bar, in one place. The renderer used to compute this inline and
+     `stackBars` compared dates, so the two disagreed about what "overlapping" meant and
+     short neighbours were painted on top of each other (REQ-PLANSTACK-1012). */
+  const extent = (b) => ({
+    left: b.startIdx * PX + 3,
+    width: Math.max((b.endIdx - b.startIdx + 1) * PX - 6, 72),
+  });
   const bars = indexBars(raw, origin);
 
   let lanes = Array.isArray(planning?.lanes) && planning.lanes.length
@@ -164,7 +171,7 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
     return { ...h, startIdx, endIdx: Math.max(dayIndex(origin, z), startIdx) };
   });
   const byLane = Object.fromEntries(lanes.map((ln) => [ln, bars.filter((b) => b.lane === ln)]));
-  const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || []), 1) * ROW_H + PAD * 2);
+  const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2);
   const bodyH = heights.reduce((a, h) => a + h, 0);
   const months = buildMonthBands(origin, totalDays, locale);
   const weeks = buildWeekBands(origin, totalDays);
@@ -218,7 +225,11 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
           ))}
         </div>
 
-        <div style={{ position: "relative", width: chartW }}>
+        {/* `flex: 1` lets the track take the room the lane column leaves, so a plan
+            shorter than the viewport fills it instead of stopping two thirds across;
+            `minWidth: chartW` keeps a longer one at its true scale and scrolls.
+            implements: REQ-PLANSTACK-1012 */}
+        <div style={{ position: "relative", minWidth: chartW, flex: 1 }}>
           <div style={{ position: "relative", height: HEAD_H, borderBottom: "1px solid var(--border)",
             background: "var(--bg-raised)" }}>
             <div style={{ height: FLAG_H, position: "relative" }}>
@@ -328,7 +339,7 @@ ${h.headline}`}
           {lanes.map((ln, i) => {
             const tone = LANE_TONE[i % LANE_TONE.length];
             const laneBars = byLane[ln] || [];
-            stackBars(laneBars);
+            stackBars(laneBars, extent);
             return (
               <div key={ln} style={{
                 position: "relative", height: heights[i],
@@ -348,8 +359,7 @@ ${h.headline}`}
                   }} />
                 ))}
                 {laneBars.map((bar) => {
-                  const left = bar.startIdx * PX + 3;
-                  const width = Math.max((bar.endIdx - bar.startIdx + 1) * PX - 6, 72);
+                  const { left, width } = extent(bar);
                   const top = PAD + bar.subRow * ROW_H;
                   return (
                     <div
@@ -391,21 +401,29 @@ ${h.headline}`}
             );
           })}
 
-          {todayIdx >= 0 && todayIdx < totalDays && (
-            <div style={{
-              position: "absolute", top: HEAD_H, height: bodyH,
-              left: todayIdx * PX + PX / 2, width: 2,
-              background: "var(--accent-2)", opacity: 0.8, pointerEvents: "none", zIndex: 2,
-            }} />
-          )}
-          {flags.map((f) => (
-            <div key={`line-${f.ms}`} title={`${f.ms} · ${f.at.toLocaleDateString(loc)}`} style={{
-              position: "absolute", top: HEAD_H, height: bodyH,
-              left: f.idx * PX + PX / 2, width: 0,
-              borderLeft: "2px dashed var(--indigo-400)", opacity: 0.55,
-              pointerEvents: "none", zIndex: 1,
-            }} />
-          ))}
+          {/* Guides mark the WORK, not the dates. `today` and the milestones keep their
+              header pills — the reader still finds them on the ruler — but a rule drawn
+              the full height of the chart was ruling a line through the bars it was
+              meant to help read. A start is solid and an end dotted, because a start is
+              a commitment and an end an estimate.  implements: REQ-PLANSTACK-1012 */}
+          {bars.map((b) => {
+            const { left, width } = extent(b);
+            return (
+              <Fragment key={`guide-${b.key}`}>
+                <div style={{
+                  position: "absolute", top: HEAD_H, height: bodyH, left, width: 0,
+                  borderLeft: "1px solid var(--fg-faint)", opacity: 0.4,
+                  pointerEvents: "none", zIndex: 1,
+                }} />
+                <div style={{
+                  position: "absolute", top: HEAD_H, height: bodyH,
+                  left: left + width, width: 0,
+                  borderLeft: "1px dotted var(--fg-faint)", opacity: 0.28,
+                  pointerEvents: "none", zIndex: 1,
+                }} />
+              </Fragment>
+            );
+          })}
         </div>
       </div>
       {/* Sticky too, and for the same reason: the note belongs to the reader, not to

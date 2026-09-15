@@ -80,13 +80,28 @@ export function overlaps(a, b) {
 }
 
 /** Assign sub-rows inside a lane so overlapping bars stack vertically. */
-export function stackBars(bars) {
+/** Assign each bar a sub-row so that none is drawn over another, and return the row
+ *  count. Pass `extent` to compare what is DRAWN rather than what is scheduled.
+ *
+ *  Without it this compared dates, and a bar is not drawn at its date width: the chart
+ *  floors a bar at a readable minimum, so a week (7 x 7px - 6 = 43px) renders as 72px.
+ *  Two bars a week apart start 49px apart, so they do not overlap as dates, land on one
+ *  row, and are then painted 23px on top of each other — the label of the first
+ *  disappearing under the second. The row chooser has to know the width the renderer
+ *  will use.  implements: REQ-PLANSTACK-1012 */
+export function stackBars(bars, extent) {
   const sorted = [...bars].sort((a, b) => a.startIdx - b.startIdx || a.endIdx - b.endIdx);
+  const clash = extent
+    ? (a, b) => {
+        const pa = extent(a), pb = extent(b);
+        return pa.left < pb.left + pb.width && pb.left < pa.left + pa.width;
+      }
+    : overlaps;
   const rows = [];
   for (const bar of sorted) {
     let row = 0;
     for (; row < rows.length; row++) {
-      if (!rows[row].some((b) => overlaps(b, bar))) break;
+      if (!rows[row].some((b) => clash(b, bar))) break;
     }
     if (row === rows.length) rows.push([]);
     bar.subRow = row;

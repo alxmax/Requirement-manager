@@ -8,7 +8,6 @@ from .mapcmd import cmd_map
 from .parse import load_requirements
 from .scan import _walk_code, scan_members
 from .site import _site_default_target, _site_pages_bootstrap, cmd_site
-from .targets import default_horizon
 from .tags import TAG_RE, _findall_tags, _scan_file_tags
 from .workspace import Workspace
 

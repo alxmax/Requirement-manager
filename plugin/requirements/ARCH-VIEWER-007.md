@@ -904,3 +904,51 @@ CASE-5 — the roadmap payload survives the mode's removal
   Given  a repo with a `ROADMAP.md` holding one item
   When   `sync` writes the export
   Then   `_map.json` still carries that item under `roadmap`, with its context
+
+---
+id: REQ-PLANSTACK-1012
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Bars are stacked by what is drawn, not by what is scheduled
+
+## Description
+> Two bars a week apart do not overlap as dates, so they were put on one row — and then
+> painted 23px on top of each other, the first one's title vanishing under the second.
+> The chart floors a bar at a readable width, so a week renders at 72px where its dates
+> ask for 43; the row chooser was comparing the dates and the renderer was drawing the
+> floor. One of them had to learn the other's answer, and the renderer cannot: it draws
+> what it is given.
+
+Every bullet below is binding.
+- One function answers where a bar is drawn and how wide, and both the renderer and the
+  row chooser read it — neither computes its own.
+- `stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even
+  where their dates do not.
+- Two bars far enough apart that the floor cannot make them touch still share a row, so
+  the lane grows only where it must.
+- The full-height vertical guides mark the work: a solid rule at each bar's start and a
+  dotted one at its end. `today` and the milestones keep their header pills and rule no
+  line through the lanes.
+- The track fills the width the lane column leaves, and keeps its true scale when the
+  plan is longer than the viewport.
+
+## Cases
+CASE-1 — bars a week apart are drawn on separate rows
+  Given  two seven-day bars starting seven days apart, and the 72px floor
+  When   the Plan renders
+  Then   they carry different sub-rows, and stacking them by date alone would not
+
+CASE-2 — bars that really are apart still share a row
+  Given  two seven-day bars starting forty days apart
+  When   the Plan renders
+  Then   one row holds both
+
+CASE-3 — the guides mark the work, not the dates
+  Given  a plan carrying a bar and a milestone due date
+  When   the Plan renders
+  Then   the milestone keeps its header pill and no dashed full-height rule is drawn

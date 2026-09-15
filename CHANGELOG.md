@@ -2,6 +2,25 @@
 
 ## plugin `v7.19.0` — 2026-09-16
 
+**Two bars a week apart were drawn on top of each other.** They do not overlap as dates,
+so the row chooser put them on one row — and the renderer then drew each at the 72px
+floor from starts 49px apart, so the second covered 23px of the first, its title with it.
+The chart floors a bar at a readable width (a week asks for 43px), so `stackBars` was
+comparing what was scheduled while the renderer drew what was floored. One function now
+answers where a bar sits and how wide, and both read it: two bars whose DRAWN boxes
+intersect take different sub-rows, and two far enough apart still share one, so a lane
+grows only where it must.
+
+The full-height vertical guides move with it. They ruled lines through the bars they were
+meant to help read; now a solid rule marks each bar's start and a dotted one its end — a
+start is a commitment and an end an estimate. `today` and the milestones keep their header
+pills, so the dates are still findable on the ruler without a rule through the work.
+
+And the track fills the width the lane column leaves instead of stopping short of it,
+while keeping its true scale when the plan runs longer than the viewport.
+
+
+
 **The plan was scheduling versions that had already shipped, for the second time.** It
 placed `v7.9` on 30 September while the plugin stood at 7.18.0 and `v7.11.0` was already
 a tag — the exact failure this file's own comment records from the last time, when it

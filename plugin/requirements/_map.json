@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.2",
+  "engine_version": "2026-09-16.3",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -5811,7 +5811,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:86"
+          "loc": "plugin/scripts/reqmap_engine/init.py:85"
         },
         {
           "role": "implements",
@@ -7172,15 +7172,15 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:131"
+          "loc": "plugin/scripts/reqmap_engine/init.py:130"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:156"
+          "loc": "plugin/scripts/reqmap_engine/init.py:155"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:199"
+          "loc": "plugin/scripts/reqmap_engine/init.py:198"
         }
       ],
       "test_exempt": null,
@@ -7237,7 +7237,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:156"
+          "loc": "plugin/scripts/reqmap_engine/init.py:155"
         }
       ],
       "test_exempt": null,
@@ -7302,7 +7302,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:199"
+          "loc": "plugin/scripts/reqmap_engine/init.py:198"
         }
       ],
       "test_exempt": null,
@@ -9034,7 +9034,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:176"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:183"
         },
         {
           "role": "tested-by",
@@ -13599,7 +13599,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:131"
+          "loc": "plugin/scripts/reqmap_engine/init.py:130"
         },
         {
           "role": "implements",
@@ -14680,7 +14680,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:147"
+          "loc": "app/scripts/ssr-smoke.jsx:148"
         },
         {
           "role": "implements",
@@ -16271,7 +16271,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/init.py:239"
+          "loc": "plugin/scripts/reqmap_engine/init.py:238"
         },
         {
           "role": "implements",
@@ -17938,7 +17938,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:100"
+          "loc": "app/scripts/ssr-smoke.jsx:101"
         },
         {
           "role": "implements",
@@ -18353,7 +18353,8 @@
         "REQ-VIEWER-977",
         "REQ-VIEWER-984",
         "REQ-VIEWER-995",
-        "REQ-VIEWER-999"
+        "REQ-VIEWER-999",
+        "REQ-PLANSTACK-1012"
       ],
       "members": [
         {
@@ -19294,7 +19295,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "app/scripts/ssr-smoke.jsx:68"
+          "loc": "app/scripts/ssr-smoke.jsx:69"
         },
         {
           "role": "implements",
@@ -19386,6 +19387,65 @@
       "risks": [],
       "clauses": 5,
       "covered": 5
+    },
+    {
+      "id": "REQ-PLANSTACK-1012",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Bars are stacked by what is drawn, not by what is scheduled",
+      "intent": "Two bars a week apart do not overlap as dates, so they were put on one row — and then painted 23px on top of each other, the first one's title vanishing under the second. The chart floors a bar at a readable width, so a week renders at 72px where its dates ask for 43; the row chooser was comparing the dates and the renderer was drawing the floor. One of them had to learn the other's answer, and the renderer cannot: it draws what it is given.",
+      "contract": [
+        "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
+        "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
+        "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
+        "The full-height vertical guides mark the work: a solid rule at each bar's start and a dotted one at its end. `today` and the milestones keep their header pills and rule no line through the lanes.",
+        "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport."
+      ],
+      "verify": [],
+      "notes": [],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — bars a week apart are drawn on separate rows Given  two seven-day bars starting seven days apart, and the 72px floor When   the Plan renders Then   they carry different sub-rows, and stacking them by date alone would not",
+        "CASE-2 — — bars that really are apart still share a row Given  two seven-day bars starting forty days apart When   the Plan renders Then   one row holds both",
+        "CASE-3 — — the guides mark the work, not the dates Given  a plan carrying a bar and a milestone due date When   the Plan renders Then   the milestone keeps its header pill and no dashed full-height rule is drawn"
+      ],
+      "accept": "CASE-1 — bars a week apart are drawn on separate rows\n  Given  two seven-day bars starting seven days apart, and the 72px floor\n  When   the Plan renders\n  Then   they carry different sub-rows, and stacking them by date alone would not\n\nCASE-2 — bars that really are apart still share a row\n  Given  two seven-day bars starting forty days apart\n  When   the Plan renders\n  Then   one row holds both\n\nCASE-3 — the guides mark the work, not the dates\n  Given  a plan carrying a bar and a milestone due date\n  When   the Plan renders\n  Then   the milestone keeps its header pill and no dashed full-height rule is drawn",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-VIEWER-007"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "app/scripts/ssr-smoke.jsx:684"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/lib/timeline.js:91"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:231"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:408"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": null,
+      "priority": "",
+      "risks": [],
+      "clauses": 3,
+      "covered": 3
     },
     {
       "id": "ARCH-VLEVEL-037",
@@ -21716,6 +21776,10 @@
       "ARCH-VIEWER-007"
     ],
     [
+      "REQ-PLANSTACK-1012",
+      "ARCH-VIEWER-007"
+    ],
+    [
       "ARCH-VLEVEL-037",
       "SYS-VMODEL-107"
     ],
@@ -22321,7 +22385,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "797 lines (over 500)"
+        "detail": "855 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -22329,7 +22393,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "72 line(s) wider than 100 columns, first at line 1"
+        "detail": "78 line(s) wider than 100 columns, first at line 1"
       },
       {
         "pillar": "standards",
@@ -22569,7 +22633,7 @@
         "file": "app/src/views/roadmap/PlanGantt.jsx",
         "line": 21,
         "name": "PlanGantt.jsx",
-        "detail": "9 line(s) wider than 100 columns, first at line 21"
+        "detail": "10 line(s) wider than 100 columns, first at line 21"
       },
       {
         "pillar": "abstraction",
@@ -22585,7 +22649,7 @@
         "file": "app/src/views/roadmap/PlanGantt.jsx",
         "line": 113,
         "name": "PlanGantt",
-        "detail": "`PlanGantt` is 310 lines (over 80)"
+        "detail": "`PlanGantt` is 328 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
@@ -22641,11 +22705,11 @@
   },
   "health": {
     "score": 97,
-    "total": 267,
-    "healthy": 259,
-    "confirmed": 259,
-    "implemented": 250,
-    "tested": 247,
+    "total": 268,
+    "healthy": 260,
+    "confirmed": 260,
+    "implemented": 251,
+    "tested": 248,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,
