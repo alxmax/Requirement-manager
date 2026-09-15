@@ -3719,7 +3719,7 @@ class Design(unittest.TestCase):  # tested-by: REQ-DESIGN-980  # tested-by: REQ-
             reqs = R.load_requirements(rq)
             data = R._assemble_map_data(reqs, {}, rq, d)
             self.assertEqual(data["design"]["score"], 100)
-            self.assertIn("design OOP: 100/100 (1/1 source files", R._build_md_text(dict(data, todos=[])))
+            self.assertIn("design pass-rate: 100% (1/1 source files", R._build_md_text(dict(data, todos=[])))
             buf = io.StringIO()
             with redirect_stdout(buf):
                 R.cmd_health(R.Workspace(reqs, {}, rq, d), True)
@@ -4824,6 +4824,27 @@ class DocsAreTrue(unittest.TestCase):  # implements: REQ-SELFGATE-990  # tested-
                          "CLAUDE.md claims {} engine modules, the package has {}".format(
                              m.group(1), actual))
 
+    def test_the_corpus_counts_in_claude_md_are_current(self):  # verifies: REQ-SELFGATE-990#CASE-4
+        """CLAUDE.md's corpus paragraph claimed 68 architecture requirements against 63,
+        159 code against 191, 236 total against 263, and 197-in-71-files against 263-in-72.
+        Every check in the repo passed while it said so, and an outside reader found it
+        rather than a check. RM035 re-measures the same markers in any repo, but it is
+        warn-only inside a run that already prints thirty-odd warnings — this is the half
+        that fails a build. Asserting the marker SET first is what makes deleting a marker
+        loud instead of silently reducing what is checked."""
+        claude_md = open(os.path.join(self.root, "CLAUDE.md"), encoding="utf-8").read()
+        claims = R.doc_claims(claude_md)
+        self.assertEqual(
+            {"total", "files", "level:system", "level:architecture", "level:code"},
+            {kind for kind, _claimed, _line in claims},
+            "CLAUDE.md no longer marks the corpus counts it states")
+        counts = R.corpus_counts(
+            R.load_requirements(os.path.join(self.root, "plugin", "requirements")))
+        wrong = [(kind, claimed, counts.get(kind)) for kind, claimed, _line in claims
+                 if counts.get(kind) != claimed]
+        self.assertEqual([], wrong,
+                         "CLAUDE.md states (kind, claimed, actual): {}".format(wrong))
+
     def test_the_index_states_no_count_it_would_have_to_maintain(self):  # verifies: REQ-SELFGATE-990#CASE-3
         # "Twenty-three decisions" was written when there were 23 and never moved again.
         index = open(os.path.join(self.root, "docs", "adr", "README.md"), encoding="utf-8").read()
@@ -4967,9 +4988,9 @@ class AdvisoryDataCarriesNoVerdict(unittest.TestCase):  # tested-by: ARCH-DESIGN
 
     def test_the_md_design_summary_line_is_dropped(self):
         text = "\n".join(["---", "generated: 2026-01-01", "nodes: 3",
-                          "design OOP: 29/100 (9/31 files)", "---", "# Map"])
+                          "design pass-rate: 29% (9/31 files)", "---", "# Map"])
         out = R._strip_generated(text)
-        self.assertNotIn("design OOP", out)
+        self.assertNotIn("design pass-rate", out)
         self.assertIn("nodes: 3", out)
 
 

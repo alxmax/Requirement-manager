@@ -127,7 +127,7 @@ def _strip_generated(text):  # implements: REQ-DESIGN-991
                 or l.startswith("engine: ")
                 # `_map.md`'s one-line design summary: the same advisory number, and
                 # the same reason it must not be able to fail a build.
-                or l.startswith("design OOP: ")
+                or l.startswith("design pass-rate: ")
                 or l.lstrip().startswith('"repo":')
                 or l.lstrip().startswith('"engine_version":')):
             continue

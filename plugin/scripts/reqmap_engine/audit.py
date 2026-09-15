@@ -157,7 +157,7 @@ def _design_candidate_line(code_root, reqs_dir):
     design = _design_summary(code_root, reqs_dir) if code_root else None
     if design is None or design["clean_files"] >= design["files"]:
         return None
-    return "design {}/100 - {} of {} source files carry a candidate".format(
+    return "design pass-rate {}% - {} of {} source files carry a candidate".format(
         design["score"], design["files"] - design["clean_files"], design["files"])
 
 
@@ -297,7 +297,7 @@ def _summary_table_rows(gate_rc, signals, dups):
             ("Health", "{}/100 ({}/{} green on every axis)".format(
                 health["score"], health["healthy"], health["total"]), "reqmap.py gate --risk")]
     if design is not None:
-        rows.append(("Design OOP", "{}/100 ({}/{} files with no candidate)".format(
+        rows.append(("Design pass-rate", "{}% ({}/{} files with no candidate)".format(
             design["score"], design["clean_files"], design["files"]), "reqmap.py gate --design"))
     if untagged is not None:
         rows.append(("Untagged code", "{} file(s) traced to no requirement".format(len(untagged)),

@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-15.3",
+  "engine_version": "2026-09-15.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -408,11 +408,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:108"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:128"
         }
       ],
       "test_exempt": null,
@@ -480,11 +480,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:108"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:118"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:128"
         }
       ],
       "test_exempt": null,
@@ -552,11 +552,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:109"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:119"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:119"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:129"
         }
       ],
       "test_exempt": null,
@@ -641,7 +641,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5188"
+          "loc": "plugin/scripts/test_reqmap_report.py:5209"
         },
         {
           "role": "implements",
@@ -830,7 +830,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5188"
+          "loc": "plugin/scripts/test_reqmap_report.py:5209"
         },
         {
           "role": "implements",
@@ -1025,7 +1025,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:242"
+          "loc": "plugin/scripts/reqmap.py:251"
         },
         {
           "role": "tested-by",
@@ -1752,6 +1752,7 @@
         "ARCH-ACVERIFY-019",
         "ARCH-AUDIT-065",
         "ARCH-DOCBUNDLE-026",
+        "ARCH-DOCCLAIMS-071",
         "ARCH-DRIFTIMPACT-035",
         "ARCH-INIT-012",
         "ARCH-LEVEL-051",
@@ -1859,6 +1860,10 @@
         },
         {
           "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2834"
+        },
+        {
+          "role": "tested-by",
           "loc": "plugin/scripts/test_reqmap_report.py:647"
         },
         {
@@ -1867,23 +1872,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:56"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:78"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:79"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:107"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:108"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:163"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:178"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
         },
         {
           "role": "implements",
@@ -2269,23 +2274,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:56"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:78"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:79"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:107"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:108"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:163"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:178"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
         }
       ],
       "test_exempt": null,
@@ -2342,23 +2347,23 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:57"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:79"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:80"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:108"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:109"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:164"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:165"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:180"
         }
       ],
       "test_exempt": null,
@@ -2636,7 +2641,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:147"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:148"
         },
         {
           "role": "implements",
@@ -2725,7 +2730,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4976"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -2879,7 +2884,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4976"
+          "loc": "plugin/scripts/test_reqmap_report.py:4997"
         },
         {
           "role": "implements",
@@ -2931,7 +2936,8 @@
         "ARCH-PARSE-001"
       ],
       "used_by": [
-        "ARCH-DESIGN-061"
+        "ARCH-DESIGN-061",
+        "ARCH-DOCCLAIMS-071"
       ],
       "satisfies": [
         "SYS-AUTHOR-101"
@@ -2942,7 +2948,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:276"
+          "loc": "plugin/scripts/reqmap.py:285"
         },
         {
           "role": "tested-by",
@@ -2950,11 +2956,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:191"
+          "loc": "plugin/scripts/reqmap_engine/config.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:201"
+          "loc": "plugin/scripts/reqmap_engine/config.py:207"
         }
       ],
       "test_exempt": null,
@@ -3013,11 +3019,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:191"
+          "loc": "plugin/scripts/reqmap_engine/config.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/config.py:201"
+          "loc": "plugin/scripts/reqmap_engine/config.py:207"
         }
       ],
       "test_exempt": null,
@@ -3355,7 +3361,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5222"
+          "loc": "plugin/scripts/test_reqmap_report.py:5243"
         },
         {
           "role": "implements",
@@ -3469,7 +3475,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "implements",
@@ -3831,7 +3837,7 @@
         "`design` reports inheritance and polymorphism candidates: unrelated classes sharing method names or bodies, `isinstance` chains, equality switches on one value. [[REQ-DESIGN-951]]",
         "`design` prints the candidates grouped by pillar with one advice line each, emits JSON on request, skips test files, always exits 0, never enters the gate. [[REQ-DESIGN-952]]",
         "`design` reports house standards per file: length, wide lines, public definitions without a docstring, definitions per file. [[REQ-DESIGN-953]]",
-        "The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design OOP:`) and `health`. [[REQ-DESIGN-954]]",
+        "The same analysis folds into one design score that rides in `_map.json`, the `_map.md` header (as `design pass-rate:`) and `health`. [[REQ-DESIGN-954]]",
         "JS/TS, C/C++, Java, C#, Go, Rust, Kotlin, Swift, Scala, Dart and PHP are read through brace-matching heuristics that feed the same shape checks. [[REQ-DESIGN-955]]",
         "The candidates themselves ride in `_map.json` beside their score, so the viewer lists them instead of only counting them. [[REQ-DESIGN-976]]",
         "A `metrics` pillar measures each Python class with the one Chidamber & Kemerer metric that survived calibration — RFC. [[REQ-DESIGN-978]]",
@@ -3894,11 +3900,11 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4834"
+          "loc": "plugin/scripts/test_reqmap_report.py:4855"
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "implements",
@@ -4207,10 +4213,10 @@
       "current_impl": [],
       "acc": [
         "CASE-1 — — the score counts clean files Given  a clean documented module, a module writing a global, and a test file writing a global When   `_design_summary` runs Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate",
-        "CASE-2 — — the map header and health carry the score Given  a corpus and one clean module When   the map data is assembled and `health --json` runs Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design OOP:`) names it, and the JSON carries `design_score` 100",
+        "CASE-2 — — the map header and health carry the score Given  a corpus and one clean module When   the map data is assembled and `health --json` runs Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design pass-rate:`) names it, and the JSON carries `design_score` 100",
         "CASE-3 — — no program logic, no key Given  a repo whose only code is a stylesheet When   the map data is assembled and `health --json` runs Then   neither `design` nor `design_score` is present --------------------"
       ],
-      "accept": "CASE-1 — the score counts clean files\n  Given  a clean documented module, a module writing a global, and a test file writing a global\n  When   `_design_summary` runs\n  Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate\n\nCASE-2 — the map header and health carry the score\n  Given  a corpus and one clean module\n  When   the map data is assembled and `health --json` runs\n  Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design OOP:`) names it, and the JSON carries `design_score` 100\n\nCASE-3 — no program logic, no key\n  Given  a repo whose only code is a stylesheet\n  When   the map data is assembled and `health --json` runs\n  Then   neither `design` nor `design_score` is present\n\n--------------------",
+      "accept": "CASE-1 — the score counts clean files\n  Given  a clean documented module, a module writing a global, and a test file writing a global\n  When   `_design_summary` runs\n  Then   it reports 2 files, 1 clean, score 50, one encapsulation and one standards candidate\n\nCASE-2 — the map header and health carry the score\n  Given  a corpus and one clean module\n  When   the map data is assembled and `health --json` runs\n  Then   `_map.json` carries `design.score` 100, the `_map.md` header (as `design pass-rate:`) names it, and the JSON carries `design_score` 100\n\nCASE-3 — no program logic, no key\n  Given  a repo whose only code is a stylesheet\n  When   the map data is assembled and `health --json` runs\n  Then   neither `design` nor `design_score` is present\n\n--------------------",
       "input": "",
       "output": "",
       "desc": "",
@@ -4248,15 +4254,7 @@
       "priority": "",
       "risks": [],
       "clauses": 3,
-      "covered": 3,
-      "i18n": {
-        "ro": {
-          "title": "Sănătatea designului în hartă",
-          "intent": "O listă de candidați este ceva ce citești o dată; un număr este ceva ce urmărești. Aceeași parcurgere pe care o face `design` este condensată într-o singură înregistrare — câte fișiere Python nu conțin niciun candidat — iar acea înregistrare călătorește în harta comisă alături de graful cerințelor, în antetul hărții și în `health`, astfel încât deriva de design apare acolo unde apare deja deriva cerințelor.",
-          "contract": "> O listă de candidați este ceva ce citești o dată; un număr este ceva ce urmărești.\n> Aceeași parcurgere pe care o face `design` este condensată într-o singură înregistrare — câte fișiere Python\n> nu conțin niciun candidat — iar acea înregistrare călătorește în harta comisă alături de\n> graful cerințelor, în antetul hărții și în `health`, astfel încât deriva de design apare\n> acolo unde apare deja deriva cerințelor.\n\nFiecare punct de mai jos este obligatoriu.\n- `_design_summary(code_root)` returnează `{files, clean_files, score, candidates}` peste fișierele de logică de program care nu sunt de test, `score` fiind procentul de fișiere fără niciun candidat, iar `candidates` numărul pe grup; returnează `None` când nu există niciun astfel de fișier.\n- `_assemble_map_data` atașează acea înregistrare drept `design` în `_map.json` și omite cheia când înregistrarea este `None`, astfel încât un repo fără Python nu capătă o cheie goală.\n- Antetul lui `_map.md` conține o linie `design: S/100 (C/F source files without a design candidate)` atunci când înregistrarea există.\n- `health` afișează o linie de design, iar `health --json` conține `design_score` și `design_files` atunci când înregistrarea există; ambele lipsesc în caz contrar.\n- Înregistrarea este deterministă, așa că `map --check` tratează un scor de design modificat ca pe orice altă modificare a hărții comise.",
-          "acceptance": "CASE-1 — scorul numără fișierele curate\n  Given  un modul curat, documentat, un modul care scrie într-o variabilă globală și un fișier de test care scrie într-o variabilă globală\n  When   rulează `_design_summary`\n  Then   raportează 2 fișiere, 1 curat, scor 50, un candidat de încapsulare și unul de standarde\n\nCASE-2 — antetul hărții și health conțin scorul\n  Given  un corpus și un modul curat\n  When   datele hărții sunt asamblate și rulează `health --json`\n  Then   `_map.json` conține `design.score` 100, antetul `_map.md` (ca `design OOP:`) îl numește, iar JSON-ul conține `design_score` 100\n\nCASE-3 — fără logică de program, fără cheie\n  Given  un repo al cărui unic cod este o foaie de stiluri\n  When   datele hărții sunt asamblate și rulează `health --json`\n  Then   nici `design`, nici `design_score` nu este prezent"
-        }
-      }
+      "covered": 3
     },
     {
       "id": "REQ-DESIGN-955",
@@ -4598,7 +4596,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:4834"
+          "loc": "plugin/scripts/test_reqmap_report.py:4855"
         },
         {
           "role": "implements",
@@ -4749,6 +4747,124 @@
           "acceptance": "CASE-1 — un fișier HTML mare și netaguit din docs/ este semnalat\n  Given  `docs/arch.html` la sau peste `DOC_BUNDLE_MIN_BYTES`, fără niciun tag `generated-from:`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   returnează `[\"docs/arch.html\"]`, pe care `gate` îl încorporează doar în avertismentele sale —\n         niciodată o eroare, lăsând codul de ieșire neafectat\n\nCASE-2 — un fișier HTML mare și netaguit din afara docs/ nu este niciodată semnalat\n  Given  un `top.html` mare și netaguit la rădăcina repo-ului, în afara `docs/`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   `top.html` lipsește din rezultat\n\nCASE-3 — ieșirile motorului sunt excluse chiar și atunci când sunt mari și netaguite\n  Given  `docs/map.html` și `docs/_x.html`, mari și netaguite\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   niciun fișier nu apare în rezultat, pentru că motorul le verifică prospețimea separat pentru\n         aceste două, pe propria cale\n\nCASE-4 — un tipar din .reqmapignore suprimă constatarea\n  Given  un `docs/poster.html` mare și netaguit, potrivit de o linie `.reqmapignore` `docs/poster.html`\n  When   `untagged_doc_bundles` scanează repo-ul\n  Then   `docs/poster.html` lipsește din rezultat"
         }
       }
+    },
+    {
+      "id": "ARCH-DOCCLAIMS-071",
+      "layer": "feature",
+      "level": "architecture",
+      "status": "confirmed",
+      "area": "ARCH",
+      "title": "Corpus counts a document states about itself",
+      "intent": "A prose document that says \"236 requirements in total\" is asserting something the engine can count, and nothing was counting it. This repository's own `CLAUDE.md` — the file every contributor and every agent reads first — drifted to four wrong counts while the gate reported zero errors: 68 architecture requirements against 63, 159 code against 191, 236 total against 263, and 197-in-71-files against 263-in-72. That is the exact failure this tool exists to prevent, sitting in the tool's own front page. An external audit found it before any check did.",
+      "contract": [
+        "A number a document marks as a corpus count is re-measured against the live corpus, and the gate warns when the two disagree. [[REQ-DOCCLAIMS-1012]]",
+        "The rule is opt-in in two independent ways — a document with no marker yields nothing, and `DOC_CLAIM_FILES` names which documents are read — so a repository that wants none of it is untouched. [[REQ-DOCCLAIMS-1012]]"
+      ],
+      "verify": [],
+      "notes": [
+        "Warn, never error. A sentence that has fallen behind is a documentation defect; the gate's errors are reserved for link integrity, and `.githooks/pre-commit` runs the gate on every commit. An error here would block every commit that adds a requirement until its author re-edited a paragraph, which is a tax on the repository's most common edit.",
+        "The counterpart to warn-only is that this repository ALSO asserts its own numbers in `DocsAreTrue`, where a wrong one fails CI. The rule is the portable half and the test is the binding half: a warn in a stream of thirty-odd warnings is detection in principle, and this repository needs detection in practice.",
+        "Opt-in was chosen over a default-on prose scan because a regex over arbitrary prose cannot tell a live count from a historical one. `CLAUDE.md` line 130 states both in the same paragraph — \"263 requirements in total\" is live, \"the 573 one-sentence atomic leaves were folded into 126 groups\" is a true statement about a past morning. Only the author knows which is which, and the marker is how they say so.",
+        "`files` counts distinct requirement files through the parser, never a directory glob. A glob over `requirements/*.md` returns 75 against a real 72, because `_map.md`, `_findings.md` and `_ai_review.md` live there and hold no requirement — the first draft of this very requirement was written from the glob number and was wrong."
+      ],
+      "current_impl": [
+        "`reqmap_engine/docclaims.py`, wired into the gate as RM035 by an import in `gate.py`.",
+        "`DOC_CLAIM_FILES` in `reqmap_engine/config.py`, listed in `CONFIG_KEYS`."
+      ],
+      "acc": [
+        "CASE-1 — Given  a document marking a corpus count that disagrees with the corpus When   `gate` runs Then   it warns naming the document, the line, the stated number and the measured one, and the exit code is unchanged",
+        "CASE-2 — Given  a repository whose documents carry no marker When   `gate` runs Then   no finding is produced and the run is byte-identical to one from before this requirement existed"
+      ],
+      "accept": "CASE-1\n  Given  a document marking a corpus count that disagrees with the corpus\n  When   `gate` runs\n  Then   it warns naming the document, the line, the stated number and the measured one,\n         and the exit code is unchanged\n\nCASE-2\n  Given  a repository whose documents carry no marker\n  When   `gate` runs\n  Then   no finding is produced and the run is byte-identical to one from before this\n         requirement existed",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [
+        "ARCH-CHECK-006",
+        "ARCH-CONFIG-060"
+      ],
+      "depends_on": [
+        "ARCH-CHECK-006",
+        "ARCH-CONFIG-060"
+      ],
+      "used_by": [],
+      "satisfies": [
+        "SYS-GATE-102"
+      ],
+      "satisfied_by": [
+        "REQ-DOCCLAIMS-1012"
+      ],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2749"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/docclaims.py:68"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.15",
+      "priority": "",
+      "risks": []
+    },
+    {
+      "id": "REQ-DOCCLAIMS-1012",
+      "layer": "feature",
+      "level": "code",
+      "status": "confirmed",
+      "area": "REQ",
+      "title": "Re-measuring a marked claim",
+      "intent": "The check is worth having only if it cannot quietly check nothing. Two ways it could: a marker naming a kind the engine does not count, and a number measured with the wrong instrument. The first is reported rather than skipped; the second is why `files` goes through the parser and never through a directory glob.",
+      "contract": [
+        "`corpus_counts` returns `total`, `files`, and one `level:<value>` / `layer:<value>` entry per value present in the corpus, with `files` counting distinct requirement file names as the parser reports them.",
+        "`doc_claims` returns the kind, the claimed integer and the line number of every `<!--reqmap:KIND-->` marker in a document, in source order.",
+        "A marked claim whose measured value differs produces one warning naming the document, the line, the claimed number and the measured number.",
+        "A marker naming a kind the engine cannot count produces one warning listing the kinds it can, rather than being skipped in silence.",
+        "A known axis with no members measures zero, so a claim of zero on an undeclared rung is compared rather than reported as unknown.",
+        "A document named in `DOC_CLAIM_FILES` that cannot be opened or decoded is skipped without a finding, and the rule never changes the exit code."
+      ],
+      "verify": [],
+      "notes": [
+        "The marker leads the number and the extractor takes the first integer within a short span after it, so `<!--reqmap:level:code-->191 code` reads as an ordinary sentence and a second number later in the same line cannot be captured by mistake.",
+        "`level:` and `layer:` values are read from the corpus rather than from a fixed list, so a repository using its own vocabulary needs no engine change to mark its counts."
+      ],
+      "current_impl": [],
+      "acc": [
+        "CASE-1 — — a stale number warns Given  a document containing `5` and a corpus of 3 requirements When   the gate rules run Then   exactly one RM035 warning names both 5 and 3",
+        "CASE-2 — — a current number is silent Given  that same document stating 3 When   the gate rules run Then   no RM035 finding is produced",
+        "CASE-3 — — an unknown kind is named, not skipped Given  a document containing `3` When   the gate rules run Then   one RM035 warning says the kind is unknown and lists the kinds the engine counts",
+        "CASE-4 — — no marker, no work Given  a document carrying no `<!--reqmap:` marker When   the gate rules run Then   no RM035 finding is produced",
+        "CASE-5 — — the file count is the parser's, not the glob's Given  a requirements directory holding two requirement files and a generated `_map.md` When   `corpus_counts` runs Then   its `files` value is 2"
+      ],
+      "accept": "CASE-1 — a stale number warns\n  Given  a document containing `<!--reqmap:total-->5` and a corpus of 3 requirements\n  When   the gate rules run\n  Then   exactly one RM035 warning names both 5 and 3\n\nCASE-2 — a current number is silent\n  Given  that same document stating 3\n  When   the gate rules run\n  Then   no RM035 finding is produced\n\nCASE-3 — an unknown kind is named, not skipped\n  Given  a document containing `<!--reqmap:totl-->3`\n  When   the gate rules run\n  Then   one RM035 warning says the kind is unknown and lists the kinds the engine counts\n\nCASE-4 — no marker, no work\n  Given  a document carrying no `<!--reqmap:` marker\n  When   the gate rules run\n  Then   no RM035 finding is produced\n\nCASE-5 — the file count is the parser's, not the glob's\n  Given  a requirements directory holding two requirement files and a generated `_map.md`\n  When   `corpus_counts` runs\n  Then   its `files` value is 2",
+      "input": "",
+      "output": "",
+      "desc": "",
+      "deps": [],
+      "depends_on": [],
+      "used_by": [],
+      "satisfies": [
+        "ARCH-DOCCLAIMS-071"
+      ],
+      "satisfied_by": [],
+      "members": [
+        {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2749"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/docclaims.py:69"
+        }
+      ],
+      "test_exempt": null,
+      "milestone": "v7.15",
+      "priority": "",
+      "risks": [],
+      "clauses": 5,
+      "covered": 5
     },
     {
       "id": "ARCH-DRIFT-003",
@@ -6428,7 +6544,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "implements",
@@ -7048,7 +7164,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "implements",
@@ -7694,6 +7810,10 @@
           "loc": "plugin/scripts/test_reqmap_author.py:700"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2867"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lint.py:13"
         },
@@ -7711,11 +7831,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:78"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:88"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:102"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:112"
         }
       ],
       "test_exempt": null,
@@ -7781,6 +7901,10 @@
           "loc": "plugin/scripts/test_reqmap_author.py:2222"
         },
         {
+          "role": "tested-by",
+          "loc": "plugin/scripts/test_reqmap_gate.py:2867"
+        },
+        {
           "role": "implements",
           "loc": "plugin/scripts/reqmap_engine/lint.py:14"
         },
@@ -7794,27 +7918,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:163"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:173"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:184"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:245"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:255"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:303"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:362"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:372"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:404"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:414"
         }
       ],
       "test_exempt": null,
@@ -7882,11 +8006,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:78"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:88"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:102"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:112"
         }
       ],
       "test_exempt": null,
@@ -7994,31 +8118,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:96"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:106"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:163"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:173"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:184"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:194"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:245"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:255"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:303"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:313"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:362"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:372"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:404"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:414"
         }
       ],
       "test_exempt": null,
@@ -8083,7 +8207,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/lintrules.py:96"
+          "loc": "plugin/scripts/reqmap_engine/lintrules.py:106"
         }
       ],
       "test_exempt": null,
@@ -8462,7 +8586,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "tested-by",
@@ -10728,7 +10852,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "tested-by",
@@ -11164,11 +11288,11 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:329"
+          "loc": "plugin/scripts/reqmap.py:338"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:347"
+          "loc": "plugin/scripts/reqmap.py:356"
         },
         {
           "role": "tested-by",
@@ -11216,7 +11340,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:347"
+          "loc": "plugin/scripts/reqmap.py:356"
         },
         {
           "role": "tested-by",
@@ -11577,7 +11701,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:137"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:138"
         }
       ],
       "test_exempt": null,
@@ -12215,7 +12339,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:258"
+          "loc": "plugin/scripts/reqmap.py:267"
         },
         {
           "role": "tested-by",
@@ -12618,7 +12742,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5090"
+          "loc": "plugin/scripts/test_reqmap_report.py:5111"
         },
         {
           "role": "implements",
@@ -13478,27 +13602,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:22"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:23"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:56"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:57"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:78"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:79"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:107"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:108"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:163"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:164"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:178"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
         },
         {
           "role": "implements",
@@ -13572,7 +13696,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:22"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:23"
         },
         {
           "role": "implements",
@@ -13652,27 +13776,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:23"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:24"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:57"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:58"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:79"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:80"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:108"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:109"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:164"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:165"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:179"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:180"
         },
         {
           "role": "implements",
@@ -13737,7 +13861,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/gate.py:23"
+          "loc": "plugin/scripts/reqmap_engine/gate.py:24"
         }
       ],
       "test_exempt": null,
@@ -14361,7 +14485,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5011"
+          "loc": "plugin/scripts/test_reqmap_report.py:5032"
         },
         {
           "role": "implements",
@@ -14701,7 +14825,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_report.py:5011"
+          "loc": "plugin/scripts/test_reqmap_report.py:5032"
         },
         {
           "role": "implements",
@@ -15930,7 +16054,7 @@
       "members": [
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap.py:232"
+          "loc": "plugin/scripts/reqmap.py:241"
         },
         {
           "role": "tested-by",
@@ -19594,6 +19718,7 @@
         "ARCH-ACVERIFY-019",
         "ARCH-CHECK-006",
         "ARCH-DOCBUNDLE-026",
+        "ARCH-DOCCLAIMS-071",
         "ARCH-DRIFT-003",
         "ARCH-DRIFTIMPACT-035",
         "ARCH-GITRUN-067",
@@ -20085,6 +20210,14 @@
     [
       "ARCH-DOCBUNDLE-026",
       "ARCH-SCAN-002"
+    ],
+    [
+      "ARCH-DOCCLAIMS-071",
+      "ARCH-CHECK-006"
+    ],
+    [
+      "ARCH-DOCCLAIMS-071",
+      "ARCH-CONFIG-060"
     ],
     [
       "ARCH-DRIFTIMPACT-035",
@@ -20679,6 +20812,14 @@
     [
       "REQ-DOCBUNDLE-840",
       "ARCH-DOCBUNDLE-026"
+    ],
+    [
+      "ARCH-DOCCLAIMS-071",
+      "SYS-GATE-102"
+    ],
+    [
+      "REQ-DOCCLAIMS-1012",
+      "ARCH-DOCCLAIMS-071"
     ],
     [
       "ARCH-DRIFT-003",
@@ -21750,7 +21891,7 @@
     },
     {
       "month": "2026-09",
-      "count": 75,
+      "count": 76,
       "first": "2026-09-02",
       "last": "2026-09-15",
       "versions": [
@@ -21828,7 +21969,8 @@
         "v7.14.0",
         "v7.15.0",
         "v7.16.0",
-        "v7.17.0"
+        "v7.17.0",
+        "v7.18.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"
@@ -22013,8 +22155,8 @@
     }
   ],
   "design": {
-    "files": 91,
-    "clean_files": 66,
+    "files": 92,
+    "clean_files": 67,
     "score": 73,
     "candidates": {
       "encapsulation": 8,
@@ -22301,7 +22443,7 @@
         "pillar": "encapsulation",
         "kind": "global-state",
         "file": "plugin/scripts/reqmap_engine/config.py",
-        "line": 201,
+        "line": 207,
         "name": "apply_config",
         "detail": "`apply_config` writes module state: CODE_EXTS"
       },
@@ -22309,7 +22451,7 @@
         "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "plugin/scripts/reqmap_engine/gate.py",
-        "line": 176,
+        "line": 177,
         "name": "cmd_check",
         "detail": "`cmd_check` takes 7 parameters (over 6)"
       },
@@ -22343,11 +22485,11 @@
   },
   "health": {
     "score": 97,
-    "total": 263,
-    "healthy": 255,
-    "confirmed": 255,
-    "implemented": 246,
-    "tested": 243,
+    "total": 265,
+    "healthy": 257,
+    "confirmed": 257,
+    "implemented": 248,
+    "tested": 245,
     "drafts": 0,
     "orphans": 0,
     "untested": 0,

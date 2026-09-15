@@ -14,6 +14,7 @@ from .model import Finding, GATE_RULES
 from .registry import _check_integration_fresh
 from .rules import DRIFT_RULES
 from . import axis  # noqa: F401 — registers RM032 after every rule in `rules`
+from . import docclaims  # noqa: F401 — registers RM035, same reason as `axis`
 from .sections import _legacy_schema_ids
 from .workspace import GateContext, Workspace
 
