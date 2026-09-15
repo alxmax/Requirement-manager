@@ -429,7 +429,7 @@ class Promote(unittest.TestCase):  # tested-by: ARCH-PROMOTE-011  # tested-by: R
             self.assertIn(b"body line\n", after)
 
 
-class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INIT-860  # tested-by: REQ-INIT-861
+class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INIT-860  # tested-by: REQ-INIT-861  # tested-by: REQ-PLANHORIZON-1010 @unit
     def _init(self, code_root, wipe=False):
         reqs_dir = os.path.join(code_root, "requirements")
         buf = io.StringIO()
@@ -441,6 +441,40 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
         path = os.path.join(d, "requirements", rid + ".md")
         _write(path, "---\nid: {}\nstatus: confirmed\n---\n\n# Cap\n".format(rid))
         return path
+
+    def test_seeds_the_plan_files_once(self):  # verifies: REQ-PLANHORIZON-1010#CASE-4
+        # A plan file a repo does not have is a plan nobody writes — and a second `init`
+        # that overwrote an edited one would be worse than never seeding it.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
+            _code, _out, reqs_dir = self._init(d)
+            roadmap = os.path.join(d, "ROADMAP.md")
+            planning = os.path.join(reqs_dir, "_planning.json")
+            self.assertTrue(os.path.exists(roadmap))
+            self.assertTrue(os.path.exists(planning))
+            seeded = json.loads(io.open(planning, encoding="utf-8").read())
+            self.assertEqual(["Feature", "Fix", "Release"], seeded["lanes"])
+            # no frozen end: the horizon is recomputed, so the calendar cannot go stale
+            self.assertNotIn("until", seeded["cadence"])
+            _write(roadmap, "# mine\n")
+            _write(planning, '{"lanes": ["Only"]}')
+            self._init(d)
+            self.assertEqual("# mine\n", io.open(roadmap, encoding="utf-8").read())
+            self.assertEqual(["Only"],
+                             json.loads(io.open(planning, encoding="utf-8").read())["lanes"])
+
+    def test_the_seeded_plan_is_not_drafted_as_a_capability(self):  # verifies: REQ-PLANHORIZON-1010#CASE-5
+        # `init` seeds ROADMAP.md before the extraction pass, so without the ignore line
+        # the extractor reads it as untagged prose and mints a requirement whose subject
+        # is the plan file itself — then stamps a membership tag into the plan.
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "scripts", "app.py"), "def f(x):\n    return x\n")
+            _code, _out, reqs_dir = self._init(d)
+            body = io.open(os.path.join(d, "ROADMAP.md"), encoding="utf-8").read()
+            self.assertNotIn("implements:", body)
+            drafted = [f for f in os.listdir(reqs_dir) if f.endswith(".md")]
+            self.assertFalse([f for f in drafted if "ROADMAP" in f.upper()],
+                             "the plan file is not a capability")
 
     def test_scaffolds_dir_ignore_lock_and_map(self):  # verifies: REQ-INIT-860#CASE-1  # verifies: REQ-INIT-860#CASE-3
         with tempfile.TemporaryDirectory() as d:

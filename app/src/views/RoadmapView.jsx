@@ -9,7 +9,7 @@
    zoom shrinks everything including the type, density narrows the chip and
    keeps the type crisp. Both are remembered per reader. */
 import { useEffect, useState } from "react";
-import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY } from "../lib/data.js";
+import { REQUIREMENTS, TODOS, TARGETS, ROADMAP, HISTORY, BRANCH } from "../lib/data.js";
 import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
@@ -149,13 +149,17 @@ function Segmented({ label, options, value, onChange, optionKey, optionLabel }) 
 /* `initialZoom` / `initialDensity` let a host (or a render test) preset the two
  * controls, the same seam `I18nProvider` opens with `initialLocale`; otherwise
  * the chart remembers the reader's last choice, and falls back to 100%/comfy. */
-export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory }) {  // implements: REQ-VIEWER-984
+export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode, initialRoadmap, initialHistory, initialBranch }) {  // implements: REQ-VIEWER-984
   const { t, locale } = useI18n();
   const hasPlan = !!(TARGETS?.bars?.length)
     || Object.values(TARGETS?.milestones || {}).some((m) => m?.due)
     // Shipped history alone is a timeline worth drawing: a repo that has released
     // for months and planned nothing yet still has something to show on the Plan.
-    || !!(initialHistory || HISTORY).length;
+    || !!(initialHistory || HISTORY).length
+    // And a cadence alone is too. A repo that has planned NOTHING is the one that most
+    // needs a calendar to plan on, which is why `init` seeds one (REQ-PLANHORIZON-1010);
+    // requiring a bar first made the empty case the one with nothing to look at.
+    || !!(TARGETS?.releases?.length);
   // The roadmap items are still carried and still read — by the Plan's detail panel,
   // which looks up a selected bar's note by `req`. What is gone is the Horizons MODE:
   // a plan with dates and a plan with horizons were two pictures of one file, and the
@@ -301,7 +305,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
            className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
         {mode === "plan" ? (
           <PlanGantt planning={TARGETS} history={initialHistory || HISTORY}
-                     roadmap={roadmapItems}
+                     roadmap={roadmapItems} branch={initialBranch || BRANCH}
                      locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
         ) : (
         /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with

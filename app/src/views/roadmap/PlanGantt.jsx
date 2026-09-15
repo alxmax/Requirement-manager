@@ -2,15 +2,24 @@
 /* Calendar Gantt: months and ISO weeks on X, swimlanes on Y, today + milestone flags in
  * the header. Selecting a bar opens the note its author wrote under the matching
  * ROADMAP.md item (REQ-VIEWER-999). */
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, stackBars,
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
 
-const PX = 7;
+/* 11px a day, and a floor of 30. At 7px a week drew 43px and was floored to 72 — nearly
+ * three days of borrowed room, which is what pushed a bar into its neighbour's week. At
+ * 11 a week is 71px of its own, and the floor only catches bars under three days, which
+ * have no label room at any scale.  implements: REQ-PLANSTACK-1012 */
+const PX = 11;
+const BAR_MIN_W = 30;
 const LABEL_W = 108;
-const ROW_H = 26;
+/* 3 lines x 11px x 1.3 = 43px of text, plus the bar's 8px of vertical padding, plus the
+ * 6px the row keeps between bars. A row of 50 clipped the third line half-way down its
+ * glyphs — the wrap promised three lines and the box only had room for two and a half. */
+const LABEL_LINES = 3;
+const ROW_H = 58;
 const PAD = 10;
 const FLAG_H = 22;
 const MONTH_H = 26;
@@ -110,7 +119,7 @@ function BarNote({ bar, roadmap, t, openSpec, onClose }) {  // implements: REQ-V
   );
 }
 
-export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpec }) {
+export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom, openSpec }) {
   const [picked, setPicked] = useState(null);
   const todayD = parseIso(isoLocal(new Date()));
   const raw = buildPlanBars(planning);
@@ -124,7 +133,9 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
    * next to a `today` line they do not share.  implements: REQ-HISTORY-1003 */
   const past = (history || []).filter((h) => parseIso(h.first) && parseIso(h.last));
 
-  if (!raw.length && !dueList.length && !past.length) {
+  // A cadence with no bars is still a calendar, and a repo that has planned nothing is
+  // the one that needs one — `init` seeds it for exactly that (REQ-PLANHORIZON-1010).
+  if (!raw.length && !dueList.length && !past.length && !(planning?.releases || []).length) {
     return (
       <div style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         {t("Add milestones with due dates or bars in _planning.json.")}
@@ -136,6 +147,12 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
     ...raw.flatMap((b) => [parseIso(b.start), parseIso(b.end)]),
     ...dueList.map((d) => d.at),
     ...past.flatMap((h) => [parseIso(h.first), parseIso(h.last)]),
+    // Release dates extend the range like any other dated thing. Without this a
+    // cadence running past the last bar or due — `until: 2026-12-31` with nothing
+    // scheduled in December — emits dates the chart then drops on the `idx <
+    // totalDays` filter below: the engine says a release lands and the chart, having
+    // never grown to reach it, shows nothing and reports nothing.
+    ...(planning?.releases || []).map(parseIso),
     todayD,
   ].filter(Boolean);
   let origin = monthStart(new Date(Math.min(...dates.map((d) => d.getTime()))));
@@ -143,6 +160,13 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
 
   const totalDays = dayIndex(origin, end) + 1;
   const chartW = totalDays * PX;
+  /* The drawn box of a bar, in one place. The renderer used to compute this inline and
+     `stackBars` compared dates, so the two disagreed about what "overlapping" meant and
+     short neighbours were painted on top of each other (REQ-PLANSTACK-1012). */
+  const extent = (b) => ({
+    left: b.startIdx * PX + 3,
+    width: Math.max((b.endIdx - b.startIdx + 1) * PX - 6, BAR_MIN_W),
+  });
   const bars = indexBars(raw, origin);
 
   let lanes = Array.isArray(planning?.lanes) && planning.lanes.length
@@ -156,7 +180,7 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
     return { ...h, startIdx, endIdx: Math.max(dayIndex(origin, z), startIdx) };
   });
   const byLane = Object.fromEntries(lanes.map((ln) => [ln, bars.filter((b) => b.lane === ln)]));
-  const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || []), 1) * ROW_H + PAD * 2);
+  const heights = lanes.map((ln) => Math.max(stackBars(byLane[ln] || [], extent), 1) * ROW_H + PAD * 2);
   const bodyH = heights.reduce((a, h) => a + h, 0);
   const months = buildMonthBands(origin, totalDays, locale);
   const weeks = buildWeekBands(origin, totalDays);
@@ -173,11 +197,27 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
 
   return (
     <div style={{ zoom: zoom / 100, width: "max-content", minWidth: "100%" }}>
+      {/* No `overflow: hidden` here. It made this box the sticky column's scrollport,
+          and a scrollport that never scrolls never lets its sticky child stick — so the
+          lane names slid away while the note panel, which sits outside this box, stayed.
+          The radius moves to the children that touch the corners. */}
       <div style={{
         display: "flex", border: "1px solid var(--border)", borderRadius: 8,
-        overflow: "hidden", background: "var(--surface)",
+        background: "var(--surface)",
       }}>
-        <div style={{ width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)", background: "var(--bg-raised)" }}>
+        {/* Sticky: the chart scrolls sideways for months, and a lane the reader cannot
+            name is a row of bars with no subject. zIndex clears the bars, which are
+            absolutely positioned inside each lane. */}
+        <div style={{
+          width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)",
+          background: "var(--bg-raised)", position: "sticky", left: 0, zIndex: 5,
+          borderRadius: "8px 0 0 8px",
+          /* The scroller pads itself 20px, and `left: 0` sticks to the PADDING box — so
+             scrolled bars slid through that band and showed up beside the lane names.
+             The shadow paints the column's own background across it; the scroller clips
+             it at the same edge, so it plugs the gap exactly and spills nowhere. */
+          boxShadow: "-24px 0 0 var(--bg-raised)",
+        }}>
           <div style={{ height: HEAD_H, borderBottom: "1px solid var(--border)" }} />
           {pastRows.length > 0 && (
             <div style={{
@@ -186,7 +226,10 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
               letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--fg-faint)",
               borderBottom: "1px solid var(--border)",
             }}>
-              {t("Shipped")}
+              {/* The branch git is on, not the word "Shipped": a map opened from a
+                  feature branch looked identical to one opened from main, right up to
+                  the moment someone acted on the wrong plan (REQ-PLANBRANCH-1011). */}
+              {branch || t("Shipped")}
             </div>
           )}
           {lanes.map((ln, i) => (
@@ -201,7 +244,11 @@ export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpe
           ))}
         </div>
 
-        <div style={{ position: "relative", width: chartW }}>
+        {/* `flex: 1` lets the track take the room the lane column leaves, so a plan
+            shorter than the viewport fills it instead of stopping two thirds across;
+            `minWidth: chartW` keeps a longer one at its true scale and scrolls.
+            implements: REQ-PLANSTACK-1012 */}
+        <div style={{ position: "relative", minWidth: chartW, flex: 1 }}>
           <div style={{ position: "relative", height: HEAD_H, borderBottom: "1px solid var(--border)",
             background: "var(--bg-raised)" }}>
             <div style={{ height: FLAG_H, position: "relative" }}>
@@ -311,7 +358,7 @@ ${h.headline}`}
           {lanes.map((ln, i) => {
             const tone = LANE_TONE[i % LANE_TONE.length];
             const laneBars = byLane[ln] || [];
-            stackBars(laneBars);
+            stackBars(laneBars, extent);
             return (
               <div key={ln} style={{
                 position: "relative", height: heights[i],
@@ -331,8 +378,7 @@ ${h.headline}`}
                   }} />
                 ))}
                 {laneBars.map((bar) => {
-                  const left = bar.startIdx * PX + 3;
-                  const width = Math.max((bar.endIdx - bar.startIdx + 1) * PX - 6, 72);
+                  const { left, width } = extent(bar);
                   const top = PAD + bar.subRow * ROW_H;
                   return (
                     <div
@@ -341,13 +387,13 @@ ${h.headline}`}
                       onClick={() => setPicked(
                         picked && picked.key === bar.key ? null : bar)}
                       style={{
-                        position: "absolute", left, top, width, height: ROW_H - 4,
+                        position: "absolute", left, top, width, height: ROW_H - 6,
                         background: tone.bg, color: tone.fg, borderRadius: 4,
                         boxSizing: "border-box",
                         border: `1px solid color-mix(in oklch, ${tone.edge} 40%, transparent)`,
                         borderLeft: `3px solid ${tone.edge}`,
-                        fontSize: 11, fontWeight: 600, padding: "0 8px",
-                        display: "flex", alignItems: "center", overflow: "hidden",
+                        fontSize: 11, fontWeight: 600, padding: "4px 8px",
+                        display: "flex", alignItems: "flex-start", overflow: "hidden",
                         cursor: "pointer",
                         outline: picked && picked.key === bar.key
                           ? "2px solid var(--accent-2)" : "none",
@@ -361,9 +407,12 @@ ${h.headline}`}
                           pointerEvents: "none",
                         }} />
                       )}
+                      {/* Three lines, then an ellipsis. A title cut mid-word on one
+                          line told the reader nothing about how much it was missing. */}
                       <span style={{
-                        position: "relative", overflow: "hidden", textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        position: "relative", overflow: "hidden",
+                        display: "-webkit-box", WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: LABEL_LINES, lineHeight: 1.3, whiteSpace: "normal",
                       }}>
                         {bar.title}
                       </span>
@@ -374,26 +423,39 @@ ${h.headline}`}
             );
           })}
 
-          {todayIdx >= 0 && todayIdx < totalDays && (
-            <div style={{
-              position: "absolute", top: HEAD_H, height: bodyH,
-              left: todayIdx * PX + PX / 2, width: 2,
-              background: "var(--accent-2)", opacity: 0.8, pointerEvents: "none", zIndex: 2,
-            }} />
-          )}
-          {flags.map((f) => (
-            <div key={`line-${f.ms}`} title={`${f.ms} · ${f.at.toLocaleDateString(loc)}`} style={{
-              position: "absolute", top: HEAD_H, height: bodyH,
-              left: f.idx * PX + PX / 2, width: 0,
-              borderLeft: "2px dashed var(--indigo-400)", opacity: 0.55,
-              pointerEvents: "none", zIndex: 1,
-            }} />
-          ))}
+          {/* Guides mark the WORK, not the dates. `today` and the milestones keep their
+              header pills — the reader still finds them on the ruler — but a rule drawn
+              the full height of the chart was ruling a line through the bars it was
+              meant to help read. A start is solid and an end dotted, because a start is
+              a commitment and an end an estimate.  implements: REQ-PLANSTACK-1012 */}
+          {bars.map((b) => {
+            const { left, width } = extent(b);
+            return (
+              <Fragment key={`guide-${b.key}`}>
+                <div style={{
+                  position: "absolute", top: HEAD_H, height: bodyH, left, width: 0,
+                  borderLeft: "2px solid var(--fg-muted)", opacity: 0.5,
+                  pointerEvents: "none", zIndex: 1,
+                }} />
+                <div style={{
+                  position: "absolute", top: HEAD_H, height: bodyH,
+                  left: left + width, width: 0,
+                  borderLeft: "2px dotted var(--fg-muted)", opacity: 0.38,
+                  pointerEvents: "none", zIndex: 1,
+                }} />
+              </Fragment>
+            );
+          })}
         </div>
       </div>
+      {/* Sticky too, and for the same reason: the note belongs to the reader, not to
+          the month the bar happens to sit in. Left unpinned it slid out of view with
+          the chart, clipping its own first words. */}
       {picked && (
-        <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
-                 onClose={() => setPicked(null)} />
+        <div style={{ position: "sticky", left: 0, width: "min(760px, 100%)" }}>
+          <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
+                   onClose={() => setPicked(null)} />
+        </div>
       )}
     </div>
   );

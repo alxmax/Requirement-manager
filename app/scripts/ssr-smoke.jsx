@@ -19,6 +19,7 @@ import { MapView } from "../src/views/MapView.jsx";
 import { ProblemsView, computeProblems, computeQuestions } from "../src/views/ProblemsView.jsx";
 import { RoadmapView } from "../src/views/RoadmapView.jsx";
 import { PlanGantt, noteText, matchItem } from "../src/views/roadmap/PlanGantt.jsx";
+import { stackBars } from "../src/lib/timeline.js";
 import { SpecDoc } from "../src/views/SpecDoc.jsx";
 import { REQ_BY_ID } from "../src/lib/data.js";
 import { ExplorerView } from "../src/views/ExplorerView.jsx";
@@ -636,6 +637,108 @@ for (const [label, ok] of barNoteChecks) test(label, ok);
 // The chart PLACES engine-computed dates and derives none. Asserted by handing it
 // a date the weekday arithmetic would never produce: if a rule appears for it, the
 // viewer is reading the list; if the viewer recomputed, it would not be there.
+test("cadence: a release past the last bar still gets a column",  // verifies: REQ-PLANCADENCE-1000#CASE-1
+  (() => {
+    // `until` running past everything scheduled is the whole point of a cadence: the
+    // months after the last bar are exactly where the next releases land. Before the
+    // range counted release dates, those were emitted and then dropped by the
+    // in-range filter — the engine said a release lands and the chart showed nothing.
+    const far = renderToString(<PlanGantt planning={{
+      lanes: ["Feature"],
+      bars: [{ title: "b", lane: "Feature", start: "2026-09-21", end: "2026-09-27" }],
+      cadence: { every: "month", on: "last", lane: "Release", until: "2026-12-31" },
+      releases: ["2026-09-30", "2026-12-31"],
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    return far.includes("2026-12-31") || far.toLowerCase().includes("dec");
+  })());
+
+test("cadence: a plan with only a cadence still draws its calendar",  // verifies: REQ-PLANHORIZON-1010#CASE-3
+  (() => {
+    // The seeded shape: no bars, no milestone dues, no history. It used to render the
+    // "add milestones or bars" dead end — the empty case being the one with nothing to
+    // look at, which is backwards for a repo that has planned nothing yet.
+    const bare = renderToString(<PlanGantt planning={{
+      lanes: ["Feature", "Bug", "Release"],
+      cadence: { every: "month", on: "last", lane: "Release" },
+      milestones: {}, bars: [],
+      releases: ["2026-09-30", "2026-10-31", "2026-11-30", "2026-12-31"],
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    return !bare.includes("Add milestones with due dates")
+      && bare.includes("Feature") && bare.includes("Release");
+  })());
+
+test("roadmap: the shipped band is named by the branch",  // verifies: REQ-PLANBRANCH-1011#CASE-4
+  (() => {
+    const hist = [{ month: "2026-06", count: 2, first: "2026-06-01", last: "2026-06-30",
+                    versions: ["v1.0.0"], landmark: "v1.0.0", headline: "first" }];
+    const named = renderToString(<PlanGantt planning={{ lanes: ["Feature"], bars: [] }}
+      history={hist} branch="feat/plan-bar-note" locale="en" t={(x) => x} zoom={100} />);
+    const bare = renderToString(<PlanGantt planning={{ lanes: ["Feature"], bars: [] }}
+      history={hist} locale="en" t={(x) => x} zoom={100} />);
+    // a branch shows its own name; no branch keeps the former label rather than a blank
+    return named.includes("feat/plan-bar-note") && !named.includes(">Shipped<")
+      && bare.includes("Shipped");
+  })());
+
+// ---- overlapping short bars ------------------------------------------------
+// tested-by: REQ-PLANSTACK-1012 @unit
+// Two ONE-DAY bars on consecutive days. Widening the day to 11px took week-long bars out
+// of the floor entirely (a week is 71px of its own, starts are 77px apart), so the case
+// that remains is the short one: a single day draws 5px and is floored to 30, while the
+// next day starts 11px along. Dates say no overlap; pixels say 19px of it.
+const stackPlan = {
+  lanes: ["Feature"],
+  bars: [
+    { title: "primul lucru cu titlu lung", lane: "Feature", start: "2026-09-21", end: "2026-09-21" },
+    { title: "al doilea lucru",            lane: "Feature", start: "2026-09-22", end: "2026-09-22" },
+  ],
+};
+test("gantt: two one-day bars on consecutive days take separate rows",  // verifies: REQ-PLANSTACK-1012#CASE-1
+  (() => {
+    const a = { startIdx: 0, endIdx: 0 }, b = { startIdx: 1, endIdx: 1 };
+    const extent = (x) => ({ left: x.startIdx * 11 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 11 - 6, 30) });
+    // dates say "no overlap"; pixels say otherwise, and pixels are what is painted
+    const rows = stackBars([a, b], extent);
+    const rowsByDate = stackBars([{ ...a }, { ...b }]);
+    return rows === 2 && rowsByDate === 1;
+  })());
+
+test("gantt: bars that really are apart still share one row",  // verifies: REQ-PLANSTACK-1012#CASE-2
+  (() => {
+    // a full week each, a week apart: 71px of bar, 77px between starts, no clash at all —
+    // which is what widening the day bought, and the stacker must not invent a row for it
+    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 7, endIdx: 13 };
+    const extent = (x) => ({ left: x.startIdx * 11 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 11 - 6, 30) });
+    return stackBars([a, b], extent) === 1;
+  })());
+
+test("gantt: the chart itself stacks them, not just the helper",  // verifies: REQ-PLANSTACK-1012#CASE-1
+  (() => {
+    // The two checks above exercise stackBars directly, so they stay green even if
+    // PlanGantt forgets to hand it `extent` — which is the whole fix. This asserts the
+    // WIRING: render the clashing pair and read the two bars' `top` out of the markup.
+    const html = renderToString(<PlanGantt planning={stackPlan} history={[]}
+      locale="en" t={(x) => x} zoom={100} />);
+    // React SSR writes inline styles as `top:10px`, no space, so the probe is a plain
+    // substring: with both bars on row 0 the markup carries `top:10px` twice and
+    // `top:36px` (PAD + ROW_H) not at all.
+    const secondRow = (html.match(/top:68px/g) || []).length;   // PAD 10 + ROW_H 58
+    if (!secondRow) { console.log("   (bars share a row — stacking not wired)"); }
+    return secondRow >= 1;
+  })());
+
+test("gantt: the guides mark the work, not today or the milestones",  // verifies: REQ-PLANSTACK-1012#CASE-3
+  (() => {
+    const html = renderToString(<PlanGantt planning={{
+      ...stackPlan,
+      milestones: { "v9.9": { due: "2026-09-30" } },
+    }} history={[]} locale="en" t={(x) => x} zoom={100} />);
+    // the milestone keeps its header pill; what goes is the full-height dashed rule
+    return html.includes("v9.9") && !html.includes("dashed var(--indigo-400)");
+  })());
+
 const cadencePlan = {
   lanes: ["Engine"],
   bars: [{ title: "a bar", lane: "Engine", start: "2026-09-13", end: "2026-09-30" }],

@@ -255,6 +255,10 @@ export let ROADMAP = [];
  * CHANGELOG.md. Facts, not plan — the Gantt draws it left of the today line.
  * implements: REQ-HISTORY-1003 */
 export let HISTORY = [];
+/* The branch git was on when the map was written, when it could say. Absent is not a
+ * wrong answer — a detached HEAD or no work tree both read as unknown, and the band
+ * keeps its former label.  implements: REQ-PLANBRANCH-1011 */
+export let BRANCH = null;
 
 function derive() {
   REQ_EDGES = REQUIREMENTS.flatMap(r => (r.deps || []).map(d => [r.id, d]));
@@ -271,6 +275,7 @@ export function adoptMapExport(data) {               // implements: REQ-VIEWER-9
   if ("todos" in data) TODOS = Array.isArray(data.todos) ? data.todos : [];
   if ("roadmap" in data) ROADMAP = Array.isArray(data.roadmap) ? data.roadmap : [];
   if ("history" in data) HISTORY = Array.isArray(data.history) ? data.history : [];
+  if ("branch" in data) BRANCH = typeof data.branch === "string" && data.branch ? data.branch : null;
   if ("commands" in data) COMMANDS = Array.isArray(data.commands) ? data.commands : [];
   const health = data.health, design = data.design;
   HEALTH = (health && typeof health.score === "number") ? health : null;

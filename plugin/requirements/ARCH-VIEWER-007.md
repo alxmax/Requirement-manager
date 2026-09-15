@@ -904,3 +904,61 @@ CASE-5 — the roadmap payload survives the mode's removal
   Given  a repo with a `ROADMAP.md` holding one item
   When   `sync` writes the export
   Then   `_map.json` still carries that item under `roadmap`, with its context
+
+---
+id: REQ-PLANSTACK-1012
+status: confirmed
+level: code
+layer: feature
+owner: Alex
+satisfies: [ARCH-VIEWER-007]
+---
+
+# Bars are stacked by what is drawn, not by what is scheduled
+
+## Description
+> Two bars a week apart do not overlap as dates, so they were put on one row — and then
+> painted 23px on top of each other, the first one's title vanishing under the second.
+> The chart floors a bar at a readable width, and at 7px a day a week drew 43px and was
+> floored to 72: nearly three days of borrowed room. A wider day gives a week 71px of its
+> own and takes it out of the floor entirely, which leaves the floor to the bars that have
+> no label room at any scale. The row chooser still has to know what the renderer will
+> draw, because the renderer cannot know what the chooser meant — it draws what it is given.
+
+Every bullet below is binding.
+- One function answers where a bar is drawn and how wide, and both the renderer and the
+  row chooser read it — neither computes its own.
+- `stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even
+  where their dates do not.
+- Two bars far enough apart that the floor cannot make them touch still share a row, so
+  the lane grows only where it must.
+- The full-height vertical guides mark the work: a solid rule at each bar's start and a
+  dotted one at its end. `today` and the milestones keep their header pills and rule no
+  line through the lanes.
+- The track fills the width the lane column leaves, and keeps its true scale when the
+  plan is longer than the viewport.
+- A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.
+- The lane column stays in place while the chart scrolls sideways, which means no
+  ancestor of it may declare an overflow: an ancestor that does becomes its scrollport,
+  and a scrollport that never scrolls never lets its sticky child stick.
+
+## Cases
+CASE-1 — two one-day bars on consecutive days take separate rows
+  Given  two one-day bars a day apart, each floored to the minimum bar width
+  When   the Plan renders
+  Then   they carry different sub-rows, and stacking them by date alone would not
+
+CASE-2 — a week-long pair a week apart shares one row
+  Given  two seven-day bars starting seven days apart
+  When   the Plan renders
+  Then   one row holds both, because neither is floored and they never touch
+
+CASE-4 — the lane column survives a sideways scroll
+  Given  a plan wide enough to scroll
+  When   the reader scrolls the chart sideways
+  Then   the lane names stay in place, as the note panel does
+
+CASE-3 — the guides mark the work, not the dates
+  Given  a plan carrying a bar and a milestone due date
+  When   the Plan renders
+  Then   the milestone keeps its header pill and no dashed full-height rule is drawn

@@ -1,5 +1,120 @@
 # Changelog
 
+## plugin `v7.19.0` — 2026-09-16
+
+**And the gap beside the sticky lane names is plugged.** The scroller pads itself 20px
+and `left: 0` sticks to the PADDING box, not the border box — so scrolled bars slid
+through that band and appeared next to the lane names, which is the one place a reader
+reads them. The column now paints its own background across the band with a box-shadow
+the scroller clips at the same edge: it plugs the gap exactly and spills nowhere.
+
+**Three follow-ups from reading the rendered chart.** The wrap promised three lines and
+the box had room for two and a half: 3 x 11px x 1.3 is 43px of text, plus the bar's 8px
+of padding, against a row of 50 that left it 44 — so the third line was clipped through
+its glyphs. The row is 58 now, and the line count is a named constant rather than a 3
+written in two places. The work guides take the weight the date rules used to carry (1px
+to 2px), since they are the only full-height lines left. And the second lane is `Fix`,
+not `Bug`, in this repo's plan and in the one `init` seeds.
+
+**The lane names were sliding away while the note panel stayed, and the reason was one
+word.** The bordered box around the chart declared `overflow: hidden` for its rounded
+corners, which made it the sticky column's scrollport — and a scrollport that never
+scrolls never lets its sticky child stick. The note panel sits outside that box, so it
+worked, which is exactly the difference a reader would notice. The radius moves to the
+children that touch the corners and the overflow goes.
+
+**A day is 11px now, not 7.** At 7 a week drew 43px and the readable-width floor inflated
+it to 72 — nearly three days of borrowed room, which is what pushed a bar into its
+neighbour's week. At 11 a week is 71px of its own and never meets the floor, which drops
+to 30 and now only catches bars under three days, where no scale would give room for a
+label. Titles wrap to three lines and the bar is tall enough to hold them, rather than
+being cut mid-word on one.
+
+That changes what the stacking net is FOR, and the tests say so: the week-apart pair no
+longer clashes at all and must stay on one row, while the case that remains is two
+one-day bars on consecutive days — 30px of bar, 11px between starts.
+
+**Two bars a week apart were drawn on top of each other.** They do not overlap as dates,
+so the row chooser put them on one row — and the renderer then drew each at the 72px
+floor from starts 49px apart, so the second covered 23px of the first, its title with it.
+The chart floors a bar at a readable width (a week asks for 43px), so `stackBars` was
+comparing what was scheduled while the renderer drew what was floored. One function now
+answers where a bar sits and how wide, and both read it: two bars whose DRAWN boxes
+intersect take different sub-rows, and two far enough apart still share one, so a lane
+grows only where it must.
+
+The full-height vertical guides move with it. They ruled lines through the bars they were
+meant to help read; now a solid rule marks each bar's start and a dotted one its end — a
+start is a commitment and an end an estimate. `today` and the milestones keep their header
+pills, so the dates are still findable on the ruler without a rule through the work.
+
+And the track fills the width the lane column leaves instead of stopping short of it,
+while keeping its true scale when the plan runs longer than the viewport.
+
+
+
+**The plan was scheduling versions that had already shipped, for the second time.** It
+placed `v7.9` on 30 September while the plugin stood at 7.18.0 and `v7.11.0` was already
+a tag — the exact failure this file's own comment records from the last time, when it
+planned v7.4 for a December that came after v7.4.0 went out. Milestones are renumbered
+ahead of the release line (v7.19 / v7.20 / v8.0).
+
+Ordering was checked and is not at fault: `_version_key` in the engine and `semverCmp`
+in the viewer both compare numerically per segment, so v7.9 sorts before v7.10 by design
+rather than by luck. Zero-padding the labels to `v7.09` was declined for the same
+reason — it would diverge from the real tags (`v7.8.0`, `v7.11.0`) and from semver,
+which does not pad.
+
+
+
+**The lane column and the note panel stay put now.** Both scrolled away with the chart:
+scroll two months right and the lanes had no labels and the note clipped its own first
+words. Both are `position: sticky, left: 0`, because a lane the reader cannot name is a
+row of bars with no subject, and the note belongs to the reader rather than to the month
+the bar happens to sit in.
+
+**The shipped band is named by the branch git is on.** "Shipped" said nothing a reader
+did not already know from the band's position; what they could not see is which branch
+they were looking at, and a map opened from a feature branch looked identical to one
+opened from `main` right up to the moment someone acted on the wrong plan. `_map.json`
+carries `branch` when git can answer, and it is excluded from the freshness diff exactly
+as `repo` is — both are git-derived, so comparing them would fail `map --check` on every
+branch and every fork. A detached HEAD answers the literal `HEAD`, which is not a branch:
+absent beats a name that names nothing, and the band keeps its old label.
+
+
+
+**A plan file a repo does not have is a plan nobody writes.** `init` scaffolded neither
+`ROADMAP.md` nor `_planning.json`, so a fresh repo's Plan tab said "add milestones with
+due dates or bars in _planning.json" — the empty case being the one with nothing to look
+at, which is backwards: the repo that has planned nothing is exactly the one that needs a
+calendar to plan ON. `init` now writes both, once, and never overwrites an edited one.
+
+The seeded `_planning.json` deliberately carries **no `until`**. A horizon written into a
+file goes stale by definition — this very file planned a version that had already
+shipped, once. `default_horizon` computes it instead: the end of the current year, or
+three months out, whichever is later. Mid-year that is the year end; from October it
+rolls forward, so asked in December 2026 it answers March 2027 rather than showing one
+month at the point a reader most needs the next quarter. Lanes start as Feature / Fix /
+Release, which are a vocabulary, not a schema.
+
+**Two deliberate "no"s are reversed, and named as such.** `_plan_span` returned
+`(None, None)` for a plan covering no dates, reasoning that "a cadence needs something to
+run alongside, and inventing a span from today would put markers on an empty chart"; it
+now runs from today to the horizon. The chart's empty-plan message no longer fires when a
+cadence alone is present. `REQ-PLANCADENCE-1000` CASE-5 asserted the old behaviour and is
+replaced by `REQ-PLANHORIZON-1010` CASE-2.
+
+**And a bug the seeding exposed twice.** `ROADMAP.md` is now in `init`'s `.reqmapignore`
+seed: seeded before the extraction pass, the extractor read it as untagged prose and
+drafted a requirement whose subject was the plan file, then stamped a membership tag into
+it. `_read_roadmap` opens the file by name, so the scanner never needed it. Separately,
+release dates did not extend the chart's range — a cadence running past the last bar
+emitted dates the in-range filter then dropped, so the engine said a release lands and
+the chart, never having grown to reach it, showed nothing and reported nothing.
+
+This repo's own `_planning.json` is rebuilt to match: lanes Feature / Fix / Release, one
+bar (the MCP server at W39), v7.9 / v8.0 / v8.1 kept, calendar through 31 December.
 ## plugin `v7.18.0` — 2026-09-15
 
 **Four numbers in this repo's own front page were wrong, and every check passed.**
