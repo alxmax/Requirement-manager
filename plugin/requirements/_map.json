@@ -21741,7 +21741,7 @@
     },
     {
       "month": "2026-09",
-      "count": 73,
+      "count": 74,
       "first": "2026-09-02",
       "last": "2026-09-15",
       "versions": [
@@ -21817,7 +21817,8 @@
         "v7.9.0",
         "v7.13.0",
         "v7.14.0",
-        "v7.15.0"
+        "v7.15.0",
+        "v7.16.0"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI"

@@ -1,5 +1,31 @@
 # Changelog
 
+## plugin `v7.16.0` — 2026-09-15
+
+**`clarify` counts; it does not read — and until now nothing told the assistant to do
+the reading.** The engine says so in its own output: *"there are 6 clauses and 5 cases.
+This check counts, it does not read, so it cannot say WHICH — that is the part only you
+can do."* That sentence described a job no instruction assigned, so an open question
+reached the user as the engine's own wording — a count, with no way to act on it.
+
+Both `SKILL.md` and `SKILL.universal.md` grow an **Advisory clarify answers** step,
+sibling to the Advisory doc-sync step and built the same way: the engine's deterministic
+half is the count, the assistant's semantic half is reading the requirement. Whenever an
+open question reaches the user — from `clarify <ID>` or from `gate --risk`'s buckets —
+the assistant now owes two things instead of a relay: ONE synthesized question naming
+the specific undecided thing in the requirement's own vocabulary (several findings that
+are the same ambiguity collapse into one; one that turns out to be already answered is
+reported as answered), and **2-4 concrete answer options** the user can pick — "add
+CASE-6 asserting X", "fold clause 4 into CASE-2", "move clause 4 to [[OTHER-ID]]" —
+recommendation first, each with what it costs. Never a restatement of the question,
+never "clarify this", and never a `lint_exempt`, which is the reflex this step exists to
+replace. The picked option is written into the requirement and the command re-run, so
+the question disappears because it was answered rather than silenced.
+
+No engine change: `clarify --json` already emits every field this needs. The Claude Code
+variant presents the options with `AskUserQuestion`; the universal variant as a numbered
+list, since that tool is not available to every assistant.
+
 ## plugin `v7.15.0` — 2026-09-15
 
 **Two freshness verdicts could come back green after measuring nothing.**
