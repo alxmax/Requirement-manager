@@ -310,7 +310,7 @@ def _print_health_report(data, design, untagged, lag, headline_only):
         # score rides along because it is the other half of "how is this repo doing" and
         # folding `health` into `next` had quietly dropped it from every text surface.
         if design is not None:
-            print("Design OOP:         {}/100  ({}/{} source files with no candidate)".format(
+            print("Design pass-rate:   {}%  ({}/{} source files with no candidate)".format(
                 design["score"], design["clean_files"], design["files"]))
         return
     # Say what the headline cannot: a draft caps `score` by construction, so a low
@@ -331,7 +331,7 @@ def _print_health_report(data, design, untagged, lag, headline_only):
     if untagged:    print("  untagged code (no requirement):   {}".format(len(untagged)))
     if lag:         print("  commits since requirements touched:{}".format(lag))
     if design is not None:
-        print("  design (source files w/o candidate): {}/100  ({}/{}) — "
+        print("  design pass-rate (files w/o candidate): {}%  ({}/{}) — "
              "run `reqmap.py gate --design`".format(
                  design["score"], design["clean_files"], design["files"]))
     if total == 0:

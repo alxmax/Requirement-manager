@@ -133,7 +133,7 @@ def cmd_lint(ws, strict=False, decompose=False, only=None):
             print("  {} {:18} {}".format(mark, f["check"], f["detail"]))
         if decompose and reqs_dir:
             _apply_decompose(fs, reqs_dir, rid, r, reqs, created)
-    print("\n{} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
+    print("\nreadability: {} non-draft requirement(s) linted · {} error(s) · {} warning(s)".format(
         len(targets), errors, warns))
     if created:
         print("{} draft(s) scaffolded: {}".format(len(created), ", ".join(created)))

@@ -82,7 +82,7 @@ from reqmap_engine import (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review, targets, plandrift, history,
-    pyramid, cliflags, site_template,
+    pyramid, cliflags, site_template, docclaims,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -187,6 +187,15 @@ def _dispatch_gate(a, ws, code_root, reqs_dir):
         rc = cmd_lint(ws, strict=True) or rc
     if not a.no_map_check:
         rc = cmd_map(ws, code_root, True) or rc
+    # Last, because a reader takes the last line as the verdict. `cmd_check` prints its
+    # own counts where it runs, which is FIRST — a hundred lines above the end on this
+    # corpus — so the line a run finished on was the readability sub-report's count. An
+    # auditor read that as the gate under-reporting itself by 32. The sub-reports now say
+    # which check they belong to, and this line is the verdict: nothing may print below it.
+    print("\ngate: {} — link sync + drift + test links{}{}.".format(
+        "PASS" if rc == 0 else "FAIL",
+        "" if a.no_lint else ", readability",
+        "" if a.no_map_check else ", map freshness"))
     return rc
 def _dispatch_sync(a, ws, code_root, reqs_dir):
     """`sync` and its write modes. Returns the exit code."""
@@ -371,7 +380,7 @@ _ENGINE_MODULES = (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
-    cliflags, site_template,
+    cliflags, site_template, docclaims,
 )
 
 

@@ -26,8 +26,8 @@
       "reason": "v6.2.0: clarify --decompose splits along contract groups (REQ-DECOMPOSE-994); ARCH-DECOMPOSE-050 gains the second seam"
     },
     "ARCH-DESIGN-061": {
-      "hash": "d58683e18e9c",
-      "reason": "ADR-0036: REQ-SIMILAR-921 gains the sibling-skip clause and CASE-8; ARCH-CLARIFY-062 and ARCH-DESIGN-061 each name the child they did not name (Senate 2026-09-07)"
+      "hash": "98d3066d75c0",
+      "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
     },
     "ARCH-DRIFT-003": {
       "hash": "d29eb01c1e04",
@@ -104,6 +104,10 @@
     "REQ-DECOMPOSE-839": {
       "hash": "754c8d23f4ff",
       "reason": "the two split findings named a remedy that no-ops on them; message and behaviour now agree"
+    },
+    "REQ-DESIGN-954": {
+      "hash": "79d473bf523a",
+      "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
     },
     "REQ-DESIGN-978": {
       "hash": "3bb3687f63b8",
