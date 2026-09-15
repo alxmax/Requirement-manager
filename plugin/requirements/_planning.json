@@ -12,8 +12,16 @@
     "`Later` items carry no dates on purpose. They are parked behind an `unpark:` condition",
     "and dating them would turn a condition into a deadline."
   ],
-  "lanes": ["Engine", "Viewer", "Ops"],
-  "cadence": { "every": "month", "on": "last", "lane": "Release" },
+  "lanes": [
+    "Engine",
+    "Viewer",
+    "Ops"
+  ],
+  "cadence": {
+    "every": "month",
+    "on": "last",
+    "lane": "Release"
+  },
   "bars": [
     {
       "title": "n=2: Consilium-py pe check@v7, verde 7 zile",
@@ -31,6 +39,14 @@
       "end": "2026-09-30",
       "milestone": "v7.9",
       "req": "ARCH-CMDREGISTRY-033"
+    },
+    {
+      "title": "Server MCP: expune reqmap ca tool",
+      "lane": "Engine",
+      "start": "2026-09-21",
+      "end": "2026-09-27",
+      "milestone": "v7.9",
+      "progress": 0
     },
     {
       "title": "README de 90 de linii",

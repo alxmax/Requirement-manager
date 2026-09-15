@@ -1,5 +1,35 @@
 # Changelog
 
+## plugin `v7.17.0` — 2026-09-15
+
+**A Gantt bar was a title and two dates.** It said when something was scheduled and
+nothing about what it is, so the reader who did not already know went to look elsewhere
+— and the place they would look, `ROADMAP.md`, already held the answer: the lines an
+author writes under an item are where the reasoning lives, and the parser has been
+collecting them as `context` all along. Selecting a bar now opens a panel below the
+chart with that note, the bar's milestone, its horizon, and its requirement.
+
+The join is `req:`, the one id both a bar and a roadmap item carry. A bar no item claims
+opens the panel with its own title and dates and no note, rather than nothing happening.
+Context written as an HTML comment renders as its text: the `<!-- -->` markers are how a
+plan file hides a note from a Markdown reader, not part of what the note says.
+
+**The Horizons mode is gone with it.** A plan with dates and a plan with horizons were
+two pictures of one file, and the dated one is the one people read. `Horizons.jsx` is
+deleted and the Roadmap tab offers Versions and Plan; a reader whose stored choice was
+Horizons lands on Plan instead of on a mode with no matching option.
+
+What did NOT go is the data. `_map.json` still carries `roadmap`, every item with its
+horizon, `req:`, `unpark:`, done flag and context — the panel reads it, and `gate
+--audit` still reports a `req:` that names nothing and a `Later` with no `unpark:`,
+both straight from the file. Dropping the payload to remove one of its renderings is
+the mistake `REQ-DESIGN-991` already refused once: the data stays in the artifacts.
+
+`REQ-VIEWER-999` is rewritten rather than retired — one of its two binding clauses was
+about the payload and still holds. Its five cases are replaced, and the five SSR smoke
+checks that asserted the three columns are replaced by seven for the panel, the join
+and the comment stripping.
+
 ## plugin `v7.16.0` — 2026-09-15
 
 **`clarify` counts; it does not read — and until now nothing told the assistant to do

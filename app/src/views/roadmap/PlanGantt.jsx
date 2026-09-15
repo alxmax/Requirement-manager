@@ -1,6 +1,8 @@
 // implements: ARCH-VIEWER-007
 /* Calendar Gantt: months and ISO weeks on X, swimlanes on Y, today + milestone flags in
- * the header. */
+ * the header. Selecting a bar opens the note its author wrote under the matching
+ * ROADMAP.md item (REQ-VIEWER-999). */
+import { useState } from "react";
 import {
   parseIso, isoLocal, dayIndex, addDays, buildMonthBands, buildWeekBands, stackBars,
 } from "../../lib/timeline.js";
@@ -41,7 +43,75 @@ function indexBars(raw, origin) {
   }).filter(Boolean);
 }
 
-export function PlanGantt({ planning, history, locale, t, zoom, openSpec }) {
+
+/** ROADMAP.md keeps a note under an item as an HTML comment, which is how a plan file
+ *  hides it from a Markdown reader — the markers are packaging, not content. Strip them
+ *  and the blank lines they leave, so the panel shows the sentence and not the syntax. */
+export function noteText(context) {  // implements: REQ-VIEWER-999
+  if (typeof context !== "string") return "";
+  return context
+    .replace(/<!--/g, "")
+    .replace(/-->/g, "")
+    .split(/\r?\n/)
+    .map((ln) => ln.trim())
+    .join("\n")
+    .trim();
+}
+
+/** The roadmap item a bar belongs to. `req` is the only id both sides carry, so it is the
+ *  join; a bar with none, or one no item claims, simply has no note. */
+export function matchItem(bar, roadmap) {  // implements: REQ-VIEWER-999
+  const req = bar?.reqId || bar?.req;
+  if (!req || !Array.isArray(roadmap)) return null;
+  return roadmap.find((it) => it && it.req === req) || null;
+}
+
+function BarNote({ bar, roadmap, t, openSpec, onClose }) {  // implements: REQ-VIEWER-999
+  const item = matchItem(bar, roadmap);
+  const note = noteText(item?.context);
+  const req = bar?.reqId || bar?.req;
+  return (
+    <div style={{
+      marginTop: 12, padding: "14px 16px", borderRadius: 6,
+      background: "var(--surface)", border: "1px solid var(--border-soft)",
+      borderLeft: "3px solid var(--accent-2)", maxWidth: 760,
+    }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" }}>
+        <strong style={{ fontSize: 14 }}>{bar.title}</strong>
+        <span style={{ fontSize: 11, color: "var(--fg-faint)" }}>
+          {bar.start} → {bar.end}
+          {bar.milestone ? ` · ${bar.milestone}` : ""}
+          {item?.horizon ? ` · ${item.horizon}` : ""}
+        </span>
+        <button type="button" onClick={onClose} style={{
+          marginLeft: "auto", background: "none", border: "none", cursor: "pointer",
+          color: "var(--fg-faint)", fontSize: 16, lineHeight: 1, padding: 0,
+        }} aria-label={t ? t("Close") : "Close"}>×</button>
+      </div>
+      {req && (
+        <div style={{ fontSize: 11, marginTop: 6 }}>
+          {openSpec
+            ? <button type="button" onClick={() => openSpec(req)} style={{
+                background: "none", border: "none", padding: 0, cursor: "pointer",
+                color: "var(--accent-2)", font: "inherit", textDecoration: "underline",
+              }}>{req}</button>
+            : <span style={{ color: "var(--fg-faint)" }}>{req}</span>}
+        </div>
+      )}
+      {note
+        ? <div style={{
+            marginTop: 10, fontSize: 12.5, lineHeight: 1.55, whiteSpace: "pre-wrap",
+          }}>{note}</div>
+        : <div style={{ marginTop: 10, fontSize: 12, color: "var(--fg-faint)" }}>
+            {t ? t("No note in ROADMAP.md for this item.")
+               : "No note in ROADMAP.md for this item."}
+          </div>}
+    </div>
+  );
+}
+
+export function PlanGantt({ planning, history, roadmap, locale, t, zoom, openSpec }) {
+  const [picked, setPicked] = useState(null);
   const todayD = parseIso(isoLocal(new Date()));
   const raw = buildPlanBars(planning);
   const dueList = Object.entries(planning?.milestones || {})
@@ -268,7 +338,8 @@ ${h.headline}`}
                     <div
                       key={bar.key}
                       title={`${bar.title}\n${bar.start} → ${bar.end}${bar.milestone ? `\n${bar.milestone}` : ""}`}
-                      onClick={bar.reqId && openSpec ? () => openSpec(bar.reqId) : undefined}
+                      onClick={() => setPicked(
+                        picked && picked.key === bar.key ? null : bar)}
                       style={{
                         position: "absolute", left, top, width, height: ROW_H - 4,
                         background: tone.bg, color: tone.fg, borderRadius: 4,
@@ -277,7 +348,10 @@ ${h.headline}`}
                         borderLeft: `3px solid ${tone.edge}`,
                         fontSize: 11, fontWeight: 600, padding: "0 8px",
                         display: "flex", alignItems: "center", overflow: "hidden",
-                        cursor: bar.reqId ? "pointer" : "default",
+                        cursor: "pointer",
+                        outline: picked && picked.key === bar.key
+                          ? "2px solid var(--accent-2)" : "none",
+                        outlineOffset: 1,
                       }}
                     >
                       {bar.progress != null && (
@@ -317,6 +391,10 @@ ${h.headline}`}
           ))}
         </div>
       </div>
+      {picked && (
+        <BarNote bar={picked} roadmap={roadmap} t={t} openSpec={openSpec}
+                 onClose={() => setPicked(null)} />
+      )}
     </div>
   );
 }

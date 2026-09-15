@@ -1,9 +1,9 @@
 ---
 generated: 2026-09-15
-engine: 2026-09-15.2
+engine: 2026-09-15.3
 nodes: 263
 edges: 115
-design OOP: 72/100 (66/92 source files without a design candidate)
+design OOP: 73/100 (66/91 source files without a design candidate)
 ---
 
 # Requirement Map
@@ -266,7 +266,7 @@ graph LR
     REQ_VIEWER_977["The advisory design tab<br><small>REQ-VIEWER-977</small>"]
     REQ_VIEWER_984["Reading a roadmap wider than the screen<br><small>REQ-VIEWER-984</small>"]
     REQ_VIEWER_995["The roadmap has one lane, and it is named for what the chips are<br><small>REQ-VIEWER-995</small>"]
-    REQ_VIEWER_999["The Roadmap tab shows the horizon plan as three columns<br><small>REQ-VIEWER-999</small>"]
+    REQ_VIEWER_999["A plan bar opens the note its author wrote in ROADMAP.md<br><small>REQ-VIEWER-999</small>"]
     REQ_VLEVEL_944["A tested-by tag may carry a level suffix<br><small>REQ-VLEVEL-944</small>"]
     REQ_VLEVEL_945["scan_test_levels collects real levels, not documented examples<br><small>REQ-VLEVEL-945</small>"]
     REQ_VLEVEL_946["The gate reads levels: unvalidated needs, system-only bus code<br><small>REQ-VLEVEL-946</small>"]

@@ -14,7 +14,6 @@ import { useI18n } from "../lib/i18n.jsx";
 import { useDragPan } from "../lib/useDragPan.js";
 import { ZoomControl, useCanvasZoom, clampZoom, ctrlBtn, ZOOM_DEFAULT, ZOOM_MIN, ZOOM_MAX } from "../lib/canvasZoom.jsx";
 import { PlanGantt } from "./roadmap/PlanGantt.jsx";
-import { Horizons } from "./roadmap/Horizons.jsx";
 
 const ZOOM_KEY = "reqmap.roadmap.zoom";
 const DENSITY_KEY = "reqmap.roadmap.density";
@@ -157,25 +156,21 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
     // Shipped history alone is a timeline worth drawing: a repo that has released
     // for months and planned nothing yet still has something to show on the Plan.
     || !!(initialHistory || HISTORY).length;
-  // `Not now` is parsed but never drawn, so a ROADMAP.md holding only that section
-  // must not switch the mode on and then render three empty columns.
-  const horizonItems = (initialRoadmap || ROADMAP)
-    .filter(i => i.horizon === "now" || i.horizon === "next" || i.horizon === "later");
-  const hasHorizons = horizonItems.length > 0;
+  // The roadmap items are still carried and still read — by the Plan's detail panel,
+  // which looks up a selected bar's note by `req`. What is gone is the Horizons MODE:
+  // a plan with dates and a plan with horizons were two pictures of one file, and the
+  // dated one is the one people read (REQ-VIEWER-999).
+  const roadmapItems = initialRoadmap || ROADMAP;
   const [mode, setMode] = useState(() => {
     const stored = readStored(MODE_KEY, (v) => {
       if (v === "versions" || v === "plan") return v;
-      if (v === "horizons") return v;
+      // A reader whose last choice was Horizons — here or in another repo — must land
+      // somewhere that exists rather than on a mode with no matching option.
+      if (v === "horizons") return "plan";
       if (v === "timeline") return "plan"; // renamed
       return null;
     }, null);
-    // A reader whose last choice was Horizons in another repo must not land on a mode
-    // this one cannot offer — the segmented control would have no matching option.
-    const remembered = stored === "horizons" && !hasHorizons ? null : stored;
-    // Plan first: it is the view that answers both questions at once — what shipped, on
-    // the Shipped band, and what is scheduled, to the right of today. Horizons answers
-    // only the second, so it is a click away rather than the landing view.
-    return initialMode || remembered || (hasPlan ? "plan" : hasHorizons ? "horizons" : "versions");
+    return initialMode || stored || (hasPlan ? "plan" : "versions");
   });
   const [showUnscheduled, setShowUnscheduled] = useState(false);
   const { zoom, setZoom, canvasRef } = useCanvasZoom({
@@ -220,7 +215,7 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
   // 618 of them here produced a wall of chips that said nothing about the plan.
   const unscheduled = REQUIREMENTS.filter(r => !r.milestone && r.status !== "deprecated" && r.level !== "code");
 
-  if (!milestones.length && !unscheduled.length && !hasPlan && !hasHorizons) {
+  if (!milestones.length && !unscheduled.length && !hasPlan) {
     return (
       <div className="main" style={{ padding: 40, color: "var(--fg-faint)", fontSize: 13 }}>
         No milestones yet. Add <code>milestone: v1.x</code> to requirement frontmatter
@@ -268,11 +263,10 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
         background: "var(--bg-raised)", flexShrink: 0,
       }}>
         <ZoomControl zoom={zoom} setZoom={setZoom} />
-        {(hasPlan || hasHorizons) && (
+        {hasPlan && (
           <Segmented
             label={t("View")}
             options={[
-              ...(hasHorizons ? [{ id: "horizons", label: t("Horizons") }] : []),
               ...(hasPlan ? [{ id: "plan", label: t("Plan") }] : []),
               { id: "versions", label: t("Versions") },
             ]}
@@ -305,10 +299,9 @@ export function RoadmapView({ openSpec, initialZoom, initialDensity, initialMode
 
       <div ref={canvasRef} onMouseDown={onMouseDown} onClickCapture={onClickCapture}
            className="canvas pan" style={{ flex: 1, minHeight: 0, overflow: "auto", padding: "24px 20px" }}>
-        {mode === "horizons" ? (
-          <Horizons items={horizonItems} t={t} openSpec={openSpec} zoom={zoom} />
-        ) : mode === "plan" ? (
+        {mode === "plan" ? (
           <PlanGantt planning={TARGETS} history={initialHistory || HISTORY}
+                     roadmap={roadmapItems}
                      locale={locale} t={t} zoom={zoom} openSpec={openSpec} />
         ) : (
         /* CSS `zoom` (not `transform: scale`) so the scroll extent shrinks with

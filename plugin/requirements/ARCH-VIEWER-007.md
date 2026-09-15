@@ -31,7 +31,7 @@ Every bullet below is binding.
 - The viewer lists the engine's code-review candidates in a tab of their own, kept out of the count of what is open about the corpus. [[REQ-VIEWER-977]]
 - The roadmap chart is readable at a corpus's real width: the reader scales it and chooses how tightly it packs, and both choices survive a reload. [[REQ-VIEWER-984]]
 - The roadmap has one lane, Implementations, holding every open `TODO.md` item and every milestoned requirement whatever its `lane:` says. [[REQ-VIEWER-995]]
-- The Roadmap tab shows `ROADMAP.md`'s horizon plan as three columns, Now / Next / Later, offered only when the export carries one. [[REQ-VIEWER-999]]
+- Selecting a plan bar opens a detail panel carrying the note its author wrote under the matching `ROADMAP.md` item. [[REQ-VIEWER-999]]
 
 ## Cases
 CASE-1
@@ -854,53 +854,53 @@ milestone: v7.7
 satisfies: [ARCH-VIEWER-007]
 ---
 
-# The Roadmap tab shows the horizon plan as three columns
+# A plan bar opens the note its author wrote in ROADMAP.md
 
 ## Description
-> A version roadmap answers "when", a horizon roadmap answers "what is next" — and a repo
-> that keeps the second one had nowhere to see it. The Plan and Versions modes both sort by
-> semver, so `ROADMAP.md`'s `Now` / `Next` / `Later` items had no column to land in and the
-> viewer showed a plan the maintainer had stopped using. The three horizons are the whole
-> model: what is being worked on, what is queued, and what is parked with a condition that
-> would bring it back.
+> A Gantt bar is a title and two dates. It says when something is scheduled and nothing
+> about what it is, so the reader who does not already know goes to look somewhere else —
+> and the place they would look, `ROADMAP.md`, already holds the answer: the lines an
+> author writes under an item are where the reasoning lives. The Horizons mode that used
+> to render those items as three columns is gone; a plan with dates and a plan with
+> horizons were two pictures of one file, and the dated one is the one people read.
 
 Every bullet below is binding.
 - `_map.json` carries `roadmap`, the parsed `ROADMAP.md` items, each with its horizon, its
-  `req:` id when present, its `unpark:` condition when present, and whether it is done.
-- The Roadmap tab offers a Horizons mode only when the export carries at least one roadmap
-  item, so a repo with no `ROADMAP.md` sees exactly the modes it saw before.
-- Horizons mode renders one column per horizon in the order `Now`, `Next`, `Later`, each
-  column listing its own items and nothing else.
-- An item whose `req:` names a requirement in the registry opens that requirement; an item
-  with no `req:`, or one naming an id the registry does not have, renders as plain text and
-  navigates nowhere.
-- A `Later` item shows its `unpark:` condition, because a parked item without one is the
-  thing `gate --audit` reports.
-- A done item is rendered as done and is not counted among a horizon's open items.
+  `req:` id when present, its `unpark:` condition when present, whether it is done, and the
+  `context` lines written under it.
+- Selecting a plan bar opens a detail panel below the chart carrying that bar's title, its
+  milestone, its horizon when one is known, and the `context` of the matching roadmap item.
+- A bar matches a roadmap item by `req:`, the one id both sides carry.
+- A bar no roadmap item claims opens the panel with its own title and dates, and no note.
+- Context written as an HTML comment renders as its text, because the comment markers are
+  how a plan file hides a note from a Markdown reader, not part of what the note says.
+- The panel names the requirement when the bar carries a `req` the registry has, and opens
+  it on request; an id the registry does not have is shown as plain text.
+- Nothing renders a Now / Next / Later column: the Roadmap tab offers Versions and Plan.
 
 ## Cases
-CASE-1 — the three horizons each get their own column
+CASE-1 — selecting a bar shows the note written under its roadmap item
+  Given  a bar carrying `req: AREA-A-001` and a roadmap item with the same `req:` whose
+         context reads `two sentences of why`
+  When   the reader selects that bar
+  Then   a panel below the chart shows the bar's title and `two sentences of why`
+
+CASE-2 — a bar with no matching item still opens, with no note
+  Given  a bar carrying no `req`, and a roadmap list that does not mention it
+  When   the reader selects that bar
+  Then   the panel shows its title, milestone and dates, and no note section
+
+CASE-3 — an HTML-comment context renders as text
+  Given  a roadmap item whose context is `<!-- the reason -->`
+  When   its bar is selected
+  Then   the panel shows `the reason` and neither comment marker
+
+CASE-4 — the Horizons mode is gone
   Given  an export whose `roadmap` carries one `now`, one `next` and one `later` item
-  When   the Roadmap tab renders in Horizons mode
-  Then   three columns appear in the order Now, Next, Later, each holding its own item
-
-CASE-2 — no roadmap items means no Horizons mode
-  Given  an export carrying an empty `roadmap` list
   When   the Roadmap tab renders
-  Then   no Horizons option is offered and the existing modes are unchanged
+  Then   the only modes offered are Versions and Plan, and no Now/Next/Later column exists
 
-CASE-3 — a req: that resolves is navigable, one that does not is not
-  Given  two `now` items, one carrying `req:` an id the registry has and one carrying an id
-         it does not
-  When   the Roadmap tab renders in Horizons mode
-  Then   the first is rendered as a link to that requirement and the second as plain text
-
-CASE-4 — a parked item shows what would bring it back
-  Given  a `later` item carrying `unpark: a named consumer asks`
-  When   the Roadmap tab renders in Horizons mode
-  Then   the column shows that condition alongside the item
-
-CASE-5 — a done item is not counted as open
-  Given  a `now` horizon holding one done item and one open item
-  When   the Roadmap tab renders in Horizons mode
-  Then   the column's open count is 1 and the done item is marked done
+CASE-5 — the roadmap payload survives the mode's removal
+  Given  a repo with a `ROADMAP.md` holding one item
+  When   `sync` writes the export
+  Then   `_map.json` still carries that item under `roadmap`, with its context
