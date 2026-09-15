@@ -255,6 +255,59 @@ def _export_doc_for(node):
     return json.loads(R._build_json_text({"nodes": [base], "edges": []}))
 
 
+# Every key `_build_map_data` puts on a node, frozen. The engine -> _map.json ->
+# viewer seam fails SILENTLY by construction: `adaptNode` (app/src/lib/loadData.js)
+# turns any key it cannot find into []/""/null, so a dropped field renders as an
+# empty panel and nothing goes red. It has happened: `roadmap` and `history` were
+# emitted, carried on window.__REQMAP_DATA__ and thrown away by the adapter for two
+# releases (v7.6.0-v7.8.0) with every check green — see loadData.js:78-84. No test
+# asserted the shape of the payload, only the values of a few fields, so nothing
+# could have caught it. This is that test: change the emitted set and it goes red,
+# which forces the change to be deliberate and to reach the adapter in the same
+# commit.
+_NODE_KEYS = frozenset((
+    "id", "area", "title", "layer", "level", "status",
+    "intent", "contract", "notes", "current_impl", "verify",
+    "acc", "accept", "desc", "input", "output",
+    "deps", "depends_on", "used_by", "satisfies", "satisfied_by",
+    "members", "risks", "test_exempt", "milestone", "priority",
+))
+# Attached AFTER _build_map_data by cmd_map, so they are absent here and optional in
+# the committed file: _attach_ac_coverage adds clauses/covered only for a requirement
+# with labelled criteria, _attach_translations adds i18n only for a translated one.
+_NODE_KEYS_ATTACHED_LATER = frozenset(("clauses", "covered", "i18n"))
+
+
+class MapPayloadShape(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-870
+    def _node(self):
+        with tempfile.TemporaryDirectory() as d:
+            rd = os.path.join(d, "requirements")
+            _write(os.path.join(rd, "AREA-A-001.md"),
+                   REQ.format(id="AREA-A-001", status="baseline", layer="bus", extra="", title="A"))
+            return R._build_map_data(R.load_requirements(rd), {})
+
+    def test_node_carries_exactly_the_frozen_key_set(self):  # verifies: ARCH-MAP-007#CASE-1
+        node = self._node()["nodes"][0]
+        got = set(node)
+        self.assertEqual(
+            got, set(_NODE_KEYS),
+            "the per-node key set changed: added {} / dropped {}. A consumer reads "
+            "these by name and fails open on a missing one, so update loadData.js "
+            "(and this set) in the same commit."
+            .format(sorted(got - _NODE_KEYS) or "-", sorted(_NODE_KEYS - got) or "-"))
+
+    def test_coverage_and_i18n_keys_are_attached_after_build(self):  # verifies: ARCH-MAP-007#CASE-1
+        # guards the split itself: if one of these ever moves into _build_map_data the
+        # frozen set above is wrong, and this names which one rather than failing twice.
+        node = self._node()["nodes"][0]
+        self.assertEqual(set(node) & _NODE_KEYS_ATTACHED_LATER, set())
+
+    def test_build_map_data_top_level_keys(self):  # verifies: REQ-MAP-870#CASE-2
+        # cmd_map enriches this with repo/engine_version/todos/roadmap/history/
+        # commands/design/health/planning; the graph itself is these three.
+        self.assertEqual(set(self._node()), {"nodes", "edges", "upstream_edges"})
+
+
 class JsonExport(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: REQ-MAP-870
     def test_export_writes_nodes_edges_and_version(self):  # verifies: REQ-MAP-870#CASE-1  # verifies: REQ-MAP-870#CASE-2  # verifies: ARCH-MAP-007#CASE-1
         with tempfile.TemporaryDirectory() as d:
@@ -833,8 +886,12 @@ class MapFreshness(unittest.TestCase):  # tested-by: ARCH-MAP-007  # tested-by: 
         with tempfile.TemporaryDirectory() as d:
             self._seed(d)
             code, out = self._map(d, check=True)   # never generated
-            self.assertEqual(code, 0)
-            self.assertIn("fresh", out)
+            self.assertEqual(code, 0)              # a consumer who never maps passes
+            # ...and says so, rather than reporting a freshness it never measured:
+            # with nothing on disk the old wording claimed "map is fresh" after
+            # comparing zero files.
+            self.assertIn("no committed map to check", out)
+            self.assertNotIn("is fresh", out)
 
     def test_fresh_map_passes_check(self):
         with tempfile.TemporaryDirectory() as d:

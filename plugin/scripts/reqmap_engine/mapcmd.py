@@ -7,7 +7,7 @@ from . import config as cfg
 from .author import _parse_todos
 from .design_report import _design_summary
 from .findings import _render_findings, cmd_findings
-from .git import _repo_name
+from .git import _git, _repo_name
 from .health import _health_record
 from .i18n import _attach_translations
 from .history import by_month, read_history
@@ -147,6 +147,32 @@ def _strip_engine_stat(html):  # implements: ARCH-SITE-026
     return _ENGINE_STAT_RE.sub("", html)
 
 
+_MAP_ARTIFACTS = ("_map.md", "_map.json")
+
+
+def _absent_tracked_artifacts(reqs_dir, root="."):
+    # implements: ARCH-MAP-007  # implements: REQ-MAP-871
+    """Map artifacts git TRACKS but that are missing from the working tree.
+
+    `_stale_artifacts` reads an absent file as "nothing committed to be stale
+    against", which is right for a consumer who never runs `map` and wrong for a
+    file git is tracking: there the absence is a gap, and answering "fresh" would
+    be a verdict reached by comparing nothing. Fails open exactly like every other
+    git call here — no git, no work tree, a non-zero exit all mean "not tracked",
+    so the old convention is what a consumer keeps."""
+    absent = []
+    for name in _MAP_ARTIFACTS:
+        path = os.path.join(reqs_dir, name)
+        if os.path.exists(path):
+            continue
+        # --error-unmatch: git exits non-zero when the path is untracked, and
+        # `_git` turns any non-zero into None.
+        if _git(["ls-files", "--error-unmatch", "--", os.path.relpath(path, root)],
+                cwd=root):
+            absent.append(name)
+    return absent
+
+
 def _stale_artifacts(data, reqs_dir, root=".", reqs=None):
     # implements: ARCH-MAP-007  # implements: REQ-FINDINGS-856  # implements: REQ-MAP-871
     """Names of the committed generated artifacts that no longer match a fresh
@@ -199,11 +225,21 @@ def _map_check(data, reqs_dir, root=".", reqs=None):
     files. Stale (committed != freshly-built) -> exit 1 so a code/requirement edit
     that shifts the map can't be committed without regenerating it. A map that was
     never generated (file absent) is NOT stale — consumers who don't track maps pass.
-    The `generated:` timestamp is ignored so an unchanged map never trips on time."""
+    The `generated:` timestamp is ignored so an unchanged map never trips on time.
+    A file git TRACKS but that is missing fails instead, and a run that compared no
+    artifact at all says so rather than reporting freshness it did not measure."""
+    absent = _absent_tracked_artifacts(reqs_dir, root)
+    if absent:
+        print("FAIL  committed map is missing from the working tree: {} — git tracks "
+              "it; restore it or run `reqmap.py sync`.".format(", ".join(absent)))
+        return 1
     stale = _stale_artifacts(data, reqs_dir, root, reqs)
     if stale:
         print("FAIL  map is stale: {} — run `reqmap.py sync` and commit the result."
               .format(", ".join(stale)))
         return 1
+    if not any(os.path.exists(os.path.join(reqs_dir, n)) for n in _MAP_ARTIFACTS):
+        print("OK  no committed map to check.")
+        return 0
     print("OK  map is fresh.")
     return 0

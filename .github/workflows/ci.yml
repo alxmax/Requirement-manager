@@ -174,9 +174,12 @@ jobs:
       # plugin/requirements/_map.json, so the smoke runs against this repo's real
       # registry rather than a stand-in. Placed before the build: a render throw should
       # fail in seconds, not after a Vite build.
+      # `--require` is what makes that sentence true: without it a missing export makes
+      # sync exit 0 and the smoke runs against the baked stand-in with the job still
+      # green — the real registry silently untested.
       - name: Viewer SSR smoke  # implements: REQ-REPRO-905
         working-directory: app
-        run: npm run sync && npm run smoke
+        run: npm run sync -- --require && npm run smoke
       - name: Rebuild the vendored viewer  # implements: REQ-REPRO-905
         working-directory: app
         run: npm run build:viewer

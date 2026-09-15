@@ -5,7 +5,7 @@ from . import config as cfg
 from .acceptance import _automatable_acs, _labeled_acs
 from .i18n import _load_translations
 from .locks import load_memberlock, lock_path, member_drift, untracked_locks
-from .mapcmd import _stale_artifacts
+from .mapcmd import _absent_tracked_artifacts, _stale_artifacts
 from .model import (
     ENFORCED, LEVEL_TEST_PAIR, MILESTONE_RE, VALID_LAYER, VALID_LEVEL, VALID_STATUS, _as_list,
     _dependency_cycles, _impl_exempt, gate_rule
@@ -462,11 +462,16 @@ def _map_stale_rule(ctx):  # implements: ARCH-MAP-007
     if ctx.update_lock:
         return
     try:
+        absent_map = _absent_tracked_artifacts(ctx.reqs_dir, ctx.code_root)
         stale_map = _stale_artifacts(
             ctx.ws.map_data(ctx.code_root, ctx.full_members),
             ctx.reqs_dir, ctx.code_root, ctx.reqs)
     except Exception:
-        stale_map = []            # fail-open — a freshness probe never blocks the gate
+        absent_map, stale_map = [], []  # fail-open — a freshness probe never blocks the gate
+    if absent_map:
+        yield None, ("committed map is missing from the working tree: "
+                     + ", ".join(absent_map)
+                     + " — git tracks it; restore it or run `reqmap.py sync`")
     if stale_map:
         yield None, ("committed map is stale: " + ", ".join(stale_map)
                      + " — run `reqmap.py sync` (or `map`) and commit the result")

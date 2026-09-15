@@ -1,5 +1,37 @@
 # Changelog
 
+## plugin `v7.15.0` — 2026-09-15
+
+**Two freshness verdicts could come back green after measuring nothing.**
+`_stale_artifacts` reads an absent artifact as "nothing committed to be stale against"
+— right for a consumer who never runs `map`, wrong for a file git is tracking, where
+the absence is a gap. With `_map.json` gone from the working tree the gate still
+printed `OK  map is fresh.`, a verdict reached by comparing zero files, in a repo
+whose whole thesis is anti-drift. New `_absent_tracked_artifacts` asks git whether the
+missing artifact is tracked and reports it when it is; `map --check` fails on it and
+RM027 warns, so both read the same answer as before. A run that compared no artifact
+at all now says `OK  no committed map to check.` instead of claiming freshness it did
+not measure. The consumer convention is untouched: no git, no work tree, or an
+untracked file all still mean "not tracked", so a repo that never committed a map
+passes exactly as it did.
+
+The same shape in CI: `npm run sync` exits 0 when it cannot find the engine export and
+the app falls back to a baked dataset, so the `artifacts` job's SSR smoke — added
+precisely to run the viewer against this repo's REAL registry — would have run against
+the stand-in and reported green. `sync-data.mjs` grows `--require`, which makes that
+fallback fatal, and the workflow passes it. A local `npm run sync` still falls back.
+
+**And the seam that lets a dropped field disappear in silence is now asserted.**
+`adaptNode` turns any key it cannot find into `[]`/`""`/`null`, so a field the engine
+stops emitting renders as an empty panel with nothing going red — as `roadmap` and
+`history` did for two releases (v7.6.0–v7.8.0). No test described the payload's SHAPE,
+only a few of its values. `MapPayloadShape` freezes the 26 keys `_build_map_data` puts
+on every node and the three top-level graph keys, and names `clauses`/`covered`/`i18n`
+as attached afterwards by `cmd_map`. Drop a key and it fails with the key's name and a
+pointer to `loadData.js`, which forces the adapter to change in the same commit.
+
+No schema change: not one emitted key was added or removed.
+
 ## plugin `v7.14.0` — 2026-09-15
 
 **The stale-instruction guard was a member of a requirement that said nothing about it.**
