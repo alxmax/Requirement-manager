@@ -9,7 +9,7 @@
   ],
   "lanes": [
     "Feature",
-    "Bug",
+    "Fix",
     "Release"
   ],
   "cadence": {

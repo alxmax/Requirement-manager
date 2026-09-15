@@ -144,7 +144,7 @@ def _planning_seed():
             "whichever is later - the engine computes it, so it never goes stale.",
             "Pin it by adding `until` to `cadence` if you want a fixed end.",
         ],
-        "lanes": ["Feature", "Bug", "Release"],
+        "lanes": ["Feature", "Fix", "Release"],
         "cadence": {"every": "month", "on": "last", "lane": "Release"},
         "milestones": {},
         "bars": [],

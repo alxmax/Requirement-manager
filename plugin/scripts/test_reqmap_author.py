@@ -453,7 +453,7 @@ class Init(unittest.TestCase):  # tested-by: ARCH-INIT-012  # tested-by: REQ-INI
             self.assertTrue(os.path.exists(roadmap))
             self.assertTrue(os.path.exists(planning))
             seeded = json.loads(io.open(planning, encoding="utf-8").read())
-            self.assertEqual(["Feature", "Bug", "Release"], seeded["lanes"])
+            self.assertEqual(["Feature", "Fix", "Release"], seeded["lanes"])
             # no frozen end: the horizon is recomputed, so the calendar cannot go stale
             self.assertNotIn("until", seeded["cadence"])
             _write(roadmap, "# mine\n")

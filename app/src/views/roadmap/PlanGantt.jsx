@@ -15,7 +15,11 @@ import { buildPlanBars } from "../../lib/planBars.js";
 const PX = 11;
 const BAR_MIN_W = 30;
 const LABEL_W = 108;
-const ROW_H = 50;   // three wrapped label lines plus the bar's own padding
+/* 3 lines x 11px x 1.3 = 43px of text, plus the bar's 8px of vertical padding, plus the
+ * 6px the row keeps between bars. A row of 50 clipped the third line half-way down its
+ * glyphs — the wrap promised three lines and the box only had room for two and a half. */
+const LABEL_LINES = 3;
+const ROW_H = 58;
 const PAD = 10;
 const FLAG_H = 22;
 const MONTH_H = 26;
@@ -208,6 +212,11 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
           width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)",
           background: "var(--bg-raised)", position: "sticky", left: 0, zIndex: 5,
           borderRadius: "8px 0 0 8px",
+          /* The scroller pads itself 20px, and `left: 0` sticks to the PADDING box — so
+             scrolled bars slid through that band and showed up beside the lane names.
+             The shadow paints the column's own background across it; the scroller clips
+             it at the same edge, so it plugs the gap exactly and spills nowhere. */
+          boxShadow: "-24px 0 0 var(--bg-raised)",
         }}>
           <div style={{ height: HEAD_H, borderBottom: "1px solid var(--border)" }} />
           {pastRows.length > 0 && (
@@ -403,7 +412,7 @@ ${h.headline}`}
                       <span style={{
                         position: "relative", overflow: "hidden",
                         display: "-webkit-box", WebkitBoxOrient: "vertical",
-                        WebkitLineClamp: 3, lineHeight: 1.3, whiteSpace: "normal",
+                        WebkitLineClamp: LABEL_LINES, lineHeight: 1.3, whiteSpace: "normal",
                       }}>
                         {bar.title}
                       </span>
@@ -425,13 +434,13 @@ ${h.headline}`}
               <Fragment key={`guide-${b.key}`}>
                 <div style={{
                   position: "absolute", top: HEAD_H, height: bodyH, left, width: 0,
-                  borderLeft: "1px solid var(--fg-faint)", opacity: 0.4,
+                  borderLeft: "2px solid var(--fg-muted)", opacity: 0.5,
                   pointerEvents: "none", zIndex: 1,
                 }} />
                 <div style={{
                   position: "absolute", top: HEAD_H, height: bodyH,
                   left: left + width, width: 0,
-                  borderLeft: "1px dotted var(--fg-faint)", opacity: 0.28,
+                  borderLeft: "2px dotted var(--fg-muted)", opacity: 0.38,
                   pointerEvents: "none", zIndex: 1,
                 }} />
               </Fragment>

@@ -2,6 +2,20 @@
 
 ## plugin `v7.19.0` — 2026-09-16
 
+**And the gap beside the sticky lane names is plugged.** The scroller pads itself 20px
+and `left: 0` sticks to the PADDING box, not the border box — so scrolled bars slid
+through that band and appeared next to the lane names, which is the one place a reader
+reads them. The column now paints its own background across the band with a box-shadow
+the scroller clips at the same edge: it plugs the gap exactly and spills nowhere.
+
+**Three follow-ups from reading the rendered chart.** The wrap promised three lines and
+the box had room for two and a half: 3 x 11px x 1.3 is 43px of text, plus the bar's 8px
+of padding, against a row of 50 that left it 44 — so the third line was clipped through
+its glyphs. The row is 58 now, and the line count is a named constant rather than a 3
+written in two places. The work guides take the weight the date rules used to carry (1px
+to 2px), since they are the only full-height lines left. And the second lane is `Fix`,
+not `Bug`, in this repo's plan and in the one `init` seeds.
+
 **The lane names were sliding away while the note panel stayed, and the reason was one
 word.** The bordered box around the chart declared `overflow: hidden` for its rounded
 corners, which made it the sticky column's scrollport — and a scrollport that never
@@ -81,7 +95,7 @@ file goes stale by definition — this very file planned a version that had alre
 shipped, once. `default_horizon` computes it instead: the end of the current year, or
 three months out, whichever is later. Mid-year that is the year end; from October it
 rolls forward, so asked in December 2026 it answers March 2027 rather than showing one
-month at the point a reader most needs the next quarter. Lanes start as Feature / Bug /
+month at the point a reader most needs the next quarter. Lanes start as Feature / Fix /
 Release, which are a vocabulary, not a schema.
 
 **Two deliberate "no"s are reversed, and named as such.** `_plan_span` returned
@@ -99,7 +113,7 @@ release dates did not extend the chart's range — a cadence running past the la
 emitted dates the in-range filter then dropped, so the engine said a release lands and
 the chart, never having grown to reach it, showed nothing and reported nothing.
 
-This repo's own `_planning.json` is rebuilt to match: lanes Feature / Bug / Release, one
+This repo's own `_planning.json` is rebuilt to match: lanes Feature / Fix / Release, one
 bar (the MCP server at W39), v7.9 / v8.0 / v8.1 kept, calendar through 31 December.
 ## plugin `v7.18.0` — 2026-09-15
 

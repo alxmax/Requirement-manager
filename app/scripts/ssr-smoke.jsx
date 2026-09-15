@@ -724,7 +724,7 @@ test("gantt: the chart itself stacks them, not just the helper",  // verifies: R
     // React SSR writes inline styles as `top:10px`, no space, so the probe is a plain
     // substring: with both bars on row 0 the markup carries `top:10px` twice and
     // `top:36px` (PAD + ROW_H) not at all.
-    const secondRow = (html.match(/top:60px/g) || []).length;   // PAD 10 + ROW_H 50
+    const secondRow = (html.match(/top:68px/g) || []).length;   // PAD 10 + ROW_H 58
     if (!secondRow) { console.log("   (bars share a row — stacking not wired)"); }
     return secondRow >= 1;
   })());
