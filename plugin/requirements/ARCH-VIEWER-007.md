@@ -919,10 +919,11 @@ satisfies: [ARCH-VIEWER-007]
 ## Description
 > Two bars a week apart do not overlap as dates, so they were put on one row — and then
 > painted 23px on top of each other, the first one's title vanishing under the second.
-> The chart floors a bar at a readable width, so a week renders at 72px where its dates
-> ask for 43; the row chooser was comparing the dates and the renderer was drawing the
-> floor. One of them had to learn the other's answer, and the renderer cannot: it draws
-> what it is given.
+> The chart floors a bar at a readable width, and at 7px a day a week drew 43px and was
+> floored to 72: nearly three days of borrowed room. A wider day gives a week 71px of its
+> own and takes it out of the floor entirely, which leaves the floor to the bars that have
+> no label room at any scale. The row chooser still has to know what the renderer will
+> draw, because the renderer cannot know what the chooser meant — it draws what it is given.
 
 Every bullet below is binding.
 - One function answers where a bar is drawn and how wide, and both the renderer and the
@@ -936,17 +937,26 @@ Every bullet below is binding.
   line through the lanes.
 - The track fills the width the lane column leaves, and keeps its true scale when the
   plan is longer than the viewport.
+- A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.
+- The lane column stays in place while the chart scrolls sideways, which means no
+  ancestor of it may declare an overflow: an ancestor that does becomes its scrollport,
+  and a scrollport that never scrolls never lets its sticky child stick.
 
 ## Cases
-CASE-1 — bars a week apart are drawn on separate rows
-  Given  two seven-day bars starting seven days apart, and the 72px floor
+CASE-1 — two one-day bars on consecutive days take separate rows
+  Given  two one-day bars a day apart, each floored to the minimum bar width
   When   the Plan renders
   Then   they carry different sub-rows, and stacking them by date alone would not
 
-CASE-2 — bars that really are apart still share a row
-  Given  two seven-day bars starting forty days apart
+CASE-2 — a week-long pair a week apart shares one row
+  Given  two seven-day bars starting seven days apart
   When   the Plan renders
-  Then   one row holds both
+  Then   one row holds both, because neither is floored and they never touch
+
+CASE-4 — the lane column survives a sideways scroll
+  Given  a plan wide enough to scroll
+  When   the reader scrolls the chart sideways
+  Then   the lane names stay in place, as the note panel does
 
 CASE-3 — the guides mark the work, not the dates
   Given  a plan carrying a bar and a milestone due date

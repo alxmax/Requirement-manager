@@ -141,6 +141,10 @@
       "hash": "4ddea76b8894",
       "reason": null
     },
+    "REQ-PLANSTACK-1012": {
+      "hash": "e7d3ea39a6d7",
+      "reason": null
+    },
     "REQ-PLANTAGGED-1005": {
       "hash": "ebb234c6ee12",
       "reason": "feedback 2026-09-14: lint fixes and recorded exemption reasons"

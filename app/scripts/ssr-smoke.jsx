@@ -682,21 +682,22 @@ test("roadmap: the shipped band is named by the branch",  // verifies: REQ-PLANB
 
 // ---- overlapping short bars ------------------------------------------------
 // tested-by: REQ-PLANSTACK-1012 @unit
-// Two bars a WEEK apart do not overlap as dates, so the old date-based stacker put them
-// on one row — and the renderer then drew each 72px wide from starts 49px apart, so the
-// second covered 23px of the first, label included.
+// Two ONE-DAY bars on consecutive days. Widening the day to 11px took week-long bars out
+// of the floor entirely (a week is 71px of its own, starts are 77px apart), so the case
+// that remains is the short one: a single day draws 5px and is floored to 30, while the
+// next day starts 11px along. Dates say no overlap; pixels say 19px of it.
 const stackPlan = {
   lanes: ["Feature"],
   bars: [
-    { title: "primul lucru cu titlu lung", lane: "Feature", start: "2026-09-21", end: "2026-09-27" },
-    { title: "al doilea lucru",            lane: "Feature", start: "2026-09-28", end: "2026-10-04" },
+    { title: "primul lucru cu titlu lung", lane: "Feature", start: "2026-09-21", end: "2026-09-21" },
+    { title: "al doilea lucru",            lane: "Feature", start: "2026-09-22", end: "2026-09-22" },
   ],
 };
-test("gantt: two bars a week apart are drawn on separate rows",  // verifies: REQ-PLANSTACK-1012#CASE-1
+test("gantt: two one-day bars on consecutive days take separate rows",  // verifies: REQ-PLANSTACK-1012#CASE-1
   (() => {
-    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 7, endIdx: 13 };
-    const extent = (x) => ({ left: x.startIdx * 7 + 3,
-                             width: Math.max((x.endIdx - x.startIdx + 1) * 7 - 6, 72) });
+    const a = { startIdx: 0, endIdx: 0 }, b = { startIdx: 1, endIdx: 1 };
+    const extent = (x) => ({ left: x.startIdx * 11 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 11 - 6, 30) });
     // dates say "no overlap"; pixels say otherwise, and pixels are what is painted
     const rows = stackBars([a, b], extent);
     const rowsByDate = stackBars([{ ...a }, { ...b }]);
@@ -705,10 +706,11 @@ test("gantt: two bars a week apart are drawn on separate rows",  // verifies: RE
 
 test("gantt: bars that really are apart still share one row",  // verifies: REQ-PLANSTACK-1012#CASE-2
   (() => {
-    // far enough that even the 72px floor cannot make them touch
-    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 40, endIdx: 46 };
-    const extent = (x) => ({ left: x.startIdx * 7 + 3,
-                             width: Math.max((x.endIdx - x.startIdx + 1) * 7 - 6, 72) });
+    // a full week each, a week apart: 71px of bar, 77px between starts, no clash at all —
+    // which is what widening the day bought, and the stacker must not invent a row for it
+    const a = { startIdx: 0, endIdx: 6 }, b = { startIdx: 7, endIdx: 13 };
+    const extent = (x) => ({ left: x.startIdx * 11 + 3,
+                             width: Math.max((x.endIdx - x.startIdx + 1) * 11 - 6, 30) });
     return stackBars([a, b], extent) === 1;
   })());
 
@@ -722,7 +724,7 @@ test("gantt: the chart itself stacks them, not just the helper",  // verifies: R
     // React SSR writes inline styles as `top:10px`, no space, so the probe is a plain
     // substring: with both bars on row 0 the markup carries `top:10px` twice and
     // `top:36px` (PAD + ROW_H) not at all.
-    const secondRow = (html.match(/top:36px/g) || []).length;
+    const secondRow = (html.match(/top:60px/g) || []).length;   // PAD 10 + ROW_H 50
     if (!secondRow) { console.log("   (bars share a row — stacking not wired)"); }
     return secondRow >= 1;
   })());

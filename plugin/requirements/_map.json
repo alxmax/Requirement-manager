@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.3",
+  "engine_version": "2026-09-16.4",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -9034,7 +9034,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:183"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:188"
         },
         {
           "role": "tested-by",
@@ -9100,7 +9100,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:124"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:129"
         },
         {
           "role": "tested-by",
@@ -19362,15 +19362,15 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:50"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:55"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:63"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:68"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:69"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:74"
         },
         {
           "role": "implements",
@@ -19395,23 +19395,26 @@
       "status": "confirmed",
       "area": "REQ",
       "title": "Bars are stacked by what is drawn, not by what is scheduled",
-      "intent": "Two bars a week apart do not overlap as dates, so they were put on one row — and then painted 23px on top of each other, the first one's title vanishing under the second. The chart floors a bar at a readable width, so a week renders at 72px where its dates ask for 43; the row chooser was comparing the dates and the renderer was drawing the floor. One of them had to learn the other's answer, and the renderer cannot: it draws what it is given.",
+      "intent": "Two bars a week apart do not overlap as dates, so they were put on one row — and then painted 23px on top of each other, the first one's title vanishing under the second. The chart floors a bar at a readable width, and at 7px a day a week drew 43px and was floored to 72: nearly three days of borrowed room. A wider day gives a week 71px of its own and takes it out of the floor entirely, which leaves the floor to the bars that have no label room at any scale. The row chooser still has to know what the renderer will draw, because the renderer cannot know what the chooser meant — it draws what it is given.",
       "contract": [
         "One function answers where a bar is drawn and how wide, and both the renderer and the row chooser read it — neither computes its own.",
         "`stackBars` puts two bars on different sub-rows when their DRAWN boxes intersect, even where their dates do not.",
         "Two bars far enough apart that the floor cannot make them touch still share a row, so the lane grows only where it must.",
         "The full-height vertical guides mark the work: a solid rule at each bar's start and a dotted one at its end. `today` and the milestones keep their header pills and rule no line through the lanes.",
-        "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport."
+        "The track fills the width the lane column leaves, and keeps its true scale when the plan is longer than the viewport.",
+        "A bar's title wraps, to a declared line limit, and the bar is tall enough to hold it.",
+        "The lane column stays in place while the chart scrolls sideways, which means no ancestor of it may declare an overflow: an ancestor that does becomes its scrollport, and a scrollport that never scrolls never lets its sticky child stick."
       ],
       "verify": [],
       "notes": [],
       "current_impl": [],
       "acc": [
-        "CASE-1 — — bars a week apart are drawn on separate rows Given  two seven-day bars starting seven days apart, and the 72px floor When   the Plan renders Then   they carry different sub-rows, and stacking them by date alone would not",
-        "CASE-2 — — bars that really are apart still share a row Given  two seven-day bars starting forty days apart When   the Plan renders Then   one row holds both",
+        "CASE-1 — — two one-day bars on consecutive days take separate rows Given  two one-day bars a day apart, each floored to the minimum bar width When   the Plan renders Then   they carry different sub-rows, and stacking them by date alone would not",
+        "CASE-2 — — a week-long pair a week apart shares one row Given  two seven-day bars starting seven days apart When   the Plan renders Then   one row holds both, because neither is floored and they never touch",
+        "CASE-4 — — the lane column survives a sideways scroll Given  a plan wide enough to scroll When   the reader scrolls the chart sideways Then   the lane names stay in place, as the note panel does",
         "CASE-3 — — the guides mark the work, not the dates Given  a plan carrying a bar and a milestone due date When   the Plan renders Then   the milestone keeps its header pill and no dashed full-height rule is drawn"
       ],
-      "accept": "CASE-1 — bars a week apart are drawn on separate rows\n  Given  two seven-day bars starting seven days apart, and the 72px floor\n  When   the Plan renders\n  Then   they carry different sub-rows, and stacking them by date alone would not\n\nCASE-2 — bars that really are apart still share a row\n  Given  two seven-day bars starting forty days apart\n  When   the Plan renders\n  Then   one row holds both\n\nCASE-3 — the guides mark the work, not the dates\n  Given  a plan carrying a bar and a milestone due date\n  When   the Plan renders\n  Then   the milestone keeps its header pill and no dashed full-height rule is drawn",
+      "accept": "CASE-1 — two one-day bars on consecutive days take separate rows\n  Given  two one-day bars a day apart, each floored to the minimum bar width\n  When   the Plan renders\n  Then   they carry different sub-rows, and stacking them by date alone would not\n\nCASE-2 — a week-long pair a week apart shares one row\n  Given  two seven-day bars starting seven days apart\n  When   the Plan renders\n  Then   one row holds both, because neither is floored and they never touch\n\nCASE-4 — the lane column survives a sideways scroll\n  Given  a plan wide enough to scroll\n  When   the reader scrolls the chart sideways\n  Then   the lane names stay in place, as the note panel does\n\nCASE-3 — the guides mark the work, not the dates\n  Given  a plan carrying a bar and a milestone due date\n  When   the Plan renders\n  Then   the milestone keeps its header pill and no dashed full-height rule is drawn",
       "input": "",
       "output": "",
       "desc": "",
@@ -19433,19 +19436,24 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:231"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:14"
         },
         {
           "role": "implements",
-          "loc": "app/src/views/roadmap/PlanGantt.jsx:408"
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:241"
+        },
+        {
+          "role": "implements",
+          "loc": "app/src/views/roadmap/PlanGantt.jsx:421"
         }
       ],
       "test_exempt": null,
       "milestone": null,
       "priority": "",
       "risks": [],
-      "clauses": 3,
-      "covered": 3
+      "clauses": 4,
+      "covered": 3,
+      "gap": "no `verifies:` tag for CASE-4"
     },
     {
       "id": "ARCH-VLEVEL-037",
@@ -22385,7 +22393,7 @@
         "file": "app/scripts/ssr-smoke.jsx",
         "line": 1,
         "name": "ssr-smoke.jsx",
-        "detail": "855 lines (over 500)"
+        "detail": "857 lines (over 500)"
       },
       {
         "pillar": "standards",
@@ -22631,15 +22639,15 @@
         "pillar": "standards",
         "kind": "line-too-long",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 21,
+        "line": 26,
         "name": "PlanGantt.jsx",
-        "detail": "10 line(s) wider than 100 columns, first at line 21"
+        "detail": "10 line(s) wider than 100 columns, first at line 26"
       },
       {
         "pillar": "abstraction",
         "kind": "deep-nesting",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 113,
+        "line": 118,
         "name": "PlanGantt",
         "detail": "`PlanGantt` nests 7 levels deep (over 4)"
       },
@@ -22647,15 +22655,15 @@
         "pillar": "abstraction",
         "kind": "long-function",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 113,
+        "line": 118,
         "name": "PlanGantt",
-        "detail": "`PlanGantt` is 328 lines (over 80)"
+        "detail": "`PlanGantt` is 336 lines (over 80)"
       },
       {
         "pillar": "encapsulation",
         "kind": "long-parameter-list",
         "file": "app/src/views/roadmap/PlanGantt.jsx",
-        "line": 113,
+        "line": 118,
         "name": "PlanGantt",
         "detail": "`PlanGantt` takes 8 parameters (over 6)"
       },

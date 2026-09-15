@@ -8,9 +8,14 @@ import {
 } from "../../lib/timeline.js";
 import { buildPlanBars } from "../../lib/planBars.js";
 
-const PX = 7;
+/* 11px a day, and a floor of 30. At 7px a week drew 43px and was floored to 72 — nearly
+ * three days of borrowed room, which is what pushed a bar into its neighbour's week. At
+ * 11 a week is 71px of its own, and the floor only catches bars under three days, which
+ * have no label room at any scale.  implements: REQ-PLANSTACK-1012 */
+const PX = 11;
+const BAR_MIN_W = 30;
 const LABEL_W = 108;
-const ROW_H = 26;
+const ROW_H = 50;   // three wrapped label lines plus the bar's own padding
 const PAD = 10;
 const FLAG_H = 22;
 const MONTH_H = 26;
@@ -156,7 +161,7 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
      short neighbours were painted on top of each other (REQ-PLANSTACK-1012). */
   const extent = (b) => ({
     left: b.startIdx * PX + 3,
-    width: Math.max((b.endIdx - b.startIdx + 1) * PX - 6, 72),
+    width: Math.max((b.endIdx - b.startIdx + 1) * PX - 6, BAR_MIN_W),
   });
   const bars = indexBars(raw, origin);
 
@@ -188,9 +193,13 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
 
   return (
     <div style={{ zoom: zoom / 100, width: "max-content", minWidth: "100%" }}>
+      {/* No `overflow: hidden` here. It made this box the sticky column's scrollport,
+          and a scrollport that never scrolls never lets its sticky child stick — so the
+          lane names slid away while the note panel, which sits outside this box, stayed.
+          The radius moves to the children that touch the corners. */}
       <div style={{
         display: "flex", border: "1px solid var(--border)", borderRadius: 8,
-        overflow: "hidden", background: "var(--surface)",
+        background: "var(--surface)",
       }}>
         {/* Sticky: the chart scrolls sideways for months, and a lane the reader cannot
             name is a row of bars with no subject. zIndex clears the bars, which are
@@ -198,6 +207,7 @@ export function PlanGantt({ planning, history, roadmap, branch, locale, t, zoom,
         <div style={{
           width: LABEL_W, flexShrink: 0, borderRight: "1px solid var(--border)",
           background: "var(--bg-raised)", position: "sticky", left: 0, zIndex: 5,
+          borderRadius: "8px 0 0 8px",
         }}>
           <div style={{ height: HEAD_H, borderBottom: "1px solid var(--border)" }} />
           {pastRows.length > 0 && (
@@ -368,13 +378,13 @@ ${h.headline}`}
                       onClick={() => setPicked(
                         picked && picked.key === bar.key ? null : bar)}
                       style={{
-                        position: "absolute", left, top, width, height: ROW_H - 4,
+                        position: "absolute", left, top, width, height: ROW_H - 6,
                         background: tone.bg, color: tone.fg, borderRadius: 4,
                         boxSizing: "border-box",
                         border: `1px solid color-mix(in oklch, ${tone.edge} 40%, transparent)`,
                         borderLeft: `3px solid ${tone.edge}`,
-                        fontSize: 11, fontWeight: 600, padding: "0 8px",
-                        display: "flex", alignItems: "center", overflow: "hidden",
+                        fontSize: 11, fontWeight: 600, padding: "4px 8px",
+                        display: "flex", alignItems: "flex-start", overflow: "hidden",
                         cursor: "pointer",
                         outline: picked && picked.key === bar.key
                           ? "2px solid var(--accent-2)" : "none",
@@ -388,9 +398,12 @@ ${h.headline}`}
                           pointerEvents: "none",
                         }} />
                       )}
+                      {/* Three lines, then an ellipsis. A title cut mid-word on one
+                          line told the reader nothing about how much it was missing. */}
                       <span style={{
-                        position: "relative", overflow: "hidden", textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
+                        position: "relative", overflow: "hidden",
+                        display: "-webkit-box", WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 3, lineHeight: 1.3, whiteSpace: "normal",
                       }}>
                         {bar.title}
                       </span>

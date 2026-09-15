@@ -2,6 +2,24 @@
 
 ## plugin `v7.19.0` — 2026-09-16
 
+**The lane names were sliding away while the note panel stayed, and the reason was one
+word.** The bordered box around the chart declared `overflow: hidden` for its rounded
+corners, which made it the sticky column's scrollport — and a scrollport that never
+scrolls never lets its sticky child stick. The note panel sits outside that box, so it
+worked, which is exactly the difference a reader would notice. The radius moves to the
+children that touch the corners and the overflow goes.
+
+**A day is 11px now, not 7.** At 7 a week drew 43px and the readable-width floor inflated
+it to 72 — nearly three days of borrowed room, which is what pushed a bar into its
+neighbour's week. At 11 a week is 71px of its own and never meets the floor, which drops
+to 30 and now only catches bars under three days, where no scale would give room for a
+label. Titles wrap to three lines and the bar is tall enough to hold them, rather than
+being cut mid-word on one.
+
+That changes what the stacking net is FOR, and the tests say so: the week-apart pair no
+longer clashes at all and must stay on one row, while the case that remains is two
+one-day bars on consecutive days — 30px of bar, 11px between starts.
+
 **Two bars a week apart were drawn on top of each other.** They do not overlap as dates,
 so the row chooser put them on one row — and the renderer then drew each at the 72px
 floor from starts 49px apart, so the second covered 23px of the first, its title with it.
