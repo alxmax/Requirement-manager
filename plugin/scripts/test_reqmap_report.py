@@ -3219,6 +3219,33 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertNotIn("REQ-A-002  <->  REQ-A-003", out)
         self.assertIn("REQ-A-002  <->  REQ-B-004", out)
 
+    # tested-by: REQ-SIMILARIDS-1025 @unit
+    def test_two_requirements_sharing_only_ids_are_not_a_pair(self):  # verifies: REQ-SIMILARIDS-1025#CASE-1
+        reqs = {"REQ-A-001": {"meta": {}, "body": "## Description\n- alpha bravo [[REQ-X-001]] req: REQ-X-001\n"},
+                "REQ-B-002": {"meta": {}, "body": "## Description\n- charlie delta [[REQ-X-001]] req: REQ-X-001\n"}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        self.assertNotIn("<->", buf.getvalue())
+
+    def test_the_prose_around_an_id_is_still_compared(self):  # verifies: REQ-SIMILARIDS-1025#CASE-2
+        clause = "- the scanner walks the tree and collects membership tags per file "
+        reqs = {"REQ-A-001": {"meta": {}, "body": "## Description\n" + clause + "[[REQ-ALPHA-007]]\n"},
+                "REQ-B-002": {"meta": {}, "body": "## Description\n" + clause + "[[REQ-BRAVO-008]]\n"}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        out = buf.getvalue()
+        self.assertIn("REQ-A-001  <->  REQ-B-002", out)
+        shared = out.split("shared terms:")[1].splitlines()[0]
+        self.assertNotIn("alpha", shared)
+        self.assertNotIn("req", shared.split(", "))
+
+    def test_search_keeps_the_ids(self):  # verifies: REQ-SIMILARIDS-1025#CASE-3
+        body = "## Description\n- the scanner walks the tree [[REQ-X-001]]\n"
+        self.assertIn("REQ-X-001", R._sim_text(body))
+        self.assertNotIn("REQ-X-001", R.similar._dupes_text(body))
+
     def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
         body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
         reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},

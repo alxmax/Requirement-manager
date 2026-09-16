@@ -86,8 +86,8 @@
       "reason": "ARCH-SELFGATE-039 gains its third obligation sentence: check_retired_verbs.py was a member of it with no clause describing the guard, and its suite carried no tested-by."
     },
     "ARCH-SIMILAR-016": {
-      "hash": "e36d53b747be",
-      "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
+      "hash": "b6c0988f8765",
+      "reason": "dupes ignores ids"
     },
     "ARCH-TRANSLATE-044": {
       "hash": "7437837e022f",

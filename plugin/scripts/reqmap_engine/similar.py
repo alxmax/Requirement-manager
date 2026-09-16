@@ -5,6 +5,7 @@ from . import config as cfg
 from .i18n import _load_translations
 from .model import _as_list
 from .sections import ACCEPTANCE_LABELS, CONTRACT_LABELS, _from_any
+from .tags import _ID_PAT
 from .text import _bullets, _req_title, _section_raw
 
 
@@ -130,6 +131,21 @@ def _sim_text(body):  # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-
     return " ".join(parts)
 
 
+# A requirement id, the `[[ID]]` link around it, and a `req: ID` field name no behaviour:
+# on this corpus the token `req` sat in 80 of 281 bags, one per `[[REQ-...]]` an ARCH clause
+# ends with, and an id's stem repeats the topic word the prose already carries.
+_DUPES_ID_RE = re.compile(r"\[\[\s*" + _ID_PAT + r"\s*\]\]"
+                          r"|(?<![\w-])req\s*:\s*" + _ID_PAT
+                          + r"|(?<![\w-])" + _ID_PAT + r"(?![\w-])")
+
+
+def _dupes_text(body):  # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILARIDS-1025
+    """`_sim_text` with requirement ids and their link syntax removed, for `dupes` only.
+    `search` keeps the ids: its bag is pinned to the viewer's port by a shared fixture, and
+    an id in a query is answered by `_id_matches` before any ranking."""
+    return _DUPES_ID_RE.sub(" ", _sim_text(body))
+
+
 def _tfidf(docs):  # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-922
     """docs: {id: token_list}. Returns {id: {term: weight}} with smoothed idf =
     log((1 + N) / (1 + df)) + 1 — always positive (so a 2-doc corpus does not
@@ -226,7 +242,7 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     suite) is skipped and counted instead of reported."""
     linked = set(_test_suite_pairs(members)) | _hierarchy_pairs(reqs)
     placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
-    docs = {rid: _sim_tokens(_sim_text(r["body"])) for rid, r in reqs.items()
+    docs = {rid: _sim_tokens(_dupes_text(r["body"])) for rid, r in reqs.items()
             if rid not in placeholder}
     docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
     if placeholder:

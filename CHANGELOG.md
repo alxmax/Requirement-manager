@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v7.21.10` — 2026-09-16
+
+**`dupes` no longer compares requirement ids.** Every ARCH clause ends with the `[[REQ-...]]` it
+delegates to, so the token `req` sat in 80 of 281 bags of words and an id's stem repeated the
+topic word the prose already carried. `dupes` now removes ids, `[[ID]]` links and `req: ID`
+fields before tokenizing (REQ-SIMILARIDS-1025); `search` keeps them, so its text still matches
+the viewer's port. On this corpus the pair count stays 27: three pairs that matched on ids
+left, and three that the id tokens had been diluting took their place.
+
 ## plugin `v7.21.9` — 2026-09-16
 
 **Two overlaps `gate --dupes` found are resolved.** REQ-ATOMICFORM-053 specified the atomic
