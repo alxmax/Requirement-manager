@@ -424,6 +424,7 @@ footer a:hover{color:var(--accent)}
       <li><a href="#model">Model</a></li>
       <li><a href="#commands">Commands</a></li>
       <li><a href="#layers">Layers</a></li>
+      <li><a href="#mcp">MCP</a></li>
       <li><a href="#release">Plan &amp; release</a></li>
       <li><a href="#ci">CI/CD</a></li>
       <li><a href="#install">Install</a></li>
@@ -624,11 +625,12 @@ has not been re-touched.</pre></div>
   <div class="wrap-wide">
     <div class="wrap" style="padding:0">
       <div class="label reveal">Commands</div>
-      <h2 class="reveal">Five verbs</h2>
+      <h2 class="reveal">Six verbs</h2>
       <p class="lead reveal">
         One stdlib-only Python engine. No installation, no dependencies. Every read-only question
         is a flag on <code>gate</code>, every write a flag on <code>sync</code>, so the shape of a
-        command tells you whether it can change a file.
+        command tells you whether it can change a file. The sixth verb, <code>mcp</code>, serves
+        the same commands to an AI assistant.
       </p>
     </div>
 
@@ -646,7 +648,7 @@ has not been re-touched.</pre></div>
         <div class="cmd-d">
           <strong>The verdict.</strong> Every tag resolves, every confirmed requirement has code, every <code>depends_on</code> exists; then readability and map freshness. Run before every commit and in CI; never writes.<br>
           <span class="fl">--strict</span> · <span class="fl">--json</span> · <span class="fl">--since &lt;ref&gt;</span><br>
-          Questions: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span> · <span class="fl">--search</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review</span>
+          Questions: <span class="fl">--risk</span> what next · <span class="fl">--audit</span> every discovery pass, including the plan and version signals · <span class="fl">--show ID</span> · <span class="fl">--search</span> · <span class="fl">--dupes</span> · <span class="fl">--design</span> · <span class="fl">--i18n</span> · <span class="fl">--review</span>, each with <span class="fl">--json</span> for an agent
         </div>
       </div>
       <div class="cmd">
@@ -656,6 +658,10 @@ has not been re-touched.</pre></div>
       <div class="cmd">
         <div class="cmd-n"><code>clarify AREA-NAME-NNN</code></div>
         <div class="cmd-d">The questions a requirement has not answered: vague terms, numbers without units, clauses without a case, a missing failure path. Read-only, exit 0. <span class="fl">--decompose</span> plans code-rung children · <span class="fl">--levels</span> proposes a rung for every requirement.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>mcp</code></div>
+        <div class="cmd-d">Serve the engine to an AI assistant over the Model Context Protocol on stdio: fifteen tools and a resource per requirement. Read-only by default. <span class="fl">--allow-writes</span> adds sync, new and release · see <a href="#mcp">MCP</a></div>
       </div>
     </div>
   </div>
@@ -898,6 +904,40 @@ python scripts/reqmap.py sync
       <a href="./map.html" style="color:var(--accent);text-decoration:none;font-weight:500">map.html</a>
       — this repo's own capability graph, built by <code>reqmap.py sync</code> in the deploy job and
       served alongside this page on GitHub Pages. Opens in-browser, no install.
+    </div>
+  </div>
+</section>
+
+<!-- MCP SERVER -->
+<section id="mcp">
+  <div class="wrap-wide">
+    <div class="wrap" style="padding:0">
+      <div class="label reveal">MCP</div>
+      <h2 class="reveal">The same engine, as tools</h2>
+      <p class="lead reveal">
+        <code>reqmap.py mcp</code> lets Claude Code, VS Code with Copilot or any MCP client ask the
+        corpus through typed tools instead of the terminal. The server computes nothing itself:
+        every call runs the CLI in a fresh process and hands back what it printed.
+      </p>
+    </div>
+
+    <div class="cmds reveal">
+      <div class="cmd">
+        <div class="cmd-n"><code>1 · init</code></div>
+        <div class="cmd-d">Writes <code>.mcp.json</code> (Claude Code) and <code>.vscode/mcp.json</code> (VS Code) when absent, with paths under each client's project-root variable, pointing at the vendored engine. Never edits an existing config.</div>
+      </div>
+      <div class="cmd gate">
+        <div class="cmd-n"><code>2 · tools/call</code></div>
+        <div class="cmd-d">A newline-delimited JSON-RPC message on stdin, protocol <code>2025-06-18</code>. A tool that writes is refused with <code>-32602</code> unless the server started with <span class="fl">--allow-writes</span>; the call becomes one <code>reqmap.py</code> process, and its output returns on stdout. <code>isError</code> only when the command failed: a gate FAIL verdict is an answer.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>3 · tools</code></div>
+        <div class="cmd-d">Read: <code>reqmap_gate</code> · <code>reqmap_next</code> · <code>reqmap_health</code> · <code>reqmap_show</code> · <code>reqmap_search</code> · <code>reqmap_audit</code> · <code>reqmap_dupes</code> · <code>reqmap_design</code> · <code>reqmap_untagged</code> · <code>reqmap_review</code> · <code>reqmap_clarify</code> · <code>reqmap_release_plan</code>. Write, only with <span class="fl">--allow-writes</span>: <code>reqmap_sync</code> · <code>reqmap_new</code> · <code>reqmap_release</code>. A test holds every verb and flag they use to the command registry.</div>
+      </div>
+      <div class="cmd">
+        <div class="cmd-n"><code>4 · resources</code></div>
+        <div class="cmd-d"><code>reqmap://map</code> is the committed <code>_map.json</code>; <code>reqmap://requirement/&lt;id&gt;</code> is one requirement's dossier, attachable as context before implementing it. The list is read from the map file, with no scan. Decision record: ADR-0043.</div>
+      </div>
     </div>
   </div>
 </section>

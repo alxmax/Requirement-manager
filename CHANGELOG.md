@@ -1,5 +1,17 @@
 # Changelog
 
+## plugin `v7.21.15` — 2026-09-16
+
+**README and `docs/architecture.html` describe the MCP server, and the skill files lose three
+stale verbs.** README counts six verbs, lists `mcp` in the verb table, notes `--json` on
+`--show`, `--search` and `--dupes` and `distinct_from` on `--dupes`, and lists `mcp.py` and the
+client configs in the layout; its layout no longer repeats the diagram skill's files, which
+left the repo at v6.1.0. The architecture page gains an MCP section — client configs, one call
+from stdin to a fresh `reqmap.py` process, the fifteen tools, the resources — and a `mcp` card
+among the verbs. Both `requirement-manager` skill files named `draft` as a creation verb, where
+`init` does that work, and the universal file still called `check` a supported alias of
+`gate`; it was removed in v4.0.0.
+
 ## plugin `v7.21.14` — 2026-09-16
 
 **`SKILL.md` says when to use the MCP tools.** Both `requirement-manager` skill files gain a
