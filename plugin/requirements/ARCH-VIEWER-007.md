@@ -862,6 +862,7 @@ owner: Alex
 milestone: v7.7
 satisfies: [ARCH-VIEWER-007]
 lint_exempt: [file-spread]
+distinct_from: [REQ-UNPLANNED-1024, REQ-ROADMAP-998, ARCH-ROADMAP-038]
 ---
 
 # A plan bar opens the note its author wrote in ROADMAP.md
@@ -926,6 +927,9 @@ CASE-6 — a bar appears in its version's column
 **Notes**
 - `lint_exempt: file-spread` — the engine exports `roadmap`, the data layer adopts it and
   the Plan's note panel renders it: one payload crossing the engine/viewer boundary.
+- `distinct_from: REQ-UNPLANNED-1024` - `REQ-UNPLANNED-1024` is an engine line counting unscheduled items; this is the viewer panel for one selected bar.
+- `distinct_from: REQ-ROADMAP-998` - `REQ-ROADMAP-998` parses ROADMAP.md; this renders what it parsed.
+- `distinct_from: ARCH-ROADMAP-038` - `ARCH-ROADMAP-038` is the engine's roadmap capability; this is its viewer side.
 
 ---
 id: REQ-PLANSTACK-1012

@@ -43,6 +43,11 @@ def _exemption_reason_recorded(body, check):
     return check.lower() in (body or "").lower()
 
 
+# Every frontmatter field that silences a finding for one requirement. `distinct_from:` is
+# one: it names a requirement `dupes` would pair this one with, after a reviewer read both.
+EXEMPTION_FIELDS = ("lint_exempt", "gate_exempt", "distinct_from")
+
+
 def _exemptions_in_force(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ-AUDIT-971
     """Every `lint_exempt:`/`gate_exempt:` entry in the corpus, as records carrying the
     requirement, the field, the silenced check and whether a reason is recorded.
@@ -54,7 +59,7 @@ def _exemptions_in_force(reqs):  # implements: ARCH-AUDIT-065  # implements: REQ
     for rid in sorted(reqs):
         r = reqs[rid]
         meta, body = r["meta"], r["body"]
-        for field in ("lint_exempt", "gate_exempt"):
+        for field in EXEMPTION_FIELDS:
             for check in _as_list(meta.get(field)):
                 out.append({"id": rid, "field": field, "check": check,
                             "reason": _exemption_reason_recorded(body, check)})
@@ -231,6 +236,32 @@ def _hierarchy_pairs(reqs):
     return linked
 
 
+def _distinct_pairs(reqs):
+    # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILARDISTINCT-1026
+    """Pairs a reviewer read and recorded as different obligations with `distinct_from:`,
+    from either side. Lexical overlap cannot tell a shared topic from a shared obligation:
+    on this corpus a real duplicate scored 0.54 and a pair checking different things 0.51,
+    so no threshold separates them and only a recorded reading can."""
+    return {frozenset((rid, other)) for rid, r in reqs.items()
+            for other in _as_list((r.get("meta") or {}).get("distinct_from")) if other != rid}
+
+
+def _similar_skips(skipped_linked, skipped_distinct, retired):
+    # implements: REQ-SIMILAR-921  # implements: REQ-SIMILARDISTINCT-1026
+    """Print the counts of what `dupes` left out, one line each, only when non-zero."""
+    if retired:
+        print("skipped {} deprecated requirement(s): a retired contract is not a duplicate "
+              "of a live one.\n".format(retired))
+    if skipped_linked:
+        print(("skipped {} pair(s) linked by tested-by or satisfies, or siblings under one "
+               "parent (a requirement and its own test suite, a parent and its child, and two "
+               "children of one parent share vocabulary by construction).\n")
+              .format(skipped_linked))
+    if skipped_distinct:
+        print("skipped {} pair(s) a reviewer recorded as distinct with `distinct_from:`.\n"
+              .format(skipped_distinct))
+
+
 def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     # implements: ARCH-SIMILAR-016  # implements: REQ-SIMILAR-920  # implements: REQ-SIMILAR-923
     """Report requirement pairs whose contracts overlap at or above `threshold`
@@ -241,9 +272,12 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     With `members`, a pair linked by `tested-by` (one requirement is the other's test
     suite) is skipped and counted instead of reported."""
     linked = set(_test_suite_pairs(members)) | _hierarchy_pairs(reqs)
+    distinct = _distinct_pairs(reqs)
     placeholder = sorted(rid for rid, r in reqs.items() if _placeholder_contract(r["body"]))
+    retired = {rid for rid, r in reqs.items()
+               if (r.get("meta") or {}).get("status") == "deprecated"}
     docs = {rid: _sim_tokens(_dupes_text(r["body"])) for rid, r in reqs.items()
-            if rid not in placeholder}
+            if rid not in placeholder and rid not in retired}
     docs = {rid: toks for rid, toks in docs.items() if toks}   # skip empty contracts
     if placeholder:
         print("skipped {} requirement(s) whose Contract is still the draft placeholder — "
@@ -254,7 +288,7 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
     vecs = _tfidf(docs)
     ids = sorted(vecs)
     pairs = []
-    skipped_linked = 0
+    skipped_linked = skipped_distinct = 0
     for i in range(len(ids)):
         for j in range(i + 1, len(ids)):
             s = _cosine(vecs[ids[i]], vecs[ids[j]])
@@ -262,15 +296,14 @@ def cmd_similar(reqs, threshold=cfg.SIMILAR_THRESHOLD, members=None, top=None):
                 if frozenset((ids[i], ids[j])) in linked:
                     skipped_linked += 1
                     continue
+                if frozenset((ids[i], ids[j])) in distinct:
+                    skipped_distinct += 1
+                    continue
                 shared = sorted(set(vecs[ids[i]]) & set(vecs[ids[j]]),
                                 key=lambda t: (-(vecs[ids[i]][t] + vecs[ids[j]][t]), t))[:5]
                 pairs.append((s, ids[i], ids[j], shared))
     pairs.sort(key=lambda x: (-x[0], x[1], x[2]))
-    if skipped_linked:
-        print(("skipped {} pair(s) linked by tested-by or satisfies, or siblings under one "
-               "parent (a requirement and its own test suite, a parent and its child, and two "
-               "children of one parent share vocabulary by construction).\n")
-              .format(skipped_linked))
+    _similar_skips(skipped_linked, skipped_distinct, len(retired))
     if not pairs:
         print("No overlapping requirement pairs at or above {:.2f}. {} requirement(s) compared."
               .format(threshold, len(docs)))

@@ -128,6 +128,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-NEXT-013]
+distinct_from: [REQ-SHOW-919, REQ-MAPDIAGRAMS-878]
 ---
 
 # next reads the same risk signals the Risk tab reads
@@ -167,6 +168,10 @@ CASE-4 — implements-only members do not count as tested
   When   `cmd_next` runs
   Then   the header reads "1 tested", not "2 tested"
 
+## Context
+**Notes**
+- `distinct_from: REQ-SHOW-919` - `REQ-SHOW-919` prints one requirement's signals and exits non-zero on an unknown id; this groups every requirement's signals into buckets. Both read `_risk_signals`, which is the point.
+- `distinct_from: REQ-MAPDIAGRAMS-878` - `REQ-MAPDIAGRAMS-878` draws the flagged requirements as the Risk diagram in `_map.md`; this prints them as action buckets.
 
 --------------------
 

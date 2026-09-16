@@ -21,7 +21,7 @@ Every bullet below is binding.
 - `gate` reports an `ERROR` and exits non-zero for a dangling tag, an invalid status/layer/form/level, a missing `depends_on` target, or an enforced requirement with no `implements:` member. [[REQ-CHECK-828]] details the behaviour.
 - `gate` warns (not errors) on contract drift against the lock, a confirmed requirement with no `tested-by:` link, or a confirmed requirement missing its `## Description`/`## Cases` section; `--strict` promotes most of these to errors. [[REQ-CHECK-829]] details the behaviour.
 - `gate` warns on a malformed `milestone:` value, and on a corrupt or git-untracked lock file, without affecting the exit code. [[REQ-CHECK-830]] details the behaviour.
-- `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on an unvalidated confirmed need, a bus requirement tested only at `@system`, or a `depends_on` cycle. [[REQ-CHECK-831]] details the behaviour.
+- `gate` counts legacy-schema requirements in its summary and warns, without affecting the exit code, on a `depends_on` cycle; under `--since` it reads the level warnings' facts from the whole tree. [[REQ-CHECK-831]] details the behaviour.
 - `gate` prints the open verify-intent finding count and a summary of requirements, members, errors and warnings; neither affects the exit code. [[REQ-CHECK-832]] details the behaviour.
 - With `--update-lock` — always passed by `sync` — `gate` writes the current binding hashes to `requirements/_reqlock.json`; the bare `gate` verb is otherwise report-only. [[REQ-CHECK-833]] details the behaviour.
 
@@ -219,6 +219,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-CHECK-006]
+distinct_from: [REQ-MEMBERDRIFT-880]
 ---
 
 # Contract drift and missing-coverage warnings
@@ -288,6 +289,9 @@ CASE-7 — a confirmed requirement missing Cases warns and exits 0
   When   `gate` runs
   Then   its output contains "missing '## Cases'" and it exits 0
 
+## Context
+**Notes**
+- `distinct_from: REQ-MEMBERDRIFT-880` - `REQ-MEMBERDRIFT-880` is member drift, code ahead of its spec; this is contract drift, the spec ahead of its code.
 
 --------------------
 
@@ -381,23 +385,22 @@ milestone: v3.2
 satisfies: [ARCH-CHECK-006]
 ---
 
-# Corpus-health warnings: needs, levels, cycles
+# Corpus-health warnings: legacy schema and cycles
 
 ## Description
-> These warnings are opt-in signals about corpus health rather than individual contract
-> breaks: an unvalidated stakeholder need, foundation code tested only end-to-end, or a
-> `depends_on` cycle that makes build order ambiguous. They stay warnings even under
-> `--strict` so upgrading the engine never flips a green build red.
+> These warnings are signals about corpus health rather than individual contract breaks:
+> a requirement still in the legacy schema, or a `depends_on` cycle that makes build order
+> ambiguous. They stay warnings even under `--strict` so upgrading the engine never flips a
+> green build red. The two level warnings are [[REQ-VLEVEL-946]]'s; this requirement once
+> restated them word for word.
 
 Every bullet below is binding.
 - `gate` counts those legacy-schema requirements in the summary.
 - The legacy-schema warning does not affect the exit code.
-- A confirmed `need` with no `validated-against:` member is a `WARN`, once the repo carries at
-  least one such tag (see [[ARCH-VLEVEL-037]]).
-- Whether the repo carries such a tag, and whether a given need carries one, are read from
-  the whole tree. `--since` narrows which requirements are REPORTED on, never the facts a
-  rule reads: half a tag pair inside a diff never warns about the half outside it.
-- A confirmed `bus` requirement whose levelled `tested-by:` links are all `@system` is a `WARN`.
+- Under `--since`, whether the repo carries a `validated-against:` tag, and whether a given
+  need carries one, are read from the whole tree. `--since` narrows which requirements are
+  REPORTED on, never the facts a rule reads: half a tag pair inside a diff never warns about
+  the half outside it.
 - A `depends_on` cycle is a `WARN` naming the whole chain, once per distinct cycle.
 - The cycle warning stays a warning under `--strict`, so an existing corpus keeps its
   exit code when the engine is upgraded.
@@ -413,34 +416,23 @@ CASE-2 — a legacy-schema requirement warns but the gate exits 0
   When   `gate` runs
   Then   its output contains "legacy schema" and it exits 0
 
-CASE-3 — an unvalidated confirmed need warns once the repo has opted in
-  Given  a confirmed need with no `validated-against:` tag, in a repo where at least one
-         `validated-against:` tag exists elsewhere
-  When   `gate` runs
-  Then   its output names that need alongside "validated-against"
-
-CASE-4 — a bus requirement verified only at @system warns
-  Given  a confirmed `layer: bus` requirement whose only levelled `tested-by:` link is
-         `@system`
-  When   `gate` runs
-  Then   its output contains "@system"
-
-CASE-5 — a depends_on cycle warns once, naming the whole chain
+CASE-3 — a depends_on cycle warns once, naming the whole chain
   Given  two requirements whose `depends_on` fields point at each other
   When   `gate` runs
   Then   its output contains "depends_on cycle" and "A-X-001 -> A-X-002 -> A-X-001", and
          it exits 0
 
-CASE-6 — --strict does not promote the cycle warning to an error
+CASE-4 — --strict does not promote the cycle warning to an error
   Given  two requirements whose `depends_on` fields point at each other
   When   `gate --strict` runs
   Then   it still exits 0
 
-CASE-7 — --since narrows the scope, not the facts
+CASE-5 — --since narrows the scope, not the facts
   Given  two confirmed needs, each with a `validated-against:` member, and a `--since` diff
-         touching only the first one's member file
+         touching only the first one's member file; and separately an unvalidated need
+         inside the diff
   When   `gate --since` runs
-  Then   neither need is warned about: the second's tag is outside the diff, not absent
+  Then   neither validated need is warned about, and the unvalidated one still is
 
 
 --------------------
@@ -500,6 +492,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-CHECK-006]
+distinct_from: [REQ-DRIFT-842]
 ---
 
 # Advancing the lock file
@@ -533,4 +526,8 @@ CASE-3 — the gate verb never writes lock updated
   Given  a plain draft requirement, no `--update-lock` flag
   When   `reqmap.py gate --root <d>` runs
   Then   it exits 0 and its stdout contains no "lock updated" line
+
+## Context
+**Notes**
+- `distinct_from: REQ-DRIFT-842` - `REQ-DRIFT-842` is the lock file's read and write layer; this is when `gate` and `sync` advance it.
 

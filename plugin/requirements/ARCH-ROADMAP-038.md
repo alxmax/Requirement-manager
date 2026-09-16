@@ -7,6 +7,7 @@ owner: Alex
 milestone: v2.17
 depends_on: [ARCH-HEALTH-017]
 satisfies: [SYS-REPORT-105]
+distinct_from: [REQ-PLANADVANCE-1020]
 ---
 
 # Roadmap coherence signals
@@ -96,7 +97,7 @@ CASE-6
 **Current implementation**
 - `_roadmap_signals`, `_version_key` and `_roadmap_behind` in `reqmap.py`, read by
   `cmd_health` and `_audit_summary`.
-
+- `distinct_from: REQ-PLANADVANCE-1020` - `REQ-PLANADVANCE-1020` changes the plan when a release is applied; this capability reads and reports on the plan and never writes it.
 
 --------------------
 
@@ -418,6 +419,7 @@ level: code
 layer: feature
 owner: Alex
 satisfies: [ARCH-ROADMAP-038]
+distinct_from: [REQ-NEXTVERSION-1017, REQ-VERSIONALIGN-1016, ARCH-RELEASE-072, REQ-PLANADVANCE-1020, REQ-RELEASECMD-1018]
 ---
 
 # A plan that schedules a version already declared is reported
@@ -480,6 +482,11 @@ CASE-6 — reported, never gated
                     both read it; `milestones` carries only a due date and a label.
 - a numbered milestone  valid only for the NEXT release. At about five releases a day
                     (20 in 2026-09-13..16), a number further out is overtaken within hours.
+- `distinct_from: REQ-NEXTVERSION-1017` - `REQ-NEXTVERSION-1017` picks the lowest planned version above the baseline; this reports the planned ones at or below it. Same baseline, opposite sides.
+- `distinct_from: REQ-VERSIONALIGN-1016` - `REQ-VERSIONALIGN-1016` compares the version sources with one another; this compares the plan with the highest of them.
+- `distinct_from: ARCH-RELEASE-072` - `ARCH-RELEASE-072` is the capability that cuts a release from the plan; this is the read-only report on a plan that fell behind.
+- `distinct_from: REQ-PLANADVANCE-1020` - `REQ-PLANADVANCE-1020` removes a released version from the plan when a release is applied; this reports one still there because nothing removed it.
+- `distinct_from: REQ-RELEASECMD-1018` - `REQ-RELEASECMD-1018` is the command that writes a release; this report never writes.
 
 ---
 id: REQ-UNPLANNED-1024

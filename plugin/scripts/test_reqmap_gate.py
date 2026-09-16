@@ -168,7 +168,7 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         self.assertNotIn("missing '## Description'", out)
         self.assertNotIn("missing '## Cases'", out)
 
-    def test_need_without_validation_warns_once_the_repo_opts_in(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-CHECK-831#CASE-3  # verifies: REQ-TRACE-935#CASE-4  # tested-by: REQ-VLEVEL-946  # verifies: REQ-VLEVEL-946#CASE-1
+    def test_need_without_validation_warns_once_the_repo_opts_in(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-TRACE-935#CASE-4  # tested-by: REQ-VLEVEL-946  # verifies: REQ-VLEVEL-946#CASE-1
         # Two needs: one validated, one not. The repo has opted in (a validated-against
         # tag exists), so the unvalidated need warns and the validated one does not.
         files = {
@@ -192,7 +192,7 @@ class Gate(unittest.TestCase):  # tested-by: REQ-DRIFT-841  # tested-by: REQ-DRI
         _, out = self._check(files)
         self.assertNotIn("validated-against", out)
 
-    def test_bus_verified_only_at_system_level_warns(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-CHECK-831#CASE-4  # verifies: REQ-VLEVEL-946#CASE-3
+    def test_bus_verified_only_at_system_level_warns(self):  # tested-by: ARCH-VLEVEL-037 @unit  # verifies: REQ-VLEVEL-946#CASE-3
         files = {
             "CORE-X-001.md": REQ.format(id="CORE-X-001", status="confirmed", layer="bus",
                                         extra="", title="Foundation"),
@@ -1023,7 +1023,7 @@ class DependsOnCycles(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested
             reqs = self._load(d, {"A-X-001": ["A-X-001"]})
             self.assertEqual(len(R._dependency_cycles(reqs)), 1)
 
-    def test_gate_warns_and_does_not_error(self):  # verifies: ARCH-CHECK-006#CASE-14  # verifies: REQ-CHECK-831#CASE-5
+    def test_gate_warns_and_does_not_error(self):  # verifies: ARCH-CHECK-006#CASE-14  # verifies: REQ-CHECK-831#CASE-3
         with tempfile.TemporaryDirectory() as d:
             self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
             reqs, members = R.load_requirements(d), R.scan_members(d, d)
@@ -1035,7 +1035,7 @@ class DependsOnCycles(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # tested
             self.assertIn("A-X-001 -> A-X-002 -> A-X-001", out)
             self.assertEqual(code, 0)                              # warn-only
 
-    def test_strict_does_not_promote_the_cycle_warning(self):  # verifies: REQ-CHECK-831#CASE-6
+    def test_strict_does_not_promote_the_cycle_warning(self):  # verifies: REQ-CHECK-831#CASE-4
         # a consumer whose corpus has a cycle must not see a green CI turn red on upgrade
         with tempfile.TemporaryDirectory() as d:
             self._load(d, {"A-X-001": ["A-X-002"], "A-X-002": ["A-X-001"]})
@@ -2672,13 +2672,13 @@ class SinceScopesNotFacts(unittest.TestCase):  # tested-by: ARCH-CHECK-006  # te
         ws = R.Workspace(reqs, narrowed, "requirements", ".", {}, {})
         return R.GateContext(ws, since="HEAD~1", full_members=full)
 
-    def test_a_validated_need_outside_the_diff_is_not_warned_about(self):  # verifies: REQ-CHECK-831#CASE-7
+    def test_a_validated_need_outside_the_diff_is_not_warned_about(self):  # verifies: REQ-CHECK-831#CASE-5
         full = {"SYS-A-001": [("validated-against", "a.md", 1)],
                 "SYS-B-002": [("validated-against", "b.md", 1)]}
         ctx = self._ctx({"SYS-A-001": full["SYS-A-001"]}, full)
         self.assertEqual(list(R._need_not_validated_rule(ctx)), [])
 
-    def test_a_genuinely_unvalidated_need_in_the_diff_still_warns(self):  # verifies: REQ-CHECK-831#CASE-3
+    def test_a_genuinely_unvalidated_need_in_the_diff_still_warns(self):  # verifies: REQ-CHECK-831#CASE-5
         full = {"SYS-A-001": [("validated-against", "a.md", 1)],
                 "SYS-B-002": [("implements", "b.py", 1)]}
         ctx = self._ctx({"SYS-B-002": full["SYS-B-002"]}, full)

@@ -275,6 +275,7 @@ layer: feature
 owner: Alex
 milestone: v4.2
 satisfies: [ARCH-DESIGN-061]
+distinct_from: [REQ-HEALTH-968]
 ---
 
 # Design health in the map
@@ -308,6 +309,10 @@ CASE-3 — no program logic, no key
   Given  a repo whose only code is a stylesheet
   When   the map data is assembled and `health --json` runs
   Then   neither `design` nor `design_score` is present
+
+## Context
+**Notes**
+- `distinct_from: REQ-HEALTH-968` - `REQ-HEALTH-968` carries the requirement health record in the map; this carries the code design record.
 
 --------------------
 
@@ -368,6 +373,7 @@ layer: feature
 owner: Alex
 milestone: v5.6
 satisfies: [ARCH-DESIGN-061]
+distinct_from: [REQ-VIEWER-977]
 ---
 
 # Design candidates in the map
@@ -405,6 +411,10 @@ CASE-4 — deterministic
   Given  a repo whose code did not change
   When   `map` runs twice
   Then   both runs write the same `design` block
+
+## Context
+**Notes**
+- `distinct_from: REQ-VIEWER-977` - `REQ-VIEWER-977` is the viewer tab that renders the design candidates; this emits them into `_map.json`.
 
 ---
 id: REQ-DESIGN-978

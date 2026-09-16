@@ -91,6 +91,7 @@ layer: feature
 owner: Alex
 milestone: v3.2
 satisfies: [ARCH-DOCBUNDLE-026]
+distinct_from: [REQ-ORPHANCODE-888]
 ---
 
 # Flagging a large, unlinked docs/ HTML bundle
@@ -139,4 +140,8 @@ CASE-4 — a .reqmapignore pattern suppresses the finding
   Given  a large, untagged `docs/poster.html` matched by a `.reqmapignore` line `docs/poster.html`
   When   `untagged_doc_bundles` scans the repo
   Then   `docs/poster.html` is absent from the result
+
+## Context
+**Notes**
+- `distinct_from: REQ-ORPHANCODE-888` - `REQ-ORPHANCODE-888` warns on untagged program files; this on untagged HTML under `docs/`. Each names the other's scope.
 

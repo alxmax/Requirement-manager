@@ -3246,6 +3246,33 @@ class Stage2Engine(unittest.TestCase):  # tested-by: ARCH-CONFIG-060  # tested-b
         self.assertIn("REQ-X-001", R._sim_text(body))
         self.assertNotIn("REQ-X-001", R.similar._dupes_text(body))
 
+    # tested-by: REQ-SIMILARDISTINCT-1026 @unit
+    def test_a_recorded_distinct_pair_is_skipped_and_counted(self):  # verifies: REQ-SIMILARDISTINCT-1026#CASE-1
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"REQ-A-001": {"meta": {"distinct_from": ["REQ-B-002"]}, "body": body},
+                "REQ-B-002": {"meta": {}, "body": body},
+                "REQ-C-003": {"meta": {}, "body": body}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        out = buf.getvalue()
+        self.assertIn("skipped 1 pair(s) a reviewer recorded as distinct", out)
+        self.assertNotIn("REQ-A-001  <->  REQ-B-002", out)
+        self.assertIn("REQ-A-001  <->  REQ-C-003", out)
+        self.assertIn("REQ-B-002  <->  REQ-C-003", out)
+
+    def test_a_deprecated_requirement_is_not_compared(self):  # verifies: REQ-SIMILARDISTINCT-1026#CASE-3
+        body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
+        reqs = {"REQ-A-001": {"meta": {"status": "deprecated"}, "body": body},
+                "REQ-B-002": {"meta": {}, "body": body},
+                "REQ-C-003": {"meta": {}, "body": "## Description\n- unrelated words entirely here\n"}}
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            R.cmd_similar(reqs, 0.35, {})
+        out = buf.getvalue()
+        self.assertIn("skipped 1 deprecated requirement(s)", out)
+        self.assertNotIn("<->", out)
+
     def test_dupes_top_truncates_with_a_count(self):  # verifies: REQ-SIMILAR-923#CASE-6
         body = "## Description\n- the scanner walks the tree and collects membership tags per file\n"
         reqs = {"A-A-001": {"meta": {}, "body": body}, "A-B-002": {"meta": {}, "body": body},
@@ -3359,6 +3386,20 @@ class Audit(unittest.TestCase):  # tested-by: ARCH-AUDIT-065  # tested-by: REQ-A
         self.assertEqual(rid, "REQ-A-001")
         self.assertIn("lint_exempt", msg)
         self.assertIn("ac-count-high", msg)
+
+    def test_a_distinct_from_with_no_written_reason_is_a_warning(self):  # verifies: REQ-SIMILARDISTINCT-1026#CASE-2
+        r = self._req()
+        r["meta"]["distinct_from"] = ["REQ-B-002"]
+        reqs = {"REQ-A-001": r}
+        members = {"REQ-A-001": [("implements", "x.py", 1)]}
+        with tempfile.TemporaryDirectory() as d:
+            ctx = R.GateContext(R.Workspace(reqs, members, d, d), full_members=members,
+                                update_lock=False)
+            found = list(R._exemption_without_reason_rule(ctx))
+        self.assertEqual(1, len(found))
+        self.assertIn("distinct_from", found[0][1])
+        self.assertIn("REQ-B-002", found[0][1])
+        self.assertIn("distinct_from", [e["field"] for e in R._exemptions_in_force(reqs)])
 
     def test_exemption_rule_is_never_promoted_by_strict(self):  # verifies: REQ-AUDIT-971#CASE-3
         rule = R.gate_rule_by_id("RM030")
