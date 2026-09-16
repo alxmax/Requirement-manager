@@ -110,7 +110,9 @@ Heading-uri rezervate: Now, Next, Later, Not now. Nimic altceva la `## `.
 
 - [x] MCP server, stdlib, din registrul de comenzi | unpark: consumator numit care nu poate CLI
       <!-- v7.21.12, ADR-0043. Deblocat de decizia maintainerului („MCP e un must have”), nu de
-           condiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes. -->
+           condiția din unpark: `reqmap.py mcp`, 15 tool-uri, read-only fără --allow-writes.
+           v7.21.13: JSON pentru show/search/dupes și resursele reqmap://map și
+           reqmap://requirement/<id>. În _planning.json, bara „Server MCP” e la 100%. -->
 - [ ] n=2: Consilium-py pe `uses: alxmax/requirement-manager/check@v7`. Job-ul `gate`: scoate `setup-python` + `python scripts/reqmap.py gate`, pune action-ul; păstrează `map --check` până re-vendorizezi motorul | unpark: Consilium-py are action-ul pe `main`, verde 7 zile
 - [ ] Licență Apache-2.0 / MIT în loc de BSL 1.1 | unpark: primul evaluator intern într-o firmă care cere grant
 - [ ] Search RO: rank pe flexiuni, nu match literal | unpark: un cititor din afara repo-ului care folosește viewer-ul în RO
