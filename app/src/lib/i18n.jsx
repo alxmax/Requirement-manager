@@ -87,7 +87,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "{a}/{b} green": "{a}/{b} verzi",
   "{a}/{b} files clean": "{a}/{b} fișiere curate",
   "Requirements green on every axis — confirmed, implemented, tested, no open question, no drift":
-    "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări deschise, fără drift",
+    "Cerințe verzi pe fiecare axă — confirmate, implementate, testate, fără întrebări "
+      + "deschise, fără drift",
   "Source files with no OOP or house-standard candidate — advisory, never part of the gate":
     "Fișiere sursă fără semnalări OOP sau de standarde — consultativ, niciodată parte din gate",
   "Map": "Hartă",
@@ -103,7 +104,8 @@ const RO = {  // implements: REQ-VIEWER-943
   "Every verb the engine exposes, generated from its own command registry.":
     "Fiecare verb pe care motorul îl expune, generat din propriul lui registru de comenzi.",
   "No command list in this map.": "Harta nu conține lista de comenzi.",
-  "Regenerate it with a current engine — `reqmap.py sync` writes the command reference into _map.json.":
+  ["Regenerate it with a current engine — `reqmap.py sync` writes the command reference "
+    + "into _map.json."]:
     "Regenereaz-o cu un motor actual — `reqmap.py sync` scrie referința de comenzi în _map.json.",
   "Explorer": "Explorator",
   "Findings": "Constatări",
@@ -133,8 +135,10 @@ const RO = {  // implements: REQ-VIEWER-943
   // findings
   "open verify-intent questions": "întrebări de verificare deschise",
   "No open questions.": "Nicio întrebare deschisă.",
-  "Every requirement's Verify-intent section is either empty or still carries the authored placeholder, which the engine does not count as a finding either.":
-    "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
+  ["Every requirement's Verify-intent section is either empty or still carries the authored "
+    + "placeholder, which the engine does not count as a finding either."]:
+    "Secțiunea Verify-intent a fiecărei cerințe este fie goală, fie conține încă "
+      + "textul-șablon autorat, pe care nici motorul nu îl numără drept constatare.",
   "{n} open question(s) across {m} requirement(s)":
     "{n} întrebare/întrebări deschise în {m} cerință/cerințe",
   "Answer it, fold the answer into the Description, then delete the bullet.":
@@ -194,23 +198,23 @@ const RO = {  // implements: REQ-VIEWER-943
  * it translates. Flags stay literal: `--accept-drift` is something you type. A
  * command with no entry here falls back to the registry's English summary. */
 const COMMAND_RO = {  // implements: REQ-VIEWER-964
-  "init": "Prima rulare: creează requirements/ și .reqmapignore dacă lipsesc, scoate cerințe-schiță din codul existent, construiește lock-ul și harta, apoi tipărește pașii următori. Idempotentă.",
-  "new": "Schelet de cerință nouă din șablon. Cu --from-todo și --id o pre-umple dintr-un item din TODO.md.",
-  "draft": "O cerință-schiță pentru fiecare fișier netaggat, cod sau proză. Cu --plan emite doar planul JSON și nu scrie nimic.",
-  "clarify": "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, numere fără unitate, cantități nemărginite, clauze fără caz, lipsa căii de eșec. Doar citește, iese mereu cu 0.",
-  "confirm": "Semnătura umană: trece starea în confirmed. Refuză dacă cerința nu are membru implements:.",
-  "implement": "Brieful pentru scrierea codului: obligațiile, cazurile, membrii existenți, întrebările deschise, tag-urile exacte și unde stă cod asemănător. Nu scrie cod.",
-  "gate": "Verdictul complet: legăturile tag-urilor, driftul, legătura cu testele, apoi lizibilitatea cerințelor și prospețimea hărții comise. Doar raportează.",
-  "sync": "Reconstruiește tot ce e derivat: lock-ul, harta, digestul de constatări, regiunile paginii de prezentare. --accept-drift când un contract confirmat chiar s-a schimbat.",
-  "retire": "Scoate o cerință din uz. Tipărește întâi raza de explozie și refuză cât există dependenți. Depreciază implicit; --delete o șterge, --apply e obligatoriu ca să scrie ceva.",
-  "next": "Ce urmează: scorul de coerență și gălețile de risc. --json/--badge dau numerele, --untagged listează fișierele fără tag.",
-  "show": "Dosarul unei cerințe: intenție, clauze, dependențe în ambele sensuri, membri cu fișier:linie, întrebări deschise, semnale de risc.",
-  "search": "Clasare după relevanță lexicală, cu scor. Spune explicit când nimic nu trece pragul.",
-  "dupes": "Semnalează perechi de cerințe cu contracte care se suprapun, ca să prinzi o reimplementare divergentă înainte să intre.",
-  "design": "Recenzie de design pe cod: cei patru piloni OOP plus standardele casei. Doar citește, iese cu 0, nu intră niciodată în gate.",
-  "review": "Plan JSON pentru o trecere de calitate semantică făcută de un AI.",
-  "suggest-verifies": "Propune tag-uri `# verifies: <id>#CASE-N` pentru teste deja numite după criteriul pe care îl verifică. --apply le scrie.",
-  "translate": "Manuală, opțională: pune în cache o traducere a corpusului în requirements/_i18n/<locale>.json. Nu e chemată niciodată de gate sau de hook.",
+  "init":
+    "Prima rulare: creează requirements/ și .reqmapignore dacă lipsesc, scoate "
+      + "cerințe-schiță din codul existent, construiește lock-ul și harta, apoi tipărește "
+      + "pașii următori. Idempotentă.",
+  "new":
+    "Schelet de cerință nouă din șablon. Cu --from-todo și --id o pre-umple dintr-un item "
+      + "din TODO.md.",
+  "clarify":
+    "Întreabă ce nu a răspuns cerința: termeni fără prag măsurabil, numere fără unitate, "
+      + "cantități nemărginite, clauze fără caz, lipsa căii de eșec. Doar citește, iese mereu "
+      + "cu 0.",
+  "gate":
+    "Verdictul complet: legăturile tag-urilor, driftul, legătura cu testele, apoi "
+      + "lizibilitatea cerințelor și prospețimea hărții comise. Doar raportează.",
+  "sync":
+    "Reconstruiește tot ce e derivat: lock-ul, harta, digestul de constatări, regiunile "
+      + "paginii de prezentare. --accept-drift când un contract confirmat chiar s-a schimbat.",
 };
 
 const DICT = { ro: RO };
@@ -232,7 +236,8 @@ export function translate(locale, s, params) {  // implements: REQ-VIEWER-943
  * fallback rendering) when no cache entry exists — never throws, never
  * fabricates a translation. `isTranslated` is the only signal callers need to
  * decide whether to show the "machine-translated, unreviewed" badge. */
-export function translatedText(node, locale, field, fallback = null) {  // implements: REQ-TRANSLATE-938
+// implements: REQ-TRANSLATE-938
+export function translatedText(node, locale, field, fallback = null) {
   const cached = node && node.i18n && node.i18n[locale] && node.i18n[locale][field];
   return cached ? { text: cached, isTranslated: true } : { text: fallback, isTranslated: false };
 }

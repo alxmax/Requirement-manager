@@ -19,7 +19,9 @@ export const NODE_CY = 46;
 export function edgesWithin(reqs, ids) {
   const set = ids instanceof Set ? ids : new Set(ids);
   const out = [];
-  for (const r of reqs) for (const d of r.deps || []) if (set.has(d) && set.has(r.id)) out.push([r.id, d]);
+  for (const r of reqs) {
+    for (const d of r.deps || []) if (set.has(d) && set.has(r.id)) out.push([r.id, d]);
+  }
   return out;
 }
 
@@ -68,7 +70,9 @@ function rankNodes(ids, edges) {  // implements: REQ-VIEWER-942
   ids.forEach((id) => (rank[id] = 0));
   for (let pass = 0; pass < ids.length; pass++) {
     let changed = false;
-    for (const [a, b] of acyclic) if (rank[b] < rank[a] + 1) { rank[b] = rank[a] + 1; changed = true; }
+    for (const [a, b] of acyclic) {
+      if (rank[b] < rank[a] + 1) { rank[b] = rank[a] + 1; changed = true; }
+    }
     if (!changed) break;
   }
   return rank;
@@ -81,7 +85,8 @@ const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
  * @returns {{pos:Object<string,[number,number]>, edges:Array, width:number, height:number}}
  */
 export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
-  const COLW = opts.colW || 300, ROWH = opts.rowH || 170, X0 = 50, Y0 = 40, ISO_COLS = 3, ISO_W = 220;
+  const COLW = opts.colW || 300, ROWH = opts.rowH || 170;
+  const X0 = 50, Y0 = 40, ISO_COLS = 3, ISO_W = 220;
   const ids = reqs.map((r) => r.id);
   const idset = new Set(ids);
   const edges = edgesWithin(reqs, idset);
@@ -93,8 +98,10 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
   const rank = rankNodes(ids, edges);
   const cols = {}; let maxRank = 0; const iso = [];
   for (const id of ids) {
-    if (deg[id]) { const r = rank[id]; (cols[r] = cols[r] || []).push(id); if (r > maxRank) maxRank = r; }
-    else iso.push(id);
+    if (!deg[id]) { iso.push(id); continue; }
+    const r = rank[id];
+    (cols[r] = cols[r] || []).push(id);
+    if (r > maxRank) maxRank = r;
   }
 
   // barycenter crossing-minimisation: order each rank by the mean position of its
@@ -127,10 +134,15 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
   }
   const isoX = X0 + (maxRank + 1) * COLW + 30;
   const isoY0 = yMid - ((Math.ceil(iso.length / ISO_COLS) - 1) / 2) * ROWH;
-  iso.forEach((id, k) => (pos[id] = [isoX + (k % ISO_COLS) * ISO_W, isoY0 + Math.floor(k / ISO_COLS) * ROWH]));
+  iso.forEach((id, k) => {
+    pos[id] = [isoX + (k % ISO_COLS) * ISO_W, isoY0 + Math.floor(k / ISO_COLS) * ROWH];
+  });
 
   let width = 1000, height = 600;
-  for (const [x, y] of Object.values(pos)) { width = Math.max(width, x + NODE_W + 60); height = Math.max(height, y + 160); }
+  for (const [x, y] of Object.values(pos)) {
+    width = Math.max(width, x + NODE_W + 60);
+    height = Math.max(height, y + 160);
+  }
 
   // metadata the edge router needs: column x per rank, sorted card tops per rank.
   const colX = {}, colYs = {};
@@ -138,7 +150,10 @@ export function computeLayout(reqs, opts = {}) {  // implements: REQ-VIEWER-942
     colX[r] = X0 + r * COLW;
     colYs[r] = (cols[r] || []).map((id) => pos[id][1]).sort((a, b) => a - b);
   }
-  return { pos, edges, width, height, hasIsolated: iso.length > 0, colX, colYs, rankOf: rank, colW: COLW, lo: 0, hi: height };
+  return {
+    pos, edges, width, height, hasIsolated: iso.length > 0, colX, colYs, rankOf: rank,
+    colW: COLW, lo: 0, hi: height,
+  };
 }
 
 /* ---- card-avoiding orthogonal edge routing -------------------------------- */
@@ -153,7 +168,11 @@ function clearY(tops, wantY, lo, hi) {
   for (const [a, b] of occ) { if (a > prev) gaps.push([prev, a]); prev = Math.max(prev, b); }
   if (prev < hi) gaps.push([prev, hi]);
   let best = wantY, bd = Infinity;
-  for (const [a, b] of gaps) { const c = b - a >= 20 ? Math.max(a + 10, Math.min(b - 10, wantY)) : (a + b) / 2; const dd = Math.abs(c - wantY); if (dd < bd) { bd = dd; best = c; } }
+  for (const [a, b] of gaps) {
+    const c = b - a >= 20 ? Math.max(a + 10, Math.min(b - 10, wantY)) : (a + b) / 2;
+    const dd = Math.abs(c - wantY);
+    if (dd < bd) { bd = dd; best = c; }
+  }
   return best;
 }
 
@@ -166,7 +185,9 @@ function roundedPath(pts, R = 11) {
     const v1x = cx - px, v1y = cy - py, v2x = nx - cx, v2y = ny - cy;
     const l1 = Math.hypot(v1x, v1y) || 1, l2 = Math.hypot(v2x, v2y) || 1;
     const r = Math.min(R, l1 / 2, l2 / 2);
-    d += ` L${cx - (v1x / l1) * r},${cy - (v1y / l1) * r} Q${cx},${cy} ${cx + (v2x / l2) * r},${cy + (v2y / l2) * r}`;
+    const inX = cx - (v1x / l1) * r, inY = cy - (v1y / l1) * r;
+    const outX = cx + (v2x / l2) * r, outY = cy + (v2y / l2) * r;
+    d += ` L${inX},${inY} Q${cx},${cy} ${outX},${outY}`;
   }
   const last = pts[pts.length - 1];
   d += ` L${last[0]},${last[1]}`;
@@ -276,7 +297,8 @@ export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VI
   };
 
   let xUnit = 0;
-  h.roots.filter((id) => visSet.has(id)).forEach((id) => { widthOf(id); place(id, xUnit, 0); xUnit += widthOf(id); });
+  h.roots.filter((id) => visSet.has(id))
+    .forEach((id) => { widthOf(id); place(id, xUnit, 0); xUnit += widthOf(id); });
   visible.forEach((r) => {
     if (pos[r.id]) return;
     widthOf(r.id);
@@ -297,5 +319,8 @@ export function computeHierarchyLayout(reqs, opts = {}) {  // implements: REQ-VI
     colYs[d] = visible.filter((r) => depthOf[r.id] === d && pos[r.id])
       .map((r) => pos[r.id][1]).sort((a, b) => a - b);
   }
-  return { pos, edges, width, height, codeCounts, depthOf, colX, colYs, rankOf: depthOf, lo: 0, hi: height, colW: COLW };
+  return {
+    pos, edges, width, height, codeCounts, depthOf, colX, colYs, rankOf: depthOf,
+    lo: 0, hi: height, colW: COLW,
+  };
 }

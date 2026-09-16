@@ -1,5 +1,24 @@
 # Changelog
 
+## plugin `v7.21.2` — 2026-09-16
+
+**The viewer's components fit in 100 columns, and three messages stop naming commands that
+no longer exist.** Long JSX, style objects and one-line loops in `App`, `Rail`, `TopBar`,
+`SpecDoc`, `ProblemsView`, `CommandsView`, `layout.js`, `loadData.js`, `search.js`,
+`timeline.js` and `useDragPan.js` are wrapped or pulled into named constants; long strings in
+`i18n.jsx` and the icon paths in `icons.jsx` are concatenations of the same text. `SpecDoc`
+is split into section components on the way. Nothing renders differently.
+
+- The Problems inbox told a reader to run `reqmap.py findings` and `req promote <ID>`, and the
+  translated badge credited `reqmap.py translate`; all three were removed long ago. They now
+  point at `_findings.md`, `status: confirmed` and nothing, respectively.
+- `COMMAND_RO` carried Romanian summaries for twelve commands the map no longer exports
+  (`draft`, `confirm`, `implement`, `next`, `show`, `dupes`, `design`, `review`,
+  `suggest-verifies`, `translate`, `retire`, `search`); only the five live verbs remain.
+
+`gate --design` now reports, outside the engine's four documented findings, only the baked
+fixture `data.js` and the smoke test file.
+
 ## plugin `v7.21.1` — 2026-09-16
 
 **The viewer's largest components are split, and every structural design finding outside

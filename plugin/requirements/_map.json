@@ -15781,7 +15781,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/search.js:137"
+          "loc": "app/src/lib/search.js:138"
         },
         {
           "role": "tested-by",
@@ -18645,11 +18645,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:235"
+          "loc": "app/src/lib/i18n.jsx:239"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/loadData.js:68"
+          "loc": "app/src/lib/loadData.js:69"
         },
         {
           "role": "tested-by",
@@ -18776,7 +18776,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:263"
+          "loc": "app/src/lib/i18n.jsx:268"
         },
         {
           "role": "tested-by",
@@ -19573,19 +19573,19 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/layout.js:37"
+          "loc": "app/src/lib/layout.js:39"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/layout.js:64"
+          "loc": "app/src/lib/layout.js:66"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/layout.js:83"
+          "loc": "app/src/lib/layout.js:87"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/layout.js:228"
+          "loc": "app/src/lib/layout.js:249"
         },
         {
           "role": "implements",
@@ -19656,11 +19656,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:224"
+          "loc": "app/src/lib/i18n.jsx:228"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:270"
+          "loc": "app/src/lib/i18n.jsx:275"
         }
       ],
       "test_exempt": null,
@@ -19849,11 +19849,11 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:196"
+          "loc": "app/src/lib/i18n.jsx:200"
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/i18n.jsx:282"
+          "loc": "app/src/lib/i18n.jsx:287"
         },
         {
           "role": "implements",
@@ -19986,7 +19986,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/loadData.js:84"
+          "loc": "app/src/lib/loadData.js:85"
         }
       ],
       "test_exempt": null,
@@ -20209,7 +20209,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/components/Rail.jsx:35"
+          "loc": "app/src/components/Rail.jsx:47"
         },
         {
           "role": "implements",
@@ -20288,7 +20288,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:104"
+          "loc": "app/src/lib/timeline.js:105"
         },
         {
           "role": "implements",
@@ -20347,7 +20347,7 @@
         },
         {
           "role": "implements",
-          "loc": "app/src/lib/timeline.js:80"
+          "loc": "app/src/lib/timeline.js:81"
         },
         {
           "role": "implements",
@@ -23276,7 +23276,7 @@
     },
     {
       "month": "2026-09",
-      "count": 80,
+      "count": 81,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23359,11 +23359,17 @@
         "v7.19.0",
         "v7.20.0",
         "v7.21.0",
-        "v7.21.1"
+        "v7.21.1",
+        "v7.21.2"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.2",
+          "date": "2026-09-16",
+          "headline": "**The viewer's components fit in 100 columns, and three messages stop naming commands that"
+        },
         {
           "version": "v7.21.1",
           "date": "2026-09-16",
@@ -23951,15 +23957,15 @@
   ],
   "design": {
     "files": 100,
-    "clean_files": 81,
-    "score": 81,
+    "clean_files": 94,
+    "score": 94,
     "candidates": {
       "encapsulation": 3,
       "abstraction": 0,
       "inheritance": 0,
       "polymorphism": 0,
       "metrics": 0,
-      "standards": 17
+      "standards": 4
     },
     "findings": [
       {
@@ -23981,114 +23987,10 @@
       {
         "pillar": "standards",
         "kind": "line-too-long",
-        "file": "app/src/App.jsx",
-        "line": 29,
-        "name": "App.jsx",
-        "detail": "5 line(s) wider than 100 columns, first at line 29"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/components/Rail.jsx",
-        "line": 3,
-        "name": "Rail.jsx",
-        "detail": "15 line(s) wider than 100 columns, first at line 3"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/components/TopBar.jsx",
-        "line": 30,
-        "name": "TopBar.jsx",
-        "detail": "5 line(s) wider than 100 columns, first at line 30"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
         "file": "app/src/lib/data.js",
         "line": 7,
         "name": "data.js",
         "detail": "86 line(s) wider than 100 columns, first at line 7"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/i18n.jsx",
-        "line": 90,
-        "name": "i18n.jsx",
-        "detail": "20 line(s) wider than 100 columns, first at line 90"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/icons.jsx",
-        "line": 6,
-        "name": "icons.jsx",
-        "detail": "10 line(s) wider than 100 columns, first at line 6"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/layout.js",
-        "line": 22,
-        "name": "layout.js",
-        "detail": "11 line(s) wider than 100 columns, first at line 22"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/loadData.js",
-        "line": 50,
-        "name": "loadData.js",
-        "detail": "2 line(s) wider than 100 columns, first at line 50"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/search.js",
-        "line": 78,
-        "name": "search.js",
-        "detail": "1 line(s) wider than 100 columns, first at line 78"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/timeline.js",
-        "line": 80,
-        "name": "timeline.js",
-        "detail": "1 line(s) wider than 100 columns, first at line 80"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/lib/useDragPan.js",
-        "line": 22,
-        "name": "useDragPan.js",
-        "detail": "1 line(s) wider than 100 columns, first at line 22"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/CommandsView.jsx",
-        "line": 22,
-        "name": "CommandsView.jsx",
-        "detail": "3 line(s) wider than 100 columns, first at line 22"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/ProblemsView.jsx",
-        "line": 9,
-        "name": "ProblemsView.jsx",
-        "detail": "15 line(s) wider than 100 columns, first at line 9"
-      },
-      {
-        "pillar": "standards",
-        "kind": "line-too-long",
-        "file": "app/src/views/SpecDoc.jsx",
-        "line": 16,
-        "name": "SpecDoc.jsx",
-        "detail": "17 line(s) wider than 100 columns, first at line 16"
       },
       {
         "pillar": "encapsulation",
