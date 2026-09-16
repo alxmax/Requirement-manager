@@ -4,7 +4,7 @@ import contextlib, datetime, io, json
 from . import MAP_ENGINE_VERSION, config as cfg
 from .design_report import _design_summary, cmd_design
 from .gate import cmd_check, run_gate_rules
-from .groups import _contract_groups
+from .groups import decomposable
 from .health import _health_record, cmd_coverage
 from .i18n import _translation_gaps
 from .lint import lint_requirement
@@ -114,8 +114,7 @@ def _decompose_candidates_line(reqs):
     kids = set()
     for _r in reqs.values():
         kids.update(_as_list(_r["meta"].get("satisfies")))
-    splittable = [rid for rid, _r in reqs.items()
-                  if rid not in kids and len(_contract_groups(_r["body"])) >= 2]
+    splittable = [rid for rid, _r in reqs.items() if rid not in kids and decomposable(_r)]
     if not splittable:
         return None
     return ("{} requirement(s) carry contract groups and no code children - "

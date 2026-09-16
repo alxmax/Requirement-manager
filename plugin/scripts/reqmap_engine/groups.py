@@ -396,6 +396,15 @@ def _write_group_split(plans, reqs, reqs_dir):
     return written
 
 
+def decomposable(r):  # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-994
+    """True when a requirement's own group labels can be split into code-rung children:
+    two or more groups, and not already at `level: code`. A code requirement's children
+    would sit below the lowest rung there is, so its groups are its own structure, not
+    seams to split along."""
+    return (r["meta"].get("level") != "code"
+            and len(_contract_groups(r["body"])) >= 2)
+
+
 def cmd_decompose_groups(ws, only=None, apply_it=False, code_root=None):
     # implements: ARCH-DECOMPOSE-050  # implements: REQ-DECOMPOSE-994
     """Split a requirement into code-rung children along its own contract group labels.
@@ -411,8 +420,11 @@ def cmd_decompose_groups(ws, only=None, apply_it=False, code_root=None):
     deleting the children restores the corpus exactly."""
     reqs, reqs_dir = ws.reqs, ws.reqs_dir
     members = ws.members or {}
-    targets = [only] if only else [
-        rid for rid in sorted(reqs) if len(_contract_groups(reqs[rid]["body"])) >= 2]
+    if only and reqs[only]["meta"].get("level") == "code":
+        print("{} is at `level: code`: its groups are its own structure, and a child would "
+              "sit below the code rung. Nothing to split.".format(only))
+        return 0
+    targets = [only] if only else [rid for rid in sorted(reqs) if decomposable(reqs[rid])]
     if only and len(_contract_groups(reqs[only]["body"])) < 2:
         return None
     if not targets:

@@ -3190,6 +3190,17 @@ CASE-3
         self.assertIn("work TOGETHER", parent)
         self.assertEqual(len(R._acc_blocks(parent.split("---", 2)[2])), 1)
 
+    def test_a_code_requirement_is_not_split(self):  # verifies: REQ-DECOMPOSE-994#CASE-4
+        _write(os.path.join(self.rd, "TOOL-UTILS.md"),
+               self.PARENT.replace("level: architecture", "level: code"))
+        rc, out = self._run(apply_it=True)
+        self.assertEqual(rc, 0)
+        self.assertIn("level: code", out)
+        self.assertEqual(self._files(), ["TOOL-UTILS.md"])
+        reqs = R.load_requirements(self.rd)
+        self.assertFalse(R.decomposable(reqs["TOOL-UTILS"]))
+        self.assertIsNone(R.audit._decompose_candidates_line(reqs))
+
     def test_a_requirement_with_no_groups_falls_through(self):
         _write(os.path.join(self.rd, "TOOL-UTILS.md"),
                self.PARENT.replace("**Module**\n", "").replace("**`load_json_stdin(name)`**\n", "")
