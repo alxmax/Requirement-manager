@@ -35,7 +35,7 @@ CASE-2 — the work-tree root has one answer
   Then   both resolve it through the same call and agree
 
 CASE-3 — no feature reaches git on its own
-  Given  the engine source
+  Given  the engine source, apart from the MCP server that starts `reqmap.py` itself
   When   it is searched for a process start
   Then   the runner is the only place one happens
 
@@ -93,6 +93,6 @@ CASE-3 — the root falls back to the directory it was given
   Then   it returns that directory unchanged
 
 CASE-4 — the engine starts no git process anywhere else
-  Given  the engine source
+  Given  the engine source, apart from the MCP server that starts `reqmap.py` itself
   When   it is searched for `subprocess.run` and `subprocess.check_output`
   Then   the only occurrence is inside `_git`

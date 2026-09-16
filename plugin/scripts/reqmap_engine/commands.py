@@ -340,6 +340,12 @@ COMMANDS = {
                 "type": "bool",
                 "help": "Promote drift and test-link integrity from warn to error.",
             },
+            {
+                "name": "json",
+                "flag": "--json",
+                "type": "bool",
+                "help": "With --retire or --release: emit the plan as JSON.",
+            },
         ],
     },
     "clarify": {
@@ -382,6 +388,25 @@ COMMANDS = {
              "help": "Emit the questions as JSON for an agent to answer."},
         ],
     },
+    # `tool: False` — a server is not a function to call, so the generated function-calling
+    # schema leaves it out; the help text and SKILL.md still document it.
+    "mcp": {
+        "summary": (
+            "Serve this repository's requirements to an AI assistant over the Model Context "
+            "Protocol (stdio). Each tool is one reqmap invocation in a fresh process. "
+            "Read-only unless --allow-writes."
+        ),
+        "arg": None,
+        "tool": False,
+        "params": [
+            {
+                "name": "allow_writes",
+                "flag": "--allow-writes",
+                "type": "bool",
+                "help": "Also offer the tools that write: sync, new and release.",
+            },
+        ],
+    },
 }
 
 
@@ -391,5 +416,5 @@ COMMANDS = {
 COMMAND_GROUPS = (
     ("author", ("init", "new", "clarify")),
     ("build", ("sync",)),
-    ("read", ("gate",)),
+    ("read", ("gate", "mcp")),
 )

@@ -6,6 +6,7 @@ from .draft import cmd_extract
 from .mapdata import _roadmap_signals
 from .gate import cmd_check
 from .mapcmd import cmd_map
+from .mcpconfig import seed_mcp_files
 from .release import seed_release_files
 from .versions import version_files
 from .parse import load_requirements
@@ -222,7 +223,9 @@ def _seed_plan_files(code_root, reqs_dir, created):
         created.append(os.path.relpath(planning, code_root).replace(os.sep, "/"))
     seeded, notes = seed_release_files(code_root, reqs_dir)
     created.extend(seeded)
-    return notes
+    seeded, mcp_notes = seed_mcp_files(code_root, reqs_dir)  # implements: REQ-MCPSEED-1029
+    created.extend(seeded)
+    return notes + mcp_notes
 
 
 def _print_release_setup(reqs_dir, code_root, notes):

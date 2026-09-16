@@ -89,6 +89,8 @@ Every bullet below is binding.
 - The `SKILL.universal.md` command table is generated from `COMMANDS` by `gen-integration` and written into the `<!--##REQMAP:COMMANDS##-->` region; prose outside that region is never touched.
 - The `SKILL.md` command list is generated the same way, into the same region marker, as a grouped bullet list. It is the contract an assistant reads on a fresh repo, so a verb that exists is documented there and one that does not, is not.
 - Internal commands (e.g. `gen-integration`) are excluded from AI-facing generated artifacts.
+- A command marked `tool: False` — `mcp`, a server rather than a function to call — is left out
+  of the function-calling schema and still documented in both SKILL command regions.
 - The gate fails (exit non-zero) when a committed generated artifact is stale relative to a fresh generation.
 - All generators and the gate check are stdlib-only; no third-party imports are permitted.
 

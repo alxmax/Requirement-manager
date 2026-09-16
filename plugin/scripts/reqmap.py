@@ -26,6 +26,7 @@ Subcommands:
   findings          aggregate open verify-intent items into requirements/_findings.md
   design            advisory design candidates in the repo's code, any language (four OOP pillars +
                     metrics + standards; never the gate)
+  mcp [--allow-writes]  serve the requirements to an AI assistant over MCP (stdio)
   confirm <ID>      flip a reviewed requirement's status to confirmed (one frontmatter edit)
   review [ID]       emit a JSON review plan (intent/contract/acceptance/anchors) for AI-assisted
                     quality review
@@ -65,6 +66,7 @@ from reqmap_engine.init import cmd_init
 from reqmap_engine.levels import cmd_levels
 from reqmap_engine.lint import cmd_lint
 from reqmap_engine.mapcmd import cmd_map
+from reqmap_engine.mcp import serve as cmd_mcp
 from reqmap_engine.registry import _cli_choices, cmd_gen_integration
 from reqmap_engine.release import cmd_release
 from reqmap_engine.retire import cmd_retire
@@ -83,7 +85,7 @@ from reqmap_engine import (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, review, targets, plandrift, history,
-    pyramid, cliflags, site_template, docclaims, versions, release,
+    pyramid, cliflags, site_template, docclaims, versions, release, mcp, mcpconfig,
 )
 # Declared support floor, deliberately equal to the OLDEST version CI actually runs
 # (the `tests` matrix in .github/workflows/ci.yml). The code itself needs only 3.7
@@ -290,6 +292,8 @@ def main():
     if not os.path.exists(tmpl):
         tmpl = None
 
+    if a.cmd == "mcp":               # a long-running server: no workspace of its own
+        return cmd_mcp(a)
     if a.cmd == "new":
         if getattr(a, "from_todo", None):
             return cmd_promote_todo(reqs_dir, tmpl, a.from_todo, a.new_id, a.mark_done, code_root)
@@ -380,7 +384,7 @@ _ENGINE_MODULES = (
     risk, show, design, design_python, design_brace, design_report, mapmd,
     mapjson, viewer, site, mapdata, health, mapcmd, workspace, rules,
     gate, audit, init, retire, levels, pyramid, review, targets, plandrift, history,
-    cliflags, site_template, docclaims, versions, release,
+    cliflags, site_template, docclaims, versions, release, mcp, mcpconfig,
 )
 
 

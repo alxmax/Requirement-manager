@@ -1,5 +1,23 @@
 # Changelog
 
+## plugin `v7.21.12` — 2026-09-16
+
+**`reqmap.py mcp`: the engine as an MCP server.** An assistant can now reach the engine over
+the Model Context Protocol on stdio, with fifteen tools named for the question they answer —
+`reqmap_gate`, `reqmap_next`, `reqmap_health`, `reqmap_show(id)`, `reqmap_search(query)`,
+`reqmap_audit`, `reqmap_dupes`, `reqmap_design`, `reqmap_untagged`, `reqmap_review(id)`,
+`reqmap_clarify`, `reqmap_release_plan`, and, only with `--allow-writes`, `reqmap_sync`,
+`reqmap_new` and `reqmap_release`. Each call is one `reqmap.py` invocation in a fresh process,
+so the CLI stays the only code path, and a test holds every verb and flag a tool uses to the
+command registry (ARCH-MCP-073).
+
+Stdlib only, protocol revision `2025-06-18`, with a conformance test over real stdio. `init`
+writes `.mcp.json` (Claude Code) and `.vscode/mcp.json` (VS Code with Copilot) when absent,
+with paths under each client's project-root variable. The plugin does not declare the server,
+and the gate does not warn when the configs are missing. ADR-0043 records why, and supersedes
+the Senate deferral of 2026-06-21. `sync` gained `--json` in the registry: `--retire` and
+`--release` already emitted it.
+
 ## plugin `v7.21.11` — 2026-09-16
 
 **A pair a reviewer read and found distinct stops coming back from `dupes`.** `dupes` measures

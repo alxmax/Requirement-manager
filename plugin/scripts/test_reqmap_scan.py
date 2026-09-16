@@ -1529,6 +1529,10 @@ class OneGitRunner(unittest.TestCase):  # tested-by: ARCH-GITRUN-067  # tested-b
         for path in sources:
             with io.open(path, encoding="utf-8") as f:
                 tree = ast.parse(f.read())
+            if os.path.basename(path) == "mcp.py":
+                # The MCP server starts `reqmap.py` itself, one process per tool call
+                # (ADR-0043). It is not a git process, which is what this invariant is about.
+                continue
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef) and node.name == "_git":
                     runner = (path, node.lineno, node.end_lineno)
@@ -1543,6 +1547,8 @@ class OneGitRunner(unittest.TestCase):  # tested-by: ARCH-GITRUN-067  # tested-b
         self.assertIsNotNone(runner)
         self.assertEqual(starts[0][0], runner[0])
         self.assertTrue(runner[1] < starts[0][1] <= (runner[2] or starts[0][1]))
+        with io.open(os.path.join(pkg, "mcp.py"), encoding="utf-8") as f:
+            self.assertNotIn('"git"', f.read())
 
 
 class OneSectionReader(unittest.TestCase):  # tested-by: ARCH-SECTIONS-068  # tested-by: REQ-SECTIONS-994

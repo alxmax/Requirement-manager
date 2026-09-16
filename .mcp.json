@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "reqmap": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "${CLAUDE_PROJECT_DIR:-.}/plugin/scripts/reqmap.py",
+        "mcp",
+        "--root",
+        "${CLAUDE_PROJECT_DIR:-.}",
+        "--reqs",
+        "${CLAUDE_PROJECT_DIR:-.}/plugin/requirements",
+        "--code",
+        "${CLAUDE_PROJECT_DIR:-.}"
+      ]
+    }
+  }
+}
