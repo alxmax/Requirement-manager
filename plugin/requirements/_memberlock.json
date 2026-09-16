@@ -9,7 +9,7 @@
     },
     "ARCH-CHECK-006": {
       "plugin/hooks/pre-commit": "3f8d3f6e1d16604c471085c414e2e49c6f5f9092bd58a571d42d80b5a85673d4",
-      "plugin/scripts/reqmap_engine/__init__.py": "702d4a8a3a35d23f8cfb4ec3fd4ed3d3c893e645c114d8074f046426f3bc7905",
+      "plugin/scripts/reqmap_engine/__init__.py": "47581a61c13819a32320792a72a1ffa22bf6761778831e9f54720751dba7238b",
       "plugin/scripts/reqmap_engine/locks.py#_ver_key": "44275f687cd154f838531f97a8b052e79ae2aba9a983032ac47414b9a68360b6",
       "plugin/scripts/reqmap_engine/locks.py#warn_if_stale": "2bc1dc1aa766271c86c6f3bcb584cd998c9ac2634f4c85448e00998a9c2f71e1",
       "plugin/scripts/reqmap_engine/mapjson.py#_path_key": "081b32c797a53ef391a69a5653132225cadab8c259977e7b25298c68a1b0949d",
@@ -74,7 +74,7 @@
       "plugin/scripts/reqmap.py#_pipe_closed": "23cfa7cac75d9bd4dfe9428cc0d7585f7350303c4168161466b0b7e5717e5215"
     },
     "ARCH-RELEASE-072": {
-      "plugin/scripts/reqmap_engine/release.py": "50117e879a70f47f45565100f3d97bca67cbbf7cfcc3623798b99e7327b44b7b",
+      "plugin/scripts/reqmap_engine/release.py": "aa82e13fd0f21f140f7eacdf1efad8163c5e6314303c7123d15d27c1bcfeed17",
       "plugin/scripts/reqmap_engine/versions.py": "3a2cd098341aae6961e407cc8107512593c46f90ad5dadc18e8407a729e7dc96"
     },
     "ARCH-REVIEW-022": {
@@ -303,7 +303,7 @@
     "REQ-RELEASEWORKFLOW-1019": {
       "plugin/scripts/reqmap_engine/history.py#entry_body": "c6c849df0b0f908dc755b0d5930bded7655de992961024949df4a4857c9be849",
       "plugin/scripts/reqmap_engine/release.py#_declared": "487e85a25e4b391118e701f59a3e9ce69f4086dab143040b355a99b53914e9c8",
-      "plugin/scripts/reqmap_engine/release.py#release_workflow": "6beb3811d8b7a3fd5ccff94e0a00adb21c88900fba9fa9a764e8a2aa6f120704"
+      "plugin/scripts/reqmap_engine/release.py#release_workflow": "1f3a9958d14ec6e8e09c0fab7861695dccb7e24cc865d8dcef0588792326a8fc"
     },
     "REQ-RETIRE-960": {
       "plugin/scripts/reqmap_engine/retire.py#_print_retire_plan": "a5a6f9b197ecdb439fac2f692fd0ad1b49aa73c9094621ea314d03691b5fd062"

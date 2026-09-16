@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.7",
+  "engine_version": "2026-09-16.8",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -12671,7 +12671,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3819"
+          "loc": "plugin/scripts/test_reqmap_author.py:3823"
         },
         {
           "role": "implements",
@@ -12695,7 +12695,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:285"
+          "loc": "plugin/scripts/reqmap_engine/release.py:290"
         },
         {
           "role": "implements",
@@ -12820,7 +12820,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:285"
+          "loc": "plugin/scripts/reqmap_engine/release.py:290"
         }
       ],
       "test_exempt": null,
@@ -13083,7 +13083,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/release.py:286"
+          "loc": "plugin/scripts/reqmap_engine/release.py:291"
         }
       ],
       "test_exempt": null,
@@ -13181,7 +13181,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3842"
+          "loc": "plugin/scripts/test_reqmap_author.py:3846"
         },
         {
           "role": "implements",
@@ -13236,7 +13236,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3880"
+          "loc": "plugin/scripts/test_reqmap_author.py:3884"
         },
         {
           "role": "implements",
@@ -14480,7 +14480,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3880"
+          "loc": "plugin/scripts/test_reqmap_author.py:3884"
         },
         {
           "role": "implements",

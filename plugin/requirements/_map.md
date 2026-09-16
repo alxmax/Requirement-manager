@@ -1,6 +1,6 @@
 ---
 generated: 2026-09-16
-engine: 2026-09-16.7
+engine: 2026-09-16.8
 nodes: 281
 edges: 120
 design pass-rate: 72% (68/94 source files without a design candidate)
@@ -705,12 +705,12 @@ graph LR
   f_plugin_scripts_reqmap_engine_health_py_102_250["plugin/scripts/reqmap_engine/health.py:102-250"]
   ARCH_REGISTRYLAG_035 -->|implements| f_plugin_scripts_reqmap_engine_health_py_102_250
   ARCH_RELEASE_072["Releasing from the plan<br><small>ARCH-RELEASE-072</small>"]
-  f_plugin_scripts_test_reqmap_author_py_3819["plugin/scripts/test_reqmap_author.py:3819"]
-  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3819
+  f_plugin_scripts_test_reqmap_author_py_3823["plugin/scripts/test_reqmap_author.py:3823"]
+  ARCH_RELEASE_072 -->|tested-by| f_plugin_scripts_test_reqmap_author_py_3823
   f_plugin_scripts_reqmap_engine_plandrift_py_251_301["plugin/scripts/reqmap_engine/plandrift.py:251-301"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_plandrift_py_251_301
-  f_plugin_scripts_reqmap_engine_release_py_1_285["plugin/scripts/reqmap_engine/release.py:1-285"]
-  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_release_py_1_285
+  f_plugin_scripts_reqmap_engine_release_py_1_290["plugin/scripts/reqmap_engine/release.py:1-290"]
+  ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_release_py_1_290
   f_plugin_scripts_reqmap_engine_versions_py_1_201["plugin/scripts/reqmap_engine/versions.py:1-201"]
   ARCH_RELEASE_072 -->|implements| f_plugin_scripts_reqmap_engine_versions_py_1_201
   ARCH_REPRO_041["Committed build artifacts stay re-derivable<br><small>ARCH-REPRO-041</small>"]

@@ -3805,6 +3805,10 @@ class ReleaseWorkflow(unittest.TestCase):  # tested-by: REQ-RELEASEWORKFLOW-1019
         self.assertIn("gh release create", text)
         with tempfile.TemporaryDirectory() as d:
             self.assertIsNone(R.release_workflow(d, os.path.join(d, "requirements")))
+            # an engine on another Windows drive: relpath raises instead of answering ".."
+            with mock.patch.object(R.release.os.path, "relpath",
+                                   side_effect=ValueError("path is on mount 'D:'")):
+                self.assertIsNone(R.release_workflow(d, os.path.join(d, "requirements")))
 
     def test_json_reports_the_declared_version_its_tag_and_notes(self):  # verifies: REQ-RELEASEWORKFLOW-1019#CASE-5
         with tempfile.TemporaryDirectory() as d:

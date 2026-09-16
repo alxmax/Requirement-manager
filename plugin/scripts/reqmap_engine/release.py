@@ -266,10 +266,15 @@ def release_workflow(code_root, reqs_dir):  # implements: REQ-RELEASEWORKFLOW-10
     root = os.path.abspath(code_root)
     engine = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                           "reqmap.py")
-    rel_engine = os.path.relpath(engine, root)
+    try:
+        rel_engine = os.path.relpath(engine, root)
+        rel_reqs = os.path.relpath(os.path.abspath(reqs_dir), root)
+    except ValueError:
+        # Windows: a path on another drive has no relative form, and it is certainly not
+        # inside the checkout.
+        return None
     if rel_engine.startswith(".."):
         return None
-    rel_reqs = os.path.relpath(os.path.abspath(reqs_dir), root)
     return _WORKFLOW.format(branch=_default_branch(code_root),
                             engine=rel_engine.replace(os.sep, "/"),
                             reqs=rel_reqs.replace(os.sep, "/"))
