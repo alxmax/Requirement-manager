@@ -1,5 +1,20 @@
 # Changelog
 
+## plugin `v7.21.8` — 2026-09-16
+
+**A retired requirement no longer lowers the health score.** The headline score divided the
+green count by every requirement, and a `deprecated` one can never be green, so each retired
+requirement capped the score for good: this repo read 97/100 with nothing wrong, 8 retired
+requirements in the denominator. The reviewed score already left them out. `health --json`
+gains `scored` (the denominator) and `deprecated`; the console, `gate --audit` and the viewer's
+rail read `healthy/scored` (REQ-HEALTH-858 CASE-5). This repo now reads 100/100.
+
+REQ-PLANSTALE-1013 named `plugin.json` as the version source while the code reads every
+version file (REQ-VERSIONFILES-1014); the clause now says so. `CLAUDE.md` is corrected where a
+run of the engine against it showed it wrong: id numbers are not unique on their own, the
+Action alias ships with plugin 7.x, the CLI has five verbs, and it now covers the viewer's
+commands and the planning/release flow.
+
 ## plugin `v7.21.7` — 2026-09-16
 
 **Every roadmap line names the edit that clears it, and `init` says when the roadmap is

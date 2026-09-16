@@ -137,6 +137,10 @@
       "hash": "3ce6caaa0842",
       "reason": "plain present tense"
     },
+    "REQ-HEALTH-858": {
+      "hash": "417d0647ff2c",
+      "reason": "health score leaves deprecated out"
+    },
     "REQ-HEALTH-859": {
       "hash": "524079054104",
       "reason": "ADR-0036 / RM032: six childless architecture requirements lowered to level: code under their teams (ATOMICFORM, MODULEFILE -> ARCH-PARSE-001; DESCRIPTION -> ARCH-SECTIONS-068; REDUNDANCY -> ARCH-SIMILAR-016; VRUNGS -> ARCH-VLEVEL-037; REVIEWEDSCORE -> ARCH-HEALTH-017); each parent names its new member; SYS listings updated"
@@ -182,8 +186,8 @@
       "reason": "readability: split stacked clauses, third cases, file-spread by directory"
     },
     "REQ-PLANSTALE-1013": {
-      "hash": "9434789ef73b",
-      "reason": null
+      "hash": "9b9493630743",
+      "reason": "health score excludes deprecated; PLANSTALE baseline names version files"
     },
     "REQ-PLANTAGGED-1005": {
       "hash": "ebb234c6ee12",

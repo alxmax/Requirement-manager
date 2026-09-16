@@ -341,7 +341,8 @@ def _summary_table_rows(gate_rc, signals, dups):
     verdict = "FAIL" if gate_rc else "clean"
     rows = [("Gate", verdict, "reqmap.py gate"),
             ("Health", "{}/100 ({}/{} green on every axis)".format(
-                health["score"], health["healthy"], health["total"]), "reqmap.py gate --risk")]
+                health["score"], health["healthy"], health.get("scored", health["total"])),
+             "reqmap.py gate --risk")]
     if design is not None:
         rows.append(("Design pass-rate", "{}% ({}/{} files with no candidate)".format(
             design["score"], design["clean_files"], design["files"]), "reqmap.py gate --design"))
