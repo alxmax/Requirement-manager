@@ -2286,6 +2286,26 @@ class RoadmapSignals(unittest.TestCase):  # tested-by: ARCH-ROADMAP-038  # teste
         data = self._health("# TODO\n\n## v2.13\n- [x] shipped | lane: feature\n", req_ms="v2.13")
         self.assertNotIn("roadmap_unmapped", data)
 
+    def test_each_roadmap_line_names_its_next_step(self):  # verifies: REQ-ROADMAP-983#CASE-4
+        reqs = {"REQ-A-001": {"meta": {"milestone": "v2.13"}, "body": ""}}
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "TODO.md"),
+                   "# TODO\n\n## v2.16\n- [x] a | lane: feature\n\n## Deferred\n- [ ] b\n")
+            lines = R.audit._roadmap_lag_lines(reqs, d)
+        self.assertTrue(any("add `milestone:` to the requirements that shipped after v2.13" in x
+                            for x in lines), lines)
+        self.assertTrue(any("start each with its version" in x and "Deferred" in x
+                            for x in lines), lines)
+
+    def test_init_names_an_inert_roadmap(self):  # verifies: REQ-ROADMAP-983#CASE-5
+        with tempfile.TemporaryDirectory() as d:
+            _write(os.path.join(d, "TODO.md"), "# TODO\n\n## Backlog\n- [ ] b\n")
+            _write(os.path.join(d, "app.py"), "def run():\n    return 1\n")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                R.cmd_init(os.path.join(d, "requirements"), d, no_site=True)
+        self.assertEqual(1, buf.getvalue().count("the roadmap chart stays empty"))
+
 
 class ViewerDataSync(unittest.TestCase):  # tested-by: ARCH-VIEWER-007
     def _fixture(self, path, entries):

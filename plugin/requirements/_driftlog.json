@@ -205,6 +205,10 @@
       "hash": "34bdcb2ea67a",
       "reason": "v6.1.0: excalidraw-diagram split into its own repository; REQ-REPRO-905 no longer covers the departed diagram"
     },
+    "REQ-ROADMAP-983": {
+      "hash": "7a94ddf4659e",
+      "reason": "roadmap next steps"
+    },
     "REQ-RULES-947": {
       "hash": "68dd0cb1b87c",
       "reason": "baked fixture is JSON"
