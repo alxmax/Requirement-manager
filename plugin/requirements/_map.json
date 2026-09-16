@@ -1,5 +1,5 @@
 {
-  "engine_version": "2026-09-16.10",
+  "engine_version": "2026-09-16.11",
   "repo": "alxmax/Requirement-manager",
   "nodes": [
     {
@@ -665,67 +665,67 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:127"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:126"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:143"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:159"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:169"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:168"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:178"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:177"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:189"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:188"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:198"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:197"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:207"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:206"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:229"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:266"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:265"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:298"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:297"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:329"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:328"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:358"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:357"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:369"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:368"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:392"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:391"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:423"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:422"
         },
         {
           "role": "implements",
@@ -850,31 +850,31 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:229"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:228"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:298"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:297"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:329"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:328"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:358"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:357"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:369"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:368"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:392"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:391"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:423"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:422"
         }
       ],
       "test_exempt": null,
@@ -1061,27 +1061,27 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:127"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:126"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:143"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:142"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:159"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:158"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:169"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:168"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:207"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:206"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:266"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:265"
         }
       ],
       "test_exempt": null,
@@ -1578,7 +1578,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3334"
+          "loc": "plugin/scripts/test_reqmap_author.py:3345"
         },
         {
           "role": "implements",
@@ -1632,7 +1632,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3334"
+          "loc": "plugin/scripts/test_reqmap_author.py:3345"
         },
         {
           "role": "implements",
@@ -1685,7 +1685,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3334"
+          "loc": "plugin/scripts/test_reqmap_author.py:3345"
         },
         {
           "role": "implements",
@@ -3519,7 +3519,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/groups.py:400"
+          "loc": "plugin/scripts/reqmap_engine/groups.py:399"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/groups.py:409"
         },
         {
           "role": "implements",
@@ -3742,7 +3746,8 @@
         "No `implements:` tag is written. Each child lists the members it is expected to claim, found by searching the parent's `implements:` files for the group's subject at a definition.",
         "A parent with more than `LINT_AC_MAX` groups is refused with the group list and the instruction to merge labels first.",
         "Without `--apply` the run prints the whole plan and writes nothing. With it, the children are written and the parent is rewritten: each split group becomes one obligation line naming its child, moved cases leave, surviving cases keep their labels, and a parent left with no case gets one placeholder naming what the rung still owes. Everything outside the Description and Cases is byte-identical.",
-        "With no id, every requirement in the corpus that carries two or more groups is planned, and each is written independently on `--apply`."
+        "With no id, every requirement in the corpus that carries two or more groups is planned, and each is written independently on `--apply`.",
+        "A requirement already at `level: code` is never split, named or not: its children would sit below the code rung. Named, the run says so and writes nothing; `sync` never counts it as a candidate."
       ],
       "verify": [],
       "notes": [],
@@ -3751,12 +3756,12 @@
         "CASE-1 — — the author's group labels are the seams Given  a requirement whose Description has three bold labels, each followed by bullets When   `clarify <ID> --decompose --apply` runs Then   three child files exist, each carrying its group's bullets verbatim, `level: code`, `level_source: auto`, `status: draft` and `satisfies: [<ID>]`",
         "CASE-2 — — a case moves only when it names exactly one subject Given  a parent case naming one group's subject, one naming two, and one naming none When   the split runs Then   the first case lands in its child and the other two stay on the parent, and stdout reports 2 stayed",
         "CASE-3 — — no tag is written, expected members are listed Given  a parent whose `implements:` file defines the group's subject as a function When   the split runs Then   the child's Context lists that `file:line` and no `implements:` line was added to any source file",
-        "CASE-4 — — too many groups is refused, not split Given  a requirement with `LINT_AC_MAX + 1` groups When   the split runs with `--apply` Then   nothing is written and stdout names the groups and says to merge them first",
+        "CASE-4 — — a split that cannot be made is refused, not attempted Given  a requirement with `LINT_AC_MAX + 1` groups, and one at `level: code` with three When   the split runs on each with `--apply`, and `sync` lists its candidates Then   nothing is written; stdout names the groups and says to merge them first for the first, says the second is at the code rung, and `sync` does not count the second",
         "CASE-5 — — the dry run is a dry run Given  a splittable requirement When   `clarify <ID> --decompose` runs without `--apply` Then   the plan is printed and no file in the requirements directory changed",
         "CASE-6 — — the parent is rewritten only where the split happened Given  a parent with prose before its Description and a Context section after its Cases When   the split runs with `--apply` Then   every split group is one line ending in its child's id, surviving cases keep their original labels, and the text outside Description and Cases is byte-identical",
         "CASE-7 — — a parent stripped of every case gets a placeholder, not an empty section Given  a parent whose cases all name a child When   the split runs with `--apply` Then   the parent's Cases section holds one placeholder case rather than nothing"
       ],
-      "accept": "CASE-1 — the author's group labels are the seams\n  Given  a requirement whose Description has three bold labels, each followed by bullets\n  When   `clarify <ID> --decompose --apply` runs\n  Then   three child files exist, each carrying its group's bullets verbatim, `level: code`,\n         `level_source: auto`, `status: draft` and `satisfies: [<ID>]`\n\nCASE-2 — a case moves only when it names exactly one subject\n  Given  a parent case naming one group's subject, one naming two, and one naming none\n  When   the split runs\n  Then   the first case lands in its child and the other two stay on the parent, and stdout\n         reports 2 stayed\n\nCASE-3 — no tag is written, expected members are listed\n  Given  a parent whose `implements:` file defines the group's subject as a function\n  When   the split runs\n  Then   the child's Context lists that `file:line` and no `implements:` line was added to\n         any source file\n\nCASE-4 — too many groups is refused, not split\n  Given  a requirement with `LINT_AC_MAX + 1` groups\n  When   the split runs with `--apply`\n  Then   nothing is written and stdout names the groups and says to merge them first\n\nCASE-5 — the dry run is a dry run\n  Given  a splittable requirement\n  When   `clarify <ID> --decompose` runs without `--apply`\n  Then   the plan is printed and no file in the requirements directory changed\n\nCASE-6 — the parent is rewritten only where the split happened\n  Given  a parent with prose before its Description and a Context section after its Cases\n  When   the split runs with `--apply`\n  Then   every split group is one line ending in its child's id, surviving cases keep their\n         original labels, and the text outside Description and Cases is byte-identical\n\nCASE-7 — a parent stripped of every case gets a placeholder, not an empty section\n  Given  a parent whose cases all name a child\n  When   the split runs with `--apply`\n  Then   the parent's Cases section holds one placeholder case rather than nothing",
+      "accept": "CASE-1 — the author's group labels are the seams\n  Given  a requirement whose Description has three bold labels, each followed by bullets\n  When   `clarify <ID> --decompose --apply` runs\n  Then   three child files exist, each carrying its group's bullets verbatim, `level: code`,\n         `level_source: auto`, `status: draft` and `satisfies: [<ID>]`\n\nCASE-2 — a case moves only when it names exactly one subject\n  Given  a parent case naming one group's subject, one naming two, and one naming none\n  When   the split runs\n  Then   the first case lands in its child and the other two stay on the parent, and stdout\n         reports 2 stayed\n\nCASE-3 — no tag is written, expected members are listed\n  Given  a parent whose `implements:` file defines the group's subject as a function\n  When   the split runs\n  Then   the child's Context lists that `file:line` and no `implements:` line was added to\n         any source file\n\nCASE-4 — a split that cannot be made is refused, not attempted\n  Given  a requirement with `LINT_AC_MAX + 1` groups, and one at `level: code` with three\n  When   the split runs on each with `--apply`, and `sync` lists its candidates\n  Then   nothing is written; stdout names the groups and says to merge them first for the\n         first, says the second is at the code rung, and `sync` does not count the second\n\nCASE-5 — the dry run is a dry run\n  Given  a splittable requirement\n  When   `clarify <ID> --decompose` runs without `--apply`\n  Then   the plan is printed and no file in the requirements directory changed\n\nCASE-6 — the parent is rewritten only where the split happened\n  Given  a parent with prose before its Description and a Context section after its Cases\n  When   the split runs with `--apply`\n  Then   every split group is one line ending in its child's id, surviving cases keep their\n         original labels, and the text outside Description and Cases is byte-identical\n\nCASE-7 — a parent stripped of every case gets a placeholder, not an empty section\n  Given  a parent whose cases all name a child\n  When   the split runs with `--apply`\n  Then   the parent's Cases section holds one placeholder case rather than nothing",
       "input": "",
       "output": "",
       "desc": "",
@@ -3830,7 +3835,11 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/groups.py:400"
+          "loc": "plugin/scripts/reqmap_engine/groups.py:399"
+        },
+        {
+          "role": "implements",
+          "loc": "plugin/scripts/reqmap_engine/groups.py:409"
         }
       ],
       "test_exempt": null,
@@ -5819,7 +5828,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3464"
+          "loc": "plugin/scripts/test_reqmap_author.py:3475"
         },
         {
           "role": "implements",
@@ -12683,7 +12692,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3823"
+          "loc": "plugin/scripts/test_reqmap_author.py:3834"
         },
         {
           "role": "implements",
@@ -12770,7 +12779,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3572"
+          "loc": "plugin/scripts/test_reqmap_author.py:3583"
         },
         {
           "role": "implements",
@@ -12828,7 +12837,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3612"
+          "loc": "plugin/scripts/test_reqmap_author.py:3623"
         },
         {
           "role": "implements",
@@ -12879,11 +12888,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3646"
+          "loc": "plugin/scripts/test_reqmap_author.py:3657"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:189"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:188"
         },
         {
           "role": "implements",
@@ -12943,7 +12952,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3676"
+          "loc": "plugin/scripts/test_reqmap_author.py:3687"
         },
         {
           "role": "implements",
@@ -13000,7 +13009,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3698"
+          "loc": "plugin/scripts/test_reqmap_author.py:3709"
         },
         {
           "role": "implements",
@@ -13079,7 +13088,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3771"
+          "loc": "plugin/scripts/test_reqmap_author.py:3782"
         },
         {
           "role": "implements",
@@ -13138,7 +13147,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3698"
+          "loc": "plugin/scripts/test_reqmap_author.py:3709"
         },
         {
           "role": "implements",
@@ -13193,11 +13202,11 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3846"
+          "loc": "plugin/scripts/test_reqmap_author.py:3857"
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:198"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:197"
         },
         {
           "role": "implements",
@@ -13248,7 +13257,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3884"
+          "loc": "plugin/scripts/test_reqmap_author.py:3895"
         },
         {
           "role": "implements",
@@ -14435,7 +14444,7 @@
         },
         {
           "role": "implements",
-          "loc": "plugin/scripts/reqmap_engine/audit.py:178"
+          "loc": "plugin/scripts/reqmap_engine/audit.py:177"
         },
         {
           "role": "implements",
@@ -14494,7 +14503,7 @@
       "members": [
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3884"
+          "loc": "plugin/scripts/test_reqmap_author.py:3895"
         },
         {
           "role": "implements",
@@ -18512,7 +18521,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3226"
+          "loc": "plugin/scripts/test_reqmap_author.py:3237"
         },
         {
           "role": "implements",
@@ -18782,7 +18791,7 @@
         },
         {
           "role": "tested-by",
-          "loc": "plugin/scripts/test_reqmap_author.py:3226"
+          "loc": "plugin/scripts/test_reqmap_author.py:3237"
         },
         {
           "role": "implements",
@@ -23298,7 +23307,7 @@
     },
     {
       "month": "2026-09",
-      "count": 83,
+      "count": 84,
       "first": "2026-09-02",
       "last": "2026-09-16",
       "versions": [
@@ -23384,11 +23393,17 @@
         "v7.21.1",
         "v7.21.2",
         "v7.21.3",
-        "v7.21.4"
+        "v7.21.4",
+        "v7.21.5"
       ],
       "landmark": "v7.0.0",
       "headline": "The engine is a package behind a thin CLI",
       "entries": [
+        {
+          "version": "v7.21.5",
+          "date": "2026-09-16",
+          "headline": "A requirement already at `level: code` is no longer offered for decomposition"
+        },
         {
           "version": "v7.21.4",
           "date": "2026-09-16",

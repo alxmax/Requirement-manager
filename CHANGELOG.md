@@ -1,5 +1,14 @@
 # Changelog
 
+## plugin `v7.21.5` — 2026-09-16
+
+**A requirement already at `level: code` is no longer offered for decomposition.** `sync`
+counted REQ-REVIEWEDSCORE-109 as a candidate because its Description carries three group
+labels, and `clarify --decompose` planned three draft children with no cases — children
+below the code rung, which the V-model does not have. `decomposable` now excludes the code
+rung for both the `sync` line and the corpus-wide plan; named by id, the run says the
+requirement is at the code rung and writes nothing (REQ-DECOMPOSE-994 CASE-4).
+
 ## plugin `v7.21.4` — 2026-09-16
 
 **Two of the engine's four design findings are fixed; the other two are kept on the record

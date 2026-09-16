@@ -320,6 +320,9 @@ Every bullet below is binding.
   Description and Cases is byte-identical.
 - With no id, every requirement in the corpus that carries two or more groups is planned,
   and each is written independently on `--apply`.
+- A requirement already at `level: code` is never split, named or not: its children would sit
+  below the code rung. Named, the run says so and writes nothing; `sync` never counts it as a
+  candidate.
 
 ## Cases
 CASE-1 — the author's group labels are the seams
@@ -340,10 +343,11 @@ CASE-3 — no tag is written, expected members are listed
   Then   the child's Context lists that `file:line` and no `implements:` line was added to
          any source file
 
-CASE-4 — too many groups is refused, not split
-  Given  a requirement with `LINT_AC_MAX + 1` groups
-  When   the split runs with `--apply`
-  Then   nothing is written and stdout names the groups and says to merge them first
+CASE-4 — a split that cannot be made is refused, not attempted
+  Given  a requirement with `LINT_AC_MAX + 1` groups, and one at `level: code` with three
+  When   the split runs on each with `--apply`, and `sync` lists its candidates
+  Then   nothing is written; stdout names the groups and says to merge them first for the
+         first, says the second is at the code rung, and `sync` does not count the second
 
 CASE-5 — the dry run is a dry run
   Given  a splittable requirement

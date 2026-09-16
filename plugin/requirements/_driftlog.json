@@ -113,6 +113,10 @@
       "hash": "754c8d23f4ff",
       "reason": "the two split findings named a remedy that no-ops on them; message and behaviour now agree"
     },
+    "REQ-DECOMPOSE-994": {
+      "hash": "5b01a09cf615",
+      "reason": "code requirements are not decomposed"
+    },
     "REQ-DESIGN-954": {
       "hash": "79d473bf523a",
       "reason": "design OOP -> design pass-rate: the score is a file pass-rate, not an OOP grade"
